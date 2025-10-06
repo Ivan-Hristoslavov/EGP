@@ -1,0 +1,37 @@
+# Database
+DATABASE_URL="postgresql://postgres:password@localhost:5432/plumbe"
+
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# Stripe
+STRIPE_SECRET_KEY=your_stripe_secret_key
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+STRIPE_WEBHOOK_SECRET=your_webhook_secret
+
+# SendGrid
+SENDGRID_API_KEY=your_sendgrid_api_key
+NEXT_PUBLIC_BUSINESS_EMAIL=info@fixmyleak.co.uk
+
+# Site Configuration
+NEXT_PUBLIC_SITE_URL=https://fixmyleak.co.uk
+
+# SEO and Analytics
+GOOGLE_SITE_VERIFICATION=your_google_verification_code
+YANDEX_VERIFICATION=your_yandex_verification_code
+YAHOO_VERIFICATION=your_yahoo_verification_code
+NEXT_PUBLIC_GOOGLE_ANALYTICS_ID=G-LQ5Y01GKTW
+GOOGLE_TAG_MANAGER_ID=your_gtm_id
+
+# Social Media
+NEXT_PUBLIC_FACEBOOK_URL=https://www.facebook.com/fixmyleak
+NEXT_PUBLIC_INSTAGRAM_URL=https://www.instagram.com/fixmyleak
+NEXT_PUBLIC_LINKEDIN_URL=https://www.linkedin.com/company/fixmyleak
+NEXT_PUBLIC_TWITTER_URL=https://twitter.com/fixmyleak
+
+# Business Information
+NEXT_PUBLIC_BUSINESS_PHONE=07476 746635
+NEXT_PUBLIC_BUSINESS_ADDRESS=London, UK
+NEXT_PUBLIC_BUSINESS_HOURS=24/7 Emergency Service
