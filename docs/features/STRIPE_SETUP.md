@@ -36,7 +36,7 @@ NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 # Admin Credentials
-ADMIN_EMAIL=admin@fixmyleak.com
+ADMIN_EMAIL=
 ADMIN_PASSWORD=your-secure-password-here
 ADMIN_NAME=Your Full Name
 ```

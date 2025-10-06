@@ -346,7 +346,7 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO admin_settings (key, value) VALUES
     ('dayOffSettings', '{"enabled": false, "message": "We are currently closed for maintenance", "showBanner": false, "startDate": "", "endDate": ""}'),
     ('businessHours', '{"monday": {"open": "08:00", "close": "18:00"}, "tuesday": {"open": "08:00", "close": "18:00"}, "wednesday": {"open": "08:00", "close": "18:00"}, "thursday": {"open": "08:00", "close": "18:00"}, "friday": {"open": "08:00", "close": "18:00"}, "saturday": {"open": "08:00", "close": "18:00"}, "sunday": {"open": "08:00", "close": "18:00"}}'),
-    ('companyInfo', '{"name": "FixMyLeak", "address": "London, UK", "phone": "+44 7700 123456", "email": "info@fixmyleak.com", "website": "https://fixmyleak.com"}'),
+    ('companyInfo', '{"name": "EGP", "address": "London, UK", "phone": "123456789", "email": "", "website": "https://egp.com"}'),
     ('googleCalendarIntegration', '{"enabled": false, "calendarId": "", "clientId": "", "clientSecret": ""}')
 ON CONFLICT (key) DO NOTHING;
 

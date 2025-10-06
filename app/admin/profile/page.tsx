@@ -90,12 +90,12 @@ export default function ProfilePage() {
       setProfileData({
         firstName: firstName || "Plamen",
         lastName: lastName || "Zhelev",
-        email: dbProfile.email || process.env.NEXT_PUBLIC_ADMIN_EMAIL || "plamen@fixmyleak.co.uk",
-        businessEmail: dbProfile.business_email || process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "admin@fixmyleak.co.uk",
+        email: dbProfile.email || process.env.NEXT_PUBLIC_ADMIN_EMAIL || "",
+        businessEmail: dbProfile.business_email || process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "",
         phone: dbProfile.phone || "+44 7700 900123",
         about: dbProfile.about || "",
 
-        companyName: dbProfile.company_name || "Fix My Leak",
+        companyName: dbProfile.company_name || "EGP",
         companyAddress: dbProfile.company_address || "London, UK",
 
         insuranceProvider: dbProfile.insurance_provider || "Zurich Insurance",
@@ -545,7 +545,7 @@ export default function ProfilePage() {
                     <input
                       className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
                       type="text"
-                      placeholder="e.g., Fix My Leak"
+                      placeholder="e.g., EGP"
                       value={profileData.companyName}
                       onChange={(e) =>
                         setProfileData({

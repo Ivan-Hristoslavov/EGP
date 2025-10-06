@@ -387,9 +387,9 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO admin_settings (key, value) VALUES
     ('dayOffSettings', '{"enabled": false, "message": "We are currently closed for maintenance", "showBanner": false, "startDate": "", "endDate": ""}'),
     ('businessHours', '{"monday": {"open": "08:00", "close": "18:00"}, "tuesday": {"open": "08:00", "close": "18:00"}, "wednesday": {"open": "08:00", "close": "18:00"}, "thursday": {"open": "08:00", "close": "18:00"}, "friday": {"open": "08:00", "close": "18:00"}, "saturday": {"open": "08:00", "close": "18:00"}, "sunday": {"open": "08:00", "close": "18:00"}}'),
-    ('companyInfo', '{"name": "FixMyLeak", "address": "London, UK", "phone": "+44 7700 123456", "email": "info@fixmyleak.com", "website": "https://fixmyleak.com"}'),
+    ('companyInfo', '{"name": "EGP", "address": "London, UK", "phone": "123456789", "email": "", "website": "https://egp.com"}'),
     ('googleCalendarIntegration', '{"enabled": false, "calendarId": "", "clientId": "", "clientSecret": ""}'),
-    ('vatSettings', '{"enabled": true, "rate": 20.0, "registrationNumber": "GB123456789", "companyName": "FixMyLeak Ltd"}')
+    ('vatSettings', '{"enabled": true, "rate": 20.0, "registrationNumber": "GB123456789", "companyName": "EGP Ltd"}')
 ON CONFLICT (key) DO NOTHING;
 
 -- Insert admin profile with hashed password
@@ -413,7 +413,7 @@ INSERT INTO admin_profile (
     'hristoslavov.ivanov@gmail.com',
     '+44 7700 123456',
     '$2b$10$Vm7Uj8XkFOHN7Kq5wJ8J6.rKjBzKZJpK6qJ7Kq5wJ8J6.rKjBzKZJ',
-    'FixMyLeak Ltd',
+    'EGP Ltd',
     '123 Plumbing Street, London, SW1A 1AA',
     'Professional plumbing services with over 10 years of experience.',
     'Barclays Bank',
