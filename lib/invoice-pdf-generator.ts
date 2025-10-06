@@ -25,7 +25,7 @@ export function generateInvoicePDF(invoice: Invoice, vatSettings?: { is_enabled:
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(26);
-  doc.text(invoice.company_name || "FixMyLeak", spacing.margin, 45);
+  doc.text(invoice.company_name || "EGP", spacing.margin, 45);
 
   doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
@@ -81,7 +81,7 @@ export function generateInvoicePDF(invoice: Invoice, vatSettings?: { is_enabled:
   y += spacing.lineHeight + 6;
   doc.setTextColor(37, 99, 235);
   doc.setFontSize(13);
-  doc.text(invoice.company_name || "FixMyLeak", spacing.margin, y);
+  doc.text(invoice.company_name || "EGP", spacing.margin, y);
 
   y += spacing.lineHeight;
   doc.setFont("helvetica", "normal");
@@ -98,7 +98,7 @@ export function generateInvoicePDF(invoice: Invoice, vatSettings?: { is_enabled:
   doc.text(`Tel: ${invoice.company_phone || "+44 7700 123456"}`, spacing.margin, y);
 
   y += spacing.lineHeight;
-  doc.text(`Email: ${invoice.company_email || "admin@fixmyleak.com"}`, spacing.margin, y);
+  doc.text(`Email: ${invoice.company_email || "admin@egp.com"}`, spacing.margin, y);
 
   if (invoice.company_vat_number) {
     y += spacing.lineHeight;
@@ -326,7 +326,7 @@ export function generateInvoicePDF(invoice: Invoice, vatSettings?: { is_enabled:
   doc.setFontSize(7);
   doc.setTextColor(107, 114, 128);
 
-  let footerText = `${invoice.company_name || "FixMyLeak"} • ${invoice.company_address || "London, UK"}`;
+  let footerText = `${invoice.company_name || "EGP"} • ${invoice.company_address || "London, UK"}`;
   if (invoice.company_vat_number) {
     footerText += ` • VAT: ${invoice.company_vat_number}`;
   }

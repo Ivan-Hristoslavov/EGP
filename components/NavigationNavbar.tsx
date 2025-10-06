@@ -251,7 +251,7 @@ export default function NavigationNavbar() {
               className="text-2xl font-bold transition-all duration-500 hover:scale-110 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 drop-shadow-lg"
               href="/"
             >
-              FIX MY LEAK
+              EGP
             </Link>
 
             {/* Desktop Navigation */}

@@ -1,7 +1,7 @@
-# SEO Optimization Guide for FixMyLeak
+# SEO Optimization Guide for EGP
 
 ## Overview
-This document outlines the comprehensive SEO optimizations implemented for the FixMyLeak website to improve search engine visibility and rankings.
+This document outlines the comprehensive SEO optimizations implemented for the EGP website to improve search engine visibility and rankings.
 
 ## 🎯 Key SEO Improvements Implemented
 
@@ -15,7 +15,7 @@ This document outlines the comprehensive SEO optimizations implemented for the F
 ```json
 {
   "@type": "PlumbingService",
-  "name": "FixMyLeak",
+  "name": "EGP",
   "areaServed": ["Clapham", "Chelsea", "Battersea", "Balham", "Wandsworth", "Streatham"],
   "serviceType": ["Emergency Plumbing", "Leak Detection", "Bathroom Installation"],
   "openingHours": "24/7 Emergency Service",

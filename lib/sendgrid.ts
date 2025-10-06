@@ -43,14 +43,14 @@ async function getSenderEmail(): Promise<string> {
 
     if (error) {
       console.warn('Could not fetch admin profile business_email:', error);
-      return adminEmail || 'noreply@fixmyleak.com';
+      return adminEmail || 'noreply@egp.com';
     }
 
     // Use business_email if available, otherwise fall back to regular email or env
-    return profile?.business_email || profile?.email || adminEmail || 'noreply@fixmyleak.com';
+    return profile?.business_email || profile?.email || adminEmail || 'noreply@egp.com';
   } catch (error) {
     console.warn('Error getting sender email:', error);
-    return adminEmail || 'noreply@fixmyleak.com';
+    return adminEmail || 'noreply@egp.com';
   }
 }
 

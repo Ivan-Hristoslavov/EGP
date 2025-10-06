@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide explains how to set up SendGrid email functionality for the FixMyLeak plumbing service website. The system now includes:
+This guide explains how to set up SendGrid email functionality for the EGP website. The system now includes:
 
 - **SendGrid Integration**: Professional email sending via SendGrid API
 - **Conditional Email Logic**: Uses admin email from database if available, otherwise falls back to environment variable
@@ -19,7 +19,7 @@ Add these variables to your `.env.local` file:
 SENDGRID_API_KEY=your_sendgrid_api_key_here
 
 # Admin Credentials (fallback email)
-ADMIN_EMAIL=admin@fixmyleak.com
+ADMIN_EMAIL=admin@egp.com
 ```
 
 ## SendGrid Account Setup
@@ -38,7 +38,7 @@ ADMIN_EMAIL=admin@fixmyleak.com
 ### 3. Verify Sender Email
 1. Go to Settings → Sender Authentication
 2. Choose "Single Sender Verification"
-3. Add your business email (e.g., admin@fixmyleak.com)
+3. Add your business email (e.g., admin@egp.com)
 4. Click the verification link sent to your email
 
 ## Email Logic Implementation
@@ -61,10 +61,10 @@ async function getSenderEmail(): Promise<string> {
     }
 
     // 2. Fall back to environment variable
-    return adminEmail || 'noreply@fixmyleak.com';
+    return adminEmail || 'noreply@egp.com';
   } catch (error) {
     // 3. Final fallback
-    return adminEmail || 'noreply@fixmyleak.com';
+    return adminEmail || 'noreply@egp.com';
   }
 }
 ```
@@ -72,7 +72,7 @@ async function getSenderEmail(): Promise<string> {
 ### Priority Order:
 1. **Database Email**: Email from admin profile in Supabase
 2. **Environment Variable**: `ADMIN_EMAIL` from `.env.local`
-3. **Default Fallback**: `noreply@fixmyleak.com`
+3. **Default Fallback**: `noreply@egp.com`
 
 ## Testing the Setup
 

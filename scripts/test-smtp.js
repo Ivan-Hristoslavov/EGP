@@ -28,12 +28,12 @@ async function testSMTP() {
     const info = await transporter.sendMail({
       from: 'hristoslavov.ivanov@gmail.com',
       to: 'hristoslavov.ivanov@gmail.com',
-      subject: 'Test Email from FixMyLeak SMTP',
+      subject: 'Test Email from EGP SMTP',
       text: 'This is a test email sent via SendGrid SMTP.',
       html: `
         <html>
           <body>
-            <h2>Test Email from FixMyLeak</h2>
+            <h2>Test Email from EGP</h2>
             <p>This is a test email sent via SendGrid SMTP.</p>
             <p>If you received this email, the SMTP configuration is working correctly!</p>
             <hr>

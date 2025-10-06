@@ -192,10 +192,10 @@ export function CreateInvoiceModal({
     formDataToSend.append('vat_amount', vatAmount.toString());
     formDataToSend.append('total_amount', totalAmount.toString());
     formDataToSend.append('status', 'pending');
-            formDataToSend.append('company_name', dbProfile?.company_name || "FixMyLeak");
+            formDataToSend.append('company_name', dbProfile?.company_name || "EGP");
     formDataToSend.append('company_address', dbProfile?.company_address || "London, UK");
     formDataToSend.append('company_phone', dbProfile?.phone || "+44 7700 123456");
-    formDataToSend.append('company_email', dbProfile?.business_email || dbProfile?.email || "admin@fixmyleak.com");
+    formDataToSend.append('company_email', dbProfile?.business_email || dbProfile?.email || "admin@egp.com");
     formDataToSend.append('company_vat_number', vatSettings?.is_enabled ? (vatSettings.vat_number || "") : "");
     formDataToSend.append('notes', formData.notes || '');
 
@@ -264,17 +264,17 @@ export function CreateInvoiceModal({
           {/* Business Info Section */}
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
             <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-2">
-              FixMyLeak Business Info
+              EGP Business Info
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-blue-800 dark:text-blue-200">
               <div>
-                <strong>Company:</strong> {dbProfile?.company_name || "FixMyLeak"}
+                <strong>Company:</strong> {dbProfile?.company_name || "EGP"}
               </div>
               <div>
                 <strong>Phone:</strong> {dbProfile?.phone || "+44 7700 123456"}
               </div>
               <div>
-                <strong>Email:</strong> {dbProfile?.business_email || dbProfile?.email || "admin@fixmyleak.com"}
+                <strong>Email:</strong> {dbProfile?.business_email || dbProfile?.email || "admin@egp.com"}
               </div>
               {vatSettings?.is_enabled && (
                 <div>

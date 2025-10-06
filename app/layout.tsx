@@ -18,7 +18,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getAdminProfile();
-  const companyName = profile?.company_name || "FixMyLeak";
+  const companyName = profile?.company_name || "EGP";
   
   // Ensure years_of_experience includes "Years" if not already present
   const yearsExperience = profile?.years_of_experience 
@@ -32,7 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const responseTimeNormalized = responseTime.replace(/\s+(minutes?|mins?)\s*/gi, '').trim();
   
   return {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://fixmyleak.co.uk'),
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://egp.com'),
     title: {
       default: `${companyName} - Emergency Plumber London | Same Day Service | Clapham, Chelsea, Battersea`,
       template: `%s | ${companyName} - Emergency Plumber London`
@@ -61,7 +61,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "plumber SW8",
       "plumber SW18",
       "plumber SW16",
-      "fix my leak",
+      "egp",
       "emergency plumbing services",
       "professional plumber London"
     ],
@@ -85,7 +85,7 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       locale: "en_GB",
       siteName: companyName,
-      url: process.env.NEXT_PUBLIC_SITE_URL || 'https://fixmyleak.co.uk',
+      url: process.env.NEXT_PUBLIC_SITE_URL || 'https://egp.com',
       images: [],
     },
     twitter: {
@@ -93,8 +93,8 @@ export async function generateMetadata(): Promise<Metadata> {
       title: `${companyName} - Emergency Plumber London`,
       description: `Professional emergency plumber covering South West London with same-day service. ${responseTimeNormalized}-minute response time.`,
       images: [],
-      creator: "@fixmyleak",
-      site: "@fixmyleak",
+      creator: "@egp",
+      site: "@egp",
     },
     robots: {
       index: true,
@@ -126,10 +126,10 @@ export async function generateMetadata(): Promise<Metadata> {
       "DC.date": new Date().toISOString(),
       "DC.type": "Service",
       "DC.format": "text/html",
-      "DC.identifier": process.env.NEXT_PUBLIC_SITE_URL || 'https://fixmyleak.co.uk',
+      "DC.identifier": process.env.NEXT_PUBLIC_SITE_URL || 'https://egp.com',
       "DC.language": "en",
       "DC.coverage": "South West London",
-      "DC.rights": "Copyright © 2024 FixMyLeak. All rights reserved.",
+      "DC.rights": "Copyright © 2024 EGP. All rights reserved.",
     },
   };
 }
@@ -185,10 +185,10 @@ export default async function RootLayout({
   const structuredData = {
     "@context": "https://schema.org",
     "@type": ["LocalBusiness", "Plumber"],
-    "@id": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://fixmyleak.co.uk'}#business`,
-    "name": adminProfile?.company_name || "FixMyLeak",
-    "description": `Professional emergency plumber covering South West London with ${responseTimeNormalized}-minute response time.`,
-    "url": process.env.NEXT_PUBLIC_SITE_URL || 'https://fixmyleak.co.uk',
+    "@id": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://egp.com'}#business`,
+    "name": adminProfile?.company_name || "EGP",
+    "description": `Professional services platform - A skeleton template for building modern web applications.`,
+    "url": process.env.NEXT_PUBLIC_SITE_URL || 'https://egp.com',
     "telephone": adminProfile?.phone || "07476 746635",
     "email": adminProfile?.business_email || "pzplumbingservices@gmail.com",
     "founder": {
@@ -261,14 +261,10 @@ export default async function RootLayout({
       "ratingValue": 4.8,
       "reviewCount": 150,
       "itemReviewed": {
-        "@id": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://fixmyleak.co.uk'}#business`
+        "@id": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://egp.com'}#business`
       }
     },
-    "sameAs": [
-      "https://www.facebook.com/fixmyleak",
-      "https://www.instagram.com/fixmyleak",
-      "https://www.linkedin.com/company/fixmyleak"
-    ],
+    "sameAs": [],
     "bankDetails": {
       "@type": "BankAccount",
       "bankName": adminProfile?.bank_name || "",
@@ -285,10 +281,10 @@ export default async function RootLayout({
         <link rel="shortcut icon" href="/favicon.ico" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="msapplication-TileColor" content="#ffffff" />
-        <meta name="application-name" content="FixMyLeak" />
+        <meta name="application-name" content="EGP" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="FixMyLeak" />
+        <meta name="apple-mobile-web-app-title" content="EGP" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#3b82f6" />
         <meta name="msapplication-config" content="/browserconfig.xml" />

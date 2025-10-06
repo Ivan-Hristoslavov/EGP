@@ -39,7 +39,7 @@ async function sendBookingNotificationEmail(booking: any) {
 // Priority order for sender email:
 // 1. Database email (admin_profile.email)
 // 2. Environment variable (ADMIN_EMAIL)
-// 3. Default fallback (noreply@fixmyleak.com)
+// 3. Default fallback (noreply@egp.com)
 ```
 
 ### **HTML Email Templates**
@@ -86,7 +86,7 @@ async function sendBookingNotificationEmail(booking: any) {
 ```bash
 # Required for email functionality
 SENDGRID_API_KEY=your_sendgrid_api_key_here
-ADMIN_EMAIL=admin@fixmyleak.com
+ADMIN_EMAIL=admin@egp.com
 
 # Optional (fallback)
 STRIPE_SECRET_KEY=your_stripe_secret_key

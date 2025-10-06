@@ -11,10 +11,10 @@ WHERE password IS NULL;
 -- Note: In production, passwords should be properly hashed
 UPDATE admin_profile 
 SET 
-  email = 'admin@fixmyleak.com',
+  email = 'admin@egp.com',
   password = 'plamen-admin-2024',
   name = 'Plamen Zhelev'
-WHERE email = 'admin@fixmyleak.com';
+WHERE email = 'admin@egp.com';
 
 -- Make password field required for future records
 ALTER TABLE admin_profile 

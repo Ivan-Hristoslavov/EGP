@@ -28,8 +28,8 @@ interface Area {
 
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getAdminProfile();
-  const companyName = profile?.company_name || "FixMyLeak";
-  const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://fixmyleak.co.uk';
+  const companyName = profile?.company_name || "EGP";
+  const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://egp.com';
   
   const responseTime = profile?.response_time || "45 minutes";
   // Normalize response time to avoid duplication (remove any existing "minute/minutes")

@@ -82,7 +82,7 @@ INSERT INTO bookings (customer_name, customer_email, customer_phone, service, da
 
 -- Insert default admin profile
 INSERT INTO admin_profile (name, email, phone, company_name, company_address, gas_safe_number) VALUES
-('Plamen Zhelev', 'admin@fixmyleak.com', '+44 7700 123456', 'FixMyLeak Ltd', 'London, UK', 'GS123456');
+('Admin User', 'admin@egp.com', '+44 7700 123456', 'EGP Ltd', 'London, UK', 'GS123456');
 
 -- Insert default admin settings
 INSERT INTO admin_settings (key, value) VALUES

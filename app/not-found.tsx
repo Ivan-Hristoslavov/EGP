@@ -55,10 +55,10 @@ export default function NotFound() {
           <div className="text-sm text-gray-500 dark:text-gray-400">
             <p>Need help? Contact us at{" "}
               <a
-                href={`mailto:${process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "info@fixmyleak.co.uk"}`}
+                href={`mailto:${process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "info@egp.com"}`}
                 className="text-blue-600 dark:text-blue-400 hover:underline"
               >
-                {process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "info@fixmyleak.co.uk"}
+                {process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "info@egp.com"}
               </a>
             </p>
           </div>

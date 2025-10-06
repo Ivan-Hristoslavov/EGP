@@ -143,7 +143,7 @@ npm start
 ## 🎯 **Admin Access**
 
 ### **Default Admin Credentials**
-- **Email**: `admin@fixmyleak.com`
+- **Email**: `admin@egp.com`
 - **Password**: Set in environment variables
 - **URL**: `/admin/login`
 
