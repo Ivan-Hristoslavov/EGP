@@ -275,7 +275,7 @@ export function InvoiceDetailsModal({ isOpen, onClose, invoice, adminProfile, va
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
-                            target.src = '/placeholder-image.png';
+                            target.style.display = 'none';
                           }}
                         />
                         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
@@ -329,7 +329,7 @@ export function InvoiceDetailsModal({ isOpen, onClose, invoice, adminProfile, va
                   className="max-w-full max-h-full object-contain"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    target.src = '/placeholder-image.png';
+                    target.style.display = 'none';
                   }}
                 />
               </div>

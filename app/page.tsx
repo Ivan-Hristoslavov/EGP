@@ -54,20 +54,13 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       locale: "en_GB",
       siteName: companyName,
-      images: [
-        {
-          url: "/fix_my_leak_logo.jpg",
-          width: 1200,
-          height: 630,
-          alt: `${companyName} - Professional Emergency Plumber London`,
-        },
-      ],
+      images: [],
     },
     twitter: {
       card: "summary_large_image",
       title: `${companyName} - Emergency Plumber London`,
       description: `Professional emergency plumber covering South West London with same-day service. ${responseTimeNormalized}-minute response time.`,
-      images: ["/fix_my_leak_logo.jpg"],
+      images: [],
     },
   };
 }
@@ -142,15 +135,11 @@ export default async function HomePage() {
             {/* Profile Image - Centered */}
             <div className="flex justify-center mb-12">
               <div className="relative">
-                <div className="relative rounded-3xl overflow-hidden shadow-2xl">
-                  <Image
-                    src="/plamen.jpeg"
-                    alt="Professional Plumber at work"
-                    width={600}
-                    height={600}
-                    className="w-[28rem] h-[28rem] object-cover"
-                    priority
-                  />
+                <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gray-200 flex items-center justify-center">
+                  <div className="text-gray-500 text-center p-8">
+                    <div className="text-6xl mb-4">🔧</div>
+                    <p className="text-xl">Professional Services</p>
+                  </div>
                 </div>
                 {/* Decorative elements */}
                 <div className="absolute -top-4 -right-4 w-8 h-8 bg-blue-500 rounded-full opacity-20"></div>

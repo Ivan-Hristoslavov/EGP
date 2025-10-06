@@ -77,16 +77,13 @@ export function AreaPage({ areaName, postcode, description, localKeywords, nearb
               </div>
             </div>
 
-            {/* Right Column - Image */}
+            {/* Right Column - Placeholder */}
             <div className="relative">
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl">
-                <Image
-                  src="/plamen.jpeg"
-                  alt={`Professional Plumber in ${areaName}`}
-                  width={600}
-                  height={400}
-                  className="object-cover w-full h-[400px]"
-                />
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gray-200 flex items-center justify-center">
+                <div className="text-gray-500 text-center p-8">
+                  <div className="text-4xl mb-2">🔧</div>
+                  <p>Professional Services</p>
+                </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
               </div>
               

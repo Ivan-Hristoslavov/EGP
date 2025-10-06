@@ -89,12 +89,10 @@ export function SectionHero() {
             {/* MCS Certified - Dynamic */}
             {hasMscCertified && (
               <div className="flex flex-1 items-center justify-center w-full md:min-w-[200px] md:max-w-[320px] min-h-[64px] bg-white/30 backdrop-blur-sm rounded-xl p-3 shadow-sm border border-white/20">
-                <img
-                  src="/mcs-logo.png"
-                  alt="MCS Certified - Microgeneration Certificate Scheme"
-                  className="h-10 md:h-12 w-auto object-contain mx-auto"
-                  style={{ maxWidth: "120px" }}
-                />
+                <div className="text-white text-center">
+                  <div className="text-lg font-bold">MCS</div>
+                  <div className="text-xs">CERTIFIED</div>
+                </div>
               </div>
             )}
             
