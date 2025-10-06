@@ -63,7 +63,7 @@ CREATE TRIGGER update_admin_profile_updated_at BEFORE UPDATE ON admin_profile FO
 
 -- Insert default admin profile
 INSERT INTO admin_profile (name, email, phone, company_name, company_address, gas_safe_number) VALUES
-('Admin User', 'admin@egp.com', '+44 7700 123456', 'EGP Ltd', 'London, UK', 'GS123456');
+('Admin User', '', '123456789', 'EGP Ltd', 'London, UK', 'GS123456');
 
 -- Insert default admin settings
 INSERT INTO admin_settings (key, value) VALUES

@@ -5,8 +5,8 @@ export const siteConfig = {
   description:
     "Professional services platform - A skeleton template for building modern web applications.",
   links: {
-    phone: "00000 000000",
-    email: process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "info@egp.com",
+    phone: "123456789",
+    email: process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "",
   },
   areas: [],
 };

@@ -129,7 +129,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "DC.identifier": process.env.NEXT_PUBLIC_SITE_URL || 'https://egp.com',
       "DC.language": "en",
       "DC.coverage": "South West London",
-      "DC.rights": "Copyright © 2024 EGP. All rights reserved.",
+      "DC.rights": `Copyright © ${new Date().getFullYear()} EGP. All rights reserved.`,
     },
   };
 }
@@ -189,11 +189,11 @@ export default async function RootLayout({
     "name": adminProfile?.company_name || "EGP",
     "description": `Professional services platform - A skeleton template for building modern web applications.`,
     "url": process.env.NEXT_PUBLIC_SITE_URL || 'https://egp.com',
-    "telephone": adminProfile?.phone || "07476 746635",
-    "email": adminProfile?.business_email || "pzplumbingservices@gmail.com",
+    "telephone": adminProfile?.phone || "123456789",
+    "email": adminProfile?.business_email || "",
     "founder": {
       "@type": "Person",
-      "name": adminProfile?.name || "Plamen Zhelev"
+      "name": adminProfile?.name || "Admin User"
     },
     "address": {
       "@type": "PostalAddress",

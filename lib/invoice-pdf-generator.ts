@@ -95,10 +95,10 @@ export function generateInvoicePDF(invoice: Invoice, vatSettings?: { is_enabled:
   });
 
   y += spacing.lineHeight;
-  doc.text(`Tel: ${invoice.company_phone || "+44 7700 123456"}`, spacing.margin, y);
+  doc.text(`Tel: ${invoice.company_phone || "123456789"}`, spacing.margin, y);
 
   y += spacing.lineHeight;
-  doc.text(`Email: ${invoice.company_email || "admin@egp.com"}`, spacing.margin, y);
+  doc.text(`Email: ${invoice.company_email || ""}`, spacing.margin, y);
 
   if (invoice.company_vat_number) {
     y += spacing.lineHeight;
