@@ -4,6 +4,9 @@ export type IconSvgProps = SVGProps<SVGSVGElement> & {
   size?: number;
 };
 
+// Export site configuration types
+export * from "./site";
+
 export type AdminProfile = {
   id: string;
   name: string;

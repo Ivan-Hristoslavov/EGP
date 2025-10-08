@@ -7,8 +7,9 @@ import { DayOffBanner } from "./DayOffBanner";
 import { AdminProfile } from "@/lib/admin-profile";
 import { useActiveDayOffPeriods } from "@/hooks/useDayOffPeriods";
 
-import NavigationNavbar from "./NavigationNavbar";
-import FooterMain from './FooterMain';
+import HeaderAesthetics from "./HeaderAesthetics";
+import FloatingContactButtons from "./FloatingContactButtons";
+import FooterAesthetics from './FooterAesthetics';
 
 export default function LayoutMain({
   children,
@@ -40,16 +41,17 @@ export default function LayoutMain({
       {/* Day Off Banner - Always at the top */}
       <DayOffBanner />
       
-      {/* Navigation - Positioned below sticky banner */}
-      <div className={`sticky z-40 transition-all duration-300 ${hasDayOffBanner ? 'top-[40px]' : 'top-0'}`}>
-        <NavigationNavbar />
-      </div>
+      {/* New Aesthetics Header - Fixed position */}
+      <HeaderAesthetics />
       
-      {/* Main content with dynamic padding based on banner presence */}
-      <main className={`flex-grow transition-all duration-300 ${hasDayOffBanner ? 'pt-0' : 'pt-0'}`}>
+      {/* Floating Contact Buttons */}
+      <FloatingContactButtons />
+      
+      {/* Main content with padding for fixed header */}
+      <main className={`flex-grow transition-all duration-300 ${hasDayOffBanner ? 'pt-[200px]' : 'pt-[180px]'}`}>
         {children}
       </main>
-      <FooterMain />
+      <FooterAesthetics />
     </div>
   );
 }
