@@ -67,9 +67,9 @@ export default function BlogPage() {
     <div className="min-h-screen bg-white dark:bg-gray-900">
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-8">
-            Our Blog
-          </h1>
+                <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-8 font-playfair">
+                  Our Blog
+                </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-12">
             Stay informed about the latest in aesthetic treatments, skincare tips, and beauty insights.
           </p>

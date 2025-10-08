@@ -200,7 +200,7 @@ export default function HeaderAesthetics() {
             {/* Centered Logo - Clean & Clear with Maximum Distance from Navigation */}
             <Link 
               href="/" 
-              className="absolute left-1/2 transform -translate-x-1/2 flex flex-col items-center justify-center text-center px-20 lg:px-24 xl:px-28 2xl:px-32"
+              className="absolute left-1/2 transform -translate-x-1/2 flex flex-col items-center justify-center text-center px-4 sm:px-6"
             >
               <h1 className="font-playfair text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light text-gray-900 dark:text-white whitespace-nowrap leading-tight">
                 EGP AESTHETICS
@@ -277,7 +277,7 @@ export default function HeaderAesthetics() {
                       ].map((item) => (
                         <li key={item.name}>
                           <Link
-                            href={`/services/${item.name.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '')}`}
+                            href={`/book?service=${item.name.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '')}`}
                             className="group flex items-start justify-between gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors font-montserrat"
                             onClick={() => setActiveMenu(null)}
                           >
@@ -314,7 +314,7 @@ export default function HeaderAesthetics() {
                       ].map((item) => (
                         <li key={item.name}>
                           <Link
-                            href={`/services/${item.name.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '')}`}
+                            href={`/book?service=${item.name.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '')}`}
                             className="group flex items-start justify-between gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors font-montserrat"
                             onClick={() => setActiveMenu(null)}
                           >
@@ -348,7 +348,7 @@ export default function HeaderAesthetics() {
                       ].map((item) => (
                         <li key={item.name}>
                           <Link
-                            href={`/services/${item.name.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '')}`}
+                            href={`/book?service=${item.name.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '')}`}
                             className="group flex items-start justify-between gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors font-montserrat"
                             onClick={() => setActiveMenu(null)}
                           >
@@ -377,7 +377,7 @@ export default function HeaderAesthetics() {
                       ].map((item) => (
                         <li key={item.name}>
                           <Link
-                            href={`/services/${item.name.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '')}`}
+                            href={`/book?service=${item.name.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '')}`}
                             className="group flex items-start justify-between gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors font-montserrat"
                             onClick={() => setActiveMenu(null)}
                           >
@@ -423,7 +423,7 @@ export default function HeaderAesthetics() {
                       ].map((condition) => (
                         <li key={condition}>
                           <Link
-                            href={`/conditions/${condition.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '')}`}
+                            href={`/conditions/${condition.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '')}`}
                             className="text-sm text-gray-600 dark:text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors font-montserrat"
                             onClick={() => setActiveMenu(null)}
                           >
@@ -449,17 +449,35 @@ export default function HeaderAesthetics() {
                         "Double Chin / Jawline Fat",
                         "Post-Pregnancy Tummy",
                         "Water Retention / Bloating / Swelling"
-                      ].map((condition) => (
-                        <li key={condition}>
-                          <Link
-                            href={`/conditions/${condition.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '')}`}
-                            className="text-sm text-gray-600 dark:text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors font-montserrat"
-                            onClick={() => setActiveMenu(null)}
-                          >
-                            {condition}
-                          </Link>
-                        </li>
-                      ))}
+                      ].map((condition) => {
+                        // Create proper URL mapping for body conditions
+                        const urlMapping: { [key: string]: string } = {
+                          "Cellulite (Thighs, Buttocks, Abdomen)": "cellulite-thighs-buttocks-abdomen",
+                          "Stubborn Belly Fat / Abdominal Fat": "stubborn-belly-fat-abdominal-fat",
+                          "Love Handles / Flanks": "love-handles-flanks",
+                          "Sagging Skin (Skin Laxity)": "sagging-skin-skin-laxity",
+                          "Stretch Marks": "stretch-marks",
+                          "Arm Fat & Bingo Wings": "arm-fat-bingo-wings",
+                          "Thigh Fat & Inner Thigh Laxity": "thigh-fat-inner-thigh-laxity",
+                          "Double Chin / Jawline Fat": "double-chin-jawline-fat",
+                          "Post-Pregnancy Tummy": "post-pregnancy-tummy",
+                          "Water Retention / Bloating / Swelling": "water-retention-bloating-swelling"
+                        };
+                        
+                        const url = urlMapping[condition] || condition.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '');
+                        
+                        return (
+                          <li key={condition}>
+                            <Link
+                              href={`/conditions/${url}`}
+                              className="text-sm text-gray-600 dark:text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors font-montserrat"
+                              onClick={() => setActiveMenu(null)}
+                            >
+                              {condition}
+                            </Link>
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                   <div></div>
@@ -523,7 +541,7 @@ export default function HeaderAesthetics() {
                         ].map((item) => (
                           <li key={item.name}>
                             <Link
-                              href={`/services/${item.name.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '')}`}
+                              href={`/book?service=${item.name.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '')}`}
                               className="flex items-start justify-between gap-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-rose-50 dark:hover:bg-gray-800 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg transition-colors active:scale-95 touch-manipulation font-montserrat"
                               onClick={() => {
                                 setMobileMenuOpen(false);
@@ -554,7 +572,7 @@ export default function HeaderAesthetics() {
                         ].map((item) => (
                           <li key={item.name}>
                             <Link
-                              href={`/services/${item.name.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '')}`}
+                              href={`/book?service=${item.name.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '')}`}
                               className="flex items-start justify-between gap-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-rose-50 dark:hover:bg-gray-800 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg transition-colors active:scale-95 touch-manipulation font-montserrat"
                               onClick={() => {
                                 setMobileMenuOpen(false);
@@ -602,7 +620,7 @@ export default function HeaderAesthetics() {
                         ].map((condition) => (
                           <li key={condition}>
                             <Link
-                              href={`/conditions/${condition.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '')}`}
+                              href={`/conditions/${condition.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '')}`}
                               className="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-rose-50 dark:hover:bg-gray-800 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg transition-colors active:scale-95 touch-manipulation font-montserrat"
                               onClick={() => {
                                 setMobileMenuOpen(false);
