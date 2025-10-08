@@ -30,7 +30,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { to, subject = "Test Email from FixMyLeak", message = "This is a test email to verify SendGrid configuration." } = body;
+    const { to, subject = "Test Email", message = "This is a test email to verify SendGrid configuration." } = body;
 
     if (!to) {
       return NextResponse.json(
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       html: `
         <html>
           <body>
-            <h2>Test Email from FixMyLeak</h2>
+            <h2>Test Email</h2>
             <p>${message}</p>
             <p>This email was sent to verify that SendGrid is working correctly.</p>
             <p>If you received this email, the email configuration is working properly!</p>

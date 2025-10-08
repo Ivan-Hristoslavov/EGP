@@ -222,9 +222,6 @@ Booking ID: ${booking.id}
 Created: ${new Date(booking.created_at).toLocaleString("en-GB")}
 
 Please review and update the booking status in your admin panel.
-
-Best regards,
-FixMyLeak System
   `.trim();
 }
 
@@ -250,7 +247,6 @@ function generateBookingNotificationEmailHtml(booking: any): string {
 <body>
     <div class="header">
         <h1>New Booking Request</h1>
-        <p>FixMyLeak Plumbing Services</p>
     </div>
     
     <div class="content">
@@ -292,7 +288,7 @@ function generateBookingNotificationEmailHtml(booking: any): string {
     </div>
     
     <div class="footer">
-        <p>This is an automated notification from the FixMyLeak booking system.</p>
+        <p>This is an automated notification from the booking system.</p>
     </div>
 </body>
 </html>

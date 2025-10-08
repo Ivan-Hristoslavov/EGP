@@ -4,8 +4,8 @@ import TermsPageClient from './terms-client';
 
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getAdminProfile();
-  const companyName = profile?.company_name || "FixMyLeak";
-  const canonical = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://fixmyleak.co.uk'}/terms`;
+  const companyName = profile?.company_name || "Company";
+  const canonical = `${process.env.NEXT_PUBLIC_SITE_URL}/terms`;
   
   return {
     title: `Terms & Conditions | ${companyName} - Emergency Plumber London`,

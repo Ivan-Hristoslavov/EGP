@@ -54,7 +54,7 @@ export default function TestEmailPage() {
         },
         body: JSON.stringify({
           to: testEmail,
-          subject: "Test Email from FixMyLeak Admin",
+          subject: "Test Email from Admin Panel",
           message: "This is a test email to verify that SendGrid is working correctly with the admin panel."
         }),
       });

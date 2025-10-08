@@ -4,8 +4,8 @@ import PrivacyPageClient from './privacy-client';
 
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getAdminProfile();
-  const companyName = profile?.company_name || "FixMyLeak";
-  const canonical = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://fixmyleak.co.uk'}/privacy`;
+  const companyName = profile?.company_name || "Company";
+  const canonical = `${process.env.NEXT_PUBLIC_SITE_URL}/privacy`;
   
   return {
     title: `Privacy Policy | ${companyName} - Emergency Plumber London`,
