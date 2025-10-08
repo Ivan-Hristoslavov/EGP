@@ -1,7 +1,7 @@
 import "@/styles/globals.css";
 import { Metadata, Viewport } from "next";
 import clsx from "clsx";
-import { Inter } from "next/font/google";
+// Removed Inter - using our custom fonts
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { Providers } from "./providers";
@@ -14,7 +14,7 @@ import LayoutMain from "@/components/LayoutMain";
 import { getAdminProfile } from "@/lib/admin-profile";
 import { createClient } from "@/lib/supabase/server";
 
-const inter = Inter({ subsets: ["latin"] });
+// Using playfairDisplay and montserrat from config/fonts.ts
 
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getAdminProfile();
@@ -317,11 +317,10 @@ export default async function RootLayout({
       </head>
       <body
         className={clsx(
-          "min-h-screen text-foreground bg-background font-sans antialiased",
+          "min-h-screen text-foreground bg-background font-montserrat antialiased",
           playfairDisplay.variable,
           montserrat.variable,
-          fontSans.variable,
-          inter.className
+          fontSans.variable
         )}
         suppressHydrationWarning
       >

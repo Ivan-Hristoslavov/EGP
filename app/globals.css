@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  /* Apply default fonts globally */
+  body {
+    @apply font-montserrat antialiased;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-playfair;
+  }
+  
+  /* Ensure smooth font rendering */
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
 /* Smooth animations for mobile menu */
 @keyframes slideInRight {
   from {
@@ -59,16 +76,15 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  @apply bg-gray-100 dark:bg-gray-800;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #667eea, #764ba2);
-  border-radius: 4px;
+  @apply bg-gradient-to-b from-rose-400 to-pink-500 rounded;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, #5a6fd8, #6a4190);
+  @apply from-rose-500 to-pink-600;
 }
 
 /* Loading skeleton animation */
@@ -148,12 +164,12 @@ html {
 }
 
 .glow-on-hover:hover {
-  box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 0 20px rgba(244, 63, 94, 0.4);
 }
 
 /* Gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -162,7 +178,7 @@ html {
 /* Custom focus styles */
 .focus-ring:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.3);
 }
 
 /* Backdrop blur fallback */
@@ -170,4 +186,4 @@ html {
   .backdrop-blur-fallback {
     background-color: rgba(255, 255, 255, 0.9);
   }
-} 
+}

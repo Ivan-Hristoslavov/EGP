@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 
 // Condition data - this would typically come from a database
 const conditionsData = {
+  // Face Conditions
   'acne-acne-scarring': {
     title: 'Acne & Acne Scarring',
     category: 'Face Conditions',
@@ -27,6 +28,42 @@ const conditionsData = {
       'Medical Skin Peels - £200',
       'Skincare Routine - £100',
       'Injectable Mesotherapy - £170'
+    ],
+    popular: false
+  },
+  'hyperpigmentation-melasma': {
+    title: 'Hyperpigmentation & Melasma',
+    category: 'Face Conditions',
+    description: 'Advanced treatments for dark spots and uneven skin tone',
+    treatments: [
+      'Medical Skin Peels - £200',
+      'IPL Therapy - £250',
+      'PRP Treatment - £480',
+      'Injectable Mesotherapy - £170'
+    ],
+    popular: true
+  },
+  'barcode-lines-around-lips': {
+    title: 'Barcode Lines Around Lips',
+    category: 'Face Conditions',
+    description: 'Smooth fine lines around the mouth for a youthful appearance',
+    treatments: [
+      'Barcode Lips Treatment - £129',
+      'Lip Enhancement - £290',
+      'Lip Hydration - £190',
+      'Medical Skin Peels - £200'
+    ],
+    popular: true
+  },
+  'bruxism': {
+    title: 'Bruxism',
+    category: 'Face Conditions',
+    description: 'Reduce jaw tension and teeth grinding with targeted treatments',
+    treatments: [
+      'Bruxism Treatment - £279',
+      'Jaw Slimming - £279',
+      'Masseter Treatment - £250',
+      'Combined Treatment - £350'
     ],
     popular: false
   },
@@ -54,17 +91,331 @@ const conditionsData = {
     ],
     popular: true
   },
+  'nasolabial-folds': {
+    title: 'Nasolabial Folds',
+    category: 'Face Conditions',
+    description: 'Smooth lines from nose to mouth for a refreshed look',
+    treatments: [
+      'Nasolabial Folds Filler - £290',
+      'Cheek & Mid-Face Filler - £390',
+      '5-Point Facelift - £950',
+      'PRP Treatment - £480'
+    ],
+    popular: true
+  },
+  'shadows-around-nasolabial-folds': {
+    title: 'Shadows Around Nasolabial Folds',
+    category: 'Face Conditions',
+    description: 'Brighten and lift the mid-face area to reduce shadows',
+    treatments: [
+      'Cheek & Mid-Face Filler - £390',
+      '5-Point Facelift - £950',
+      'PRP Treatment - £480',
+      'Profhilo - £390'
+    ],
+    popular: false
+  },
+  'under-eye-hollows': {
+    title: 'Under-Eye Hollows',
+    category: 'Face Conditions',
+    description: 'Restore volume and smooth under-eye area',
+    treatments: [
+      'Tear Trough Filler - £390',
+      'Under-Eye Skin Booster - £159',
+      '3-Step Under-Eye Treatment - £390',
+      'PRP Treatment - £480'
+    ],
+    popular: true
+  },
+  'eye-bags': {
+    title: 'Eye Bags',
+    category: 'Face Conditions',
+    description: 'Reduce puffiness and tighten under-eye area',
+    treatments: [
+      '3-Step Under-Eye Treatment - £390',
+      'Tear Trough Filler - £390',
+      'Radiofrequency & Ultrasound - £250',
+      'Combined Treatment - £350'
+    ],
+    popular: true
+  },
+  'flat-cheeks': {
+    title: 'Flat Cheeks',
+    category: 'Face Conditions',
+    description: 'Restore cheek volume and definition',
+    treatments: [
+      'Cheek & Mid-Face Filler - £390',
+      '5-Point Facelift - £950',
+      'Profhilo - £390',
+      'Sculptra - £790'
+    ],
+    popular: false
+  },
+  'flat-pebble-chin': {
+    title: 'Flat / Pebble Chin',
+    category: 'Face Conditions',
+    description: 'Enhance chin definition and profile',
+    treatments: [
+      'Chin Filler - £290',
+      'Jawline Filler - £550',
+      'Pebble Chin Treatment - £179',
+      '5-Point Facelift - £950'
+    ],
+    popular: false
+  },
+  'gummy-smile': {
+    title: 'Gummy Smile',
+    category: 'Face Conditions',
+    description: 'Reduce excessive gum exposure when smiling',
+    treatments: [
+      'Gummy Smile Treatment - £129',
+      'Lip Enhancement - £290',
+      'Combined Treatment - £350',
+      'PRP Treatment - £480'
+    ],
+    popular: false
+  },
+  'heavy-lower-face': {
+    title: 'Heavy Lower Face',
+    category: 'Face Conditions',
+    description: 'Slim and contour the lower face and jawline',
+    treatments: [
+      'Jaw Slimming - £279',
+      'Jawline Filler - £550',
+      'Radiofrequency & Ultrasound - £250',
+      'Combined Treatment - £350'
+    ],
+    popular: true
+  },
+  'jowling': {
+    title: 'Jowling',
+    category: 'Face Conditions',
+    description: 'Tighten and lift sagging jawline area',
+    treatments: [
+      '5-Point Facelift - £950',
+      'Jawline Filler - £550',
+      'Radiofrequency & Ultrasound - £250',
+      'Ultrasound Lift & Tighten - £190'
+    ],
+    popular: true
+  },
+  'low-eyebrows': {
+    title: 'Low Eyebrows',
+    category: 'Face Conditions',
+    description: 'Lift and shape eyebrows for a more youthful appearance',
+    treatments: [
+      'Brow Lift - £279',
+      '5-Point Facelift - £950',
+      'PRP Treatment - £480',
+      'Combined Treatment - £350'
+    ],
+    popular: false
+  },
+
+  // Body Conditions
   'cellulite': {
     title: 'Cellulite',
     category: 'Body Conditions',
     description: 'Reduce the appearance of cellulite on thighs, buttocks, and abdomen',
     treatments: [
       'Radiofrequency & Ultrasound - £250',
-      'Ultrasound Therapy - £190',
+      'Ultrasound Lift & Tighten - £190',
       'Body Fat Burning Mesotherapy - £170',
       'Combined Treatment - £350'
     ],
     popular: false
+  },
+  'stubborn-belly-fat--abdominal-fat': {
+    title: 'Stubborn Belly Fat / Abdominal Fat',
+    category: 'Body Conditions',
+    description: 'Target stubborn belly fat with advanced non-invasive treatments',
+    treatments: [
+      'Fat Freezing Treatment - £200',
+      'Body Fat Burning Mesotherapy - £170',
+      'Radiofrequency & Ultrasound - £250',
+      'Combined Treatment - £350'
+    ],
+    popular: true
+  },
+  'love-handles--flanks': {
+    title: 'Love Handles / Flanks',
+    category: 'Body Conditions',
+    description: 'Sculpt and contour the waist area for a more defined silhouette',
+    treatments: [
+      'Fat Freezing Treatment - £200',
+      'Radiofrequency & Ultrasound - £250',
+      'Body Fat Burning Mesotherapy - £170',
+      'Combined Treatment - £350'
+    ],
+    popular: true
+  },
+  'sagging-skin--skin-laxity': {
+    title: 'Sagging Skin (Skin Laxity)',
+    category: 'Body Conditions',
+    description: 'Tighten and firm loose skin for a more youthful appearance',
+    treatments: [
+      'Radiofrequency & Ultrasound - £250',
+      'Ultrasound Lift & Tighten - £190',
+      'Combined Treatment - £350',
+      'PRP Treatment - £480'
+    ],
+    popular: true
+  },
+  'stretch-marks': {
+    title: 'Stretch Marks',
+    category: 'Body Conditions',
+    description: 'Reduce the appearance of stretch marks and improve skin texture',
+    treatments: [
+      'Microneedling Facial - £170',
+      'Radiofrequency & Ultrasound - £250',
+      'PRP Treatment - £480',
+      'Injectable Mesotherapy - £170'
+    ],
+    popular: false
+  },
+  'arm-fat--bingo-wings': {
+    title: 'Arm Fat & Bingo Wings',
+    category: 'Body Conditions',
+    description: 'Tone and tighten upper arms for a more sculpted look',
+    treatments: [
+      'Fat Freezing Treatment - £200',
+      'Radiofrequency & Ultrasound - £250',
+      'Ultrasound Lift & Tighten - £190',
+      'Combined Treatment - £350'
+    ],
+    popular: true
+  },
+  'thigh-fat--inner-thigh-laxity': {
+    title: 'Thigh Fat & Inner Thigh Laxity',
+    category: 'Body Conditions',
+    description: 'Reduce thigh fat and tighten inner thigh area',
+    treatments: [
+      'Fat Freezing Treatment - £200',
+      'Radiofrequency & Ultrasound - £250',
+      'Ultrasound Lift & Tighten - £190',
+      'Combined Treatment - £350'
+    ],
+    popular: true
+  },
+  'double-chin--jawline-fat': {
+    title: 'Double Chin / Jawline Fat',
+    category: 'Body Conditions',
+    description: 'Eliminate double chin and define jawline',
+    treatments: [
+      'Fat Freezing Treatment - £200',
+      'Jaw Slimming - £279',
+      'Jawline Filler - £550',
+      'Combined Treatment - £350'
+    ],
+    popular: true
+  },
+  'post-pregnancy-tummy': {
+    title: 'Post-Pregnancy Tummy',
+    category: 'Body Conditions',
+    description: 'Restore abdominal area after pregnancy',
+    treatments: [
+      'Radiofrequency & Ultrasound - £250',
+      'Ultrasound Lift & Tighten - £190',
+      'Body Fat Burning Mesotherapy - £170',
+      'Combined Treatment - £350'
+    ],
+    popular: true
+  },
+  'water-retention--bloating--swelling': {
+    title: 'Water Retention / Bloating / Swelling',
+    category: 'Body Conditions',
+    description: 'Reduce water retention and bloating for a slimmer appearance',
+    treatments: [
+      'Body Fat Burning Mesotherapy - £170',
+      'Radiofrequency & Ultrasound - £250',
+      'Combined Treatment - £350',
+      'Injectable Mesotherapy - £170'
+    ],
+    popular: false
+  },
+  'cellulite-thighs-buttocks-abdomen': {
+    title: 'Cellulite (Thighs, Buttocks, Abdomen)',
+    category: 'Body Conditions',
+    description: 'Reduce the appearance of cellulite on thighs, buttocks, and abdomen',
+    treatments: [
+      'Radiofrequency & Ultrasound - £250',
+      'Ultrasound Lift & Tighten - £190',
+      'Body Fat Burning Mesotherapy - £170',
+      'Combined Treatment - £350'
+    ],
+    popular: true
+  },
+  'stubborn-belly-fat-abdominal-fat': {
+    title: 'Stubborn Belly Fat / Abdominal Fat',
+    category: 'Body Conditions',
+    description: 'Target stubborn belly fat with advanced non-invasive treatments',
+    treatments: [
+      'Fat Freezing Treatment - £200',
+      'Body Fat Burning Mesotherapy - £170',
+      'Radiofrequency & Ultrasound - £250',
+      'Combined Treatment - £350'
+    ],
+    popular: true
+  },
+  'love-handles-flanks': {
+    title: 'Love Handles / Flanks',
+    category: 'Body Conditions',
+    description: 'Sculpt and contour the waist area for a more defined silhouette',
+    treatments: [
+      'Fat Freezing Treatment - £200',
+      'Radiofrequency & Ultrasound - £250',
+      'Body Fat Burning Mesotherapy - £170',
+      'Combined Treatment - £350'
+    ],
+    popular: true
+  },
+  'sagging-skin-skin-laxity': {
+    title: 'Sagging Skin (Skin Laxity)',
+    category: 'Body Conditions',
+    description: 'Tighten and firm loose skin for a more youthful appearance',
+    treatments: [
+      'Radiofrequency & Ultrasound - £250',
+      'Ultrasound Lift & Tighten - £190',
+      'Combined Treatment - £350',
+      'PRP Treatment - £480'
+    ],
+    popular: true
+  },
+  'arm-fat-bingo-wings': {
+    title: 'Arm Fat & Bingo Wings',
+    category: 'Body Conditions',
+    description: 'Tone and tighten upper arms for a more sculpted look',
+    treatments: [
+      'Fat Freezing Treatment - £200',
+      'Radiofrequency & Ultrasound - £250',
+      'Ultrasound Lift & Tighten - £190',
+      'Combined Treatment - £350'
+    ],
+    popular: true
+  },
+  'thigh-fat-inner-thigh-laxity': {
+    title: 'Thigh Fat & Inner Thigh Laxity',
+    category: 'Body Conditions',
+    description: 'Reduce thigh fat and tighten inner thigh area',
+    treatments: [
+      'Fat Freezing Treatment - £200',
+      'Radiofrequency & Ultrasound - £250',
+      'Ultrasound Lift & Tighten - £190',
+      'Combined Treatment - £350'
+    ],
+    popular: true
+  },
+  'double-chin-jawline-fat': {
+    title: 'Double Chin / Jawline Fat',
+    category: 'Body Conditions',
+    description: 'Eliminate double chin and define jawline',
+    treatments: [
+      'Fat Freezing Treatment - £200',
+      'Jaw Slimming - £279',
+      'Jawline Filler - £550',
+      'Combined Treatment - £350'
+    ],
+    popular: true
   }
 };
 
@@ -145,7 +496,7 @@ export default function ConditionPage({ params }: PageProps) {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/book-consultation"
+                     href={`/book?condition=${params.slug}`}
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-lg font-semibold rounded-full hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl"
               >
                 <Calendar className="w-5 h-5" />
@@ -245,7 +596,7 @@ export default function ConditionPage({ params }: PageProps) {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/book-consultation"
+                     href={`/book?condition=${params.slug}`}
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-lg font-semibold rounded-full hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl"
               >
                 <Calendar className="w-5 h-5" />

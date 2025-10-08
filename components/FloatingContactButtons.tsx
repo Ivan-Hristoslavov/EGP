@@ -9,8 +9,8 @@ export default function FloatingContactButtons() {
   return (
     <>
       {/* Desktop Floating Buttons - Three Buttons in Column */}
-      <div className="hidden lg:flex fixed bottom-6 right-6 z-50 flex-col gap-3">
-        {/* Free Consultation Button */}
+      <div className="hidden lg:flex fixed bottom-6 right-6 z-50 flex-col gap-3 items-end">
+        {/* Book Treatment Now Button */}
         <ButtonBookNow size="sm" />
         
         {/* Call Button */}
@@ -22,8 +22,12 @@ export default function FloatingContactButtons() {
           <span className="text-sm">Call Now</span>
         </a>
         
-        {/* WhatsApp Button */}
-        <ButtonWhatsApp floating />
+        {/* WhatsApp Button - Circular with glow effect */}
+        <div className="relative">
+          <ButtonWhatsApp floating />
+          {/* Online indicator dot */}
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white dark:border-gray-900 animate-pulse"></div>
+        </div>
       </div>
 
       {/* Mobile Floating Buttons - Bottom Bar with Three Buttons */}

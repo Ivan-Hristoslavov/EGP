@@ -6,33 +6,275 @@ import { notFound } from 'next/navigation';
 
 // Service data - this would typically come from a database
 const servicesData = {
-  'free-discovery-consultation': {
+  'book-treatment-now': {
     title: 'Book Treatment Now',
-    category: 'Consultation',
-    price: 'Free',
+    category: 'Face',
+    price: 'From £50',
     duration: '30 minutes',
-    description: 'Start your aesthetic journey with a complimentary consultation',
+    description: 'Start your aesthetic journey with a personalized consultation',
     benefits: [
       'Expert skin analysis and assessment',
       'Personalized treatment recommendations',
       'Transparent pricing information',
-      'No-obligation consultation',
       'Professional advice from qualified practitioners',
       'Customized treatment plan creation'
     ],
     popular: true
   },
+  // FACE Services
+  'digital-skin-analysis': {
+    title: 'Digital Skin Analysis',
+    category: 'Face',
+    price: '£50',
+    duration: '45 minutes',
+    description: 'Advanced digital analysis of your skin condition and concerns',
+    benefits: [
+      'Comprehensive skin assessment',
+      'Detailed analysis report',
+      'Personalized recommendations',
+      'Before/after tracking',
+      'Professional skin mapping'
+    ],
+    popular: false
+  },
+  'prp': {
+    title: 'PRP',
+    category: 'Face',
+    price: '£480',
+    duration: '60 minutes',
+    description: 'Platelet-rich plasma treatment for skin rejuvenation',
+    benefits: [
+      'Natural skin regeneration',
+      'Reduced fine lines and wrinkles',
+      'Improved skin texture',
+      'Stimulates collagen production',
+      'Minimal downtime'
+    ],
+    popular: true
+  },
+  'exosomes': {
+    title: 'Exosomes',
+    category: 'Face',
+    price: '£550',
+    duration: '60 minutes',
+    description: 'Advanced exosome therapy for cellular regeneration',
+    benefits: [
+      'Advanced cellular regeneration',
+      'Anti-ageing benefits',
+      'Improved skin quality',
+      'Reduced inflammation',
+      'Enhanced healing'
+    ],
+    popular: false
+  },
+  'polynucleotides': {
+    title: 'Polynucleotides',
+    category: 'Face',
+    price: '£390',
+    duration: '45 minutes',
+    description: 'DNA-based treatment for skin regeneration and hydration',
+    benefits: [
+      'Deep skin hydration',
+      'Improved skin elasticity',
+      'Reduced fine lines',
+      'Enhanced skin quality',
+      'Natural regeneration'
+    ],
+    popular: false
+  },
+  '5-point-facelift': {
+    title: '5-Point Facelift',
+    category: 'Face',
+    price: '£950',
+    duration: '90 minutes',
+    description: 'Comprehensive facial lifting using multiple injection points',
+    benefits: [
+      'Comprehensive facial lifting',
+      'Natural-looking results',
+      'Long-lasting effects',
+      'Minimal downtime',
+      'Professional technique'
+    ],
+    popular: true
+  },
+  'profhilo': {
+    title: 'Profhilo',
+    category: 'Face',
+    price: '£390',
+    duration: '45 minutes',
+    description: 'Revolutionary skin remodelling treatment for hydration and firmness',
+    benefits: [
+      'Deep skin hydration',
+      'Improved skin firmness',
+      'Natural-looking results',
+      'Long-lasting effects',
+      'Minimal downtime'
+    ],
+    popular: true
+  },
+  'sculptra': {
+    title: 'Sculptra',
+    category: 'Face',
+    price: '£790',
+    duration: '60 minutes',
+    description: 'Collagen-stimulating treatment for volume restoration',
+    benefits: [
+      'Stimulates natural collagen',
+      'Gradual, natural results',
+      'Long-lasting effects',
+      'Volume restoration',
+      'Professional technique'
+    ],
+    popular: false
+  },
+  'skin-boosters': {
+    title: 'Skin Boosters',
+    category: 'Face',
+    price: '£230',
+    duration: '45 minutes',
+    description: 'Hydrating skin boosters for improved skin quality',
+    benefits: [
+      'Deep skin hydration',
+      'Improved skin texture',
+      'Natural-looking results',
+      'Quick procedure',
+      'Minimal downtime'
+    ],
+    popular: true
+  },
+  'deep-cleansing-facial': {
+    title: 'Deep Cleansing Facial',
+    category: 'Face',
+    price: '£170',
+    duration: '60 minutes',
+    description: 'Professional deep cleansing facial treatment',
+    benefits: [
+      'Deep pore cleansing',
+      'Improved skin texture',
+      'Relaxing experience',
+      'Professional products',
+      'Immediate results'
+    ],
+    popular: false
+  },
+  'medical-skin-peels': {
+    title: 'Medical Skin Peels',
+    category: 'Face',
+    price: '£200',
+    duration: '45 minutes',
+    description: 'Professional medical-grade skin peels for skin renewal',
+    benefits: [
+      'Skin renewal and regeneration',
+      'Improved skin texture',
+      'Reduced pigmentation',
+      'Professional strength',
+      'Visible results'
+    ],
+    popular: true
+  },
+  'deep-hydra-detox-facial': {
+    title: 'Deep Hydra Detox Facial',
+    category: 'Face',
+    price: '£200',
+    duration: '60 minutes',
+    description: 'Hydrating and detoxifying facial treatment',
+    benefits: [
+      'Deep hydration',
+      'Skin detoxification',
+      'Improved skin quality',
+      'Relaxing treatment',
+      'Immediate glow'
+    ],
+    popular: false
+  },
+  'nctf-under-eye-skin-booster': {
+    title: 'NCTF Under-Eye Skin Booster',
+    category: 'Face',
+    price: '£159',
+    duration: '30 minutes',
+    description: 'Specialized under-eye skin booster for dark circles and fine lines',
+    benefits: [
+      'Targeted under-eye treatment',
+      'Reduces dark circles',
+      'Minimizes fine lines',
+      'Quick procedure',
+      'Natural results'
+    ],
+    popular: true
+  },
+  '3-step-under-eye-treatment': {
+    title: '3-Step Under-Eye Treatment',
+    category: 'Face',
+    price: '£390',
+    duration: '60 minutes',
+    description: 'Comprehensive 3-step treatment for under-eye concerns',
+    benefits: [
+      'Comprehensive under-eye care',
+      'Multiple treatment benefits',
+      'Professional technique',
+      'Visible improvements',
+      'Long-lasting results'
+    ],
+    popular: true
+  },
+  'injectable-mesotherapy': {
+    title: 'Injectable Mesotherapy',
+    category: 'Face',
+    price: '£170',
+    duration: '45 minutes',
+    description: 'Injectable mesotherapy for skin rejuvenation and hydration',
+    benefits: [
+      'Deep skin hydration',
+      'Improved skin texture',
+      'Reduced fine lines',
+      'Natural ingredients',
+      'Minimal downtime'
+    ],
+    popular: false
+  },
+  'microneedling-facial': {
+    title: 'Microneedling Facial',
+    category: 'Face',
+    price: '£170',
+    duration: '60 minutes',
+    description: 'Professional microneedling for skin renewal and collagen stimulation',
+    benefits: [
+      'Stimulates collagen production',
+      'Improves skin texture',
+      'Reduces fine lines',
+      'Minimizes pores',
+      'Natural renewal process'
+    ],
+    popular: true
+  },
+  'full-face-balancing': {
+    title: 'Full Face Balancing',
+    category: 'Face',
+    price: '£790',
+    duration: '90 minutes',
+    description: 'Comprehensive full-face balancing treatment for harmonious features',
+    benefits: [
+      'Comprehensive facial balancing',
+      'Harmonious results',
+      'Professional technique',
+      'Natural-looking outcome',
+      'Long-lasting effects'
+    ],
+    popular: false
+  },
+
+  // ANTI-WRINKLE INJECTIONS
   'baby-botox': {
     title: 'Baby Botox',
     category: 'Anti-Wrinkle Injections',
     price: '£199',
-    duration: '15-20 minutes',
+    duration: '30 minutes',
     description: 'Subtle, natural-looking anti-wrinkle injections for a refreshed appearance',
     benefits: [
       'Subtle, natural-looking results',
       'Preventive anti-ageing approach',
       'Minimal downtime',
-      'Quick 15-20 minute procedure',
+      'Quick procedure',
       'Results last 3-4 months',
       'Suitable for first-time patients'
     ],

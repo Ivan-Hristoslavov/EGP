@@ -260,14 +260,14 @@ export default function ConditionsPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/book-consultation"
+                     href="/book"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-lg font-semibold rounded-full hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl"
               >
                 <Star className="w-5 h-5" />
                 Book Treatment Now
               </Link>
               <Link
-                href="/services"
+                     href="/book"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-rose-500 text-rose-500 dark:text-rose-400 text-lg font-semibold rounded-full hover:bg-rose-500 hover:text-white transition-all"
               >
                 <ArrowRight className="w-5 h-5" />
