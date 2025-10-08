@@ -1,9 +1,23 @@
-import { Fira_Code as FontMono, Inter as FontSans } from "next/font/google";
+import { Playfair_Display, Montserrat, Fira_Code as FontMono } from "next/font/google";
 
-export const fontSans = FontSans({
+// Luxury serif font for headings
+export const playfairDisplay = Playfair_Display({
   subsets: ["latin"],
-  variable: "--font-sans",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-playfair",
+  display: "swap",
 });
+
+// Modern sans-serif for body text
+export const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-montserrat",
+  display: "swap",
+});
+
+// Legacy exports for compatibility
+export const fontSans = montserrat;
 
 export const fontMono = FontMono({
   subsets: ["latin"],

@@ -9,7 +9,7 @@ import { ToastProvider } from "@/components/Toast";
 import HashNavigation from "@/components/HashNavigation";
 import { AdminProfileProvider } from "@/components/AdminProfileContext";
 
-import { fontSans } from "@/config/fonts";
+import { playfairDisplay, montserrat, fontSans } from "@/config/fonts";
 import LayoutMain from "@/components/LayoutMain";
 import { getAdminProfile } from "@/lib/admin-profile";
 import { createClient } from "@/lib/supabase/server";
@@ -318,26 +318,19 @@ export default async function RootLayout({
       <body
         className={clsx(
           "min-h-screen text-foreground bg-background font-sans antialiased",
+          playfairDisplay.variable,
+          montserrat.variable,
           fontSans.variable,
           inter.className
         )}
         suppressHydrationWarning
       >
-        <Providers
-          themeProps={{
-            attribute: "class",
-            defaultTheme: "light",
-            enableSystem: true,
-            themes: ["light", "dark"],
-          }}
-        >
-          <ToastProvider>
-            <AdminProfileProvider>
-              <HashNavigation />
-              <LayoutMain adminProfile={adminProfile}>{children}</LayoutMain>
-            </AdminProfileProvider>
-          </ToastProvider>
-        </Providers>
+        <ToastProvider>
+          <Providers>
+            <HashNavigation />
+            <LayoutMain adminProfile={adminProfile}>{children}</LayoutMain>
+          </Providers>
+        </ToastProvider>
         <SpeedInsights />
       </body>
     </html>

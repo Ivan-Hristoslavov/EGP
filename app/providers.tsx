@@ -6,6 +6,7 @@ import * as React from "react";
 import { HeroUIProvider } from "@heroui/system";
 import { useRouter } from "next/navigation";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { AdminProfileProvider } from "@/components/AdminProfileContext";
 
 export interface ProvidersProps {
   children: React.ReactNode;
@@ -24,9 +25,17 @@ export function Providers({ children, themeProps }: ProvidersProps) {
   const router = useRouter();
 
   return (
-    <NextThemesProvider {...themeProps}>
+    <NextThemesProvider 
+      attribute="class"
+      defaultTheme="light"
+      enableSystem={true}
+      themes={["light", "dark"]}
+      {...themeProps}
+    >
       <HeroUIProvider navigate={router.push}>
-        {children}
+        <AdminProfileProvider>
+          {children}
+        </AdminProfileProvider>
       </HeroUIProvider>
     </NextThemesProvider>
   );
