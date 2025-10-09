@@ -40,7 +40,7 @@ export function AreaPage({ areaName, postcode, description, localKeywords, nearb
               </div>
 
               <h1 className="text-5xl font-bold mb-6 leading-tight">
-                Emergency Plumber in <span className="text-yellow-300">{areaName}</span>
+                Premium Aesthetics in <span className="text-yellow-300">{areaName}</span>
               </h1>
 
               <p className="text-xl text-blue-100 mb-8 leading-relaxed">
@@ -111,10 +111,10 @@ export function AreaPage({ areaName, postcode, description, localKeywords, nearb
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Plumbing Services in {areaName}
+              Aesthetic Treatments in {areaName}
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Professional plumbing solutions for {areaName} residents and businesses
+              Professional aesthetic treatments for {areaName} residents
             </p>
           </div>
 
@@ -135,8 +135,8 @@ export function AreaPage({ areaName, postcode, description, localKeywords, nearb
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                   </svg>
                 ),
-                title: `Emergency Plumber ${areaName}`,
-                description: "24/7 emergency plumbing services with rapid response times throughout {areaName}."
+                title: `Expert Treatments ${areaName}`,
+                description: "Professional aesthetic treatments with expert practitioners serving {areaName}."
               },
               {
                 icon: (
@@ -212,7 +212,7 @@ export function AreaPage({ areaName, postcode, description, localKeywords, nearb
                 },
                 {
                   title: "45-Minute Response",
-                  description: `Emergency callouts in ${areaName} with guaranteed response times under 45 minutes.`
+                  description: `Consultation bookings in ${areaName} with guaranteed response times under 45 minutes.`
                 },
                 {
                   title: "Fully Qualified",
@@ -273,7 +273,7 @@ export function AreaPage({ areaName, postcode, description, localKeywords, nearb
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Need a Plumber in {areaName}?
+              Book Treatment in {areaName}?
             </h2>
             <p className="text-xl text-gray-600">
               Get in touch for fast, professional service
@@ -285,7 +285,7 @@ export function AreaPage({ areaName, postcode, description, localKeywords, nearb
             <div className="space-y-8">
               <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
                 <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                  Emergency Callout {areaName}
+                  Book Consultation {areaName}
                 </h3>
                 
                 <div className="space-y-6">

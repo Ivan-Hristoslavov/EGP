@@ -68,7 +68,7 @@ export default function HeaderAesthetics() {
             {/* Left side - Find Us */}
             <div className="hidden lg:flex items-center gap-4 xl:gap-6">
               <Link 
-                href="/contact" 
+                href="/find-us" 
                 className="flex items-center gap-1.5 hover:text-rose-100 transition-colors"
               >
                 <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -145,12 +145,18 @@ export default function HeaderAesthetics() {
       {/* Main Navigation Header - Clean No Filter Clinic Style */}
       <div className="border-b border-gray-100 dark:border-gray-800">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-20 md:h-24">
+          <div className={`flex items-center justify-between transition-all duration-300 ${
+            scrolled ? "h-16 md:h-18" : "h-20 md:h-24"
+          }`}>
             {/* Left Navigation Links */}
-            <nav className="hidden lg:flex items-center gap-6 xl:gap-8 mr-8 xl:mr-12 2xl:mr-16">
+            <nav className={`hidden lg:flex items-center transition-all duration-300 ${
+              scrolled ? "gap-4 xl:gap-6 mr-6 xl:mr-8 2xl:mr-12" : "gap-6 xl:gap-8 mr-8 xl:mr-12 2xl:mr-16"
+            }`}>
               <Link
                 href="/about"
-                className="font-montserrat text-gray-700 dark:text-gray-300 hover:text-rose-600 dark:hover:text-rose-400 font-light transition-colors text-xs lg:text-sm uppercase tracking-widest"
+                className={`font-montserrat text-gray-700 dark:text-gray-300 hover:text-rose-600 dark:hover:text-rose-400 font-light transition-all duration-300 uppercase tracking-widest ${
+                  scrolled ? "text-xs" : "text-xs lg:text-sm"
+                }`}
               >
                 About
               </Link>
@@ -175,10 +181,14 @@ export default function HeaderAesthetics() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-lg hover:bg-rose-50 dark:hover:bg-gray-800 transition-all touch-manipulation"
+              className={`lg:hidden rounded-lg hover:bg-rose-50 dark:hover:bg-gray-800 transition-all duration-300 touch-manipulation ${
+                scrolled ? "p-1.5" : "p-2"
+              }`}
               aria-label="Toggle menu"
             >
-              <div className="w-6 h-5 flex flex-col justify-between">
+              <div className={`flex flex-col justify-between transition-all duration-300 ${
+                scrolled ? "w-5 h-4" : "w-6 h-5"
+              }`}>
                 <span 
                   className={`block h-0.5 bg-gray-700 dark:bg-gray-300 rounded-full transition-all duration-300 ${
                     mobileMenuOpen ? 'rotate-45 translate-y-2' : ''
@@ -200,33 +210,51 @@ export default function HeaderAesthetics() {
             {/* Centered Logo - Clean & Clear with Maximum Distance from Navigation */}
             <Link 
               href="/" 
-              className="absolute left-1/2 transform -translate-x-1/2 flex flex-col items-center justify-center text-center px-4 sm:px-6"
+              className="group absolute left-1/2 transform -translate-x-1/2 flex flex-col items-center justify-center text-center px-4 sm:px-6 transition-all duration-300 hover:scale-105"
             >
-              <h1 className="font-playfair text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light text-gray-900 dark:text-white whitespace-nowrap leading-tight">
+              <h1 className={`font-playfair font-light text-gray-900 dark:text-white whitespace-nowrap leading-tight transition-all duration-300 group-hover:bg-gradient-to-r group-hover:from-rose-500 group-hover:via-pink-500 group-hover:to-rose-600 group-hover:bg-clip-text group-hover:text-transparent ${
+                scrolled ? "text-lg sm:text-xl md:text-2xl lg:text-3xl" : "text-xl sm:text-2xl md:text-3xl lg:text-4xl"
+              }`}>
                 EGP AESTHETICS
               </h1>
-              <p className="font-montserrat text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-light mt-1 tracking-[0.3em] uppercase">
+              <p className={`font-montserrat text-gray-500 dark:text-gray-400 font-light tracking-[0.3em] uppercase transition-all duration-300 group-hover:text-rose-400 dark:group-hover:text-rose-300 group-hover:tracking-[0.4em] ${
+                scrolled ? "text-[8px] sm:text-[9px] mt-0.5" : "text-[10px] sm:text-xs mt-1"
+              }`}>
                 London
               </p>
+              
+              {/* Subtle glow effect on hover */}
+              <div className="absolute inset-0 -z-10 rounded-full bg-gradient-to-r from-rose-500/10 via-pink-500/10 to-rose-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl scale-110"></div>
+              
+              {/* Animated underline effect */}
+              <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-px bg-gradient-to-r from-rose-500 to-pink-500 transition-all duration-300 group-hover:w-full"></div>
             </Link>
 
             {/* Right Navigation Links */}
-            <nav className="hidden lg:flex items-center gap-6 xl:gap-8 ml-8 xl:ml-12 2xl:ml-16">
+            <nav className={`hidden lg:flex items-center transition-all duration-300 ${
+              scrolled ? "gap-4 xl:gap-6 ml-6 xl:ml-8 2xl:ml-12" : "gap-6 xl:gap-8 ml-8 xl:ml-12 2xl:ml-16"
+            }`}>
               <Link
                 href="/blog"
-                className="font-montserrat text-gray-700 dark:text-gray-300 hover:text-rose-600 dark:hover:text-rose-400 font-light transition-colors text-xs lg:text-sm uppercase tracking-widest"
+                className={`font-montserrat text-gray-700 dark:text-gray-300 hover:text-rose-600 dark:hover:text-rose-400 font-light transition-all duration-300 uppercase tracking-widest ${
+                  scrolled ? "text-xs" : "text-xs lg:text-sm"
+                }`}
               >
                 Blog
               </Link>
               <Link
                 href="/press"
-                className="font-montserrat text-gray-700 dark:text-gray-300 hover:text-rose-600 dark:hover:text-rose-400 font-light transition-colors text-xs lg:text-sm uppercase tracking-widest"
+                className={`font-montserrat text-gray-700 dark:text-gray-300 hover:text-rose-600 dark:hover:text-rose-400 font-light transition-all duration-300 uppercase tracking-widest ${
+                  scrolled ? "text-xs" : "text-xs lg:text-sm"
+                }`}
               >
                 Awards/ Press
               </Link>
               <Link
                 href="/membership"
-                className="font-montserrat text-gray-700 dark:text-gray-300 hover:text-rose-600 dark:hover:text-rose-400 font-light transition-colors text-xs lg:text-sm uppercase tracking-widest"
+                className={`font-montserrat text-gray-700 dark:text-gray-300 hover:text-rose-600 dark:hover:text-rose-400 font-light transition-all duration-300 uppercase tracking-widest ${
+                  scrolled ? "text-xs" : "text-xs lg:text-sm"
+                }`}
               >
                 Skin Membership
               </Link>
@@ -252,12 +280,21 @@ export default function HeaderAesthetics() {
               {activeMenu === 'treatments' && (
                 <>
                   <div>
-                    <h3 className="text-xs font-light text-gray-700 dark:text-gray-300 mb-4 uppercase tracking-widest font-montserrat">
-                      Face
-                    </h3>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xs font-light text-gray-700 dark:text-gray-300 uppercase tracking-widest font-montserrat">
+                        Face
+                      </h3>
+                      <Link
+                        href="/services?category=Face"
+                        onClick={() => setActiveMenu(null)}
+                        className="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors font-medium"
+                      >
+                        View All →
+                      </Link>
+                    </div>
                     <ul className="space-y-3">
                       {[
-                        { name: "Book Treatment Now", price: "From £50" },
+                        { name: "Free Discovery Consultation", price: "Free" },
                         { name: "Digital Skin Analysis", price: "£50" },
                         { name: "PRP", price: "£480" },
                         { name: "Exosomes", price: "£550" },
@@ -293,9 +330,18 @@ export default function HeaderAesthetics() {
                     </ul>
                   </div>
                   <div>
-                    <h3 className="text-xs font-light text-gray-700 dark:text-gray-300 mb-4 uppercase tracking-widest font-montserrat">
-                      Anti-Wrinkle Injections
-                    </h3>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xs font-light text-gray-700 dark:text-gray-300 uppercase tracking-widest font-montserrat">
+                        Anti-Wrinkle Injections
+                      </h3>
+                      <Link
+                        href="/services?category=Anti-Wrinkle%20Injections"
+                        onClick={() => setActiveMenu(null)}
+                        className="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors font-medium"
+                      >
+                        View All →
+                      </Link>
+                    </div>
                     <ul className="space-y-3">
                       {[
                         { name: "Baby Botox", price: "£199" },
@@ -310,7 +356,7 @@ export default function HeaderAesthetics() {
                         { name: "Neck Lift", price: "£329" },
                         { name: "Jaw Slimming", price: "£279" },
                         { name: "Pebble Chin", price: "£179" },
-                        { name: "Bruxism", price: "£279" }
+                        { name: "Bruxism (Deep Grinding)", price: "£279" }
                       ].map((item) => (
                         <li key={item.name}>
                           <Link
@@ -330,15 +376,24 @@ export default function HeaderAesthetics() {
                     </ul>
                   </div>
                   <div>
-                    <h3 className="text-xs font-light text-gray-700 dark:text-gray-300 mb-4 uppercase tracking-widest font-montserrat">
-                      Fillers
-                    </h3>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xs font-light text-gray-700 dark:text-gray-300 uppercase tracking-widest font-montserrat">
+                        Fillers
+                      </h3>
+                      <Link
+                        href="/services?category=Fillers"
+                        onClick={() => setActiveMenu(null)}
+                        className="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors font-medium"
+                      >
+                        View All →
+                      </Link>
+                    </div>
                     <ul className="space-y-3">
                       {[
                         { name: "Cheek & Mid-Face Filler", price: "£390" },
                         { name: "Chin Filler", price: "£290" },
-                        { name: "Marionette Lines Filler", price: "£290" },
-                        { name: "Nasolabial Folds Filler", price: "£290" },
+                        { name: "Filler for Marionette Lines", price: "£290" },
+                        { name: "Filler for Nasolabial Folds", price: "£290" },
                         { name: "Jawline Filler", price: "£550" },
                         { name: "Lip Enhancement", price: "£290" },
                         { name: "Lip Hydration", price: "£190" },
@@ -364,16 +419,25 @@ export default function HeaderAesthetics() {
                     </ul>
                   </div>
                   <div>
-                    <h3 className="text-xs font-light text-gray-700 dark:text-gray-300 mb-4 uppercase tracking-widest font-montserrat">
-                      Body
-                    </h3>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xs font-light text-gray-700 dark:text-gray-300 uppercase tracking-widest font-montserrat">
+                        Body
+                      </h3>
+                      <Link
+                        href="/services?category=Body"
+                        onClick={() => setActiveMenu(null)}
+                        className="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors font-medium"
+                      >
+                        View All →
+                      </Link>
+                    </div>
                     <ul className="space-y-3">
                       {[
-                        { name: "Body Fat Burning Mesotherapy", price: "£170" },
-                        { name: "Radiofrequency & Ultrasound", price: "£250" },
-                        { name: "Fat Freezing Treatment", price: "£200" },
-                        { name: "Ultrasound Lift & Tighten", price: "£190" },
-                        { name: "Combined Treatment", price: "£350" }
+                        { name: "Body Fat Burning Mesotherapy (20×20 cm)", price: "£170" },
+                        { name: "Radiofrequency & Ultrasound for Skin Tightening", price: "£250" },
+                        { name: "Fat Freezing Treatment (Abdomen)", price: "£200" },
+                        { name: "Ultrasound Lift & Tighten Face/Body", price: "£190" },
+                        { name: "Combined with Mesotherapy", price: "£350" }
                       ].map((item) => (
                         <li key={item.name}>
                           <Link
@@ -398,9 +462,18 @@ export default function HeaderAesthetics() {
               {activeMenu === 'conditions' && (
                 <>
                   <div>
-                    <h3 className="text-xs font-light text-gray-700 dark:text-gray-300 mb-4 uppercase tracking-widest font-montserrat">
-                      Face Conditions
-                    </h3>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xs font-light text-gray-700 dark:text-gray-300 uppercase tracking-widest font-montserrat">
+                        Face Conditions
+                      </h3>
+                      <Link
+                        href="/conditions"
+                        onClick={() => setActiveMenu(null)}
+                        className="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors font-medium"
+                      >
+                        View All →
+                      </Link>
+                    </div>
                     <ul className="space-y-3">
                       {[
                         "Acne & Acne Scarring",
@@ -434,9 +507,18 @@ export default function HeaderAesthetics() {
                     </ul>
                   </div>
                   <div>
-                    <h3 className="text-xs font-light text-gray-700 dark:text-gray-300 mb-4 uppercase tracking-widest font-montserrat">
-                      Body Conditions
-                    </h3>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xs font-light text-gray-700 dark:text-gray-300 uppercase tracking-widest font-montserrat">
+                        Body Conditions
+                      </h3>
+                      <Link
+                        href="/conditions?category=Body"
+                        onClick={() => setActiveMenu(null)}
+                        className="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors font-medium"
+                      >
+                        View All →
+                      </Link>
+                    </div>
                     <ul className="space-y-3">
                       {[
                         "Cellulite (Thighs, Buttocks, Abdomen)",
@@ -532,7 +614,7 @@ export default function HeaderAesthetics() {
                       </h4>
                       <ul className="space-y-1">
                         {[
-                          { name: "Book Treatment Now", price: "From £50" },
+                          { name: "Free Discovery Consultation", price: "Free" },
                           { name: "Digital Skin Analysis", price: "£50" },
                           { name: "PRP", price: "£480" },
                           { name: "Exosomes", price: "£550" },
@@ -606,9 +688,18 @@ export default function HeaderAesthetics() {
                 {activeMenu === 'conditions' && (
                   <div className="mt-2 pl-4 sm:pl-6 space-y-3">
                     <div>
-                      <h4 className="text-xs font-light text-gray-600 dark:text-gray-400 mb-2 uppercase tracking-widest font-montserrat">
-                        Face Conditions
-                      </h4>
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-xs font-light text-gray-600 dark:text-gray-400 uppercase tracking-widest font-montserrat">
+                          Face Conditions
+                        </h4>
+                        <Link
+                          href="/conditions"
+                          onClick={() => setActiveMenu(null)}
+                          className="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors font-medium"
+                        >
+                          View All →
+                        </Link>
+                      </div>
                       <ul className="space-y-1">
                         {[
                           "Acne & Acne Scarring",
@@ -631,6 +722,54 @@ export default function HeaderAesthetics() {
                             </Link>
                           </li>
                         ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-xs font-light text-gray-600 dark:text-gray-400 uppercase tracking-widest font-montserrat">
+                          Body Conditions
+                        </h4>
+                        <Link
+                          href="/conditions?category=Body"
+                          onClick={() => setActiveMenu(null)}
+                          className="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors font-medium"
+                        >
+                          View All →
+                        </Link>
+                      </div>
+                      <ul className="space-y-1">
+                        {[
+                          "Cellulite (Thighs, Buttocks, Abdomen)",
+                          "Stubborn Belly Fat / Abdominal Fat",
+                          "Love Handles / Flanks",
+                          "Sagging Skin (Skin Laxity)",
+                          "Stretch Marks",
+                          "Arm Fat & Bingo Wings"
+                        ].map((condition) => {
+                          // Create proper URL mapping for body conditions
+                          const urlMapping: { [key: string]: string } = {
+                            "Cellulite (Thighs, Buttocks, Abdomen)": "cellulite-thighs-buttocks-abdomen",
+                            "Stubborn Belly Fat / Abdominal Fat": "stubborn-belly-fat-abdominal-fat",
+                            "Love Handles / Flanks": "love-handles-flanks",
+                            "Sagging Skin (Skin Laxity)": "sagging-skin-skin-laxity",
+                            "Stretch Marks": "stretch-marks",
+                            "Arm Fat & Bingo Wings": "arm-fat-bingo-wings"
+                          };
+                          
+                          const slug = urlMapping[condition] || condition.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '');
+                          
+                          return (
+                            <li key={condition}>
+                              <Link
+                                href={`/conditions/${slug}`}
+                                className="text-xs text-gray-600 dark:text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors font-montserrat"
+                                onClick={() => setMobileMenuOpen(false)}
+                              >
+                                {condition}
+                              </Link>
+                            </li>
+                          );
+                        })}
                       </ul>
                     </div>
                   </div>
@@ -661,6 +800,15 @@ export default function HeaderAesthetics() {
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Skin Membership
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/find-us"
+                  className="block px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base text-gray-700 dark:text-gray-300 hover:bg-rose-50 dark:hover:bg-gray-800 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg font-light transition-colors active:scale-95 font-montserrat uppercase tracking-widest"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Find Us
                 </Link>
               </li>
 

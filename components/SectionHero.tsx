@@ -38,9 +38,9 @@ export function SectionHero() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/90 z-10" />
 
       <div className="relative z-20 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col items-center">
-        {/* Top Row with Emergency Badge and Trust Badges */}
+        {/* Top Row with Availability Badge and Trust Badges */}
         <div className="flex flex-col items-center mb-6 w-full">
-          {/* Emergency Badge */}
+          {/* Availability Badge */}
           <div className="inline-flex items-center px-4 py-2 bg-black/40 backdrop-blur-md rounded-full text-white text-sm font-medium border border-white/20 mb-4">
             <svg
               className="w-4 h-4 mr-2 text-green-400"
@@ -53,7 +53,7 @@ export function SectionHero() {
                 clipRule="evenodd"
               />
             </svg>
-            24/7 Emergency Service
+            Expert Aesthetic Treatments
           </div>
 
           {/* Trust Badges - Responsive, no text overflow */}
@@ -226,7 +226,7 @@ export function SectionHero() {
             >
               <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
             </svg>
-            Book Emergency Service
+            Book Treatment Now
           </a>
           <a
             className="bg-white/10 backdrop-blur-md hover:bg-white/15 text-white px-6 py-3 rounded-lg text-base font-medium transition-all duration-300 border border-white/20 inline-flex items-center justify-center w-full sm:w-auto"

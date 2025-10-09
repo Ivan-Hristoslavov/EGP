@@ -103,12 +103,12 @@ export default function ButtonBookNow({
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
             <div className="sticky top-0 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 text-white px-6 py-4 flex items-center justify-between rounded-t-2xl">
               <div>
-                <h2 className="text-2xl font-bold">Book Treatment Now</h2>
-                <p className="text-rose-100 text-sm mt-1">Worth £50 - Absolutely FREE!</p>
+                <h2 className="text-3xl font-bold">Book Treatment Now</h2>
+                <p className="text-rose-100 text-base mt-2">Worth £50 - Absolutely FREE!</p>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -120,7 +120,7 @@ export default function ButtonBookNow({
             </div>
 
             {/* Modal Content */}
-            <div className="p-6">
+            <div className="p-8">
               {submitStatus === "success" ? (
                 <div className="text-center py-8">
                   <div className="w-16 h-16 bg-gradient-to-br from-rose-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">

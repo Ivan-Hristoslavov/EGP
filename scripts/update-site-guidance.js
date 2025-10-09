@@ -11,30 +11,30 @@ const siteGuidanceContent = [
     title: "Dashboard Overview",
     content: `# Dashboard Overview
 
-Your dashboard provides a comprehensive overview of your plumbing business performance. This is your command center for monitoring key metrics and managing daily operations.
+Your dashboard provides a comprehensive overview of your aesthetic clinic performance. This is your command center for monitoring key metrics and managing daily operations.
 
 ## Key Features
 
 ### Today's Schedule
-- View all bookings scheduled for today
-- Quick access to customer details and service information
+- View all appointments scheduled for today
+- Quick access to client details and treatment information
 - Status indicators for each booking (pending, confirmed, completed)
 
 ### Quick Statistics
 - Revenue Tracking: Monitor daily, weekly, and monthly income
-- Completed Jobs: Track finished work and success rates
+- Completed Treatments: Track finished procedures and success rates
 - Pending Invoices: Keep track of outstanding payments
-- Customer Satisfaction: View recent reviews and ratings
+- Client Satisfaction: View recent reviews and ratings
 
 ### Recent Activity Feed
-- Latest customer interactions and bookings
+- Latest client interactions and bookings
 - Recent invoice and payment activities
 - System notifications and alerts
 
 ### Performance Metrics
 - Monthly comparisons and growth trends
-- Service popularity analysis
-- Customer retention rates
+- Treatment popularity analysis
+- Client retention rates
 
 ## Tips for Daily Use
 - Check your dashboard first thing each morning
@@ -48,7 +48,7 @@ Your dashboard provides a comprehensive overview of your plumbing business perfo
     title: "Managing Bookings",
     content: `# Managing Bookings
 
-The booking system is the heart of your business operations. Efficiently manage customer appointments, track service delivery, and maintain customer relationships.
+The booking system is the heart of your clinic operations. Efficiently manage client appointments, track treatment delivery, and maintain client relationships.
 
 ## Key Features
 
@@ -59,71 +59,71 @@ The booking system is the heart of your business operations. Efficiently manage 
 - Quick Actions: Direct access to booking details and modifications
 
 ### Booking Details Management
-- Customer Information: Complete contact details and service history
-- Service Specifications: Detailed service type and requirements
-- Special Notes: Important customer requests and preferences
-- Address Information: Service location and access instructions
+- Client Information: Complete contact details and treatment history
+- Treatment Specifications: Detailed treatment type and requirements
+- Special Notes: Important client requests and preferences
+- Medical History: Important health information and contraindications
 
 ### Status Management
 - Pending: New bookings awaiting confirmation
 - Confirmed: Approved and scheduled appointments
-- In Progress: Currently being serviced
-- Completed: Finished work with customer satisfaction
+- In Progress: Currently being treated
+- Completed: Finished treatments with client satisfaction
 - Cancelled: Cancelled appointments with reasons
 
-### Customer History Integration
-- Past Services: Complete record of previous work
-- Preferences: Customer-specific requirements and notes
+### Client History Integration
+- Past Treatments: Complete record of previous procedures
+- Preferences: Client-specific requirements and notes
 - Communication History: Email and SMS interactions
 - Payment History: Previous invoices and payment status
 
 ## Best Practices
 - Confirm bookings within 24 hours of receipt
-- Use detailed notes for customer-specific requirements
-- Update status immediately after service completion
+- Use detailed notes for client-specific requirements
+- Update status immediately after treatment completion
 - Check for scheduling conflicts before accepting new bookings
-- Maintain clear communication with customers throughout the process`,
+- Maintain clear communication with clients throughout the process`,
     category: "bookings",
     sort_order: 2
   },
   {
-    title: "Customer Management",
-    content: `# Customer Management
+    title: "Client Management",
+    content: `# Client Management
 
-Build lasting relationships with your customers through comprehensive profile management and service history tracking.
+Build lasting relationships with your clients through comprehensive profile management and treatment history tracking.
 
 ## Key Features
 
-### Customer Profiles
+### Client Profiles
 - Contact Information: Name, email, phone, and address details
-- Customer Type: Individual or business customer classification
-- Company Details: Business information for corporate clients
+- Client Type: Individual classification
+- Medical History: Important health information and allergies
 - Communication Preferences: Preferred contact methods and times
 
-### Service History Tracking
-- Complete Work Record: All past services and dates
-- Service Details: Specific work performed and materials used
+### Treatment History Tracking
+- Complete Treatment Record: All past procedures and dates
+- Treatment Details: Specific work performed and products used
 - Pricing Information: Historical pricing and payment records
-- Warranty Information: Service guarantees and warranty periods
+- Follow-up Schedule: Recommended follow-up appointments
 
 ### Notes and Reminders
-- Customer Preferences: Specific requirements and preferences
-- Special Instructions: Access requirements, parking information
-- Follow-up Reminders: Scheduled follow-up calls or maintenance
-- Important Dates: Customer-specific important dates
+- Client Preferences: Specific requirements and preferences
+- Special Instructions: Medical considerations and contraindications
+- Follow-up Reminders: Scheduled follow-up calls or treatments
+- Important Dates: Client-specific important dates
 
 ### Communication Tools
-- Email Integration: Direct email from customer profiles
+- Email Integration: Direct email from client profiles
 - SMS Capabilities: Text message notifications and updates
 - Communication History: Complete record of all interactions
 - Automated Reminders: System-generated follow-up messages
 
-## Customer Relationship Tips
-- Update customer information after each service visit
-- Use notes to record specific customer preferences
-- Send follow-up communications after service completion
-- Track customer satisfaction and feedback
-- Maintain detailed records for warranty and follow-up services`,
+## Client Relationship Tips
+- Update client information after each treatment visit
+- Use notes to record specific client preferences
+- Send follow-up communications after treatment completion
+- Track client satisfaction and feedback
+- Maintain detailed records for follow-up treatments`,
     category: "customers",
     sort_order: 3
   },
@@ -137,14 +137,14 @@ Create professional invoices, manage payment tracking, and streamline your billi
 
 ### Professional Invoice Creation
 - Automatic Numbering: System-generated unique invoice numbers
-- Company Branding: Your business details and logo integration
-- Service Details: Comprehensive breakdown of work performed
+- Clinic Branding: Your business details and logo integration
+- Treatment Details: Comprehensive breakdown of procedures performed
 - VAT Management: Automatic VAT calculations and compliance
-- Photo Attachments: Include work photos with invoices
+- Photo Attachments: Include treatment photos with invoices
 
 ### Photo Attachments Feature
-- Work Documentation: Attach photos of completed work
-- Before/After Images: Show problem and solution
+- Treatment Documentation: Attach photos of completed work
+- Before/After Images: Show results and transformation
 - Multiple Images: Support for up to 5 photos per invoice
 - Automatic Email: Photos sent automatically with invoice emails
 - Professional Presentation: Images enhance invoice credibility
@@ -164,14 +164,14 @@ Create professional invoices, manage payment tracking, and streamline your billi
 
 ## Invoice Workflow
 1. Create Invoice: Generate from booking or manual entry
-2. Add Photos: Attach relevant work images (optional)
+2. Add Photos: Attach relevant treatment images (optional)
 3. Review Details: Check all information and calculations
-4. Send Email: Deliver invoice with photos to customer
+4. Send Email: Deliver invoice with photos to client
 5. Track Payment: Monitor payment status and follow up
 6. Record Payment: Update system when payment received
 
 ## Best Practices
-- Send invoices immediately after job completion
+- Send invoices immediately after treatment completion
 - Include relevant photos to support your work
 - Use payment links for faster payment collection
 - Set up automatic reminders for overdue payments
@@ -183,13 +183,13 @@ Create professional invoices, manage payment tracking, and streamline your billi
     title: "Reviews Management",
     content: `# Reviews Management
 
-Manage customer reviews and testimonials to build trust and credibility for your plumbing business.
+Manage client reviews and testimonials to build trust and credibility for your aesthetic clinic.
 
 ## Key Features
 
 ### Review Approval System
 - Moderation Process: All reviews require approval before publication
-- Quality Control: Ensure reviews meet your business standards
+- Quality Control: Ensure reviews meet your clinic standards
 - Spam Protection: Filter out inappropriate or fake reviews
 - Content Guidelines: Maintain professional review standards
 
@@ -199,31 +199,31 @@ Manage customer reviews and testimonials to build trust and credibility for your
 - Delete Function: Remove inappropriate reviews permanently
 - Bulk Operations: Manage multiple reviews simultaneously
 
-### Customer Information
-- Reviewer Details: Customer name and contact information
-- Service History: Link reviews to specific services
+### Client Information
+- Reviewer Details: Client name and contact information
+- Treatment History: Link reviews to specific treatments
 - Rating System: 1-5 star rating with detailed feedback
 - Date Tracking: When reviews were submitted and approved
 
 ### Display Management
 - Featured Reviews: Highlight your best testimonials
 - Website Integration: Automatic display on your website
-- Social Proof: Build customer trust through testimonials
+- Social Proof: Build client trust through testimonials
 - SEO Benefits: Reviews improve search engine visibility
 
 ## Review Management Process
-1. Review Submission: Customers submit reviews through your website
+1. Review Submission: Clients submit reviews through your website
 2. Notification: You receive notification of new review
 3. Moderation: Review content for appropriateness and accuracy
 4. Approval Decision: Approve, reject, or request modifications
 5. Publication: Approved reviews appear on your website
-6. Response: Optionally respond to customer feedback
+6. Response: Optionally respond to client feedback
 
 ## Best Practices
 - Review and approve submissions within 24 hours
 - Respond to both positive and negative reviews professionally
-- Use reviews to identify areas for service improvement
-- Encourage satisfied customers to leave reviews
+- Use reviews to identify areas for treatment improvement
+- Encourage satisfied clients to leave reviews
 - Maintain a balance of recent and diverse testimonials`,
     category: "reviews",
     sort_order: 5
@@ -232,24 +232,24 @@ Manage customer reviews and testimonials to build trust and credibility for your
     title: "Settings and Configuration",
     content: `# Settings and Configuration
 
-Configure your business settings, working hours, pricing, and system preferences to match your business needs and operational requirements.
+Configure your clinic settings, working hours, pricing, and system preferences to match your business needs and operational requirements.
 
 ## Key Features
 
 ### Business Information Management
-- Company Details: Name, address, contact information
-- Professional Credentials: Gas Safe registration, insurance details
+- Clinic Details: Name, address, contact information
+- Professional Credentials: CQC registration, insurance details
 - Company Status: Legal structure (Ltd, Sole Trader, etc.)
-- Response Time: Set customer response time expectations
+- Response Time: Set client response time expectations
 
 ### Working Hours Configuration
 - Daily Schedule: Set start and end times for each day
-- Working Days: Select which days you provide services
+- Working Days: Select which days you provide treatments
 - Holiday Management: Configure time off and vacation periods
-- Emergency Services: 24/7 emergency call-out settings
+- Consultation Hours: Standard consultation availability
 
 ### Pricing Management
-- Service Rates: Configure standard and emergency rates
+- Treatment Rates: Configure standard and consultation rates
 - VAT Settings: Enable/disable VAT and set rates
 - Discount Options: Set up promotional pricing
 - Payment Terms: Define payment methods and terms
@@ -261,7 +261,7 @@ Configure your business settings, working hours, pricing, and system preferences
 - Reminder Settings: Payment and follow-up reminders
 
 ## Configuration Tips
-- Keep business information up to date at all times
+- Keep clinic information up to date at all times
 - Review and adjust pricing regularly based on market conditions
 - Set realistic working hours that match your capacity
 - Enable notifications for important business events
@@ -273,14 +273,14 @@ Configure your business settings, working hours, pricing, and system preferences
     title: "Gallery Management",
     content: `# Gallery Management
 
-Showcase your best work and build customer confidence through a professional photo gallery of completed projects.
+Showcase your best work and build client confidence through a professional photo gallery of treatment results.
 
 ## Key Features
 
 ### Photo Organization
 - Section Management: Organize photos into logical categories
-- Before/After Images: Show problem and solution pairs
-- Project Types: Categorize by service type (emergency, installation, etc.)
+- Before/After Images: Show transformation and results
+- Treatment Types: Categorize by treatment type (Botox, Fillers, etc.)
 - Location Tags: Add area or location information
 
 ### Image Management
@@ -290,21 +290,21 @@ Showcase your best work and build customer confidence through a professional pho
 - Bulk Operations: Upload and manage multiple images
 
 ### Display Control
-- Featured Images: Highlight your best work
+- Featured Images: Highlight your best results
 - Order Management: Control the display order of photos
 - Active/Inactive: Show or hide specific images
 - Website Integration: Automatic display on your website
 
-### Customer Engagement
-- Professional Presentation: Build trust through quality work photos
-- Service Examples: Show customers what to expect
+### Client Engagement
+- Professional Presentation: Build trust through quality treatment photos
+- Treatment Examples: Show clients what to expect
 - Social Proof: Demonstrate your expertise and experience
 - Marketing Tool: Use gallery for marketing and sales
 
 ## Gallery Best Practices
-- Upload high-quality, well-lit photos of completed work
+- Upload high-quality, well-lit photos of completed treatments
 - Include before and after images when possible
-- Organize photos into logical sections (emergency, installation, etc.)
+- Organize photos into logical sections (face, body, etc.)
 - Keep gallery updated with recent work
 - Use descriptive titles and descriptions for SEO benefits`,
     category: "gallery",
@@ -325,7 +325,7 @@ Streamline your payment collection with multiple payment methods and automated p
 - Online Payments: Stripe payment link integration
 
 ### Stripe Payment Links
-- Secure Links: Generate secure payment links for customers
+- Secure Links: Generate secure payment links for clients
 - Email Integration: Send payment links via email
 - Automatic Tracking: Payment status updates automatically
 - Multiple Currencies: Support for GBP and other currencies
@@ -333,7 +333,7 @@ Streamline your payment collection with multiple payment methods and automated p
 ### Payment Tracking
 - Status Monitoring: Track pending, paid, and failed payments
 - Payment History: Complete record of all transactions
-- Customer Linking: Connect payments to specific customers
+- Client Linking: Connect payments to specific clients
 - Invoice Integration: Automatic invoice status updates
 
 ### Automated Features
@@ -344,17 +344,17 @@ Streamline your payment collection with multiple payment methods and automated p
 
 ## Payment Workflow
 1. Create Invoice: Generate invoice with payment details
-2. Send Payment Link: Email secure payment link to customer
-3. Customer Payment: Customer completes payment online
+2. Send Payment Link: Email secure payment link to client
+3. Client Payment: Client completes payment online
 4. Confirmation: Automatic payment confirmation and receipt
 5. Status Update: Invoice status updated to paid
-6. Follow-up: Send thank you and service follow-up
+6. Follow-up: Send thank you and treatment follow-up
 
 ## Best Practices
-- Send payment links immediately after job completion
+- Send payment links immediately after treatment completion
 - Follow up on overdue payments promptly
 - Keep detailed payment records for accounting
-- Provide multiple payment options for customer convenience
+- Provide multiple payment options for client convenience
 - Use automated reminders to improve payment collection`,
     category: "payments",
     sort_order: 8
@@ -363,7 +363,7 @@ Streamline your payment collection with multiple payment methods and automated p
     title: "FAQ Management",
     content: `# FAQ Management
 
-Manage frequently asked questions to reduce customer inquiries and provide quick answers to common questions.
+Manage frequently asked questions to reduce client inquiries and provide quick answers to common questions.
 
 ## Key Features
 
@@ -371,7 +371,7 @@ Manage frequently asked questions to reduce customer inquiries and provide quick
 - Category Management: Organize questions by topic
 - Order Control: Set the display order of questions
 - Active/Inactive: Show or hide specific questions
-- Search Functionality: Help customers find answers quickly
+- Search Functionality: Help clients find answers quickly
 
 ### Content Management
 - Rich Text Editor: Format answers with text styling
@@ -379,7 +379,7 @@ Manage frequently asked questions to reduce customer inquiries and provide quick
 - Link Integration: Add links to related information
 - Version Control: Track changes and updates
 
-### Customer Experience
+### Client Experience
 - Quick Answers: Provide immediate answers to common questions
 - Reduced Inquiries: Decrease customer service workload
 - Professional Appearance: Show expertise and organization
@@ -388,7 +388,7 @@ Manage frequently asked questions to reduce customer inquiries and provide quick
 ### Website Integration
 - Automatic Display: FAQs appear on your website
 - Mobile Responsive: Optimized for all device types
-- Search Function: Help customers find specific information
+- Search Function: Help clients find specific information
 - Contact Integration: Easy transition to contact form
 
 ## FAQ Management Tips
@@ -396,7 +396,7 @@ Manage frequently asked questions to reduce customer inquiries and provide quick
 - Use clear, concise language
 - Organize questions logically by category
 - Include contact information for complex questions
-- Regularly review and update content based on customer feedback`,
+- Regularly review and update content based on client feedback`,
     category: "faq",
     sort_order: 9
   },
@@ -404,18 +404,18 @@ Manage frequently asked questions to reduce customer inquiries and provide quick
     title: "Area Coverage Management",
     content: `# Area Coverage Management
 
-Manage your service areas and coverage zones to help customers understand where you provide services.
+Manage your service areas and coverage zones to help clients understand where you provide treatments.
 
 ## Key Features
 
 ### Area Configuration
 - Geographic Zones: Define specific service areas
 - Area Descriptions: Detailed information about each area
-- Service Availability: Specify which services in each area
+- Service Availability: Specify which treatments in each area
 - Response Times: Set expected response times by area
 
-### Customer Communication
-- Area Information: Help customers understand coverage
+### Client Communication
+- Area Information: Help clients understand coverage
 - Service Clarity: Clear expectations about service availability
 - Professional Presentation: Show organized service structure
 - Marketing Tool: Use areas for targeted marketing
@@ -475,4 +475,4 @@ async function updateSiteGuidance() {
   }
 }
 
-updateSiteGuidance(); 
+updateSiteGuidance();

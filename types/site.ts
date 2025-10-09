@@ -105,7 +105,7 @@ export interface TrustIndicators {
   certifications: string[];
 }
 
-export interface Emergency {
+export interface UrgentContact {
   enabled: boolean;
   message: string;
   phone: string;
@@ -134,7 +134,7 @@ export interface SiteConfig {
   serviceCategories: ServiceCategory[];
   conditionCategories: ConditionCategory[];
   trust: TrustIndicators;
-  emergency: Emergency;
+  urgentContact: UrgentContact;
   analytics: Analytics;
   links: {
     phone: string;

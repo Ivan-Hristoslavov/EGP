@@ -1290,12 +1290,12 @@ export default function BookingsPage() {
                         }
                       >
                         <option value="">Select a service</option>
-                        <option value="Leak Detection">Leak Detection</option>
-                        <option value="Pipe Repair">Pipe Repair</option>
-                        <option value="Drain Cleaning">Drain Cleaning</option>
-                        <option value="Emergency Plumbing">Emergency Plumbing</option>
-                        <option value="Boiler Service">Boiler Service</option>
-                        <option value="Bathroom Installation">Bathroom Installation</option>
+                        <option value="Botox Treatment">Botox Treatment</option>
+                        <option value="Dermal Fillers">Dermal Fillers</option>
+                        <option value="Skin Treatments">Skin Treatments</option>
+                        <option value="Consultation">Consultation</option>
+                        <option value="Facial Aesthetics">Facial Aesthetics</option>
+                        <option value="Body Contouring">Body Contouring</option>
                       </select>
                     </div>
 
@@ -1520,12 +1520,12 @@ export default function BookingsPage() {
                         }
                       >
                         <option value="">Select a service</option>
-                        <option value="Leak Detection">Leak Detection</option>
-                        <option value="Pipe Repair">Pipe Repair</option>
-                        <option value="Drain Cleaning">Drain Cleaning</option>
-                        <option value="Emergency Plumbing">Emergency Plumbing</option>
-                        <option value="Boiler Service">Boiler Service</option>
-                        <option value="Bathroom Installation">Bathroom Installation</option>
+                        <option value="Botox Treatment">Botox Treatment</option>
+                        <option value="Dermal Fillers">Dermal Fillers</option>
+                        <option value="Skin Treatments">Skin Treatments</option>
+                        <option value="Consultation">Consultation</option>
+                        <option value="Facial Aesthetics">Facial Aesthetics</option>
+                        <option value="Body Contouring">Body Contouring</option>
                       </select>
                     </div>
 

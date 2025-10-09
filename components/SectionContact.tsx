@@ -20,7 +20,7 @@ type BusinessSettings = {
   businessEmail: string;
   businessPhone: string;
   businessAddress: string;
-  emergencyRate: string;
+  consultationRate: string;
   standardRate: string;
   responseTime: string;
 };
@@ -49,7 +49,7 @@ export default function SectionContact() {
       adminSettings?.responseTime ||
       adminProfile?.response_time ||
       "45 minutes",
-    emergencyRate: adminSettings?.emergencyRate || "150",
+    consultationRate: adminSettings?.consultationRate || "150",
     standardRate: adminSettings?.standardRate || "75",
   };
 
@@ -194,7 +194,7 @@ export default function SectionContact() {
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed transition-colors duration-300 max-w-4xl mx-auto">
             Get in touch for immediate assistance or book your service online.
-            Professional plumbing solutions available 24/7.
+            Professional aesthetic treatments with instant confirmation.
           </p> */}
           <h2 className="text-5xl font-bold text-gray-900 dark:text-white mb-6 transition-colors duration-300">
             Book & Pay Immediately
@@ -208,53 +208,7 @@ export default function SectionContact() {
         {/* Two Row Layout */}
         <div className="space-y-12">
           {/* Row 1: Contact Information Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Emergency Contact */}
-            <div className="group relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-600">
-              <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-orange-500/5 dark:from-red-500/10 dark:to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="relative">
-                <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <svg
-                    className="w-7 h-7 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                    />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                  Emergency 24/7
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
-                  Urgent plumbing repairs
-                </p>
-                {isLoadingSettings ? (
-                  <div className="animate-pulse space-y-2">
-                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
-                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
-                  </div>
-                ) : (
-                  <>
-                    <a
-                      href={`tel:${businessData.businessPhone}`}
-                      className="text-red-600 dark:text-red-400 font-bold text-lg hover:text-red-700 dark:hover:text-red-300 transition-colors"
-                    >
-                      {businessData.businessPhone}
-                    </a>
-                    <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-                      From £{businessData.emergencyRate}/hour
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Regular Contact */}
             <div className="group relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-600">
               <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 dark:from-green-500/10 dark:to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

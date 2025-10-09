@@ -220,7 +220,6 @@ export default function FormBooking() {
         preferredDate: formData.get("preferred-date") as string,
         timeSlot: formData.get("timeSlot") as string,
         description: formData.get("description") as string,
-        isEmergency: formData.get("isEmergency") === "on",
       };
 
       // Validate required fields
@@ -245,9 +244,9 @@ export default function FormBooking() {
         return;
       }
 
-      // Check if date is in day off period (allow emergency bookings)
-      if (dayOffInfo.isDayOff && !data.isEmergency) {
-        showError("Day Off Period", "Regular bookings are not available on this date. You can still book emergency services.");
+      // Check if date is in day off period
+      if (dayOffInfo.isDayOff) {
+        showError("Day Off Period", "Bookings are not available on this date. Please select another date.");
         setIsSubmitting(false);
         return;
       }
@@ -304,9 +303,9 @@ export default function FormBooking() {
         service: serviceName,
         date: data.preferredDate,
         time: data.timeSlot.split(" - ")[0],
-        status: data.isEmergency ? "pending" : "scheduled",
+        status: "scheduled",
         payment_status: "pending",
-        amount: data.isEmergency ? 120.0 : 80.0,
+        amount: 80.0,
         address: data.address,
         notes: data.description || null,
       };
@@ -377,28 +376,28 @@ export default function FormBooking() {
   }
 
   return (
-    <form key={formKey} className="space-y-4" onSubmit={handleSubmit}>
+    <form key={formKey} className="space-y-6" onSubmit={handleSubmit}>
       
       {/* Grid Layout for Form Fields */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         {/* Left Column - Personal Details */}
-        <div className="space-y-4">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="w-7 h-7 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-              <span className="text-blue-600 dark:text-blue-400 font-bold text-xs">1</span>
+        <div className="space-y-6">
+          <div className="flex items-center space-x-4 mb-6">
+            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+              <span className="text-blue-600 dark:text-blue-400 font-bold text-sm">1</span>
             </div>
-            <h4 className="text-base font-semibold text-gray-900 dark:text-white">Your Details</h4>
+            <h4 className="text-xl font-semibold text-gray-900 dark:text-white">Your Details</h4>
           </div>
           
           {/* Name */}
           <div>
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="name">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="name">
               Full Name *
             </label>
             <input
               required
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm"
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-base"
               id="name"
               name="name"
               placeholder="Your full name"
@@ -407,14 +406,14 @@ export default function FormBooking() {
           </div>
 
           {/* Email and Phone */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="email">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="email">
                 Email *
               </label>
               <input
                 required
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-base"
                 id="email"
                 name="email"
                 placeholder="your@email.com"
@@ -423,12 +422,12 @@ export default function FormBooking() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="phone">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="phone">
                 Phone *
               </label>
               <input
                 required
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-base"
                 id="phone"
                 name="phone"
                 placeholder="+44 7XXX XXXXXX"
@@ -461,7 +460,7 @@ export default function FormBooking() {
               className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none text-sm"
               id="description"
               name="description"
-              placeholder="Describe your plumbing issue..."
+              placeholder="Any additional notes or questions..."
               rows={2}
             />
           </div>
@@ -690,29 +689,6 @@ export default function FormBooking() {
               )}
             </div>
           </div>
-
-          {/* Emergency Option */}
-          <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
-            <div className="flex items-center">
-              <input
-                className="h-4 w-4 rounded border-red-300 text-red-600 focus:ring-red-500"
-                id="isEmergency"
-                name="isEmergency"
-                type="checkbox"
-              />
-              <label className="ml-2 flex items-center text-xs font-medium" htmlFor="isEmergency">
-                <svg className="w-4 h-4 text-red-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
-                </svg>
-                <span className="text-red-700 dark:text-red-300">
-                  <strong>Emergency Service</strong> (45min response)
-                </span>
-              </label>
-            </div>
-            <p className="text-xs text-red-600 dark:text-red-400 mt-1 ml-6">
-              Select for urgent plumbing emergencies
-            </p>
-          </div>
         </div>
       </div>
 
@@ -747,7 +723,7 @@ export default function FormBooking() {
 
       <div className="text-center">
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          * Required fields. Emergency? Call{" "}
+          * Required fields. Questions? Call{" "}
           <a href={`tel:${businessPhone}`} className="font-bold text-blue-600 dark:text-blue-400 hover:underline">
             {businessPhone}
           </a>

@@ -1,37 +1,76 @@
-# Database
-DATABASE_URL="postgresql://postgres:password@localhost:5432/plumbe"
-
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-
-# Stripe
-STRIPE_SECRET_KEY=your_stripe_secret_key
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
-STRIPE_WEBHOOK_SECRET=your_webhook_secret
-
-# SendGrid
-SENDGRID_API_KEY=your_sendgrid_api_key
-NEXT_PUBLIC_BUSINESS_EMAIL=
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=https://placeholder.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder
 
 # Site Configuration
-NEXT_PUBLIC_SITE_URL=https://egp.com
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
-# SEO and Analytics
-GOOGLE_SITE_VERIFICATION=your_google_verification_code
-YANDEX_VERIFICATION=your_yandex_verification_code
-YAHOO_VERIFICATION=your_yahoo_verification_code
-NEXT_PUBLIC_GOOGLE_ANALYTICS_ID=G-LQ5Y01GKTW
-GOOGLE_TAG_MANAGER_ID=your_gtm_id
+# Stripe Configuration
+STRIPE_SECRET_KEY=sk_test_placeholder_key
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_placeholder_key
+STRIPE_WEBHOOK_SECRET=whsec_placeholder
 
-# Social Media
-NEXT_PUBLIC_FACEBOOK_URL=https://www.facebook.com/egp
-NEXT_PUBLIC_INSTAGRAM_URL=https://www.instagram.com/egp
-NEXT_PUBLIC_LINKEDIN_URL=https://www.linkedin.com/company/egp
-NEXT_PUBLIC_TWITTER_URL=https://twitter.com/egp
+# SendGrid Email Configuration
+SENDGRID_API_KEY=SG.placeholder_key
+SENDGRID_FROM_EMAIL=noreply@egpaesthetics.co.uk
 
-# Business Information
-NEXT_PUBLIC_BUSINESS_PHONE=123456789
-NEXT_PUBLIC_BUSINESS_ADDRESS=London, UK
-NEXT_PUBLIC_BUSINESS_HOURS=24/7 Emergency Service
+# Admin Configuration
+ADMIN_EMAIL=admin@egpaesthetics.co.uk
+ADMIN_PASSWORD=admin123
+ADMIN_NAME=Admin User
+
+# Google Calendar (optional - add later)
+GOOGLE_CLIENT_ID=placeholder.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=placeholder_secret
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=placeholder.apps.googleusercontent.com
+
+# Social Media & Analytics
+NEXT_PUBLIC_SOCIAL_MEDIA_INSTAGRAM=https://instagram.com/egpaesthetics
+NEXT_PUBLIC_SOCIAL_MEDIA_FACEBOOK=https://facebook.com/egpaesthetics
+NEXT_PUBLIC_GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX
+
+# WhatsApp Business
+NEXT_PUBLIC_WHATSAPP_NUMBER=+447700000000
+
+# ========================================
+# EGP AESTHETICS LONDON - BRANDING CONFIG
+# ========================================
+
+# Site Configuration
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
+# Contact Information
+NEXT_PUBLIC_PHONE_NUMBER=+447XXXXXXXXX
+NEXT_PUBLIC_BUSINESS_EMAIL=info@egpaesthetics.co.uk
+
+# Address
+NEXT_PUBLIC_ADDRESS_STREET=
+NEXT_PUBLIC_ADDRESS_CITY=London
+NEXT_PUBLIC_ADDRESS_POSTCODE=
+NEXT_PUBLIC_ADDRESS_FULL=London, UK
+
+# Social Media URLs
+NEXT_PUBLIC_SOCIAL_INSTAGRAM=https://instagram.com/egpaesthetics
+NEXT_PUBLIC_SOCIAL_FACEBOOK=https://facebook.com/egpaesthetics
+NEXT_PUBLIC_SOCIAL_YOUTUBE=https://youtube.com/@egpaesthetics
+NEXT_PUBLIC_SOCIAL_TIKTOK=
+NEXT_PUBLIC_SOCIAL_LINKEDIN=
+NEXT_PUBLIC_SOCIAL_TWITTER=
+
+# Trust Indicators
+NEXT_PUBLIC_YEAR_ESTABLISHED=2020
+NEXT_PUBLIC_TREATMENTS_COUNT=1000+
+NEXT_PUBLIC_SATISFACTION_RATE=98%
+
+# Analytics (optional - add when ready)
+NEXT_PUBLIC_GA_ID=
+NEXT_PUBLIC_FB_PIXEL_ID=
+NEXT_PUBLIC_GOOGLE_ADS_ID=
+
+# Google Calendar (add when ready)
+GOOGLE_CALENDAR_ID=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=
+

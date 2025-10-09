@@ -8,14 +8,14 @@ export async function generateMetadata(): Promise<Metadata> {
   const canonical = `${process.env.NEXT_PUBLIC_SITE_URL}/privacy`;
   
   return {
-    title: `Privacy Policy | ${companyName} - Emergency Plumber London`,
-    description: `Privacy policy for ${companyName} plumbing services. How we collect, use, and protect your personal information.`,
+    title: `Privacy Policy | ${companyName} - Aesthetic Clinic London`,
+    description: `Privacy policy for ${companyName} aesthetic services. How we collect, use, and protect your personal information.`,
     alternates: {
       canonical,
     },
     openGraph: {
       title: `Privacy Policy | ${companyName}`,
-      description: `Privacy policy for ${companyName} plumbing services. How we collect, use, and protect your personal information.`,
+      description: `Privacy policy for ${companyName} aesthetic services. How we collect, use, and protect your personal information.`,
       url: canonical,
       type: "website",
       siteName: companyName,

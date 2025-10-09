@@ -43,7 +43,7 @@ type SettingsState = {
   insuranceProvider: string;
 
   // Pricing
-  emergencyRate: string;
+  consultationRate: string;
   standardRate: string;
 
   // Working Hours
@@ -81,7 +81,7 @@ const defaultSettings: SettingsState = {
   fullyInsured: false,
   insuranceProvider: "",
 
-  emergencyRate: "150",
+  consultationRate: "150",
   standardRate: "75",
 
   workingHoursStart: "08:00",
@@ -90,7 +90,7 @@ const defaultSettings: SettingsState = {
 
   dayOffEnabled: false,
   dayOffMessage:
-    "Limited service hours today. Emergency services available 24/7.",
+    "Limited service hours today. Contact us for urgent bookings.",
   dayOffStartDate: "",
   dayOffEndDate: "",
 
@@ -1054,7 +1054,7 @@ export default function AdminSettingsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
-                      Emergency Rate (per hour)
+                      Consultation Rate (per session)
                     </label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">
@@ -1063,9 +1063,9 @@ export default function AdminSettingsPage() {
                       <input
                         className="w-full pl-8 pr-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
                         type="number"
-                        value={settings.emergencyRate}
+                        value={settings.consultationRate}
                         onChange={(e) =>
-                          handleInputChange("emergencyRate", e.target.value)
+                          handleInputChange("consultationRate", e.target.value)
                         }
                       />
                     </div>

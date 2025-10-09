@@ -144,8 +144,8 @@ export default function FooterMain() {
               )}
             </Link>
             <p className="mt-4 text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300 max-w-md">
-              Professional plumbing services across South West London. Emergency repairs, 
-              installations.
+              Premier aesthetic treatments across South West London. Expert practitioners, 
+              proven results.
             </p>
             <div className="mt-4 space-y-2">
               {isLoading ? (
@@ -156,7 +156,7 @@ export default function FooterMain() {
               ) : (
                 <>
                   <p className="text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300">
-                    📞 Emergency 24/7: <span className="font-semibold text-blue-600 dark:text-blue-400">{businessData.businessPhone}</span>
+                    📞 Contact: <span className="font-semibold text-blue-600 dark:text-blue-400">{businessData.businessPhone}</span>
                   </p>
                   <p className="text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300">
                     📧 Email: <span className="font-semibold">{businessData.businessEmail}</span>

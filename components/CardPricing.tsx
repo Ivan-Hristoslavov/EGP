@@ -13,40 +13,40 @@ type PricingTier = {
 
 const pricingTiers: PricingTier[] = [
   {
-    name: "Emergency Call Out",
-    description: "24/7 emergency plumbing services",
+    name: "Consultation",
+    description: "Expert aesthetic consultation",
     price: 85,
     features: [
-      "Same day response",
-      "Available 24/7",
-      "First hour of work included",
-      "Parts not included",
-      "Free quote for additional work",
+      "Same day availability",
+      "Expert practitioner",
+      "Personalized treatment plan",
+      "Product recommendations",
+      "Free follow-up advice",
     ],
     isPopular: true,
   },
   {
-    name: "Standard Service",
-    description: "Regular plumbing maintenance and repairs",
+    name: "Standard Treatment",
+    description: "Professional aesthetic treatments",
     price: 65,
     features: [
       "Next day appointment",
       "Standard working hours",
-      "First hour of work included",
-      "Parts not included",
-      "Written quote provided",
+      "Premium products used",
+      "Aftercare included",
+      "Results consultation",
     ],
   },
   {
-    name: "Bathroom Installation",
-    description: "Complete bathroom design and installation",
+    name: "Treatment Package",
+    description: "Complete aesthetic treatment package",
     price: 2500,
     features: [
-      "Full bathroom design",
-      "Supply and installation",
-      "All fixtures included",
-      "5-year workmanship guarantee",
-      "Free initial consultation",
+      "Multiple treatments included",
+      "Premium product range",
+      "Regular follow-ups",
+      "12-month support",
+      "Free consultations",
     ],
   },
 ];
@@ -155,7 +155,7 @@ export function CardPricing() {
             * All prices are in GBP and include VAT. Parts and materials are
             charged separately.
             <br />
-            * Emergency call-out fee applies outside of standard working hours.
+            * Consultation fee applies for all initial appointments.
             <br />* Prices may vary based on location and job complexity.
           </p>
         </div>

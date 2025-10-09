@@ -35,7 +35,7 @@ export default function SectionHeroAesthetics() {
   }, []);
 
   return (
-    <section className="relative h-[calc(100vh-80px)] sm:h-screen min-h-[500px] sm:min-h-[600px] max-h-[900px] overflow-hidden">
+    <section className="relative h-screen min-h-[500px] sm:min-h-[600px] max-h-[900px] overflow-hidden z-20">
       {/* Background Slides */}
       {slides.map((slide, index) => (
         <div
@@ -53,7 +53,7 @@ export default function SectionHeroAesthetics() {
       ))}
 
       {/* Content */}
-      <div className="relative z-20 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
+      <div className="relative z-30 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-start pt-32">
         <div className="w-full max-w-3xl">
           {/* Badge */}
           <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 backdrop-blur-md rounded-full text-white mb-4 sm:mb-6 border border-white/20">
@@ -110,15 +110,15 @@ export default function SectionHeroAesthetics() {
       </div>
 
       {/* Slide Indicators */}
-      <div className="absolute bottom-16 sm:bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex gap-2">
+      <div className="absolute bottom-16 sm:bottom-8 left-1/2 transform -translate-x-1/2 z-30 flex gap-3">
         {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`h-2 sm:h-3 rounded-full transition-all touch-manipulation ${
+            className={`h-3 sm:h-4 rounded-full transition-all duration-300 touch-manipulation hover:scale-110 ${
               currentSlide === index
-                ? "bg-white w-6 sm:w-8"
-                : "bg-white/50 hover:bg-white/75 w-2 sm:w-3"
+                ? "bg-white w-8 sm:w-10 shadow-lg"
+                : "bg-white/60 hover:bg-white/80 w-3 sm:w-4 hover:w-5 sm:hover:w-6"
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />
@@ -126,7 +126,7 @@ export default function SectionHeroAesthetics() {
       </div>
 
       {/* Scroll Indicator - Hidden on small mobile */}
-      <div className="hidden sm:block absolute bottom-8 right-4 sm:right-8 z-20 text-white animate-bounce">
+      <div className="hidden sm:block absolute bottom-8 right-4 sm:right-8 z-30 text-white animate-bounce">
         <svg
           className="w-5 h-5 sm:w-6 sm:h-6"
           fill="none"

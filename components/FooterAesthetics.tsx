@@ -292,6 +292,17 @@ export default function FooterAesthetics() {
                 <Heart className="w-3 h-3 inline text-rose-500 fill-rose-500" />{" "}
                 for beautiful transformations
               </p>
+              <p className="text-xs text-gray-600 text-center sm:text-right mt-2">
+                Developed by{" "}
+                <a
+                  href="https://serenity.rapid-frame.co.uk/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-rose-400 hover:text-rose-300 transition-colors font-semibold"
+                >
+                  Serenity Web Studio
+                </a>
+              </p>
             </div>
           </div>
         </div>

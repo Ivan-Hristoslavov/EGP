@@ -492,7 +492,7 @@ export default function ProfilePage() {
                         })
                       }
                       label="Specializations"
-                      placeholder="e.g., Emergency repairs"
+                      placeholder="e.g., Botox, Fillers, Skin Treatments"
                       description="List your main areas of expertise. Press Enter or click + to add each item."
                     />
                   </div>

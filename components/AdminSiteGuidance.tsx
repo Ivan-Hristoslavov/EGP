@@ -106,8 +106,8 @@ export function AdminSiteGuidance() {
             <div className="text-sm text-gray-600 dark:text-gray-400">Categories</div>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">24/7</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Support Available</div>
+            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">Expert</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Professional Care</div>
           </div>
         </div>
       </div>

@@ -48,7 +48,7 @@ export default function LayoutMain({
       <FloatingContactButtons />
       
       {/* Main content with padding for fixed header */}
-      <main className={`flex-grow transition-all duration-300 ${hasDayOffBanner ? 'pt-[200px]' : 'pt-[180px]'}`}>
+      <main className={`flex-grow transition-all duration-300 ${hasDayOffBanner ? 'pt-[120px]' : 'pt-[100px]'}`}>
         {children}
       </main>
       <FooterAesthetics />

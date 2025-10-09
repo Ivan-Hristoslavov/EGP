@@ -8,14 +8,14 @@ export async function generateMetadata(): Promise<Metadata> {
   const canonical = `${process.env.NEXT_PUBLIC_SITE_URL}/terms`;
   
   return {
-    title: `Terms & Conditions | ${companyName} - Emergency Plumber London`,
-    description: `Terms and conditions for ${companyName} plumbing services. Professional emergency plumber covering South West London.`,
+    title: `Terms & Conditions | ${companyName} - Aesthetic Clinic London`,
+    description: `Terms and conditions for ${companyName} aesthetic services. Premier aesthetic clinic covering South West London.`,
     alternates: {
       canonical,
     },
     openGraph: {
       title: `Terms & Conditions | ${companyName}`,
-      description: `Terms and conditions for ${companyName} plumbing services.`,
+      description: `Terms and conditions for ${companyName} aesthetic services.`,
       url: canonical,
       type: "website",
       siteName: companyName,

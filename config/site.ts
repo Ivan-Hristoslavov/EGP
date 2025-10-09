@@ -164,10 +164,10 @@ export const siteConfig = {
     ],
   },
   
-  // Emergency & Support
-  emergency: {
+  // Urgent Contact & Support
+  urgentContact: {
     enabled: true,
-    message: "For urgent matters, please call us directly",
+    message: "For urgent bookings, please call us directly",
     phone: process.env.NEXT_PUBLIC_PHONE_NUMBER || "+44 XXXX XXXXXX",
   },
   

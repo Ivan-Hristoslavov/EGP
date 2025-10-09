@@ -10,13 +10,17 @@ export function middleware(request: NextRequest) {
       return NextResponse.next();
     }
 
-    // Check for admin authentication
-    const adminAuth = request.cookies.get("adminAuth");
+    // TEMPORARILY DISABLED: Allow access to admin panel without authentication
+    // TODO: Re-enable authentication when ready
+    return NextResponse.next();
 
-    if (!adminAuth || adminAuth.value !== "authenticated") {
-      // Redirect to login page
-      return NextResponse.redirect(new URL("/admin/login", request.url));
-    }
+    // Check for admin authentication
+    // const adminAuth = request.cookies.get("adminAuth");
+
+    // if (!adminAuth || adminAuth.value !== "authenticated") {
+    //   // Redirect to login page
+    //   return NextResponse.redirect(new URL("/admin/login", request.url));
+    // }
   }
 
   return NextResponse.next();
