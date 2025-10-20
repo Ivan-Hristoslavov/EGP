@@ -44,12 +44,6 @@ export type Customer = {
   email: string;
   phone: string;
   address: string;
-  customer_type: 'individual' | 'company';
-  company_name?: string;
-  vat_number?: string;
-  contact_person?: string;
-  contact_email?: string;
-  contact_phone?: string;
   notes?: string;
   stripe_customer_id?: string;
   created_at: string;

@@ -8,12 +8,6 @@ type Customer = {
   email: string;
   phone: string;
   address: string;
-  customer_type: "individual" | "company";
-  company_name?: string;
-  vat_number?: string;
-  contact_person?: string;
-  contact_email?: string;
-  contact_phone?: string;
   notes?: string;
   created_at: string;
   updated_at: string;
@@ -201,10 +195,6 @@ export function DeleteCustomerModal({
               <div>
                 <span className="text-sm font-medium text-gray-500 dark:text-gray-400 transition-colors duration-300">Phone:</span>
                 <p className="text-gray-900 dark:text-white transition-colors duration-300">{customer.phone}</p>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400 transition-colors duration-300">Type:</span>
-                <p className="text-gray-900 dark:text-white transition-colors duration-300 capitalize">{customer.customer_type}</p>
               </div>
             </div>
           </div>
