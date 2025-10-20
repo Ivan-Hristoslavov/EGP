@@ -33,7 +33,6 @@ type Customer = {
   name: string;
   email: string;
   address: string;
-  customer_type: string;
 };
 
 type Booking = {
@@ -48,6 +47,275 @@ type Booking = {
   status: string;
   payment_status: string;
 };
+
+// Get date helper
+const getDate = (daysOffset: number) => {
+  const date = new Date();
+  date.setDate(date.getDate() + daysOffset);
+  return date.toISOString().split('T')[0];
+};
+
+// Dummy services data
+const DUMMY_SERVICES = [
+  "Botox Treatment",
+  "Dermal Fillers",
+  "Lip Enhancement",
+  "Baby Botox",
+  "Profhilo Treatment",
+  "Anti-wrinkle Treatment",
+  "Fat Freezing",
+  "Skin Consultation",
+  "Facial Aesthetics",
+  "Body Contouring",
+  "Skin Treatments",
+  "Consultation",
+  "Chemical Peels",
+  "Microneedling",
+  "Laser Hair Removal",
+  "CoolSculpting",
+  "Hyaluronic Acid Fillers",
+  "Thread Lifts",
+  "PRP Treatment",
+  "HydraFacial",
+  "Dermaplaning",
+  "Microdermabrasion",
+  "LED Light Therapy",
+  "Radio Frequency Treatment",
+  "Ultrasound Therapy",
+  "Cryotherapy",
+  "Vitamin Injections",
+  "Skin Tightening",
+  "Acne Treatment",
+  "Pigmentation Treatment",
+  "Scar Reduction",
+  "Wrinkle Relaxation",
+  "Jawline Contouring",
+  "Cheek Enhancement",
+  "Non-surgical Nose Job",
+  "Eyebrow Lamination",
+  "Eyelash Extensions",
+  "Brow Microblading",
+  "Lip Tattooing",
+  "Skin Rejuvenation",
+  "Anti-aging Facial",
+  "Deep Cleansing Facial",
+  "Brightening Treatment",
+  "Detox Treatment"
+];
+
+// Dummy payments data
+const DUMMY_PAYMENTS: Payment[] = [
+  {
+    id: "payment-1",
+    booking_id: "booking-1",
+    customer_id: "dummy-1",
+    amount: 199,
+    payment_method: "card",
+    payment_status: "paid",
+    payment_date: getDate(0),
+    reference: "PAY-2025-001",
+    notes: "Baby Botox treatment - paid via Stripe",
+    created_at: getDate(0),
+    updated_at: getDate(0),
+    customers: {
+      name: "Sarah Johnson",
+      email: "sarah.j@example.com"
+    },
+    bookings: {
+      service: "Baby Botox",
+      date: getDate(0),
+      customer_name: "Sarah Johnson"
+    }
+  },
+  {
+    id: "payment-2",
+    booking_id: "booking-2",
+    customer_id: "dummy-2",
+    amount: 290,
+    payment_method: "card",
+    payment_status: "paid",
+    payment_date: getDate(0),
+    reference: "PAY-2025-002",
+    notes: "Lip Enhancement - online payment",
+    created_at: getDate(0),
+    updated_at: getDate(0),
+    customers: {
+      name: "Emma Williams",
+      email: "emma.w@example.com"
+    },
+    bookings: {
+      service: "Lip Enhancement",
+      date: getDate(0),
+      customer_name: "Emma Williams"
+    }
+  },
+  {
+    id: "payment-3",
+    booking_id: "booking-3",
+    customer_id: "dummy-3",
+    amount: 390,
+    payment_method: "bank_transfer",
+    payment_status: "paid",
+    payment_date: getDate(-1),
+    reference: "BANK-2025-003",
+    notes: "Profhilo Treatment - bank transfer",
+    created_at: getDate(-1),
+    updated_at: getDate(-1),
+    customers: {
+      name: "Lisa Brown",
+      email: "lisa.b@example.com"
+    },
+    bookings: {
+      service: "Profhilo Treatment",
+      date: getDate(-1),
+      customer_name: "Lisa Brown"
+    }
+  },
+  {
+    id: "payment-4",
+    booking_id: "booking-4",
+    customer_id: "dummy-4",
+    amount: 75,
+    payment_method: "card",
+    payment_status: "refunded",
+    payment_date: getDate(-2),
+    reference: "REFUND-2025-004",
+    notes: "Consultation cancelled - refunded",
+    created_at: getDate(-2),
+    updated_at: getDate(-2),
+    customers: {
+      name: "Rachel Green",
+      email: "rachel@example.com"
+    },
+    bookings: {
+      service: "Skin Consultation",
+      date: getDate(-2),
+      customer_name: "Rachel Green"
+    }
+  },
+  {
+    id: "payment-5",
+    booking_id: "booking-5",
+    customer_id: "dummy-5",
+    amount: 220,
+    payment_method: "cash",
+    payment_status: "paid",
+    payment_date: getDate(-3),
+    reference: "CASH-2025-005",
+    notes: "Anti-wrinkle Treatment - cash payment",
+    created_at: getDate(-3),
+    updated_at: getDate(-3),
+    customers: {
+      name: "Jessica Taylor",
+      email: "jessica.t@example.com"
+    },
+    bookings: {
+      service: "Anti-wrinkle Treatment",
+      date: getDate(-3),
+      customer_name: "Jessica Taylor"
+    }
+  },
+  {
+    id: "payment-6",
+    booking_id: "booking-6",
+    customer_id: "dummy-6",
+    amount: 200,
+    payment_method: "card",
+    payment_status: "paid",
+    payment_date: getDate(-5),
+    reference: "PAY-2025-006",
+    notes: "Fat Freezing - Stripe payment",
+    created_at: getDate(-5),
+    updated_at: getDate(-5),
+    customers: {
+      name: "Maria Garcia",
+      email: "maria.g@example.com"
+    },
+    bookings: {
+      service: "Fat Freezing",
+      date: getDate(-5),
+      customer_name: "Maria Garcia"
+    }
+  },
+  {
+    id: "payment-7",
+    booking_id: "booking-7",
+    customer_id: "dummy-7",
+    amount: 320,
+    payment_method: "card",
+    payment_status: "refunded",
+    payment_date: getDate(-7),
+    reference: "REFUND-2025-007",
+    notes: "Dermal Fillers - client cancelled, refunded",
+    created_at: getDate(-7),
+    updated_at: getDate(-7),
+    customers: {
+      name: "Jennifer Davis",
+      email: "jennifer.d@example.com"
+    },
+    bookings: {
+      service: "Dermal Fillers",
+      date: getDate(-7),
+      customer_name: "Jennifer Davis"
+    }
+  },
+  {
+    id: "payment-8",
+    booking_id: "booking-8",
+    customer_id: "dummy-8",
+    amount: 250,
+    payment_method: "bank_transfer",
+    payment_status: "paid",
+    payment_date: getDate(-10),
+    reference: "BANK-2025-008",
+    notes: "Botox Treatment - corporate payment",
+    created_at: getDate(-10),
+    updated_at: getDate(-10),
+    customers: {
+      name: "Amanda Wilson",
+      email: "amanda@elite-beauty.example.com"
+    },
+    bookings: {
+      service: "Botox Treatment",
+      date: getDate(-10),
+      customer_name: "Amanda Wilson"
+    }
+  },
+  {
+    id: "payment-9",
+    booking_id: null,
+    customer_id: "dummy-1",
+    amount: 150,
+    payment_method: "card",
+    payment_status: "pending",
+    payment_date: getDate(0),
+    reference: "PENDING-2025-009",
+    notes: "Deposit payment - pending confirmation",
+    created_at: getDate(0),
+    updated_at: getDate(0),
+    customers: {
+      name: "Sarah Johnson",
+      email: "sarah.j@example.com"
+    }
+  },
+  {
+    id: "payment-10",
+    booking_id: null,
+    customer_id: "dummy-3",
+    amount: 100,
+    payment_method: "cash",
+    payment_status: "paid",
+    payment_date: getDate(-1),
+    reference: "CASH-2025-010",
+    notes: "Deposit for upcoming treatment",
+    created_at: getDate(-1),
+    updated_at: getDate(-1),
+    customers: {
+      name: "Lisa Brown",
+      email: "lisa.b@example.com"
+    }
+  }
+];
 
 export default function PaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -65,6 +333,7 @@ export default function PaymentsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showPaymentLinkModal, setShowPaymentLinkModal] = useState(false);
   const [showEmailLinkModal, setShowEmailLinkModal] = useState(false);
+  const [paymentActionType, setPaymentActionType] = useState<"record" | "link" | "email">("record");
   const [showEditModal, setShowEditModal] = useState(false);
   const [processingPayment, setProcessingPayment] = useState<string | null>(
     null
@@ -85,6 +354,7 @@ export default function PaymentsPage() {
   const [newPayment, setNewPayment] = useState({
     customer_id: "",
     booking_id: "",
+    service: "",
     amount: "",
     payment_method: "cash" as const,
     payment_date: format(new Date(), "yyyy-MM-dd"),
@@ -96,6 +366,7 @@ export default function PaymentsPage() {
     id: "",
     customer_id: "",
     booking_id: "",
+    service: "",
     amount: "",
     payment_method: "cash" as "cash" | "card" | "bank_transfer" | "cheque",
     payment_date: "",
@@ -143,10 +414,27 @@ export default function PaymentsPage() {
 
       if (paymentsRes.ok) {
         const paymentsData = await paymentsRes.json();
-        setPayments(paymentsData.payments || []);
+        const fetchedPayments = paymentsData.payments || [];
+        
+        // Use dummy data if no real payments exist
+        if (fetchedPayments.length === 0) {
+          console.log("No payments found, using dummy data");
+          setPayments(DUMMY_PAYMENTS);
+          setTotalPages(1);
+          setTotalCount(DUMMY_PAYMENTS.length);
+          setCurrentPage(1);
+        } else {
+          setPayments(fetchedPayments);
         setTotalPages(paymentsData.pagination?.totalPages || 1);
         setTotalCount(paymentsData.pagination?.totalCount || 0);
         setCurrentPage(paymentsData.pagination?.page || 1);
+        }
+      } else {
+        console.log("API error, using dummy payments data");
+        setPayments(DUMMY_PAYMENTS);
+        setTotalPages(1);
+        setTotalCount(DUMMY_PAYMENTS.length);
+        setCurrentPage(1);
       }
 
       if (customersRes.ok) {
@@ -166,6 +454,12 @@ export default function PaymentsPage() {
       }
     } catch (error) {
       console.error("Error loading data:", error);
+      // Use dummy data on error
+      console.log("Exception occurred, using dummy payments data");
+      setPayments(DUMMY_PAYMENTS);
+      setTotalPages(1);
+      setTotalCount(DUMMY_PAYMENTS.length);
+      setCurrentPage(1);
     } finally {
       setLoading(false);
     }
@@ -190,7 +484,11 @@ export default function PaymentsPage() {
     }
 
     try {
-      const response = await fetch("/api/payments", {
+      let response;
+      
+      if (paymentActionType === "record") {
+        // Regular payment recording
+        response = await fetch("/api/payments", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -200,26 +498,71 @@ export default function PaymentsPage() {
           amount: parseFloat(newPayment.amount),
         }),
       });
+      } else if (paymentActionType === "link") {
+        // Create payment link
+        response = await fetch("/api/payments", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            type: "create_payment_link",
+            customer_id: newPayment.customer_id,
+            booking_id: newPayment.booking_id,
+            amount: parseFloat(newPayment.amount),
+            payment_date: newPayment.payment_date,
+            reference: newPayment.reference,
+            notes: newPayment.notes,
+          }),
+        });
+      } else if (paymentActionType === "email") {
+        // Create payment link and send email
+        response = await fetch("/api/payments", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            type: "create_and_send_payment_link",
+            customer_id: newPayment.customer_id,
+            booking_id: newPayment.booking_id,
+            amount: parseFloat(newPayment.amount),
+            payment_date: newPayment.payment_date,
+            reference: newPayment.reference,
+            notes: newPayment.notes,
+          }),
+        });
+      }
 
-      if (response.ok) {
+      if (response && response.ok) {
         await loadData();
         setShowCreateModal(false);
         setNewPayment({
           customer_id: "",
           booking_id: "",
+          service: "",
           amount: "",
           payment_method: "cash",
           payment_date: format(new Date(), "yyyy-MM-dd"),
           reference: "",
           notes: "",
         });
+        
+        // Show success message based on action type
+        if (paymentActionType === "record") {
+          showSuccess("Payment Recorded", "Payment has been successfully recorded.");
+        } else if (paymentActionType === "link") {
+          showSuccess("Payment Link Created", "Payment link has been created successfully.");
       } else {
-        const error = await response.json();
-        setFormError(error.error || "Failed to create payment");
+          showSuccess("Payment Link Sent", "Payment link has been created and sent to customer.");
+        }
+      } else {
+        const error = await response?.json();
+        setFormError(error?.error || "Failed to process payment");
       }
     } catch (error) {
-      console.error("Error creating payment:", error);
-      setFormError("Failed to create payment");
+      console.error("Error processing payment:", error);
+      setFormError("Failed to process payment");
     }
   };
 
@@ -353,6 +696,7 @@ export default function PaymentsPage() {
       id: payment.id,
       customer_id: payment.customer_id || "",
       booking_id: payment.booking_id || "",
+      service: payment.bookings?.service || "",
       amount: payment.amount.toString(),
       payment_method: payment.payment_method,
       payment_date: payment.payment_date,
@@ -422,6 +766,7 @@ export default function PaymentsPage() {
           id: "",
           customer_id: "",
           booking_id: "",
+          service: "",
           amount: "",
           payment_method: "cash",
           payment_date: "",
@@ -718,118 +1063,132 @@ export default function PaymentsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-pink-50/50 to-purple-50/50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800">
+      <div className="max-w-7xl mx-auto p-6 space-y-8">
+        {/* Compact Header */}
+        <div className="relative overflow-hidden bg-gradient-to-r from-green-500 via-emerald-500 to-teal-600 rounded-2xl shadow-lg">
+          <div className="absolute inset-0 bg-black/5"></div>
+          
+          <div className="relative px-6 py-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
-              Payments
+                <h1 className="text-2xl font-bold text-white mb-1">
+                  Payments Management
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1 transition-colors duration-300">
-              Manage and track all payment transactions.
+                <p className="text-white/90 text-sm">
+                  Track and manage payment transactions
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+              
+              <div className="flex items-center gap-3">
             {/* View Toggle */}
-            <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1 transition-colors duration-300">
+                <div className="flex bg-white/20 backdrop-blur-sm rounded-lg p-1 border border-white/30">
               <button
-                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+                    className={`flex items-center px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200 ${
                   viewMode === "table"
-                    ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
-                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                        ? "bg-white text-green-600 shadow-sm"
+                        : "text-white hover:bg-white/20"
                 }`}
                 onClick={() => handleViewModeChange("table")}
               >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 6h18m-9 8h9m-9 4h9m-9-8h9m-9-4H3" />
+                    <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 6h18m-9 8h9m-9 4h9m-9-8h9" />
                 </svg>
                 Table
               </button>
               <button
-                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+                    className={`flex items-center px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200 ${
                   viewMode === "cards"
-                    ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
-                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                        ? "bg-white text-green-600 shadow-sm"
+                        : "text-white hover:bg-white/20"
                 }`}
                 onClick={() => handleViewModeChange("cards")}
               >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14-7H5a2 2 0 00-2 2v12a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2z" />
                 </svg>
                 Cards
               </button>
             </div>
-            {/* Create Payment Link Button */}
+                
+                {/* Unified Action Button */}
             <button
-              className="flex items-center justify-center px-3 py-2 text-sm font-medium text-white bg-green-600 dark:bg-green-500 rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition-colors duration-300"
-              onClick={() => setShowPaymentLinkModal(true)}
-            >
-              <svg
-                className="w-4 h-4 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
-                />
+                  className="flex items-center px-4 py-1.5 text-xs font-medium text-green-600 bg-white rounded-lg hover:bg-white/90 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  onClick={() => {
+                    setPaymentActionType("record");
+                    setShowCreateModal(true);
+                  }}
+                >
+                  <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
-              <span className="hidden sm:inline">Payment Link</span>
-              <span className="sm:hidden">Link</span>
+                  <span className="hidden sm:inline">Add Payment</span>
+                  <span className="sm:hidden">Add</span>
             </button>
+              </div>
+            </div>
+          </div>
+        </div>
 
-            {/* Create Email Link Button */}
-            <button
-              className="flex items-center justify-center px-3 py-2 text-sm font-medium text-white bg-orange-600 dark:bg-orange-500 rounded-lg hover:bg-orange-700 dark:hover:bg-orange-600 transition-colors duration-300"
-              onClick={() => setShowEmailLinkModal(true)}
-            >
-              <svg
-                className="w-4 h-4 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                />
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 p-6 hover:shadow-xl transition-all duration-300">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+            <div className="relative">
+              <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg mb-3 inline-block">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
-              <span className="hidden sm:inline">Email Link</span>
-              <span className="sm:hidden">Email</span>
-            </button>
+              </div>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white mb-1">{payments.length}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Total Payments</p>
+            </div>
+          </div>
 
-            {/* Create Payment Button */}
-            <button
-              className="flex items-center justify-center px-3 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors duration-300"
-              onClick={() => setShowCreateModal(true)}
-            >
-              <svg
-                className="w-4 h-4 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                />
+          <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 p-6 hover:shadow-xl transition-all duration-300">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+            <div className="relative">
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg mb-3 inline-block">
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
-              <span className="hidden sm:inline">Record Payment</span>
-              <span className="sm:hidden">Record</span>
-            </button>
+              </div>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white mb-1">{payments.filter(p => p.payment_status === "paid").length}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Paid</p>
+            </div>
+          </div>
+
+          <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 p-6 hover:shadow-xl transition-all duration-300">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+            <div className="relative">
+              <div className="p-3 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl shadow-lg mb-3 inline-block">
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white mb-1">{payments.filter(p => p.payment_status === "pending").length}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Pending</p>
+            </div>
+          </div>
+
+          <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 p-6 hover:shadow-xl transition-all duration-300">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+            <div className="relative">
+              <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl shadow-lg mb-3 inline-block">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                </svg>
+              </div>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+                £{payments.filter(p => p.payment_status === "paid").reduce((sum, p) => sum + p.amount, 0).toFixed(2)}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Total Revenue</p>
+            </div>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 transition-colors duration-300">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 p-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 md:space-x-4">
             <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
               <div>
@@ -1017,8 +1376,8 @@ export default function PaymentsPage() {
         </div>
       </div>
 
-      {/* Payments Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
+      {/* Payments Display */}
+      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 overflow-hidden">
         {loading ? (
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400" />
@@ -1074,55 +1433,54 @@ export default function PaymentsPage() {
             {/* Table View */}
             {viewMode === "table" && (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 transition-colors duration-300">
-                <thead className="bg-gray-50 dark:bg-gray-700/50 transition-colors duration-300">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider transition-colors duration-300">
-                      Reference
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider transition-colors duration-300">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Customer
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider transition-colors duration-300">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Amount
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider transition-colors duration-300">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Method
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider transition-colors duration-300">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider transition-colors duration-300">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Date
                     </th>
-                    <th className="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider transition-colors duration-300">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700 transition-colors duration-300">
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {filteredPayments.map((payment) => (
                     <tr
                       key={payment.id}
-                      className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-300"
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
                     >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white transition-colors duration-300">
-                        {payment.reference ? (
-                          <span className="cursor-help" title={payment.reference}>
-                            {truncateReference(payment.reference)}
-                          </span>
-                        ) : (
-                          "-"
-                        )}
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                            {payment.customers?.name || "Unknown Customer"}
+                          </div>
+                          {payment.customers?.email && (
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                              {payment.customers.email}
+                            </div>
+                          )}
+                        </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300">
-                        {payment.customers?.email || "Unknown"}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white transition-colors duration-300">
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="text-sm font-semibold text-gray-900 dark:text-white">
                         £{payment.amount.toFixed(2)}
+                        </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300">
-                        <div className="flex items-center">
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                           <span className="mr-2">
                             {getPaymentMethodIcon(payment.payment_method)}
                           </span>
@@ -1131,25 +1489,25 @@ export default function PaymentsPage() {
                           </span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                            payment.payment_status
-                          )}`}
+                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            payment.payment_status === "paid" ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" :
+                            payment.payment_status === "pending" ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200" :
+                            payment.payment_status === "refunded" ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200" :
+                            "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                          }`}
                         >
-                          <span className="capitalize">
                             {payment.payment_status}
-                          </span>
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
                         {format(new Date(payment.payment_date), "dd MMM yyyy")}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm">
-                        <div className="flex items-center justify-center space-x-1">
-                          {/* View Details Button */}
+                      <td className="px-4 py-3 whitespace-nowrap text-center text-sm">
+                        <div className="flex items-center justify-center gap-1">
                           <button
-                            className="inline-flex items-center justify-center w-8 h-8 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-all duration-200"
+                            className="inline-flex items-center justify-center w-7 h-7 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-md transition-colors duration-200"
                             onClick={() => setSelectedPayment(payment)}
                             title="View Details"
                           >
@@ -1174,98 +1532,24 @@ export default function PaymentsPage() {
                             </svg>
                           </button>
 
-                          {/* Copy Payment Link Button - Only show for payment links */}
-                          {isPaymentLink(payment) &&
-                            getPaymentLinkUrl(payment) && (
-                              <button
-                                className="inline-flex items-center justify-center w-8 h-8 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-all duration-200"
-                                onClick={() => handleCopyPaymentLink(payment)}
-                                title="Copy Payment Link"
-                              >
-                                <svg
-                                  className="w-4 h-4"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
-                                  />
-                                </svg>
-                              </button>
-                            )}
-
-                          {/* Send Payment Link Email Button - Only show for payment links */}
-                          {isPaymentLink(payment) &&
-                            getPaymentLinkUrl(payment) &&
-                            payment.customers?.email && (
-                              <button
-                                className="inline-flex items-center justify-center w-8 h-8 text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 hover:bg-orange-50 dark:hover:bg-orange-900/30 rounded-lg transition-all duration-200"
-                                onClick={() =>
-                                  handleSendPaymentLinkEmail(payment)
-                                }
-                                title="Send Payment Link Email"
-                              >
-                                <svg
-                                  className="w-4 h-4"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                                  />
-                                </svg>
-                              </button>
-                            )}
-
-                          {/* Edit Button - Only show for pending/failed payments */}
                           {canEditPayment(payment.payment_status) && (
                             <button
-                              className="inline-flex items-center justify-center w-8 h-8 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-all duration-200"
+                              className="inline-flex items-center justify-center w-7 h-7 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-md transition-colors duration-200"
                               onClick={() => handleEditPayment(payment)}
                               title="Edit Payment"
                             >
-                              <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                />
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                               </svg>
                             </button>
                           )}
-
-                          {/* Delete Button */}
                           <button
-                            className="inline-flex items-center justify-center w-8 h-8 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-all duration-200"
+                            className="inline-flex items-center justify-center w-7 h-7 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-colors duration-200"
                             onClick={() => handleDeletePayment(payment)}
                             title="Delete Payment"
                           >
-                            <svg
-                              className="w-4 h-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                              />
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
                           </button>
                         </div>
@@ -1281,71 +1565,90 @@ export default function PaymentsPage() {
             {viewMode === "cards" && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredPayments.map((payment) => (
-                  <div key={payment.id} className="bg-white dark:bg-gray-800 shadow-lg rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 p-6">
-                    {/* Header with Amount and Status */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-2">
-                          <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                            £{payment.amount.toFixed(2)}
+                  <div key={payment.id} className="group relative overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 p-6 hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer">
+                    {/* Animated Background */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-100/20 via-emerald-50/10 to-teal-100/20 dark:from-green-900/10 dark:via-emerald-900/5 dark:to-teal-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+                    
+                    <div className="relative z-10">
+                      {/* Header with Customer Avatar */}
+                      <div className="flex items-start gap-4 mb-4">
+                        <div className="relative">
+                          <div className="w-14 h-14 bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
+                            <span className="text-white font-bold text-lg">
+                              {(payment.customers?.name || "?").charAt(0).toUpperCase()}
                           </span>
-                          <span
-                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
-                              payment.payment_status
-                            )}`}
-                          >
+                          </div>
+                          <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white dark:border-gray-800 ${
+                            payment.payment_status === "paid" ? "bg-green-500" : 
+                            payment.payment_status === "pending" ? "bg-yellow-500" : "bg-red-500"
+                          }`}></div>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-bold text-gray-900 dark:text-white mb-1">
+                            {payment.customers?.name || "Unknown Customer"}
+                          </h3>
+                          {payment.customers?.email && (
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                              {payment.customers.email}
+                            </p>
+                          )}
+                        </div>
+                        <span className={`inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-bold shadow-md ${
+                          payment.payment_status === "paid" ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white" :
+                          payment.payment_status === "pending" ? "bg-gradient-to-r from-yellow-500 to-orange-600 text-white" :
+                          payment.payment_status === "refunded" ? "bg-gradient-to-r from-red-500 to-red-600 text-white" :
+                          "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                        }`}>
                             {payment.payment_status.toUpperCase()}
                           </span>
                         </div>
-                        <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+
+                      {/* Amount & Payment Method */}
+                      <div className="flex items-center justify-between mb-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50/50 dark:from-green-900/20 dark:to-emerald-800/10 rounded-xl">
+                        <div>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1">Amount</p>
+                          <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                            £{payment.amount.toFixed(2)}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
                         {getPaymentMethodIcon(payment.payment_method)}
-                          <span className="capitalize">
+                          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 capitalize">
                           {payment.payment_method.replace("_", " ")}
                         </span>
-                        </div>
                       </div>
-                    </div>
-
-                    {/* Customer Info */}
-                    <div className="mb-4">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <svg className="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">
-                          {payment.customers?.name || "Unknown Customer"}
-                        </span>
-                      </div>
-                      {payment.customers?.email && (
-                        <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                          </svg>
-                          <span className="truncate">{payment.customers.email}</span>
-                        </div>
-                      )}
                     </div>
 
                     {/* Payment Details */}
-                    <div className="space-y-3 mb-6">
+                      <div className="space-y-2 mb-4">
                       {payment.reference && (
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600 dark:text-gray-400 font-medium">Reference:</span>
-                          <span className="text-gray-900 dark:text-white font-mono">
+                          <div className="flex items-center gap-2 text-sm">
+                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                            </svg>
+                            <span className="text-gray-600 dark:text-gray-400">Ref:</span>
+                            <span className="text-gray-900 dark:text-white font-mono text-xs">
                             {truncateReference(payment.reference)}
                           </span>
                         </div>
                       )}
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600 dark:text-gray-400 font-medium">Date:</span>
-                        <span className="text-gray-900 dark:text-white">
+                        <div className="flex items-center gap-2 text-sm">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <span className="text-gray-600 dark:text-gray-400">Date:</span>
+                          <span className="text-gray-900 dark:text-white font-semibold">
                           {format(new Date(payment.payment_date), "dd MMM yyyy")}
                         </span>
                       </div>
                       {payment.bookings && (
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600 dark:text-gray-400 font-medium">Service:</span>
-                          <span className="text-gray-900 dark:text-white truncate max-w-[120px]">
+                          <div className="flex items-center gap-2 text-sm">
+                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            <span className="text-gray-600 dark:text-gray-400">Service:</span>
+                            <span className="text-gray-900 dark:text-white font-semibold truncate flex-1">
                             {payment.bookings.service}
                           </span>
                         </div>
@@ -1353,64 +1656,38 @@ export default function PaymentsPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-200/50 dark:border-gray-700/50">
                       <button
-                        className="inline-flex items-center px-3 py-2 text-xs font-medium text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors duration-200"
+                          className="flex-1 p-2.5 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-200 font-semibold"
                         onClick={() => setSelectedPayment(payment)}
                       >
-                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                        View
                       </button>
-
-                      {isPaymentLink(payment) && getPaymentLinkUrl(payment) && (
-                        <button
-                          className="inline-flex items-center px-3 py-2 text-xs font-medium text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-lg transition-colors duration-200"
-                          onClick={() => handleCopyPaymentLink(payment)}
-                        >
-                          <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                          </svg>
-                          Copy
-                        </button>
-                      )}
-
-                      {isPaymentLink(payment) &&
-                        getPaymentLinkUrl(payment) &&
-                        payment.customers?.email && (
-                          <button
-                            className="inline-flex items-center px-3 py-2 text-xs font-medium text-orange-700 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 hover:bg-orange-100 dark:hover:bg-orange-900/50 rounded-lg transition-colors duration-200"
-                            onClick={() => handleSendPaymentLinkEmail(payment)}
-                          >
-                            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                            Email
-                          </button>
-                        )}
 
                       {canEditPayment(payment.payment_status) && (
                         <button
-                          className="inline-flex items-center px-3 py-2 text-xs font-medium text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/30 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg transition-colors duration-200"
+                            className="p-2.5 bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-200"
                           onClick={() => handleEditPayment(payment)}
+                            title="Edit Payment"
                         >
-                          <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
-                          Edit
                         </button>
                       )}
 
                       <button
-                        className="inline-flex items-center px-3 py-2 text-xs font-medium text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors duration-200"
+                          className="p-2.5 bg-gradient-to-br from-red-500 to-red-600 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-200"
                         onClick={() => handleDeletePayment(payment)}
+                          title="Delete Payment"
                       >
-                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                        Delete
                       </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -1438,18 +1715,95 @@ export default function PaymentsPage() {
               className="fixed inset-0 transition-opacity bg-gray-500 dark:bg-gray-900 bg-opacity-75 dark:bg-opacity-75"
               onClick={() => setShowCreateModal(false)}
             />
-            <div className="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white dark:bg-gray-800 rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full transition-colors duration-300">
-              <div className="px-4 pt-5 pb-4 bg-white dark:bg-gray-800 sm:p-6 sm:pb-4 transition-colors duration-300">
-                <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white transition-colors duration-300">
-                  Record New Payment
-                </h3>
-                <div className="mt-4 space-y-4">
+            <div className="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white dark:bg-gray-800 rounded-2xl shadow-2xl sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full transition-colors duration-300">
+              {/* Modern Header */}
+              <div className="relative bg-gradient-to-r from-green-500 via-emerald-500 to-teal-600 p-6">
+                <div className="absolute inset-0 bg-black/10"></div>
+                <div className="relative flex items-center justify-between">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors duration-300">
-                      Customer
+                    <h3 className="text-2xl font-bold text-white mb-1">
+                      Add Payment
+                    </h3>
+                    <p className="text-white/90 text-sm">
+                      {paymentActionType === "record" ? "Record a new payment transaction" :
+                       paymentActionType === "link" ? "Create a payment link for customer" :
+                       "Create and send payment link via email"}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowCreateModal(false)}
+                    className="p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-xl transition-all duration-200"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              
+              <div className="px-6 py-6 bg-white dark:bg-gray-800 transition-colors duration-300">
+                
+                {/* Modern Action Type Tabs */}
+                <div className="mb-8">
+                  <div className="flex bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl p-2 border border-green-200 dark:border-green-800">
+                    <button
+                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${
+                        paymentActionType === "record"
+                          ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg"
+                          : "text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-800/30"
+                      }`}
+                      onClick={() => setPaymentActionType("record")}
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <span className="hidden sm:inline">Record Payment</span>
+                      <span className="sm:hidden">Record</span>
+                    </button>
+                    <button
+                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${
+                        paymentActionType === "link"
+                          ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg"
+                          : "text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-800/30"
+                      }`}
+                      onClick={() => setPaymentActionType("link")}
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                      </svg>
+                      <span className="hidden sm:inline">Payment Link</span>
+                      <span className="sm:hidden">Link</span>
+                    </button>
+                    <button
+                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${
+                        paymentActionType === "email"
+                          ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg"
+                          : "text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-800/30"
+                      }`}
+                      onClick={() => setPaymentActionType("email")}
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      <span className="hidden sm:inline">Email Link</span>
+                      <span className="sm:hidden">Email</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Customer Selection */}
+                  <div className="group">
+                    <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2 transition-colors duration-300">
+                      <span className="flex items-center gap-2">
+                        <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        Customer *
+                      </span>
                     </label>
                     <select
-                      className="w-full px-3 py-2 mt-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
+                      className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300 hover:border-green-300 dark:hover:border-green-500"
                       value={newPayment.customer_id}
                       onChange={(e) =>
                         setNewPayment({
@@ -1467,12 +1821,48 @@ export default function PaymentsPage() {
                       ))}
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors duration-300">
+                  {/* Service field - only for record payment */}
+                  {paymentActionType === "record" && (
+                    <div className="group">
+                      <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2 transition-colors duration-300">
+                        <span className="flex items-center gap-2">
+                          <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                          </svg>
+                          Service *
+                        </span>
+                      </label>
+                      <select
+                        className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300 hover:border-green-300 dark:hover:border-green-500"
+                        value={newPayment.service}
+                        onChange={(e) =>
+                          setNewPayment({
+                            ...newPayment,
+                            service: e.target.value,
+                          })
+                        }
+                      >
+                        <option value="">Select a service</option>
+                        {DUMMY_SERVICES.map((service) => (
+                          <option key={service} value={service}>
+                            {service}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  {/* Booking Selection */}
+                  <div className="group">
+                    <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2 transition-colors duration-300">
+                      <span className="flex items-center gap-2">
+                        <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
                       Booking (Optional)
+                      </span>
                     </label>
                     <select
-                      className="w-full px-3 py-2 mt-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
+                      className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300 hover:border-green-300 dark:hover:border-green-500"
                       value={newPayment.booking_id}
                       onChange={(e) =>
                         setNewPayment({
@@ -1494,21 +1884,28 @@ export default function PaymentsPage() {
                       ))}
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors duration-300">
-                      Amount
+                  {/* Amount Field */}
+                  <div className="group">
+                    <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2 transition-colors duration-300">
+                      <span className="flex items-center gap-2">
+                        <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                        </svg>
+                        {paymentActionType === "record" ? "Amount" : "Payment Amount"} *
+                      </span>
                     </label>
-                    <div className="relative mt-1 rounded-md shadow-sm">
-                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <span className="text-gray-500 dark:text-gray-400 sm:text-sm transition-colors duration-300">
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                        <span className="text-green-600 font-semibold text-lg">
                           £
                         </span>
                       </div>
                       <input
-                        className="w-full pl-7 pr-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
+                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300 hover:border-green-300 dark:hover:border-green-500 text-lg font-medium"
                         type="number"
                         step="0.01"
                         min="0"
+                        placeholder="0.00"
                         value={newPayment.amount}
                         onChange={(e) =>
                           setNewPayment({
@@ -1519,12 +1916,19 @@ export default function PaymentsPage() {
                       />
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors duration-300">
-                      Payment Method
+                  {/* Payment Method - only for record payment */}
+                  {paymentActionType === "record" && (
+                    <div className="group">
+                      <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2 transition-colors duration-300">
+                        <span className="flex items-center gap-2">
+                          <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                          </svg>
+                          Payment Method *
+                        </span>
                     </label>
                     <select
-                      className="w-full px-3 py-2 mt-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
+                        className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300 hover:border-green-300 dark:hover:border-green-500"
                       value={newPayment.payment_method}
                       onChange={(e) =>
                         setNewPayment({
@@ -1533,18 +1937,25 @@ export default function PaymentsPage() {
                         })
                       }
                     >
-                      <option value="cash">Cash</option>
-                      <option value="card">Card</option>
-                      <option value="bank_transfer">Bank Transfer</option>
-                      <option value="cheque">Cheque</option>
+                        <option value="cash">💵 Cash</option>
+                        <option value="card">💳 Card</option>
+                        <option value="bank_transfer">🏦 Bank Transfer</option>
+                        <option value="cheque">📄 Cheque</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors duration-300">
+                  )}
+                  {/* Payment Date */}
+                  <div className="group">
+                    <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2 transition-colors duration-300">
+                      <span className="flex items-center gap-2">
+                        <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
                       Payment Date
+                      </span>
                     </label>
                     <input
-                      className="w-full px-3 py-2 mt-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
+                      className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300 hover:border-green-300 dark:hover:border-green-500"
                       type="date"
                       value={newPayment.payment_date}
                       onChange={(e) =>
@@ -1555,12 +1966,18 @@ export default function PaymentsPage() {
                       }
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors duration-300">
+                  {/* Reference */}
+                  <div className="group">
+                    <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2 transition-colors duration-300">
+                      <span className="flex items-center gap-2">
+                        <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
                       Reference (Optional)
+                      </span>
                     </label>
                     <input
-                      className="w-full px-3 py-2 mt-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
+                      className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300 hover:border-green-300 dark:hover:border-green-500"
                       type="text"
                       value={newPayment.reference}
                       onChange={(e) =>
@@ -1569,14 +1986,21 @@ export default function PaymentsPage() {
                           reference: e.target.value,
                         })
                       }
+                      placeholder="Transaction reference or invoice number"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors duration-300">
+                  {/* Notes */}
+                  <div className="group">
+                    <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2 transition-colors duration-300">
+                      <span className="flex items-center gap-2">
+                        <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
                       Notes (Optional)
+                      </span>
                     </label>
                     <textarea
-                      className="w-full px-3 py-2 mt-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
+                      className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300 hover:border-green-300 dark:hover:border-green-500 resize-none"
                       rows={3}
                       value={newPayment.notes}
                       onChange={(e) =>
@@ -1585,6 +2009,7 @@ export default function PaymentsPage() {
                           notes: e.target.value,
                         })
                       }
+                      placeholder="Additional notes or comments"
                     />
                   </div>
                   {formError && (
@@ -1594,27 +2019,41 @@ export default function PaymentsPage() {
                   )}
                 </div>
               </div>
-              <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700 sm:px-6 sm:flex sm:flex-row-reverse transition-colors duration-300">
+              {/* Modern Footer */}
+              <div className="px-6 py-6 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 border-t border-gray-200 dark:border-gray-600">
+                <div className="flex gap-3">
                 <button
-                  className="inline-flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 border border-transparent rounded-lg shadow-sm hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300"
+                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   onClick={handleCreatePayment}
                 >
-                  Create Payment
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      {paymentActionType === "record" ? (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      ) : paymentActionType === "link" ? (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                      ) : (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      )}
+                    </svg>
+                    {paymentActionType === "record" ? "Record Payment" : 
+                     paymentActionType === "link" ? "Create Payment Link" : 
+                     "Send Payment Link"}
                 </button>
                 <button
-                  className="mt-3 inline-flex justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors duration-300"
+                    className="px-6 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200"
                   onClick={() => setShowCreateModal(false)}
                 >
                   Cancel
                 </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Payment Link Modal */}
-      {showPaymentLinkModal && (
+      {/* Payment Link Modal - REMOVED - Now using unified modal */}
+      {false && showPaymentLinkModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
             <div
@@ -1918,8 +2357,8 @@ export default function PaymentsPage() {
         </div>
       )}
 
-      {/* Email Link Modal */}
-      {showEmailLinkModal && (
+      {/* Email Link Modal - REMOVED - Now using unified modal */}
+      {false && showEmailLinkModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
             <div
@@ -2215,6 +2654,28 @@ export default function PaymentsPage() {
                         <option key={customer.id} value={customer.id}>
                           {customer.name}{" "}
                           {customer.email ? `(${customer.email})` : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors duration-300">
+                      Service
+                    </label>
+                    <select
+                      className="w-full px-3 py-2 mt-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
+                      value={editPayment.service}
+                      onChange={(e) =>
+                        setEditPayment({
+                          ...editPayment,
+                          service: e.target.value,
+                        })
+                      }
+                    >
+                      <option value="">Select a service</option>
+                      {DUMMY_SERVICES.map((service) => (
+                        <option key={service} value={service}>
+                          {service}
                         </option>
                       ))}
                     </select>

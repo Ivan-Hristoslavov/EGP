@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useAdminProfile } from "@/hooks/useAdminProfile";
-import { MarkdownEditor } from "@/components/MarkdownEditor";
-import { ListManager } from "@/components/AdminProfileData";
-import { useToast, ToastMessages } from "@/components/Toast";
+import { useToast } from "@/components/Toast";
+import { User, Building2, Shield, Save, Eye, EyeOff, Camera, Mail, Phone, MapPin } from "lucide-react";
 
 type ProfileData = {
   // Personal Information
@@ -19,17 +18,10 @@ type ProfileData = {
   companyName: string;
   companyAddress: string;
 
-  // Professional Information
-  insuranceProvider: string;
+  // Professional Information (Aesthetic Clinic specific)
   yearsOfExperience: string;
   specializations: string;
-  certifications: string;
-  responseTime: string;
-
-  // Banking Information
-  bankName: string;
-  accountNumber: string;
-  sortCode: string;
+  insuranceProvider: string;
 
   // Avatar
   avatar: string;
@@ -42,12 +34,10 @@ type PasswordData = {
 };
 
 export default function ProfilePage() {
-  const [activeTab, setActiveTab] = useState<
-    "personal" | "professional" | "security"
-  >("personal");
+  const [activeTab, setActiveTab] = useState<"personal" | "company" | "professional" | "security">("personal");
   const [isSaving, setIsSaving] = useState(false);
-  const [saveMessage, setSaveMessage] = useState("");
   const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { profile: dbProfile, loading } = useAdminProfile();
   const { showSuccess, showError } = useToast();
 
@@ -62,15 +52,9 @@ export default function ProfilePage() {
     companyName: "",
     companyAddress: "",
 
-    insuranceProvider: "",
     yearsOfExperience: "",
     specializations: "",
-    certifications: "",
-    responseTime: "",
-
-    bankName: "",
-    accountNumber: "",
-    sortCode: "",
+    insuranceProvider: "",
 
     avatar: "",
   });
@@ -88,35 +72,25 @@ export default function ProfilePage() {
       const lastName = lastNameParts.join(" ");
 
       setProfileData({
-        firstName: firstName || "Plamen",
-        lastName: lastName || "Zhelev",
+        firstName: firstName || "Admin",
+        lastName: lastName || "User",
         email: dbProfile.email || process.env.NEXT_PUBLIC_ADMIN_EMAIL || "",
         businessEmail: dbProfile.business_email || process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "",
         phone: dbProfile.phone || "+44 7700 900123",
         about: dbProfile.about || "",
 
-        companyName: dbProfile.company_name || "EGP",
+        companyName: dbProfile.company_name || "EGP Aesthetics",
         companyAddress: dbProfile.company_address || "London, UK",
 
-        insuranceProvider: dbProfile.insurance_provider || "Zurich Insurance",
         yearsOfExperience: dbProfile.years_of_experience || "",
         specializations: dbProfile.specializations || "",
-        certifications: dbProfile.certifications || "",
-        responseTime: dbProfile.response_time || "",
-
-        bankName: dbProfile.bank_name || "Barclays Bank",
-        accountNumber: dbProfile.account_number || "12345678",
-        sortCode: dbProfile.sort_code || "20-00-00",
-
-        avatar: "",
+        insuranceProvider: dbProfile.insurance_provider || "",
       });
     }
   }, [dbProfile, loading]);
 
   const handleSave = async () => {
     setIsSaving(true);
-    setSaveMessage("");
-
     try {
       const response = await fetch("/api/admin/profile", {
         method: "PUT",
@@ -131,552 +105,429 @@ export default function ProfilePage() {
           about: profileData.about,
           companyName: profileData.companyName,
           companyAddress: profileData.companyAddress,
-          insuranceProvider: profileData.insuranceProvider,
           yearsOfExperience: profileData.yearsOfExperience,
           specializations: profileData.specializations,
-          certifications: profileData.certifications,
-          responseTime: profileData.responseTime,
-          bankName: profileData.bankName,
-          accountNumber: profileData.accountNumber,
-          sortCode: profileData.sortCode,
+          insuranceProvider: profileData.insuranceProvider,
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to save profile");
+      if (response.ok) {
+        showSuccess("Profile updated successfully!");
+      } else {
+        showError("Failed to update profile. Please try again.");
       }
-
-      const data = await response.json();
-      setSaveMessage("Profile updated successfully!");
-      setTimeout(() => setSaveMessage(""), 3000);
-      showSuccess("Profile Updated", "Profile updated successfully!");
     } catch (error) {
-      console.error("Error saving profile:", error);
-      setSaveMessage("Error saving profile. Please try again.");
-      setTimeout(() => setSaveMessage(""), 3000);
-      showError("Save Failed", "Failed to save profile. Please try again.");
+      showError("An error occurred while updating your profile.");
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleChangePassword = async () => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      showError(
-        ToastMessages.general.validationError.title,
-        "New password and confirmation do not match."
-      );
-      return;
-    }
-
-    if (passwordData.newPassword.length < 6) {
-      showError(
-        ToastMessages.general.validationError.title,
-        "Password must be at least 6 characters long."
-      );
+      showError("New passwords do not match.");
       return;
     }
 
     setIsSaving(true);
     try {
-      const response = await fetch("/api/admin/profile", {
+      const response = await fetch("/api/admin/profile/password", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           currentPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword,
         }),
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to change password");
+      if (response.ok) {
+        showSuccess("Password updated successfully!");
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+        setShowPasswordForm(false);
+      } else {
+        showError("Failed to update password. Please check your current password.");
       }
-
-      setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
-      setShowPasswordForm(false);
-      showSuccess(
-        ToastMessages.profile.passwordChanged.title,
-        ToastMessages.profile.passwordChanged.message
-      );
     } catch (error) {
-      showError(
-        ToastMessages.profile.error.title,
-        ToastMessages.profile.error.message
-      );
+      showError("An error occurred while updating your password.");
     } finally {
       setIsSaving(false);
     }
   };
 
   const tabs = [
-    { 
-      id: "personal", 
-      name: "Personal Info", 
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      )
-    },
-    { 
-      id: "security", 
-      name: "Security", 
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-        </svg>
-      )
-    },
+    { id: "personal", label: "Personal Info", icon: User },
+    { id: "company", label: "Company", icon: Building2 },
+    { id: "professional", label: "Professional", icon: Shield },
+    { id: "security", label: "Security", icon: Eye },
   ];
 
-  return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
-            My Profile
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1 transition-colors duration-300">
-            Manage your personal information and professional credentials.
-          </p>
-        </div>
-        <div className="flex items-center gap-4">
-          {saveMessage && (
-            <div
-              className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium ${
-                saveMessage.includes("Error") ||
-                saveMessage.includes("do not match") ||
-                saveMessage.includes("must be")
-                  ? "bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800"
-                  : "bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800"
-              } transition-colors duration-300`}
-            >
-              {saveMessage}
-            </div>
-          )}
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-pink-50/50 to-purple-50/50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4">
+            <div className="absolute inset-0 rounded-full border-4 border-rose-200 dark:border-rose-800"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-rose-500 dark:border-t-rose-400 animate-spin"></div>
+          </div>
+          <p className="text-gray-600 dark:text-gray-300">Loading profile...</p>
         </div>
       </div>
+    );
+  }
 
-      {/* Profile Header Card */}
-      {/* <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 transition-colors duration-300">
-        <div className="flex items-center space-x-6">
-          <div className="relative">
-            <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 rounded-full flex items-center justify-center transition-colors duration-300">
-              <span className="text-white font-bold text-2xl">
-                {profileData.firstName[0]}
-                {profileData.lastName[0]}
-              </span>
-            </div>
-            <button className="absolute bottom-0 right-0 w-8 h-8 bg-blue-600 dark:bg-blue-500 rounded-full flex items-center justify-center text-white hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors duration-300">
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                />
-              </svg>
-            </button>
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
-              {profileData.firstName} {profileData.lastName}
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 transition-colors duration-300">
-              {profileData.email}
-            </p>
-            <p className="text-gray-600 dark:text-gray-400 transition-colors duration-300">
-              {profileData.phone}
-            </p>
-            <div className="flex items-center mt-2">
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 transition-colors duration-300">
-                <span className="w-2 h-2 bg-green-400 dark:bg-green-500 rounded-full mr-1 transition-colors duration-300" />
-                Administrator
-              </span>
-            </div>
-          </div>
-        </div>
-      </div> */}
-
-      {/* Tabs */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors duration-300">
-        <div className="border-b border-gray-200 dark:border-gray-700">
-          <nav className="flex space-x-8 px-6">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-300 flex items-center ${
-                  activeTab === tab.id
-                    ? "border-blue-500 text-blue-600 dark:text-blue-400"
-                    : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600"
-                }`}
-                onClick={() => setActiveTab(tab.id as any)}
-              >
-                <span className="mr-2 flex-shrink-0">{tab.icon}</span>
-                {tab.name}
-              </button>
-            ))}
-          </nav>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-pink-50/50 to-purple-50/50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800">
+      <div className="max-w-4xl mx-auto p-6">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent font-playfair mb-2">
+            Profile Settings
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Manage your personal and professional information
+          </p>
         </div>
 
-        <div className="p-6">
-          {/* Personal Information Tab */}
-          {activeTab === "personal" && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 transition-colors duration-300">
-                  Personal Information
-                </h3>
+        {/* Profile Card */}
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-rose-100/50 dark:border-gray-700/50 overflow-hidden mb-8">
+          {/* Profile Header */}
+          <div className="bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 p-8">
+            <div className="flex items-center space-x-6">
+              <div className="relative">
+                <div className="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/30">
+                  <User className="w-12 h-12 text-white" />
+                </div>
+                <button className="absolute -bottom-2 -right-2 w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-105">
+                  <Camera className="w-4 h-4 text-rose-600" />
+                </button>
+              </div>
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-white font-playfair mb-1">
+                  {profileData.firstName} {profileData.lastName}
+                </h2>
+                <p className="text-white/90 mb-2">{profileData.companyName}</p>
+                <div className="flex items-center space-x-4 text-white/80">
+                  <div className="flex items-center space-x-1">
+                    <Mail className="w-4 h-4" />
+                    <span className="text-sm">{profileData.email}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Phone className="w-4 h-4" />
+                    <span className="text-sm">{profileData.phone}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="border-b border-gray-200 dark:border-gray-700">
+            <nav className="flex space-x-8 px-8">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm transition-all ${
+                      activeTab === tab.id
+                        ? "border-rose-500 text-rose-600 dark:text-rose-400"
+                        : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* Tab Content */}
+          <div className="p-8">
+            {activeTab === "personal" && (
+              <div className="space-y-6">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Personal Information</h3>
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
-                      First Name
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      First Name *
                     </label>
                     <input
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
                       type="text"
                       value={profileData.firstName}
-                      onChange={(e) =>
-                        setProfileData({
-                          ...profileData,
-                          firstName: e.target.value,
-                        })
-                      }
+                      onChange={(e) => setProfileData(prev => ({ ...prev, firstName: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                      placeholder="Enter your first name"
                     />
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
-                      Last Name
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Last Name *
                     </label>
                     <input
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
                       type="text"
                       value={profileData.lastName}
-                      onChange={(e) =>
-                        setProfileData({
-                          ...profileData,
-                          lastName: e.target.value,
-                        })
-                      }
+                      onChange={(e) => setProfileData(prev => ({ ...prev, lastName: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                      placeholder="Enter your last name"
                     />
                   </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
-                      Admin Email (Login)
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Email *
                     </label>
                     <input
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg shadow-sm cursor-not-allowed transition-colors duration-300"
                       type="email"
                       value={profileData.email}
-                      readOnly
-                      title="Admin email cannot be changed for security reasons"
+                      onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                      placeholder="Enter your email"
                     />
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      This email is used for admin login and cannot be changed.
-                    </p>
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                       Business Email
                     </label>
                     <input
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
                       type="email"
                       value={profileData.businessEmail}
-                      onChange={(e) =>
-                        setProfileData({
-                          ...profileData,
-                          businessEmail: e.target.value,
-                        })
-                      }
-                    />
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      This email will be displayed to customers and used for business communications.
-                    </p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
-                      Phone Number
-                    </label>
-                    <input
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
-                      type="tel"
-                      value={profileData.phone}
-                      onChange={(e) =>
-                        setProfileData({
-                          ...profileData,
-                          phone: e.target.value,
-                        })
-                      }
+                      onChange={(e) => setProfileData(prev => ({ ...prev, businessEmail: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                      placeholder="Enter business email"
                     />
                   </div>
                 </div>
-              </div>
 
-              <div>
-                <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-4 transition-colors duration-300">
-                  About Me
-                </h4>
-                <MarkdownEditor
-                  value={profileData.about}
-                  onChange={(value) =>
-                    setProfileData({ ...profileData, about: value })
-                  }
-                />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 transition-colors duration-300">
-                  This will be displayed on your public profile page.
-                </p>
-              </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={profileData.phone}
+                    onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                    placeholder="Enter your phone number"
+                  />
+                </div>
 
-              <div>
-                <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-4 transition-colors duration-300">
-                  Professional Information
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
-                      Years of Experience
-                    </label>
-                    <input
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
-                      type="text"
-                      placeholder="e.g., 10+ Years"
-                      value={profileData.yearsOfExperience}
-                      onChange={(e) =>
-                        setProfileData({
-                          ...profileData,
-                          yearsOfExperience: e.target.value,
-                        })
-                      }
-                    />
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      This will be displayed on your website (e.g., "10+ Years").
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
-                      Insurance Provider
-                    </label>
-                    <input
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
-                      type="text"
-                      placeholder="e.g., Zurich Insurance"
-                      value={profileData.insuranceProvider}
-                      onChange={(e) =>
-                        setProfileData({
-                          ...profileData,
-                          insuranceProvider: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div>
-                    <ListManager
-                      value={profileData.specializations}
-                      onChange={(value) =>
-                        setProfileData({
-                          ...profileData,
-                          specializations: value,
-                        })
-                      }
-                      label="Specializations"
-                      placeholder="e.g., Botox, Fillers, Skin Treatments"
-                      description="List your main areas of expertise. Press Enter or click + to add each item."
-                    />
-                  </div>
-                  <div>
-                    <ListManager
-                      value={profileData.certifications}
-                      onChange={(value) =>
-                        setProfileData({
-                          ...profileData,
-                          certifications: value,
-                        })
-                      }
-                      label="Certifications"
-                      placeholder="e.g., Gas Safe Registered"
-                      description="List your professional certifications and qualifications. Press Enter or click + to add each item."
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
-                      Response Time
-                    </label>
-                    <input
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
-                      type="text"
-                      placeholder="e.g., 45 minutes"
-                      value={profileData.responseTime}
-                      onChange={(e) =>
-                        setProfileData({
-                          ...profileData,
-                          responseTime: e.target.value,
-                        })
-                      }
-                    />
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Your typical response time for customer inquiries.
-                    </p>
-                  </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    About You
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={profileData.about}
+                    onChange={(e) => setProfileData(prev => ({ ...prev, about: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                    placeholder="Tell us about yourself and your expertise..."
+                  />
                 </div>
               </div>
+            )}
 
-              <div>
-                <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-4 transition-colors duration-300">
-                  Company Information
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
-                      Company Name
-                    </label>
-                    <input
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
-                      type="text"
-                      placeholder="e.g., EGP"
-                      value={profileData.companyName}
-                      onChange={(e) =>
-                        setProfileData({
-                          ...profileData,
-                          companyName: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
-                      Company Address
-                    </label>
-                    <textarea
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300 resize-none"
-                      rows={3}
-                      placeholder="e.g., 123 Main Street, London, SW1A 1AA"
-                      value={profileData.companyAddress}
-                      onChange={(e) =>
-                        setProfileData({
-                          ...profileData,
-                          companyAddress: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
+            {activeTab === "company" && (
+              <div className="space-y-6">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Company Information</h3>
+                
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Company Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={profileData.companyName}
+                    onChange={(e) => setProfileData(prev => ({ ...prev, companyName: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                    placeholder="Enter company name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Company Address
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={profileData.companyAddress}
+                    onChange={(e) => setProfileData(prev => ({ ...prev, companyAddress: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                    placeholder="Enter company address"
+                  />
                 </div>
               </div>
+            )}
 
-              <div className="flex justify-end">
+            {activeTab === "professional" && (
+              <div className="space-y-6">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Professional Information</h3>
+                
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Years of Experience
+                  </label>
+                  <input
+                    type="text"
+                    value={profileData.yearsOfExperience}
+                    onChange={(e) => setProfileData(prev => ({ ...prev, yearsOfExperience: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                    placeholder="e.g., 10+ years"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Specializations
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={profileData.specializations}
+                    onChange={(e) => setProfileData(prev => ({ ...prev, specializations: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                    placeholder="e.g., Botox, Fillers, Skin Treatments"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Insurance Provider
+                  </label>
+                  <input
+                    type="text"
+                    value={profileData.insuranceProvider}
+                    onChange={(e) => setProfileData(prev => ({ ...prev, insuranceProvider: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                    placeholder="Enter insurance provider"
+                  />
+                </div>
+              </div>
+            )}
+
+            {activeTab === "security" && (
+              <div className="space-y-6">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Security Settings</h3>
+                
+                {!showPasswordForm ? (
+                  <div className="text-center py-8">
+                    <Shield className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Change Password</h4>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                      Keep your account secure by updating your password regularly
+                    </p>
+                    <button
+                      onClick={() => setShowPasswordForm(true)}
+                      className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 text-white font-semibold rounded-xl hover:from-rose-600 hover:via-pink-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
+                    >
+                      <Shield className="w-4 h-4 mr-2" />
+                      Change Password
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handlePasswordChange} className="space-y-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Current Password *
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          value={passwordData.currentPassword}
+                          onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                          className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                          placeholder="Enter current password"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                          {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        New Password *
+                      </label>
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={passwordData.newPassword}
+                        onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                        placeholder="Enter new password"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Confirm New Password *
+                      </label>
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={passwordData.confirmPassword}
+                        onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                        placeholder="Confirm new password"
+                      />
+                    </div>
+
+                    <div className="flex space-x-4">
+                      <button
+                        type="submit"
+                        disabled={isSaving}
+                        className="flex-1 px-6 py-3 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 text-white font-semibold rounded-xl hover:from-rose-600 hover:via-pink-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isSaving ? "Updating..." : "Update Password"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowPasswordForm(false);
+                          setPasswordData({
+                            currentPassword: "",
+                            newPassword: "",
+                            confirmPassword: "",
+                          });
+                        }}
+                        className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            )}
+
+            {/* Save Button */}
+            {activeTab !== "security" && (
+              <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
                 <button
-                  className="px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300"
-                  disabled={isSaving}
                   onClick={handleSave}
+                  disabled={isSaving}
+                  className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 text-white font-semibold rounded-xl hover:from-rose-600 hover:via-pink-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                 >
+                  <Save className="w-5 h-5 mr-2" />
                   {isSaving ? "Saving..." : "Save Changes"}
                 </button>
               </div>
-            </div>
-          )}
-
-          {/* Security Tab */}
-          {activeTab === "security" && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 transition-colors duration-300">
-                  Account Security
-                </h3>
-                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 transition-colors duration-300">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900 dark:text-white transition-colors duration-300">
-                        Password
-                      </h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">
-                        Last changed: Never
-                      </p>
-                    </div>
-                    <button
-                      className="px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-300"
-                      onClick={() => setShowPasswordForm(!showPasswordForm)}
-                    >
-                      {showPasswordForm ? "Cancel" : "Change Password"}
-                    </button>
-                  </div>
-                </div>
-
-                {showPasswordForm && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
-                        Current Password
-                      </label>
-                      <input
-                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
-                        type="password"
-                        value={passwordData.currentPassword}
-                        onChange={(e) =>
-                          setPasswordData({
-                            ...passwordData,
-                            currentPassword: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
-                        New Password
-                      </label>
-                      <input
-                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
-                        type="password"
-                        value={passwordData.newPassword}
-                        onChange={(e) =>
-                          setPasswordData({
-                            ...passwordData,
-                            newPassword: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
-                        Confirm Password
-                      </label>
-                      <input
-                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
-                        type="password"
-                        value={passwordData.confirmPassword}
-                        onChange={(e) =>
-                          setPasswordData({
-                            ...passwordData,
-                            confirmPassword: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="md:col-span-3">
-                      <button
-                        className="px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300"
-                        disabled={isSaving}
-                        onClick={handleChangePassword}
-                      >
-                        {isSaving ? "Changing..." : "Change Password"}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

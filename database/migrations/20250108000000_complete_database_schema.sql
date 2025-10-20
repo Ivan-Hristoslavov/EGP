@@ -51,12 +51,6 @@ CREATE TABLE IF NOT EXISTS customers (
   email VARCHAR(255) NOT NULL,
   phone VARCHAR(50) NOT NULL,
   address TEXT NOT NULL,
-  customer_type VARCHAR(20) DEFAULT 'individual' CHECK (customer_type IN ('individual', 'company')),
-  company_name VARCHAR(255),
-  vat_number VARCHAR(50),
-  contact_person VARCHAR(255),
-  contact_email VARCHAR(255),
-  contact_phone VARCHAR(50),
   notes TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -309,7 +303,6 @@ CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
 
 -- Customers indexes
 CREATE INDEX IF NOT EXISTS idx_customers_email ON customers(email);
-CREATE INDEX IF NOT EXISTS idx_customers_customer_type ON customers(customer_type);
 
 -- Payments indexes
 CREATE INDEX IF NOT EXISTS idx_payments_booking_id ON payments(booking_id);
@@ -424,7 +417,7 @@ BEGIN
         'customer',
         NEW.id,
         'New customer added: ' || NEW.name,
-        jsonb_build_object('customer_type', NEW.customer_type, 'email', NEW.email)
+        jsonb_build_object('email', NEW.email)
       );
     END IF;
   END IF;

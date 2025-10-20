@@ -37,12 +37,6 @@ CREATE TABLE IF NOT EXISTS customers (
     email VARCHAR(255) NOT NULL,
     phone VARCHAR(50) NOT NULL,
     address TEXT NOT NULL,
-    customer_type VARCHAR(20) DEFAULT 'individual' CHECK (customer_type IN ('individual', 'company')),
-    company_name VARCHAR(255),
-    vat_number VARCHAR(50),
-    contact_person VARCHAR(255),
-    contact_email VARCHAR(255),
-    contact_phone VARCHAR(50),
     notes TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

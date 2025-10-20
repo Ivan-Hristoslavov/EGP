@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from "next/link";
 import { siteConfig } from "@/config/site";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -98,13 +99,16 @@ export default function MembershipPage() {
                   ))}
                 </ul>
                 
-                <button className={`w-full py-3 px-6 rounded-lg font-semibold transition-all ${
-                  tier.popular
-                    ? 'bg-rose-500 hover:bg-rose-600 text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white'
-                }`}>
+                <Link
+                  href="/membership/signup"
+                  className={`w-full py-3 px-6 rounded-lg font-semibold transition-all text-center block ${
+                    tier.popular
+                      ? 'bg-rose-500 hover:bg-rose-600 text-white'
+                      : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white'
+                  }`}
+                >
                   Join {tier.name}
-                </button>
+                </Link>
               </div>
             ))}
           </div>
