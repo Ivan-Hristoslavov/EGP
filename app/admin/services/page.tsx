@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Upload, Image as ImageIcon, Tag, Clock, DollarSign, Eye, EyeOff, Settings, FolderPlus, Filter, Search } from "lucide-react";
-import { DUMMY_SERVICES, Service as DummyService, MAIN_TABS, getMainTabCategories, getCategoryLabel } from "@/lib/dummy-services";
+// Removed dummy services import - will use database data
 
 interface Category {
   id: string;
@@ -42,6 +42,28 @@ const defaultCategories: Category[] = [
   { id: "6", name: "medical", description: "Advanced medical aesthetics", color: "blue", icon: "medical" },
 ];
 
+// Add missing constants and functions
+
+const getMainTabCategories = (mainTab: 'book-now' | 'by-condition') => {
+  if (mainTab === 'book-now') {
+    return ['face', 'lips', 'skin', 'body', 'hair', 'medical'];
+  } else {
+    return ['face', 'lips', 'skin', 'body', 'hair', 'medical'];
+  }
+};
+
+const getCategoryLabel = (mainTab: 'book-now' | 'by-condition', category: string) => {
+  const labels: { [key: string]: string } = {
+    'face': 'Face',
+    'lips': 'Lips',
+    'skin': 'Skin',
+    'body': 'Body',
+    'hair': 'Hair',
+    'medical': 'Medical'
+  };
+  return labels[category] || category;
+};
+
 export default function AdminServicesPage() {
   const [activeTab, setActiveTab] = useState<"services" | "categories">("services");
   const [mainTab, setMainTab] = useState<'book-now' | 'by-condition'>('book-now');
@@ -78,67 +100,86 @@ export default function AdminServicesPage() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  // Load dummy services on mount
+  // Load services from database on mount
   useEffect(() => {
-    // Convert dummy services to match our Service interface
-    const convertedServices: Service[] = DUMMY_SERVICES.map(service => ({
-      id: service.id,
-      name: service.name,
-      price: service.price,
-      mainTab: service.mainTab,
-      category: service.category,
-      duration: service.duration,
-      description: service.description,
-      details: service.description, // Use description as details for now
-      benefits: [], // Empty for now
-      preparation: "",
-      aftercare: "",
-      featured: false,
-      popular: false,
-      slug: service.slug,
-      requiresConsultation: service.requiresConsultation,
-      downtimeDays: service.downtimeDays,
-      resultsDurationWeeks: service.resultsDurationWeeks
-    }));
-    
-    setServices(convertedServices);
+    loadServices();
   }, []);
 
-  const saveServices = (updatedServices: Service[]) => {
+  const loadServices = async () => {
+    try {
+      // Simulate API call - replace with actual Supabase call
+      const response = await fetch('/api/services', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setServices(data.services || []);
+      } else {
+        // Fallback to empty array
+        setServices([]);
+      }
+    } catch (error) {
+      console.error('Error loading services:', error);
+      setServices([]);
+    }
+  };
+
+  const saveServices = async (updatedServices: Service[]) => {
     setServices(updatedServices);
-    localStorage.setItem('admin-services', JSON.stringify(updatedServices));
+    // TODO: Implement API call to save services to database
+    // await fetch('/api/services', { method: 'PUT', body: JSON.stringify(updatedServices) });
   };
 
-  const saveCategories = (updatedCategories: Category[]) => {
+  const saveCategories = async (updatedCategories: Category[]) => {
     setCategories(updatedCategories);
-    localStorage.setItem('admin-categories', JSON.stringify(updatedCategories));
+    // TODO: Implement API call to save categories to database
+    // await fetch('/api/categories', { method: 'PUT', body: JSON.stringify(updatedCategories) });
   };
 
-  const handleAddService = () => {
+  const handleAddService = async () => {
     if (!newService.name || !newService.price || !newService.category) return;
 
-    const service: Service = {
-      id: Date.now().toString(),
-      name: newService.name!,
-      price: newService.price!,
-      mainTab: newService.mainTab!,
-      category: newService.category!,
-      duration: newService.duration || 30,
-      description: newService.description || "",
-      details: newService.details || "",
-      benefits: newService.benefits || [],
-      preparation: newService.preparation || "",
-      aftercare: newService.aftercare || "",
-      featured: newService.featured || false,
-      popular: newService.popular || false,
-      slug: newService.slug || newService.name!.toLowerCase().replace(/\s+/g, '-'),
-      requiresConsultation: newService.requiresConsultation || false,
-      downtimeDays: newService.downtimeDays || 0,
-      resultsDurationWeeks: newService.resultsDurationWeeks || null
-    };
+    try {
+      const serviceData = {
+        name: newService.name!,
+        price: newService.price!,
+        mainTab: newService.mainTab!,
+        category: newService.category!,
+        duration: newService.duration || 30,
+        description: newService.description || "",
+        details: newService.details || "",
+        benefits: newService.benefits || [],
+        preparation: newService.preparation || "",
+        aftercare: newService.aftercare || "",
+        featured: newService.featured || false,
+        popular: newService.popular || false,
+        slug: newService.slug || newService.name!.toLowerCase().replace(/\s+/g, '-'),
+        requiresConsultation: newService.requiresConsultation || false,
+        downtimeDays: newService.downtimeDays || 0,
+        resultsDurationWeeks: newService.resultsDurationWeeks || null
+      };
 
-    saveServices([...services, service]);
-    resetServiceForm();
+      const response = await fetch('/api/services', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(serviceData),
+      });
+
+      if (response.ok) {
+        await loadServices(); // Reload services from database
+        resetServiceForm();
+      } else {
+        console.error('Failed to add service');
+      }
+    } catch (error) {
+      console.error('Error adding service:', error);
+    }
   };
 
   const handleEditService = (service: Service) => {
@@ -147,38 +188,76 @@ export default function AdminServicesPage() {
     setIsAdding(true);
   };
 
-  const handleUpdateService = () => {
+  const handleUpdateService = async () => {
     if (!editingService) return;
 
-    const updatedServices = services.map(s => 
-      s.id === editingService.id 
-        ? { ...s, ...newService }
-        : s
-    );
-    saveServices(updatedServices);
-    resetServiceForm();
-  };
+    try {
+      const response = await fetch(`/api/services/${editingService.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newService),
+      });
 
-  const handleDeleteService = (id: string) => {
-    if (confirm('Are you sure you want to delete this service?')) {
-      const updatedServices = services.filter(s => s.id !== id);
-      saveServices(updatedServices);
+      if (response.ok) {
+        await loadServices(); // Reload services from database
+        resetServiceForm();
+      } else {
+        console.error('Failed to update service');
+      }
+    } catch (error) {
+      console.error('Error updating service:', error);
     }
   };
 
-  const handleAddCategory = () => {
+  const handleDeleteService = async (id: string) => {
+    if (confirm('Are you sure you want to delete this service?')) {
+      try {
+        const response = await fetch(`/api/services/${id}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          await loadServices(); // Reload services from database
+        } else {
+          console.error('Failed to delete service');
+        }
+      } catch (error) {
+        console.error('Error deleting service:', error);
+      }
+    }
+  };
+
+  const handleAddCategory = async () => {
     if (!newCategory?.name) return;
 
-    const category: Category = {
-      id: Date.now().toString(),
-      name: newCategory.name,
-      description: newCategory.description || "",
-      color: newCategory.color || "rose",
-      icon: newCategory.icon || "face"
-    };
+    try {
+      const categoryData = {
+        name: newCategory.name,
+        description: newCategory.description || "",
+        color: newCategory.color || "rose",
+        icon: newCategory.icon || "face"
+      };
 
-    saveCategories([...categories, category]);
-    resetCategoryForm();
+      const response = await fetch('/api/categories', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(categoryData),
+      });
+
+      if (response.ok) {
+        // Reload categories from database
+        // await loadCategories();
+        resetCategoryForm();
+      } else {
+        console.error('Failed to add category');
+      }
+    } catch (error) {
+      console.error('Error adding category:', error);
+    }
   };
 
   const handleEditCategory = (category: Category) => {
@@ -187,22 +266,46 @@ export default function AdminServicesPage() {
     setShowCategoryModal(true);
   };
 
-  const handleUpdateCategory = () => {
+  const handleUpdateCategory = async () => {
     if (!editingCategory) return;
 
-    const updatedCategories = categories.map(c => 
-      c.id === editingCategory.id 
-        ? { ...c, ...newCategory }
-        : c
-    );
-    saveCategories(updatedCategories);
-    resetCategoryForm();
+    try {
+      const response = await fetch(`/api/categories/${editingCategory.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newCategory),
+      });
+
+      if (response.ok) {
+        // Reload categories from database
+        // await loadCategories();
+        resetCategoryForm();
+      } else {
+        console.error('Failed to update category');
+      }
+    } catch (error) {
+      console.error('Error updating category:', error);
+    }
   };
 
-  const handleDeleteCategory = (id: string) => {
+  const handleDeleteCategory = async (id: string) => {
     if (confirm('Are you sure you want to delete this category?')) {
-      const updatedCategories = categories.filter(c => c.id !== id);
-      saveCategories(updatedCategories);
+      try {
+        const response = await fetch(`/api/categories/${id}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          // Reload categories from database
+          // await loadCategories();
+        } else {
+          console.error('Failed to delete category');
+        }
+      } catch (error) {
+        console.error('Error deleting category:', error);
+      }
     }
   };
 
@@ -360,7 +463,7 @@ export default function AdminServicesPage() {
                 <div className="flex items-center gap-6">
                   <div>
                     <p className="text-3xl font-bold text-gray-900 dark:text-white">{filteredServices.length}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Total Services ({MAIN_TABS[mainTab].name})</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Total Services ({mainTab === 'book-now' ? 'Book Now' : 'By Condition'})</p>
                   </div>
                   <div>
                     <p className="text-3xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">

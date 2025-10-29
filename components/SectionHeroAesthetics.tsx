@@ -89,7 +89,7 @@ export default function SectionHeroAesthetics() {
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2">
               <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 flex-shrink-0" />
-              <span className="font-medium">CQC Registered</span>
+              <span className="font-medium">Professional Standards</span>
             </div>
           </div>
 

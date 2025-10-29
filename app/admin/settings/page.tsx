@@ -3,26 +3,22 @@
 import { useState, useEffect } from "react";
 import { useAdminProfile } from "@/hooks/useAdminProfile";
 import { useToast } from "@/components/Toast";
-import { 
-  Settings, 
-  Building2, 
-  Clock, 
-  Bell, 
-  Shield, 
-  Save, 
-  Mail,
-  CheckCircle,
-  DollarSign
-} from "lucide-react";
+import WorkingHoursManager from "@/components/admin/WorkingHoursManager";
+import { Building2, DollarSign, Clock, Bell, Shield, Settings, Mail, CheckCircle, Save } from "lucide-react";
 
 type SettingsState = {
   // Business Information
   businessCity: string;
   businessPostcode: string;
+  businessAddress: string;
+  businessPhone: string;
+  businessEmail: string;
   
   // Pricing
   consultationRate: string;
   standardRate: string;
+  depositRequired: boolean;
+  depositPercentage: string;
 
   // Working Hours
   workingHoursStart: string;
@@ -31,27 +27,74 @@ type SettingsState = {
 
   // Website Settings
   emailNotifications: boolean;
+  smsNotifications: boolean;
+  autoConfirmBookings: boolean;
+  requirePaymentConfirmation: boolean;
 
   // Professional Settings
   fullyInsured: boolean;
   insuranceProvider: string;
+  gasSafeRegistered: boolean;
+  gasSafeNumber: string;
+  cqcRegistered: boolean;
+  cqcNumber: string;
+
+  // Payment Settings
+  stripeEnabled: boolean;
+  stripePublishableKey: string;
+  stripeSecretKey: string;
+  paypalEnabled: boolean;
+  paypalClientId: string;
+
+  // Email Settings
+  smtpHost: string;
+  smtpPort: string;
+  smtpUsername: string;
+  smtpPassword: string;
+  fromEmail: string;
+  fromName: string;
 };
 
 const defaultSettings: SettingsState = {
   businessCity: "London",
   businessPostcode: "SW1A 1AA",
+  businessAddress: "",
+  businessPhone: "+44 7700 900123",
+  businessEmail: "info@egp.com",
   
   consultationRate: "150",
   standardRate: "75",
+  depositRequired: false,
+  depositPercentage: "20",
 
   workingHoursStart: "08:00",
   workingHoursEnd: "18:00",
   workingDays: ["monday", "tuesday", "wednesday", "thursday", "friday"],
 
   emailNotifications: true,
+  smsNotifications: false,
+  autoConfirmBookings: false,
+  requirePaymentConfirmation: true,
 
   fullyInsured: true,
   insuranceProvider: "Professional Indemnity Insurance",
+  gasSafeRegistered: false,
+  gasSafeNumber: "",
+  cqcRegistered: false,
+  cqcNumber: "",
+
+  stripeEnabled: true,
+  stripePublishableKey: "",
+  stripeSecretKey: "",
+  paypalEnabled: false,
+  paypalClientId: "",
+
+  smtpHost: "",
+  smtpPort: "587",
+  smtpUsername: "",
+  smtpPassword: "",
+  fromEmail: "",
+  fromName: "EGP Aesthetics",
 };
 
 const workingDaysOptions = [
@@ -65,7 +108,7 @@ const workingDaysOptions = [
 ];
 
 export default function AdminSettingsPage() {
-  const [activeTab, setActiveTab] = useState<"business" | "pricing" | "hours" | "notifications" | "professional">("business");
+  const [activeTab, setActiveTab] = useState<"business" | "pricing" | "hours" | "notifications" | "professional" | "payments" | "email">("business");
   const [settings, setSettings] = useState<SettingsState>(defaultSettings);
   const [isSaving, setIsSaving] = useState(false);
   const { profile, loading } = useAdminProfile();
@@ -88,9 +131,9 @@ export default function AdminSettingsPage() {
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      showSuccess("Settings saved successfully!");
+      showSuccess("Success", "Settings saved successfully!");
     } catch (error) {
-      showError("Failed to save settings. Please try again.");
+      showError("Error", "Failed to save settings. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -115,6 +158,8 @@ export default function AdminSettingsPage() {
     { id: "hours", label: "Hours", icon: Clock },
     { id: "notifications", label: "Notifications", icon: Bell },
     { id: "professional", label: "Professional", icon: Shield },
+    { id: "payments", label: "Payments", icon: DollarSign },
+    { id: "email", label: "Email", icon: Mail },
   ];
 
   if (loading) {
@@ -261,56 +306,7 @@ export default function AdminSettingsPage() {
             )}
 
             {activeTab === "hours" && (
-              <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Working Hours</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Start Time
-                    </label>
-                    <input
-                      type="time"
-                      value={settings.workingHoursStart}
-                      onChange={(e) => handleInputChange("workingHoursStart", e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      End Time
-                    </label>
-                    <input
-                      type="time"
-                      value={settings.workingHoursEnd}
-                      onChange={(e) => handleInputChange("workingHoursEnd", e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
-                    Working Days
-                  </label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {workingDaysOptions.map((day) => (
-                      <button
-                        key={day.value}
-                        onClick={() => handleWorkingDayToggle(day.value)}
-                        className={`flex items-center justify-center px-4 py-3 rounded-xl border-2 transition-all ${
-                          settings.workingDays.includes(day.value)
-                            ? "border-rose-500 bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-300"
-                            : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:border-rose-300 dark:hover:border-rose-600"
-                        }`}
-                      >
-                        <span className="font-medium">{day.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              <WorkingHoursManager />
             )}
 
             {activeTab === "notifications" && (
@@ -394,6 +390,197 @@ export default function AdminSettingsPage() {
                       className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
                       placeholder="Enter insurance provider"
                     />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "payments" && (
+              <div className="space-y-6">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Payment Settings</h3>
+                
+                <div className="space-y-6">
+                  {/* Stripe Settings */}
+                  <div className="p-6 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                          <DollarSign className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Stripe Payment</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">Accept card payments online</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleInputChange("stripeEnabled", !settings.stripeEnabled)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                          settings.stripeEnabled ? "bg-blue-600" : "bg-gray-300 dark:bg-gray-600"
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            settings.stripeEnabled ? "translate-x-6" : "translate-x-1"
+                          }`}
+                        />
+                      </button>
+                    </div>
+                    
+                    {settings.stripeEnabled && (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                              Stripe Publishable Key
+                            </label>
+                            <input
+                              type="text"
+                              value={settings.stripePublishableKey}
+                              onChange={(e) => handleInputChange("stripePublishableKey", e.target.value)}
+                              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                              placeholder="pk_test_..."
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                              Stripe Secret Key
+                            </label>
+                            <input
+                              type="password"
+                              value={settings.stripeSecretKey}
+                              onChange={(e) => handleInputChange("stripeSecretKey", e.target.value)}
+                              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                              placeholder="sk_test_..."
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* PayPal Settings */}
+                  <div className="p-6 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center">
+                          <DollarSign className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">PayPal Payment</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">Accept PayPal payments</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleInputChange("paypalEnabled", !settings.paypalEnabled)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                          settings.paypalEnabled ? "bg-yellow-600" : "bg-gray-300 dark:bg-gray-600"
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            settings.paypalEnabled ? "translate-x-6" : "translate-x-1"
+                          }`}
+                        />
+                      </button>
+                    </div>
+                    
+                    {settings.paypalEnabled && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          PayPal Client ID
+                        </label>
+                        <input
+                          type="text"
+                          value={settings.paypalClientId}
+                          onChange={(e) => handleInputChange("paypalClientId", e.target.value)}
+                          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
+                          placeholder="PayPal Client ID"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "email" && (
+              <div className="space-y-6">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Email Settings</h3>
+                
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        SMTP Host
+                      </label>
+                      <input
+                        type="text"
+                        value={settings.smtpHost}
+                        onChange={(e) => handleInputChange("smtpHost", e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                        placeholder="smtp.gmail.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        SMTP Port
+                      </label>
+                      <input
+                        type="text"
+                        value={settings.smtpPort}
+                        onChange={(e) => handleInputChange("smtpPort", e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                        placeholder="587"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        SMTP Username
+                      </label>
+                      <input
+                        type="text"
+                        value={settings.smtpUsername}
+                        onChange={(e) => handleInputChange("smtpUsername", e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                        placeholder="your-email@gmail.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        SMTP Password
+                      </label>
+                      <input
+                        type="password"
+                        value={settings.smtpPassword}
+                        onChange={(e) => handleInputChange("smtpPassword", e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                        placeholder="App password"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        From Email
+                      </label>
+                      <input
+                        type="email"
+                        value={settings.fromEmail}
+                        onChange={(e) => handleInputChange("fromEmail", e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                        placeholder="noreply@egp.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        From Name
+                      </label>
+                      <input
+                        type="text"
+                        value={settings.fromName}
+                        onChange={(e) => handleInputChange("fromName", e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                        placeholder="EGP Aesthetics"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useAdminProfile } from "@/hooks/useAdminProfile";
 import { useToast } from "@/components/Toast";
-import { User, Building2, Shield, Save, Eye, EyeOff, Camera, Mail, Phone, MapPin } from "lucide-react";
+import { User, Building2, Shield, Save, Eye, EyeOff, Camera, Mail, Phone, MapPin, Users } from "lucide-react";
+import { ColleaguesManager } from "@/components/ColleaguesManager";
 
 type ProfileData = {
   // Personal Information
@@ -34,7 +35,7 @@ type PasswordData = {
 };
 
 export default function ProfilePage() {
-  const [activeTab, setActiveTab] = useState<"personal" | "company" | "professional" | "security">("personal");
+  const [activeTab, setActiveTab] = useState<"personal" | "company" | "professional" | "colleagues" | "security">("personal");
   const [isSaving, setIsSaving] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -85,6 +86,8 @@ export default function ProfilePage() {
         yearsOfExperience: dbProfile.years_of_experience || "",
         specializations: dbProfile.specializations || "",
         insuranceProvider: dbProfile.insurance_provider || "",
+        
+        avatar: profileData.avatar || "",
       });
     }
   }, [dbProfile, loading]);
@@ -112,12 +115,12 @@ export default function ProfilePage() {
       });
 
       if (response.ok) {
-        showSuccess("Profile updated successfully!");
+        showSuccess("Success", "Profile updated successfully!");
       } else {
-        showError("Failed to update profile. Please try again.");
+        showError("Error", "Failed to update profile. Please try again.");
       }
     } catch (error) {
-      showError("An error occurred while updating your profile.");
+      showError("Error", "An error occurred while updating your profile.");
     } finally {
       setIsSaving(false);
     }
@@ -126,7 +129,7 @@ export default function ProfilePage() {
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      showError("New passwords do not match.");
+      showError("Error", "New passwords do not match.");
       return;
     }
 
@@ -144,7 +147,7 @@ export default function ProfilePage() {
       });
 
       if (response.ok) {
-        showSuccess("Password updated successfully!");
+        showSuccess("Success", "Password updated successfully!");
         setPasswordData({
           currentPassword: "",
           newPassword: "",
@@ -152,10 +155,10 @@ export default function ProfilePage() {
         });
         setShowPasswordForm(false);
       } else {
-        showError("Failed to update password. Please check your current password.");
+        showError("Error", "Failed to update password. Please check your current password.");
       }
     } catch (error) {
-      showError("An error occurred while updating your password.");
+      showError("Error", "An error occurred while updating your password.");
     } finally {
       setIsSaving(false);
     }
@@ -165,6 +168,7 @@ export default function ProfilePage() {
     { id: "personal", label: "Personal Info", icon: User },
     { id: "company", label: "Company", icon: Building2 },
     { id: "professional", label: "Professional", icon: Shield },
+    { id: "colleagues", label: "Team", icon: Users },
     { id: "security", label: "Security", icon: Eye },
   ];
 
@@ -415,6 +419,10 @@ export default function ProfilePage() {
                   />
                 </div>
               </div>
+            )}
+
+            {activeTab === "colleagues" && (
+              <ColleaguesManager />
             )}
 
             {activeTab === "security" && (

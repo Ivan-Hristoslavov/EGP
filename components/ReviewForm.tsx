@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useReviews } from "@/hooks/useReviews";
 import { useToast, ToastMessages } from "@/components/Toast";
+import { Button, Input, Textarea, Card, CardBody, CardHeader } from "@heroui/react";
 
 export function ReviewForm() {
   const { addReview } = useReviews();
@@ -191,16 +192,31 @@ export function ReviewForm() {
             Leave a Review
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto transition-colors duration-300">
-            Help others by sharing your experience with our plumbing services
+            Help others by sharing your experience with our aesthetic treatments
           </p>
         </div>
 
         {/* Review Form */}
         <div className="relative">
-          <form
-            onSubmit={handleSubmit}
-            className="bg-white dark:bg-gray-900 rounded-3xl p-8 md:p-12 shadow-lg border border-gray-200 dark:border-gray-700 transition-colors duration-300"
-          >
+          <Card className="shadow-lg border border-gray-200 dark:border-gray-700">
+            <CardHeader className="pb-0">
+              <div className="text-center">
+                <div className="inline-flex items-center px-4 py-2 bg-blue-100 dark:bg-blue-900/50 rounded-full text-blue-800 dark:text-blue-300 text-sm font-medium mb-6">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+                  </svg>
+                  Share Your Experience
+                </div>
+                <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4 transition-colors duration-300">
+                  Leave a Review
+                </h2>
+                <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto transition-colors duration-300">
+                  Help others by sharing your experience with our aesthetic treatments
+                </p>
+              </div>
+            </CardHeader>
+            <CardBody className="p-8 md:p-12">
+              <form onSubmit={handleSubmit} className="space-y-8">
             {/* Success/Error Messages */}
             {success && (
               <div className="mb-8 p-4 bg-green-500/20 dark:bg-green-400/20 border border-green-400/40 dark:border-green-300/40 rounded-2xl backdrop-blur-sm">
@@ -361,78 +377,44 @@ export function ReviewForm() {
               </div>
             </div>
 
-            {/* Message Field */}
-            <div className="mt-8">
-              <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-3 transition-colors duration-300">
-                Your Review *
-              </label>
-              <div className="relative">
-                <textarea
-                  value={form.message}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, message: e.target.value }))
-                  }
-                  rows={6}
-                  className="w-full px-4 py-4 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-2xl text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all duration-300 font-medium resize-none"
-                  placeholder="Tell us about your experience with our plumbing services. What did you like? How was our response time and service quality?"
-                  required
-                />
-                <div className="absolute bottom-4 right-4">
-                  <svg
-                    className="w-5 h-5 text-gray-400 dark:text-gray-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                    />
-                  </svg>
+                {/* Message Field */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-3 transition-colors duration-300">
+                    Your Review *
+                  </label>
+                  <Textarea
+                    value={form.message}
+                    onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
+                    placeholder="Tell us about your experience with our aesthetic treatments. What did you like? How was our service quality and results?"
+                    isRequired
+                    variant="bordered"
+                    minRows={6}
+                    classNames={{
+                      input: "text-gray-900 dark:text-white",
+                      inputWrapper: "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+                    }}
+                  />
                 </div>
-              </div>
-            </div>
 
-            {/* Submit Button */}
-            <div className="mt-10 text-center">
-              <button
-                type="submit"
-                disabled={submitting}
-                className="group relative inline-flex items-center px-12 py-4 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 text-white font-bold text-lg rounded-2xl shadow-xl hover:shadow-2xl hover:from-blue-700 hover:to-purple-700 dark:hover:from-blue-600 dark:hover:to-purple-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none backdrop-blur-sm"
-              >
-                {submitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-3" />
-                    Submitting Review...
-                  </>
-                ) : (
-                  <>
-                    <svg
-                      className="w-5 h-5 mr-3 transition-transform duration-300 group-hover:scale-110"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                      />
-                    </svg>
-                    Submit Review
-                  </>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </button>
+                {/* Submit Button */}
+                <div className="text-center">
+                  <Button
+                    type="submit"
+                    disabled={submitting}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold text-lg px-12 py-4 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+                    size="lg"
+                    isLoading={submitting}
+                   >
+                     {submitting ? "Submitting Review..." : "Submit Review"}
+                  </Button>
 
-              <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-                Your review will be published after approval by our team
-              </p>
-            </div>
-          </form>
+                  <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+                    Your review will be published after approval by our team
+                  </p>
+                </div>
+              </form>
+            </CardBody>
+          </Card>
         </div>
       </div>
     </section>

@@ -296,22 +296,6 @@ const servicesData = {
     ],
     popular: true
   },
-  'profhilo': {
-    title: 'Profhilo',
-    category: 'Face Treatments',
-    price: '£390',
-    duration: '45 minutes',
-    description: 'Revolutionary skin remodelling treatment for improved skin quality and hydration',
-    benefits: [
-      'Improves skin texture and quality',
-      'Natural-looking results',
-      'Minimal downtime',
-      'Results last 6-12 months',
-      'Suitable for all skin types',
-      'Stimulates collagen production'
-    ],
-    popular: false
-  },
   'fat-freezing-treatment': {
     title: 'Fat Freezing Treatment',
     category: 'Body Treatments',
@@ -331,13 +315,14 @@ const servicesData = {
 };
 
 interface PageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const service = servicesData[params.slug as keyof typeof servicesData];
+  const { slug } = await params;
+  const service = servicesData[slug as keyof typeof servicesData];
   
   if (!service) {
     return {
@@ -349,13 +334,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: `${service.title} | ${siteConfig.name}`,
     description: service.description,
     alternates: {
-      canonical: `${siteConfig.url}/services/${params.slug}`,
+      canonical: `${siteConfig.url}/services/${slug}`,
     },
   };
 }
 
-export default function ServicePage({ params }: PageProps) {
-  const service = servicesData[params.slug as keyof typeof servicesData];
+export default async function ServicePage({ params }: PageProps) {
+  const { slug } = await params;
+  const service = servicesData[slug as keyof typeof servicesData];
 
   if (!service) {
     notFound();

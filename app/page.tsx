@@ -5,6 +5,7 @@ import SectionFeaturedServices from "@/components/SectionFeaturedServices";
 import SectionWhyChooseUs from "@/components/SectionWhyChooseUs";
 import SectionBeforeAfter from "@/components/SectionBeforeAfter";
 import { ReviewsSection } from "@/components/ReviewsSection";
+import { ReviewForm } from "@/components/ReviewForm";
 import { FAQSection } from "@/components/FAQSection";
 import SectionNewsletter from "@/components/SectionNewsletter";
 // import SectionContact from "@/components/SectionContact"; // COMMENTED OUT - Will use direct booking with payment instead
@@ -59,6 +60,9 @@ export default async function HomePage() {
 
       {/* Testimonials/Reviews */}
       <ReviewsSection />
+
+      {/* Review Form */}
+      <ReviewForm />
 
       {/* FAQ Section */}
       <FAQSection />

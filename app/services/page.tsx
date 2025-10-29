@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { siteConfig } from "@/config/site";
 import { Search, Filter, Grid, List, ArrowLeft, Info, Plus, Clock, CheckCircle } from "lucide-react";
@@ -536,7 +536,7 @@ const durationRanges = [
   { label: 'Over 90 min', min: 90, max: Infinity }
 ];
 
-export default function ServicesPage() {
+function ServicesPageContent() {
   const searchParams = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedPriceRange, setSelectedPriceRange] = useState('All Prices');
@@ -562,10 +562,16 @@ export default function ServicesPage() {
   const filteredServices = useMemo(() => {
     return Object.entries(servicesData).filter(([serviceId, service]) => {
       const matchesCategory = selectedCategory === 'All' || service.category === selectedCategory;
-      const matchesPrice = priceRanges.find(range => range.label === selectedPriceRange)?.min <= service.price && 
-                         priceRanges.find(range => range.label === selectedPriceRange)?.max >= service.price;
-      const matchesDuration = durationRanges.find(range => range.label === selectedDurationRange)?.min <= service.duration && 
-                            durationRanges.find(range => range.label === selectedDurationRange)?.max >= service.duration;
+      const selectedPriceRangeObj = priceRanges.find(range => range.label === selectedPriceRange);
+      const matchesPrice = selectedPriceRangeObj ? (
+        selectedPriceRangeObj.min <= service.price && 
+        selectedPriceRangeObj.max >= service.price
+      ) : true;
+      const selectedDurationRangeObj = durationRanges.find(range => range.label === selectedDurationRange);
+      const matchesDuration = selectedDurationRangeObj ? (
+        selectedDurationRangeObj.min <= service.duration && 
+        selectedDurationRangeObj.max >= service.duration
+      ) : true;
       const matchesSearch = service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            service.category.toLowerCase().includes(searchTerm.toLowerCase());
@@ -1055,5 +1061,20 @@ export default function ServicesPage() {
         {renderServiceModal()}
       </div>
     </div>
+  );
+}
+
+export default function ServicesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    }>
+      <ServicesPageContent />
+    </Suspense>
   );
 }
