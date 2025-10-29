@@ -2,8 +2,13 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
+// Client for public operations (uses anon key)
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// Client for admin operations (uses service role key, bypasses RLS)
+export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 // Types for our database
 export type Database = {
@@ -266,7 +271,7 @@ export type Database = {
           service: string;
           date: string;
           time: string;
-          status: "scheduled" | "completed" | "cancelled" | "pending";
+          status: "scheduled" | "completed" | "cancelled" | "pending" | "confirmed";
           payment_status: "pending" | "paid" | "refunded";
           amount: number;
           address: string | null;
@@ -283,7 +288,7 @@ export type Database = {
           service: string;
           date: string;
           time: string;
-          status?: "scheduled" | "completed" | "cancelled" | "pending";
+          status?: "scheduled" | "completed" | "cancelled" | "pending" | "confirmed";
           payment_status?: "pending" | "paid" | "refunded";
           amount: number;
           address?: string | null;
@@ -300,7 +305,7 @@ export type Database = {
           service?: string;
           date?: string;
           time?: string;
-          status?: "scheduled" | "completed" | "cancelled" | "pending";
+          status?: "scheduled" | "completed" | "cancelled" | "pending" | "confirmed";
           payment_status?: "pending" | "paid" | "refunded";
           amount?: number;
           address?: string | null;

@@ -8,6 +8,7 @@ import { Providers } from "./providers";
 import { ToastProvider } from "@/components/Toast";
 import HashNavigation from "@/components/HashNavigation";
 import { AdminProfileProvider } from "@/components/AdminProfileContext";
+import { FirstVisitDiscountFormWrapper } from "@/components/FirstVisitDiscountFormWrapper";
 
 import { playfairDisplay, montserrat, fontSans } from "@/config/fonts";
 import LayoutMain from "@/components/LayoutMain";
@@ -329,6 +330,7 @@ export default async function RootLayout({
           <Providers>
             <HashNavigation />
             <LayoutMain adminProfile={adminProfile}>{children}</LayoutMain>
+            <FirstVisitDiscountFormWrapper />
           </Providers>
         </ToastProvider>
         <SpeedInsights />

@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { 
-  Calendar, 
-  Users, 
-  DollarSign, 
-  TrendingUp, 
-  Clock, 
+import { useState, useEffect } from "react";
+import {
+  Calendar,
+  Users,
+  DollarSign,
+  TrendingUp,
+  Clock,
   Star,
   Eye,
   Plus,
@@ -15,26 +15,32 @@ import {
   ArrowDownRight,
   CheckCircle,
   AlertCircle,
-  XCircle
+  XCircle,
 } from "lucide-react";
 
 interface Booking {
   id: string;
-  clientName: string;
+  customer_id: string | null;
+  customer_name: string;
+  customer_email: string | null;
+  customer_phone: string | null;
   service: string;
-  time: string;
   date: string;
-  status: "confirmed" | "pending" | "completed" | "cancelled";
-  price: number;
-  phone: string;
-  email: string;
+  time: string;
+  status: "scheduled" | "completed" | "cancelled" | "pending";
+  payment_status: "pending" | "paid" | "refunded";
+  amount: number;
+  address: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface StatCard {
   title: string;
   value: string;
   change: string;
-  changeType: "up" | "down";
+  changeType: "up" | "down" | "neutral";
   icon: React.ElementType;
   color: string;
 }
@@ -42,129 +48,88 @@ interface StatCard {
 // Get today's date in YYYY-MM-DD format
 const getTodayString = () => {
   const today = new Date();
-  return today.toISOString().split('T')[0];
+  return today.toISOString().split("T")[0];
 };
 
-// Dummy data with today's dates
-const dummyBookings: Booking[] = [
-  {
-    id: "1",
-    clientName: "Sarah Johnson",
-    service: "Baby Botox",
-    time: "10:00 AM",
-    date: getTodayString(),
-    status: "confirmed",
-    price: 199,
-    phone: "+44 7700 123456",
-    email: "sarah.j@email.com"
-  },
-  {
-    id: "2",
-    clientName: "Emma Williams",
-    service: "Lip Enhancement",
-    time: "12:30 PM",
-    date: getTodayString(),
-    status: "pending",
-    price: 290,
-    phone: "+44 7700 234567",
-    email: "emma.w@email.com"
-  },
-  {
-    id: "3",
-    clientName: "Lisa Brown",
-    service: "Profhilo Treatment",
-    time: "2:00 PM",
-    date: getTodayString(),
-    status: "confirmed",
-    price: 390,
-    phone: "+44 7700 345678",
-    email: "lisa.b@email.com"
-  },
-  {
-    id: "4",
-    clientName: "Rachel Green",
-    service: "Skin Consultation",
-    time: "4:30 PM",
-    date: getTodayString(),
-    status: "confirmed",
-    price: 75,
-    phone: "+44 7700 456789",
-    email: "rachel.g@email.com"
-  }
-];
+// Empty bookings array - will be populated from database
+const dummyBookings: Booking[] = [];
 
+// Empty stats - will be populated from database
 const statCards: StatCard[] = [
   {
     title: "Today's Bookings",
-    value: "4",
-    change: "+12%",
-    changeType: "up",
+    value: "0",
+    change: "0%",
+    changeType: "neutral",
     icon: Calendar,
-    color: "blue"
+    color: "blue",
   },
   {
     title: "Monthly Revenue",
-    value: "£12,450",
-    change: "+8%",
-    changeType: "up",
+    value: "£0",
+    change: "0%",
+    changeType: "neutral",
     icon: DollarSign,
-    color: "emerald"
+    color: "emerald",
   },
   {
     title: "Active Clients",
-    value: "156",
-    change: "+5%",
-    changeType: "up",
+    value: "0",
+    change: "0%",
+    changeType: "neutral",
     icon: Users,
-    color: "purple"
+    color: "purple",
   },
   {
     title: "Avg. Rating",
-    value: "4.9",
-    change: "+0.1",
-    changeType: "up",
+    value: "0.0",
+    change: "0%",
+    changeType: "neutral",
     icon: Star,
-    color: "amber"
-  }
+    color: "amber",
+  },
 ];
 
-const recentActivity = [
-  {
-    id: "1",
-    type: "booking",
-    message: "New booking from Sarah Johnson for Baby Botox",
-    time: "2 hours ago",
-    status: "confirmed"
-  },
-  {
-    id: "2",
-    type: "payment",
-    message: "Payment received from Emma Williams (£290)",
-    time: "4 hours ago",
-    status: "completed"
-  },
-  {
-    id: "3",
-    type: "review",
-    message: "5-star review received from Lisa Brown",
-    time: "6 hours ago",
-    status: "completed"
-  },
-  {
-    id: "4",
-    type: "booking",
-    message: "Booking cancelled by Maria Garcia",
-    time: "1 day ago",
-    status: "cancelled"
-  }
-];
+// Empty activity - will be populated from database
+const recentActivity: any[] = [];
 
 export default function DashboardPage() {
   const [selectedDate, setSelectedDate] = useState(getTodayString());
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load bookings on component mount
+  useEffect(() => {
+    loadBookings();
+  }, []);
+
+  const loadBookings = async () => {
+    try {
+      const response = await fetch("/api/bookings", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setBookings(data.bookings || []);
+      } else {
+        console.error("Error loading bookings:", response.statusText);
+        setBookings([]);
+      }
+    } catch (error) {
+      console.error("Error loading bookings:", error);
+      setBookings([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "confirmed":
+      case "scheduled":
         return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300";
       case "pending":
         return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300";
@@ -179,7 +144,7 @@ export default function DashboardPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "confirmed":
+      case "scheduled":
         return <CheckCircle className="w-4 h-4" />;
       case "pending":
         return <Clock className="w-4 h-4" />;
@@ -237,7 +202,9 @@ export default function DashboardPage() {
     }
   };
 
-  const todayBookings = dummyBookings.filter(booking => booking.date === selectedDate);
+  const todayBookings = bookings.filter(
+    (booking) => booking.date === selectedDate
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-pink-50/50 to-purple-50/50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800">
@@ -257,17 +224,24 @@ export default function DashboardPage() {
           {statCards.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <div key={index} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 overflow-hidden hover:shadow-xl transition-all">
+              <div
+                key={index}
+                className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 overflow-hidden hover:shadow-xl transition-all"
+              >
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <div className={`p-3 rounded-xl ${getIconBgColor(stat.color)}`}>
+                    <div
+                      className={`p-3 rounded-xl ${getIconBgColor(stat.color)}`}
+                    >
                       <Icon className={`w-6 h-6 ${getIconColor(stat.color)}`} />
                     </div>
-                    <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
-                      stat.changeType === "up" 
-                        ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-                        : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
-                    }`}>
+                    <div
+                      className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
+                        stat.changeType === "up"
+                          ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                          : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
+                      }`}
+                    >
                       {stat.changeType === "up" ? (
                         <ArrowUpRight className="w-3 h-3" />
                       ) : (
@@ -326,14 +300,19 @@ export default function DashboardPage() {
                 ) : (
                   <div className="space-y-4">
                     {todayBookings.map((booking) => (
-                      <div key={booking.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                      <div
+                        key={booking.id}
+                        className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      >
                         <div className="flex items-center space-x-4">
-                          <div className={`p-2 rounded-lg ${getStatusColor(booking.status)}`}>
+                          <div
+                            className={`p-2 rounded-lg ${getStatusColor(booking.status)}`}
+                          >
                             {getStatusIcon(booking.status)}
                           </div>
                           <div>
                             <h4 className="font-semibold text-gray-900 dark:text-white">
-                              {booking.clientName}
+                              {booking.customer_name}
                             </h4>
                             <p className="text-sm text-gray-600 dark:text-gray-400">
                               {booking.service} • {booking.time}
@@ -343,9 +322,11 @@ export default function DashboardPage() {
                         <div className="flex items-center space-x-4">
                           <div className="text-right">
                             <p className="font-semibold text-gray-900 dark:text-white">
-                              £{booking.price}
+                              £{booking.amount}
                             </p>
-                            <p className={`text-xs px-2 py-1 rounded-full ${getStatusColor(booking.status)}`}>
+                            <p
+                              className={`text-xs px-2 py-1 rounded-full ${getStatusColor(booking.status)}`}
+                            >
                               {booking.status}
                             </p>
                           </div>
@@ -373,8 +354,13 @@ export default function DashboardPage() {
               <div className="p-6">
                 <div className="space-y-4">
                   {recentActivity.map((activity) => (
-                    <div key={activity.id} className="flex items-start space-x-3">
-                      <div className={`p-2 rounded-lg ${getStatusColor(activity.status)}`}>
+                    <div
+                      key={activity.id}
+                      className="flex items-start space-x-3"
+                    >
+                      <div
+                        className={`p-2 rounded-lg ${getStatusColor(activity.status)}`}
+                      >
                         {getStatusIcon(activity.status)}
                       </div>
                       <div className="flex-1">
@@ -413,8 +399,12 @@ export default function DashboardPage() {
                     <Plus className="w-5 h-5 text-rose-600 dark:text-rose-400" />
                   </div>
                   <div className="text-left">
-                    <h3 className="font-medium text-gray-900 dark:text-white">New Booking</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Add appointment</p>
+                    <h3 className="font-medium text-gray-900 dark:text-white">
+                      New Booking
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Add appointment
+                    </p>
                   </div>
                 </button>
 
@@ -423,8 +413,12 @@ export default function DashboardPage() {
                     <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div className="text-left">
-                    <h3 className="font-medium text-gray-900 dark:text-white">Manage Clients</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">View all clients</p>
+                    <h3 className="font-medium text-gray-900 dark:text-white">
+                      Manage Clients
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      View all clients
+                    </p>
                   </div>
                 </button>
 
@@ -433,8 +427,12 @@ export default function DashboardPage() {
                     <DollarSign className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div className="text-left">
-                    <h3 className="font-medium text-gray-900 dark:text-white">View Reports</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Financial overview</p>
+                    <h3 className="font-medium text-gray-900 dark:text-white">
+                      View Reports
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Financial overview
+                    </p>
                   </div>
                 </button>
 
@@ -443,8 +441,12 @@ export default function DashboardPage() {
                     <Calendar className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div className="text-left">
-                    <h3 className="font-medium text-gray-900 dark:text-white">Calendar View</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Full calendar</p>
+                    <h3 className="font-medium text-gray-900 dark:text-white">
+                      Calendar View
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Full calendar
+                    </p>
                   </div>
                 </button>
               </div>

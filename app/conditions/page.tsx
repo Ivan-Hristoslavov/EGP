@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import { siteConfig } from "@/config/site";
 import { Search, Filter, Grid, List, ArrowLeft, Info, Plus, Clock, CheckCircle } from "lucide-react";
 import Link from 'next/link';
@@ -304,7 +305,7 @@ const sessionRanges = [
   { label: '10+ sessions', min: 10, max: Infinity }
 ];
 
-export default function ConditionsPage() {
+function ConditionsPageContent() {
   const searchParams = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedSeverity, setSelectedSeverity] = useState('All Severities');
@@ -331,8 +332,11 @@ export default function ConditionsPage() {
     return Object.entries(conditionsData).filter(([conditionId, condition]) => {
       const matchesCategory = selectedCategory === 'All' || condition.category === selectedCategory;
       const matchesSeverity = selectedSeverity === 'All Severities' || condition.severity.includes(selectedSeverity);
-      const matchesSessionRange = sessionRanges.find(range => range.label === selectedSessionRange)?.min <= parseInt(condition.sessions.split('-')[0]) && 
-                                sessionRanges.find(range => range.label === selectedSessionRange)?.max >= parseInt(condition.sessions.split('-')[condition.sessions.split('-').length - 1].split(' ')[0]);
+      const selectedRange = sessionRanges.find(range => range.label === selectedSessionRange);
+      const matchesSessionRange = selectedRange ? (
+        selectedRange.min <= parseInt(condition.sessions.split('-')[0]) && 
+        selectedRange.max >= parseInt(condition.sessions.split('-')[condition.sessions.split('-').length - 1].split(' ')[0])
+      ) : true;
       const matchesSearch = condition.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            condition.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            condition.category.toLowerCase().includes(searchTerm.toLowerCase());
@@ -809,5 +813,20 @@ export default function ConditionsPage() {
         {renderConditionModal()}
       </div>
     </div>
+  );
+}
+
+export default function ConditionsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    }>
+      <ConditionsPageContent />
+    </Suspense>
   );
 }

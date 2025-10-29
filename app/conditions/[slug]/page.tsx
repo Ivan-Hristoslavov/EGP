@@ -420,13 +420,14 @@ const conditionsData = {
 };
 
 interface PageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const condition = conditionsData[params.slug as keyof typeof conditionsData];
+  const { slug } = await params;
+  const condition = conditionsData[slug as keyof typeof conditionsData];
   
   if (!condition) {
     return {
@@ -438,13 +439,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: `${condition.title} Treatment | ${siteConfig.name}`,
     description: condition.description,
     alternates: {
-      canonical: `${siteConfig.url}/conditions/${params.slug}`,
+      canonical: `${siteConfig.url}/conditions/${slug}`,
     },
   };
 }
 
-export default function ConditionPage({ params }: PageProps) {
-  const condition = conditionsData[params.slug as keyof typeof conditionsData];
+export default async function ConditionPage({ params }: PageProps) {
+  const { slug } = await params;
+  const condition = conditionsData[slug as keyof typeof conditionsData];
 
   if (!condition) {
     notFound();
@@ -496,7 +498,7 @@ export default function ConditionPage({ params }: PageProps) {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                     href={`/book?condition=${params.slug}`}
+                     href={`/book?condition=${slug}`}
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-lg font-semibold rounded-full hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl"
               >
                 <Calendar className="w-5 h-5" />
@@ -592,11 +594,11 @@ export default function ConditionPage({ params }: PageProps) {
               Ready to Address Your Concerns?
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
-              Book your treatment now to discuss the best treatment options for your {condition.title.toLowerCase()}
+              Book your treatment now to discuss the best treatment options for {condition.title.toLowerCase()}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                     href={`/book?condition=${params.slug}`}
+                     href={`/book?condition=${slug}`}
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-lg font-semibold rounded-full hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl"
               >
                 <Calendar className="w-5 h-5" />

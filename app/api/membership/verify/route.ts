@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20',
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(request: NextRequest) {
   try {
@@ -77,9 +75,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Create new membership record
-    const startDate = new Date(subscription.current_period_start * 1000);
-    const endDate = new Date(subscription.current_period_end * 1000);
-    const nextBillingDate = new Date(subscription.current_period_end * 1000);
+    const startDate = new Date((subscription as any).current_period_start * 1000);
+    const endDate = new Date((subscription as any).current_period_end * 1000);
+    const nextBillingDate = new Date((subscription as any).current_period_end * 1000);
 
     const { data: membership, error: membershipError } = await supabase
       .from("customer_memberships")
