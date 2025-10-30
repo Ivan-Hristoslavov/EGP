@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useAreas } from "@/hooks/useAreas";
 import { useAdminProfile } from "@/components/AdminProfileContext";
 import { useAdminSettings } from "@/hooks/useAdminSettings";
@@ -9,6 +11,21 @@ export function SectionHero() {
   const { areas, loading: areasLoading } = useAreas();
   const adminProfile = useAdminProfile();
   const { settings: adminSettings } = useAdminSettings();
+
+  // Hero images in requested order: owners, egp, chair
+  const heroImages = [
+    "/hero-images/owners.JPG",
+    "/hero-images/egp.JPG",
+    "/hero-images/chair.JPG",
+  ];
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setActiveIdx((i) => (i + 1) % heroImages.length);
+    }, 6000);
+    return () => clearInterval(id);
+  }, []);
 
   // Check if credentials are available
   const hasGasSafe = adminProfile?.gas_safe_registered === true;
@@ -21,20 +38,26 @@ export function SectionHero() {
       className="relative min-h-screen flex items-start justify-center overflow-hidden py-8"
       id="home"
     >
-      {/* Background Video */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="absolute inset-0 w-full h-full object-cover z-0"
-      >
-        <source src="/video.mp4" type="video/mp4" />
-        {/* Fallback for browsers that don't support video */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-purple-900" />
-      </video>
+      {/* Background Slideshow Images */}
+      <div className="absolute inset-0 z-0">
+        {heroImages.map((src, idx) => (
+          <div
+            key={src}
+            className={`absolute inset-0 transition-opacity duration-[1200ms] ease-out ${activeIdx === idx ? "opacity-100" : "opacity-0"}`}
+          >
+            <Image
+              src={src}
+              alt="Hero background"
+              fill
+              priority={idx === 0}
+              sizes="100vw"
+              className="object-cover"
+            />
+          </div>
+        ))}
+      </div>
 
-      {/* Video Overlay - Darker gradient for better text contrast */}
+      {/* Overlay - Darker gradient for better text contrast */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/90 z-10" />
 
       <div className="relative z-20 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col items-center">

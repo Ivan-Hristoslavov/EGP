@@ -20,10 +20,10 @@ export default function PressPage() {
       description: "Recognised for excellence in aesthetic treatments and patient care.",
     },
     {
-      title: "CQC Outstanding Rating",
-      organisation: "Care Quality Commission",
+      title: "Excellence in Patient Care 2023",
+      organisation: "Aesthetic Medicine Awards",
       year: "2023",
-      description: "Achieved the highest possible rating for safety and quality of care.",
+      description: "Recognition for outstanding commitment to patient safety and satisfaction.",
     },
     {
       title: "Patient Choice Award",

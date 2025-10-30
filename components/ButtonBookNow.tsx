@@ -39,13 +39,13 @@ export default function ButtonBookNow({
   const getVariantClasses = () => {
     switch (variant) {
       case "primary":
-        return "bg-gradient-to-r from-rose-500 to-pink-500 text-white hover:from-rose-600 hover:to-pink-600 shadow-lg hover:shadow-xl";
+        return "bg-white/20 backdrop-blur-md border-2 border-white/50 text-white hover:bg-white/30 hover:border-white/70 shadow-lg hover:shadow-xl";
       case "secondary":
         return "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700";
       case "outline":
-        return "border-2 border-rose-500 text-rose-500 dark:text-rose-400 hover:bg-rose-500 hover:text-white dark:hover:text-white";
+        return "bg-white/20 backdrop-blur-md border-2 border-white/50 text-white hover:bg-white/30 hover:border-white/70";
       default:
-        return "bg-gradient-to-r from-rose-500 to-pink-500 text-white hover:from-rose-600 hover:to-pink-600 shadow-lg hover:shadow-xl";
+        return "bg-white/20 backdrop-blur-md border-2 border-white/50 text-white hover:bg-white/30 hover:border-white/70 shadow-lg hover:shadow-xl";
     }
   };
 

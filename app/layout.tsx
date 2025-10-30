@@ -10,12 +10,11 @@ import HashNavigation from "@/components/HashNavigation";
 import { AdminProfileProvider } from "@/components/AdminProfileContext";
 import { FirstVisitDiscountFormWrapper } from "@/components/FirstVisitDiscountFormWrapper";
 
-import { playfairDisplay, montserrat, fontSans } from "@/config/fonts";
 import LayoutMain from "@/components/LayoutMain";
 import { getAdminProfile } from "@/lib/admin-profile";
 import { createClient } from "@/lib/supabase/server";
 
-// Using playfairDisplay and montserrat from config/fonts.ts
+// Using Gurmukhi MN font loaded via CSS @font-face
 
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getAdminProfile();
@@ -38,7 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
       default: `${companyName} - Premium Aesthetic Treatments London | Clapham, Chelsea, Battersea`,
       template: `%s | ${companyName} - Aesthetic Clinic London`
     },
-    description: `Premier aesthetic clinic in South West London. Expert treatments in Clapham, Balham, Chelsea, Battersea, Wandsworth, Streatham. ${responseTimeNormalized}-minute response time, ${yearsExperience} experience. CQC registered, fully insured.`,
+    description: `Premier aesthetic clinic in South West London. Expert treatments in Clapham, Balham, Chelsea, Battersea, Wandsworth, Streatham. ${responseTimeNormalized}-minute response time, ${yearsExperience} experience. Fully insured.`,
     keywords: [
       "aesthetic clinic London",
       "botox London",
@@ -83,7 +82,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     openGraph: {
       title: `${companyName} - Premium Aesthetic Clinic London`,
-      description: `Premier aesthetic treatments in South West London with ${responseTimeNormalized}-minute response time. CQC registered, fully insured.`,
+      description: `Premier aesthetic treatments in South West London with ${responseTimeNormalized}-minute response time. Fully insured.`,
       type: "website",
       locale: "en_GB",
       siteName: companyName,
@@ -319,10 +318,7 @@ export default async function RootLayout({
       </head>
       <body
         className={clsx(
-          "min-h-screen text-foreground bg-background font-montserrat antialiased",
-          playfairDisplay.variable,
-          montserrat.variable,
-          fontSans.variable
+          "min-h-screen text-foreground bg-background font-gurmukhi antialiased"
         )}
         suppressHydrationWarning
       >
@@ -330,6 +326,7 @@ export default async function RootLayout({
           <Providers>
             <HashNavigation />
             <LayoutMain adminProfile={adminProfile}>{children}</LayoutMain>
+            {/* First-visit discount popup (client) */}
             <FirstVisitDiscountFormWrapper />
           </Providers>
         </ToastProvider>

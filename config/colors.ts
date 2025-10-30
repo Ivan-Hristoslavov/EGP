@@ -36,12 +36,12 @@ export const aestheticsColors = {
     metallic: "from-[#B76E79] via-[#E8B4B8] to-[#B76E79]",
   },
 
-  // Neutrals - Soft & Warm
+  // Neutrals - Soft & Warm (Warm Beige Theme)
   neutral: {
-    lightest: "#faf8f6",   // Warm white
-    light: "#f5f1ed",      // Cream
-    DEFAULT: "#e7e0db",    // Soft beige
-    dark: "#a8a29e",       // Warm gray
+    lightest: "#f7f5f2",   // Warm beige lighter (#ddd5c3 variant)
+    light: "#f0ede7",      // Warm beige light
+    DEFAULT: "#ddd5c3",    // Warm beige (primary light theme color)
+    dark: "#c9c1b0",       // Warm beige dark
   },
 
   // Category Colors (для различните услуги)

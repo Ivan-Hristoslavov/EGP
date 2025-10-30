@@ -2,6 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Local brand font: Gurmukhi MN (loaded via CSS to support .ttc) */
+@font-face {
+  font-family: 'Gurmukhi MN';
+  src: url('/fonts/Gurmukhi MN.ttc') format('truetype-collection');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* CSS Variables for warm beige theme */
+:root {
+  --warm-beige: #ddd5c3;
+  --warm-beige-light: #f0ede7;
+  --warm-beige-lighter: #f7f5f2;
+  --warm-beige-dark: #c9c1b0;
+}
+
+body {
+  font-family: 'Gurmukhi MN', sans-serif;
+  background-color: var(--warm-beige-lighter);
+}
+
+/* Apply warm beige to light theme backgrounds */
+:root:not(.dark) {
+  --background: var(--warm-beige-lighter);
+  --foreground: #1f2937;
+}
+
+:root:not(.dark) .bg-base-100,
+:root:not(.dark) .bg-base-200,
+:root:not(.dark) .bg-gray-50,
+:root:not(.dark) .bg-white {
+  background-color: var(--warm-beige-lighter) !important;
+}
+
+.font-gurmukhi {
+  font-family: 'Gurmukhi MN', sans-serif;
+}
 /* Custom animations */
 @keyframes gradient-x {
   0%, 100% {

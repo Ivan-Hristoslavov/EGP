@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FirstVisitDiscountFormWrapper } from "@/components/FirstVisitDiscountFormWrapper";
 
 export default function NotFound() {
   return (
@@ -64,6 +65,7 @@ export default function NotFound() {
           </div>
         </div>
       </div>
+      <FirstVisitDiscountFormWrapper />
     </div>
   );
 } 

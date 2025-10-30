@@ -12,8 +12,8 @@ const reasons = [
   },
   {
     icon: Shield,
-    title: "CQC Registered",
-    description: "Fully registered, insured, and compliant with all UK healthcare regulations",
+    title: "Fully Insured",
+    description: "Comprehensive insurance coverage for your peace of mind and protection",
     gradient: "from-emerald-500 to-teal-500",
   },
   {
@@ -44,7 +44,7 @@ const reasons = [
 
 export default function SectionWhyChooseUs() {
   return (
-    <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <section className="py-12 sm:py-16 md:py-20 bg-warm-beige-lighter dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-8 sm:mb-12 md:mb-16">
@@ -65,7 +65,7 @@ export default function SectionWhyChooseUs() {
                 key={reason.title}
                 className="group bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-8 shadow-md hover:shadow-2xl transition-all duration-300 sm:hover:-translate-y-2 border border-gray-100 dark:border-gray-700"
               >
-                <div className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-br ${reason.gradient} rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 sm:mb-5 md:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg`}>
+                <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-blue-600 rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 sm:mb-5 md:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
                   <Icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3">
@@ -80,15 +80,17 @@ export default function SectionWhyChooseUs() {
         </div>
 
         {/* Trust Badges */}
-        <div className="mt-8 sm:mt-12 md:mt-16 grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-8 max-w-4xl mx-auto">
-          {siteConfig.trust.certifications.map((cert) => (
-            <div
-              key={cert}
-              className="text-center p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg sm:rounded-xl border border-blue-100 dark:border-blue-800"
-            >
-              <div className="text-xs sm:text-sm font-semibold text-blue-900 dark:text-blue-400">{cert}</div>
-            </div>
-          ))}
+        <div className="mt-8 sm:mt-12 md:mt-16 flex justify-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl">
+            {siteConfig.trust.certifications.map((cert) => (
+              <div
+                key={cert}
+                className="text-center px-4 py-6 bg-blue-100 dark:bg-blue-900/40 rounded-lg border border-blue-300 dark:border-blue-700"
+              >
+                <div className="text-sm font-bold text-blue-900 dark:text-blue-300">{cert}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
