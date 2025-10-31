@@ -37,7 +37,7 @@ export default function ButtonWhatsApp({
       href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className={`inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-full hover:from-green-600 hover:to-green-700 transition-all shadow-lg hover:shadow-xl hover:scale-105 ${className}`}
+      className={`inline-flex items-center justify-center gap-2 px-6 py-3 bg-white/20 backdrop-blur-md border-2 border-white/50 text-white font-semibold rounded-full hover:bg-white/30 hover:border-white/70 transition-all shadow-lg hover:shadow-xl hover:scale-105 ${className}`}
     >
       <MessageCircle className="w-5 h-5" />
       <span>WhatsApp Us</span>

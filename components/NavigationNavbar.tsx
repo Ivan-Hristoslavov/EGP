@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import Image from "next/image";
 
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { ThemeToggle } from "./ThemeToggle";
@@ -247,11 +248,25 @@ export default function NavigationNavbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             {/* Logo */}
-            <Link
-              className="text-2xl font-bold transition-all duration-500 hover:scale-110 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 drop-shadow-lg"
-              href="/"
-            >
-              EGP
+            <Link href="/" className="flex items-center h-10">
+              <span className="relative block h-8 w-auto">
+                <Image
+                  src="/logos/LOGO_LONG BLACK.png"
+                  alt="EGP Aesthetics"
+                  width={180}
+                  height={32}
+                  className="h-8 w-auto dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/logos/LOGO_LONG WHITE.png"
+                  alt="EGP Aesthetics"
+                  width={180}
+                  height={32}
+                  className="h-8 w-auto hidden dark:block"
+                  priority
+                />
+              </span>
             </Link>
 
             {/* Desktop Navigation */}

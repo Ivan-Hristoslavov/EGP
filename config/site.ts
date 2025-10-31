@@ -157,10 +157,10 @@ export const siteConfig = {
     treatmentsPerformed: process.env.NEXT_PUBLIC_TREATMENTS_COUNT || "1000+",
     satisfactionRate: process.env.NEXT_PUBLIC_SATISFACTION_RATE || "98%",
     certifications: [
-      "CQC Registered",
       "Fully Insured",
       "Qualified Practitioners",
-      "Safe & Clean Environment"
+      "Safe & Clean Environment",
+      "Professional Standards"
     ],
   },
   

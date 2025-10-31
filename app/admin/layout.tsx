@@ -6,6 +6,7 @@ import Link from "next/link";
 import ThemeToggleButton from "../../components/ThemeToggleButton";
 import { AdminProfileData } from "@/components/AdminProfileData";
 import { Shield } from "lucide-react";
+import { FirstVisitDiscountFormWrapper } from "@/components/FirstVisitDiscountFormWrapper";
 
 const navigation = [
   {
@@ -357,6 +358,7 @@ export default function AdminLayout({
         <main className="min-h-screen bg-gradient-to-br from-rose-50/30 via-pink-50/30 to-purple-50/30 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800 transition-colors duration-300">
           <div className="p-3 sm:p-4 lg:p-6 xl:p-8">{children}</div>
         </main>
+        <FirstVisitDiscountFormWrapper />
       </div>
     </div>
   );

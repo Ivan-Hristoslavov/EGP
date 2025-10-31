@@ -247,10 +247,10 @@ export default function BookConsultationPage() {
                   <CheckCircle className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                  CQC Registered
+                  Fully Insured
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300">
-                  Fully registered and compliant with UK regulations
+                  Comprehensive coverage for your peace of mind
                 </p>
               </div>
               <div className="flex flex-col items-center">

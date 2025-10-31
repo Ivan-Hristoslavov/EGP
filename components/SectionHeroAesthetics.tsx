@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Star, CheckCircle } from "lucide-react";
 import ButtonBookNow from "./ButtonBookNow";
 import ButtonWhatsApp from "./ButtonWhatsApp";
@@ -13,17 +14,17 @@ export default function SectionHeroAesthetics() {
     {
       title: "Transform Your Natural Beauty",
       subtitle: "Expert aesthetic treatments in the heart of London",
-      image: "/images/hero/hero-1.jpg",
+      image: "/hero-images/owners.JPG",
     },
     {
       title: "Award-Winning Aesthetic Clinic",
       subtitle: "Trusted by thousands for natural-looking results",
-      image: "/images/hero/hero-2.jpg",
+      image: "/hero-images/egp.JPG",
     },
     {
       title: "Your Journey to Confidence",
       subtitle: "Personalized treatments tailored to your unique goals",
-      image: "/images/hero/hero-3.jpg",
+      image: "/hero-images/chair.JPG",
     },
   ];
 
@@ -44,11 +45,22 @@ export default function SectionHeroAesthetics() {
             currentSlide === index ? "opacity-100" : "opacity-0"
           }`}
         >
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b sm:bg-gradient-to-r from-black/80 via-black/60 to-black/40 sm:to-transparent z-10"></div>
-
-          {/* Luxury Rose Gold Background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-rose-600 via-pink-600 to-purple-700"></div>
+          {/* Background Image */}
+          <Image
+            src={slide.image}
+            alt="Hero background"
+            fill
+            priority={index === 0}
+            sizes="100vw 100vh"
+            className="object-cover"
+            style={{ objectPosition: slide.image.includes("owners.JPG") ? "center 20%" : "center center" }}
+          />
+          {/* Gradient Overlay - Lighter for owners slide */}
+          <div className={`absolute inset-0 z-10 ${
+            slide.image.includes("owners.JPG") 
+              ? "bg-gradient-to-b sm:bg-gradient-to-r from-black/50 via-black/40 to-black/20 sm:to-transparent" 
+              : "bg-gradient-to-b sm:bg-gradient-to-r from-black/80 via-black/60 to-black/40 sm:to-transparent"
+          }`}></div>
         </div>
       ))}
 
