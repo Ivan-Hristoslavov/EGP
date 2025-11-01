@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       .select(
         `
         *,
-        customers!inner(name, email),
+        customers!inner(first_name, last_name, email),
         bookings(service, date, customer_name)
       `,
       )
@@ -46,10 +46,24 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Transform payments to include name field from first_name + last_name
+    const transformedPayments = payments?.map((payment: any) => ({
+      ...payment,
+      customers: payment.customers
+        ? {
+            ...payment.customers,
+            name:
+              payment.customers.first_name && payment.customers.last_name
+                ? `${payment.customers.first_name} ${payment.customers.last_name}`
+                : payment.customers.first_name || payment.customers.last_name || "Unknown Customer",
+          }
+        : null,
+    }));
+
     const totalPages = Math.ceil((totalCount || 0) / limit);
 
     return NextResponse.json({
-      payments,
+      payments: transformedPayments || [],
       pagination: {
         page,
         limit,
@@ -90,7 +104,7 @@ export async function POST(request: NextRequest) {
       // Get customer and booking details
       const { data: customer } = await supabase
         .from("customers")
-        .select("name, email")
+        .select("first_name, last_name, email")
         .eq("id", customer_id)
         .single();
 
@@ -112,6 +126,12 @@ export async function POST(request: NextRequest) {
           { status: 404 },
         );
       }
+
+      // Create customer name from first_name and last_name
+      const customerName =
+        customer.first_name && customer.last_name
+          ? `${customer.first_name} ${customer.last_name}`
+          : customer.first_name || customer.last_name || "Customer";
 
       // Create payment record in database first
       const { data: payment, error: paymentError } = await supabase
@@ -152,7 +172,7 @@ export async function POST(request: NextRequest) {
           customer_id,
           booking_id: booking_id || "",
           payment_id: payment.id,
-          customer_name: customer.name,
+          customer_name: customerName,
           currency,
         },
       });

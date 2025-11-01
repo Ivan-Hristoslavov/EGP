@@ -36,12 +36,25 @@ export const aestheticsColors = {
     metallic: "from-[#B76E79] via-[#E8B4B8] to-[#B76E79]",
   },
 
-  // Neutrals - Soft & Warm (Warm Beige Theme)
+  // Neutrals - Soft & Warm (Warm Beige Theme) - Main Brand Color
   neutral: {
     lightest: "#f7f5f2",   // Warm beige lighter (#ddd5c3 variant)
     light: "#f0ede7",      // Warm beige light
-    DEFAULT: "#ddd5c3",    // Warm beige (primary light theme color)
+    DEFAULT: "#ddd5c3",    // Warm beige (PRIMARY MAIN COLOR - Main brand color)
     dark: "#c9c1b0",       // Warm beige dark
+    darker: "#b5ad9d",     // Warm beige darker
+    darkest: "#9d9585",    // Warm beige darkest
+  },
+  
+  // Main Brand Color Palette (based on #ddd5c3)
+  brand: {
+    lightest: "#f5f2ec",   // Very light beige
+    lighter: "#ebe8df",    // Light beige
+    light: "#ddd5c3",      // Main brand color (same as neutral.DEFAULT)
+    DEFAULT: "#ddd5c3",    // Main brand color
+    dark: "#c9c1b0",       // Dark beige
+    darker: "#b5ad9d",     // Darker beige
+    accent: "#c4b5a0",     // Accent beige for hover states
   },
 
   // Category Colors (для различните услуги)

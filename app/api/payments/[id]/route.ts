@@ -19,7 +19,7 @@ export async function GET(
       .select(
         `
         *,
-        customers!inner(name, email),
+        customers!inner(first_name, last_name, email),
         bookings(service, date)
       `,
       )
@@ -30,10 +30,22 @@ export async function GET(
       return NextResponse.json({ error: "Payment not found" }, { status: 404 });
     }
 
-    return NextResponse.json({
+    // Transform payment to include name field from first_name + last_name
+    const transformedPayment = {
       ...payment,
+      customers: payment.customers
+        ? {
+            ...payment.customers,
+            name:
+              payment.customers.first_name && payment.customers.last_name
+                ? `${payment.customers.first_name} ${payment.customers.last_name}`
+                : payment.customers.first_name || payment.customers.last_name || "Unknown Customer",
+          }
+        : null,
       service: payment.bookings?.service,
-    });
+    };
+
+    return NextResponse.json(transformedPayment);
   } catch (error) {
     console.error("Error fetching payment:", error);
 

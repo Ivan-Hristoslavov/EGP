@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { useAdminProfile } from "@/hooks/useAdminProfile";
 import { useToast } from "@/components/Toast";
 import WorkingHoursManager from "@/components/admin/WorkingHoursManager";
-import { Building2, DollarSign, Clock, Bell, Shield, Settings, Mail, CheckCircle, Save } from "lucide-react";
+import { AdminFAQManager } from "@/components/AdminFAQManager";
+import { Building2, DollarSign, Clock, Bell, Shield, Settings, Mail, CheckCircle, Save, HelpCircle } from "lucide-react";
 
 type SettingsState = {
   // Business Information
@@ -108,7 +109,7 @@ const workingDaysOptions = [
 ];
 
 export default function AdminSettingsPage() {
-  const [activeTab, setActiveTab] = useState<"business" | "pricing" | "hours" | "notifications" | "professional" | "payments" | "email">("business");
+  const [activeTab, setActiveTab] = useState<"business" | "pricing" | "hours" | "notifications" | "professional" | "payments" | "email" | "faq">("business");
   const [settings, setSettings] = useState<SettingsState>(defaultSettings);
   const [isSaving, setIsSaving] = useState(false);
   const { profile, loading } = useAdminProfile();
@@ -160,17 +161,18 @@ export default function AdminSettingsPage() {
     { id: "professional", label: "Professional", icon: Shield },
     { id: "payments", label: "Payments", icon: DollarSign },
     { id: "email", label: "Email", icon: Mail },
+    { id: "faq", label: "FAQ", icon: HelpCircle },
   ];
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-pink-50/50 to-purple-50/50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4">
-            <div className="absolute inset-0 rounded-full border-4 border-rose-200 dark:border-rose-800"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-rose-500 dark:border-t-rose-400 animate-spin"></div>
+          <div className="w-10 h-10 mx-auto mb-4">
+            <div className="absolute inset-0 rounded-full border-2 border-rose-200 dark:border-rose-800"></div>
+            <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-rose-500 dark:border-t-rose-400 animate-spin"></div>
           </div>
-          <p className="text-gray-600 dark:text-gray-300">Loading settings...</p>
+          <p className="text-gray-600 dark:text-gray-300 text-sm">Loading settings...</p>
         </div>
       </div>
     );
@@ -583,6 +585,12 @@ export default function AdminSettingsPage() {
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {activeTab === "faq" && (
+              <div className="space-y-6">
+                <AdminFAQManager />
               </div>
             )}
 

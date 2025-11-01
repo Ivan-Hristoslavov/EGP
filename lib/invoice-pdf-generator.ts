@@ -29,7 +29,7 @@ export function generateInvoicePDF(invoice: Invoice, vatSettings?: { is_enabled:
 
   doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
-  doc.text("Professional Plumbing & Heating Services", spacing.margin, 68);
+  doc.text("Professional Aesthetic Treatments", spacing.margin, 68);
 
   y = 100;
 
@@ -187,7 +187,7 @@ export function generateInvoicePDF(invoice: Invoice, vatSettings?: { is_enabled:
   y += 30;
   
   // Handle multiple service items if manual_description contains multiple lines
-  const serviceText = invoice.booking?.service || invoice.manual_description || "Professional Plumbing Service";
+  const serviceText = invoice.booking?.service || invoice.manual_description || "Professional Aesthetic Treatment";
   const serviceLines = serviceText.split('\n').filter(line => line.trim());
   
   // Debug: Log the service information

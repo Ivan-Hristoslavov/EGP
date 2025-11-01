@@ -92,10 +92,10 @@ export default function Pagination({
             disabled={page === "..." || isLoading}
             className={`px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
               page === currentPage
-                ? "bg-blue-600 text-white border border-blue-600"
+                ? "bg-[#b5ad9d] dark:bg-[#9d9585] text-white border border-[#b5ad9d] dark:border-[#9d9585]"
                 : page === "..."
                 ? "text-gray-400 cursor-default"
-                : "text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+                : "text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-[#ddd5c3] dark:hover:bg-gray-700"
             }`}
           >
             {page}

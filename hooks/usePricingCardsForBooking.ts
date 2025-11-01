@@ -48,7 +48,7 @@ export function usePricingCardsForBooking() {
           name: card.title,
           description: card.subtitle || 'Professional service',
           price: price,
-          icon: '🔧', // Default icon for plumbing services
+          icon: '💆', // Default icon for aesthetic services
           type: 'pricing_card' as const
         };
       });

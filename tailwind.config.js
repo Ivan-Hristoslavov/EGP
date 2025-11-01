@@ -19,9 +19,8 @@ const config = {
         },
       },
       fontFamily: {
-        playfair: ["var(--font-playfair)", "serif"],
-        montserrat: ["var(--font-montserrat)", "sans-serif"],
         sans: ["var(--font-montserrat)", "system-ui", "sans-serif"],
+        montserrat: ["var(--font-montserrat)", "sans-serif"],
         mono: ["var(--font-mono)"],
       },
       backgroundColor: {

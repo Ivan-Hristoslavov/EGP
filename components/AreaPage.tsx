@@ -126,8 +126,8 @@ export function AreaPage({ areaName, postcode, description, localKeywords, nearb
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                   </svg>
                 ),
-                title: `Leak Detection ${areaName}`,
-                description: "Advanced leak detection technology to find hidden water leaks quickly and accurately."
+                title: `Skin Analysis ${areaName}`,
+                description: "Advanced digital skin analysis to assess your skin condition and create a personalized treatment plan."
               },
               {
                 icon: (
@@ -144,8 +144,8 @@ export function AreaPage({ areaName, postcode, description, localKeywords, nearb
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3a2 2 0 002 2h4a2 2 0 002-2v-3M8 14V9a2 2 0 012-2h4a2 2 0 012 2v5M8 14H6a2 2 0 01-2-2V9a2 2 0 012-2h2m8 7h2a2 2 0 002-2V9a2 2 0 00-2-2h-2" />
                   </svg>
                 ),
-                title: `Bathroom Installations ${areaName}`,
-                description: "Complete bathroom renovations and installations for properties in {areaName}."
+                title: `Face Treatments ${areaName}`,
+                description: "Comprehensive facial aesthetic treatments including anti-wrinkle injections, fillers, and skin rejuvenation."
               },
               {
                 icon: (
@@ -153,8 +153,8 @@ export function AreaPage({ areaName, postcode, description, localKeywords, nearb
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                   </svg>
                 ),
-                title: `Boiler Repair ${areaName}`,
-                description: "Gas Safe registered boiler repairs and servicing for {areaName} homes."
+                title: `Body Contouring ${areaName}`,
+                description: "Professional body contouring and fat reduction treatments for {areaName} clients."
               },
               {
                 icon: (
@@ -162,8 +162,8 @@ export function AreaPage({ areaName, postcode, description, localKeywords, nearb
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 ),
-                title: `Drain Unblocking ${areaName}`,
-                description: "Fast and effective drain clearing services using professional equipment."
+                title: `Medical Skin Peels ${areaName}`,
+                description: "Professional medical-grade skin peels for skin renewal and improvement."
               },
               {
                 icon: (
@@ -171,8 +171,8 @@ export function AreaPage({ areaName, postcode, description, localKeywords, nearb
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 ),
-                title: `Pipe Repairs ${areaName}`,
-                description: "Professional pipe repair and replacement services throughout {areaName}."
+                title: `PRP & Exosomes ${areaName}`,
+                description: "Advanced regenerative treatments using PRP and exosome therapy for skin rejuvenation."
               },
             ].map((service, index) => (
               <div key={index} className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-gray-100">

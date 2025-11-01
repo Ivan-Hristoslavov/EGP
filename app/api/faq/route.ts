@@ -1,15 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const supabase = createClient();
+    const { searchParams } = new URL(request.url);
+    const all = searchParams.get("all") === "1";
     
-    const { data: faqItems, error } = await supabase
+    let query = supabase
       .from("faq")
-      .select("*")
-      .eq("is_active", true)
-      .order("order", { ascending: true });
+      .select("*");
+    
+    // If not admin mode, only return active items
+    if (!all) {
+      query = query.eq("is_active", true);
+    }
+    
+    const { data: faqItems, error } = await query.order("order", { ascending: true });
 
     if (error) {
       console.error("Error fetching FAQ items:", error);

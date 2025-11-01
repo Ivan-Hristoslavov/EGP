@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useGallery } from "@/hooks/useGallery";
 import { useGallerySections } from "@/hooks/useGallerySections";
 import { useAreas } from "@/hooks/useAreas";
+import { useServices } from "@/hooks/useServices";
 import { GalleryItem, GallerySection } from "@/types";
 import { useToast, ToastMessages } from "@/components/Toast";
 import { useConfirmation } from "@/hooks/useConfirmation";
@@ -35,6 +36,7 @@ export function AdminGalleryManager({
     deleteGallerySection,
   } = useGallerySections();
   const { areas, loading: areasLoading } = useAreas();
+  const { services, isLoading: servicesLoading } = useServices();
   const { showSuccess, showError } = useToast();
   const { confirm, modalProps } = useConfirmation();
 
@@ -112,6 +114,8 @@ export function AdminGalleryManager({
     location: "",
     completion_date: "",
     section_id: undefined as string | undefined,
+    service_id: undefined as string | undefined,
+    category_id: undefined as string | undefined,
     order: 0,
     is_featured: false,
   };
@@ -126,6 +130,48 @@ export function AdminGalleryManager({
 
   const [formData, setFormData] = useState(defaultItem);
   const [sectionFormData, setSectionFormData] = useState(defaultSection);
+
+  // Group categories by main tab
+  const categoriesByMainTab = useMemo(() => {
+    const grouped: Record<string, Array<{ id: string; name: string; slug: string }>> = {};
+    services.forEach(service => {
+      const mainTabSlug = service.main_tab.slug;
+      const categoryId = service.category.id;
+      if (!grouped[mainTabSlug]) {
+        grouped[mainTabSlug] = [];
+      }
+      const exists = grouped[mainTabSlug].some(cat => cat.id === categoryId);
+      if (!exists) {
+        grouped[mainTabSlug].push({
+          id: service.category.id,
+          name: service.category.name,
+          slug: service.category.slug
+        });
+      }
+    });
+    return grouped;
+  }, [services]);
+
+  // Get services filtered by selected category
+  const filteredServices = useMemo(() => {
+    if (!formData.category_id) return services;
+    return services.filter(service => service.category.id === formData.category_id);
+  }, [services, formData.category_id]);
+
+  // Get main tabs list
+  const mainTabs = useMemo(() => {
+    const tabs = new Map<string, { id: string; name: string; slug: string }>();
+    services.forEach(service => {
+      if (!tabs.has(service.main_tab.slug)) {
+        tabs.set(service.main_tab.slug, {
+          id: service.main_tab.id,
+          name: service.main_tab.name,
+          slug: service.main_tab.slug
+        });
+      }
+    });
+    return Array.from(tabs.values());
+  }, [services]);
 
   const handleImageUpload = async (file: File, type: "before" | "after") => {
     try {
@@ -473,6 +519,8 @@ export function AdminGalleryManager({
       location: item.location || "",
       completion_date: item.completion_date || "",
       section_id: item.section_id,
+      service_id: item.service_id,
+      category_id: item.category_id,
       order: item.order,
       is_featured: item.is_featured || false,
     });
@@ -615,16 +663,16 @@ export function AdminGalleryManager({
           </button>
         </div>
 
-        {/* Add New Item Button */}
+        {/* Add New Transformation Button */}
         {activeTab === "items" && (
           <button
             onClick={handleAdd}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
+            className="px-6 py-2.5 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 hover:from-rose-600 hover:via-pink-600 hover:to-purple-700 text-white rounded-lg transition-all shadow-lg hover:shadow-xl flex items-center gap-2 text-sm font-semibold"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            Add New Item
+            Add Transformation
           </button>
         )}
       </div>
@@ -720,8 +768,20 @@ export function AdminGalleryManager({
                     )}
                   </div>
                 </div>
-                {/* Project Type & Location */}
+                {/* Service & Category Badges */}
                 <div className="flex flex-wrap gap-2 mb-2">
+                  {item.category && (
+                    <span className="inline-flex items-center px-2.5 py-1 bg-gradient-to-r from-rose-500/10 to-pink-500/10 dark:from-rose-500/20 dark:to-pink-500/20 text-rose-700 dark:text-rose-300 border border-rose-300/50 dark:border-rose-700/50 rounded-full text-xs font-semibold">
+                      <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
+                      {item.category.name}
+                    </span>
+                  )}
+                  {item.service && (
+                    <span className="inline-flex items-center px-2.5 py-1 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 dark:from-purple-500/20 dark:to-indigo-500/20 text-purple-700 dark:text-purple-300 border border-purple-300/50 dark:border-purple-700/50 rounded-full text-xs font-medium">
+                      <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                      {item.service.name}
+                    </span>
+                  )}
                   {item.project_type && (
                     <span className="inline-flex items-center px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium">
                       <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6" /></svg>
@@ -758,149 +818,103 @@ export function AdminGalleryManager({
 
           {/* Add/Edit Form */}
           {showAddForm && (
-            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-              <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                {editingItem ? "Edit Gallery Item" : "Add New Gallery Item"}
-              </h4>
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-xl">
+              <div className="mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+                <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
+                  <svg className="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  {editingItem ? "Edit Transformation" : "Add New Before & After"}
+                </h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {editingItem ? "Update transformation details and images" : "Create a new before & after transformation showcase"}
+                </p>
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Left Column */}
+                {/* Left Column - Treatment Information */}
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Title *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.title}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          title: e.target.value,
-                        }))
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500"
-                      placeholder="e.g., Bathroom Renovation in Clapham"
-                    />
+                  <div className="pb-4 border-b border-gray-200 dark:border-gray-700">
+                    <h5 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                      <svg className="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                      </svg>
+                      Treatment Details
+                    </h5>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Section
+                      Treatment Category *
                     </label>
                     <select
-                      value={formData.section_id || ""}
+                      value={formData.category_id || ""}
+                      onChange={(e) => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          category_id: e.target.value || undefined,
+                          service_id: undefined, // Reset service when category changes
+                        }));
+                      }}
+                      className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all"
+                      disabled={servicesLoading}
+                      required
+                    >
+                      <option value="">Select treatment area...</option>
+                      {mainTabs.map(mainTab => (
+                        categoriesByMainTab[mainTab.slug] && categoriesByMainTab[mainTab.slug].length > 0 && (
+                          <optgroup key={mainTab.slug} label={mainTab.name}>
+                            {categoriesByMainTab[mainTab.slug].map((category) => (
+                              <option key={category.id} value={category.id}>
+                                {category.name}
+                              </option>
+                            ))}
+                          </optgroup>
+                        )
+                      ))}
+                    </select>
+                    <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                      Choose the treatment area (Face, Body, Lips, etc.)
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Specific Treatment *
+                    </label>
+                    <select
+                      value={formData.service_id || ""}
                       onChange={(e) =>
                         setFormData((prev) => ({
                           ...prev,
-                          section_id: e.target.value || undefined,
+                          service_id: e.target.value || undefined,
                         }))
                       }
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all"
+                      disabled={servicesLoading || !formData.category_id}
+                      required
                     >
-                      <option value="">No specific section</option>
-                      {gallerySections.map((section) => (
-                        <option key={section.id} value={section.id}>
-                          {section.title}
+                      <option value="">Select specific treatment...</option>
+                      {filteredServices.map((service) => (
+                        <option key={service.id} value={service.id}>
+                          {service.name}
                         </option>
                       ))}
                     </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Project Type
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.project_type}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          project_type: e.target.value,
-                        }))
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500"
-                      placeholder="e.g., Bathroom, Kitchen, Leak Repair"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Location
-                    </label>
-                    
-                    {/* Location Type Selection */}
-                    <div className="mb-3">
-                      <div className="flex space-x-4">
-                        <label className="flex items-center">
-                          <input
-                            type="radio"
-                            name="locationType"
-                            checked={!useCustomLocation}
-                            onChange={() => {
-                              setUseCustomLocation(false);
-                              setFormData((prev) => ({ ...prev, location: "" }));
-                            }}
-                            className="mr-2 text-blue-600 focus:ring-blue-500"
-                          />
-                          <span className="text-sm text-gray-700 dark:text-gray-300">Select from areas</span>
-                        </label>
-                        <label className="flex items-center">
-                          <input
-                            type="radio"
-                            name="locationType"
-                            checked={useCustomLocation}
-                            onChange={() => {
-                              setUseCustomLocation(true);
-                              setFormData((prev) => ({ ...prev, location: "" }));
-                            }}
-                            className="mr-2 text-blue-600 focus:ring-blue-500"
-                          />
-                          <span className="text-sm text-gray-700 dark:text-gray-300">Custom location</span>
-                        </label>
-                      </div>
-                    </div>
-
-                    {/* Location Input */}
-                    {!useCustomLocation ? (
-                      <select
-                        value={formData.location}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            location: e.target.value,
-                          }))
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500"
-                        disabled={areasLoading}
-                      >
-                        <option value="">Select an area...</option>
-                        {areas.map((area) => (
-                          <option key={area.id} value={area.name}>
-                            {area.name} ({area.postcode})
-                          </option>
-                        ))}
-                      </select>
+                    {!formData.category_id ? (
+                      <p className="mt-1.5 text-xs text-amber-600 dark:text-amber-400">
+                        Please select a treatment category first
+                      </p>
                     ) : (
-                      <input
-                        type="text"
-                        value={formData.location}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            location: e.target.value,
-                          }))
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500"
-                        placeholder="e.g., Custom location name"
-                      />
+                      <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                        Select the specific treatment performed
+                      </p>
                     )}
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Completion Date
+                      Treatment Date
                     </label>
                     <input
                       type="date"
@@ -911,11 +925,117 @@ export function AdminGalleryManager({
                           completion_date: e.target.value,
                         }))
                       }
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all"
                     />
+                    <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                      Date when the treatment was performed
+                    </p>
                   </div>
 
-                  <div className="flex items-center">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Gallery Section
+                    </label>
+                    <select
+                      value={formData.section_id || ""}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          section_id: e.target.value || undefined,
+                        }))
+                      }
+                      className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all"
+                    >
+                      <option value="">General Gallery</option>
+                      {gallerySections.map((section) => (
+                        <option key={section.id} value={section.id}>
+                          {section.title}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                      Optional: Organize into a specific gallery section
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right Column - Description & Media */}
+                <div className="space-y-4">
+                  <div className="pb-4 border-b border-gray-200 dark:border-gray-700">
+                    <h5 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                      <svg className="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      Transformation Details
+                    </h5>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Transformation Title *
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.title}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          title: e.target.value,
+                        }))
+                      }
+                      className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all"
+                      placeholder="e.g., Natural Lip Enhancement Results"
+                      required
+                    />
+                    <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                      A brief title describing the transformation
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Description
+                    </label>
+                    <textarea
+                      value={formData.description || ""}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          description: e.target.value,
+                        }))
+                      }
+                      rows={4}
+                      className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all resize-none"
+                      placeholder="Describe the treatment results, client experience, or any notable details about this transformation..."
+                    />
+                    <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                      Optional: Add details about the treatment and results
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Treatment Area / Notes
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.project_type}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          project_type: e.target.value,
+                        }))
+                      }
+                      className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all"
+                      placeholder="e.g., Upper Lip, Cheek Enhancement, Jawline Definition"
+                    />
+                    <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                      Optional: Specify the exact treatment area or add notes
+                    </p>
+                  </div>
+
+
+                  <div className="flex items-center p-3 bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 rounded-lg border border-rose-200 dark:border-rose-800">
                     <input
                       type="checkbox"
                       id="is_featured"
@@ -926,13 +1046,16 @@ export function AdminGalleryManager({
                           is_featured: e.target.checked,
                         }))
                       }
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="mr-3 w-4 h-4 text-rose-600 focus:ring-rose-500 border-gray-300 rounded"
                     />
                     <label
                       htmlFor="is_featured"
-                      className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
+                      className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2"
                     >
-                      Featured Item
+                      <svg className="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                      </svg>
+                      Feature this transformation
                     </label>
                   </div>
                 </div>

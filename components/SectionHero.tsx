@@ -137,7 +137,7 @@ export function SectionHero() {
         <div className="text-center mb-8">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 animate-fade-in-up">
             <span className="text-white">Professional</span>
-            <span className="block text-blue-400 mt-1">Plumbing Services</span>
+            <span className="block text-blue-400 mt-1">Aesthetic Treatments</span>
           </h1>
 
           <p

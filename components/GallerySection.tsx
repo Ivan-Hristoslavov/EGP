@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useGallery } from "@/hooks/useGallery";
 import { useGallerySections } from "@/hooks/useGallerySections";
 
@@ -20,21 +20,75 @@ export function GallerySection() {
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !containerRef.current) return;
+    e.preventDefault();
     
     const rect = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const percentage = (x / rect.width) * 100;
-    setSliderPosition(Math.min(Math.max(percentage, 0), 100));
+    const mouseX = e.clientX - rect.left;
+    const percent = (mouseX / rect.width) * 100;
+    
+    // Constrain between 0% and 100% to allow full range dragging
+    const newPosition = Math.max(0, Math.min(100, percent));
+    setSliderPosition(newPosition);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging || !containerRef.current) return;
+    e.preventDefault();
     
     const rect = containerRef.current.getBoundingClientRect();
-    const x = e.touches[0].clientX - rect.left;
-    const percentage = (x / rect.width) * 100;
-    setSliderPosition(Math.min(Math.max(percentage, 0), 100));
+    const touchX = e.touches[0].clientX - rect.left;
+    const percent = (touchX / rect.width) * 100;
+    
+    // Constrain between 0% and 100% to allow full range dragging
+    const newPosition = Math.max(0, Math.min(100, percent));
+    setSliderPosition(newPosition);
   };
+
+  // Global mouse move handler for dragging outside container
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (!containerRef.current) return;
+      
+      const rect = containerRef.current.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const percent = (mouseX / rect.width) * 100;
+      const newPosition = Math.max(0, Math.min(100, percent));
+      setSliderPosition(newPosition);
+    };
+
+    const handleGlobalMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    const handleGlobalTouchMove = (e: TouchEvent) => {
+      if (!containerRef.current || !e.touches[0]) return;
+      e.preventDefault();
+      
+      const rect = containerRef.current.getBoundingClientRect();
+      const touchX = e.touches[0].clientX - rect.left;
+      const percent = (touchX / rect.width) * 100;
+      const newPosition = Math.max(0, Math.min(100, percent));
+      setSliderPosition(newPosition);
+    };
+
+    const handleGlobalTouchEnd = () => {
+      setIsDragging(false);
+    };
+
+    window.addEventListener('mousemove', handleGlobalMouseMove);
+    window.addEventListener('mouseup', handleGlobalMouseUp);
+    window.addEventListener('touchmove', handleGlobalTouchMove, { passive: false });
+    window.addEventListener('touchend', handleGlobalTouchEnd);
+
+    return () => {
+      window.removeEventListener('mousemove', handleGlobalMouseMove);
+      window.removeEventListener('mouseup', handleGlobalMouseUp);
+      window.removeEventListener('touchmove', handleGlobalTouchMove);
+      window.removeEventListener('touchend', handleGlobalTouchEnd);
+    };
+  }, [isDragging]);
 
   const nextSlide = () => {
     setCurrentIndex((prev) => (prev + 1) % filteredItems.length);
@@ -157,11 +211,30 @@ export function GallerySection() {
                 ref={containerRef}
                 className="relative w-full h-full overflow-hidden cursor-col-resize select-none"
                 onMouseMove={handleMouseMove}
-                onMouseDown={() => setIsDragging(true)}
+                onMouseDown={(e) => {
+                  // Allow clicking anywhere on the container to set position
+                  if (!containerRef.current) return;
+                  const rect = containerRef.current.getBoundingClientRect();
+                  const mouseX = e.clientX - rect.left;
+                  const percent = (mouseX / rect.width) * 100;
+                  const newPosition = Math.max(0, Math.min(100, percent));
+                  setSliderPosition(newPosition);
+                  setIsDragging(true);
+                }}
                 onMouseUp={() => setIsDragging(false)}
                 onMouseLeave={() => setIsDragging(false)}
+                onTouchStart={(e) => {
+                  // Allow touching anywhere on the container to set position
+                  if (!containerRef.current) return;
+                  const touch = e.touches[0];
+                  const rect = containerRef.current.getBoundingClientRect();
+                  const touchX = touch.clientX - rect.left;
+                  const percent = (touchX / rect.width) * 100;
+                  const newPosition = Math.max(0, Math.min(100, percent));
+                  setSliderPosition(newPosition);
+                  setIsDragging(true);
+                }}
                 onTouchMove={handleTouchMove}
-                onTouchStart={() => setIsDragging(true)}
                 onTouchEnd={() => setIsDragging(false)}
               >
                 {/* After Image (Background) */}
@@ -195,15 +268,30 @@ export function GallerySection() {
 
                 {/* Slider Line */}
                 <div 
-                  className="absolute top-0 bottom-0 w-1 bg-white shadow-lg z-10 cursor-col-resize"
+                  className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg z-10 pointer-events-none"
                   style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}
+                />
+
+                {/* Slider Handle */}
+                <div 
+                  className="absolute top-1/2 w-12 h-12 bg-white rounded-full shadow-xl flex items-center justify-center cursor-col-resize border-4 border-blue-500 z-10"
+                  style={{ 
+                    left: `${sliderPosition}%`, 
+                    transform: 'translate(-50%, -50%)',
+                    transition: isDragging ? 'none' : 'left 0.3s ease'
+                  }}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    setIsDragging(true);
+                  }}
+                  onTouchStart={(e) => {
+                    e.preventDefault();
+                    setIsDragging(true);
+                  }}
                 >
-                  {/* Slider Handle */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-xl flex items-center justify-center cursor-col-resize border-4 border-blue-500">
-                    <div className="flex space-x-1">
-                      <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
-                      <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
-                    </div>
+                  <div className="flex space-x-1">
+                    <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
+                    <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
                   </div>
                 </div>
 

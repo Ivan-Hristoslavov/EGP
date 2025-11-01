@@ -17,7 +17,7 @@ export default function FooterAesthetics() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative bg-warm-beige dark:bg-gray-900 text-gray-900 dark:text-gray-300">
+    <footer className="relative bg-[#ddd5c3] dark:bg-gray-900 text-gray-900 dark:text-gray-300">
       <div className="relative">
         {/* Main Footer Content */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
@@ -69,7 +69,7 @@ export default function FooterAesthetics() {
                 <li>
                   <Link 
                     href="/services" 
-                    className="text-gray-700 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm"
+                    className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
                   >
                     All Treatments
                   </Link>
@@ -77,7 +77,7 @@ export default function FooterAesthetics() {
                 <li>
                   <Link 
                     href="/services/face" 
-                    className="text-gray-700 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm"
+                    className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
                   >
                     Face Treatments
                   </Link>
@@ -85,7 +85,7 @@ export default function FooterAesthetics() {
                 <li>
                   <Link 
                     href="/services/anti-wrinkle" 
-                    className="text-gray-700 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm"
+                    className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
                   >
                     Anti-Wrinkle Injections
                   </Link>
@@ -93,7 +93,7 @@ export default function FooterAesthetics() {
                 <li>
                   <Link 
                     href="/services/fillers" 
-                    className="text-gray-700 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm"
+                    className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
                   >
                     Dermal Fillers
                   </Link>
@@ -101,7 +101,7 @@ export default function FooterAesthetics() {
                 <li>
                   <Link 
                     href="/services/body" 
-                    className="text-gray-700 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm"
+                    className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
                   >
                     Body Treatments
                   </Link>
@@ -109,7 +109,7 @@ export default function FooterAesthetics() {
                 <li>
                   <Link 
                     href="/about" 
-                    className="text-gray-700 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm"
+                    className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
                   >
                     About Us
                   </Link>
@@ -117,7 +117,7 @@ export default function FooterAesthetics() {
                 <li>
                   <Link 
                     href="/blog" 
-                    className="text-gray-700 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm"
+                    className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
                   >
                     Blog
                   </Link>
@@ -134,7 +134,7 @@ export default function FooterAesthetics() {
                 <li>
                   <a 
                     href={`tel:${siteConfig.contact.phone}`}
-                    className="flex items-center gap-3 text-gray-700 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm group"
+                    className="flex items-center gap-3 text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm group"
                   >
                     <Phone className="w-5 h-5 flex-shrink-0 text-gray-600 dark:text-gray-500" />
                     <span>{siteConfig.contact.phone}</span>
@@ -143,7 +143,7 @@ export default function FooterAesthetics() {
                 <li>
                   <a 
                     href={`mailto:${siteConfig.contact.email}`}
-                    className="flex items-center gap-3 text-gray-700 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm group"
+                    className="flex items-center gap-3 text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm group"
                   >
                     <Mail className="w-5 h-5 flex-shrink-0 text-gray-600 dark:text-gray-500" />
                     <span>{siteConfig.contact.email}</span>
@@ -236,7 +236,7 @@ export default function FooterAesthetics() {
                   <li>
                     <Link 
                       href="/terms" 
-                      className="text-xs text-gray-700 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                      className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors"
                     >
                       Terms & Conditions
                     </Link>
@@ -244,7 +244,7 @@ export default function FooterAesthetics() {
                   <li>
                     <Link 
                       href="/privacy" 
-                      className="text-xs text-gray-700 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                      className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors"
                     >
                       Privacy Policy
                     </Link>
@@ -273,7 +273,7 @@ export default function FooterAesthetics() {
                   href="https://serenity.rapid-frame.co.uk/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors font-semibold"
+                  className="text-[#9d9585] dark:text-[#c9c1b0] hover:text-[#b5ad9d] dark:hover:text-[#ddd5c3] transition-colors font-semibold"
                 >
                   Serenity Web Studio
                 </a>
