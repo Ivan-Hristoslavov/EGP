@@ -8,6 +8,29 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get("category");
     const slug = searchParams.get("slug");
 
+    // Handle slug lookup (single condition)
+    if (slug) {
+      let singleQuery = supabase
+        .from("conditions")
+        .select("*")
+        .eq("slug", slug)
+        .eq("is_active", true)
+        .single();
+
+      const { data, error } = await singleQuery;
+
+      if (error) {
+        console.error("Error fetching condition by slug:", error);
+        return NextResponse.json(
+          { error: "Failed to fetch condition" },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({ condition: data });
+    }
+
+    // Handle multiple conditions
     let query = supabase
       .from("conditions")
       .select("*")
@@ -18,13 +41,8 @@ export async function GET(request: NextRequest) {
       query = query.eq("category", category);
     }
 
-    // Filter by slug if provided (for single condition lookup)
-    if (slug) {
-      query = query.eq("slug", slug).single();
-    } else {
-      // Order by display_order if getting all conditions
-      query = query.order("display_order", { ascending: true });
-    }
+    // Order by display_order
+    query = query.order("display_order", { ascending: true });
 
     const { data, error } = await query;
 
@@ -36,7 +54,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(slug ? { condition: data } : { conditions: data });
+    return NextResponse.json({ conditions: data });
   } catch (error) {
     console.error("Error in conditions GET:", error);
     return NextResponse.json(

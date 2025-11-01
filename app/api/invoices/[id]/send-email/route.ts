@@ -76,7 +76,7 @@ export async function POST(
         const paymentLinkData = await createPaymentLink({
           amount: invoice.total_amount,
           currency: currency,
-          description: `Invoice ${invoice.invoice_number} - ${invoice.booking?.service || invoice.manual_service || 'Plumbing Service'}`,
+          description: `Invoice ${invoice.invoice_number} - ${invoice.booking?.service || invoice.manual_service || 'Aesthetic Treatment'}`,
           customerEmail: invoice.customer.email,
           metadata: {
             invoice_id: invoice.id,
@@ -319,7 +319,7 @@ function generateEmailBody(invoice: any, paymentLink: string | null, hasAttachme
   return `
 Dear ${customerName},
 
-Thank you for choosing ${invoice.company_name} for your plumbing needs.
+Thank you for choosing ${invoice.company_name} for your aesthetic treatment.
 
 Please find attached your invoice PDF and details for the services provided:
 
@@ -327,7 +327,7 @@ Invoice Details:
 - Invoice Number: ${invoice.invoice_number}
 - Invoice Date: ${invoiceDate}
 - Due Date: ${dueDate}
-- Service: ${invoice.booking?.service || invoice.manual_service || 'Plumbing Service'}
+- Service: ${invoice.booking?.service || invoice.manual_service || 'Aesthetic Treatment'}
 - Total Amount: ${currencySymbol}${invoice.total_amount.toFixed(2)}
 
 ${invoice.notes ? `Additional Notes:\n${invoice.notes}\n\n` : ''}
@@ -395,13 +395,13 @@ function generateEmailHtml(invoice: any, paymentLink: string | null, hasAttachme
 <body>
     <div class="header">
         <h1>${invoice.company_name}</h1>
-        <p>Professional Plumbing Services</p>
+        <p>Professional Aesthetic Treatments</p>
     </div>
     
     <div class="content">
         <h2>Dear ${customerName},</h2>
         
-        <p>Thank you for choosing ${invoice.company_name} for your plumbing needs.</p>
+        <p>Thank you for choosing ${invoice.company_name} for your aesthetic treatment.</p>
         
         <p>Please find your invoice PDF attached and details below:</p>
         

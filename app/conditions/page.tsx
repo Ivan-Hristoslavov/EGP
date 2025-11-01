@@ -136,16 +136,6 @@ function ConditionsPageContent() {
               </p>
             </div>
 
-            {/* Details */}
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                Treatment Details
-              </h3>
-              <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                {condition.details}
-              </p>
-            </div>
-
             {/* Treatments */}
             {condition.treatments && condition.treatments.length > 0 && (
               <div>
@@ -159,25 +149,6 @@ function ConditionsPageContent() {
                       <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                       <span className="text-gray-700 dark:text-gray-300">{treatment}</span>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Severity Levels */}
-            {condition.severity && condition.severity.length > 0 && (
-              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6 border-l-4 border-blue-500">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Severity Levels
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {condition.severity.map((level, index) => (
-                    <span key={index} className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full text-sm">
-                      {level}
-                    </span>
                   ))}
                 </div>
               </div>

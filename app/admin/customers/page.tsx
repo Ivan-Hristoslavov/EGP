@@ -83,15 +83,28 @@ export default function CustomersPage() {
         console.log("Loaded customers:", data);
         const fetchedCustomers = data.customers || [];
         
+        // Transform API response to match Customer type (combine first_name + last_name into name)
+        const transformedCustomers = fetchedCustomers.map((customer: any) => ({
+          id: customer.id,
+          name: `${customer.first_name || ''} ${customer.last_name || ''}`.trim() || 'Unnamed Customer',
+          email: customer.email || '',
+          phone: customer.phone || '',
+          address: customer.address || '',
+          postcode: customer.postcode || '',
+          city: customer.city || '',
+          created_at: customer.created_at || '',
+          updated_at: customer.updated_at || '',
+        }));
+        
         // Use dummy data if no real customers exist
-        if (fetchedCustomers.length === 0) {
+        if (transformedCustomers.length === 0) {
           console.log("No customers found, using dummy data");
           setCustomers(DUMMY_CUSTOMERS);
           setTotalPages(1);
           setTotalCount(DUMMY_CUSTOMERS.length);
           setCurrentPage(1);
         } else {
-          setCustomers(fetchedCustomers);
+          setCustomers(transformedCustomers);
           setTotalPages(data.pagination?.totalPages || 1);
           setTotalCount(data.pagination?.totalCount || 0);
           setCurrentPage(data.pagination?.page || 1);

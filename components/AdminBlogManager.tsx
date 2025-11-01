@@ -260,24 +260,24 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 10;
 
-  const defaultPost = {
+  const defaultPost: Omit<BlogPost, 'id' | 'created_at' | 'updated_at'> = {
     title: "",
     slug: "",
-    excerpt: "",
+    excerpt: null,
     content: "",
     category: "General",
-    featured_image_url: "",
+    featured_image_url: null,
     featured: false,
     is_published: false,
     published_at: null,
     read_time_minutes: 5,
-    seo_title: "",
-    seo_description: "",
+    seo_title: null,
+    seo_description: null,
     author_name: "EGP Aesthetics Team",
     display_order: 0,
   };
 
-  const [formData, setFormData] = useState(defaultPost);
+  const [formData, setFormData] = useState<Omit<BlogPost, 'id' | 'created_at' | 'updated_at'>>(defaultPost);
 
   useEffect(() => {
     if (triggerModal) {
@@ -314,40 +314,42 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
 
   const handleSubmit = async () => {
     if (!formData.title || !formData.slug || !formData.content) {
-      showError("Please fill in all required fields (Title, Slug, Content)");
+      showError("Validation Error", "Please fill in all required fields (Title, Slug, Content)");
       return;
     }
 
     try {
       if (editingPost) {
         await updatePost(editingPost.id, formData);
-        showSuccess("Blog post updated successfully!");
+        showSuccess("Success", "Blog post updated successfully!");
       } else {
         await addPost(formData);
-        showSuccess("Blog post created successfully!");
+        showSuccess("Success", "Blog post created successfully!");
       }
       setShowModal(false);
       setEditingPost(null);
       setFormData(defaultPost);
     } catch (err) {
-      showError(err instanceof Error ? err.message : "Failed to save blog post");
+      showError("Error", err instanceof Error ? err.message : "Failed to save blog post");
     }
   };
 
   const handleDelete = async (post: BlogPost) => {
-    const confirmed = await confirm({
-      title: "Delete Blog Post",
-      message: `Are you sure you want to delete "${post.title}"? This action cannot be undone.`,
-    });
-
-    if (confirmed) {
-      try {
-        await deletePost(post.id);
-        showSuccess("Blog post deleted successfully!");
-      } catch (err) {
-        showError(err instanceof Error ? err.message : "Failed to delete blog post");
+    await confirm(
+      {
+        title: "Delete Blog Post",
+        message: `Are you sure you want to delete "${post.title}"? This action cannot be undone.`,
+        isDestructive: true,
+      },
+      async () => {
+        try {
+          await deletePost(post.id);
+          showSuccess("Success", "Blog post deleted successfully!");
+        } catch (err) {
+          showError("Error", err instanceof Error ? err.message : "Failed to delete blog post");
+        }
       }
-    }
+    );
   };
 
   const paginatedPosts = posts.slice(
@@ -479,6 +481,8 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
               <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
+                totalCount={posts.length}
+                limit={postsPerPage}
                 onPageChange={setCurrentPage}
               />
             </div>

@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333;">Payment Request</h2>
         
-        <p>Dear ${customer.name},</p>
+        <p>Dear ${customerName},</p>
         
         <p>We hope this email finds you well. We have prepared a secure payment link for your convenience.</p>
         
