@@ -6,310 +6,31 @@ import { Suspense } from 'react';
 import { siteConfig } from "@/config/site";
 import { Search, Filter, Grid, List, ArrowLeft, Info, Plus, Clock, CheckCircle } from "lucide-react";
 import Link from 'next/link';
+import { useConditions } from "@/hooks/useConditions";
+import type { Condition } from "@/hooks/useConditions";
 
-// Conditions data with detailed information
-const conditionsData = {
-  // FACE CONDITIONS
-  'acne-acne-scarring': {
-    name: 'Acne & Acne Scarring',
-    category: 'Face',
-    description: 'Comprehensive treatment for active acne and scar reduction',
-    details: 'Our advanced acne treatments combine medical-grade products with professional techniques to clear active breakouts and reduce the appearance of acne scars. We offer various approaches including chemical peels, microneedling, and laser treatments.',
-    treatments: ['Chemical Peels', 'Microneedling', 'Laser Therapy', 'Medical Skincare'],
-    severity: ['Mild', 'Moderate', 'Severe'],
-    duration: '60-90 minutes',
-    sessions: '3-6 sessions'
-  },
-  'rosacea': {
-    name: 'Rosacea',
-    category: 'Face',
-    description: 'Specialized treatment for rosacea and facial redness',
-    details: 'Rosacea treatment focuses on reducing facial redness, inflammation, and visible blood vessels. Our gentle yet effective treatments help calm irritated skin and improve overall complexion.',
-    treatments: ['Laser Therapy', 'Gentle Chemical Peels', 'Medical Skincare', 'Light Therapy'],
-    severity: ['Mild', 'Moderate'],
-    duration: '45-60 minutes',
-    sessions: '4-8 sessions'
-  },
-  'hyperpigmentation-melasma': {
-    name: 'Hyperpigmentation & Melasma',
-    category: 'Face',
-    description: 'Advanced treatments for dark spots and uneven skin tone',
-    details: 'Hyperpigmentation treatments target dark spots, age spots, and melasma using advanced lightening agents, chemical peels, and laser technology to achieve even, radiant skin tone.',
-    treatments: ['Chemical Peels', 'Laser Therapy', 'Medical Skincare', 'Microneedling'],
-    severity: ['Mild', 'Moderate', 'Severe'],
-    duration: '45-90 minutes',
-    sessions: '4-10 sessions'
-  },
-  'barcode-lines-around-lips': {
-    name: 'Barcode Lines Around Lips',
-    category: 'Face',
-    description: 'Treatment for vertical lines around the mouth area',
-    details: 'Barcode lines around the lips are treated with targeted botulinum toxin injections to smooth the vertical lines that form around the mouth, creating a more youthful appearance.',
-    treatments: ['Anti-Wrinkle Injections', 'Dermal Fillers', 'Laser Therapy'],
-    severity: ['Mild', 'Moderate'],
-    duration: '30 minutes',
-    sessions: '1-2 sessions'
-  },
-  'bruxism': {
-    name: 'Bruxism (Teeth Grinding)',
-    category: 'Face',
-    description: 'Treatment for teeth grinding and jaw tension',
-    details: 'Bruxism treatment uses botulinum toxin injections to relax the masseter muscles, reducing teeth grinding, jaw clenching, and associated pain while protecting your teeth.',
-    treatments: ['Anti-Wrinkle Injections', 'Muscle Relaxation Therapy'],
-    severity: ['Mild', 'Moderate', 'Severe'],
-    duration: '45 minutes',
-    sessions: '2-3 sessions'
-  },
-  'dark-under-eye-circles': {
-    name: 'Dark Under-Eye Circles',
-    category: 'Face',
-    description: 'Specialized treatment for under-eye dark circles and hollows',
-    details: 'Dark under-eye circles are treated using a combination of dermal fillers, specialized skincare, and sometimes laser therapy to brighten the eye area and reduce shadows.',
-    treatments: ['Tear Trough Fillers', 'Medical Skincare', 'Laser Therapy', 'Microneedling'],
-    severity: ['Mild', 'Moderate'],
-    duration: '60 minutes',
-    sessions: '2-4 sessions'
-  },
-  'double-chin': {
-    name: 'Double Chin',
-    category: 'Face',
-    description: 'Non-surgical treatment for chin and jawline contouring',
-    details: 'Double chin treatment uses advanced techniques including fat-dissolving injections and skin tightening to create a more defined jawline and reduce excess fat under the chin.',
-    treatments: ['Fat Dissolving Injections', 'Skin Tightening', 'Dermal Fillers', 'Ultrasound Therapy'],
-    severity: ['Mild', 'Moderate'],
-    duration: '45-60 minutes',
-    sessions: '2-4 sessions'
-  },
-  'nasolabial-folds': {
-    name: 'Nasolabial Folds',
-    category: 'Face',
-    description: 'Treatment for lines extending from nose to mouth corners',
-    details: 'Nasolabial folds are treated with dermal fillers to smooth the lines that extend from the nose to the corners of the mouth, restoring youthful facial contours.',
-    treatments: ['Dermal Fillers', 'Skin Tightening', 'Chemical Peels'],
-    severity: ['Mild', 'Moderate', 'Severe'],
-    duration: '45 minutes',
-    sessions: '1-2 sessions'
-  },
-  'shadows-around-nasolabial-folds': {
-    name: 'Shadows Around Nasolabial Folds',
-    category: 'Face',
-    description: 'Treatment for shadowing and hollowing in the mid-face area',
-    details: 'Shadows around nasolabial folds are addressed using strategic dermal filler placement to restore volume and eliminate the appearance of hollowing in the mid-face area.',
-    treatments: ['Dermal Fillers', 'Skin Boosters', 'Laser Therapy'],
-    severity: ['Mild', 'Moderate'],
-    duration: '45-60 minutes',
-    sessions: '1-2 sessions'
-  },
-  'under-eye-hollows': {
-    name: 'Under-Eye Hollows',
-    category: 'Face',
-    description: 'Treatment for under-eye hollows and tear troughs',
-    details: 'Under-eye hollows are treated with specialized tear trough fillers to restore volume and eliminate the sunken appearance, creating a more refreshed and youthful look.',
-    treatments: ['Tear Trough Fillers', 'Skin Boosters', 'Laser Therapy'],
-    severity: ['Mild', 'Moderate', 'Severe'],
-    duration: '60 minutes',
-    sessions: '1-2 sessions'
-  },
-  'eye-bags': {
-    name: 'Eye Bags',
-    category: 'Face',
-    description: 'Treatment for under-eye puffiness and bags',
-    details: 'Eye bags are treated using a combination of dermal fillers to smooth the area and sometimes surgical techniques to remove excess skin and fat for a more refreshed appearance.',
-    treatments: ['Dermal Fillers', 'Skin Tightening', 'Laser Therapy'],
-    severity: ['Mild', 'Moderate'],
-    duration: '45-60 minutes',
-    sessions: '1-2 sessions'
-  },
-  'flat-cheeks': {
-    name: 'Flat Cheeks',
-    category: 'Face',
-    description: 'Cheek enhancement and volume restoration',
-    details: 'Flat cheeks are enhanced using dermal fillers to restore volume and create more defined, youthful cheekbones and mid-face contours.',
-    treatments: ['Cheek Fillers', 'Skin Tightening', 'Laser Therapy'],
-    severity: ['Mild', 'Moderate', 'Severe'],
-    duration: '60 minutes',
-    sessions: '1-2 sessions'
-  },
-  'flat-pebble-chin': {
-    name: 'Flat / Pebble Chin',
-    category: 'Face',
-    description: 'Chin enhancement and contouring treatment',
-    details: 'Flat or pebble chin is enhanced using dermal fillers or botulinum toxin injections to create better chin projection and smoother texture.',
-    treatments: ['Chin Fillers', 'Anti-Wrinkle Injections', 'Skin Smoothing'],
-    severity: ['Mild', 'Moderate'],
-    duration: '45 minutes',
-    sessions: '1-2 sessions'
-  },
-  'gummy-smile': {
-    name: 'Gummy Smile',
-    category: 'Face',
-    description: 'Treatment to reduce excessive gum exposure when smiling',
-    details: 'Gummy smile is treated with botulinum toxin injections to relax the upper lip muscles, reducing excessive gum exposure and creating a more balanced smile.',
-    treatments: ['Anti-Wrinkle Injections', 'Muscle Relaxation'],
-    severity: ['Mild', 'Moderate'],
-    duration: '30 minutes',
-    sessions: '1-2 sessions'
-  },
-  'heavy-lower-face': {
-    name: 'Heavy Lower Face',
-    category: 'Face',
-    description: 'Lower face contouring and lifting treatment',
-    details: 'Heavy lower face is addressed using a combination of dermal fillers and botulinum toxin injections to create better definition and lift in the lower face area.',
-    treatments: ['Jawline Fillers', 'Anti-Wrinkle Injections', 'Skin Tightening'],
-    severity: ['Mild', 'Moderate', 'Severe'],
-    duration: '60-90 minutes',
-    sessions: '2-3 sessions'
-  },
-  'jowling': {
-    name: 'Jowling',
-    category: 'Face',
-    description: 'Treatment for sagging jawline and jowls',
-    details: 'Jowling is treated using advanced skin tightening techniques, dermal fillers, and sometimes surgical procedures to restore a more defined jawline.',
-    treatments: ['Skin Tightening', 'Jawline Fillers', 'Ultrasound Therapy'],
-    severity: ['Mild', 'Moderate', 'Severe'],
-    duration: '60-90 minutes',
-    sessions: '3-6 sessions'
-  },
-  'low-eyebrows': {
-    name: 'Low Eyebrows',
-    category: 'Face',
-    description: 'Brow lifting and positioning treatment',
-    details: 'Low eyebrows are lifted using botulinum toxin injections to create a more lifted, youthful brow position and open up the eye area.',
-    treatments: ['Brow Lift Injections', 'Anti-Wrinkle Injections'],
-    severity: ['Mild', 'Moderate'],
-    duration: '30 minutes',
-    sessions: '1-2 sessions'
-  },
-
-  // BODY CONDITIONS
-  'cellulite-thighs-buttocks-abdomen': {
-    name: 'Cellulite (Thighs, Buttocks, Abdomen)',
-    category: 'Body',
-    description: 'Advanced cellulite reduction treatment for multiple areas',
-    details: 'Cellulite treatment combines radiofrequency, ultrasound, and specialized massage techniques to break down fat deposits and improve skin texture in the thighs, buttocks, and abdomen.',
-    treatments: ['Radiofrequency Therapy', 'Ultrasound Treatment', 'Specialized Massage', 'Skin Tightening'],
-    severity: ['Mild', 'Moderate', 'Severe'],
-    duration: '90 minutes',
-    sessions: '6-12 sessions'
-  },
-  'stubborn-belly-fat-abdominal-fat': {
-    name: 'Stubborn Belly Fat / Abdominal Fat',
-    category: 'Body',
-    description: 'Targeted fat reduction for abdominal area',
-    details: 'Stubborn belly fat is treated using fat-freezing technology, mesotherapy, and radiofrequency to reduce localized fat deposits and tighten the abdominal area.',
-    treatments: ['Fat Freezing', 'Mesotherapy', 'Radiofrequency', 'Skin Tightening'],
-    severity: ['Mild', 'Moderate', 'Severe'],
-    duration: '60-90 minutes',
-    sessions: '4-8 sessions'
-  },
-  'love-handles-flanks': {
-    name: 'Love Handles / Flanks',
-    category: 'Body',
-    description: 'Contouring treatment for side body fat',
-    details: 'Love handles and flank fat are targeted using fat-freezing technology and skin tightening treatments to create a more contoured waistline.',
-    treatments: ['Fat Freezing', 'Skin Tightening', 'Radiofrequency', 'Ultrasound'],
-    severity: ['Mild', 'Moderate'],
-    duration: '60-75 minutes',
-    sessions: '4-6 sessions'
-  },
-  'sagging-skin-skin-laxity': {
-    name: 'Sagging Skin (Skin Laxity)',
-    category: 'Body',
-    description: 'Comprehensive skin tightening treatment',
-    details: 'Sagging skin is treated using advanced radiofrequency and ultrasound technology to stimulate collagen production and tighten loose skin.',
-    treatments: ['Radiofrequency', 'Ultrasound Therapy', 'Skin Tightening', 'Laser Therapy'],
-    severity: ['Mild', 'Moderate', 'Severe'],
-    duration: '60-90 minutes',
-    sessions: '6-10 sessions'
-  },
-  'stretch-marks': {
-    name: 'Stretch Marks',
-    category: 'Body',
-    description: 'Treatment for stretch marks and skin texture improvement',
-    details: 'Stretch marks are treated using microneedling, laser therapy, and specialized skincare to improve skin texture and reduce the appearance of stretch marks.',
-    treatments: ['Microneedling', 'Laser Therapy', 'Medical Skincare', 'Radiofrequency'],
-    severity: ['Mild', 'Moderate', 'Severe'],
-    duration: '45-75 minutes',
-    sessions: '6-12 sessions'
-  },
-  'arm-fat-bingo-wings': {
-    name: 'Arm Fat & "Bingo Wings"',
-    category: 'Body',
-    description: 'Arm contouring and skin tightening treatment',
-    details: 'Arm fat and loose skin are treated using fat-freezing technology and skin tightening treatments to create more toned, defined arms.',
-    treatments: ['Fat Freezing', 'Skin Tightening', 'Radiofrequency', 'Ultrasound'],
-    severity: ['Mild', 'Moderate', 'Severe'],
-    duration: '60-75 minutes',
-    sessions: '4-8 sessions'
-  },
-  'thigh-fat-inner-thigh-laxity': {
-    name: 'Thigh Fat & Inner Thigh Laxity',
-    category: 'Body',
-    description: 'Inner thigh contouring and tightening',
-    details: 'Inner thigh fat and skin laxity are addressed using fat-freezing technology and skin tightening treatments to create smoother, more toned inner thighs.',
-    treatments: ['Fat Freezing', 'Skin Tightening', 'Radiofrequency', 'Mesotherapy'],
-    severity: ['Mild', 'Moderate', 'Severe'],
-    duration: '60-90 minutes',
-    sessions: '4-8 sessions'
-  },
-  'double-chin-jawline-fat': {
-    name: 'Double Chin / Jawline Fat',
-    category: 'Body',
-    description: 'Jawline and chin contouring treatment',
-    details: 'Double chin and jawline fat are treated using fat-dissolving injections and skin tightening to create a more defined jawline and eliminate excess chin fat.',
-    treatments: ['Fat Dissolving Injections', 'Skin Tightening', 'Ultrasound Therapy', 'Dermal Fillers'],
-    severity: ['Mild', 'Moderate'],
-    duration: '45-60 minutes',
-    sessions: '2-4 sessions'
-  },
-  'post-pregnancy-tummy': {
-    name: 'Post-Pregnancy Tummy',
-    category: 'Body',
-    description: 'Post-pregnancy abdominal restoration treatment',
-    details: 'Post-pregnancy tummy concerns are addressed using a combination of skin tightening, fat reduction, and muscle toning treatments to restore pre-pregnancy contours.',
-    treatments: ['Skin Tightening', 'Fat Freezing', 'Radiofrequency', 'Ultrasound Therapy'],
-    severity: ['Mild', 'Moderate', 'Severe'],
-    duration: '75-90 minutes',
-    sessions: '6-12 sessions'
-  },
-  'water-retention-bloating-swelling': {
-    name: 'Water Retention / Bloating / Swelling',
-    category: 'Body',
-    description: 'Lymphatic drainage and swelling reduction treatment',
-    details: 'Water retention and swelling are treated using lymphatic drainage massage, specialized treatments, and lifestyle recommendations to reduce bloating and improve circulation.',
-    treatments: ['Lymphatic Drainage', 'Specialized Massage', 'Radiofrequency', 'Ultrasound Therapy'],
-    severity: ['Mild', 'Moderate'],
-    duration: '60-75 minutes',
-    sessions: '4-8 sessions'
-  }
+// Category mapping: display name -> filter value
+const categoryMapping: Record<string, string> = {
+  'All': 'All',
+  'Face Condition': 'Face Conditions',
+  'Body Condition': 'Body Conditions'
 };
 
-const categories = [
-  'All',
-  'Face',
-  'Body'
-];
+const categories = Object.keys(categoryMapping);
 
-const severityLevels = [
-  { label: 'All Severities', value: 'All' },
-  { label: 'Mild', value: 'Mild' },
-  { label: 'Moderate', value: 'Moderate' },
-  { label: 'Severe', value: 'Severe' }
-];
+// Helper function to convert category value to display name
+const getCategoryDisplayName = (categoryValue: string): string => {
+  const entry = Object.entries(categoryMapping).find(
+    ([_, value]) => value === categoryValue
+  );
+  return entry ? entry[0] : categoryValue;
+};
 
-const sessionRanges = [
-  { label: 'All Sessions', min: 0, max: Infinity },
-  { label: '1-3 sessions', min: 1, max: 3 },
-  { label: '4-6 sessions', min: 4, max: 6 },
-  { label: '7-10 sessions', min: 7, max: 10 },
-  { label: '10+ sessions', min: 10, max: Infinity }
-];
 
 function ConditionsPageContent() {
   const searchParams = useSearchParams();
+  const { conditions, isLoading } = useConditions();
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedSeverity, setSelectedSeverity] = useState('All Severities');
-  const [selectedSessionRange, setSelectedSessionRange] = useState('All Sessions');
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
@@ -321,29 +42,36 @@ function ConditionsPageContent() {
   // Handle URL parameters
   useEffect(() => {
     const category = searchParams.get('category');
-    if (category && categories.includes(category)) {
-      setSelectedCategory(category);
-      setShowFilters(true);
+    if (category) {
+      // Find the display name from the filter value
+      const displayName = Object.keys(categoryMapping).find(
+        key => categoryMapping[key] === category
+      ) || category;
+      if (displayName && categories.includes(displayName)) {
+        setSelectedCategory(displayName);
+        setShowFilters(true);
+      }
     }
   }, [searchParams]);
 
   // Filter conditions based on selected criteria
   const filteredConditions = useMemo(() => {
-    return Object.entries(conditionsData).filter(([conditionId, condition]) => {
-      const matchesCategory = selectedCategory === 'All' || condition.category === selectedCategory;
-      const matchesSeverity = selectedSeverity === 'All Severities' || condition.severity.includes(selectedSeverity);
-      const selectedRange = sessionRanges.find(range => range.label === selectedSessionRange);
-      const matchesSessionRange = selectedRange ? (
-        selectedRange.min <= parseInt(condition.sessions.split('-')[0]) && 
-        selectedRange.max >= parseInt(condition.sessions.split('-')[condition.sessions.split('-').length - 1].split(' ')[0])
-      ) : true;
-      const matchesSearch = condition.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    // Ensure conditions is always an array
+    if (!Array.isArray(conditions)) {
+      return [];
+    }
+    
+    return conditions.filter((condition) => {
+      // Map display name to filter value
+      const categoryFilterValue = categoryMapping[selectedCategory] || selectedCategory;
+      const matchesCategory = categoryFilterValue === 'All' || condition.category === categoryFilterValue;
+      const matchesSearch = condition.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            condition.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            condition.category.toLowerCase().includes(searchTerm.toLowerCase());
       
-      return matchesCategory && matchesSeverity && matchesSessionRange && matchesSearch;
+      return matchesCategory && matchesSearch;
     });
-  }, [selectedCategory, selectedSeverity, selectedSessionRange, searchTerm]);
+  }, [conditions, selectedCategory, searchTerm]);
 
   // Pagination
   const totalPages = Math.ceil(filteredConditions.length / itemsPerPage);
@@ -351,20 +79,9 @@ function ConditionsPageContent() {
   const paginatedConditions = filteredConditions.slice(startIndex, startIndex + itemsPerPage);
 
   // Reset page when filters change
-  const handleFilterChange = (filterType: string, value: string) => {
+  useEffect(() => {
     setCurrentPage(1);
-    switch (filterType) {
-      case 'category':
-        setSelectedCategory(value);
-        break;
-      case 'severity':
-        setSelectedSeverity(value);
-        break;
-      case 'sessions':
-        setSelectedSessionRange(value);
-        break;
-    }
-  };
+  }, [selectedCategory, searchTerm]);
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
@@ -373,9 +90,17 @@ function ConditionsPageContent() {
 
   const renderConditionModal = () => {
     if (!selectedCondition) return null;
+    if (!Array.isArray(conditions)) return null;
     
-    const condition = conditionsData[selectedCondition as keyof typeof conditionsData];
+    const condition = conditions.find(c => c.slug === selectedCondition);
     if (!condition) return null;
+
+    // Parse treatments from JSONB array
+    const treatments = Array.isArray(condition.treatments) 
+      ? condition.treatments 
+      : typeof condition.treatments === 'string' 
+        ? JSON.parse(condition.treatments) 
+        : [];
 
     return (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -383,14 +108,9 @@ function ConditionsPageContent() {
           {/* Header */}
           <div className="bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 text-white px-8 py-6 flex items-center justify-between rounded-t-2xl flex-shrink-0">
             <div>
-              <h2 className="text-3xl font-bold mb-2">{condition.name}</h2>
+              <h2 className="text-3xl font-bold mb-2">{condition.title}</h2>
               <div className="flex items-center gap-4 text-rose-100">
-                <span className="flex items-center gap-1 text-lg">
-                  <Clock className="w-5 h-5" />
-                  {condition.duration}
-                </span>
-                <span className="bg-white/20 px-3 py-1 rounded-full text-sm">{condition.category}</span>
-                <span className="text-sm">{condition.sessions}</span>
+                <span className="bg-white/20 px-3 py-1 rounded-full text-sm">{getCategoryDisplayName(condition.category)}</span>
               </div>
             </div>
             <button
@@ -479,6 +199,19 @@ function ConditionsPageContent() {
     );
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <div className="text-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400">Loading conditions...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
       <div className="container mx-auto px-4 max-w-7xl">
@@ -562,43 +295,11 @@ function ConditionsPageContent() {
                   </label>
                   <select
                     value={selectedCategory}
-                    onChange={(e) => handleFilterChange('category', e.target.value)}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     {categories.map(category => (
                       <option key={category} value={category}>{category}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Severity Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Severity Level
-                  </label>
-                  <select
-                    value={selectedSeverity}
-                    onChange={(e) => handleFilterChange('severity', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  >
-                    {severityLevels.map(level => (
-                      <option key={level.value} value={level.value}>{level.label}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Sessions Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Treatment Sessions
-                  </label>
-                  <select
-                    value={selectedSessionRange}
-                    onChange={(e) => handleFilterChange('sessions', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  >
-                    {sessionRanges.map(range => (
-                      <option key={range.label} value={range.label}>{range.label}</option>
                     ))}
                   </select>
                 </div>
@@ -610,14 +311,12 @@ function ConditionsPageContent() {
         {/* Results Count */}
         <div className="flex items-center justify-between mb-6">
           <p className="text-gray-600 dark:text-gray-400">
-            Showing {filteredConditions.length} of {Object.keys(conditionsData).length} conditions
+            Showing {filteredConditions.length} of {Array.isArray(conditions) ? conditions.length : 0} conditions
           </p>
-          {selectedCategory !== 'All' && (
+          {(selectedCategory !== 'All' || searchTerm) && (
             <button
               onClick={() => {
                 setSelectedCategory('All');
-                setSelectedSeverity('All Severities');
-                setSelectedSessionRange('All Sessions');
                 setSearchTerm('');
                 setCurrentPage(1);
               }}
@@ -639,8 +338,6 @@ function ConditionsPageContent() {
             <button
               onClick={() => {
                 setSelectedCategory('All');
-                setSelectedSeverity('All Severities');
-                setSelectedSessionRange('All Sessions');
                 setSearchTerm('');
                 setCurrentPage(1);
               }}
@@ -655,9 +352,9 @@ function ConditionsPageContent() {
               ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
               : 'grid-cols-1'
           }`}>
-            {paginatedConditions.map(([conditionId, condition]) => (
+            {paginatedConditions.map((condition) => (
               <div
-                key={conditionId}
+                key={condition.id}
                 className={`bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden ${
                   viewMode === 'list' ? 'flex items-center p-8' : 'p-0'
                 }`}
@@ -680,35 +377,26 @@ function ConditionsPageContent() {
                     {/* Content */}
                     <div className="p-6">
                       <div className="flex items-start justify-between mb-3">
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{condition.name}</h3>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{condition.title}</h3>
                         <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full text-xs font-medium flex-shrink-0 ml-3">
-                          {condition.category}
+                          {getCategoryDisplayName(condition.category)}
                         </span>
                       </div>
                       <p className="text-gray-600 dark:text-gray-400 mb-4 leading-relaxed text-sm line-clamp-2">
                         {condition.description}
                       </p>
-                      <div className="flex items-center justify-between mb-6">
-                        <span className="flex items-center gap-1 text-sm text-gray-500">
-                          <Clock className="w-4 h-4" />
-                          {condition.duration}
-                        </span>
-                        <span className="text-sm text-gray-500">
-                          {condition.sessions}
-                        </span>
-                      </div>
                       
                       {/* Buttons */}
                       <div className="flex gap-3">
                         <button
-                          onClick={() => setSelectedCondition(conditionId)}
+                          onClick={() => setSelectedCondition(condition.slug)}
                           className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border border-blue-500 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors font-medium text-sm"
                         >
                           <Info className="w-4 h-4" />
                           Details
                         </button>
                         <Link
-                          href={`/book?condition=${conditionId}`}
+                          href={`/book?condition=${condition.slug}`}
                           className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all font-medium text-sm shadow-md hover:shadow-lg"
                         >
                           <Plus className="w-4 h-4" />
@@ -733,34 +421,25 @@ function ConditionsPageContent() {
                     
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-3">
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">{condition.name}</h3>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">{condition.title}</h3>
                         <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full text-xs font-medium flex-shrink-0 ml-4">
-                          {condition.category}
+                          {getCategoryDisplayName(condition.category)}
                         </span>
                       </div>
                       <p className="text-gray-600 dark:text-gray-400 mb-3 leading-relaxed">
                         {condition.description}
                       </p>
-                      <div className="flex items-center gap-6 text-sm text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          {condition.duration}
-                        </span>
-                        <span>
-                          {condition.sessions}
-                        </span>
-                      </div>
                     </div>
                     <div className="flex gap-2 ml-6 flex-shrink-0">
                       <button
-                        onClick={() => setSelectedCondition(conditionId)}
+                        onClick={() => setSelectedCondition(condition.slug)}
                         className="flex items-center justify-center gap-2 px-4 py-2.5 border border-blue-500 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors font-medium text-sm"
                       >
                         <Info className="w-4 h-4" />
                         Details
                       </button>
                       <Link
-                        href={`/book?condition=${conditionId}`}
+                        href={`/book?condition=${condition.slug}`}
                         className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all font-medium text-sm shadow-md hover:shadow-lg"
                       >
                         <Plus className="w-4 h-4" />

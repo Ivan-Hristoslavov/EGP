@@ -162,6 +162,8 @@ export type GallerySection = {
 export type GalleryItem = {
   id: string;
   section_id?: string;
+  service_id?: string;
+  category_id?: string;
   title: string;
   description?: string;
   before_image_url: string;
@@ -175,6 +177,31 @@ export type GalleryItem = {
   is_featured: boolean;
   created_at: string;
   updated_at: string;
+  // Populated from joins
+  service?: {
+    id: string;
+    name: string;
+    category?: {
+      id: string;
+      name: string;
+      slug: string;
+      main_tab?: {
+        id: string;
+        name: string;
+        slug: string;
+      };
+    };
+  };
+  category?: {
+    id: string;
+    name: string;
+    slug: string;
+    main_tab?: {
+      id: string;
+      name: string;
+      slug: string;
+    };
+  };
 };
 
 export type Review = {

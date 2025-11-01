@@ -237,25 +237,29 @@ export default function NavigationNavbar() {
   }
 
   return (
-    <nav className=" w-full backdrop-blur-xl bg-white/90 dark:bg-gray-900/90 shadow-lg border-b border-white/20 dark:border-gray-800/30 transition-all duration-300">
+    <nav className="w-full backdrop-blur-xl bg-[#ddd5c3]/90 dark:bg-gray-900/90 shadow-lg border-b border-[#ddd5c3]/30 dark:border-gray-800/30 transition-all duration-300">
       <div
         className={`transition-all duration-300 ease-out ${
           isScrolled
-            ? "bg-white/95 dark:bg-gray-900/95 py-3 border-b border-blue-100/50 dark:border-gray-700/50"
-            : "bg-white/80 dark:bg-gray-900/80 py-4"
+            ? "bg-[#ddd5c3]/95 dark:bg-gray-900/95 py-3 border-b border-[#c9c1b0]/50 dark:border-gray-700/50"
+            : "bg-[#ddd5c3]/90 dark:bg-gray-900/90 py-4"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             {/* Logo */}
-            <Link href="/" className="flex items-center h-10">
-              <span className="relative block h-8 w-auto">
+            <Link href="/" className="flex items-center h-10 group relative">
+              {/* Pantone color glow effect on hover */}
+              <div className="absolute inset-0 -z-10 rounded-full bg-[#9d9585] opacity-0 group-hover:opacity-50 transition-opacity duration-500 blur-2xl scale-125 animate-pulse -left-8 -right-8 -top-2 -bottom-2"></div>
+              <div className="absolute inset-0 -z-10 rounded-full bg-[#b5ad9d] opacity-0 group-hover:opacity-40 transition-opacity duration-500 blur-xl scale-115 -left-4 -right-4 -top-1 -bottom-1"></div>
+              
+              <span className="relative block h-8 w-auto transition-all duration-300 group-hover:scale-110 group-hover:brightness-110 group-hover:drop-shadow-lg">
                 <Image
                   src="/logos/LOGO_LONG BLACK.png"
                   alt="EGP Aesthetics"
                   width={180}
                   height={32}
-                  className="h-8 w-auto dark:hidden"
+                  className="h-8 w-auto dark:hidden transition-all duration-300 group-hover:opacity-90 group-hover:drop-shadow-xl"
                   priority
                 />
                 <Image
@@ -263,7 +267,7 @@ export default function NavigationNavbar() {
                   alt="EGP Aesthetics"
                   width={180}
                   height={32}
-                  className="h-8 w-auto hidden dark:block"
+                  className="h-8 w-auto hidden dark:block transition-all duration-300 group-hover:opacity-90 group-hover:drop-shadow-xl"
                   priority
                 />
               </span>
@@ -278,8 +282,8 @@ export default function NavigationNavbar() {
                       <button
                         className={`relative px-4 py-3 text-sm font-semibold transition-all duration-500 rounded-full hover:scale-110 transform hover:-translate-y-1 flex items-center gap-1 ${
                           isActiveDropdown(item)
-                            ? "text-white bg-blue-600 dark:bg-blue-500 shadow-lg hover:shadow-xl hover:bg-blue-700 dark:hover:bg-blue-600"
-                            : "text-blue-600 dark:text-blue-400 hover:text-white hover:bg-blue-600 dark:hover:bg-blue-500 hover:shadow-lg"
+                            ? "text-white bg-[#c9c1b0] dark:bg-[#b5ad9d] shadow-lg hover:shadow-xl hover:bg-[#b5ad9d] dark:hover:bg-[#9d9585]"
+                            : "text-gray-700 dark:text-gray-300 hover:text-white hover:bg-[#9d9585] dark:hover:bg-[#b5ad9d] hover:shadow-lg"
                         }`}
                         onMouseEnter={() => setOpenDropdown(item.name)}
                         onMouseLeave={() => setOpenDropdown(null)}
@@ -295,7 +299,7 @@ export default function NavigationNavbar() {
                       
                       {/* Dropdown Menu */}
                       <div
-                        className={`absolute top-full left-0 mt-2 w-48 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-blue-100/50 dark:border-gray-600/50 transition-all duration-300 ${
+                        className={`absolute top-full left-0 mt-2 w-48 bg-[#f0ede7]/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-[#c9c1b0]/50 dark:border-gray-600/50 transition-all duration-300 ${
                           openDropdown === item.name ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-2"
                         }`}
                         onMouseEnter={() => setOpenDropdown(item.name)}
@@ -303,18 +307,18 @@ export default function NavigationNavbar() {
                       >
                         <div className="py-2">
                           {item.dropdown.map((subItem) => (
-                            <Link
-                              key={subItem.name}
-                              href={subItem.href}
-                              onClick={(e) => handleClick(e, subItem.href)}
-                              className={`block px-4 py-3 text-sm font-medium transition-all duration-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 ${
-                                activeSection === subItem.href.substring(1)
-                                  ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20"
-                                  : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-                              }`}
-                            >
-                              {subItem.name}
-                            </Link>
+                      <Link
+                        key={subItem.name}
+                        href={subItem.href}
+                        onClick={(e) => handleClick(e, subItem.href)}
+                        className={`block px-4 py-3 text-sm font-medium transition-all duration-300 hover:bg-[#9d9585] dark:hover:bg-gray-700/50 hover:text-white ${
+                          activeSection === subItem.href.substring(1)
+                            ? "text-white dark:text-gray-200 bg-[#9d9585] dark:bg-gray-700/50"
+                            : "text-gray-700 dark:text-gray-300 dark:hover:text-gray-200"
+                        }`}
+                      >
+                        {subItem.name}
+                      </Link>
                           ))}
                         </div>
                       </div>
@@ -323,8 +327,8 @@ export default function NavigationNavbar() {
                     <Link
                       className={`relative px-4 py-3 text-sm font-semibold transition-all duration-500 rounded-full hover:scale-110 transform hover:-translate-y-1 ${
                         activeSection === item.href.substring(1)
-                          ? "text-white bg-blue-600 dark:bg-blue-500 shadow-lg hover:shadow-xl hover:bg-blue-700 dark:hover:bg-blue-600"
-                          : "text-blue-600 dark:text-blue-400 hover:text-white hover:bg-blue-600 dark:hover:bg-blue-500 hover:shadow-lg"
+                          ? "text-white bg-[#c9c1b0] dark:bg-[#b5ad9d] shadow-lg hover:shadow-xl hover:bg-[#b5ad9d] dark:hover:bg-[#9d9585]"
+                          : "text-gray-700 dark:text-gray-300 hover:text-white hover:bg-[#9d9585] dark:hover:bg-[#b5ad9d] hover:shadow-lg"
                       }`}
                       href={item.href}
                       onClick={(e) => handleClick(e, item.href)}
@@ -346,7 +350,7 @@ export default function NavigationNavbar() {
 
             {/* Mobile Menu Button */}
             <button
-              className="lg:hidden p-3 rounded-full transition-all duration-500 hover:scale-110 transform hover:-translate-y-1 text-blue-600 dark:text-blue-400 hover:text-white hover:bg-blue-600 dark:hover:bg-blue-500 shadow-lg hover:shadow-xl"
+              className="lg:hidden p-3 rounded-full transition-all duration-500 hover:scale-110 transform hover:-translate-y-1 text-gray-700 dark:text-gray-300 hover:text-gray-900 hover:bg-[#c9c1b0] dark:hover:bg-[#b5ad9d] shadow-lg hover:shadow-xl"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               <svg
@@ -388,7 +392,7 @@ export default function NavigationNavbar() {
               : "max-h-0 opacity-0"
           }`}
         >
-          <div className="flex flex-col space-y-2 p-6 rounded-2xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl shadow-2xl border border-blue-100/50 dark:border-gray-600/50 mx-4">
+          <div className="flex flex-col space-y-2 p-6 rounded-2xl bg-[#f0ede7]/95 dark:bg-gray-800/95 backdrop-blur-xl shadow-2xl border border-[#c9c1b0]/50 dark:border-gray-600/50 mx-4">
             {navigation.map((item, index) => (
               <div key={item.name}>
                 {item.dropdown ? (
@@ -401,8 +405,8 @@ export default function NavigationNavbar() {
                         key={subItem.name}
                         className={`px-6 py-3 text-base font-semibold rounded-xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-1 block ${
                           activeSection === subItem.href.substring(1)
-                            ? "text-white bg-blue-600 dark:bg-blue-500 shadow-lg"
-                            : "text-blue-600 dark:text-blue-400 hover:text-white hover:bg-blue-600 dark:hover:bg-blue-500 hover:shadow-lg"
+                            ? "text-white bg-[#c9c1b0] dark:bg-[#b5ad9d] shadow-lg"
+                            : "text-gray-700 dark:text-gray-300 hover:text-white hover:bg-[#9d9585] dark:hover:bg-[#b5ad9d] hover:shadow-lg"
                         }`}
                         href={subItem.href}
                         style={{ animationDelay: `${index * 0.1}s` }}
@@ -419,8 +423,8 @@ export default function NavigationNavbar() {
                   <Link
                     className={`px-6 py-4 text-base font-semibold rounded-xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-1 block ${
                       activeSection === item.href.substring(1)
-                        ? "text-white bg-blue-600 dark:bg-blue-500 shadow-lg"
-                        : "text-blue-600 dark:text-blue-400 hover:text-white hover:bg-blue-600 dark:hover:bg-blue-500 hover:shadow-lg"
+                        ? "text-white bg-[#c9c1b0] dark:bg-[#b5ad9d] shadow-lg"
+                        : "text-gray-700 dark:text-gray-300 hover:text-white hover:bg-[#9d9585] dark:hover:bg-[#b5ad9d] hover:shadow-lg"
                     }`}
                     href={item.href}
                     style={{ animationDelay: `${index * 0.1}s` }}
@@ -436,7 +440,7 @@ export default function NavigationNavbar() {
             ))}
             
             {/* Mobile Theme Toggle */}
-            <div className="flex justify-center pt-4 border-t border-blue-100 dark:border-gray-600">
+            <div className="flex justify-center pt-4 border-t border-[#c9c1b0] dark:border-gray-600">
               <ThemeToggle size="lg" />
             </div>
           </div>

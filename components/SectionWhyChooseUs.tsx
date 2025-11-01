@@ -44,7 +44,7 @@ const reasons = [
 
 export default function SectionWhyChooseUs() {
   return (
-    <section className="py-12 sm:py-16 md:py-20 bg-warm-beige-lighter dark:from-gray-900 dark:to-gray-800">
+    <section className="py-12 sm:py-16 md:py-20 bg-warm-beige-lighter dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-8 sm:mb-12 md:mb-16">

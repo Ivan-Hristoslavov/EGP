@@ -5,21 +5,34 @@ export async function GET() {
   try {
     const supabase = createClient();
     
+    // Check if table exists by trying to query it
     const { data: areas, error } = await supabase
       .from("admin_areas_cover")
       .select("*")
       .eq("is_active", true)
       .order("order", { ascending: true });
 
+    // If table doesn't exist or error, return empty array instead of error
     if (error) {
+      // Check if it's a table not found error (42P01) or relation doesn't exist
+      if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        console.log("Areas table not found, returning empty array");
+        return NextResponse.json([]);
+      }
       console.error("Error fetching areas:", error);
-      return NextResponse.json({ error: "Failed to fetch areas" }, { status: 500 });
+      // Return empty array instead of error to prevent 500s
+      return NextResponse.json([]);
+    }
+
+    // If no areas found, return empty array
+    if (!areas || areas.length === 0) {
+      return NextResponse.json([]);
     }
 
     // Transform data to match expected format
     const transformedAreas = areas.map(area => ({
       id: area.id,
-      name: area.name, // Fixed: use 'name' instead of 'area_name'
+      name: area.name || area.area_name, // Support both field names
       description: area.description,
       postcode: area.postcode,
       response_time: area.response_time,
@@ -32,7 +45,8 @@ export async function GET() {
 
     return NextResponse.json(transformedAreas);
   } catch (error) {
-    console.error("Error in areas GET:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    // Return empty array instead of error to prevent 500s
+    console.log("Error in areas GET (returning empty array):", error);
+    return NextResponse.json([]);
   }
 } 

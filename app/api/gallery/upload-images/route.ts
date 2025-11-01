@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
         
         // Test bucket access first
         const { data: bucketTest, error: bucketError } = await supabase.storage
-          .from('gallery')
+          .from('egp')
           .list('', { limit: 1 });
         
         if (bucketError) {
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
         
         // Upload to Supabase Storage
         const { data, error } = await supabase.storage
-          .from('gallery')
+          .from('egp')
           .upload(filename, buffer, {
             contentType: processedImage.finalType,
             cacheControl: '3600',
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
 
         // Get public URL
         const { data: urlData } = supabase.storage
-          .from('gallery')
+          .from('egp')
           .getPublicUrl(filename);
 
         results.beforeUrl = urlData.publicUrl;
@@ -155,7 +155,7 @@ export async function POST(request: NextRequest) {
         
         // Upload to Supabase Storage
         const { data, error } = await supabase.storage
-          .from('gallery')
+          .from('egp')
           .upload(filename, buffer, {
             contentType: processedImage.finalType,
             cacheControl: '3600',
@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
 
         // Get public URL
         const { data: urlData } = supabase.storage
-          .from('gallery')
+          .from('egp')
           .getPublicUrl(filename);
 
         results.afterUrl = urlData.publicUrl;

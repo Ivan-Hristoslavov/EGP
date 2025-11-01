@@ -2,114 +2,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Review } from '@/types';
 
-// Dummy reviews data
-const DUMMY_REVIEWS: Review[] = [
-  {
-    id: "dummy-review-1",
-    customer_name: "Sarah Johnson",
-    customer_email: "sarah.j@example.com",
-    rating: 5,
-    title: "Fantastic Experience!",
-    comment: "Absolutely fantastic experience! The staff was professional and the results exceeded my expectations. Highly recommend!",
-    message: "Absolutely fantastic experience! The staff was professional and the results exceeded my expectations. Highly recommend!",
-    is_approved: true,
-    is_featured: true,
-    created_at: "2025-01-05T10:00:00Z",
-    updated_at: "2025-01-05T10:00:00Z"
-  },
-  {
-    id: "dummy-review-2",
-    customer_name: "Emma Williams",
-    customer_email: "emma.w@example.com",
-    rating: 5,
-    title: "Perfect Lip Enhancement",
-    comment: "The lip enhancement treatment was perfect. Natural-looking results and excellent aftercare. Will definitely be back!",
-    message: "The lip enhancement treatment was perfect. Natural-looking results and excellent aftercare. Will definitely be back!",
-    is_approved: true,
-    is_featured: true,
-    created_at: "2025-01-03T10:00:00Z",
-    updated_at: "2025-01-03T10:00:00Z"
-  },
-  {
-    id: "dummy-review-3",
-    customer_name: "Lisa Brown",
-    customer_email: "lisa.b@example.com",
-    rating: 5,
-    title: "Amazing Profhilo Treatment",
-    comment: "Profhilo treatment was amazing! My skin looks so much better. The practitioner was knowledgeable and made me feel comfortable throughout.",
-    message: "Profhilo treatment was amazing! My skin looks so much better. The practitioner was knowledgeable and made me feel comfortable throughout.",
-    is_approved: true,
-    is_featured: true,
-    created_at: "2025-01-02T10:00:00Z",
-    updated_at: "2025-01-02T10:00:00Z"
-  },
-  {
-    id: "dummy-review-4",
-    customer_name: "Rachel Green",
-    customer_email: "rachel@example.com",
-    rating: 5,
-    title: "Great Consultation Service",
-    comment: "Great consultation service. They took time to understand my needs and provided excellent advice. Very professional clinic.",
-    message: "Great consultation service. They took time to understand my needs and provided excellent advice. Very professional clinic.",
-    is_approved: true,
-    is_featured: false,
-    created_at: "2025-01-01T10:00:00Z",
-    updated_at: "2025-01-01T10:00:00Z"
-  },
-  {
-    id: "dummy-review-5",
-    customer_name: "Jessica Taylor",
-    customer_email: "jessica.t@example.com",
-    rating: 4,
-    title: "Good Anti-Wrinkle Treatment",
-    comment: "Good anti-wrinkle treatment. Results were visible and natural. The clinic has a lovely atmosphere and friendly staff.",
-    message: "Good anti-wrinkle treatment. Results were visible and natural. The clinic has a lovely atmosphere and friendly staff.",
-    is_approved: true,
-    is_featured: false,
-    created_at: "2024-12-30T10:00:00Z",
-    updated_at: "2024-12-30T10:00:00Z"
-  },
-  {
-    id: "dummy-review-6",
-    customer_name: "Maria Garcia",
-    customer_email: "maria.g@example.com",
-    rating: 5,
-    title: "Excellent Fat Freezing",
-    comment: "Fat freezing treatment worked better than expected! Professional service and great results. Highly recommend this clinic.",
-    message: "Fat freezing treatment worked better than expected! Professional service and great results. Highly recommend this clinic.",
-    is_approved: true,
-    is_featured: false,
-    created_at: "2024-12-28T10:00:00Z",
-    updated_at: "2024-12-28T10:00:00Z"
-  },
-  {
-    id: "dummy-review-7",
-    customer_name: "Jennifer Davis",
-    customer_email: "jennifer.d@example.com",
-    rating: 5,
-    title: "Skilled Dermal Fillers",
-    comment: "Excellent dermal filler treatment. The practitioner was skilled and the results look very natural. Very happy with the service!",
-    message: "Excellent dermal filler treatment. The practitioner was skilled and the results look very natural. Very happy with the service!",
-    is_approved: false,
-    is_featured: false,
-    created_at: "2024-12-25T10:00:00Z",
-    updated_at: "2024-12-25T10:00:00Z"
-  },
-  {
-    id: "dummy-review-8",
-    customer_name: "Amanda Wilson",
-    customer_email: "amanda@example.com",
-    rating: 5,
-    title: "Outstanding Botox Treatment",
-    comment: "Outstanding Botox treatment! Quick, painless, and effective. The clinic is clean and modern with professional staff.",
-    message: "Outstanding Botox treatment! Quick, painless, and effective. The clinic is clean and modern with professional staff.",
-    is_approved: false,
-    is_featured: false,
-    created_at: "2024-12-22T10:00:00Z",
-    updated_at: "2024-12-22T10:00:00Z"
-  }
-];
-
 // Global cache to prevent multiple API calls
 let reviewsCache: { [key: string]: Review[] } = {};
 let cachePromises: { [key: string]: Promise<Review[]> | null } = {};
@@ -130,17 +22,16 @@ export function useReviews(adminMode = false) {
       if (!res.ok) throw new Error(data.error || 'Failed to fetch reviews');
       const reviewsData = data.reviews || [];
       
-      // Use dummy data if no real reviews exist
-      const finalReviews = reviewsData.length === 0 ? DUMMY_REVIEWS : reviewsData;
-      reviewsCache[cacheKey] = finalReviews; // Update cache
-      setReviews(finalReviews);
+      // Use database reviews only - no fallback dummy data
+      reviewsCache[cacheKey] = reviewsData; // Update cache
+      setReviews(reviewsData);
       setError(null);
     } catch (err) {
-      // Use dummy data on error
-      console.log('Error fetching reviews, using dummy data');
-      reviewsCache[cacheKey] = DUMMY_REVIEWS;
-      setReviews(DUMMY_REVIEWS);
-      setError(null); // Don't show error when we have fallback data
+      // Show error when fetch fails
+      console.error('Error fetching reviews:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch reviews';
+      setError(errorMessage);
+      setReviews([]);
     } finally {
       setIsLoading(false);
     }
@@ -211,22 +102,21 @@ export function useReviews(adminMode = false) {
         }
         const reviewsData = data.reviews || [];
         
-        // Use dummy data if no real reviews exist
-        const finalReviews = reviewsData.length === 0 ? DUMMY_REVIEWS : reviewsData;
-        reviewsCache[cacheKey] = finalReviews;
-        setReviews(finalReviews);
+        // Use database reviews only - no fallback dummy data
+        reviewsCache[cacheKey] = reviewsData;
+        setReviews(reviewsData);
         setIsLoading(false);
-        return finalReviews;
+        return reviewsData;
       })
       .catch(err => {
-        // Use dummy data on error
-        console.log('Error fetching reviews, using dummy data');
-        reviewsCache[cacheKey] = DUMMY_REVIEWS;
-        setReviews(DUMMY_REVIEWS);
-        setError(null); // Don't show error when we have fallback data
+        // Show error when fetch fails
+        console.error('Error fetching reviews:', err);
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch reviews';
+        setError(errorMessage);
+        setReviews([]);
         setIsLoading(false);
         cachePromises[cacheKey] = null; // Reset promise on error
-        return DUMMY_REVIEWS;
+        return [];
       });
   }, [adminMode, cacheKey]);
 

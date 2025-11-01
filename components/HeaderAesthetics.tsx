@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import ThemeToggleButton from "./ThemeToggleButton";
@@ -13,12 +13,112 @@ import {
   ChevronDown,
   Calendar
 } from "lucide-react";
+import { useServices } from "@/hooks/useServices";
+import { useConditions } from "@/hooks/useConditions";
+import type { Condition } from "@/hooks/useConditions";
 
 export default function HeaderAesthetics() {
+  const { services } = useServices();
+  const { conditions } = useConditions();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
+
+  // Group services by main_tab and category for mega menu
+  const servicesByMainTab = useMemo(() => {
+    const grouped: Record<string, Record<string, {
+      category: { id: string; name: string; slug: string; display_order?: number };
+      services: Array<{ name: string; price: number; slug: string }>;
+    }>> = {};
+    
+    services.forEach(service => {
+      const mainTabSlug = service.main_tab.slug;
+      const categoryId = service.category.id;
+      
+      if (!grouped[mainTabSlug]) {
+        grouped[mainTabSlug] = {};
+      }
+      if (!grouped[mainTabSlug][categoryId]) {
+        grouped[mainTabSlug][categoryId] = {
+          category: {
+            id: service.category.id,
+            name: service.category.name,
+            slug: service.category.slug,
+            display_order: service.category.display_order ?? 0
+          },
+          services: []
+        };
+      }
+      grouped[mainTabSlug][categoryId].services.push({
+        name: service.name,
+        price: service.price,
+        slug: service.slug
+      });
+    });
+    return grouped;
+  }, [services]);
+
+  // Get Book Now services (for mega menu) with categories sorted by display_order
+  const bookNowCategories = useMemo(() => {
+    const bookNowData = servicesByMainTab['book-now'] || {};
+    const categories = Object.values(bookNowData).map(item => item.category);
+    
+    // Remove duplicates by id and sort by display_order
+    const uniqueCategories = Array.from(
+      new Map(categories.map(cat => [cat.id, cat])).values()
+    );
+    
+    // Sort by display_order first, then by name for consistent ordering
+    return uniqueCategories.sort((a, b) => {
+      const orderA = a.display_order ?? 999;
+      const orderB = b.display_order ?? 999;
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
+      return a.name.localeCompare(b.name);
+    });
+  }, [servicesByMainTab]);
+
+  const bookNowServices = useMemo(() => {
+    return servicesByMainTab['book-now'] || {};
+  }, [servicesByMainTab]);
+
+  // Group conditions by category for mega menu
+  const conditionsByCategory = useMemo(() => {
+    const grouped: {
+      face: Condition[];
+      body: Condition[];
+    } = {
+      face: [],
+      body: [],
+    };
+
+    conditions.forEach((condition) => {
+      if (condition.category === "Face Conditions") {
+        grouped.face.push(condition);
+      } else if (condition.category === "Body Conditions") {
+        grouped.body.push(condition);
+      }
+    });
+
+    // Sort by display_order, then by title
+    grouped.face.sort((a, b) => {
+      if (a.display_order !== b.display_order) {
+        return a.display_order - b.display_order;
+      }
+      return a.title.localeCompare(b.title);
+    });
+
+    grouped.body.sort((a, b) => {
+      if (a.display_order !== b.display_order) {
+        return a.display_order - b.display_order;
+      }
+      return a.title.localeCompare(b.title);
+    });
+
+    return grouped;
+  }, [conditions]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -58,11 +158,11 @@ export default function HeaderAesthetics() {
   return (
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? "bg-white dark:bg-gray-900 shadow-lg" : "bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm"
+        scrolled ? "bg-[#ddd5c3] dark:bg-gray-900 shadow-lg" : "bg-[#ddd5c3]/95 dark:bg-gray-900/95 backdrop-blur-sm"
       }`}
     >
       {/* Top Bar - Contact Info */}
-      <div className="bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 text-white">
+      <div className="bg-[#c9c1b0] dark:bg-gray-800 text-gray-900 dark:text-gray-100">
         <div className="container mx-auto px-2 sm:px-4">
           <div className="flex items-center justify-between h-9 sm:h-10 text-xs sm:text-sm">
             {/* Left side - Find Us */}
@@ -143,7 +243,7 @@ export default function HeaderAesthetics() {
       </div>
 
       {/* Main Navigation Header - Clean No Filter Clinic Style */}
-      <div className="border-b border-gray-100 dark:border-gray-800">
+      <div className="border-b border-[#c9c1b0] dark:border-gray-800">
         <div className="container mx-auto px-4">
           <div className={`flex items-center justify-between transition-all duration-300 ${
             scrolled ? "h-16 md:h-18" : "h-20 md:h-24"
@@ -154,27 +254,57 @@ export default function HeaderAesthetics() {
             }`}>
               <Link
                 href="/about"
-                className={`font-montserrat text-gray-700 dark:text-gray-300 hover:text-rose-600 dark:hover:text-rose-400 font-light transition-all duration-300 uppercase tracking-widest ${
+                className={`group relative font-montserrat text-gray-700 dark:text-gray-300 font-light transition-all duration-300 uppercase tracking-widest px-3 py-1.5 -mx-3 -my-1.5 rounded-md ${
                   scrolled ? "text-xs" : "text-xs lg:text-sm"
                 }`}
               >
-                About
+                <span className="relative z-10 transition-all duration-300 group-hover:text-gray-900 dark:group-hover:text-white">
+                  About Us
+                </span>
+                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
+                <span className="absolute inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-md group-hover:shadow-lg border border-white/20 dark:border-gray-700/20" style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}></span>
               </Link>
               <button
-                className="font-montserrat text-gray-700 dark:text-gray-300 hover:text-rose-600 dark:hover:text-rose-400 font-light transition-colors text-xs lg:text-sm uppercase tracking-widest flex items-center gap-1"
+                className={`group relative font-montserrat text-gray-700 dark:text-gray-300 font-light transition-all duration-300 text-xs lg:text-sm uppercase tracking-widest flex items-center gap-1 px-3 py-1.5 -mx-3 -my-1.5 rounded-md ${
+                  activeMenu === 'treatments' ? 'text-gray-900 dark:text-white' : ''
+                }`}
                 onMouseEnter={() => handleMenuEnter('treatments')}
                 onMouseLeave={handleMenuLeave}
               >
-                Book Now
-                <ChevronDown className="w-2.5 h-2.5" />
+                <span className="relative z-10 transition-all duration-300 group-hover:text-gray-900 dark:group-hover:text-white">
+                  Book Now
+                </span>
+                <ChevronDown className={`relative z-10 w-2.5 h-2.5 transition-all duration-300 ${activeMenu === 'treatments' ? 'rotate-180 text-gray-900 dark:text-white' : 'group-hover:text-gray-900 dark:group-hover:text-white'}`} />
+                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
+                {/* Blurred white/black background */}
+                <span className={`absolute inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-md transition-all duration-300 border border-white/20 dark:border-gray-700/20 ${
+                  activeMenu === 'treatments' ? 'opacity-100 shadow-lg' : 'opacity-0 group-hover:opacity-100 shadow-md group-hover:shadow-lg'
+                }`} style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}></span>
+                {/* Gradient overlay */}
+                <span className={`absolute inset-0 bg-gradient-to-r from-rose-500/10 via-pink-500/10 to-rose-600/10 rounded-md transition-all duration-300 ${
+                  activeMenu === 'treatments' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                }`} style={{ backdropFilter: 'blur(4px)' }}></span>
               </button>
               <button
-                className="font-montserrat text-gray-700 dark:text-gray-300 hover:text-rose-600 dark:hover:text-rose-400 font-light transition-colors text-xs lg:text-sm uppercase tracking-widest flex items-center gap-1"
+                className={`group relative font-montserrat text-gray-700 dark:text-gray-300 font-light transition-all duration-300 text-xs lg:text-sm uppercase tracking-widest flex items-center gap-1 px-3 py-1.5 -mx-3 -my-1.5 rounded-md ${
+                  activeMenu === 'conditions' ? 'text-gray-900 dark:text-white' : ''
+                }`}
                 onMouseEnter={() => handleMenuEnter('conditions')}
                 onMouseLeave={handleMenuLeave}
               >
-                By Condition
-                <ChevronDown className="w-2.5 h-2.5" />
+                <span className="relative z-10 transition-all duration-300 group-hover:text-gray-900 dark:group-hover:text-white">
+                  By Condition
+                </span>
+                <ChevronDown className={`relative z-10 w-2.5 h-2.5 transition-all duration-300 ${activeMenu === 'conditions' ? 'rotate-180 text-gray-900 dark:text-white' : 'group-hover:text-gray-900 dark:group-hover:text-white'}`} />
+                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
+                {/* Blurred white/black background */}
+                <span className={`absolute inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-md transition-all duration-300 border border-white/20 dark:border-gray-700/20 ${
+                  activeMenu === 'conditions' ? 'opacity-100 shadow-lg' : 'opacity-0 group-hover:opacity-100 shadow-md group-hover:shadow-lg'
+                }`} style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}></span>
+                {/* Gradient overlay */}
+                <span className={`absolute inset-0 bg-gradient-to-r from-rose-500/10 via-pink-500/10 to-rose-600/10 rounded-md transition-all duration-300 ${
+                  activeMenu === 'conditions' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                }`} style={{ backdropFilter: 'blur(4px)' }}></span>
               </button>
             </nav>
 
@@ -212,22 +342,23 @@ export default function HeaderAesthetics() {
               href="/" 
               className="group absolute left-1/2 transform -translate-x-1/2 flex flex-col items-center justify-center text-center px-4 sm:px-6 transition-all duration-300 hover:scale-105"
             >
-              <h1 className={`font-playfair font-light text-gray-900 dark:text-white whitespace-nowrap leading-tight transition-all duration-300 group-hover:bg-gradient-to-r group-hover:from-rose-500 group-hover:via-pink-500 group-hover:to-rose-600 group-hover:bg-clip-text group-hover:text-transparent ${
+              <h1 className={`font-playfair font-light text-gray-900 dark:text-white whitespace-nowrap leading-tight transition-all duration-300 group-hover:brightness-110 group-hover:drop-shadow-lg ${
                 scrolled ? "text-lg sm:text-xl md:text-2xl lg:text-3xl" : "text-xl sm:text-2xl md:text-3xl lg:text-4xl"
               }`}>
                 EGP AESTHETICS
               </h1>
-              <p className={`font-montserrat text-gray-500 dark:text-gray-400 font-light tracking-[0.3em] uppercase transition-all duration-300 group-hover:text-rose-400 dark:group-hover:text-rose-300 group-hover:tracking-[0.4em] ${
+              <p className={`font-montserrat text-gray-500 dark:text-gray-400 font-light tracking-[0.3em] uppercase transition-all duration-300 group-hover:text-[#9d9585] dark:group-hover:text-[#c9c1b0] group-hover:tracking-[0.4em] ${
                 scrolled ? "text-[8px] sm:text-[9px] mt-0.5" : "text-[10px] sm:text-xs mt-1"
               }`}>
                 London
               </p>
               
-              {/* Subtle glow effect on hover */}
-              <div className="absolute inset-0 -z-10 rounded-full bg-gradient-to-r from-rose-500/10 via-pink-500/10 to-rose-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl scale-110"></div>
+              {/* Subtle glow effect on hover - Different for light and dark themes */}
+              <div className="absolute inset-0 -z-10 rounded-full bg-rose-500/20 dark:bg-[#ddd5c3]/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl scale-110"></div>
+              <div className="absolute inset-0 -z-10 rounded-full bg-pink-500/15 dark:bg-[#c9c1b0]/25 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-lg scale-105"></div>
               
               {/* Animated underline effect */}
-              <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-px bg-gradient-to-r from-rose-500 to-pink-500 transition-all duration-300 group-hover:w-full"></div>
+              <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-px bg-gradient-to-r from-rose-500 via-pink-500 to-rose-500 dark:from-[#c9c1b0] dark:via-[#ddd5c3] dark:to-[#c9c1b0] transition-all duration-300 group-hover:w-full"></div>
             </Link>
 
             {/* Right Navigation Links */}
@@ -236,30 +367,41 @@ export default function HeaderAesthetics() {
             }`}>
               <Link
                 href="/blog"
-                className={`font-montserrat text-gray-700 dark:text-gray-300 hover:text-rose-600 dark:hover:text-rose-400 font-light transition-all duration-300 uppercase tracking-widest ${
+                className={`group relative font-montserrat text-gray-700 dark:text-gray-300 font-light transition-all duration-300 uppercase tracking-widest px-3 py-1.5 -mx-3 -my-1.5 rounded-md ${
                   scrolled ? "text-xs" : "text-xs lg:text-sm"
                 }`}
               >
-                Blog
+                <span className="relative z-10 transition-all duration-300 group-hover:text-gray-900 dark:group-hover:text-white">
+                  Blog
+                </span>
+                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
+                <span className="absolute inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-md group-hover:shadow-lg border border-white/20 dark:border-gray-700/20" style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}></span>
               </Link>
               <Link
                 href="/press"
-                className={`font-montserrat text-gray-700 dark:text-gray-300 hover:text-rose-600 dark:hover:text-rose-400 font-light transition-all duration-300 uppercase tracking-widest ${
+                className={`group relative font-montserrat text-gray-700 dark:text-gray-300 font-light transition-all duration-300 uppercase tracking-widest px-3 py-1.5 -mx-3 -my-1.5 rounded-md ${
                   scrolled ? "text-xs" : "text-xs lg:text-sm"
                 }`}
               >
-                Awards/ Press
+                <span className="relative z-10 transition-all duration-300 group-hover:text-gray-900 dark:group-hover:text-white">
+                  Awards/ Press
+                </span>
+                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
+                <span className="absolute inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-md group-hover:shadow-lg border border-white/20 dark:border-gray-700/20" style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}></span>
               </Link>
               <Link
                 href="/membership"
-                className={`font-montserrat text-gray-700 dark:text-gray-300 hover:text-rose-600 dark:hover:text-rose-400 font-light transition-all duration-300 uppercase tracking-widest ${
+                className={`group relative font-montserrat text-gray-700 dark:text-gray-300 font-light transition-all duration-300 uppercase tracking-widest px-3 py-1.5 -mx-3 -my-1.5 rounded-md ${
                   scrolled ? "text-xs" : "text-xs lg:text-sm"
                 }`}
               >
-                Skin Membership
+                <span className="relative z-10 transition-all duration-300 group-hover:text-gray-900 dark:group-hover:text-white">
+                  Skin Membership
+                </span>
+                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
+                <span className="absolute inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-md group-hover:shadow-lg border border-white/20 dark:border-gray-700/20" style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}></span>
               </Link>
             </nav>
-
             {/* Mobile Theme Toggle */}
             <div className="lg:hidden">
               <ThemeToggleButton />
@@ -271,191 +413,76 @@ export default function HeaderAesthetics() {
       {/* Mega Menu Dropdowns */}
       {(activeMenu === 'treatments' || activeMenu === 'conditions') && (
         <div 
-          className="absolute left-0 right-0 top-full z-50 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 shadow-lg"
+          className="absolute left-0 right-0 top-full z-50 shadow-2xl overflow-hidden backdrop-blur-xl"
+          style={{
+            animation: 'slideDown 0.3s ease-out',
+          }}
           onMouseEnter={() => handleMenuEnter(activeMenu)}
           onMouseLeave={handleMenuLeave}
         >
+          {/* Transparent blurred background - Glassmorphism effect */}
+          <div 
+            className="absolute inset-0 min-h-full bg-white/70 dark:bg-black/70 backdrop-blur-xl backdrop-saturate-150"
+          ></div>
+          {/* Additional transparent blur layer for depth */}
+          <div 
+            className="absolute inset-0 min-h-full bg-white/50 dark:bg-black/50 backdrop-blur-lg"
+          ></div>
+          {/* Subtle border for definition */}
+          <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-gray-200/50 dark:via-gray-700/50 to-transparent z-20"></div>
+          {/* Content wrapper */}
+          <div className="relative z-10">
           <div className="container mx-auto px-4 py-8">
-            <div className="grid grid-cols-4 gap-8">
+            <div className={`grid gap-8 ${
+              bookNowCategories.length === 1 ? 'grid-cols-1' :
+              bookNowCategories.length === 2 ? 'grid-cols-2' :
+              bookNowCategories.length === 3 ? 'grid-cols-3' :
+              bookNowCategories.length >= 4 ? 'grid-cols-4' : 'grid-cols-4'
+            }`}>
               {activeMenu === 'treatments' && (
                 <>
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xs font-light text-gray-700 dark:text-gray-300 uppercase tracking-widest font-montserrat">
-                        Face
-                      </h3>
-                      <Link
-                        href="/services?category=Face"
-                        onClick={() => setActiveMenu(null)}
-                        className="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors font-medium"
-                      >
-                        View All →
-                      </Link>
-                    </div>
-                    <ul className="space-y-3">
-                      {[
-                        { name: "Free Discovery Consultation", price: "Free" },
-                        { name: "Digital Skin Analysis", price: "£50" },
-                        { name: "PRP", price: "£480" },
-                        { name: "Exosomes", price: "£550" },
-                        { name: "Polynucleotides", price: "£390" },
-                        { name: "5-Point Facelift", price: "£950" },
-                        { name: "Profhilo", price: "£390" },
-                        { name: "Sculptra", price: "£790" },
-                        { name: "Skin Boosters", price: "£230" },
-                        { name: "Deep Cleansing Facial", price: "£170" },
-                        { name: "Medical Skin Peels", price: "£200" },
-                        { name: "Deep Hydra Detox Facial", price: "£200" },
-                        { name: "NCTF Under-Eye Skin Booster", price: "£159" },
-                        { name: "3-Step Under-Eye Treatment", price: "£390" },
-                        { name: "Injectable Mesotherapy", price: "£170" },
-                        { name: "Microneedling Facial", price: "£170" },
-                        { name: "Full Face Balancing", price: "£790" }
-                      ].map((item) => (
-                        <li key={item.name}>
+                  {bookNowCategories.map((category) => {
+                    const categoryServices = bookNowServices[category.id]?.services || [];
+                    return (
+                      <div key={category.id}>
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-xs font-light text-gray-700 dark:text-gray-300 uppercase tracking-widest font-montserrat">
+                            {category.name}
+                          </h3>
                           <Link
-                            href={`/book?service=${item.name.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '')}`}
-                            className="group flex items-start justify-between gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors font-montserrat"
+                            href={`/services?category=${encodeURIComponent(category.name)}`}
                             onClick={() => setActiveMenu(null)}
+                            className="group relative text-xs font-medium transition-all duration-300"
                           >
-                            <span className="group-hover:translate-x-1 transition-transform">
-                              {item.name}
+                            <span className="relative z-10 bg-gradient-to-r from-rose-600 via-pink-600 to-rose-600 bg-clip-text text-transparent group-hover:from-rose-700 group-hover:via-pink-700 group-hover:to-rose-700 transition-all duration-300">
+                              View All
                             </span>
-                            <span className="font-semibold bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent whitespace-nowrap">
-                              {item.price}
-                            </span>
+                            <span className="relative z-10 ml-1 inline-block group-hover:translate-x-1 transition-transform duration-300">→</span>
                           </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xs font-light text-gray-700 dark:text-gray-300 uppercase tracking-widest font-montserrat">
-                        Anti-Wrinkle Injections
-                      </h3>
-                      <Link
-                        href="/services?category=Anti-Wrinkle%20Injections"
-                        onClick={() => setActiveMenu(null)}
-                        className="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors font-medium"
-                      >
-                        View All →
-                      </Link>
-                    </div>
-                    <ul className="space-y-3">
-                      {[
-                        { name: "Baby Botox", price: "£199" },
-                        { name: "Brow Lift", price: "£279" },
-                        { name: "Eye Wrinkles", price: "£179" },
-                        { name: "Forehead Lines", price: "£179" },
-                        { name: "Glabella Lines", price: "£179" },
-                        { name: "Barcode Lips", price: "£129" },
-                        { name: "Bunny Lines", price: "£129" },
-                        { name: "Lip Lines", price: "£179" },
-                        { name: "Gummy Smile", price: "£129" },
-                        { name: "Neck Lift", price: "£329" },
-                        { name: "Jaw Slimming", price: "£279" },
-                        { name: "Pebble Chin", price: "£179" },
-                        { name: "Bruxism (Deep Grinding)", price: "£279" }
-                      ].map((item) => (
-                        <li key={item.name}>
-                          <Link
-                            href={`/book?service=${item.name.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '')}`}
-                            className="group flex items-start justify-between gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors font-montserrat"
-                            onClick={() => setActiveMenu(null)}
-                          >
-                            <span className="group-hover:translate-x-1 transition-transform">
-                              {item.name}
-                            </span>
-                            <span className="font-semibold bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent whitespace-nowrap">
-                              {item.price}
-                            </span>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xs font-light text-gray-700 dark:text-gray-300 uppercase tracking-widest font-montserrat">
-                        Fillers
-                      </h3>
-                      <Link
-                        href="/services?category=Fillers"
-                        onClick={() => setActiveMenu(null)}
-                        className="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors font-medium"
-                      >
-                        View All →
-                      </Link>
-                    </div>
-                    <ul className="space-y-3">
-                      {[
-                        { name: "Cheek & Mid-Face Filler", price: "£390" },
-                        { name: "Chin Filler", price: "£290" },
-                        { name: "Filler for Marionette Lines", price: "£290" },
-                        { name: "Filler for Nasolabial Folds", price: "£290" },
-                        { name: "Jawline Filler", price: "£550" },
-                        { name: "Lip Enhancement", price: "£290" },
-                        { name: "Lip Hydration", price: "£190" },
-                        { name: "Tear Trough Filler", price: "£390" },
-                        { name: "Temple Filler", price: "£290" },
-                        { name: "Filler Dissolving", price: "£150" }
-                      ].map((item) => (
-                        <li key={item.name}>
-                          <Link
-                            href={`/book?service=${item.name.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '')}`}
-                            className="group flex items-start justify-between gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors font-montserrat"
-                            onClick={() => setActiveMenu(null)}
-                          >
-                            <span className="group-hover:translate-x-1 transition-transform">
-                              {item.name}
-                            </span>
-                            <span className="font-semibold bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent whitespace-nowrap">
-                              {item.price}
-                            </span>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xs font-light text-gray-700 dark:text-gray-300 uppercase tracking-widest font-montserrat">
-                        Body
-                      </h3>
-                      <Link
-                        href="/services?category=Body"
-                        onClick={() => setActiveMenu(null)}
-                        className="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors font-medium"
-                      >
-                        View All →
-                      </Link>
-                    </div>
-                    <ul className="space-y-3">
-                      {[
-                        { name: "Body Fat Burning Mesotherapy (20×20 cm)", price: "£170" },
-                        { name: "Radiofrequency & Ultrasound for Skin Tightening", price: "£250" },
-                        { name: "Fat Freezing Treatment (Abdomen)", price: "£200" },
-                        { name: "Ultrasound Lift & Tighten Face/Body", price: "£190" },
-                        { name: "Combined with Mesotherapy", price: "£350" }
-                      ].map((item) => (
-                        <li key={item.name}>
-                          <Link
-                            href={`/book?service=${item.name.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '')}`}
-                            className="group flex items-start justify-between gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors font-montserrat"
-                            onClick={() => setActiveMenu(null)}
-                          >
-                            <span className="group-hover:translate-x-1 transition-transform">
-                              {item.name}
-                            </span>
-                            <span className="font-semibold bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent whitespace-nowrap">
-                              {item.price}
-                            </span>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                        </div>
+                        <ul className="space-y-2 max-h-[600px] overflow-y-auto menu-scroll pr-2">
+                          {categoryServices.map((item) => (
+                            <li key={item.name}>
+                              <Link
+                                href={`/book?service=${item.slug}`}
+                                className="group relative flex items-start justify-between gap-2 px-2 py-2 -mx-2 rounded-md text-sm text-gray-700 dark:text-gray-300 font-montserrat transition-all duration-300 hover:bg-gradient-to-r hover:from-rose-50/50 hover:via-pink-50/50 hover:to-rose-50/50 dark:hover:from-rose-950/10 dark:hover:via-pink-950/10 dark:hover:to-rose-950/10"
+                                onClick={() => setActiveMenu(null)}
+                              >
+                                <span className="relative z-10 group-hover:translate-x-1 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-all duration-300">
+                                  {item.name}
+                                  {/* Animated underline */}
+                                  <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
+                                </span>
+                                <span className="relative z-10 font-semibold bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 bg-clip-text text-transparent whitespace-nowrap group-hover:scale-110 transition-transform duration-300">
+                                  £{item.price}
+                                </span>
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    );
+                  })}
                 </>
               )}
               
@@ -469,38 +496,27 @@ export default function HeaderAesthetics() {
                       <Link
                         href="/conditions"
                         onClick={() => setActiveMenu(null)}
-                        className="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors font-medium"
+                        className="group relative text-xs font-medium transition-all duration-300"
                       >
-                        View All →
+                        <span className="relative z-10 bg-gradient-to-r from-rose-600 via-pink-600 to-rose-600 bg-clip-text text-transparent group-hover:from-rose-700 group-hover:via-pink-700 group-hover:to-rose-700 transition-all duration-300">
+                          View All
+                        </span>
+                        <span className="relative z-10 ml-1 inline-block group-hover:translate-x-1 transition-transform duration-300">→</span>
                       </Link>
                     </div>
-                    <ul className="space-y-3">
-                      {[
-                        "Acne & Acne Scarring",
-                        "Rosacea",
-                        "Hyperpigmentation & Melasma",
-                        "Barcode Lines Around Lips",
-                        "Bruxism",
-                        "Dark Under-Eye Circles",
-                        "Double Chin",
-                        "Nasolabial Folds",
-                        "Shadows Around Nasolabial Folds",
-                        "Under-Eye Hollows",
-                        "Eye Bags",
-                        "Flat Cheeks",
-                        "Flat / Pebble Chin",
-                        "Gummy Smile",
-                        "Heavy Lower Face",
-                        "Jowling",
-                        "Low Eyebrows"
-                      ].map((condition) => (
-                        <li key={condition}>
+                    <ul className="space-y-2 max-h-[600px] overflow-y-auto menu-scroll pr-2">
+                      {conditionsByCategory.face.map((condition) => (
+                        <li key={condition.id}>
                           <Link
-                            href={`/conditions/${condition.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '')}`}
-                            className="text-sm text-gray-600 dark:text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors font-montserrat"
+                            href={`/conditions/${condition.slug}`}
+                            className="group relative block px-2 py-2 -mx-2 rounded-md text-sm text-gray-700 dark:text-gray-300 font-montserrat transition-all duration-300 hover:bg-gradient-to-r hover:from-rose-50/50 hover:via-pink-50/50 hover:to-rose-50/50 dark:hover:from-rose-950/10 dark:hover:via-pink-950/10 dark:hover:to-rose-950/10"
                             onClick={() => setActiveMenu(null)}
                           >
-                            {condition}
+                            <span className="relative z-10 group-hover:translate-x-1 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-all duration-300 inline-block">
+                              {condition.title}
+                              {/* Animated underline */}
+                              <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
+                            </span>
                           </Link>
                         </li>
                       ))}
@@ -514,52 +530,30 @@ export default function HeaderAesthetics() {
                       <Link
                         href="/conditions?category=Body"
                         onClick={() => setActiveMenu(null)}
-                        className="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors font-medium"
+                        className="group relative text-xs font-medium transition-all duration-300"
                       >
-                        View All →
+                        <span className="relative z-10 bg-gradient-to-r from-rose-600 via-pink-600 to-rose-600 bg-clip-text text-transparent group-hover:from-rose-700 group-hover:via-pink-700 group-hover:to-rose-700 transition-all duration-300">
+                          View All
+                        </span>
+                        <span className="relative z-10 ml-1 inline-block group-hover:translate-x-1 transition-transform duration-300">→</span>
                       </Link>
                     </div>
-                    <ul className="space-y-3">
-                      {[
-                        "Cellulite (Thighs, Buttocks, Abdomen)",
-                        "Stubborn Belly Fat / Abdominal Fat",
-                        "Love Handles / Flanks",
-                        "Sagging Skin (Skin Laxity)",
-                        "Stretch Marks",
-                        "Arm Fat & Bingo Wings",
-                        "Thigh Fat & Inner Thigh Laxity",
-                        "Double Chin / Jawline Fat",
-                        "Post-Pregnancy Tummy",
-                        "Water Retention / Bloating / Swelling"
-                      ].map((condition) => {
-                        // Create proper URL mapping for body conditions
-                        const urlMapping: { [key: string]: string } = {
-                          "Cellulite (Thighs, Buttocks, Abdomen)": "cellulite-thighs-buttocks-abdomen",
-                          "Stubborn Belly Fat / Abdominal Fat": "stubborn-belly-fat-abdominal-fat",
-                          "Love Handles / Flanks": "love-handles-flanks",
-                          "Sagging Skin (Skin Laxity)": "sagging-skin-skin-laxity",
-                          "Stretch Marks": "stretch-marks",
-                          "Arm Fat & Bingo Wings": "arm-fat-bingo-wings",
-                          "Thigh Fat & Inner Thigh Laxity": "thigh-fat-inner-thigh-laxity",
-                          "Double Chin / Jawline Fat": "double-chin-jawline-fat",
-                          "Post-Pregnancy Tummy": "post-pregnancy-tummy",
-                          "Water Retention / Bloating / Swelling": "water-retention-bloating-swelling"
-                        };
-                        
-                        const url = urlMapping[condition] || condition.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '');
-                        
-                        return (
-                          <li key={condition}>
-                            <Link
-                              href={`/conditions/${url}`}
-                              className="text-sm text-gray-600 dark:text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors font-montserrat"
-                              onClick={() => setActiveMenu(null)}
-                            >
-                              {condition}
-                            </Link>
-                          </li>
-                        );
-                      })}
+                    <ul className="space-y-2 max-h-[600px] overflow-y-auto menu-scroll pr-2">
+                      {conditionsByCategory.body.map((condition) => (
+                        <li key={condition.id}>
+                          <Link
+                            href={`/conditions/${condition.slug}`}
+                            className="group relative block px-2 py-2 -mx-2 rounded-md text-sm text-gray-700 dark:text-gray-300 font-montserrat transition-all duration-300 hover:bg-gradient-to-r hover:from-rose-50/50 hover:via-pink-50/50 hover:to-rose-50/50 dark:hover:from-rose-950/10 dark:hover:via-pink-950/10 dark:hover:to-rose-950/10"
+                            onClick={() => setActiveMenu(null)}
+                          >
+                            <span className="relative z-10 group-hover:translate-x-1 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-all duration-300 inline-block">
+                              {condition.title}
+                              {/* Animated underline */}
+                              <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
+                            </span>
+                          </Link>
+                        </li>
+                      ))}
                     </ul>
                   </div>
                   <div></div>
@@ -567,6 +561,7 @@ export default function HeaderAesthetics() {
                 </>
               )}
             </div>
+          </div>
           </div>
         </div>
       )}
@@ -608,68 +603,39 @@ export default function HeaderAesthetics() {
                 </button>
                 {activeMenu === 'treatments' && (
                   <div className="mt-2 pl-4 sm:pl-6 space-y-3">
-                    <div>
-                      <h4 className="text-xs font-light text-gray-600 dark:text-gray-400 mb-2 uppercase tracking-widest font-montserrat">
-                        Face
-                      </h4>
-                      <ul className="space-y-1">
-                        {[
-                          { name: "Free Discovery Consultation", price: "Free" },
-                          { name: "Digital Skin Analysis", price: "£50" },
-                          { name: "PRP", price: "£480" },
-                          { name: "Exosomes", price: "£550" },
-                          { name: "Polynucleotides", price: "£390" },
-                          { name: "5-Point Facelift", price: "£950" }
-                        ].map((item) => (
-                          <li key={item.name}>
-                            <Link
-                              href={`/book?service=${item.name.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '')}`}
-                              className="flex items-start justify-between gap-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-rose-50 dark:hover:bg-gray-800 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg transition-colors active:scale-95 touch-manipulation font-montserrat"
-                              onClick={() => {
-                                setMobileMenuOpen(false);
-                                setActiveMenu(null);
-                              }}
-                            >
-                              <span className="flex-1">{item.name}</span>
-                              <span className="font-semibold bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent whitespace-nowrap text-sm">
-                                {item.price}
-                              </span>
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-light text-gray-600 dark:text-gray-400 mb-2 uppercase tracking-widest font-montserrat">
-                        Anti-Wrinkle Injections
-                      </h4>
-                      <ul className="space-y-1">
-                        {[
-                          { name: "Baby Botox", price: "£199" },
-                          { name: "Brow Lift", price: "£279" },
-                          { name: "Eye Wrinkles", price: "£179" },
-                          { name: "Forehead Lines", price: "£179" },
-                          { name: "Glabella Lines", price: "£179" },
-                          { name: "Barcode Lips", price: "£129" }
-                        ].map((item) => (
-                          <li key={item.name}>
-                            <Link
-                              href={`/book?service=${item.name.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '')}`}
-                              className="flex items-start justify-between gap-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-rose-50 dark:hover:bg-gray-800 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg transition-colors active:scale-95 touch-manipulation font-montserrat"
-                              onClick={() => {
-                                setMobileMenuOpen(false);
-                                setActiveMenu(null);
-                              }}
-                            >
-                              <span className="flex-1">{item.name}</span>
-                              <span className="font-semibold bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent whitespace-nowrap text-sm">
-                                {item.price}
-                              </span>
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                    {bookNowCategories.map((category) => {
+                      const categoryServices = bookNowServices[category.id]?.services || [];
+                      return (
+                        <div key={category.id}>
+                          <h4 className="text-xs font-light text-gray-600 dark:text-gray-400 mb-2 uppercase tracking-widest font-montserrat">
+                            {category.name}
+                          </h4>
+                          <ul className="space-y-1 max-h-[400px] overflow-y-auto menu-scroll pr-2">
+                            {categoryServices.map((item) => (
+                              <li key={item.name}>
+                                <Link
+                                  href={`/book?service=${item.slug}`}
+                                  className="group relative flex items-start justify-between gap-2 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-rose-50/50 dark:hover:bg-gray-800/50 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg transition-all duration-300 active:scale-95 touch-manipulation font-montserrat"
+                                  onClick={() => {
+                                    setMobileMenuOpen(false);
+                                    setActiveMenu(null);
+                                  }}
+                                >
+                                  <span className="relative flex-1">
+                                    {item.name}
+                                    {/* Animated underline */}
+                                    <span className="absolute left-0 -bottom-0.5 w-0 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
+                                  </span>
+                                  <span className="font-semibold bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent whitespace-nowrap text-sm group-hover:scale-105 transition-transform duration-300">
+                                    £{item.price}
+                                  </span>
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </li>
@@ -700,25 +666,22 @@ export default function HeaderAesthetics() {
                           View All →
                         </Link>
                       </div>
-                      <ul className="space-y-1">
-                        {[
-                          "Acne & Acne Scarring",
-                          "Rosacea",
-                          "Hyperpigmentation & Melasma",
-                          "Dark Under-Eye Circles",
-                          "Double Chin",
-                          "Nasolabial Folds"
-                        ].map((condition) => (
-                          <li key={condition}>
+                      <ul className="space-y-1 max-h-[400px] overflow-y-auto menu-scroll pr-2">
+                        {conditionsByCategory.face.map((condition) => (
+                          <li key={condition.id}>
                             <Link
-                              href={`/conditions/${condition.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '')}`}
-                              className="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-rose-50 dark:hover:bg-gray-800 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg transition-colors active:scale-95 touch-manipulation font-montserrat"
+                              href={`/conditions/${condition.slug}`}
+                              className="group relative block px-3 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-rose-50/50 dark:hover:bg-gray-800/50 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg transition-all duration-300 active:scale-95 touch-manipulation font-montserrat"
                               onClick={() => {
                                 setMobileMenuOpen(false);
                                 setActiveMenu(null);
                               }}
                             >
-                              {condition}
+                              <span className="relative">
+                                {condition.title}
+                                {/* Animated underline */}
+                                <span className="absolute left-0 -bottom-0.5 w-0 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
+                              </span>
                             </Link>
                           </li>
                         ))}
@@ -737,39 +700,25 @@ export default function HeaderAesthetics() {
                           View All →
                         </Link>
                       </div>
-                      <ul className="space-y-1">
-                        {[
-                          "Cellulite (Thighs, Buttocks, Abdomen)",
-                          "Stubborn Belly Fat / Abdominal Fat",
-                          "Love Handles / Flanks",
-                          "Sagging Skin (Skin Laxity)",
-                          "Stretch Marks",
-                          "Arm Fat & Bingo Wings"
-                        ].map((condition) => {
-                          // Create proper URL mapping for body conditions
-                          const urlMapping: { [key: string]: string } = {
-                            "Cellulite (Thighs, Buttocks, Abdomen)": "cellulite-thighs-buttocks-abdomen",
-                            "Stubborn Belly Fat / Abdominal Fat": "stubborn-belly-fat-abdominal-fat",
-                            "Love Handles / Flanks": "love-handles-flanks",
-                            "Sagging Skin (Skin Laxity)": "sagging-skin-skin-laxity",
-                            "Stretch Marks": "stretch-marks",
-                            "Arm Fat & Bingo Wings": "arm-fat-bingo-wings"
-                          };
-                          
-                          const slug = urlMapping[condition] || condition.toLowerCase().replace(/\s+/g, '-').replace(/[&/]/g, '').replace(/[()]/g, '');
-                          
-                          return (
-                            <li key={condition}>
-                              <Link
-                                href={`/conditions/${slug}`}
-                                className="text-xs text-gray-600 dark:text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors font-montserrat"
-                                onClick={() => setMobileMenuOpen(false)}
-                              >
-                                {condition}
-                              </Link>
-                            </li>
-                          );
-                        })}
+                      <ul className="space-y-1 max-h-[400px] overflow-y-auto menu-scroll pr-2">
+                        {conditionsByCategory.body.map((condition) => (
+                          <li key={condition.id}>
+                            <Link
+                              href={`/conditions/${condition.slug}`}
+                              className="group relative block px-3 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-rose-50/50 dark:hover:bg-gray-800/50 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg transition-all duration-300 active:scale-95 touch-manipulation font-montserrat"
+                              onClick={() => {
+                                setMobileMenuOpen(false);
+                                setActiveMenu(null);
+                              }}
+                            >
+                              <span className="relative">
+                                {condition.title}
+                                {/* Animated underline */}
+                                <span className="absolute left-0 -bottom-0.5 w-0 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
+                              </span>
+                            </Link>
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   </div>

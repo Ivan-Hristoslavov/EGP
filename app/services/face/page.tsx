@@ -1,34 +1,31 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useMemo } from "react";
 import Link from "next/link";
 import { Calendar, Clock, ArrowRight } from "lucide-react";
 import ButtonBookNow from "@/components/ButtonBookNow";
-
-export const metadata: Metadata = {
-  title: "Face Treatments in London",
-  description: "Advanced facial treatments including PRP, EXOSOMES, Profhilo, skin boosters, and medical skin peels. Expert aesthetic treatments in London.",
-};
-
-const faceServices = [
-  { name: "Free Discovery Consultation", price: "Free", duration: 30, slug: "free-consultation", featured: true },
-  { name: "Digital Skin Analysis & Consultation", price: 50, duration: 45, slug: "skin-analysis" },
-  { name: "PRP Treatment", price: 480, duration: 60, slug: "prp", popular: true },
-  { name: "EXOSOMES", price: 550, duration: 60, slug: "exosomes" },
-  { name: "Polynucleotides", price: 390, duration: 45, slug: "polynucleotides" },
-  { name: "5-Point Facelift", price: 950, duration: 90, slug: "5-point-facelift", featured: true },
-  { name: "Profhilo", price: 390, duration: 30, slug: "profhilo", popular: true },
-  { name: "Sculptra", price: 790, duration: 60, slug: "sculptra" },
-  { name: "Skin Boosters", price: 230, duration: 30, slug: "skin-boosters" },
-  { name: "Deep Cleansing Facial", price: 170, duration: 60, slug: "deep-cleansing-facial" },
-  { name: "Medical Skin Peels", price: 200, duration: 45, slug: "medical-skin-peels" },
-  { name: "Deep Hydra Detox Facial", price: 180, duration: 60, slug: "hydra-detox-facial" },
-  { name: "NCTF Under-Eye Skin Booster", price: 159, duration: 20, slug: "nctf-under-eye" },
-  { name: "3-Step Under-Eye Signature Treatment", price: 390, duration: 45, slug: "3-step-under-eye", featured: true },
-  { name: "Injectable Mesotherapy", price: 250, duration: 30, slug: "injectable-mesotherapy" },
-  { name: "Microneedling Facial", price: 170, duration: 60, slug: "microneedling-facial" },
-  { name: "Full Face Balancing", price: 790, duration: 90, slug: "full-face-balancing" },
-];
+import { useServices } from "@/hooks/useServices";
 
 export default function FaceTreatmentsPage() {
+  const { services, isLoading } = useServices();
+
+  // Filter services for Face category
+  const faceServices = useMemo(() => {
+    return services.filter(service => service.category.name === 'FACE');
+  }, [services]);
+
+  // Show loading state while services are being fetched
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading face treatments...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero */}
@@ -58,14 +55,9 @@ export default function FaceTreatmentsPage() {
               >
                 {/* Badges */}
                 <div className="flex gap-2 mb-4">
-                  {service.featured && (
+                  {service.is_featured && (
                     <span className="px-3 py-1 bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-xs font-bold rounded-full">
                       FEATURED
-                    </span>
-                  )}
-                  {service.popular && (
-                    <span className="px-3 py-1 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-xs font-bold rounded-full">
-                      POPULAR
                     </span>
                   )}
                 </div>
@@ -86,14 +78,8 @@ export default function FaceTreatmentsPage() {
                 {/* Price & CTA */}
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                   <div>
-                    {typeof service.price === "number" ? (
-                      <>
-                        <span className="text-sm text-gray-600">From</span>
-                        <div className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">£{service.price}</div>
-                      </>
-                    ) : (
-                      <div className="text-2xl font-bold bg-gradient-to-r from-yellow-500 to-amber-500 bg-clip-text text-transparent">{service.price}</div>
-                    )}
+                    <span className="text-sm text-gray-600">From</span>
+                    <div className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">£{service.price}</div>
                   </div>
                   <div className="flex items-center gap-2 bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent font-semibold group-hover:gap-3 transition-all">
                     <span>Learn More</span>

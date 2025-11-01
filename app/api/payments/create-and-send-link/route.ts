@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     // Get customer and booking details
     const { data: customer } = await supabase
       .from("customers")
-      .select("name, email")
+      .select("first_name, last_name, email")
       .eq("id", customer_id)
       .single();
 
@@ -45,6 +45,12 @@ export async function POST(request: NextRequest) {
         { status: 404 }
       );
     }
+
+    // Create customer name from first_name and last_name
+    const customerName =
+      customer.first_name && customer.last_name
+        ? `${customer.first_name} ${customer.last_name}`
+        : customer.first_name || customer.last_name || "Customer";
 
     // Create payment record in database first
     const { data: payment, error: paymentError } = await supabase
@@ -84,7 +90,7 @@ export async function POST(request: NextRequest) {
         customer_id,
         booking_id: booking_id || "",
         payment_id: payment.id,
-        customer_name: customer.name,
+        customer_name: customerName,
         currency,
         created_via: "email_link",
       },

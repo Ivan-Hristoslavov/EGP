@@ -14,7 +14,7 @@ import LayoutMain from "@/components/LayoutMain";
 import { getAdminProfile } from "@/lib/admin-profile";
 import { createClient } from "@/lib/supabase/server";
 
-// Using Gurmukhi MN font loaded via CSS @font-face
+// Using Montserrat font loaded via CSS @font-face
 
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getAdminProfile();
@@ -318,7 +318,7 @@ export default async function RootLayout({
       </head>
       <body
         className={clsx(
-          "min-h-screen text-foreground bg-background font-gurmukhi antialiased"
+          "min-h-screen text-foreground bg-background font-sans antialiased"
         )}
         suppressHydrationWarning
       >

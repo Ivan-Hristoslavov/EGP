@@ -292,7 +292,7 @@
 3. Personalized Care (pink gradient)
 4. Natural Results (purple gradient)
 5. Flexible Appointments (orange gradient)
-6. 98% Satisfaction (yellow gradient)
+6. 100% Satisfaction (yellow gradient)
 
 #### 4. `components/SectionBeforeAfter.tsx`
 **Features:**

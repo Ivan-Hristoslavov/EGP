@@ -106,42 +106,6 @@ export function FAQSection() {
             </div>
           ))}
         </div>
-
-        {/* Contact CTA */}
-        <div className="mt-16 text-center">
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl p-8 text-white">
-            <h3 className="text-2xl font-bold mb-4">Still have questions?</h3>
-            <p className="text-white/90 mb-6 max-w-2xl mx-auto">
-              Our friendly team is here to help. Get in touch and we'll answer
-              any questions you have about our services.
-            </p>
-            <a
-              className="inline-flex items-center bg-white text-blue-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-              href="#contact"
-              onClick={(e) => {
-                e.preventDefault();
-                document
-                  .getElementById("contact")
-                  ?.scrollIntoView({ behavior: "smooth" });
-              }}
-            >
-              <svg
-                className="w-5 h-5 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                />
-              </svg>
-              Contact Us
-            </a>
-          </div>
-        </div>
       </div>
     </section>
   );

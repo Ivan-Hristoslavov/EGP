@@ -155,7 +155,7 @@ export const siteConfig = {
   trust: {
     yearEstablished: process.env.NEXT_PUBLIC_YEAR_ESTABLISHED || "2020",
     treatmentsPerformed: process.env.NEXT_PUBLIC_TREATMENTS_COUNT || "1000+",
-    satisfactionRate: process.env.NEXT_PUBLIC_SATISFACTION_RATE || "98%",
+    satisfactionRate: process.env.NEXT_PUBLIC_SATISFACTION_RATE || "100%",
     certifications: [
       "Fully Insured",
       "Qualified Practitioners",

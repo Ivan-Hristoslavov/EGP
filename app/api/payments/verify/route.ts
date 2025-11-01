@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
       .select(
         `
         *,
-        customers(name, email),
+        customers(first_name, last_name, email),
         bookings(service, date)
       `,
       )
@@ -78,6 +78,20 @@ export async function GET(request: NextRequest) {
     if (dbError || !payment) {
       return NextResponse.json({ error: "Payment not found" }, { status: 404 });
     }
+
+    // Transform payment to include name field from first_name + last_name
+    const transformedPayment = {
+      ...payment,
+      customers: payment.customers
+        ? {
+            ...payment.customers,
+            name:
+              payment.customers.first_name && payment.customers.last_name
+                ? `${payment.customers.first_name} ${payment.customers.last_name}`
+                : payment.customers.first_name || payment.customers.last_name || "Unknown Customer",
+          }
+        : null,
+    };
 
     // Verify with Stripe only if configured
     if (isStripeAvailable() && stripe) {
@@ -101,13 +115,13 @@ export async function GET(request: NextRequest) {
         }
 
         return NextResponse.json({
-          ...payment,
+          ...transformedPayment,
           stripe_session: {
             payment_status: session.payment_status,
             amount_total: session.amount_total,
             currency: session.currency,
           },
-          service: payment.bookings?.service,
+          service: transformedPayment.bookings?.service,
         });
       } catch (stripeError) {
         console.error("Stripe verification error:", stripeError);
@@ -116,8 +130,8 @@ export async function GET(request: NextRequest) {
 
     // Return database payment data (if Stripe not configured or verification fails)
     return NextResponse.json({
-      ...payment,
-      service: payment.bookings?.service,
+      ...transformedPayment,
+      service: transformedPayment.bookings?.service,
     });
   } catch (error) {
     console.error("Payment verification error:", error);

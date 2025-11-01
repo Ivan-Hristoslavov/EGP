@@ -14,10 +14,17 @@ export default function SectionBeforeAfter() {
     .map(item => ({
       id: item.id,
       title: item.title,
-      category: item.project_type || "Treatment",
+      category: item.category?.name || item.project_type || "Treatment",
+      service: item.service?.name,
+      project_type: item.project_type,
+      location: item.location,
+      completion_date: item.completion_date,
       before_image_url: item.before_image_url,
       after_image_url: item.after_image_url,
       description: item.description || undefined,
+      // Full category/service objects for badges
+      categoryData: item.category,
+      serviceData: item.service,
     }));
 
   // If no gallery items, show placeholder
