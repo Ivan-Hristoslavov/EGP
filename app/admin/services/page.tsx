@@ -111,10 +111,17 @@ export default function AdminServicesPage() {
 
   const loadServices = async () => {
     try {
-      const response = await fetch("/api/services");
+      // Use admin endpoint to get all services (including inactive)
+      const response = await fetch("/api/admin/services");
       if (response.ok) {
         const data = await response.json();
-        setServices(data.services || []);
+        const servicesData = data.services || [];
+        console.log("Loaded services (admin):", servicesData.length, servicesData);
+        setServices(servicesData);
+      } else {
+        console.error("Error loading services: Response not ok", response.status);
+        const errorText = await response.text();
+        console.error("Error response:", errorText);
       }
     } catch (error) {
       console.error("Error loading services:", error);
@@ -123,10 +130,17 @@ export default function AdminServicesPage() {
 
   const loadCategories = async () => {
     try {
-      const response = await fetch("/api/service-categories");
+      // Use admin endpoint to get all categories (including inactive)
+      const response = await fetch("/api/admin/service-categories");
       if (response.ok) {
         const data = await response.json();
-        setCategories(data.categories || []);
+        const categoriesData = data.categories || [];
+        console.log("Loaded categories (admin):", categoriesData.length, categoriesData);
+        setCategories(categoriesData);
+      } else {
+        console.error("Error loading categories: Response not ok", response.status);
+        const errorText = await response.text();
+        console.error("Error response:", errorText);
       }
     } catch (error) {
       console.error("Error loading categories:", error);
@@ -377,7 +391,8 @@ export default function AdminServicesPage() {
   // Filter logic
   const filteredServices = services.filter((service) => {
     // Safely check main_tab
-    const matchesMainTab = service.main_tab?.slug === mainTab;
+    const serviceMainTabSlug = service.main_tab?.slug;
+    const matchesMainTab = serviceMainTabSlug === mainTab;
     const matchesSearch =
       service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (service.description || "")
@@ -389,9 +404,28 @@ export default function AdminServicesPage() {
     return matchesMainTab && matchesSearch && matchesCategory;
   });
 
-  const currentCategories = categories.filter(
-    (cat) => cat.main_tab?.slug === mainTab
-  );
+  const currentCategories = categories.filter((cat) => {
+    const catMainTabSlug = cat.main_tab?.slug;
+    const matches = catMainTabSlug === mainTab;
+    if (!matches && mainTab === "by-condition") {
+      console.log("Category filtered out:", cat.name, "main_tab:", cat.main_tab);
+    }
+    return matches;
+  });
+
+  // Debug logging
+  useEffect(() => {
+    if (mainTab === "by-condition") {
+      console.log("BY-CONDITION Debug:", {
+        totalCategories: categories.length,
+        currentCategories: currentCategories.length,
+        currentCategoriesData: currentCategories,
+        totalServices: services.length,
+        filteredServices: filteredServices.length,
+        mainTab
+      });
+    }
+  }, [mainTab, categories, services, currentCategories, filteredServices]);
 
   if (isLoading) {
     return (

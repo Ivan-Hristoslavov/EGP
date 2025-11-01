@@ -63,10 +63,10 @@ export default function BlogPage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {featuredPosts.map((post) => (
                 <Link key={post.id} href={`/blog/${post.slug}`}>
-                  <article className="group relative bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 md:col-span-2 lg:col-span-3 cursor-pointer overflow-hidden border border-gray-100 dark:border-gray-700 hover:border-rose-200 dark:hover:border-rose-800">
+                  <article className="group relative bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 md:col-span-2 lg:col-span-3 cursor-pointer overflow-hidden border border-gray-100 dark:border-gray-700 hover:border-rose-200 dark:hover:border-rose-800 isolate">
                     {/* Hover overlay with "Read it" text */}
                     <div className="absolute inset-0 bg-gradient-to-r from-rose-500/0 via-rose-500/0 to-rose-500/0 group-hover:from-rose-500/5 group-hover:via-rose-500/10 group-hover:to-rose-500/5 transition-all duration-300 opacity-0 group-hover:opacity-100 z-0"></div>
-                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0 z-50">
+                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0 z-20">
                       <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-full text-sm font-semibold shadow-lg">
                         <span>Read it</span>
                         <ArrowRight className="w-4 h-4" />
@@ -115,10 +115,10 @@ export default function BlogPage() {
               
               {regularPosts.map((post) => (
                 <Link key={post.id} href={`/blog/${post.slug}`}>
-                  <article className="group relative bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100 dark:border-gray-700 hover:border-rose-200 dark:hover:border-rose-800 flex flex-col h-full">
+                  <article className="group relative bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100 dark:border-gray-700 hover:border-rose-200 dark:hover:border-rose-800 flex flex-col h-full isolate">
                     {/* Hover overlay with "Read it" text */}
                     <div className="absolute inset-0 bg-gradient-to-r from-rose-500/0 via-rose-500/0 to-rose-500/0 group-hover:from-rose-500/5 group-hover:via-rose-500/10 group-hover:to-rose-500/5 transition-all duration-300 opacity-0 group-hover:opacity-100 z-0"></div>
-                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0 z-50">
+                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0 z-20">
                       <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-full text-xs font-semibold shadow-lg">
                         <span>Read it</span>
                         <ArrowRight className="w-3 h-3" />
