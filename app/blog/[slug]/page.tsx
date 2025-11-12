@@ -92,19 +92,19 @@ export default async function BlogPostPage({ params }: PageProps) {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
       {/* Hero Section */}
-      <section className="py-12 md:py-16 bg-gradient-to-br from-rose-50 to-pink-50 dark:from-gray-800 dark:to-gray-900">
+      <section className="py-12 md:py-16 bg-gradient-to-br from-[#f5f1e9] via-[#eee6d9] to-[#e4d9c8] dark:from-gray-800 dark:via-gray-800 dark:to-gray-900">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <Link 
               href="/blog"
-              className="inline-flex items-center gap-2 text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors mb-6"
+              className="inline-flex items-center gap-2 text-[#9d9585] dark:text-[#c9c1b0] hover:text-[#6b5f4b] dark:hover:text-[#e0d8c8] transition-colors mb-6"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back to Blog</span>
             </Link>
 
             <div className="flex items-center gap-4 mb-6">
-              <span className="inline-block px-4 py-2 bg-rose-100 dark:bg-rose-900/30 text-rose-800 dark:text-rose-400 rounded-full text-sm font-medium">
+              <span className="inline-block px-4 py-2 bg-[#f0ede7] dark:bg-gray-800/40 text-[#6b5f4b] dark:text-[#d9d1c1] rounded-full text-sm font-medium">
                 {post.category}
               </span>
               {post.featured && (
@@ -179,10 +179,10 @@ export default async function BlogPostPage({ params }: PageProps) {
                     href={`/blog/${prevPost.slug}`}
                     className="group flex items-start gap-4 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
-                    <ArrowLeft className="w-5 h-5 text-gray-400 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors mt-1 flex-shrink-0" />
+                    <ArrowLeft className="w-5 h-5 text-gray-400 group-hover:text-[#9d9585] dark:group-hover:text-[#c9c1b0] transition-colors mt-1 flex-shrink-0" />
                     <div>
                       <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Previous Post</div>
-                      <div className="font-semibold text-gray-900 dark:text-white group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">
+                      <div className="font-semibold text-gray-900 dark:text-white group-hover:text-[#6b5f4b] dark:group-hover:text-[#d9d1c1] transition-colors">
                         {prevPost.title}
                       </div>
                     </div>
@@ -198,11 +198,11 @@ export default async function BlogPostPage({ params }: PageProps) {
                   >
                     <div className="flex-1">
                       <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Next Post</div>
-                      <div className="font-semibold text-gray-900 dark:text-white group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">
+                      <div className="font-semibold text-gray-900 dark:text-white group-hover:text-[#6b5f4b] dark:group-hover:text-[#d9d1c1] transition-colors">
                         {nextPost.title}
                       </div>
                     </div>
-                    <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors mt-1 flex-shrink-0" />
+                    <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-[#9d9585] dark:group-hover:text-[#c9c1b0] transition-colors mt-1 flex-shrink-0" />
                   </Link>
                 )}
               </div>
@@ -210,7 +210,7 @@ export default async function BlogPostPage({ params }: PageProps) {
               <div className="mt-8 text-center">
                 <Link
                   href="/blog"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg hover:from-rose-600 hover:to-pink-600 transition-colors font-medium"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-[#3f3a31] rounded-lg hover:from-[#8c846f] hover:via-[#aea693] hover:to-[#bfb6a5] transition-colors font-medium"
                 >
                   <ArrowLeft className="w-5 h-5" />
                   View All Posts

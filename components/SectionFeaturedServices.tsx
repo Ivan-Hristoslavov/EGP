@@ -9,14 +9,14 @@ import type { Service } from "@/hooks/useServices";
 
 // Gradient colors for different categories
 const categoryGradients: Record<string, string> = {
-  'FACE': 'from-rose-500 to-pink-500',
-  'BODY': 'from-emerald-500 to-teal-500',
-  'LIPS': 'from-pink-500 to-rose-500',
-  'ANTI-WRINKLE': 'from-purple-500 to-indigo-500',
-  'FILLERS': 'from-blue-500 to-cyan-500',
-  'SKIN': 'from-amber-500 to-orange-500',
-  'HAIR': 'from-violet-500 to-purple-500',
-  'default': 'from-rose-500 via-pink-500 to-purple-600',
+  'FACE': 'from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3]',
+  'BODY': 'from-[#c4b5a0] via-[#b59c74] to-[#9d9585]',
+  'LIPS': 'from-[#d8c5a7] via-[#c4b5a0] to-[#b59c74]',
+  'ANTI-WRINKLE': 'from-[#4b5563] via-[#374151] to-[#1f2937]',
+  'FILLERS': 'from-[#c4b5a0] via-[#b5ad9d] to-[#9d9585]',
+  'SKIN': 'from-[#e4d9c8] via-[#ddd5c3] to-[#c4b5a0]',
+  'HAIR': 'from-[#b5ad9d] via-[#9d9585] to-[#7a6f5a]',
+  'default': 'from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3]',
 };
 
 function getCategoryGradient(categoryName: string): string {

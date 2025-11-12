@@ -36,12 +36,12 @@ export default function SectionHeroAesthetics() {
   }, []);
 
   return (
-    <section className="relative h-screen min-h-[500px] sm:min-h-[600px] max-h-[900px] overflow-hidden z-20">
+    <section className="relative h-screen min-h-[500px] sm:min-h-[600px] max-h-[900px] overflow-hidden" style={{ zIndex: 1 }}>
       {/* Background Slides */}
       {slides.map((slide, index) => (
         <div
           key={index}
-          className={`absolute inset-0 transition-opacity duration-1000 ${
+          className={`absolute inset-0 transition-opacity duration-1000 z-0 ${
             currentSlide === index ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -53,10 +53,10 @@ export default function SectionHeroAesthetics() {
             priority={index === 0}
             sizes="100vw 100vh"
             className="object-cover"
-            style={{ objectPosition: slide.image.includes("owners.JPG") ? "center 20%" : "center center" }}
+            style={{ objectPosition: slide.image.includes("owners.JPG") ? "center 30%" : "center center" }}
           />
           {/* Gradient Overlay - Lighter for owners slide */}
-          <div className={`absolute inset-0 z-10 ${
+          <div className={`absolute inset-0 z-[1] ${
             slide.image.includes("owners.JPG") 
               ? "bg-gradient-to-b sm:bg-gradient-to-r from-black/50 via-black/40 to-black/20 sm:to-transparent" 
               : "bg-gradient-to-b sm:bg-gradient-to-r from-black/80 via-black/60 to-black/40 sm:to-transparent"
@@ -65,7 +65,7 @@ export default function SectionHeroAesthetics() {
       ))}
 
       {/* Content */}
-      <div className="relative z-30 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-start pt-32">
+      <div className="relative z-[2] container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-start pt-32">
         <div className="w-full max-w-3xl">
           {/* Badge */}
           <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 backdrop-blur-md rounded-full text-white mb-4 sm:mb-6 border border-white/20">
@@ -128,7 +128,7 @@ export default function SectionHeroAesthetics() {
       </div>
 
       {/* Slide Indicators */}
-      <div className="absolute bottom-16 sm:bottom-8 left-1/2 transform -translate-x-1/2 z-30 flex gap-3">
+      <div className="absolute bottom-16 sm:bottom-8 left-1/2 transform -translate-x-1/2 z-[2] flex gap-3">
         {slides.map((_, index) => (
           <button
             key={index}

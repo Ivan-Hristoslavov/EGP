@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import ThemeToggleButton from "./ThemeToggleButton";
@@ -8,10 +9,8 @@ import {
   Phone, 
   Mail, 
   MapPin, 
-  Menu, 
   X,
   ChevronDown,
-  Calendar
 } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import { useConditions } from "@/hooks/useConditions";
@@ -24,6 +23,12 @@ export default function HeaderAesthetics() {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+  
+  // Ensure component is mounted before rendering portal
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Group services by main_tab and category for mega menu
   const servicesByMainTab = useMemo(() => {
@@ -139,6 +144,24 @@ export default function HeaderAesthetics() {
     return () => document.removeEventListener("keydown", handleEscape);
   }, []);
 
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    };
+  }, [mobileMenuOpen]);
+
   // Handle menu hover with delay
   const handleMenuEnter = (menuType: string) => {
     if (hoverTimeout) {
@@ -156,20 +179,22 @@ export default function HeaderAesthetics() {
   };
 
   return (
+    <>
     <header 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 transition-all duration-300 ${
         scrolled ? "bg-[#ddd5c3] dark:bg-gray-900 shadow-lg" : "bg-[#ddd5c3]/95 dark:bg-gray-900/95 backdrop-blur-sm"
       }`}
+      style={{ zIndex: 9998 }}
     >
       {/* Top Bar - Contact Info */}
-      <div className="bg-[#c9c1b0] dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+      <div className="bg-[#c9c1b0] dark:bg-gray-800 text-gray-900 dark:text-gray-100 hidden sm:block">
         <div className="container mx-auto px-2 sm:px-4">
           <div className="flex items-center justify-between h-9 sm:h-10 text-xs sm:text-sm">
             {/* Left side - Find Us */}
             <div className="hidden lg:flex items-center gap-4 xl:gap-6">
               <Link 
                 href="/find-us" 
-                className="flex items-center gap-1.5 hover:text-rose-100 transition-colors"
+                className="flex items-center gap-1.5 hover:text-[#f5f1e9] transition-colors"
               >
                 <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span className="font-medium">Find Us</span>
@@ -180,7 +205,7 @@ export default function HeaderAesthetics() {
             <div className="flex items-center gap-2 sm:gap-4 md:gap-6 ml-auto w-full lg:w-auto justify-end">
               <a 
                 href={`mailto:${siteConfig.contact.email}`}
-                className="flex items-center gap-1 sm:gap-2 hover:text-rose-100 transition-colors"
+                className="flex items-center gap-1 sm:gap-2 hover:text-[#f5f1e9] transition-colors"
               >
                 <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                 <span className="hidden md:inline text-xs sm:text-sm truncate max-w-[120px] sm:max-w-none">
@@ -189,7 +214,7 @@ export default function HeaderAesthetics() {
               </a>
               <a 
                 href={`tel:${siteConfig.contact.phone}`}
-                className="flex items-center gap-1 sm:gap-2 hover:text-rose-100 transition-colors font-medium"
+                className="flex items-center gap-1 sm:gap-2 hover:text-[#f5f1e9] transition-colors font-medium"
               >
                 <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                 <span className="text-xs sm:text-sm whitespace-nowrap">{siteConfig.contact.phone}</span>
@@ -230,8 +255,8 @@ export default function HeaderAesthetics() {
                     <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                   </svg>
                 </a>
-                {/* Theme Toggle in Top Bar - Smaller and More to Right */}
-                <div className="ml-3 pl-3 border-l border-white/30">
+                {/* Theme Toggle in Top Bar - Desktop Only */}
+                <div className="hidden lg:flex ml-3 pl-3 border-l border-white/30">
                   <div className="scale-75">
                     <ThemeToggleButton />
                   </div>
@@ -261,7 +286,7 @@ export default function HeaderAesthetics() {
                 <span className="relative z-10 transition-all duration-300 group-hover:text-gray-900 dark:group-hover:text-white">
                   About Us
                 </span>
-                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
+                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
                 <span className="absolute inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-md group-hover:shadow-lg border border-white/20 dark:border-gray-700/20" style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}></span>
               </Link>
               <button
@@ -275,13 +300,13 @@ export default function HeaderAesthetics() {
                   Book Now
                 </span>
                 <ChevronDown className={`relative z-10 w-2.5 h-2.5 transition-all duration-300 ${activeMenu === 'treatments' ? 'rotate-180 text-gray-900 dark:text-white' : 'group-hover:text-gray-900 dark:group-hover:text-white'}`} />
-                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
+                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
                 {/* Blurred white/black background */}
                 <span className={`absolute inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-md transition-all duration-300 border border-white/20 dark:border-gray-700/20 ${
                   activeMenu === 'treatments' ? 'opacity-100 shadow-lg' : 'opacity-0 group-hover:opacity-100 shadow-md group-hover:shadow-lg'
                 }`} style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}></span>
                 {/* Gradient overlay */}
-                <span className={`absolute inset-0 bg-gradient-to-r from-rose-500/10 via-pink-500/10 to-rose-600/10 rounded-md transition-all duration-300 ${
+                <span className={`absolute inset-0 bg-gradient-to-r from-[#9d9585]/15 via-[#b5ad9d]/15 to-[#c9c1b0]/15 rounded-md transition-all duration-300 ${
                   activeMenu === 'treatments' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
                 }`} style={{ backdropFilter: 'blur(4px)' }}></span>
               </button>
@@ -296,13 +321,13 @@ export default function HeaderAesthetics() {
                   By Condition
                 </span>
                 <ChevronDown className={`relative z-10 w-2.5 h-2.5 transition-all duration-300 ${activeMenu === 'conditions' ? 'rotate-180 text-gray-900 dark:text-white' : 'group-hover:text-gray-900 dark:group-hover:text-white'}`} />
-                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
+                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
                 {/* Blurred white/black background */}
                 <span className={`absolute inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-md transition-all duration-300 border border-white/20 dark:border-gray-700/20 ${
                   activeMenu === 'conditions' ? 'opacity-100 shadow-lg' : 'opacity-0 group-hover:opacity-100 shadow-md group-hover:shadow-lg'
                 }`} style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}></span>
                 {/* Gradient overlay */}
-                <span className={`absolute inset-0 bg-gradient-to-r from-rose-500/10 via-pink-500/10 to-rose-600/10 rounded-md transition-all duration-300 ${
+                <span className={`absolute inset-0 bg-gradient-to-r from-[#9d9585]/15 via-[#b5ad9d]/15 to-[#c9c1b0]/15 rounded-md transition-all duration-300 ${
                   activeMenu === 'conditions' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
                 }`} style={{ backdropFilter: 'blur(4px)' }}></span>
               </button>
@@ -311,14 +336,13 @@ export default function HeaderAesthetics() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`lg:hidden rounded-lg hover:bg-rose-50 dark:hover:bg-gray-800 transition-all duration-300 touch-manipulation ${
-                scrolled ? "p-1.5" : "p-2"
+              className={`lg:hidden rounded-lg hover:bg-[#c9c1b0] dark:hover:bg-gray-800 transition-all duration-300 touch-manipulation p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center ${
+                mobileMenuOpen ? 'bg-[#c9c1b0] dark:bg-gray-800' : ''
               }`}
               aria-label="Toggle menu"
+              aria-expanded={mobileMenuOpen}
             >
-              <div className={`flex flex-col justify-between transition-all duration-300 ${
-                scrolled ? "w-5 h-4" : "w-6 h-5"
-              }`}>
+              <div className="flex flex-col justify-between w-6 h-5 transition-all duration-300">
                 <span 
                   className={`block h-0.5 bg-gray-700 dark:bg-gray-300 rounded-full transition-all duration-300 ${
                     mobileMenuOpen ? 'rotate-45 translate-y-2' : ''
@@ -340,25 +364,27 @@ export default function HeaderAesthetics() {
             {/* Centered Logo - Clean & Clear with Maximum Distance from Navigation */}
             <Link 
               href="/" 
-              className="group absolute left-1/2 transform -translate-x-1/2 flex flex-col items-center justify-center text-center px-4 sm:px-6 transition-all duration-300 hover:scale-105"
+              className="group absolute left-1/2 transform -translate-x-1/2 flex flex-col items-center justify-center text-center px-2 sm:px-4 md:px-6 transition-all duration-300 hover:scale-105 z-10"
             >
               <h1 className={`font-playfair font-light text-gray-900 dark:text-white whitespace-nowrap leading-tight transition-all duration-300 group-hover:brightness-110 group-hover:drop-shadow-lg ${
-                scrolled ? "text-lg sm:text-xl md:text-2xl lg:text-3xl" : "text-xl sm:text-2xl md:text-3xl lg:text-4xl"
+                scrolled 
+                  ? "text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl" 
+                  : "text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl"
               }`}>
                 EGP AESTHETICS
               </h1>
-              <p className={`font-montserrat text-gray-500 dark:text-gray-400 font-light tracking-[0.3em] uppercase transition-all duration-300 group-hover:text-[#9d9585] dark:group-hover:text-[#c9c1b0] group-hover:tracking-[0.4em] ${
-                scrolled ? "text-[8px] sm:text-[9px] mt-0.5" : "text-[10px] sm:text-xs mt-1"
+              <p className={`font-montserrat text-gray-500 dark:text-gray-400 font-light tracking-[0.25em] sm:tracking-[0.3em] uppercase transition-all duration-300 group-hover:text-[#9d9585] dark:group-hover:text-[#c9c1b0] group-hover:tracking-[0.35em] sm:group-hover:tracking-[0.4em] ${
+                scrolled ? "text-[7px] sm:text-[8px] md:text-[9px] mt-0.5" : "text-[8px] sm:text-[9px] md:text-[10px] lg:text-xs mt-0.5 sm:mt-1"
               }`}>
                 London
               </p>
               
               {/* Subtle glow effect on hover - Different for light and dark themes */}
-              <div className="absolute inset-0 -z-10 rounded-full bg-rose-500/20 dark:bg-[#ddd5c3]/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl scale-110"></div>
-              <div className="absolute inset-0 -z-10 rounded-full bg-pink-500/15 dark:bg-[#c9c1b0]/25 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-lg scale-105"></div>
+              <div className="absolute inset-0 -z-10 rounded-full bg-[#9d9585]/25 dark:bg-[#ddd5c3]/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl scale-110"></div>
+              <div className="absolute inset-0 -z-10 rounded-full bg-[#c9c1b0]/20 dark:bg-[#c9c1b0]/25 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-lg scale-105"></div>
               
               {/* Animated underline effect */}
-              <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-px bg-gradient-to-r from-rose-500 via-pink-500 to-rose-500 dark:from-[#c9c1b0] dark:via-[#ddd5c3] dark:to-[#c9c1b0] transition-all duration-300 group-hover:w-full"></div>
+              <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-px bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] dark:from-[#c9c1b0] dark:via-[#ddd5c3] dark:to-[#c9c1b0] transition-all duration-300 group-hover:w-full"></div>
             </Link>
 
             {/* Right Navigation Links */}
@@ -374,7 +400,7 @@ export default function HeaderAesthetics() {
                 <span className="relative z-10 transition-all duration-300 group-hover:text-gray-900 dark:group-hover:text-white">
                   Blog
                 </span>
-                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
+                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
                 <span className="absolute inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-md group-hover:shadow-lg border border-white/20 dark:border-gray-700/20" style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}></span>
               </Link>
               <Link
@@ -386,7 +412,7 @@ export default function HeaderAesthetics() {
                 <span className="relative z-10 transition-all duration-300 group-hover:text-gray-900 dark:group-hover:text-white">
                   Awards/ Press
                 </span>
-                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
+                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
                 <span className="absolute inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-md group-hover:shadow-lg border border-white/20 dark:border-gray-700/20" style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}></span>
               </Link>
               <Link
@@ -398,7 +424,7 @@ export default function HeaderAesthetics() {
                 <span className="relative z-10 transition-all duration-300 group-hover:text-gray-900 dark:group-hover:text-white">
                   Skin Membership
                 </span>
-                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
+                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
                 <span className="absolute inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-md group-hover:shadow-lg border border-white/20 dark:border-gray-700/20" style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}></span>
               </Link>
             </nav>
@@ -410,11 +436,12 @@ export default function HeaderAesthetics() {
         </div>
       </div>
 
-      {/* Mega Menu Dropdowns */}
+      {/* Mega Menu Dropdowns - Desktop Only */}
       {(activeMenu === 'treatments' || activeMenu === 'conditions') && (
         <div 
-          className="absolute left-0 right-0 top-full z-50 shadow-2xl overflow-hidden backdrop-blur-xl"
+          className="hidden lg:block absolute left-0 right-0 top-full shadow-2xl overflow-hidden backdrop-blur-xl"
           style={{
+            zIndex: 9999,
             animation: 'slideDown 0.3s ease-out',
           }}
           onMouseEnter={() => handleMenuEnter(activeMenu)}
@@ -454,7 +481,7 @@ export default function HeaderAesthetics() {
                             onClick={() => setActiveMenu(null)}
                             className="group relative text-xs font-medium transition-all duration-300"
                           >
-                            <span className="relative z-10 bg-gradient-to-r from-rose-600 via-pink-600 to-rose-600 bg-clip-text text-transparent group-hover:from-rose-700 group-hover:via-pink-700 group-hover:to-rose-700 transition-all duration-300">
+                            <span className="relative z-10 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] bg-clip-text text-transparent group-hover:from-[#857d68] group-hover:via-[#aea693] group-hover:to-[#c9c1b0] transition-all duration-300">
                               View All
                             </span>
                             <span className="relative z-10 ml-1 inline-block group-hover:translate-x-1 transition-transform duration-300">→</span>
@@ -465,15 +492,15 @@ export default function HeaderAesthetics() {
                             <li key={item.name}>
                               <Link
                                 href={`/book?service=${item.slug}`}
-                                className="group relative flex items-start justify-between gap-2 px-2 py-2 -mx-2 rounded-md text-sm text-gray-700 dark:text-gray-300 font-montserrat transition-all duration-300 hover:bg-gradient-to-r hover:from-rose-50/50 hover:via-pink-50/50 hover:to-rose-50/50 dark:hover:from-rose-950/10 dark:hover:via-pink-950/10 dark:hover:to-rose-950/10"
+                                className="group relative flex items-start justify-between gap-2 px-2 py-2 -mx-2 rounded-md text-sm text-gray-700 dark:text-gray-300 font-montserrat transition-all duration-300 hover:bg-gradient-to-r hover:from-[#f5f1e9]/80 hover:via-[#eee6d9]/80 hover:to-[#e8decd]/80 dark:hover:from-[#1f1a14]/40 dark:hover:via-[#252018]/40 dark:hover:to-[#2b251c]/40"
                                 onClick={() => setActiveMenu(null)}
                               >
-                                <span className="relative z-10 group-hover:translate-x-1 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-all duration-300">
+                                <span className="relative z-10 group-hover:translate-x-1 group-hover:text-[#8c846f] dark:group-hover:text-[#b5ad9d] transition-all duration-300">
                                   {item.name}
                                   {/* Animated underline */}
-                                  <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
+                                  <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
                                 </span>
-                                <span className="relative z-10 font-semibold bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 bg-clip-text text-transparent whitespace-nowrap group-hover:scale-110 transition-transform duration-300">
+                                <span className="relative z-10 font-semibold bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] bg-clip-text text-transparent whitespace-nowrap group-hover:scale-110 transition-transform duration-300">
                                   £{item.price}
                                 </span>
                               </Link>
@@ -498,7 +525,7 @@ export default function HeaderAesthetics() {
                         onClick={() => setActiveMenu(null)}
                         className="group relative text-xs font-medium transition-all duration-300"
                       >
-                        <span className="relative z-10 bg-gradient-to-r from-rose-600 via-pink-600 to-rose-600 bg-clip-text text-transparent group-hover:from-rose-700 group-hover:via-pink-700 group-hover:to-rose-700 transition-all duration-300">
+                        <span className="relative z-10 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] bg-clip-text text-transparent group-hover:from-[#857d68] group-hover:via-[#aea693] group-hover:to-[#c9c1b0] transition-all duration-300">
                           View All
                         </span>
                         <span className="relative z-10 ml-1 inline-block group-hover:translate-x-1 transition-transform duration-300">→</span>
@@ -509,13 +536,13 @@ export default function HeaderAesthetics() {
                         <li key={condition.id}>
                           <Link
                             href={`/conditions/${condition.slug}`}
-                            className="group relative block px-2 py-2 -mx-2 rounded-md text-sm text-gray-700 dark:text-gray-300 font-montserrat transition-all duration-300 hover:bg-gradient-to-r hover:from-rose-50/50 hover:via-pink-50/50 hover:to-rose-50/50 dark:hover:from-rose-950/10 dark:hover:via-pink-950/10 dark:hover:to-rose-950/10"
+                            className="group relative block px-2 py-2 -mx-2 rounded-md text-sm text-gray-700 dark:text-gray-300 font-montserrat transition-all duration-300 hover:bg-gradient-to-r hover:from-[#f5f1e9]/80 hover:via-[#eee6d9]/80 hover:to-[#e8decd]/80 dark:hover:from-[#1f1a14]/40 dark:hover:via-[#252018]/40 dark:hover:to-[#2b251c]/40"
                             onClick={() => setActiveMenu(null)}
                           >
-                            <span className="relative z-10 group-hover:translate-x-1 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-all duration-300 inline-block">
+                            <span className="relative z-10 group-hover:translate-x-1 group-hover:text-[#8c846f] dark:group-hover:text-[#b5ad9d] transition-all duration-300 inline-block">
                               {condition.title}
                               {/* Animated underline */}
-                              <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
+                              <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
                             </span>
                           </Link>
                         </li>
@@ -532,7 +559,7 @@ export default function HeaderAesthetics() {
                         onClick={() => setActiveMenu(null)}
                         className="group relative text-xs font-medium transition-all duration-300"
                       >
-                        <span className="relative z-10 bg-gradient-to-r from-rose-600 via-pink-600 to-rose-600 bg-clip-text text-transparent group-hover:from-rose-700 group-hover:via-pink-700 group-hover:to-rose-700 transition-all duration-300">
+                        <span className="relative z-10 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] bg-clip-text text-transparent group-hover:from-[#857d68] group-hover:via-[#aea693] group-hover:to-[#c9c1b0] transition-all duration-300">
                           View All
                         </span>
                         <span className="relative z-10 ml-1 inline-block group-hover:translate-x-1 transition-transform duration-300">→</span>
@@ -543,13 +570,13 @@ export default function HeaderAesthetics() {
                         <li key={condition.id}>
                           <Link
                             href={`/conditions/${condition.slug}`}
-                            className="group relative block px-2 py-2 -mx-2 rounded-md text-sm text-gray-700 dark:text-gray-300 font-montserrat transition-all duration-300 hover:bg-gradient-to-r hover:from-rose-50/50 hover:via-pink-50/50 hover:to-rose-50/50 dark:hover:from-rose-950/10 dark:hover:via-pink-950/10 dark:hover:to-rose-950/10"
+                            className="group relative block px-2 py-2 -mx-2 rounded-md text-sm text-gray-700 dark:text-gray-300 font-montserrat transition-all duration-300 hover:bg-gradient-to-r hover:from-[#f5f1e9]/80 hover:via-[#eee6d9]/80 hover:to-[#e8decd]/80 dark:hover:from-[#1f1a14]/40 dark:hover:via-[#252018]/40 dark:hover:to-[#2b251c]/40"
                             onClick={() => setActiveMenu(null)}
                           >
-                            <span className="relative z-10 group-hover:translate-x-1 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-all duration-300 inline-block">
+                            <span className="relative z-10 group-hover:translate-x-1 group-hover:text-[#8c846f] dark:group-hover:text-[#b5ad9d] transition-all duration-300 inline-block">
                               {condition.title}
                               {/* Animated underline */}
-                              <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
+                              <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
                             </span>
                           </Link>
                         </li>
@@ -566,67 +593,78 @@ export default function HeaderAesthetics() {
         </div>
       )}
 
-      {/* Mobile Navigation - Slide in from right with backdrop */}
-      {mobileMenuOpen && (
-        <>
-          {/* Backdrop */}
-          <div 
-            className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40 animate-fadeIn"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-          
-          {/* Slide-in Menu */}
-          <div className="lg:hidden fixed inset-y-0 right-0 w-[85%] sm:w-[380px] bg-white dark:bg-gray-900 z-50 shadow-2xl overflow-y-auto touch-manipulation animate-slideInRight">
-            <nav className="container mx-auto px-4 sm:px-6 py-6">
-            <ul className="space-y-1.5 sm:space-y-2">
+    </header>
+    {isMounted && mobileMenuOpen && createPortal(
+      <div style={{ position: 'fixed', inset: 0, zIndex: 99999, pointerEvents: 'none' }}>
+        {/* Backdrop */}
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm animate-fadeIn"
+          style={{ pointerEvents: 'auto' }}
+          onClick={() => setMobileMenuOpen(false)}
+        />
+        
+        {/* Slide-in Menu */}
+        <div className="lg:hidden fixed inset-y-0 right-0 w-[90%] max-w-[420px] bg-[#ddd5c3] dark:bg-gray-900 shadow-2xl overflow-y-auto touch-manipulation animate-slideInRight pointer-events-auto">
+            {/* Mobile Menu Header with Close Button */}
+            <div className="sticky top-0 z-10 bg-[#ddd5c3] dark:bg-gray-900 border-b border-[#c9c1b0] dark:border-gray-700 px-4 py-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white font-playfair">Menu</h2>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 -mr-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-[#c9c1b0] dark:hover:bg-gray-800 transition-colors touch-manipulation"
+                aria-label="Close menu"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <nav className="px-4 sm:px-6 py-4">
+            <ul className="space-y-2">
               {/* Left Navigation Items */}
               <li>
                 <Link
                   href="/about"
-                  className="block px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base text-gray-700 dark:text-gray-300 hover:bg-rose-50 dark:hover:bg-gray-800 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg font-light transition-colors active:scale-95 font-montserrat uppercase tracking-widest"
+                  className="block px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#c9c1b0] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 font-montserrat uppercase tracking-widest flex items-center"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  About
+                  About Us
                 </Link>
               </li>
               <li>
                 <button
                   onClick={() => setActiveMenu(activeMenu === 'treatments' ? null : 'treatments')}
-                  className="w-full flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base text-gray-700 dark:text-gray-300 hover:bg-rose-50 dark:hover:bg-gray-800 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg font-light transition-colors active:scale-95 touch-manipulation font-montserrat uppercase tracking-widest"
+                  className="w-full flex items-center justify-between px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#c9c1b0] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 touch-manipulation font-montserrat uppercase tracking-widest"
                 >
-                  Book Now
+                  <span>Book Now</span>
                   <ChevronDown 
-                    className={`w-4 h-4 transition-transform ${
+                    className={`w-5 h-5 transition-transform duration-200 ${
                       activeMenu === 'treatments' ? "rotate-180" : ""
                     }`} 
                   />
                 </button>
                 {activeMenu === 'treatments' && (
-                  <div className="mt-2 pl-4 sm:pl-6 space-y-3">
+                  <div className="mt-3 pl-2 space-y-4 bg-[#f0ede7] dark:bg-gray-800/50 rounded-lg p-4 border border-[#c9c1b0] dark:border-gray-700">
                     {bookNowCategories.map((category) => {
                       const categoryServices = bookNowServices[category.id]?.services || [];
                       return (
-                        <div key={category.id}>
-                          <h4 className="text-xs font-light text-gray-600 dark:text-gray-400 mb-2 uppercase tracking-widest font-montserrat">
+                        <div key={category.id} className="space-y-2">
+                          <h4 className="text-xs font-semibold text-gray-900 dark:text-gray-200 mb-3 uppercase tracking-wider font-montserrat px-2">
                             {category.name}
                           </h4>
-                          <ul className="space-y-1 max-h-[400px] overflow-y-auto menu-scroll pr-2">
+                          <ul className="space-y-1 max-h-[300px] overflow-y-auto menu-scroll pr-2">
                             {categoryServices.map((item) => (
                               <li key={item.name}>
                                 <Link
                                   href={`/book?service=${item.slug}`}
-                                  className="group relative flex items-start justify-between gap-2 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-rose-50/50 dark:hover:bg-gray-800/50 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg transition-all duration-300 active:scale-95 touch-manipulation font-montserrat"
+                                  className="group relative flex items-center justify-between gap-3 px-3 py-2.5 min-h-[44px] text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md transition-all duration-200 active:scale-95 touch-manipulation font-montserrat"
                                   onClick={() => {
                                     setMobileMenuOpen(false);
                                     setActiveMenu(null);
                                   }}
                                 >
-                                  <span className="relative flex-1">
+                                  <span className="flex-1 text-left leading-tight">
                                     {item.name}
-                                    {/* Animated underline */}
-                                    <span className="absolute left-0 -bottom-0.5 w-0 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
                                   </span>
-                                  <span className="font-semibold bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent whitespace-nowrap text-sm group-hover:scale-105 transition-transform duration-300">
+                                  <span className="font-semibold text-[#9d9585] dark:text-[#c9c1b0] whitespace-nowrap text-sm flex-shrink-0">
                                     £{item.price}
                                   </span>
                                 </Link>
@@ -642,80 +680,72 @@ export default function HeaderAesthetics() {
               <li>
                 <button
                   onClick={() => setActiveMenu(activeMenu === 'conditions' ? null : 'conditions')}
-                  className="w-full flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base text-gray-700 dark:text-gray-300 hover:bg-rose-50 dark:hover:bg-gray-800 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg font-light transition-colors active:scale-95 touch-manipulation font-montserrat uppercase tracking-widest"
+                  className="w-full flex items-center justify-between px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#c9c1b0] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 touch-manipulation font-montserrat uppercase tracking-widest"
                 >
-                  By Condition
+                  <span>By Condition</span>
                   <ChevronDown 
-                    className={`w-4 h-4 transition-transform ${
+                    className={`w-5 h-5 transition-transform duration-200 ${
                       activeMenu === 'conditions' ? "rotate-180" : ""
                     }`} 
                   />
                 </button>
                 {activeMenu === 'conditions' && (
-                  <div className="mt-2 pl-4 sm:pl-6 space-y-3">
+                  <div className="mt-3 pl-2 space-y-4 bg-[#f0ede7] dark:bg-gray-800/50 rounded-lg p-4 border border-[#c9c1b0] dark:border-gray-700">
                     <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-xs font-light text-gray-600 dark:text-gray-400 uppercase tracking-widest font-montserrat">
+                      <div className="flex items-center justify-between mb-3 px-2">
+                        <h4 className="text-xs font-semibold text-gray-900 dark:text-gray-200 uppercase tracking-wider font-montserrat">
                           Face Conditions
                         </h4>
                         <Link
                           href="/conditions"
                           onClick={() => setActiveMenu(null)}
-                          className="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors font-medium"
+                          className="text-xs text-[#9d9585] dark:text-[#c9c1b0] hover:text-gray-900 dark:hover:text-white transition-colors font-medium"
                         >
                           View All →
                         </Link>
                       </div>
-                      <ul className="space-y-1 max-h-[400px] overflow-y-auto menu-scroll pr-2">
+                      <ul className="space-y-1 max-h-[250px] overflow-y-auto menu-scroll pr-2">
                         {conditionsByCategory.face.map((condition) => (
                           <li key={condition.id}>
                             <Link
                               href={`/conditions/${condition.slug}`}
-                              className="group relative block px-3 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-rose-50/50 dark:hover:bg-gray-800/50 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg transition-all duration-300 active:scale-95 touch-manipulation font-montserrat"
+                              className="block px-3 py-2.5 min-h-[44px] text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md transition-all duration-200 active:scale-95 touch-manipulation font-montserrat flex items-center"
                               onClick={() => {
                                 setMobileMenuOpen(false);
                                 setActiveMenu(null);
                               }}
                             >
-                              <span className="relative">
-                                {condition.title}
-                                {/* Animated underline */}
-                                <span className="absolute left-0 -bottom-0.5 w-0 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
-                              </span>
+                              {condition.title}
                             </Link>
                           </li>
                         ))}
                       </ul>
                     </div>
                     <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-xs font-light text-gray-600 dark:text-gray-400 uppercase tracking-widest font-montserrat">
+                      <div className="flex items-center justify-between mb-3 px-2">
+                        <h4 className="text-xs font-semibold text-gray-900 dark:text-gray-200 uppercase tracking-wider font-montserrat">
                           Body Conditions
                         </h4>
                         <Link
                           href="/conditions?category=Body"
                           onClick={() => setActiveMenu(null)}
-                          className="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors font-medium"
+                          className="text-xs text-[#9d9585] dark:text-[#c9c1b0] hover:text-gray-900 dark:hover:text-white transition-colors font-medium"
                         >
                           View All →
                         </Link>
                       </div>
-                      <ul className="space-y-1 max-h-[400px] overflow-y-auto menu-scroll pr-2">
+                      <ul className="space-y-1 max-h-[250px] overflow-y-auto menu-scroll pr-2">
                         {conditionsByCategory.body.map((condition) => (
                           <li key={condition.id}>
                             <Link
                               href={`/conditions/${condition.slug}`}
-                              className="group relative block px-3 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-rose-50/50 dark:hover:bg-gray-800/50 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg transition-all duration-300 active:scale-95 touch-manipulation font-montserrat"
+                              className="block px-3 py-2.5 min-h-[44px] text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md transition-all duration-200 active:scale-95 touch-manipulation font-montserrat flex items-center"
                               onClick={() => {
                                 setMobileMenuOpen(false);
                                 setActiveMenu(null);
                               }}
                             >
-                              <span className="relative">
-                                {condition.title}
-                                {/* Animated underline */}
-                                <span className="absolute left-0 -bottom-0.5 w-0 h-0.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
-                              </span>
+                              {condition.title}
                             </Link>
                           </li>
                         ))}
@@ -727,7 +757,7 @@ export default function HeaderAesthetics() {
               <li>
                 <Link
                   href="/blog"
-                  className="block px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base text-gray-700 dark:text-gray-300 hover:bg-rose-50 dark:hover:bg-gray-800 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg font-light transition-colors active:scale-95 font-montserrat uppercase tracking-widest"
+                  className="block px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#c9c1b0] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 font-montserrat uppercase tracking-widest flex items-center"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Blog
@@ -736,7 +766,7 @@ export default function HeaderAesthetics() {
               <li>
                 <Link
                   href="/press"
-                  className="block px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base text-gray-700 dark:text-gray-300 hover:bg-rose-50 dark:hover:bg-gray-800 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg font-light transition-colors active:scale-95 font-montserrat uppercase tracking-widest"
+                  className="block px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#c9c1b0] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 font-montserrat uppercase tracking-widest flex items-center"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Awards/ Press
@@ -745,7 +775,7 @@ export default function HeaderAesthetics() {
               <li>
                 <Link
                   href="/membership"
-                  className="block px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base text-gray-700 dark:text-gray-300 hover:bg-rose-50 dark:hover:bg-gray-800 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg font-light transition-colors active:scale-95 font-montserrat uppercase tracking-widest"
+                  className="block px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#c9c1b0] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 font-montserrat uppercase tracking-widest flex items-center"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Skin Membership
@@ -754,7 +784,7 @@ export default function HeaderAesthetics() {
               <li>
                 <Link
                   href="/find-us"
-                  className="block px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base text-gray-700 dark:text-gray-300 hover:bg-rose-50 dark:hover:bg-gray-800 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg font-light transition-colors active:scale-95 font-montserrat uppercase tracking-widest"
+                  className="block px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#c9c1b0] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 font-montserrat uppercase tracking-widest flex items-center"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Find Us
@@ -765,8 +795,8 @@ export default function HeaderAesthetics() {
 
           </nav>
         </div>
-        </>
+        </div>, document.body
       )}
-    </header>
+  </>
   );
 }

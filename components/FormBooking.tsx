@@ -379,15 +379,15 @@ export default function FormBooking() {
     <form key={formKey} className="space-y-6" onSubmit={handleSubmit}>
       
       {/* Grid Layout for Form Fields */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
         
         {/* Left Column - Personal Details */}
-        <div className="space-y-6">
-          <div className="flex items-center space-x-4 mb-6">
-            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-              <span className="text-blue-600 dark:text-blue-400 font-bold text-sm">1</span>
+        <div className="space-y-4 sm:space-y-6">
+          <div className="flex items-center space-x-3 sm:space-x-4 mb-4 sm:mb-6">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-blue-600 dark:text-blue-400 font-bold text-xs sm:text-sm">1</span>
             </div>
-            <h4 className="text-xl font-semibold text-gray-900 dark:text-white">Your Details</h4>
+            <h4 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Your Details</h4>
           </div>
           
           {/* Name */}
@@ -397,7 +397,7 @@ export default function FormBooking() {
             </label>
             <input
               required
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-base"
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm sm:text-base"
               id="name"
               name="name"
               placeholder="Your full name"
@@ -406,14 +406,14 @@ export default function FormBooking() {
           </div>
 
           {/* Email and Phone */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="email">
                 Email *
               </label>
               <input
                 required
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-base"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm sm:text-base"
                 id="email"
                 name="email"
                 placeholder="your@email.com"
@@ -427,7 +427,7 @@ export default function FormBooking() {
               </label>
               <input
                 required
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-base"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm sm:text-base"
                 id="phone"
                 name="phone"
                 placeholder="+44 7XXX XXXXXX"
@@ -443,39 +443,39 @@ export default function FormBooking() {
             </label>
             <textarea
               required
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none text-sm"
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none text-sm sm:text-base min-h-[80px]"
               id="address"
               name="address"
               placeholder="Full address where service is needed"
-              rows={2}
+              rows={3}
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="description">
-              Problem Description
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="description">
+              Additional Notes (Optional)
             </label>
             <textarea
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none text-sm"
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none text-sm sm:text-base min-h-[80px]"
               id="description"
               name="description"
               placeholder="Any additional notes or questions..."
-              rows={2}
+              rows={3}
             />
           </div>
         </div>
 
         {/* Right Column - Service & Schedule */}
-        <div className="space-y-4">
+        <div className="space-y-4 sm:space-y-6">
           
           {/* Service Selection */}
           <div>
-            <div className="flex items-center space-x-3 mb-3">
-              <div className="w-7 h-7 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-                <span className="text-green-600 dark:text-green-400 font-bold text-xs">2</span>
+            <div className="flex items-center space-x-3 mb-3 sm:mb-4">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-green-600 dark:text-green-400 font-bold text-xs sm:text-sm">2</span>
               </div>
-              <h4 className="text-base font-semibold text-gray-900 dark:text-white">Service & Schedule</h4>
+              <h4 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Service & Schedule</h4>
             </div>
             
             <div className="mb-4">
@@ -489,11 +489,11 @@ export default function FormBooking() {
                   ))}
                 </div>
               ) : (
-                <div className="space-y-2 max-h-48 overflow-y-auto">
+                <div className="space-y-2 max-h-[300px] sm:max-h-48 overflow-y-auto menu-scroll pr-2">
                   {services.map((service: BookingService) => (
                     <div
                       key={service.id}
-                      className={`p-3 rounded-lg border-2 cursor-pointer transition-all hover:shadow-sm ${
+                      className={`p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-sm touch-manipulation min-h-[60px] sm:min-h-[70px] flex items-center ${
                         selectedService === service.id
                           ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-sm"
                           : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
@@ -508,20 +508,20 @@ export default function FormBooking() {
                         value={service.id}
                         onChange={(e) => setSelectedService(e.target.value)}
                       />
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2 flex-1">
-                          <span className="text-lg">{service.icon}</span>
+                      <div className="flex items-center justify-between gap-2 sm:gap-3 w-full">
+                        <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
+                          <span className="text-base sm:text-lg flex-shrink-0">{service.icon}</span>
                           <div className="flex-1 min-w-0">
-                            <h5 className="font-medium text-gray-900 dark:text-white text-xs">
+                            <h5 className="font-medium text-gray-900 dark:text-white text-sm sm:text-base truncate">
                               {service.name}
                             </h5>
-                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5 line-clamp-1">
+                            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-0.5 line-clamp-1 sm:line-clamp-2">
                               {service.description}
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/50 px-2 py-1 rounded-full whitespace-nowrap">
+                        <div className="flex items-center space-x-1.5 sm:space-x-2 flex-shrink-0">
+                          <span className="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/50 px-2 sm:px-3 py-1 rounded-full whitespace-nowrap">
                             {service.price}
                           </span>
                           {selectedService === service.id && (
@@ -541,9 +541,9 @@ export default function FormBooking() {
           </div>
 
           {/* Date and Time */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="preferred-date">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="preferred-date">
                 Date *
               </label>
               <CustomDatePicker
@@ -639,7 +639,7 @@ export default function FormBooking() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="timeSlot">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="timeSlot">
                 Time *
                 {isCheckingAvailability && (
                   <span className="ml-1 text-xs text-blue-500">
@@ -648,12 +648,12 @@ export default function FormBooking() {
                 )}
               </label>
               {isLoadingTimeSlots ? (
-                <div className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg h-9"></div>
+                <div className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg h-10 sm:h-11"></div>
               ) : (
                 <>
                   <select
                     required
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white appearance-none text-sm"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white appearance-none text-sm sm:text-base min-h-[44px]"
                     id="timeSlot"
                     name="timeSlot"
                     disabled={availableTimeSlots.length === 0}
@@ -693,42 +693,42 @@ export default function FormBooking() {
       </div>
 
       {/* Submit Button */}
-      <div className="pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-center">
+      <div className="pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-center">
         <button
-          className={`px-8 py-3 rounded-lg font-semibold text-white text-base transition-all ${
+          className={`w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-white text-base sm:text-lg transition-all min-h-[44px] touch-manipulation ${
             isSubmitting
               ? "bg-gray-400 cursor-not-allowed"
-              : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transform hover:scale-[1.02] shadow-md hover:shadow-lg"
+              : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transform hover:scale-[1.02] shadow-md hover:shadow-lg active:scale-95"
           }`}
           disabled={isSubmitting}
           type="submit"
         >
           {isSubmitting ? (
-            <div className="flex items-center justify-center">
-              <svg className="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex items-center justify-center gap-2">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
               </svg>
-              Sending...
+              <span>Sending...</span>
             </div>
           ) : (
-            <div className="flex items-center justify-center">
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center justify-center gap-2">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
               </svg>
-              Send Request
+              <span>Send Request</span>
             </div>
           )}
         </button>
       </div>
 
-      <div className="text-center">
-        <p className="text-xs text-gray-500 dark:text-gray-400">
+      <div className="text-center px-4">
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
           * Required fields. Questions? Call{" "}
-          <a href={`tel:${businessPhone}`} className="font-bold text-blue-600 dark:text-blue-400 hover:underline">
+          <a href={`tel:${businessPhone}`} className="font-bold text-blue-600 dark:text-blue-400 hover:underline break-all sm:break-normal">
             {businessPhone}
           </a>
         </p>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+        <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-500 mt-1 sm:mt-2">
           We'll contact you within 45 minutes to confirm your booking
         </p>
       </div>

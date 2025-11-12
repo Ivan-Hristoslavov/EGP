@@ -1,6 +1,127 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "../../../../lib/supabase";
 
+interface WorkingHour {
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  is_working_day: boolean;
+  buffer_minutes: number;
+  max_appointments: number;
+}
+
+const SLOT_INTERVAL_MINUTES = 30;
+
+function toDate(date: string, time: string) {
+  const [hour, minute] = time.split(":").map(Number);
+  const base = new Date(`${date}T00:00:00`);
+  base.setHours(hour, minute, 0, 0);
+  return base;
+}
+
+function toTimeString(date: Date) {
+  return `${date.getHours().toString().padStart(2, "0")}:${date
+    .getMinutes()
+    .toString()
+    .padStart(2, "0")}`;
+}
+
+function addMinutes(date: Date, minutes: number) {
+  const next = new Date(date);
+  next.setMinutes(next.getMinutes() + minutes);
+  return next;
+}
+
+async function getWorkingHourForDate(date: Date) {
+  const dow = date.getDay();
+  const { data, error } = await supabaseAdmin
+    .from("working_hours")
+    .select("*")
+    .eq("day_of_week", dow)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as WorkingHour | null;
+}
+
+async function getBookingsBetween(startDate: string, endDate: string) {
+  const { data, error } = await supabaseAdmin
+    .from("bookings")
+    .select("id, date, time, status")
+    .gte("date", startDate)
+    .lte("date", endDate);
+
+  if (error) {
+    throw error;
+  }
+
+  return data ?? [];
+}
+
+function isSlotBooked(bookings: any[], date: string, time: string) {
+  return bookings.some((booking) => {
+    if (!booking || !booking.time || !booking.date) return false;
+
+    const matchesDate = booking.date === date;
+    const normalizedTime = booking.time.length > 5 ? booking.time.slice(0, 5) : booking.time;
+    const matchesTime = normalizedTime === time;
+    const isCancelled = booking.status === "cancelled";
+
+    return matchesDate && matchesTime && !isCancelled;
+  });
+}
+
+async function buildSlotsForDate(date: string, workingHour: WorkingHour | null) {
+  if (!workingHour || !workingHour.is_working_day) {
+    return { date, slots: [], bookedSlots: [], status: "closed" as const };
+  }
+
+  const start = toDate(date, workingHour.start_time);
+  const end = toDate(date, workingHour.end_time);
+
+  if (start >= end) {
+    return { date, slots: [], bookedSlots: [], status: "closed" as const };
+  }
+
+  const bookings = await getBookingsBetween(date, date);
+  const slots: Array<{ start_time: string; end_time: string; is_available: boolean }> = [];
+  const bookedSlots: string[] = [];
+
+  let cursor = new Date(start);
+
+  while (cursor < end) {
+    const slotStart = new Date(cursor);
+    const slotEnd = addMinutes(slotStart, SLOT_INTERVAL_MINUTES);
+
+    if (slotEnd > end) {
+      break;
+    }
+
+    const slotStartStr = toTimeString(slotStart);
+    const slotEndStr = toTimeString(slotEnd);
+    const reserved = isSlotBooked(bookings, date, slotStartStr);
+
+    slots.push({
+      start_time: slotStartStr,
+      end_time: slotEndStr,
+      is_available: !reserved,
+    });
+
+    if (reserved) {
+      bookedSlots.push(slotStartStr);
+    }
+
+    cursor = addMinutes(slotStart, SLOT_INTERVAL_MINUTES + (workingHour.buffer_minutes ?? 0));
+  }
+
+  const status: "available" | "full" = slots.some((slot) => slot.is_available) ? "available" : "full";
+
+  return { date, slots, bookedSlots, status };
+}
+
 // GET - Get available time slots for a specific date
 export async function GET(request: NextRequest) {
   try {
@@ -14,56 +135,24 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Validate date format
     const dateObj = new Date(date);
-    if (isNaN(dateObj.getTime())) {
+    if (Number.isNaN(dateObj.getTime())) {
       return NextResponse.json(
         { error: "Invalid date format" },
         { status: 400 }
       );
     }
 
-    // Get existing bookings for this date
-    const { data: existingBookings, error: bookingsError } = await supabaseAdmin
-      .from("bookings")
-      .select("time")
-      .eq("date", date);
-
-    if (bookingsError) {
-      console.error("Error fetching existing bookings:", bookingsError);
-      return NextResponse.json(
-        { error: "Failed to fetch existing bookings" },
-        { status: 500 }
-      );
-    }
-
-    // Generate time slots (9:00 AM to 6:00 PM, 30-minute intervals)
-    const timeSlots = [];
-    const startHour = 9;
-    const endHour = 18;
-    const interval = 30; // minutes
-
-    for (let hour = startHour; hour < endHour; hour++) {
-      for (let minute = 0; minute < 60; minute += interval) {
-        const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-        const isBooked = existingBookings?.some(booking => 
-          booking.time.startsWith(timeString)
-        );
-        
-        timeSlots.push({
-          slot_id: `${date}-${timeString}`,
-          start_time: timeString,
-          end_time: `${hour.toString().padStart(2, '0')}:${(minute + interval).toString().padStart(2, '0')}`,
-          is_available: !isBooked
-        });
-      }
-    }
+    const workingHour = await getWorkingHourForDate(dateObj);
+    const payload = await buildSlotsForDate(date, workingHour);
 
     return NextResponse.json({
       success: true,
       date,
-      slots: timeSlots.filter(slot => slot.is_available),
-      count: timeSlots.filter(slot => slot.is_available).length
+      status: payload.status,
+      slots: payload.slots.filter((slot) => slot.is_available),
+      allSlots: payload.slots,
+      bookedSlots: payload.bookedSlots,
     });
   } catch (error) {
     console.error("Unexpected error:", error);
@@ -74,7 +163,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - Generate time slots for a date range
+// POST - Generate time slots for a date range and persist to time_slots table
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -90,7 +179,7 @@ export async function POST(request: NextRequest) {
     const start = new Date(startDate);
     const end = new Date(endDate);
 
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
       return NextResponse.json(
         { error: "Invalid date format" },
         { status: 400 }
@@ -104,12 +193,51 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // For now, just return success since we're generating slots on-demand
-    // In a full implementation, this would pre-generate slots in a time_slots table
+    const dayCount = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    const summaries = [];
+
+    for (let i = 0; i < dayCount; i++) {
+      const current = new Date(start);
+      current.setDate(start.getDate() + i);
+      const currentDate = current.toISOString().split("T")[0];
+      const workingHour = await getWorkingHourForDate(current);
+
+      if (!workingHour || !workingHour.is_working_day) {
+        summaries.push({ date: currentDate, generated: 0, skipped: true });
+        continue;
+      }
+
+      const payload = await buildSlotsForDate(currentDate, workingHour);
+
+      await supabaseAdmin
+        .from("time_slots")
+        .delete()
+        .eq("date", currentDate);
+
+      if (payload.slots.length > 0) {
+        const rows = payload.slots.map((slot) => ({
+          date: currentDate,
+          start_time: `${slot.start_time}:00`,
+          end_time: `${slot.end_time}:00`,
+          is_available: slot.is_available,
+        }));
+
+        const { error } = await supabaseAdmin.from("time_slots").insert(rows);
+
+        if (error) {
+          console.error(`Failed inserting slots for ${currentDate}:`, error);
+        }
+
+        summaries.push({ date: currentDate, generated: rows.length, skipped: false });
+      } else {
+        summaries.push({ date: currentDate, generated: 0, skipped: false });
+      }
+    }
+
     return NextResponse.json({
       success: true,
-      message: "Time slots are generated on-demand for each date",
-      note: "No pre-generation needed with current implementation"
+      summaries,
+      message: "Time slots generated successfully",
     });
   } catch (error) {
     console.error("Unexpected error:", error);
@@ -133,12 +261,14 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Since we're generating slots on-demand, there's nothing to clear
-    // This endpoint is kept for API compatibility
+    await supabaseAdmin
+      .from("time_slots")
+      .delete()
+      .eq("date", date);
+
     return NextResponse.json({
       success: true,
-      message: `Time slots for ${date} are generated on-demand`,
-      note: "No persistent slots to clear with current implementation"
+      message: `Time slots for ${date} cleared successfully`,
     });
   } catch (error) {
     console.error("Unexpected error:", error);

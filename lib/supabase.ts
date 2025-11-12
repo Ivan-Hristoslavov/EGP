@@ -390,6 +390,96 @@ export type Database = {
           updated_at?: string;
         };
       };
+      working_hours: {
+        Row: {
+          id: string;
+          day_of_week: number;
+          start_time: string;
+          end_time: string;
+          is_working_day: boolean;
+          buffer_minutes: number;
+          max_appointments: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          day_of_week: number;
+          start_time: string;
+          end_time: string;
+          is_working_day?: boolean;
+          buffer_minutes?: number;
+          max_appointments?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          day_of_week?: number;
+          start_time?: string;
+          end_time?: string;
+          is_working_day?: boolean;
+          buffer_minutes?: number;
+          max_appointments?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      service_durations: {
+        Row: {
+          id: string;
+          service_name: string;
+          duration_minutes: number;
+          buffer_minutes: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          service_name: string;
+          duration_minutes: number;
+          buffer_minutes?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          service_name?: string;
+          duration_minutes?: number;
+          buffer_minutes?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      time_slots: {
+        Row: {
+          id: string;
+          date: string;
+          start_time: string;
+          end_time: string;
+          is_available: boolean;
+          booking_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          date: string;
+          start_time: string;
+          end_time: string;
+          is_available?: boolean;
+          booking_id?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          date?: string;
+          start_time?: string;
+          end_time?: string;
+          is_available?: boolean;
+          booking_id?: string | null;
+          created_at?: string;
+        };
+      };
     };
   };
 };

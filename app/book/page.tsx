@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense, useMemo } from 'react';
+import { useState, useEffect, Suspense, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { siteConfig } from "@/config/site";
 import { Calendar, Clock, CreditCard, CheckCircle, Plus, Minus, X, ArrowLeft, Info, Shield } from "lucide-react";
@@ -10,36 +10,22 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@herou
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 
-// Mock calendar data - in real app this would come from API
-const getAvailableDates = () => {
-  const dates = [];
-  const today = new Date();
-  
-  for (let i = 1; i <= 30; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() + i);
-    
-    // Skip weekends for now (can be configured)
-    if (date.getDay() !== 0 && date.getDay() !== 6) {
-      dates.push({
-        date: date.toISOString().split('T')[0],
-        available: Math.random() > 0.3, // 70% availability
-        timeSlots: ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00']
-      });
-    }
-  }
-  
-  return dates;
-};
-
-interface OrderItem {
+type OrderItem = {
   serviceId: string;
   name: string;
   price: number;
   duration: number;
   category: string;
   quantity: number;
-}
+};
+
+type CalendarDay = {
+  date: string;
+  status: 'available' | 'full' | 'closed';
+  timeSlots: string[];
+  allSlots: string[];
+  bookedSlots: string[];
+};
 
 function BookingPageContent() {
   const searchParams = useSearchParams();
@@ -47,10 +33,14 @@ function BookingPageContent() {
   const [selectedServices, setSelectedServices] = useState<OrderItem[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
-  const [availableDates, setAvailableDates] = useState(getAvailableDates());
+  const [availableDates, setAvailableDates] = useState<CalendarDay[]>([]);
+  const [availabilityLoading, setAvailabilityLoading] = useState(true);
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<'services' | 'date' | 'preview' | 'payment'>('services');
   const [showServiceSelector, setShowServiceSelector] = useState(false);
   const [serviceInfoModal, setServiceInfoModal] = useState<string | null>(null);
+  const [hoveredDate, setHoveredDate] = useState<string | null>(null);
+  const [hoverTooltip, setHoverTooltip] = useState<{ x: number; y: number; content: string } | null>(null);
 
   // Create a lookup map from services for easy access
   const servicesDataMap = useMemo(() => {
@@ -65,7 +55,11 @@ function BookingPageContent() {
         details: service.details,
         benefits: service.benefits,
         preparation: service.preparation,
-        aftercare: service.aftercare
+        aftercare: service.aftercare,
+        requiresConsultation: service.requires_consultation,
+        downtimeDays: service.downtime_days,
+        resultsDurationWeeks: service.results_duration_weeks,
+        imageUrl: service.image_url,
       };
     });
     return map;
@@ -83,6 +77,50 @@ function BookingPageContent() {
     });
     return grouped;
   }, [services, servicesDataMap]);
+
+  const loadAvailability = useCallback(async () => {
+    setAvailabilityLoading(true);
+    setAvailabilityError(null);
+
+    try {
+      const start = new Date();
+      const startISO = start.toISOString().split('T')[0];
+      const end = new Date(start);
+      end.setDate(start.getDate() + 30);
+      const endISO = end.toISOString().split('T')[0];
+
+      const response = await fetch(`/api/booking/availability?start=${startISO}&end=${endISO}`);
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to load availability');
+      }
+
+      const mapped: CalendarDay[] = (data.days ?? []).map((day: any) => ({
+        date: day.date,
+        status: day.status,
+        timeSlots: day.availableSlots ?? [],
+        allSlots: day.allSlots ?? [],
+        bookedSlots: day.bookedSlots ?? [],
+      }));
+
+      setAvailableDates(mapped);
+
+      if (mapped.length && selectedDate && !mapped.some((day) => day.date === selectedDate)) {
+        setSelectedDate('');
+        setSelectedTime('');
+      }
+    } catch (error) {
+      console.error('Error loading availability:', error);
+      setAvailabilityError('Unable to load availability. Please try again later.');
+    } finally {
+      setAvailabilityLoading(false);
+    }
+  }, [selectedDate]);
+
+  useEffect(() => {
+    loadAvailability();
+  }, [loadAvailability]);
 
   // Auto-select service from URL parameter
   useEffect(() => {
@@ -163,6 +201,13 @@ function BookingPageContent() {
   };
 
   const handleDateSelect = (date: string) => {
+    if (availabilityLoading) return;
+
+    const info = availableDates.find((item) => item.date === date);
+    if (!info || info.status === 'closed' || info.timeSlots.length === 0) {
+      return;
+    }
+
     setSelectedDate(date);
     setSelectedTime('');
     setCurrentStep('date');
@@ -193,6 +238,29 @@ function BookingPageContent() {
     const service = servicesDataMap[serviceInfoModal];
     if (!service) return null;
 
+    const metaItems = [
+      {
+        label: 'Investment',
+        value: `£${service.price}`,
+      },
+      service.duration && {
+        label: 'Duration',
+        value: `${service.duration} min`,
+      },
+      service.requiresConsultation !== undefined && {
+        label: 'Consultation',
+        value: service.requiresConsultation ? 'Required' : 'Optional',
+      },
+      service.downtimeDays !== undefined && {
+        label: 'Downtime',
+        value: service.downtimeDays > 0 ? `${service.downtimeDays} day${service.downtimeDays > 1 ? 's' : ''}` : 'Minimal',
+      },
+      service.resultsDurationWeeks && {
+        label: 'Results last',
+        value: `${service.resultsDurationWeeks} week${service.resultsDurationWeeks > 1 ? 's' : ''}`,
+      },
+    ].filter(Boolean) as Array<{ label: string; value: string }>;
+ 
     return (
       <Modal
         isOpen={true}
@@ -207,91 +275,89 @@ function BookingPageContent() {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 text-white rounded-t-2xl">
-                <div className="flex-1">
-                  <h2 className="text-2xl sm:text-3xl font-bold mb-2">{service.name}</h2>
-                  <div className="flex flex-wrap items-center gap-4 text-rose-100">
-                    <span className="flex items-center gap-1">
-                  <Clock className="w-5 h-5" />
-                  {service.duration} minutes
-                </span>
-                <span className="text-2xl font-bold">£{service.price}</span>
-              </div>
-            </div>
+              <ModalHeader className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-[#3f3a31] rounded-t-2xl">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 w-full">
+                  <div>
+                    <p className="text-sm uppercase tracking-[0.3em] font-semibold text-[#3f3a31]/70">Treatment insight</p>
+                    <h2 className="text-2xl sm:text-3xl font-bold mt-1">{service.name}</h2>
+                    <p className="text-sm text-[#3f3a31]/80 mt-1">{service.category}</p>
+                  </div>
+                  {service.imageUrl && (
+                    <div className="hidden sm:block w-20 h-20 rounded-xl overflow-hidden border border-white/40 shadow-lg">
+                      <img src={service.imageUrl} alt={service.name} className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                </div>
               </ModalHeader>
 
               <ModalBody className="py-6">
                 <div className="space-y-6">
-            {/* Description */}
-            <div>
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                <Info className="w-5 h-5 text-rose-500" />
-                Overview
-              </h3>
-                    <p className="text-base sm:text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-                {service.description}
-              </p>
-            </div>
+                  {metaItems.length > 0 && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {metaItems.map(({ label, value }) => (
+                        <div key={label} className="bg-[#f5f1e9] dark:bg-gray-800/40 border border-[#e4d9c8] dark:border-gray-700 rounded-lg px-4 py-3">
+                          <p className="text-xs uppercase tracking-wide text-[#6b5f4b] dark:text-[#c9c1b0] font-semibold">{label}</p>
+                          <p className="text-sm sm:text-base text-gray-800 dark:text-gray-200 font-medium mt-1">{value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
-            {/* Details */}
-            {service.details && (
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3">
-                  Treatment Details
-                </h3>
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {service.details}
-                </p>
-              </div>
-            )}
+                  {service.description && (
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                        <Info className="w-5 h-5 text-[#9d9585]" />
+                        Overview
+                      </h3>
+                      <p className="text-base sm:text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+                        {service.description}
+                      </p>
+                    </div>
+                  )}
 
-            {/* Benefits */}
-            {service.benefits && service.benefits.length > 0 && (
-              <div>
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-500" />
-                  Key Benefits
-                </h3>
-                      <div className="flex flex-wrap gap-2">
+                  {service.details && (
+                    <div className="bg-white/80 dark:bg-gray-900/50 rounded-xl border border-[#e4d9c8] dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3">Treatment experience</h3>
+                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{service.details}</p>
+                    </div>
+                  )}
+
+                  {service.benefits && service.benefits.length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5 text-green-500" />
+                        Key benefits
+                      </h3>
+                      <ul className="list-disc list-inside space-y-2 text-sm sm:text-base text-gray-700 dark:text-gray-300">
                         {service.benefits.map((benefit: string, index: number) => (
-                          <Chip
-                            key={index}
-                            variant="flat"
-                            color="success"
-                            className="text-sm"
-                          >
-                            {benefit}
-                          </Chip>
-                  ))}
-                </div>
-              </div>
-            )}
+                          <li key={index}>{benefit}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
-            {/* Preparation */}
-            {service.preparation && (
-              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6 border-l-4 border-blue-500">
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-blue-500" />
-                  Preparation
-                </h3>
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {service.preparation}
-                </p>
-              </div>
-            )}
-
-            {/* Aftercare */}
-            {service.aftercare && (
-              <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-6 border-l-4 border-purple-500">
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-purple-500" />
-                  Aftercare
-                </h3>
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {service.aftercare}
-                </p>
-              </div>
-            )}
+                  {(service.preparation || service.aftercare) && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {service.preparation && (
+                        <div className="bg-[#f5f1e9] dark:bg-gray-800/40 border border-[#e4d9c8] dark:border-gray-700 rounded-lg p-4">
+                          <h4 className="text-sm font-semibold text-[#6b5f4b] dark:text-[#c9c1b0] mb-2 flex items-center gap-2">
+                            <Shield className="w-4 h-4 text-[#9d9585]" />
+                            Preparation tips
+                          </h4>
+                          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{service.preparation}</p>
+                        </div>
+                      )}
+                      {service.aftercare && (
+                        <div className="bg-[#f5f1e9] dark:bg-gray-800/40 border border-[#e4d9c8] dark:border-gray-700 rounded-lg p-4">
+                          <h4 className="text-sm font-semibold text-[#6b5f4b] dark:text-[#c9c1b0] mb-2 flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-[#9d9585]" />
+                            Aftercare guidance
+                          </h4>
+                          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{service.aftercare}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </ModalBody>
 
@@ -313,84 +379,88 @@ function BookingPageContent() {
 
   const renderServiceSelector = () => {
     return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" style={{ zIndex: 9000 }}>
         <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-          <div className="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-6 py-4 flex items-center justify-between rounded-t-2xl flex-shrink-0">
-            <h2 className="text-2xl font-bold">Select Services</h2>
+          <div className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-[#3f3a31] px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between rounded-t-2xl flex-shrink-0">
+            <h2 className="text-xl sm:text-2xl font-bold">Select Services</h2>
             <button
               onClick={() => setShowServiceSelector(false)}
-              className="p-2 hover:bg-white/20 rounded-full transition-colors"
+              className="p-2 hover:bg-white/20 rounded-full transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+              aria-label="Close"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           </div>
           
-          <div className="p-6 overflow-y-auto flex-1">
+          <div className="p-4 sm:p-6 overflow-y-auto flex-1">
             {Object.entries(servicesByCategory).map(([category, servicesList]) => (
-              <div key={category} className="mb-8">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">{category}</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div key={category} className="mb-6 sm:mb-8">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-5">{category}</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                   {servicesList.map(([serviceId, service]) => (
                     <div
                       key={serviceId}
-                      className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:border-rose-300 dark:hover:border-rose-600 transition-all duration-200 hover:shadow-lg relative group"
+                      className="border border-[#e4d9c8] dark:border-gray-700 rounded-xl p-4 sm:p-5 hover:border-[#c9c1b0] dark:hover:border-[#b5ad9d] transition-all duration-200 hover:shadow-lg relative group bg-white/95 dark:bg-gray-900/70"
                     >
-                      <div className="space-y-3">
-                      <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-gray-900 dark:text-white text-lg mb-2">{service.name}</h4>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 leading-relaxed">
+                      <div className="space-y-3 sm:space-y-4">
+                      <div className="flex flex-col gap-3">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-gray-900 dark:text-white text-base sm:text-lg mb-2 leading-tight">{service.name}</h4>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-2">
                               {service.description}
                             </p>
                         </div>
-                          <div className="text-right ml-4">
-                            <div className="text-2xl font-bold text-rose-600 dark:text-rose-400">£{service.price}</div>
-                            <div className="text-sm text-gray-500">{service.duration} min</div>
+                          <div className="flex items-center justify-between sm:justify-start sm:flex-col sm:items-start gap-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                            <div className="flex flex-col">
+                              <div className="text-xl sm:text-2xl font-bold text-[#9d9585] dark:text-[#c9c1b0]">£{service.price}</div>
+                              <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{service.duration} min</div>
+                            </div>
                         </div>
                       </div>
                         
                         {service.details && (
-                          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                            <h5 className="font-medium text-gray-900 dark:text-white mb-2">Treatment Details</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{service.details}</p>
+                          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 sm:p-4 mt-2">
+                            <h5 className="font-medium text-gray-900 dark:text-white mb-1.5 text-sm sm:text-base">Treatment Details</h5>
+                            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-2">{service.details}</p>
                     </div>
                         )}
                         
                         {service.benefits && service.benefits.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-2">
                             {service.benefits.slice(0, 3).map((benefit: string, index: number) => (
-                              <span key={index} className="bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 px-2 py-1 rounded-full text-xs">
+                              <span key={index} className="bg-[#f5f1e9] dark:bg-gray-800/40 text-[#6b5f4b] dark:text-[#c9c1b0] px-2 sm:px-2.5 py-1 rounded-full text-xs">
                                 {benefit}
                               </span>
                             ))}
                             {service.benefits.length > 3 && (
-                              <span className="text-xs text-gray-500">+{service.benefits.length - 3} more</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">+{service.benefits.length - 3} more</span>
                             )}
                           </div>
                         )}
                         
-                        <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 pt-2 mt-2 border-t border-gray-200 dark:border-gray-700">
                           <span className="flex items-center gap-1">
                             <Clock className="w-3 h-3" />
-                            {service.duration} minutes
+                            <span className="hidden sm:inline">{service.duration} minutes</span>
+                            <span className="sm:hidden">{service.duration}m</span>
                           </span>
                           <span className="flex items-center gap-1">
                             <CheckCircle className="w-3 h-3 text-green-500" />
-                            Professional treatment
+                            <span className="hidden sm:inline">Professional</span>
                           </span>
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex gap-2 pt-2">
+                        <div className="flex flex-col gap-2 pt-3 mt-2 border-t border-gray-200 dark:border-gray-700">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               setServiceInfoModal(serviceId);
                             }}
-                            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 border-2 border-blue-500 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors font-medium"
+                            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-[#c9c1b0] text-[#6b5f4b] dark:text-[#c9c1b0] rounded-lg hover:bg-[#f5f1e9] dark:hover:bg-gray-800/40 transition-colors font-medium text-sm sm:text-base min-h-[44px] touch-manipulation active:scale-95"
                           >
                             <Info className="w-4 h-4" />
-                            More Info
+                            <span>More Info</span>
                           </button>
                           <button
                             onClick={(e) => {
@@ -398,10 +468,10 @@ function BookingPageContent() {
                         addService(serviceId);
                         setShowServiceSelector(false);
                       }}
-                            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all font-medium shadow-md hover:shadow-lg"
+                            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#9d9585] to-[#c9c1b0] text-[#3f3a31] rounded-lg hover:from-[#8c846f] hover:to-[#b5ad9d] transition-all font-medium shadow-md hover:shadow-lg text-sm sm:text-base min-h-[44px] touch-manipulation active:scale-95"
                           >
                             <Plus className="w-4 h-4" />
-                            Add Service
+                            <span>Add Service</span>
                           </button>
                         </div>
                       </div>
@@ -417,61 +487,170 @@ function BookingPageContent() {
   };
 
   const renderCalendar = () => {
+    const selectedDayInfo = selectedDate
+      ? availableDates.find((item) => item.date === selectedDate)
+      : null;
+
+    if (availabilityLoading) {
+      return (
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+          <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Select Date &amp; Time</h3>
+          <div className="flex items-center gap-3 bg-[#f5f1e9] dark:bg-gray-900/60 border border-[#e4d9c8] dark:border-gray-700 rounded-xl px-4 py-6">
+            <div className="w-6 h-6 border-2 border-[#c9c1b0] border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-sm sm:text-base text-gray-700 dark:text-gray-300">Loading availability...</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (availabilityError) {
+      return (
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+          <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Select Date &amp; Time</h3>
+          <div className="bg-[#fce8e8] dark:bg-red-900/20 border border-[#f3b3b0] dark:border-red-800 rounded-xl px-4 py-6 space-y-4">
+            <p className="text-sm sm:text-base text-[#7f2b27] dark:text-red-200">{availabilityError}</p>
+            <Button
+              onPress={loadAvailability}
+              color="primary"
+              className="bg-gradient-to-r from-[#9d9585] to-[#c9c1b0] text-[#3f3a31]"
+            >
+              Retry loading availability
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
+    if (!availableDates.length) {
+      return (
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+          <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Select Date &amp; Time</h3>
+          <div className="bg-[#f5f1e9] dark:bg-gray-900/60 border border-[#e4d9c8] dark:border-gray-700 rounded-xl px-4 py-6 space-y-4 text-center">
+            <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300">No availability found for the next 30 days.</p>
+            <Button
+              onPress={loadAvailability}
+              color="primary"
+              variant="light"
+              className="mx-auto"
+            >
+              Refresh availability
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
+    const gridDays = availableDates.slice(0, 28);
+
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Select Date & Time</h3>
-        
-        {/* Calendar Grid */}
-        <div className="grid grid-cols-7 gap-2 mb-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+        <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Select Date &amp; Time</h3>
+        <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-4">
+          <span className="inline-flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#d9534f]"></span> Fully booked</span>
+          <span className="inline-flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#80c48f]"></span> Slots available</span>
+          <span className="inline-flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-gray-200"></span> Clinic closed</span>
+        </div>
+
+        <div className="grid grid-cols-7 gap-1.5 sm:gap-2 mb-4 sm:mb-6 relative">
           {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
-            <div key={day} className="text-center text-sm font-semibold text-gray-600 dark:text-gray-400 py-2">
+            <div key={day} className="text-center text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400 py-2">
               {day}
             </div>
           ))}
-          
-          {availableDates.slice(0, 28).map((dateInfo) => {
+
+          {gridDays.map((dateInfo) => {
             const date = new Date(dateInfo.date);
             const isSelected = selectedDate === dateInfo.date;
-            const isAvailable = dateInfo.available;
             const isToday = date.toDateString() === new Date().toDateString();
-            
+            const isClosed = dateInfo.status === 'closed';
+            const isFull = dateInfo.status === 'full';
+            const hasSlots = dateInfo.timeSlots.length > 0;
+            const disabled = isClosed || isFull || !hasSlots;
+
+            let statusClasses = '';
+            if (isSelected) {
+              statusClasses = 'bg-gradient-to-br from-[#9d9585] to-[#c9c1b0] text-white shadow-lg border border-transparent';
+            } else if (isClosed) {
+              statusClasses = 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border border-transparent cursor-not-allowed';
+            } else if (isFull) {
+              statusClasses = 'bg-[#fce8e8] text-[#7f2b27] border border-[#f3b3b0]';
+            } else {
+              statusClasses = 'bg-[#e7f4eb] text-[#2f6b3d] border border-[#b4dfc1] hover:bg-[#d7eddc]';
+            }
+
             return (
               <button
                 key={dateInfo.date}
-                onClick={() => isAvailable ? handleDateSelect(dateInfo.date) : null}
-                disabled={!isAvailable}
+                onClick={() => handleDateSelect(dateInfo.date)}
+                disabled={disabled}
                 className={`
-                  aspect-square rounded-lg text-sm font-medium transition-all
-                  ${isSelected 
-                    ? 'bg-rose-500 text-white' 
-                    : isAvailable 
-                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-rose-100 dark:hover:bg-rose-900/30' 
-                      : 'bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                  }
-                  ${isToday ? 'ring-2 ring-rose-300' : ''}
+                  aspect-square rounded-lg text-xs sm:text-sm font-medium transition-all touch-manipulation min-h-[36px] sm:min-h-[44px]
+                  ${statusClasses}
+                  ${isToday ? 'ring-2 ring-[#d8c5a7] dark:ring-[#b5ad9d]' : ''}
                 `}
+                onMouseEnter={(event) => {
+                  setHoveredDate(dateInfo.date);
+                  const rect = (event.currentTarget as HTMLButtonElement).getBoundingClientRect();
+                  const tooltipContent = hasSlots
+                    ? `${dateInfo.timeSlots.length} available slot${dateInfo.timeSlots.length === 1 ? '' : 's'}`
+                    : isFull
+                      ? 'Fully booked'
+                      : 'Clinic closed';
+                  setHoverTooltip({
+                    x: rect.left + rect.width / 2,
+                    y: rect.top,
+                    content: tooltipContent,
+                  });
+                }}
+                onMouseMove={(event) => {
+                  if (!hoverTooltip) return;
+                  setHoverTooltip({ ...hoverTooltip, x: event.clientX, y: event.clientY });
+                }}
+                onMouseLeave={() => {
+                  setHoveredDate(null);
+                  setHoverTooltip(null);
+                }}
               >
                 {date.getDate()}
               </button>
             );
           })}
-        </div>
-        
-        {/* Time Slots */}
-        {selectedDate && (
-          <div>
-            <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Available Times</h4>
-            <div className="grid grid-cols-3 gap-3">
-              {availableDates.find(d => d.date === selectedDate)?.timeSlots.map(time => (
-                <button
-                  key={time}
-                  onClick={() => handleTimeSelect(time)}
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:border-rose-500 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
-                >
-                  {time}
-                </button>
-              ))}
+
+          {hoverTooltip && (
+            <div
+              className="pointer-events-none fixed z-50 bg-[#3f3a31] text-white text-xs sm:text-sm px-3 py-2 rounded-md shadow-lg"
+              style={{
+                top: hoverTooltip.y + 16,
+                left: hoverTooltip.x + 16,
+              }}
+            >
+              {hoverTooltip.content}
             </div>
+          )}
+        </div>
+
+        {selectedDayInfo && (
+          <div>
+            <h4 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">Available Times</h4>
+            {selectedDayInfo.timeSlots.length === 0 ? (
+              <p className="text-sm text-gray-500 dark:text-gray-400">This day is fully booked. Please select another date.</p>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                {selectedDayInfo.timeSlots.map(time => (
+                  <button
+                    key={time}
+                    onClick={() => handleTimeSelect(time)}
+                    className={`px-3 sm:px-4 py-2.5 sm:py-3 min-h-[44px] rounded-lg text-sm sm:text-base font-medium transition-all touch-manipulation active:scale-95 border
+                      ${selectedTime === time
+                        ? 'bg-gradient-to-r from-[#9d9585] to-[#c9c1b0] text-[#3f3a31] shadow-md border-transparent'
+                        : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-[#b5ad9d] hover:text-[#8c846f] dark:hover:text-[#c9c1b0] hover:bg-[#f5f1e9] dark:hover:bg-gray-800/40'}
+                    `}
+                  >
+                    {time}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -479,29 +658,40 @@ function BookingPageContent() {
   };
 
   const renderOrderPreview = () => {
+    const formattedAppointmentDate = selectedDate
+      ? new Date(selectedDate).toLocaleDateString('en-GB', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
+      : 'Select a date';
+
+    const formattedAppointmentTime = selectedTime || 'Select a time';
+
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Order Summary</h3>
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+        <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Order Summary</h3>
         
         {/* Selected Services */}
-        <div className="space-y-3 mb-6">
+        <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
           {selectedServices.map(item => {
             const serviceData = servicesDataMap[item.serviceId];
             return (
-              <div key={item.serviceId} className="p-4 bg-gradient-to-r from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 rounded-xl border border-gray-200 dark:border-gray-600 hover:shadow-md transition-all">
-                <div className="flex items-center justify-between gap-4">
+              <div key={item.serviceId} className="p-3 sm:p-4 bg-gradient-to-r from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 rounded-xl border border-gray-200 dark:border-gray-600 hover:shadow-md transition-all">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                   {/* Left: Service Name, Price & Duration */}
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold text-gray-900 dark:text-white text-base mb-2 truncate">{item.name}</h4>
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <span className="text-lg font-bold text-rose-600 dark:text-rose-400">£{item.price}</span>
+                    <h4 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base mb-2">{item.name}</h4>
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                      <span className="text-base sm:text-lg font-bold text-[#9d9585] dark:text-[#c9c1b0]">£{item.price}</span>
                       <Chip 
                         size="sm" 
                         variant="flat" 
                         color="default"
                         classNames={{
                           base: "inline-flex items-center",
-                          content: "inline-flex items-center gap-1"
+                          content: "inline-flex items-center gap-1 text-xs"
                         }}
                       >
                         <Clock className="w-3 h-3" />
@@ -521,27 +711,27 @@ function BookingPageContent() {
                   </div>
 
                   {/* Right: Quantity & Total */}
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                     {/* Quantity Controls */}
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => updateQuantity(item.serviceId, item.quantity - 1)}
-                        className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors touch-manipulation active:scale-95"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
-                      <span className="w-10 text-center font-semibold text-gray-900 dark:text-white">{item.quantity}</span>
+                      <span className="w-12 text-center font-semibold text-gray-900 dark:text-white text-sm sm:text-base">{item.quantity}</span>
                   <button
                     onClick={() => updateQuantity(item.serviceId, item.quantity + 1)}
-                        className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors touch-manipulation active:scale-95"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
 
                     {/* Total Price */}
-                    <div className="text-right min-w-[80px]">
-                      <div className="text-xl font-bold text-rose-600 dark:text-rose-400">£{item.price * item.quantity}</div>
+                    <div className="text-left sm:text-right min-w-[80px]">
+                      <div className="text-lg sm:text-xl font-bold text-[#9d9585] dark:text-[#c9c1b0]">£{item.price * item.quantity}</div>
             </div>
                 
                     {/* Details Button */}
@@ -550,10 +740,10 @@ function BookingPageContent() {
                           e.stopPropagation();
                           setServiceInfoModal(item.serviceId);
                         }}
-                      className="px-3 py-2 text-xs font-medium border border-blue-500 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors flex items-center gap-1"
+                      className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium border border-[#c9c1b0] text-[#6b5f4b] dark:text-[#c9c1b0] rounded-lg hover:bg-[#f5f1e9] dark:hover:bg-gray-800/40 transition-colors flex items-center gap-1.5 min-h-[36px] touch-manipulation active:scale-95"
                       >
-                      <Info className="w-4 h-4" />
-                      Details
+                      <Info className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      <span>Details</span>
                       </button>
                     </div>
                     </div>
@@ -563,39 +753,34 @@ function BookingPageContent() {
         </div>
         
         {/* Appointment Details */}
-        <div className="border-t border-gray-200 dark:border-gray-600 pt-4 mb-6">
+        <div className="border-t border-gray-200 dark:border-gray-600 pt-3 sm:pt-4 mb-4 sm:mb-6">
           <div className="flex items-center gap-2 mb-2">
-            <Calendar className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-            <span className="text-gray-900 dark:text-white font-semibold">
-              {new Date(selectedDate).toLocaleDateString('en-GB', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-              })}
+            <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400 flex-shrink-0" />
+            <span className="text-sm sm:text-base text-gray-900 dark:text-white font-semibold break-words">
+              {formattedAppointmentDate}
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-            <span className="text-gray-900 dark:text-white font-semibold">{selectedTime}</span>
+            <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400 flex-shrink-0" />
+            <span className="text-sm sm:text-base text-gray-900 dark:text-white font-semibold">{formattedAppointmentTime}</span>
           </div>
         </div>
         
         {/* Total */}
-        <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
-          <div className="flex justify-between items-center mb-4">
-            <span className="text-lg font-semibold text-gray-900 dark:text-white">Total Duration:</span>
-            <span className="text-lg font-semibold text-gray-900 dark:text-white">{totalDuration} minutes</span>
+        <div className="border-t border-gray-200 dark:border-gray-600 pt-3 sm:pt-4">
+          <div className="flex justify-between items-center mb-3 sm:mb-4">
+            <span className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Total Duration:</span>
+            <span className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">{totalDuration} min</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-xl font-bold text-gray-900 dark:text-white">Total Amount:</span>
-            <span className="text-2xl font-bold text-rose-600 dark:text-rose-400">£{totalAmount}</span>
+            <span className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Total Amount:</span>
+            <span className="text-[#9d9585] dark:text-[#c9c1b0]">£{totalAmount.toFixed(0)}</span>
           </div>
         </div>
         
         <button
           onClick={proceedToPayment}
-          className="w-full mt-6 bg-gradient-to-r from-rose-500 to-pink-500 text-white py-4 rounded-lg font-semibold text-lg hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl"
+          className="w-full mt-4 sm:mt-6 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-[#3f3a31] py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg hover:shadow-xl transition-all active:scale-95 touch-manipulation min-h-[44px]"
         >
           <CreditCard className="w-5 h-5 inline mr-2" />
           Proceed to Payment
@@ -650,7 +835,7 @@ function BookingPageContent() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#9d9585] mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Loading services...</p>
         </div>
       </div>
@@ -661,18 +846,18 @@ function BookingPageContent() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6 font-playfair">
+        <div className="text-center mb-8 sm:mb-12 px-4">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 md:mb-6 font-playfair">
             Book Your Treatment
           </h1>
-          <p className="text-2xl text-gray-600 dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto">
             Select services, choose date & time, and pay securely
           </p>
         </div>
 
         {/* Progress Steps */}
-        <div className="flex justify-center mb-12">
-          <div className="flex items-center space-x-4">
+        <div className="flex justify-center mb-8 sm:mb-12 px-4 overflow-x-auto">
+          <div className="flex items-center space-x-2 sm:space-x-4 min-w-max">
             {[
               { key: 'services', label: 'Services', icon: CheckCircle },
               { key: 'date', label: 'Date & Time', icon: Calendar },
@@ -686,23 +871,23 @@ function BookingPageContent() {
               return (
                 <div key={step.key} className="flex items-center">
                   <div className={`
-                    w-10 h-10 rounded-full flex items-center justify-center
-                    ${isCompleted ? 'bg-green-500 text-white' : 
-                      isActive ? 'bg-rose-500 text-white' : 
+                    w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0
+                    ${isCompleted ? 'bg-[#6bb18d] text-white' : 
+                      isActive ? 'bg-[#9d9585] text-white' : 
                       'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}
                   `}>
-                    <Icon className="w-5 h-5" />
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
-                  <span className={`ml-2 font-medium ${
-                    isActive ? 'text-rose-600 dark:text-rose-400' : 
-                    isCompleted ? 'text-green-600 dark:text-green-400' :
+                  <span className={`ml-1.5 sm:ml-2 font-medium text-xs sm:text-sm md:text-base whitespace-nowrap ${
+                    isActive ? 'text-[#9d9585] dark:text-[#c9c1b0]' : 
+                    isCompleted ? 'text-[#6bb18d] dark:text-[#6bb18d]' :
                     'text-gray-600 dark:text-gray-400'
                   }`}>
                     {step.label}
                   </span>
                   {index < 3 && (
-                    <div className={`w-8 h-0.5 mx-4 ${
-                      isCompleted ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700'
+                    <div className={`w-4 sm:w-8 h-0.5 mx-2 sm:mx-4 flex-shrink-0 ${
+                      isCompleted ? 'bg-[#6bb18d]' : 'bg-gray-200 dark:bg-gray-700'
                     }`} />
                   )}
                 </div>
@@ -712,45 +897,45 @@ function BookingPageContent() {
         </div>
 
         {/* Main Content */}
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-6 sm:gap-8 px-4 sm:px-0">
           {/* Left Column - Current Step Content */}
           <div className="lg:col-span-2">
             {currentStep === 'services' && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">Selected Services</h3>
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Selected Services</h3>
                   <button
                     onClick={() => setShowServiceSelector(true)}
-                    className="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-6 py-2 rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all"
+                    className="w-full sm:w-auto bg-gradient-to-r from-[#9d9585] to-[#c9c1b0] text-[#3f3a31] px-4 sm:px-6 py-2.5 sm:py-2 rounded-lg hover:from-[#8c846f] hover:to-[#b5ad9d] transition-all font-medium text-sm sm:text-base min-h-[44px] touch-manipulation"
                   >
                     Add Services
                   </button>
                 </div>
                 
                 {selectedServices.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No services selected</h4>
-                    <p className="text-gray-600 dark:text-gray-400 mb-4">Add services to your order to continue</p>
+                  <div className="text-center py-8 sm:py-12">
+                    <Calendar className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mx-auto mb-4" />
+                    <h4 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2">No services selected</h4>
+                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 px-4">Add services to your order to continue</p>
                     <button
                       onClick={() => setShowServiceSelector(true)}
-                      className="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all"
+                      className="bg-gradient-to-r from-[#9d9585] to-[#c9c1b0] text-[#3f3a31] px-6 py-3 rounded-lg hover:from-[#8c846f] hover:to-[#b5ad9d] transition-all font-medium text-sm sm:text-base min-h-[44px] touch-manipulation"
                     >
                       Browse Services
                     </button>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-3 sm:space-y-4">
                     {selectedServices.map(item => {
                       const serviceData = servicesDataMap[item.serviceId];
                       return (
-                        <div key={item.serviceId} className="p-4 bg-gradient-to-r from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 rounded-xl border border-gray-200 dark:border-gray-600 hover:shadow-md transition-all">
-                          <div className="flex items-center justify-between gap-4">
+                        <div key={item.serviceId} className="p-3 sm:p-4 bg-gradient-to-r from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 rounded-xl border border-gray-200 dark:border-gray-600 hover:shadow-md transition-all">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                             {/* Left: Service Name, Price & Duration */}
                             <div className="flex-1 min-w-0">
-                              <h4 className="font-semibold text-gray-900 dark:text-white text-base mb-2 truncate">{item.name}</h4>
-                              <div className="flex items-center gap-3 flex-wrap">
-                                <span className="text-lg font-bold text-rose-600 dark:text-rose-400">£{item.price}</span>
+                              <h4 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base mb-2">{item.name}</h4>
+                              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                                <span className="text-base sm:text-lg font-bold text-[#9d9585] dark:text-[#c9c1b0]">£{item.price}</span>
                                 <Chip 
                                   size="sm" 
                                   variant="flat" 
@@ -777,39 +962,39 @@ function BookingPageContent() {
                             </div>
 
                             {/* Right: Quantity & Total */}
-                            <div className="flex items-center gap-3">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                               {/* Quantity Controls */}
                               <div className="flex items-center gap-2">
                                 <button
                                   onClick={() => updateQuantity(item.serviceId, item.quantity - 1)}
-                                  className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+                                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors touch-manipulation active:scale-95"
                                 >
                                   <Minus className="w-4 h-4" />
                                 </button>
-                                <span className="w-10 text-center font-semibold text-gray-900 dark:text-white">{item.quantity}</span>
+                                <span className="w-12 text-center font-semibold text-gray-900 dark:text-white text-sm sm:text-base">{item.quantity}</span>
                                 <button
                                   onClick={() => updateQuantity(item.serviceId, item.quantity + 1)}
-                                  className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+                                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors touch-manipulation active:scale-95"
                                 >
                                   <Plus className="w-4 h-4" />
                                 </button>
                               </div>
 
                               {/* Total Price */}
-                              <div className="text-right min-w-[80px]">
-                                <div className="text-xl font-bold text-rose-600 dark:text-rose-400">£{item.price * item.quantity}</div>
+                              <div className="text-left sm:text-right min-w-[80px]">
+                                <div className="text-lg sm:text-xl font-bold text-[#9d9585] dark:text-[#c9c1b0]">£{item.price * item.quantity}</div>
                               </div>
-
+                
                               {/* Details Button */}
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setServiceInfoModal(item.serviceId);
                                 }}
-                                className="px-3 py-2 text-xs font-medium border border-blue-500 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors flex items-center gap-1"
+                                className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium border border-[#c9c1b0] text-[#6b5f4b] dark:text-[#c9c1b0] rounded-lg hover:bg-[#f5f1e9] dark:hover:bg-gray-800/40 transition-colors flex items-center gap-1.5 min-h-[36px] touch-manipulation active:scale-95"
                               >
-                                <Info className="w-4 h-4" />
-                                Details
+                                <Info className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                <span>Details</span>
                               </button>
                             </div>
                           </div>
@@ -820,7 +1005,7 @@ function BookingPageContent() {
                     <button
                       onClick={() => setCurrentStep('date')}
                       disabled={selectedServices.length === 0}
-                      className="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white py-4 rounded-lg font-semibold text-lg hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full bg-gradient-to-r from-[#9d9585] to-[#c9c1b0] text-[#3f3a31] py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg hover:from-[#8c846f] hover:to-[#b5ad9d] transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] touch-manipulation active:scale-95"
                     >
                       Continue to Date Selection
                     </button>
@@ -837,8 +1022,8 @@ function BookingPageContent() {
           {/* Right Column - Order Summary */}
           <div className="lg:col-span-1">
             <div className="sticky top-8">
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Order Summary</h3>
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-4">Order Summary</h3>
                 
                 {selectedServices.length > 0 && (
                   <>
@@ -854,7 +1039,7 @@ function BookingPageContent() {
                     <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
                       <div className="flex justify-between text-lg font-bold">
                         <span className="text-gray-900 dark:text-white">Total:</span>
-                        <span className="text-rose-600 dark:text-rose-400">£{totalAmount}</span>
+                        <span className="text-[#9d9585] dark:text-[#c9c1b0]">£{totalAmount}</span>
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                         Duration: {totalDuration} minutes
@@ -897,7 +1082,7 @@ export default function BookingPage() {
     <Suspense fallback={
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#9d9585] mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Loading...</p>
         </div>
       </div>
