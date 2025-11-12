@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, Gift, Mail, CheckCircle } from "lucide-react";
+import { X, Gift, Mail, CheckCircle, Percent } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { setCookie, getCookie, COOKIE_NAMES } from "@/lib/cookies";
 import { usePathname } from "next/navigation";
@@ -79,12 +79,12 @@ export function FirstVisitDiscountForm() {
         <div className="bg-gradient-to-br from-[#ddd5c3] via-[#e8e1d2] to-[#ddd5c3] dark:from-gray-800 dark:via-gray-800/95 dark:to-gray-900 rounded-2xl sm:rounded-3xl border-2 border-[#c9c1b0]/50 dark:border-gray-700/50 shadow-2xl overflow-hidden">
           {discountCode ? (
             <div className="py-10 sm:py-12 md:py-14 px-6 sm:px-8 md:px-12 text-center">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-rose-500/20 to-pink-500/20 dark:from-rose-600/30 dark:to-pink-600/30 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-5 border-2 border-rose-500/30 dark:border-rose-400/40">
-                <CheckCircle className="w-10 h-10 sm:w-12 sm:h-12 text-rose-600 dark:text-rose-400" />
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-[#9d9585]/20 to-[#c9c1b0]/20 dark:from-[#9d9585]/30 dark:to-[#b5ad9d]/30 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-5 border-2 border-[#b5ad9d]/30 dark:border-[#c9c1b0]/40">
+                <Percent className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
               </div>
               <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">Congratulations!</h3>
               <p className="text-gray-700 dark:text-gray-300 text-base sm:text-lg mb-5">Here's your exclusive discount code:</p>
-              <div className="inline-block bg-gradient-to-br from-rose-500/10 to-pink-500/10 dark:from-rose-600/20 dark:to-pink-600/20 backdrop-blur-sm border-2 border-rose-500/30 dark:border-rose-400/40 rounded-xl px-6 sm:px-8 py-3 sm:py-4 mb-5">
+              <div className="inline-block bg-gradient-to-br from-[#9d9585]/15 to-[#c9c1b0]/15 dark:from-[#9d9585]/20 dark:to-[#b5ad9d]/20 backdrop-blur-sm border-2 border-[#b5ad9d]/30 dark:border-[#c9c1b0]/40 rounded-xl px-6 sm:px-8 py-3 sm:py-4 mb-5">
                 <div className="text-xs sm:text-sm text-rose-700 dark:text-rose-300 mb-1 font-medium">Your Discount Code</div>
                 <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-rose-600 dark:from-rose-400 dark:via-pink-400 dark:to-rose-400 bg-clip-text text-transparent tracking-wider">{discountCode}</div>
               </div>
@@ -123,7 +123,7 @@ export function FirstVisitDiscountForm() {
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
                         placeholder="First Name (optional)"
-                        className="w-full px-4 py-3 text-base rounded-lg bg-white/95 dark:bg-gray-800/95 border border-gray-300/50 dark:border-gray-600/50 focus:bg-white dark:focus:bg-gray-700 focus:ring-2 focus:ring-rose-500/50 dark:focus:ring-rose-400/50 outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                        className="w-full px-4 py-3 text-base rounded-lg bg-white/95 dark:bg-gray-800/95 border border-gray-300/50 dark:border-gray-600/50 focus:bg-white dark:focus:bg-gray-700 focus:ring-2 focus:ring-[#b5ad9d] focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                       />
                       <input
                         type="email"
@@ -131,7 +131,7 @@ export function FirstVisitDiscountForm() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="Your email address"
-                        className="w-full px-4 py-3 text-base rounded-lg bg-white/95 dark:bg-gray-800/95 border border-gray-300/50 dark:border-gray-600/50 focus:bg-white dark:focus:bg-gray-700 focus:ring-2 focus:ring-rose-500/50 dark:focus:ring-rose-400/50 outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                        className="w-full px-4 py-3 text-base rounded-lg bg-white/95 dark:bg-gray-800/95 border border-gray-300/50 dark:border-gray-600/50 focus:bg-white dark:focus:bg-gray-700 focus:ring-2 focus:ring-[#b5ad9d] focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                       />
                     </div>
                     <button

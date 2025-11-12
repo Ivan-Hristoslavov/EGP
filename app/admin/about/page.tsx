@@ -29,6 +29,8 @@ export default function AdminAboutPage() {
   const [newBullet, setNewBullet] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [isSavingSection, setIsSavingSection] = useState(false);
+  const [compressionQuality, setCompressionQuality] = useState(80);
 
   const [formData, setFormData] = useState({
     section_type: "hero",
@@ -59,21 +61,93 @@ export default function AdminAboutPage() {
     }
   };
 
-  const handleAddSection = async () => {
+  const compressImage = async (file: File, qualityPercent: number) => {
+    const quality = Math.min(Math.max(qualityPercent, 10), 100) / 100;
+
     try {
-      const response = await fetch('/api/about-content', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+      const bitmap = await createImageBitmap(file);
+      const canvas = document.createElement("canvas");
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      const ctx = canvas.getContext("2d");
+
+      if (!ctx) {
+        return file;
+      }
+
+      ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+
+      const blob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob(resolve, "image/webp", quality)
+      );
+
+      if (!blob) {
+        return file;
+      }
+
+      const normalizedName = file.name.replace(/\.[^/.]+$/, ".webp");
+      return new File([blob], normalizedName, { type: "image/webp" });
+    } catch (error) {
+      console.error("Image compression failed, falling back to original file:", error);
+      return file;
+    }
+  };
+
+  const uploadImageIfNeeded = async () => {
+    if (selectedImage) {
+      const fileForUpload = await compressImage(selectedImage, compressionQuality);
+
+      const payload = new FormData();
+      payload.append("file", fileForUpload);
+      if (formData.section_type) {
+        payload.append("sectionType", formData.section_type);
+      }
+
+      const response = await fetch("/api/about-content/upload", {
+        method: "POST",
+        body: payload,
       });
 
-      if (response.ok) {
-        await loadSections();
-        resetForm();
-        setIsModalOpen(false);
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.error("Image upload failed:", result.error);
+        throw new Error(result.error || "Failed to upload image");
       }
+
+      return result.url as string;
+    }
+
+    return formData.image_url || "";
+  };
+
+  const handleAddSection = async () => {
+    try {
+      setIsSavingSection(true);
+      const imageUrl = await uploadImageIfNeeded();
+
+      const response = await fetch("/api/about-content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          image_url: imageUrl || null,
+        }),
+      });
+
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "Failed to add section");
+      }
+
+      await loadSections();
+      resetForm();
+      setIsModalOpen(false);
     } catch (error) {
-      console.error('Error adding section:', error);
+      console.error("Error adding section:", error);
+      alert(error instanceof Error ? error.message : "Unable to add section.");
+    } finally {
+      setIsSavingSection(false);
     }
   };
 
@@ -96,19 +170,31 @@ export default function AdminAboutPage() {
     if (!editingSection) return;
 
     try {
+      setIsSavingSection(true);
+      const imageUrl = await uploadImageIfNeeded();
+
       const response = await fetch(`/api/about-content/${editingSection.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          image_url: imageUrl || null,
+        }),
       });
 
-      if (response.ok) {
-        await loadSections();
-        resetForm();
-        setIsModalOpen(false);
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "Failed to update section");
       }
+
+      await loadSections();
+      resetForm();
+      setIsModalOpen(false);
     } catch (error) {
-      console.error('Error updating section:', error);
+      console.error("Error updating section:", error);
+      alert(error instanceof Error ? error.message : "Unable to update section.");
+    } finally {
+      setIsSavingSection(false);
     }
   };
 
@@ -140,8 +226,12 @@ export default function AdminAboutPage() {
     });
     setEditingSection(null);
     setNewBullet("");
+    if (imagePreview?.startsWith("blob:")) {
+      URL.revokeObjectURL(imagePreview);
+    }
     setImagePreview(null);
     setSelectedImage(null);
+    setCompressionQuality(80);
   };
 
   const openAddModal = () => {
@@ -170,14 +260,30 @@ export default function AdminAboutPage() {
     const file = e.target.files?.[0];
     if (file) {
       setSelectedImage(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
-        setFormData(prev => ({ ...prev, image_url: e.target?.result as string }));
-      };
-      reader.readAsDataURL(file);
+      if (imagePreview?.startsWith("blob:")) {
+        URL.revokeObjectURL(imagePreview);
+      }
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
     }
   };
+
+  const handleRemoveImage = () => {
+    if (imagePreview?.startsWith("blob:")) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    setImagePreview(null);
+    setSelectedImage(null);
+    setFormData(prev => ({ ...prev, image_url: "" }));
+  };
+
+  useEffect(() => {
+    return () => {
+      if (imagePreview?.startsWith("blob:")) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
 
   if (isLoading) {
     return (
@@ -401,11 +507,7 @@ export default function AdminAboutPage() {
                             <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                             <button
                               type="button"
-                              onClick={() => {
-                                setImagePreview(null);
-                                setSelectedImage(null);
-                                setFormData(prev => ({ ...prev, image_url: "" }));
-                              }}
+                              onClick={handleRemoveImage}
                               className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all"
                             >
                               <X className="w-4 h-4" />
@@ -429,6 +531,26 @@ export default function AdminAboutPage() {
                             />
                           </label>
                         </div>
+                        {selectedImage && (
+                          <div className="pt-2">
+                            <div className="flex items-center justify-between text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                              <span>Image quality</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">{compressionQuality}%</span>
+                            </div>
+                            <input
+                              type="range"
+                              min={40}
+                              max={100}
+                              step={5}
+                              value={compressionQuality}
+                              onChange={(e) => setCompressionQuality(parseInt(e.target.value, 10))}
+                              className="w-full accent-[#9d9585]"
+                            />
+                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                              Lower quality reduces file size before uploading.
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -461,6 +583,7 @@ export default function AdminAboutPage() {
                   <Button
                     color="danger"
                     onPress={editingSection ? handleUpdateSection : handleAddSection}
+                    isLoading={isSavingSection}
                     className="bg-gradient-to-r from-rose-500 to-pink-500"
                   >
                     {editingSection ? "Update" : "Create"}

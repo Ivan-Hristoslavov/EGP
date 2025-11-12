@@ -132,12 +132,12 @@ function PaymentForm({
 
   if (paymentStatus === 'success') {
     return (
-      <div className="text-center py-8">
-        <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+      <div className="text-center py-6 sm:py-8 px-4">
+        <CheckCircle className="w-12 h-12 sm:w-16 sm:h-16 text-green-500 mx-auto mb-3 sm:mb-4" />
+        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">
           Payment Successful!
         </h3>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
           Your booking has been confirmed. You will receive a confirmation email shortly.
         </p>
       </div>
@@ -145,29 +145,29 @@ function PaymentForm({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Payment Summary */}
-      <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-        <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
+      <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 sm:p-6">
+        <h4 className="font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 text-base sm:text-lg">
           Payment Summary
         </h4>
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
+        <div className="space-y-2 sm:space-y-3 text-sm sm:text-base">
+          <div className="flex justify-between items-center">
             <span className="text-gray-600 dark:text-gray-400">Services:</span>
             <span className="font-medium">{services.length} item(s)</span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center flex-wrap gap-1">
             <span className="text-gray-600 dark:text-gray-400">Date:</span>
-            <span className="font-medium">
+            <span className="font-medium break-words text-right">
               {new Date(selectedDate).toLocaleDateString('en-GB')}
             </span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center">
             <span className="text-gray-600 dark:text-gray-400">Time:</span>
             <span className="font-medium">{selectedTime}</span>
           </div>
-          <div className="border-t border-gray-200 dark:border-gray-600 pt-2">
-            <div className="flex justify-between font-bold text-lg">
+          <div className="border-t border-gray-200 dark:border-gray-600 pt-3 mt-2">
+            <div className="flex justify-between font-bold text-base sm:text-lg">
               <span className="text-gray-900 dark:text-white">Total:</span>
               <span className="text-rose-600 dark:text-rose-400">£{amount.toFixed(2)}</span>
             </div>
@@ -176,8 +176,8 @@ function PaymentForm({
       </div>
 
       {/* Stripe Payment Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+        <div className="border border-gray-200 dark:border-gray-600 rounded-lg p-3 sm:p-4">
           <PaymentElement 
             options={{
               layout: 'tabs',
@@ -187,9 +187,9 @@ function PaymentForm({
 
         {/* Error Message */}
         {paymentStatus === 'error' && (
-          <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
-            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-            <p className="text-red-700 dark:text-red-400 text-sm">{errorMessage}</p>
+          <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
+            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+            <p className="text-red-700 dark:text-red-400 text-sm sm:text-base break-words">{errorMessage}</p>
           </div>
         )}
 
@@ -197,25 +197,25 @@ function PaymentForm({
         <button
           type="submit"
           disabled={!stripe || !elements || isLoading}
-          className="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white py-4 rounded-lg font-semibold text-lg hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px] touch-manipulation active:scale-95"
         >
           {isLoading ? (
             <>
               <Loader className="w-5 h-5 animate-spin" />
-              Processing Payment...
+              <span>Processing Payment...</span>
             </>
           ) : (
             <>
               <CreditCard className="w-5 h-5" />
-              Pay £{amount.toFixed(2)} Now
+              <span>Pay £{amount.toFixed(2)} Now</span>
             </>
           )}
         </button>
       </form>
 
       {/* Security Notice */}
-      <div className="text-center">
-        <p className="text-xs text-gray-500 dark:text-gray-400">
+      <div className="text-center px-4">
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
           🔒 Your payment information is secure and encrypted by Stripe
         </p>
       </div>
@@ -259,9 +259,9 @@ export default function StripePaymentForm(props: StripePaymentFormProps) {
 
   if (!clientSecret) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <Loader className="w-8 h-8 animate-spin text-rose-500" />
-        <span className="ml-2 text-gray-600 dark:text-gray-400">Initializing payment...</span>
+      <div className="flex flex-col sm:flex-row items-center justify-center py-6 sm:py-8 px-4 gap-2 sm:gap-3">
+        <Loader className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-rose-500" />
+        <span className="text-sm sm:text-base text-gray-600 dark:text-gray-400 text-center">Initializing payment...</span>
       </div>
     );
   }

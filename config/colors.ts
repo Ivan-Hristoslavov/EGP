@@ -2,38 +2,38 @@
 // Feminine, elegant, professional aesthetic clinic colors
 
 export const aestheticsColors = {
-  // Primary - Rose Gold & Pink
+  // Primary - Warm Beige Gradient (main brand tone)
   primary: {
-    light: "#fce7f3",      // Soft pink
-    DEFAULT: "#ec4899",    // Rose pink
-    dark: "#be185d",       // Deep rose
-    gradient: "from-rose-400 via-pink-500 to-rose-600",
-    gradientHover: "from-rose-500 via-pink-600 to-rose-700",
+    light: "#f5f1e9",      // Soft warm beige
+    DEFAULT: "#ddd5c3",    // Main brand beige
+    dark: "#9d9585",       // Rich warm taupe
+    gradient: "from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3]",
+    gradientHover: "from-[#8c846f] via-[#aea693] to-[#c9c1b0]",
   },
 
-  // Secondary - Lavender & Purple
+  // Secondary - Deep Charcoal & Graphite
   secondary: {
-    light: "#f3e8ff",      // Soft lavender
-    DEFAULT: "#a855f7",    // Purple
-    dark: "#7e22ce",       // Deep purple
-    gradient: "from-purple-400 via-violet-500 to-purple-600",
-    gradientHover: "from-purple-500 via-violet-600 to-purple-700",
+    light: "#e5e7eb",      // Soft gray highlight
+    DEFAULT: "#4b5563",    // Graphite
+    dark: "#1f2937",       // Charcoal
+    gradient: "from-[#4b5563] via-[#374151] to-[#1f2937]",
+    gradientHover: "from-[#374151] via-[#1f2937] to-[#111827]",
   },
 
-  // Accent - Champagne Gold
+  // Accent - Brushed Champagne
   accent: {
-    light: "#fef3c7",      // Light champagne
-    DEFAULT: "#f59e0b",    // Gold
-    dark: "#d97706",       // Deep gold
-    gradient: "from-amber-400 via-yellow-500 to-amber-600",
-    gradientHover: "from-amber-500 via-yellow-600 to-amber-700",
+    light: "#f6e8d4",
+    DEFAULT: "#d8c5a7",
+    dark: "#b59c74",
+    gradient: "from-[#d8c5a7] via-[#c4b5a0] to-[#a68e6b]",
+    gradientHover: "from-[#c4b5a0] via-[#b19775] to-[#8c744f]",
   },
 
-  // Luxury - Rose Gold Metallic
+  // Luxury - Soft Metallic Beige
   luxury: {
-    gradient: "from-rose-300 via-pink-400 to-rose-500",
-    gradientShine: "from-amber-200 via-rose-300 to-pink-400",
-    metallic: "from-[#B76E79] via-[#E8B4B8] to-[#B76E79]",
+    gradient: "from-[#c9c1b0] via-[#ddd5c3] to-[#f0ede7]",
+    gradientShine: "from-[#f5f1e9] via-[#e4d9c8] to-[#c9c1b0]",
+    metallic: "from-[#b5a48c] via-[#d8cbb1] to-[#b5a48c]",
   },
 
   // Neutrals - Soft & Warm (Warm Beige Theme) - Main Brand Color
@@ -60,10 +60,10 @@ export const aestheticsColors = {
   // Category Colors (для различните услуги)
   categories: {
     face: {
-      gradient: "from-pink-400 via-rose-400 to-pink-500",
-      hover: "from-pink-500 via-rose-500 to-pink-600",
-      bg: "#fdf2f8",         // Soft pink background
-      text: "#9f1239",       // Rose text
+      gradient: "from-[#b5ad9d] via-[#c9c1b0] to-[#ddd5c3]",
+      hover: "from-[#a89f8f] via-[#c4b5a0] to-[#d8cbb1]",
+      bg: "#f5f1e9",         // Soft beige background
+      text: "#6b5f4b",       // Warm taupe text
     },
     antiWrinkle: {
       gradient: "from-purple-400 via-violet-400 to-purple-500",
@@ -72,37 +72,37 @@ export const aestheticsColors = {
       text: "#6b21a8",       // Purple text
     },
     fillers: {
-      gradient: "from-fuchsia-400 via-pink-500 to-fuchsia-500",
-      hover: "from-fuchsia-500 via-pink-600 to-fuchsia-600",
-      bg: "#fdf4ff",         // Soft fuchsia background
-      text: "#a21caf",       // Fuchsia text
+      gradient: "from-[#d8c5a7] via-[#c4b5a0] to-[#b59c74]",
+      hover: "from-[#c4b5a0] via-[#b19775] to-[#8c744f]",
+      bg: "#f4ede1",
+      text: "#725f43",
     },
     body: {
-      gradient: "from-rose-400 via-pink-400 to-rose-500",
-      hover: "from-rose-500 via-pink-500 to-rose-600",
-      bg: "#fff1f2",         // Soft rose background
-      text: "#881337",       // Rose text
+      gradient: "from-[#c9c1b0] via-[#ddd5c3] to-[#f0ede7]",
+      hover: "from-[#b5ad9d] via-[#c4b5a0] to-[#e4d9c8]",
+      bg: "#f7f2ea",
+      text: "#5b5243",
     },
   },
 
   // Buttons - Luxury Gradients
   buttons: {
-    primary: "from-rose-500 via-pink-500 to-rose-600",
-    primaryHover: "from-rose-600 via-pink-600 to-rose-700",
-    secondary: "from-purple-500 via-violet-500 to-purple-600",
-    secondaryHover: "from-purple-600 via-violet-600 to-purple-700",
-    gold: "from-amber-400 via-yellow-500 to-amber-500",
-    goldHover: "from-amber-500 via-yellow-600 to-amber-600",
+    primary: "from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3]",
+    primaryHover: "from-[#857d68] via-[#aea693] to-[#c9c1b0]",
+    secondary: "from-[#4b5563] via-[#374151] to-[#1f2937]",
+    secondaryHover: "from-[#374151] via-[#1f2937] to-[#111827]",
+    gold: "from-[#d8c5a7] via-[#c4b5a0] to-[#b59c74]",
+    goldHover: "from-[#c4b5a0] via-[#b19775] to-[#8c744f]",
     whatsapp: "from-emerald-500 to-green-600",
     whatsappHover: "from-emerald-600 to-green-700",
   },
 
   // Backgrounds
   backgrounds: {
-    hero: "from-rose-600 via-pink-600 to-fuchsia-700",
-    section: "from-pink-50 via-rose-50 to-purple-50",
-    card: "from-white to-pink-50/30",
-    luxury: "from-rose-100 via-pink-100 to-purple-100",
+    hero: "from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3]",
+    section: "from-[#f5f1e9] via-[#f0ede7] to-[#e4d9c8]",
+    card: "from-white to-[#f5f1e9]/60",
+    luxury: "from-[#d8c5a7] via-[#c4b5a0] to-[#b59c74]",
   },
 
   // Text Colors
@@ -111,7 +111,7 @@ export const aestheticsColors = {
     secondary: "#6b7280",     // Medium gray
     light: "#9ca3af",         // Light gray
     onDark: "#ffffff",        // White
-    accent: "#be185d",        // Rose
+    accent: "#8c846f",        // Warm taupe accent
   },
 
   // Trust & Success

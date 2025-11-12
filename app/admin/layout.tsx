@@ -83,6 +83,16 @@ const navigation = [
     ),
   },
   {
+    name: "About Page",
+    href: "/admin/about",
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path d="M7 7h10m-9 4h5m-7 8h14a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+        <path d="M5 17h.01M9 21h10a2 2 0 002-2v0-12a2 2 0 00-2-2H7a2 2 0 00-2 2v12" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+      </svg>
+    ),
+  },
+  {
     name: "Payments",
     href: "/admin/payments",
     icon: (

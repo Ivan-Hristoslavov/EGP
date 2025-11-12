@@ -65,11 +65,11 @@ export default function PressPage() {
             </h2>
             <div className="space-y-8">
               {awards.map((award, index) => (
-                <div key={index} className="border-l-4 border-rose-500 pl-6">
+                <div key={index} className="border-l-4 border-[#9d9585] pl-6">
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                     {award.title}
                   </h3>
-                  <p className="text-rose-600 dark:text-rose-400 font-semibold mb-2">
+                  <p className="text-[#9d9585] dark:text-[#c9c1b0] font-semibold mb-2">
                     {award.organisation} • {award.year}
                   </p>
                   <p className="text-gray-600 dark:text-gray-300">
@@ -86,7 +86,7 @@ export default function PressPage() {
             </h2>
             <div className="space-y-6">
               {pressFeatures.map((feature, index) => (
-                <div key={index} className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                <div key={index} className="bg-[#f5f1e9] dark:bg-gray-900/70 border border-[#e4d9c8] dark:border-gray-700 p-6 rounded-lg shadow-sm">
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                     {feature.title}
                   </h3>

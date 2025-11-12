@@ -38,8 +38,7 @@ export default function LayoutMain({
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Day Off Banner - Always at the top */}
-      <DayOffBanner />
+      
       
       {/* New Aesthetics Header - Fixed position */}
       <HeaderAesthetics />
@@ -48,7 +47,7 @@ export default function LayoutMain({
       <FloatingContactButtons />
       
       {/* Main content with padding for fixed header */}
-      <main className={`flex-grow transition-all duration-300 ${hasDayOffBanner ? 'pt-[120px]' : 'pt-[100px]'}`}>
+      <main className={`flex-grow transition-all duration-300 ${hasDayOffBanner ? 'pt-[100px] sm:pt-[120px]' : 'pt-[90px] sm:pt-[100px]'}`} style={{ position: 'relative', zIndex: 1 }}>
         {children}
       </main>
       <FooterAesthetics />
