@@ -1,9 +1,66 @@
 import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 import { siteConfig } from "@/config/site";
 import { createClient } from '@/lib/supabase/server';
-import Image from 'next/image';
+import ImageWithSkeleton from "@/components/ImageWithSkeleton";
 
-async function getAboutContent() {
+type AboutContentSection = {
+  id: string;
+  section_type: string;
+  heading?: string;
+  content?: string;
+  image_url?: string;
+  bullet_points?: string[];
+};
+
+type ImageTextLayoutOptions = {
+  index: number;
+  content: ReactNode;
+  priority?: boolean;
+  imageSizes?: string;
+  heading?: ReactNode | null;
+};
+
+function renderImageTextLayout(
+  section: AboutContentSection,
+  { index, content, priority = false, imageSizes = "(max-width: 768px) 100vw, 50vw", heading }: ImageTextLayoutOptions
+) {
+  const showImage = Boolean(section.image_url);
+  const swapOnDesktop = showImage && index % 2 === 1;
+  const headingContent = heading ?? section.heading;
+
+  return (
+    <section key={section.id} className="mb-16 last:mb-0">
+      <div className={showImage ? "flex flex-col gap-8 md:grid md:grid-cols-2 md:gap-12" : "flex flex-col gap-6"}>
+        <div className={`flex flex-col gap-6 ${showImage ? (swapOnDesktop ? "md:order-2" : "md:order-1") : ""}`}>
+          {headingContent ? (
+            typeof headingContent === "string" ? (
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+              {headingContent}
+            </h2>
+            ) : (
+              headingContent
+            )
+          ) : null}
+          {content}
+        </div>
+        {showImage && (
+          <ImageWithSkeleton
+            src={section.image_url as string}
+            alt={section.heading || "About EGP Aesthetics"}
+            fill
+            className="object-cover"
+            priority={priority}
+            sizes={imageSizes}
+            containerClassName={`relative w-full overflow-hidden rounded-2xl shadow-xl h-[260px] sm:h-[340px] md:h-[440px] ${swapOnDesktop ? "md:order-1" : "md:order-2"}`}
+          />
+        )}
+      </div>
+    </section>
+  );
+}
+
+async function getAboutContent(): Promise<AboutContentSection[]> {
   try {
     const supabase = createClient();
     const { data, error } = await supabase
@@ -17,7 +74,7 @@ async function getAboutContent() {
       return [];
     }
 
-    return data || [];
+    return (data as AboutContentSection[]) ?? [];
   } catch (error) {
     console.error('Error in getAboutContent:', error);
     return [];
@@ -37,72 +94,49 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function AboutPage() {
   const sections = await getAboutContent();
 
-  // Render sections based on type
-  const renderSection = (section: any, index: number) => {
+  const renderSection = (section: AboutContentSection, index: number) => {
     switch (section.section_type) {
       case 'hero':
-        return (
-          <div key={section.id} className="mb-16">
+        return renderImageTextLayout(section, {
+          index,
+          heading: section.heading
+            ? (
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white font-playfair">
+                {section.heading}
+              </h1>
+            )
+            : null,
+          content: (
             <div className="prose prose-lg dark:prose-invert max-w-none">
-              <p className="text-xl text-gray-600 dark:text-gray-300">
+              <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
                 {section.content}
               </p>
             </div>
-            {section.image_url && (
-              <div className="mt-8 relative w-full h-96 rounded-2xl overflow-hidden shadow-xl">
-                <Image
-                  src={section.image_url}
-                  alt={section.heading || 'About EGP Aesthetics'}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
-                />
-              </div>
-            )}
-          </div>
-        );
+          ),
+          priority: index === 0,
+          imageSizes: "(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw",
+        });
 
       case 'story':
       case 'why_choose_us':
-        return (
-          <div key={section.id} className={`mb-16 ${section.image_url ? 'grid md:grid-cols-2 gap-8 items-center' : ''}`}>
-            <div>
-              {section.heading && (
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-                  {section.heading}
-                </h2>
-              )}
-              <div className="prose prose-lg dark:prose-invert max-w-none">
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                  {section.content}
-                </p>
-              </div>
+        return renderImageTextLayout(section, {
+          index,
+          content: (
+            <div className="prose prose-lg dark:prose-invert max-w-none">
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                {section.content}
+              </p>
             </div>
-            {section.image_url && (
-              <div className="relative w-full h-96 rounded-2xl overflow-hidden shadow-xl">
-                <Image
-                  src={section.image_url}
-                  alt={section.heading || 'About EGP Aesthetics'}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
-              </div>
-            )}
-          </div>
-        );
+          ),
+        });
 
       case 'values':
-        return (
-          <div key={section.id} className={`mb-16 ${section.image_url ? 'grid md:grid-cols-2 gap-8 items-start' : ''}`}>
-            <div className={section.image_url ? 'order-2 md:order-1' : ''}>
-              {section.heading && (
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-                  {section.heading}
-                </h2>
-              )}
+        return renderImageTextLayout(section, {
+          index,
+          content: (
+            <div className="space-y-6">
               {section.content && (
-                <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                   {section.content}
                 </p>
               )}
@@ -117,46 +151,21 @@ export default async function AboutPage() {
                 </ul>
               )}
             </div>
-            {section.image_url && (
-              <div className={`relative w-full h-96 rounded-2xl overflow-hidden shadow-xl ${section.image_url ? 'order-1 md:order-2' : ''}`}>
-                <Image
-                  src={section.image_url}
-                  alt={section.heading || 'About EGP Aesthetics'}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
-              </div>
-            )}
-          </div>
-        );
+          ),
+        });
 
       default:
-        return (
-          <div key={section.id} className="mb-16">
-            {section.heading && (
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-                {section.heading}
-              </h2>
-            )}
+        return renderImageTextLayout(section, {
+          index,
+          content: (
             <div className="prose prose-lg dark:prose-invert max-w-none">
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                 {section.content}
               </p>
             </div>
-            {section.image_url && (
-              <div className="mt-8 relative w-full h-96 rounded-2xl overflow-hidden shadow-xl">
-                <Image
-                  src={section.image_url}
-                  alt={section.heading || 'About EGP Aesthetics'}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
-                />
-              </div>
-            )}
-          </div>
-        );
+          ),
+          imageSizes: "(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw",
+        });
     }
   };
 

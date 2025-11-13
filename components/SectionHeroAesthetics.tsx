@@ -65,7 +65,7 @@ export default function SectionHeroAesthetics() {
       ))}
 
       {/* Content */}
-      <div className="relative z-[2] container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-start pt-32">
+      <div className="relative z-30 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-start pt-24 sm:pt-32 pb-16">
         <div className="w-full max-w-3xl">
           {/* Badge */}
           <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 backdrop-blur-md rounded-full text-white mb-4 sm:mb-6 border border-white/20">
@@ -106,8 +106,12 @@ export default function SectionHeroAesthetics() {
           </div>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-            <ButtonBookNow size="lg" showIcon />
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full max-w-lg sm:max-w-none">
+            <ButtonBookNow
+              size="lg"
+              showIcon
+              className="w-full sm:w-auto justify-center"
+            />
             <ButtonWhatsApp
               message="Hi! I'd like to book a treatment at EGP Aesthetics."
               className="text-base sm:text-lg w-full sm:w-auto justify-center"

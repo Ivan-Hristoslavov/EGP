@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
@@ -36,12 +37,30 @@ export default function NavigationNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const routerUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Hide navigation on terms and privacy pages
   const shouldHideNavigation = pathname === "/terms" || pathname === "/privacy";
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (isMobileMenuOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    } else {
+      document.body.style.overflow = "";
+    }
+  }, [isMobileMenuOpen]);
 
   useEffect(() => {
     // Throttle function to limit how often the scroll handler runs
@@ -81,10 +100,8 @@ export default function NavigationNavbar() {
         if (element) {
           const rect = element.getBoundingClientRect();
           
-          // Get navbar and banner heights for precise calculation
-          const navbar = document.querySelector('nav');
           const dayOffBanner = document.querySelector('[data-day-off-banner]') as HTMLElement;
-          const navbarHeight = navbar ? navbar.offsetHeight : 80;
+          const navbarHeight = 0;
           const bannerHeight = dayOffBanner && dayOffBanner.offsetHeight > 0 ? dayOffBanner.offsetHeight : 0;
           const totalOffset = navbarHeight + bannerHeight + 80; // 80px threshold for better detection
           
@@ -132,11 +149,8 @@ export default function NavigationNavbar() {
         setTimeout(() => {
           const element = document.getElementById(hash);
           if (element) {
-            const navbar = document.querySelector('nav');
             const dayOffBanner = document.querySelector('[data-day-off-banner]') as HTMLElement;
-            
-            // Get navbar height
-            const navbarHeight = navbar ? navbar.offsetHeight : 80;
+            const navbarHeight = 0;
             
             // Get banner height if it exists
             const bannerHeight = dayOffBanner && dayOffBanner.offsetHeight > 0 ? dayOffBanner.offsetHeight : 0;
@@ -197,28 +211,17 @@ export default function NavigationNavbar() {
         } else {
           router.push(`/#${targetId}`);
         }
-        
         // Calculate precise scroll position
-        const navbar = document.querySelector('nav');
-        const dayOffBanner = document.querySelector('[data-day-off-banner]') as HTMLElement;
-        
-        // Get navbar height
-        const navbarHeight = navbar ? navbar.offsetHeight : 80;
-        
-        // Get banner height if it exists
-        const bannerHeight = dayOffBanner && dayOffBanner.offsetHeight > 0 ? dayOffBanner.offsetHeight : 0;
-        
-        // Calculate total offset with more precise positioning
-        const totalOffset = navbarHeight + bannerHeight + 30; // 30px extra padding for better visibility
-        
-        // Get element position and calculate final scroll position
-        const elementTop = element.offsetTop;
-        const finalScrollPosition = Math.max(0, elementTop - totalOffset);
-        
-        // Scroll to precise position
-        window.scrollTo({
-          top: finalScrollPosition,
-          behavior: 'smooth'
+        window.requestAnimationFrame(() => {
+          const targetRect = element.getBoundingClientRect();
+          const scrollOffset = window.pageYOffset || document.documentElement.scrollTop;
+          const headerHeight = window.innerWidth >= 1024 ? (isScrolled ? 72 : 80) : 16;
+          const finalScrollPosition = Math.max(0, scrollOffset + targetRect.top - headerHeight);
+
+          window.scrollTo({
+            top: finalScrollPosition,
+            behavior: 'smooth'
+          });
         });
       }
     }
@@ -238,13 +241,7 @@ export default function NavigationNavbar() {
 
   return (
     <nav className="w-full backdrop-blur-xl bg-[#ddd5c3]/90 dark:bg-gray-900/90 shadow-lg border-b border-[#ddd5c3]/30 dark:border-gray-800/30 transition-all duration-300">
-      <div
-        className={`transition-all duration-300 ease-out ${
-          isScrolled
-            ? "bg-[#ddd5c3]/95 dark:bg-gray-900/95 py-3 border-b border-[#c9c1b0]/50 dark:border-gray-700/50"
-            : "bg-[#ddd5c3]/90 dark:bg-gray-900/90 py-4"
-        }`}
-      >
+        <div className={`bg-[#ddd5c3]/95 dark:bg-gray-900/95 transition-all duration-300 ${isScrolled ? "lg:py-3 lg:border-b lg:border-[#c9c1b0]/50 lg:dark:border-gray-700/50 py-4" : "py-4"}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             {/* Logo */}
@@ -385,66 +382,72 @@ export default function NavigationNavbar() {
         </div>
 
         {/* Mobile Menu */}
-        <div
-          className={`lg:hidden transition-all duration-300 overflow-hidden ${
-            isMobileMenuOpen
-              ? "max-h-96 opacity-100 mt-4 pb-4"
-              : "max-h-0 opacity-0"
-          }`}
-        >
-          <div className="flex flex-col space-y-2 p-6 rounded-2xl bg-[#f0ede7]/95 dark:bg-gray-800/95 backdrop-blur-xl shadow-2xl border border-[#c9c1b0]/50 dark:border-gray-600/50 mx-4">
-            {navigation.map((item, index) => (
-              <div key={item.name}>
-                {item.dropdown ? (
-                  <>
-                    <div className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide px-4 py-2">
-                      {item.name}
-                    </div>
-                    {item.dropdown.map((subItem) => (
+        {isMounted &&
+          createPortal(
+            <div
+              className={`lg:hidden fixed inset-0 z-[999] transition-opacity duration-300 ${
+                isMobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+              }`}
+            >
+              <div
+                className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                onClick={() => setIsMobileMenuOpen(false)}
+              />
+              <div className="relative flex flex-col h-full overflow-y-auto p-6 sm:p-8 bg-white dark:bg-gray-900 shadow-2xl border-t border-[#c9c1b0]/40 dark:border-gray-700/40">
+                {navigation.map((item, index) => (
+                  <div key={item.name}>
+                    {item.dropdown ? (
+                      <>
+                        <div className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide px-4 py-2">
+                          {item.name}
+                        </div>
+                        {item.dropdown.map((subItem) => (
+                          <Link
+                            key={subItem.name}
+                            className={`px-4 sm:px-6 py-3 text-base font-semibold rounded-xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-1 block ${
+                              activeSection === subItem.href.substring(1)
+                                ? "text-white bg-[#c9c1b0] dark:bg-[#b5ad9d] shadow-lg"
+                                : "text-gray-700 dark:text-gray-300 hover:text-white hover:bg-[#9d9585] dark:hover:bg-[#b5ad9d] hover:shadow-lg"
+                            }`}
+                            href={subItem.href}
+                            style={{ animationDelay: `${index * 0.1}s` }}
+                            onClick={(e) => {
+                              handleClick(e, subItem.href);
+                              setIsMobileMenuOpen(false);
+                            }}
+                          >
+                            {subItem.name}
+                          </Link>
+                        ))}
+                      </>
+                    ) : (
                       <Link
-                        key={subItem.name}
-                        className={`px-6 py-3 text-base font-semibold rounded-xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-1 block ${
-                          activeSection === subItem.href.substring(1)
+                        className={`px-4 sm:px-6 py-4 text-base font-semibold rounded-xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-1 block ${
+                          activeSection === item.href.substring(1)
                             ? "text-white bg-[#c9c1b0] dark:bg-[#b5ad9d] shadow-lg"
                             : "text-gray-700 dark:text-gray-300 hover:text-white hover:bg-[#9d9585] dark:hover:bg-[#b5ad9d] hover:shadow-lg"
                         }`}
-                        href={subItem.href}
+                        href={item.href}
                         style={{ animationDelay: `${index * 0.1}s` }}
                         onClick={(e) => {
-                          handleClick(e, subItem.href);
+                          handleClick(e, item.href);
                           setIsMobileMenuOpen(false);
                         }}
                       >
-                        {subItem.name}
+                        {item.name}
                       </Link>
-                    ))}
-                  </>
-                ) : (
-                  <Link
-                    className={`px-6 py-4 text-base font-semibold rounded-xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-1 block ${
-                      activeSection === item.href.substring(1)
-                        ? "text-white bg-[#c9c1b0] dark:bg-[#b5ad9d] shadow-lg"
-                        : "text-gray-700 dark:text-gray-300 hover:text-white hover:bg-[#9d9585] dark:hover:bg-[#b5ad9d] hover:shadow-lg"
-                    }`}
-                    href={item.href}
-                    style={{ animationDelay: `${index * 0.1}s` }}
-                    onClick={(e) => {
-                      handleClick(e, item.href);
-                      setIsMobileMenuOpen(false);
-                    }}
-                  >
-                    {item.name}
-                  </Link>
-                )}
+                    )}
+                  </div>
+                ))}
+                
+                {/* Mobile Theme Toggle */}
+                <div className="flex justify-center pt-4 border-t border-[#c9c1b0] dark:border-gray-600">
+                  <ThemeToggle size="lg" />
+                </div>
               </div>
-            ))}
-            
-            {/* Mobile Theme Toggle */}
-            <div className="flex justify-center pt-4 border-t border-[#c9c1b0] dark:border-gray-600">
-              <ThemeToggle size="lg" />
-            </div>
-          </div>
-        </div>
+            </div>,
+            document.body
+          )}
       </div>
     </nav>
   );
