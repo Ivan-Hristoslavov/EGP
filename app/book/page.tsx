@@ -3,12 +3,11 @@
 import { useState, useEffect, Suspense, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { siteConfig } from "@/config/site";
-import { Calendar, Clock, CreditCard, CheckCircle, Plus, Minus, X, ArrowLeft, Info, Shield } from "lucide-react";
+import { Calendar, Clock, CreditCard, CheckCircle, Plus, Minus, X, ArrowLeft, Info, Shield, ChevronDown, Lock } from "lucide-react";
 import StripePaymentForm from '@/components/StripePaymentForm';
 import { useServices } from '@/hooks/useServices';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 import { Button } from "@heroui/button";
-import { Chip } from "@heroui/chip";
 
 type OrderItem = {
   serviceId: string;
@@ -27,6 +26,8 @@ type CalendarDay = {
   bookedSlots: string[];
 };
 
+type BookingStepKey = 'services' | 'date' | 'preview' | 'payment';
+
 function BookingPageContent() {
   const searchParams = useSearchParams();
   const { services, isLoading: servicesLoading } = useServices();
@@ -41,6 +42,47 @@ function BookingPageContent() {
   const [serviceInfoModal, setServiceInfoModal] = useState<string | null>(null);
   const [hoveredDate, setHoveredDate] = useState<string | null>(null);
   const [hoverTooltip, setHoverTooltip] = useState<{ x: number; y: number; content: string } | null>(null);
+
+  const bookingSteps = useMemo(() => ([
+    { key: 'services', label: 'Services', icon: CheckCircle },
+    { key: 'date', label: 'Date & Time', icon: Calendar },
+    { key: 'preview', label: 'Preview', icon: CheckCircle },
+    { key: 'payment', label: 'Payment', icon: CreditCard }
+  ] as const), []);
+
+  const stepOrder = useMemo(() => bookingSteps.map(step => step.key), [bookingSteps]);
+  const currentStepIndex = stepOrder.indexOf(currentStep);
+
+  const stepDescriptions: Record<BookingStepKey, string> = {
+    services: "Select treatments and tailor your session",
+    date: "Choose the perfect date and time",
+    preview: "Review your booking details",
+    payment: "Confirm and secure your booking"
+  };
+
+  const isStepUnlocked = (stepKey: BookingStepKey) => {
+    switch (stepKey) {
+      case 'services':
+        return true;
+      case 'date':
+        return selectedServices.length > 0;
+      case 'preview':
+        return selectedServices.length > 0 && Boolean(selectedDate) && Boolean(selectedTime);
+      case 'payment':
+        return selectedServices.length > 0 && Boolean(selectedDate) && Boolean(selectedTime);
+      default:
+        return false;
+    }
+  };
+
+  const handleStepToggle = (stepKey: BookingStepKey) => {
+    const targetIndex = stepOrder.indexOf(stepKey);
+    const canAccess = targetIndex <= currentStepIndex || isStepUnlocked(stepKey);
+    if (!canAccess || currentStep === stepKey) {
+      return;
+    }
+    setCurrentStep(stepKey);
+  };
 
   // Create a lookup map from services for easy access
   const servicesDataMap = useMemo(() => {
@@ -231,6 +273,144 @@ function BookingPageContent() {
     console.error('Payment error:', error);
     // You could show a toast notification here
   };
+
+  const renderStepContent = (stepKey: BookingStepKey) => {
+    switch (stepKey) {
+      case 'services':
+        return renderServicesStep();
+      case 'date':
+        return renderCalendar();
+      case 'preview':
+        return renderOrderPreview();
+      case 'payment':
+        return renderStripePayment();
+      default:
+        return null;
+    }
+  };
+
+  const renderServicesStep = () => (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Selected Services</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Curate your treatment plan before choosing a date.
+          </p>
+        </div>
+        <button
+          onClick={() => setShowServiceSelector(true)}
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#b8ae9b] via-[#d0c6b4] to-[#e3d8c4] text-[#3f3a31] font-semibold shadow-md hover:shadow-lg transition-all active:scale-95 touch-manipulation min-h-[44px]"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Add Services</span>
+        </button>
+      </div>
+
+      {selectedServices.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-[#d6ccb9] dark:border-gray-700 bg-[#faf7f1] dark:bg-gray-900/60 p-8 sm:p-10 text-center">
+          <Calendar className="w-12 h-12 sm:w-16 sm:h-16 text-[#c0b49f] dark:text-[#b5ad9d] mx-auto mb-4" />
+          <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No services selected yet</h4>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+            Explore our treatments to build your bespoke experience. You can always adjust later.
+          </p>
+          <button
+            onClick={() => setShowServiceSelector(true)}
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-[#3f3a31] font-medium shadow-md hover:shadow-lg transition-all active:scale-95 touch-manipulation"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Browse Services</span>
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-4 sm:space-y-5">
+          {selectedServices.map(item => {
+            const serviceData = servicesDataMap[item.serviceId];
+            return (
+              <div
+                key={item.serviceId}
+                className="group rounded-2xl border border-[#e4d9c8] dark:border-gray-700 bg-white/95 dark:bg-gray-900/50 shadow-sm hover:shadow-lg transition-all p-4 sm:p-5"
+              >
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white leading-tight">{item.name}</h4>
+                      <span className="text-lg font-bold text-[#9d9585] dark:text-[#c9c1b0] whitespace-nowrap">
+                        £{item.price}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#f0ede7] dark:bg-gray-800/60 text-xs font-medium text-gray-700 dark:text-gray-300">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>{item.duration} min</span>
+                      </span>
+                      {serviceData?.requires_consultation && (
+                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#f8f0e5] dark:bg-gray-800/60 text-xs font-medium text-[#6b5f4b] dark:text-[#d8c5a7]">
+                          Consultation required
+                        </span>
+                      )}
+                      {serviceData?.downtime_days > 0 && (
+                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#eef8f2] dark:bg-gray-800/60 text-xs font-medium text-[#2f6b3d] dark:text-[#80c48f]">
+                          {serviceData.downtime_days}d downtime
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => updateQuantity(item.serviceId, item.quantity - 1)}
+                        className="w-10 h-10 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/70 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:border-[#c9c1b0] hover:text-[#8c846f] transition-colors touch-manipulation active:scale-95"
+                      >
+                        <Minus className="w-4 h-4" />
+                      </button>
+                      <span className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800/60 text-base font-semibold text-gray-900 dark:text-white min-w-[48px] text-center">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => updateQuantity(item.serviceId, item.quantity + 1)}
+                        className="w-10 h-10 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/70 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:border-[#c9c1b0] hover:text-[#8c846f] transition-colors touch-manipulation active:scale-95"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                      <div className="text-left sm:text-right">
+                        <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Subtotal</p>
+                        <p className="text-xl font-bold text-[#9d9585] dark:text-[#c9c1b0]">£{item.price * item.quantity}</p>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setServiceInfoModal(item.serviceId);
+                        }}
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-[#c9c1b0] text-[#6b5f4b] dark:text-[#c9c1b0] hover:bg-[#f5f1e9] dark:hover:bg-gray-800/60 transition-colors text-sm font-medium min-h-[40px] touch-manipulation active:scale-95"
+                      >
+                        <Info className="w-4 h-4" />
+                        <span>Details</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          <div className="border-t border-[#e4d9c8] dark:border-gray-700 pt-5">
+            <button
+              onClick={() => setCurrentStep('date')}
+              disabled={selectedServices.length === 0}
+              className="w-full bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-[#3f3a31] py-3.5 rounded-xl font-semibold text-base shadow-lg hover:shadow-xl transition-all active:scale-95 touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Continue to Date Selection
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
   const renderServiceInfoModal = () => {
     if (!serviceInfoModal) return null;
@@ -491,67 +671,67 @@ function BookingPageContent() {
       ? availableDates.find((item) => item.date === selectedDate)
       : null;
 
-    if (availabilityLoading) {
-      return (
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
-          <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Select Date &amp; Time</h3>
-          <div className="flex items-center gap-3 bg-[#f5f1e9] dark:bg-gray-900/60 border border-[#e4d9c8] dark:border-gray-700 rounded-xl px-4 py-6">
-            <div className="w-6 h-6 border-2 border-[#c9c1b0] border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-sm sm:text-base text-gray-700 dark:text-gray-300">Loading availability...</span>
-          </div>
+  if (availabilityLoading) {
+    return (
+      <div className="space-y-4">
+        <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Select Date &amp; Time</h3>
+        <div className="flex items-center gap-3 bg-[#f5f1e9] dark:bg-gray-900/60 border border-[#e4d9c8] dark:border-gray-700 rounded-xl px-4 py-6">
+          <div className="w-6 h-6 border-2 border-[#c9c1b0] border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-sm sm:text-base text-gray-700 dark:text-gray-300">Loading availability...</span>
         </div>
-      );
-    }
+      </div>
+    );
+  }
 
-    if (availabilityError) {
-      return (
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
-          <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Select Date &amp; Time</h3>
-          <div className="bg-[#fce8e8] dark:bg-red-900/20 border border-[#f3b3b0] dark:border-red-800 rounded-xl px-4 py-6 space-y-4">
-            <p className="text-sm sm:text-base text-[#7f2b27] dark:text-red-200">{availabilityError}</p>
-            <Button
-              onPress={loadAvailability}
-              color="primary"
-              className="bg-gradient-to-r from-[#9d9585] to-[#c9c1b0] text-[#3f3a31]"
-            >
-              Retry loading availability
-            </Button>
-          </div>
+  if (availabilityError) {
+    return (
+      <div className="space-y-4">
+        <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Select Date &amp; Time</h3>
+        <div className="bg-[#fce8e8] dark:bg-red-900/20 border border-[#f3b3b0] dark:border-red-800 rounded-xl px-4 py-6 space-y-4">
+          <p className="text-sm sm:text-base text-[#7f2b27] dark:text-red-200">{availabilityError}</p>
+          <Button
+            onPress={loadAvailability}
+            color="primary"
+            className="bg-gradient-to-r from-[#9d9585] to-[#c9c1b0] text-[#3f3a31]"
+          >
+            Retry loading availability
+          </Button>
         </div>
-      );
-    }
+      </div>
+    );
+  }
 
-    if (!availableDates.length) {
-      return (
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
-          <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Select Date &amp; Time</h3>
-          <div className="bg-[#f5f1e9] dark:bg-gray-900/60 border border-[#e4d9c8] dark:border-gray-700 rounded-xl px-4 py-6 space-y-4 text-center">
-            <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300">No availability found for the next 30 days.</p>
-            <Button
-              onPress={loadAvailability}
-              color="primary"
-              variant="light"
-              className="mx-auto"
-            >
-              Refresh availability
-            </Button>
-          </div>
+  if (!availableDates.length) {
+    return (
+      <div className="space-y-4">
+        <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Select Date &amp; Time</h3>
+        <div className="bg-[#f5f1e9] dark:bg-gray-900/60 border border-[#e4d9c8] dark:border-gray-700 rounded-xl px-4 py-6 space-y-4 text-center">
+          <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300">No availability found for the next 30 days.</p>
+          <Button
+            onPress={loadAvailability}
+            color="primary"
+            variant="light"
+            className="mx-auto"
+          >
+            Refresh availability
+          </Button>
         </div>
-      );
-    }
+      </div>
+    );
+  }
 
     const gridDays = availableDates.slice(0, 28);
 
-    return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
-        <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Select Date &amp; Time</h3>
-        <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-4">
+  return (
+    <div className="space-y-6">
+      <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Select Date &amp; Time</h3>
+      <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
           <span className="inline-flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#d9534f]"></span> Fully booked</span>
           <span className="inline-flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#80c48f]"></span> Slots available</span>
           <span className="inline-flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-gray-200"></span> Clinic closed</span>
         </div>
 
-        <div className="grid grid-cols-7 gap-1.5 sm:gap-2 mb-4 sm:mb-6 relative">
+      <div className="grid grid-cols-7 gap-1.5 sm:gap-2 relative">
           {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
             <div key={day} className="text-center text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400 py-2">
               {day}
@@ -670,83 +850,81 @@ function BookingPageContent() {
     const formattedAppointmentTime = selectedTime || 'Select a time';
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
-        <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Order Summary</h3>
+      <div className="space-y-6">
+        <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Order Summary</h3>
         
         {/* Selected Services */}
-        <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
+        <div className="space-y-4 sm:space-y-5 mb-4 sm:mb-6">
           {selectedServices.map(item => {
             const serviceData = servicesDataMap[item.serviceId];
             return (
-              <div key={item.serviceId} className="p-3 sm:p-4 bg-gradient-to-r from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 rounded-xl border border-gray-200 dark:border-gray-600 hover:shadow-md transition-all">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-                  {/* Left: Service Name, Price & Duration */}
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base mb-2">{item.name}</h4>
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                      <span className="text-base sm:text-lg font-bold text-[#9d9585] dark:text-[#c9c1b0]">£{item.price}</span>
-                      <Chip 
-                        size="sm" 
-                        variant="flat" 
-                        color="default"
-                        classNames={{
-                          base: "inline-flex items-center",
-                          content: "inline-flex items-center gap-1 text-xs"
-                        }}
-                      >
-                        <Clock className="w-3 h-3" />
+              <div
+                key={item.serviceId}
+                className="group rounded-2xl border border-[#e4d9c8] dark:border-gray-700 bg-white/95 dark:bg-gray-900/50 shadow-sm hover:shadow-lg transition-all p-4 sm:p-5"
+              >
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white leading-tight">{item.name}</h4>
+                      <span className="text-lg font-bold text-[#9d9585] dark:text-[#c9c1b0] whitespace-nowrap">
+                        £{item.price}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#f0ede7] dark:bg-gray-800/60 text-xs font-medium text-gray-700 dark:text-gray-300">
+                        <Clock className="w-3.5 h-3.5" />
                         <span>{item.duration} min</span>
-                      </Chip>
+                      </span>
                       {serviceData?.requires_consultation && (
-                        <Chip size="sm" variant="flat" color="warning">
-                          Consultation
-                        </Chip>
+                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#f8f0e5] dark:bg-gray-800/60 text-xs font-medium text-[#6b5f4b] dark:text-[#d8c5a7]">
+                          Consultation required
+                        </span>
                       )}
                       {serviceData?.downtime_days > 0 && (
-                        <Chip size="sm" variant="flat" color="secondary">
+                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#eef8f2] dark:bg-gray-800/60 text-xs font-medium text-[#2f6b3d] dark:text-[#80c48f]">
                           {serviceData.downtime_days}d downtime
-                        </Chip>
+                        </span>
                       )}
-              </div>
+                    </div>
                   </div>
 
-                  {/* Right: Quantity & Total */}
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                    {/* Quantity Controls */}
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => updateQuantity(item.serviceId, item.quantity - 1)}
-                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors touch-manipulation active:scale-95"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                      <span className="w-12 text-center font-semibold text-gray-900 dark:text-white text-sm sm:text-base">{item.quantity}</span>
-                  <button
-                    onClick={() => updateQuantity(item.serviceId, item.quantity + 1)}
-                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors touch-manipulation active:scale-95"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => updateQuantity(item.serviceId, item.quantity - 1)}
+                        className="w-10 h-10 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/70 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:border-[#c9c1b0] hover:text-[#8c846f] transition-colors touch-manipulation active:scale-95"
+                      >
+                        <Minus className="w-4 h-4" />
+                      </button>
+                      <span className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800/60 text-base font-semibold text-gray-900 dark:text-white min-w-[48px] text-center">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => updateQuantity(item.serviceId, item.quantity + 1)}
+                        className="w-10 h-10 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/70 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:border-[#c9c1b0] hover:text-[#8c846f] transition-colors touch-manipulation active:scale-95"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
 
-                    {/* Total Price */}
-                    <div className="text-left sm:text-right min-w-[80px]">
-                      <div className="text-lg sm:text-xl font-bold text-[#9d9585] dark:text-[#c9c1b0]">£{item.price * item.quantity}</div>
-            </div>
-                
-                    {/* Details Button */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                      <div className="text-left sm:text-right">
+                        <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Subtotal</p>
+                        <p className="text-xl font-bold text-[#9d9585] dark:text-[#c9c1b0]">£{item.price * item.quantity}</p>
+                      </div>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setServiceInfoModal(item.serviceId);
                         }}
-                      className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium border border-[#c9c1b0] text-[#6b5f4b] dark:text-[#c9c1b0] rounded-lg hover:bg-[#f5f1e9] dark:hover:bg-gray-800/40 transition-colors flex items-center gap-1.5 min-h-[36px] touch-manipulation active:scale-95"
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-[#c9c1b0] text-[#6b5f4b] dark:text-[#c9c1b0] hover:bg-[#f5f1e9] dark:hover:bg-gray-800/60 transition-colors text-sm font-medium min-h-[40px] touch-manipulation active:scale-95"
                       >
-                      <Info className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      <span>Details</span>
+                        <Info className="w-4 h-4" />
+                        <span>Details</span>
                       </button>
                     </div>
-                    </div>
+                  </div>
+                </div>
               </div>
             );
           })}
@@ -791,7 +969,7 @@ function BookingPageContent() {
 
   const renderStripePayment = () => {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+      <div className="space-y-6">
         <div className="flex items-center gap-4 mb-6">
           <button
             onClick={() => setCurrentStep('preview')}
@@ -856,167 +1034,125 @@ function BookingPageContent() {
         </div>
 
         {/* Progress Steps */}
-        <div className="flex justify-center mb-8 sm:mb-12 px-4 overflow-x-auto">
-          <div className="flex items-center space-x-2 sm:space-x-4 min-w-max">
-            {[
-              { key: 'services', label: 'Services', icon: CheckCircle },
-              { key: 'date', label: 'Date & Time', icon: Calendar },
-              { key: 'preview', label: 'Preview', icon: CheckCircle },
-              { key: 'payment', label: 'Payment', icon: CreditCard }
-            ].map((step, index) => {
-              const Icon = step.icon;
-              const isActive = currentStep === step.key;
-              const isCompleted = ['services', 'date', 'preview', 'payment'].indexOf(currentStep) > ['services', 'date', 'preview', 'payment'].indexOf(step.key);
-              
-              return (
-                <div key={step.key} className="flex items-center">
-                  <div className={`
-                    w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0
-                    ${isCompleted ? 'bg-[#6bb18d] text-white' : 
-                      isActive ? 'bg-[#9d9585] text-white' : 
-                      'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}
-                  `}>
-                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+        <div className="mb-8 sm:mb-12 px-4">
+          <div className="hidden sm:flex justify-center">
+            <div className="flex items-center space-x-4">
+              {bookingSteps.map((step, index) => {
+                const Icon = step.icon;
+                const isActive = currentStep === step.key;
+                const isCompleted = currentStepIndex > index;
+
+                return (
+                  <div key={step.key} className="flex items-center">
+                    <div className={`
+                      w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0
+                      ${isCompleted ? 'bg-[#6bb18d] text-white' : 
+                        isActive ? 'bg-[#9d9585] text-white' : 
+                        'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}
+                    `}>
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <span className={`ml-2 font-medium text-sm md:text-base whitespace-nowrap ${
+                      isActive ? 'text-[#9d9585] dark:text-[#c9c1b0]' : 
+                      isCompleted ? 'text-[#6bb18d] dark:text-[#6bb18d]' :
+                      'text-gray-600 dark:text-gray-400'
+                    }`}>
+                      {step.label}
+                    </span>
+                    {index < bookingSteps.length - 1 && (
+                      <div className={`w-8 h-0.5 mx-4 flex-shrink-0 ${
+                        isCompleted ? 'bg-[#6bb18d]' : 'bg-gray-200 dark:bg-gray-700'
+                      }`} />
+                    )}
                   </div>
-                  <span className={`ml-1.5 sm:ml-2 font-medium text-xs sm:text-sm md:text-base whitespace-nowrap ${
-                    isActive ? 'text-[#9d9585] dark:text-[#c9c1b0]' : 
-                    isCompleted ? 'text-[#6bb18d] dark:text-[#6bb18d]' :
-                    'text-gray-600 dark:text-gray-400'
-                  }`}>
-                    {step.label}
-                  </span>
-                  {index < 3 && (
-                    <div className={`w-4 sm:w-8 h-0.5 mx-2 sm:mx-4 flex-shrink-0 ${
-                      isCompleted ? 'bg-[#6bb18d]' : 'bg-gray-200 dark:bg-gray-700'
-                    }`} />
-                  )}
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
+
         </div>
 
         {/* Main Content */}
         <div className="grid lg:grid-cols-3 gap-6 sm:gap-8 px-4 sm:px-0">
-          {/* Left Column - Current Step Content */}
-          <div className="lg:col-span-2">
-            {currentStep === 'services' && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Selected Services</h3>
+          <div className="lg:col-span-2 space-y-5">
+            {bookingSteps.map((step, index) => {
+              const Icon = step.icon;
+              const isOpen = currentStep === step.key;
+              const isCompleted = currentStepIndex > index;
+              const isUnlocked = isStepUnlocked(step.key);
+              const canInteract = isUnlocked || index <= currentStepIndex;
+              const statusLabel = isCompleted
+                ? "Completed"
+                : isOpen
+                ? "In progress"
+                : canInteract
+                ? "Ready"
+                : "Locked";
+              const statusClass = isCompleted
+                ? "text-[#357a52] dark:text-[#6bb18d]"
+                : isOpen
+                ? "text-[#9d9585] dark:text-[#c9c1b0]"
+                : canInteract
+                ? "text-gray-600 dark:text-gray-300"
+                : "text-gray-400 dark:text-gray-600";
+              const iconWrapperClasses = isCompleted
+                ? "bg-[#6bb18d] text-white"
+                : isOpen
+                ? "bg-[#9d9585] text-white"
+                : "bg-white text-gray-600 dark:bg-gray-800 dark:text-gray-300";
+
+              return (
+                <section
+                  key={step.key}
+                  className="rounded-3xl border border-[#e4d9c8] dark:border-gray-800 bg-white/60 dark:bg-gray-900/50 backdrop-blur-sm shadow-lg"
+                >
                   <button
-                    onClick={() => setShowServiceSelector(true)}
-                    className="w-full sm:w-auto bg-gradient-to-r from-[#9d9585] to-[#c9c1b0] text-[#3f3a31] px-4 sm:px-6 py-2.5 sm:py-2 rounded-lg hover:from-[#8c846f] hover:to-[#b5ad9d] transition-all font-medium text-sm sm:text-base min-h-[44px] touch-manipulation"
+                    type="button"
+                    onClick={() => handleStepToggle(step.key)}
+                    disabled={!canInteract}
+                    className={`w-full flex items-center justify-between gap-4 px-4 sm:px-6 py-5 text-left rounded-3xl transition-colors ${
+                      canInteract
+                        ? 'hover:bg-white/80 dark:hover:bg-gray-900/70'
+                        : 'opacity-70 cursor-not-allowed'
+                    }`}
                   >
-                    Add Services
+                    <div className="flex items-center gap-4 sm:gap-5">
+                      <span className={`flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border border-[#e4d9c8]/70 dark:border-gray-700 transition-all ${iconWrapperClasses}`}>
+                        <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                      </span>
+                      <div className="flex flex-col gap-1">
+                        <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+                          {step.label}
+                        </h3>
+                        <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Step {index + 1} of {bookingSteps.length}
+                        </p>
+                        <p className="hidden sm:block text-sm text-gray-500 dark:text-gray-400">
+                          {stepDescriptions[step.key]}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`text-xs sm:text-sm font-semibold ${statusClass}`}>
+                        {statusLabel}
+                      </span>
+                      {canInteract ? (
+                        <ChevronDown
+                          className={`w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                        />
+                      ) : (
+                        <Lock className="w-4 h-4 text-gray-400 dark:text-gray-600" />
+                      )}
+                    </div>
                   </button>
-                </div>
-                
-                {selectedServices.length === 0 ? (
-                  <div className="text-center py-8 sm:py-12">
-                    <Calendar className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mx-auto mb-4" />
-                    <h4 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2">No services selected</h4>
-                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 px-4">Add services to your order to continue</p>
-                    <button
-                      onClick={() => setShowServiceSelector(true)}
-                      className="bg-gradient-to-r from-[#9d9585] to-[#c9c1b0] text-[#3f3a31] px-6 py-3 rounded-lg hover:from-[#8c846f] hover:to-[#b5ad9d] transition-all font-medium text-sm sm:text-base min-h-[44px] touch-manipulation"
-                    >
-                      Browse Services
-                    </button>
+                  <div className={`${isOpen ? 'block' : 'hidden'} border-t border-[#e4d9c8] dark:border-gray-800 px-4 sm:px-6 pb-6`}>
+                    <div className="pt-6">
+                      {renderStepContent(step.key)}
+                    </div>
                   </div>
-                ) : (
-                  <div className="space-y-3 sm:space-y-4">
-                    {selectedServices.map(item => {
-                      const serviceData = servicesDataMap[item.serviceId];
-                      return (
-                        <div key={item.serviceId} className="p-3 sm:p-4 bg-gradient-to-r from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 rounded-xl border border-gray-200 dark:border-gray-600 hover:shadow-md transition-all">
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-                            {/* Left: Service Name, Price & Duration */}
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base mb-2">{item.name}</h4>
-                              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                                <span className="text-base sm:text-lg font-bold text-[#9d9585] dark:text-[#c9c1b0]">£{item.price}</span>
-                                <Chip 
-                                  size="sm" 
-                                  variant="flat" 
-                                  color="default"
-                                  classNames={{
-                                    base: "inline-flex items-center",
-                                    content: "inline-flex items-center gap-1"
-                                  }}
-                                >
-                                  <Clock className="w-3 h-3" />
-                                  <span>{item.duration} min</span>
-                                </Chip>
-                                {serviceData?.requires_consultation && (
-                                  <Chip size="sm" variant="flat" color="warning">
-                                    Consultation
-                                  </Chip>
-                                )}
-                                {serviceData?.downtime_days > 0 && (
-                                  <Chip size="sm" variant="flat" color="secondary">
-                                    {serviceData.downtime_days}d downtime
-                                  </Chip>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Right: Quantity & Total */}
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                              {/* Quantity Controls */}
-                              <div className="flex items-center gap-2">
-                                <button
-                                  onClick={() => updateQuantity(item.serviceId, item.quantity - 1)}
-                                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors touch-manipulation active:scale-95"
-                                >
-                                  <Minus className="w-4 h-4" />
-                                </button>
-                                <span className="w-12 text-center font-semibold text-gray-900 dark:text-white text-sm sm:text-base">{item.quantity}</span>
-                                <button
-                                  onClick={() => updateQuantity(item.serviceId, item.quantity + 1)}
-                                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors touch-manipulation active:scale-95"
-                                >
-                                  <Plus className="w-4 h-4" />
-                                </button>
-                              </div>
-
-                              {/* Total Price */}
-                              <div className="text-left sm:text-right min-w-[80px]">
-                                <div className="text-lg sm:text-xl font-bold text-[#9d9585] dark:text-[#c9c1b0]">£{item.price * item.quantity}</div>
-                              </div>
-                
-                              {/* Details Button */}
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setServiceInfoModal(item.serviceId);
-                                }}
-                                className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium border border-[#c9c1b0] text-[#6b5f4b] dark:text-[#c9c1b0] rounded-lg hover:bg-[#f5f1e9] dark:hover:bg-gray-800/40 transition-colors flex items-center gap-1.5 min-h-[36px] touch-manipulation active:scale-95"
-                              >
-                                <Info className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                <span>Details</span>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                    
-                    <button
-                      onClick={() => setCurrentStep('date')}
-                      disabled={selectedServices.length === 0}
-                      className="w-full bg-gradient-to-r from-[#9d9585] to-[#c9c1b0] text-[#3f3a31] py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg hover:from-[#8c846f] hover:to-[#b5ad9d] transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] touch-manipulation active:scale-95"
-                    >
-                      Continue to Date Selection
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-            
-            {currentStep === 'date' && renderCalendar()}
-            {currentStep === 'preview' && renderOrderPreview()}
-            {currentStep === 'payment' && renderStripePayment()}
+                </section>
+              );
+            })}
           </div>
           
           {/* Right Column - Order Summary */}
