@@ -78,7 +78,7 @@ export function FlyDiscountForm({ onClose, isVisible }: FlyDiscountFormProps) {
         </button>
 
         {/* Header */}
-        <div className="relative bg-gradient-to-br from-rose-500 via-pink-500 to-purple-600 p-6 text-white">
+        <div className="relative bg-[#464C45] hover:bg-[#3a4039] p-6 text-white transition-colors">
           <div className="absolute inset-0 bg-black/10"></div>
           <div className="relative">
             <div className="flex items-center justify-center mb-4">
@@ -89,7 +89,7 @@ export function FlyDiscountForm({ onClose, isVisible }: FlyDiscountFormProps) {
             <h2 className="text-2xl font-bold text-center mb-2">
               Special Offer!
             </h2>
-            <p className="text-center text-rose-100 text-sm">
+            <p className="text-center text-white/90 text-sm">
               Get 15% off your first treatment
             </p>
           </div>
@@ -153,7 +153,7 @@ export function FlyDiscountForm({ onClose, isVisible }: FlyDiscountFormProps) {
                     value={formData.name}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-transparent"
                     placeholder="Enter your full name"
                   />
                 </div>
@@ -168,7 +168,7 @@ export function FlyDiscountForm({ onClose, isVisible }: FlyDiscountFormProps) {
                     value={formData.email}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-transparent"
                     placeholder="your@email.com"
                   />
                 </div>
@@ -182,7 +182,7 @@ export function FlyDiscountForm({ onClose, isVisible }: FlyDiscountFormProps) {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-transparent"
                     placeholder="+44 7700 900123"
                   />
                 </div>
@@ -195,7 +195,7 @@ export function FlyDiscountForm({ onClose, isVisible }: FlyDiscountFormProps) {
                     name="treatment"
                     value={formData.treatment}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-transparent"
                   >
                     <option value="">Select a treatment</option>
                     {treatments.map((treatment) => (
@@ -215,7 +215,7 @@ export function FlyDiscountForm({ onClose, isVisible }: FlyDiscountFormProps) {
                     value={formData.message}
                     onChange={handleInputChange}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent resize-none"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-transparent resize-none"
                     placeholder="Tell us about your aesthetic goals..."
                   />
                 </div>
@@ -223,7 +223,7 @@ export function FlyDiscountForm({ onClose, isVisible }: FlyDiscountFormProps) {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full bg-[#464C45] hover:bg-[#3a4039] text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
                     <>
@@ -283,6 +283,9 @@ export function useFlyDiscountForm() {
     hasShown
   };
 }
+
+
+
 
 
 

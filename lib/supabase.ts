@@ -276,6 +276,8 @@ export type Database = {
           amount: number;
           address: string | null;
           notes: string | null;
+          team_member_id: string | null;
+          service_duration_minutes: number | null;
           created_at: string;
           updated_at: string;
         };
@@ -293,6 +295,8 @@ export type Database = {
           amount: number;
           address?: string | null;
           notes?: string | null;
+          team_member_id?: string | null;
+          service_duration_minutes?: number | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -310,6 +314,8 @@ export type Database = {
           amount?: number;
           address?: string | null;
           notes?: string | null;
+          team_member_id?: string | null;
+          service_duration_minutes?: number | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -478,6 +484,50 @@ export type Database = {
           is_available?: boolean;
           booking_id?: string | null;
           created_at?: string;
+        };
+      };
+      team: {
+        Row: {
+          id: string;
+          admin_profile_id: string | null;
+          name: string;
+          email: string;
+          phone: string | null;
+          role: string;
+          specializations: string | null;
+          experience_years: string | null;
+          certifications: string | null;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          admin_profile_id?: string | null;
+          name: string;
+          email: string;
+          phone?: string | null;
+          role: string;
+          specializations?: string | null;
+          experience_years?: string | null;
+          certifications?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          admin_profile_id?: string | null;
+          name?: string;
+          email?: string;
+          phone?: string | null;
+          role?: string;
+          specializations?: string | null;
+          experience_years?: string | null;
+          certifications?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
         };
       };
     };

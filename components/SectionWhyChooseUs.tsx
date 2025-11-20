@@ -2,6 +2,8 @@
 
 import { Award, Shield, Heart, Sparkles, Clock, Star } from "lucide-react";
 import { siteConfig } from "@/config/site";
+import { aestheticsColors } from "@/config/colors";
+import { badgeBackgroundClass } from "@/config/badge-styles";
 
 const reasons = [
   {
@@ -44,10 +46,14 @@ const reasons = [
 
 export default function SectionWhyChooseUs() {
   return (
-    <section className="py-12 sm:py-16 md:py-20 bg-warm-beige-lighter dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <section className="py-12 sm:py-16 md:py-20 bg-[#f5f1e9] dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-8 sm:mb-12 md:mb-16">
+          <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-sm sm:text-base font-semibold mb-3 sm:mb-4`}>
+            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span>Why Choose Us</span>
+          </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 px-4">
             Why Choose EGP Aesthetics?
           </h2>
@@ -65,7 +71,10 @@ export default function SectionWhyChooseUs() {
                 key={reason.title}
                 className="group bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-8 shadow-md hover:shadow-2xl transition-all duration-300 sm:hover:-translate-y-2 border border-gray-100 dark:border-gray-700"
               >
-                <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-blue-600 rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 sm:mb-5 md:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
+                <div 
+                  className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 sm:mb-5 md:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg"
+                  style={{ backgroundColor: aestheticsColors.green.DEFAULT }}
+                >
                   <Icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3">
@@ -85,9 +94,13 @@ export default function SectionWhyChooseUs() {
             {siteConfig.trust.certifications.map((cert) => (
               <div
                 key={cert}
-                className="text-center px-4 py-6 bg-blue-100 dark:bg-blue-900/40 rounded-lg border border-blue-300 dark:border-blue-700"
+                className="text-center px-6 py-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
+                style={{ 
+                  backgroundColor: '#e8f5e9',
+                  border: '1px solid #c8e6c9'
+                }}
               >
-                <div className="text-sm font-bold text-blue-900 dark:text-blue-300">{cert}</div>
+                <div className="text-sm font-bold" style={{ color: aestheticsColors.green.DEFAULT }}>{cert}</div>
               </div>
             ))}
           </div>

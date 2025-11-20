@@ -13,6 +13,7 @@ import {
   Package,
   FolderTree,
   TrendingUp,
+  Star,
 } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import { Input, Textarea } from "@heroui/input";
@@ -116,10 +117,17 @@ export default function AdminServicesPage() {
       if (response.ok) {
         const data = await response.json();
         const servicesData = data.services || [];
-        console.log("Loaded services (admin):", servicesData.length, servicesData);
+        console.log(
+          "Loaded services (admin):",
+          servicesData.length,
+          servicesData
+        );
         setServices(servicesData);
       } else {
-        console.error("Error loading services: Response not ok", response.status);
+        console.error(
+          "Error loading services: Response not ok",
+          response.status
+        );
         const errorText = await response.text();
         console.error("Error response:", errorText);
       }
@@ -135,10 +143,17 @@ export default function AdminServicesPage() {
       if (response.ok) {
         const data = await response.json();
         const categoriesData = data.categories || [];
-        console.log("Loaded categories (admin):", categoriesData.length, categoriesData);
+        console.log(
+          "Loaded categories (admin):",
+          categoriesData.length,
+          categoriesData
+        );
         setCategories(categoriesData);
       } else {
-        console.error("Error loading categories: Response not ok", response.status);
+        console.error(
+          "Error loading categories: Response not ok",
+          response.status
+        );
         const errorText = await response.text();
         console.error("Error response:", errorText);
       }
@@ -241,6 +256,38 @@ export default function AdminServicesPage() {
       }
     } catch (error) {
       console.error("Error deleting service:", error);
+    }
+  };
+
+  const handleToggleFeatured = async (service: Service) => {
+    try {
+      const response = await fetch(`/api/services/${service.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: service.name,
+          slug: service.slug,
+          description: service.description || "",
+          details: service.details || "",
+          benefits: Array.isArray(service.benefits) ? service.benefits : [],
+          preparation: service.preparation || "",
+          aftercare: service.aftercare || "",
+          price: service.price,
+          duration: service.duration,
+          category_id: service.category.id,
+          requires_consultation: service.requires_consultation,
+          downtime_days: service.downtime_days,
+          results_duration_weeks: service.results_duration_weeks,
+          is_featured: !service.is_featured,
+          image_url: service.image_url,
+        }),
+      });
+
+      if (response.ok) {
+        await loadServices();
+      }
+    } catch (error) {
+      console.error("Error toggling featured status:", error);
     }
   };
 
@@ -408,7 +455,12 @@ export default function AdminServicesPage() {
     const catMainTabSlug = cat.main_tab?.slug;
     const matches = catMainTabSlug === mainTab;
     if (!matches && mainTab === "by-condition") {
-      console.log("Category filtered out:", cat.name, "main_tab:", cat.main_tab);
+      console.log(
+        "Category filtered out:",
+        cat.name,
+        "main_tab:",
+        cat.main_tab
+      );
     }
     return matches;
   });
@@ -422,16 +474,16 @@ export default function AdminServicesPage() {
         currentCategoriesData: currentCategories,
         totalServices: services.length,
         filteredServices: filteredServices.length,
-        mainTab
+        mainTab,
       });
     }
   }, [mainTab, categories, services, currentCategories, filteredServices]);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#f5f1e9] dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-rose-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#464C45] mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">
             Loading services...
           </p>
@@ -441,11 +493,11 @@ export default function AdminServicesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-[#f5f1e9] dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="max-w-7xl mx-auto p-4 sm:p-6">
         {/* Mobile-Optimized Header */}
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent mb-2">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">
             Services Management
           </h1>
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
@@ -459,8 +511,8 @@ export default function AdminServicesPage() {
             onClick={() => setMainTab("book-now")}
             className={`flex-1 px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all ${
               mainTab === "book-now"
-                ? "bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-lg"
-                : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
+                ? "bg-gradient-to-r from-[#5a6259] to-[#464C45] text-white shadow-lg"
+                : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
             }`}
           >
             BOOK NOW
@@ -469,8 +521,8 @@ export default function AdminServicesPage() {
             onClick={() => setMainTab("by-condition")}
             className={`flex-1 px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all ${
               mainTab === "by-condition"
-                ? "bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-lg"
-                : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
+                ? "bg-gradient-to-r from-[#464C45] to-[#5a6259] text-white shadow-lg"
+                : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
             }`}
           >
             BY CONDITION
@@ -483,8 +535,8 @@ export default function AdminServicesPage() {
             onClick={() => setActiveView("services")}
             className={`flex-1 px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all ${
               activeView === "services"
-                ? "bg-white dark:bg-gray-800 text-rose-600 dark:text-rose-400 border-2 border-rose-500 shadow-lg"
-                : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-2 border-transparent"
+                ? "bg-white dark:bg-gray-800 text-[#464C45] dark:text-[#464C45] border-2 border-[#464C45] shadow-lg"
+                : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-2 border-gray-200 dark:border-gray-700"
             }`}
           >
             <div className="flex items-center justify-center gap-2">
@@ -497,8 +549,8 @@ export default function AdminServicesPage() {
             onClick={() => setActiveView("categories")}
             className={`flex-1 px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all ${
               activeView === "categories"
-                ? "bg-white dark:bg-gray-800 text-rose-600 dark:text-rose-400 border-2 border-rose-500 shadow-lg"
-                : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-2 border-transparent"
+                ? "bg-white dark:bg-gray-800 text-[#464C45] dark:text-[#464C45] border-2 border-[#464C45] shadow-lg"
+                : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-2 border-gray-200 dark:border-gray-700"
             }`}
           >
             <div className="flex items-center justify-center gap-2">
@@ -513,22 +565,20 @@ export default function AdminServicesPage() {
         {activeView === "services" && (
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6">
             {/* Mobile-Optimized Actions Bar */}
-            <div className="flex flex-col gap-3 mb-6">
-              {/* Search bar */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
-                <Input
-                  placeholder="Search services..."
-                  value={searchQuery}
-                  onValueChange={setSearchQuery}
-                  variant="bordered"
-                  className="pl-10"
-                  size="lg"
-                />
-              </div>
-
-              {/* Filter and Add Button Row */}
-              <div className="flex gap-2">
+            <div className="mb-6">
+              {/* Search, Filter and Add Button - All in one line */}
+              <div className="flex gap-2 items-center">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+                  <Input
+                    placeholder="Search services..."
+                    value={searchQuery}
+                    onValueChange={setSearchQuery}
+                    variant="bordered"
+                    className="pl-10"
+                    size="lg"
+                  />
+                </div>
                 <Select
                   placeholder="All Categories"
                   selectedKeys={
@@ -540,7 +590,7 @@ export default function AdminServicesPage() {
                   }}
                   variant="bordered"
                   size="lg"
-                  className="flex-1"
+                  className="w-48"
                 >
                   <>
                     <SelectItem key="all">All Categories</SelectItem>
@@ -562,32 +612,32 @@ export default function AdminServicesPage() {
 
             {/* Mobile-Optimized Stats */}
             <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
-              <Card className="bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 border-none">
+              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 <CardBody className="p-3 sm:p-4">
                   <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
                     Total
                   </p>
-                  <p className="text-2xl sm:text-3xl font-bold text-rose-600">
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                     {filteredServices.length}
                   </p>
                 </CardBody>
               </Card>
-              <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-none">
+              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 <CardBody className="p-3 sm:p-4">
                   <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
                     Categories
                   </p>
-                  <p className="text-2xl sm:text-3xl font-bold text-purple-600">
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                     {currentCategories.length}
                   </p>
                 </CardBody>
               </Card>
-              <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border-none">
+              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 <CardBody className="p-3 sm:p-4">
                   <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
                     Featured
                   </p>
-                  <p className="text-2xl sm:text-3xl font-bold text-emerald-600">
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                     {filteredServices.filter((s) => s.is_featured).length}
                   </p>
                 </CardBody>
@@ -626,164 +676,238 @@ export default function AdminServicesPage() {
                 {filteredServices.map((service) => (
                   <Card
                     key={service.id}
-                    className="hover:shadow-xl transition-all group border border-gray-200 dark:border-gray-700"
+                    className="hover:shadow-xl transition-all group border border-gray-200 dark:border-gray-700 flex flex-col"
                   >
-                    <CardBody className="p-4 sm:p-6">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2 truncate">
-                            {service.name}
-                          </h3>
-                          <Chip size="sm" variant="flat" color="danger">
-                            {service.category.name}
-                          </Chip>
+                    <CardBody className="p-4 sm:p-6 flex flex-col flex-1">
+                      {/* Content Section - Top */}
+                      <div className="flex-1">
+                        {/* Header */}
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2 truncate">
+                              {service.name}
+                            </h3>
+                            <Chip size="sm" variant="flat" color="danger">
+                              {service.category.name}
+                            </Chip>
+                          </div>
+                          {service.is_featured && (
+                            <Chip
+                              size="sm"
+                              color="warning"
+                              variant="flat"
+                              className="ml-2"
+                            >
+                              <CheckCircle2 className="w-3 h-3 mr-1" />
+                            </Chip>
+                          )}
                         </div>
-                        {service.is_featured && (
-                          <Chip
-                            size="sm"
-                            color="warning"
-                            variant="flat"
-                            className="ml-2"
-                          >
-                            <CheckCircle2 className="w-3 h-3 mr-1" />
-                          </Chip>
+
+                        {/* Description */}
+                        <div className="mb-3">
+                          {service.description ? (
+                            <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">
+                              {service.description}
+                            </p>
+                          ) : (
+                            <p className="text-gray-400 dark:text-gray-500 text-sm italic">
+                              Missing information
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Benefits Preview */}
+                        {service.benefits && service.benefits.length > 0 ? (
+                          <div className="mb-3">
+                            <div className="flex flex-wrap gap-1">
+                              {service.benefits
+                                .slice(0, 3)
+                                .map((benefit, idx) => (
+                                  <Chip
+                                    key={idx}
+                                    size="sm"
+                                    variant="flat"
+                                    color="danger"
+                                    className="text-xs"
+                                  >
+                                    {benefit}
+                                  </Chip>
+                                ))}
+                              {service.benefits.length > 3 && (
+                                <Chip
+                                  size="sm"
+                                  variant="flat"
+                                  className="text-xs"
+                                >
+                                  +{service.benefits.length - 3}
+                                </Chip>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="mb-3">
+                            <p className="text-gray-400 dark:text-gray-500 text-xs italic">
+                              Benefits not filled
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Details Preview */}
+                        {service.details ? (
+                          <div className="mb-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                            <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1">
+                              Details:
+                            </p>
+                            <p className="text-xs text-gray-700 dark:text-gray-300 line-clamp-2">
+                              {service.details}
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="mb-3">
+                            <p className="text-gray-400 dark:text-gray-500 text-xs italic">
+                              Details not filled
+                            </p>
+                          </div>
                         )}
                       </div>
 
-                      {/* Description */}
-                      <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">
-                        {service.description}
-                      </p>
-
-                      {/* Main Info */}
-                      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 mb-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-rose-600 font-bold text-2xl">
-                            £{service.price}
-                          </span>
-                          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 text-xs">
-                            <span>⏱</span>
-                            <span>{service.duration} min</span>
+                      {/* Price and Additional Information - Below buttons */}
+                      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                              Price
+                            </p>
+                            <span className="text-rose-600 dark:text-rose-400 font-bold text-xl">
+                              £{service.price || 0}
+                            </span>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                              Duration
+                            </p>
+                            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 text-sm">
+                              <span>⏱</span>
+                              <span>{service.duration || 0} min</span>
+                            </div>
                           </div>
                         </div>
 
-                        {/* Additional Info Grid */}
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                          {service.requires_consultation && (
-                            <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
-                              <svg
-                                className="w-3 h-3"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                              <span>Consultation</span>
-                            </div>
-                          )}
-                          {service.downtime_days > 0 && (
-                            <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
-                              <svg
-                                className="w-3 h-3"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                              <span>{service.downtime_days}d downtime</span>
-                            </div>
-                          )}
-                          {service.results_duration_weeks && (
-                            <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                              <svg
-                                className="w-3 h-3"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                              <span>
-                                Lasts {service.results_duration_weeks}w
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Benefits Preview */}
-                      {service.benefits && service.benefits.length > 0 && (
-                        <div className="mb-3">
-                          <div className="flex flex-wrap gap-1">
-                            {service.benefits
-                              .slice(0, 3)
-                              .map((benefit, idx) => (
-                                <Chip
-                                  key={idx}
-                                  size="sm"
-                                  variant="flat"
-                                  color="danger"
-                                  className="text-xs"
+                        {/* Additional Information */}
+                        <div className="space-y-2">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold mb-2">
+                            Additional Information:
+                          </p>
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            {service.requires_consultation ? (
+                              <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                                <svg
+                                  className="w-3 h-3"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
                                 >
-                                  {benefit}
-                                </Chip>
-                              ))}
-                            {service.benefits.length > 3 && (
-                              <Chip
-                                size="sm"
-                                variant="flat"
-                                className="text-xs"
-                              >
-                                +{service.benefits.length - 3}
-                              </Chip>
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                                <span>Consultation</span>
+                              </div>
+                            ) : (
+                              <p className="text-gray-400 dark:text-gray-500 text-xs italic">
+                                Consultation: Not specified
+                              </p>
                             )}
+                            {service.downtime_days > 0 ? (
+                              <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
+                                <svg
+                                  className="w-3 h-3"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                                <span>{service.downtime_days}d downtime</span>
+                              </div>
+                            ) : (
+                              <p className="text-gray-400 dark:text-gray-500 text-xs italic">
+                                Downtime: Not specified
+                              </p>
+                            )}
+                            {service.results_duration_weeks ? (
+                              <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                                <svg
+                                  className="w-3 h-3"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                                <span>
+                                  Lasts {service.results_duration_weeks}w
+                                </span>
+                              </div>
+                            ) : (
+                              <p className="text-gray-400 dark:text-gray-500 text-xs italic">
+                                Results duration: Not filled
+                              </p>
+                            )}
+                            {!service.requires_consultation &&
+                              service.downtime_days === 0 &&
+                              !service.results_duration_weeks && (
+                                <p className="text-gray-400 dark:text-gray-500 text-xs italic col-span-2">
+                                  No additional information
+                                </p>
+                              )}
                           </div>
                         </div>
-                      )}
-
-                      {/* Details Preview */}
-                      {service.details && (
-                        <div className="mb-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                          <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1">
-                            Details:
-                          </p>
-                          <p className="text-xs text-gray-700 dark:text-gray-300 line-clamp-2">
-                            {service.details}
-                          </p>
+                        {/* Action Buttons - At bottom */}
+                        <div className="flex gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                          <Button
+                            size="sm"
+                            variant={service.is_featured ? "solid" : "flat"}
+                            color={service.is_featured ? "warning" : "default"}
+                            onPress={() => handleToggleFeatured(service)}
+                            className="flex-1 flex items-center justify-center"
+                            title={
+                              service.is_featured
+                                ? "Remove from featured"
+                                : "Make featured"
+                            }
+                          >
+                            <Star
+                              className={`w-4 h-4 ${service.is_featured ? "fill-current" : ""}`}
+                            />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="flat"
+                            onPress={() => handleEditService(service)}
+                            className="flex-1 flex items-center justify-center"
+                            title="Edit service"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="flat"
+                            color="danger"
+                            onPress={() => handleDeleteService(service.id)}
+                            className="flex-1 flex items-center justify-center"
+                            title="Delete service"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
-                      )}
-
-                      {/* Action Buttons */}
-                      <div className="flex gap-2 mt-4">
-                        <Button
-                          size="sm"
-                          variant="flat"
-                          onPress={() => handleEditService(service)}
-                          className="flex-1"
-                        >
-                          <Edit className="w-4 h-4 mr-2" />
-                          <span className="hidden xs:inline">Edit</span>
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="flat"
-                          color="danger"
-                          onPress={() => handleDeleteService(service.id)}
-                          isIconOnly
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
                       </div>
                     </CardBody>
                   </Card>

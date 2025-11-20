@@ -64,9 +64,9 @@ export default function BlogPage() {
               <Link key={post.id} href={`/blog/${post.slug}`}>
                 <article className="group relative flex h-full flex-col rounded-[28px] border border-[#e4d9c8] dark:border-gray-700 bg-[#fdfbf8] dark:bg-gray-900/70 shadow-xl transition-all duration-300 hover:shadow-2xl md:col-span-2 xl:col-span-3">
                   <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:from-[#9d9585]/10 group-hover:via-[#b5ad9d]/10 group-hover:to-[#ddd5c3]/10 group-hover:opacity-100" />
-                  <div className="absolute right-6 top-6 hidden items-center gap-2 rounded-full bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] px-5 py-2 text-sm font-semibold text-[#3f3a31] shadow-lg transition-all duration-300 group-hover:flex">
-                    <span>Read article</span>
+                  <div className="absolute right-6 top-6 flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-xs font-semibold text-[#6b5f4b] shadow-md backdrop-blur transition-all duration-300 group-hover:bg-[#9d9585] group-hover:text-white dark:bg-gray-900/80 dark:text-[#c9c1b0]">
                     <ArrowRight className="h-4 w-4" />
+                    <span>Read article</span>
                   </div>
 
                   <div className="relative z-10 flex flex-col gap-6 p-9 md:p-12">

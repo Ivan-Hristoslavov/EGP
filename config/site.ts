@@ -28,7 +28,7 @@ export const siteConfig = {
     instagram: process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM || "https://instagram.com/egpaesthetics",
     facebook: process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK || "https://facebook.com/egpaesthetics",
     youtube: process.env.NEXT_PUBLIC_SOCIAL_YOUTUBE || "https://youtube.com/@egpaesthetics",
-    tiktok: process.env.NEXT_PUBLIC_SOCIAL_TIKTOK || "",
+    tiktok: process.env.NEXT_PUBLIC_SOCIAL_TIKTOK || "https://www.tiktok.com/@egpaesthetics_london",
     linkedin: process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN || "",
     twitter: process.env.NEXT_PUBLIC_SOCIAL_TWITTER || "",
   },

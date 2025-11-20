@@ -3,9 +3,10 @@
 import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { siteConfig } from "@/config/site";
-import { Search, Filter, Grid, List, ArrowLeft, Info, Plus, Clock, CheckCircle } from "lucide-react";
+import { Search, Filter, ArrowLeft, Info, Plus, Clock, CheckCircle } from "lucide-react";
 import Link from 'next/link';
 import { useServices } from '@/hooks/useServices';
+import { aestheticsColors } from "@/config/colors";
 
 const categories = [
   'All',
@@ -38,7 +39,6 @@ function ServicesPageContent() {
   const [selectedPriceRange, setSelectedPriceRange] = useState('All Prices');
   const [selectedDurationRange, setSelectedDurationRange] = useState('All Durations');
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedService, setSelectedService] = useState<string | null>(null);
@@ -58,7 +58,11 @@ function ServicesPageContent() {
         details: service.details,
         benefits: service.benefits,
         preparation: service.preparation,
-        aftercare: service.aftercare
+        aftercare: service.aftercare,
+        requires_consultation: service.requires_consultation,
+        downtime_days: service.downtime_days,
+        results_duration_weeks: service.results_duration_weeks,
+        is_featured: service.is_featured
       };
     });
     return map;
@@ -92,7 +96,7 @@ function ServicesPageContent() {
           selectedDurationRangeObj.max >= serviceData.duration
         ) : true;
         const matchesSearch = serviceData.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                             serviceData.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                             (serviceData.description && serviceData.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
                              serviceData.category.toLowerCase().includes(searchTerm.toLowerCase());
         
         return matchesCategory && matchesPrice && matchesDuration && matchesSearch;
@@ -136,10 +140,10 @@ function ServicesPageContent() {
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
           {/* Header */}
-          <div className="bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 text-white px-8 py-6 flex items-center justify-between rounded-t-2xl flex-shrink-0">
+          <div className="bg-[#464C45] dark:bg-[#464C45] text-white px-8 py-6 flex items-center justify-between rounded-t-2xl flex-shrink-0">
             <div>
               <h2 className="text-3xl font-bold mb-2">{service.name}</h2>
-              <div className="flex items-center gap-4 text-rose-100">
+              <div className="flex items-center gap-4 text-white/90">
                 <span className="flex items-center gap-1 text-lg">
                 <Clock className="w-5 h-5" />
                   {service.duration} minutes
@@ -163,7 +167,7 @@ function ServicesPageContent() {
             {/* Description */}
             <div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                <Info className="w-5 h-5 text-rose-500" />
+                <Info className="w-5 h-5" style={{ color: aestheticsColors.green.DEFAULT }} />
                 Overview
               </h3>
               <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -236,7 +240,7 @@ function ServicesPageContent() {
               <Link
                 href={`/book?service=${selectedService}`}
                 onClick={() => setSelectedService(null)}
-                className="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white py-4 rounded-xl font-semibold text-lg hover:from-rose-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl block text-center"
+                className="w-full bg-[#464C45] hover:bg-[#3a4039] dark:bg-[#464C45] dark:hover:bg-[#3a4039] text-white py-4 rounded-xl font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl block text-center"
               >
                 Book This Treatment - £{service.price}
               </Link>
@@ -250,9 +254,9 @@ function ServicesPageContent() {
   // Show loading state while services are being fetched
   if (servicesLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center py-8">
+      <div className="min-h-screen bg-[#f5f1e9] dark:bg-gray-900 flex items-center justify-center py-8">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#464C45] mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Loading services...</p>
         </div>
       </div>
@@ -260,13 +264,13 @@ function ServicesPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div className="min-h-screen bg-[#f5f1e9] dark:bg-gray-900 py-8">
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <Link
             href="/book"
-            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
+            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-[#464C45] dark:hover:text-[#5a6259] transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
             Back to Booking
@@ -293,42 +297,19 @@ function ServicesPageContent() {
                 placeholder="Search services..."
                 value={searchTerm}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-[#464C45] focus:ring-2 focus:ring-[#464C45]/20 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
             </div>
 
             {/* Filter Toggle */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-rose-500 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
+              className="flex items-center gap-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-[#464C45] hover:text-[#464C45] dark:hover:text-[#5a6259] transition-colors"
             >
               <Filter className="w-5 h-5" />
               Filters
             </button>
 
-            {/* View Mode */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'grid' 
-                    ? 'bg-rose-500 text-white' 
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-600'
-                }`}
-              >
-                <Grid className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'list' 
-                    ? 'bg-rose-500 text-white' 
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-600'
-                }`}
-              >
-                <List className="w-5 h-5" />
-              </button>
-            </div>
           </div>
 
           {/* Filter Options */}
@@ -343,7 +324,7 @@ function ServicesPageContent() {
                   <select
                     value={selectedCategory}
                     onChange={(e) => handleFilterChange('category', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-[#464C45] focus:ring-2 focus:ring-[#464C45]/20 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     {categories.map(category => (
                       <option key={category} value={category}>{category}</option>
@@ -359,7 +340,7 @@ function ServicesPageContent() {
                   <select
                     value={selectedPriceRange}
                     onChange={(e) => handleFilterChange('price', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-[#464C45] focus:ring-2 focus:ring-[#464C45]/20 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     {priceRanges.map(range => (
                       <option key={range.label} value={range.label}>{range.label}</option>
@@ -375,7 +356,7 @@ function ServicesPageContent() {
                   <select
                     value={selectedDurationRange}
                     onChange={(e) => handleFilterChange('duration', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-[#464C45] focus:ring-2 focus:ring-[#464C45]/20 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     {durationRanges.map(range => (
                       <option key={range.label} value={range.label}>{range.label}</option>
@@ -401,7 +382,7 @@ function ServicesPageContent() {
                 setSearchTerm('');
                 setCurrentPage(1);
               }}
-              className="text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors"
+              className="text-[#464C45] dark:text-[#5a6259] hover:text-[#3a4039] dark:hover:text-[#464C45] transition-colors"
             >
               Clear all filters
             </button>
@@ -424,131 +405,116 @@ function ServicesPageContent() {
                 setSearchTerm('');
                 setCurrentPage(1);
               }}
-              className="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all"
+              className="bg-[#464C45] hover:bg-[#3a4039] dark:bg-[#464C45] dark:hover:bg-[#3a4039] text-white px-6 py-3 rounded-lg transition-all"
             >
               Show All Services
             </button>
           </div>
         ) : (
-          <div className={`grid gap-6 ${
-            viewMode === 'grid' 
-              ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
-              : 'grid-cols-1'
-          }`}>
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
             {paginatedServices.map(([serviceId, service]) => (
               <div
                 key={serviceId}
-                className={`bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden ${
-                  viewMode === 'list' ? 'flex items-center p-8' : 'p-0'
-                }`}
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-col h-full"
               >
-                {viewMode === 'grid' ? (
-                  <>
-                    {/* Image Placeholder */}
-                    <div className="h-48 bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900/20 dark:to-pink-900/20 flex items-center justify-center relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 to-pink-500/10"></div>
-                      <div className="text-center z-10">
-                        <div className="w-16 h-16 bg-rose-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
-                          <svg className="w-8 h-8 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                          </svg>
-                        </div>
-                        <p className="text-xs text-rose-600 dark:text-rose-400 font-medium">Service Image</p>
-                      </div>
+                {/* Price Header */}
+                <div className="bg-[#f5f1e9] dark:bg-gray-800 px-4 py-3 border-b border-[#ddd5c3]/60 dark:border-gray-700 relative rounded-t-xl">
+                  {/* Featured Badge */}
+                  {service.is_featured && (
+                    <div className="absolute top-2 left-2">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#464C45] text-white text-[10px] font-bold rounded-full">
+                        <CheckCircle className="w-3 h-3" />
+                        FEATURED
+                      </span>
                     </div>
-                    
-                    {/* Content */}
-                    <div className="p-6">
-                      <div className="flex items-start justify-between mb-3">
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{service.name}</h3>
-                        <span className="bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 px-3 py-1 rounded-full text-xs font-medium flex-shrink-0 ml-3">
-                          {service.category}
-                        </span>
-                      </div>
-                      <p className="text-gray-600 dark:text-gray-400 mb-4 leading-relaxed text-sm line-clamp-2">
-                        {service.description}
-                      </p>
-                      <div className="flex items-center justify-between mb-6">
-                        <span className="flex items-center gap-1 text-sm text-gray-500">
-                          <Clock className="w-4 h-4" />
-                          {service.duration} min
-                        </span>
-                        <span className="text-2xl font-bold text-rose-600 dark:text-rose-400">
-                          £{service.price}
-                        </span>
-                      </div>
-                      
-                      {/* Buttons */}
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => setSelectedService(serviceId)}
-                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border border-blue-500 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors font-medium text-sm"
-                        >
-                          <Info className="w-4 h-4" />
-                          Details
-                        </button>
-                        <Link
-                          href={`/book?service=${serviceId}`}
-                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all font-medium text-sm shadow-md hover:shadow-lg"
-                        >
-                          <Plus className="w-4 h-4" />
-                          Book
-                        </Link>
-                      </div>
+                  )}
+                  
+                  {/* Duration Badge - Top Right */}
+                  <div className="absolute top-2 right-2">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-[#ddd5c3]/60 dark:border-gray-700/60 rounded-full text-[10px] font-semibold text-[#464C45] dark:text-gray-200">
+                      <Clock className="w-3 h-3" />
+                      {service.duration} min
+                    </span>
+                  </div>
+                  
+                  {/* Price - Centered */}
+                  <div className="text-center pt-6 pb-2">
+                    <div className="text-3xl font-bold text-[#464C45] dark:text-[#5a6259]">
+                      £{service.price}
                     </div>
-                  </>
-                ) : (
-                  <>
-                    {/* List View with Image */}
-                    <div className="w-32 h-24 bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900/20 dark:to-pink-900/20 rounded-lg flex items-center justify-center mr-6 flex-shrink-0">
-                      <div className="text-center">
-                        <div className="w-8 h-8 bg-rose-500/20 rounded-full flex items-center justify-center mx-auto mb-1">
-                          <svg className="w-4 h-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                          </svg>
-                        </div>
-                        <p className="text-xs text-rose-600 dark:text-rose-400">Image</p>
+                  </div>
+                </div>
+                
+                {/* Content */}
+                <div className="p-4 flex flex-col flex-1">
+                  {/* Category Badge */}
+                  <div className="mb-2">
+                    <span className="inline-flex items-center px-2.5 py-0.5 bg-[#464C45] dark:bg-[#464C45] text-white rounded-full text-xs font-semibold">
+                      {service.category}
+                    </span>
+                  </div>
+                  
+                  {/* Service Name */}
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-tight mb-2">
+                    {service.name}
+                  </h3>
+                  
+                  {/* Description */}
+                  {service.description && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 leading-relaxed line-clamp-2">
+                      {service.description}
+                    </p>
+                  )}
+                  
+                  {/* Service Details */}
+                  <div className="space-y-1.5 mb-3 text-xs text-gray-500 dark:text-gray-400">
+                    {service.requires_consultation && (
+                      <div className="flex items-center gap-1.5">
+                        <CheckCircle className="w-3.5 h-3.5 text-[#464C45]" />
+                        <span>Consultation Required</span>
                       </div>
-                    </div>
-                    
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-3">
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">{service.name}</h3>
-                        <span className="bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 px-3 py-1 rounded-full text-xs font-medium flex-shrink-0 ml-4">
-                          {service.category}
-                        </span>
+                    )}
+                    {service.downtime_days > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                        <span>Downtime: {service.downtime_days} day{service.downtime_days !== 1 ? 's' : ''}</span>
                       </div>
-                      <p className="text-gray-600 dark:text-gray-400 mb-3 leading-relaxed">
-                        {service.description}
-                      </p>
-                      <div className="flex items-center gap-6 text-sm text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          {service.duration} minutes
-                        </span>
-                        <span className="text-xl font-bold text-rose-600 dark:text-rose-400">
-                          £{service.price}
-                        </span>
+                    )}
+                    {service.results_duration_weeks && (
+                      <div className="flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <span>Results: {service.results_duration_weeks} week{service.results_duration_weeks !== 1 ? 's' : ''}</span>
                       </div>
-                    </div>
-                    <div className="flex gap-2 ml-6 flex-shrink-0">
+                    )}
+                  </div>
+                  
+                  {/* Spacer to push buttons to bottom */}
+                  <div className="flex-1"></div>
+                  
+                  {/* Buttons - Fixed at bottom */}
+                  <div className="pt-3 border-t border-[#ddd5c3]/60 dark:border-gray-700">
+                    <div className="flex gap-2">
                       <button
                         onClick={() => setSelectedService(serviceId)}
-                        className="flex items-center justify-center gap-2 px-4 py-2.5 border border-blue-500 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors font-medium text-sm"
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border-2 border-[#464C45] text-[#464C45] dark:border-[#5a6259] dark:text-[#5a6259] rounded-lg hover:bg-[#f5f1e9] dark:hover:bg-gray-700/50 transition-colors font-medium text-xs"
                       >
-                        <Info className="w-4 h-4" />
+                        <Info className="w-3.5 h-3.5" />
                         Details
                       </button>
                       <Link
                         href={`/book?service=${serviceId}`}
-                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all font-medium text-sm shadow-md hover:shadow-lg"
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-[#464C45] hover:bg-[#3a4039] dark:bg-[#464C45] dark:hover:bg-[#3a4039] text-white rounded-lg transition-all font-medium text-xs shadow-sm hover:shadow-md"
                       >
-                        <Plus className="w-4 h-4" />
+                        <Plus className="w-3.5 h-3.5" />
                         Book
                       </Link>
                     </div>
-                  </>
-                )}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -560,7 +526,7 @@ function ServicesPageContent() {
             <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-rose-500 hover:text-rose-600 dark:hover:text-rose-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-[#464C45] hover:text-[#464C45] dark:hover:text-[#5a6259] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Previous
             </button>
@@ -571,8 +537,8 @@ function ServicesPageContent() {
                 onClick={() => setCurrentPage(page)}
                 className={`px-4 py-2 rounded-lg transition-colors ${
                   currentPage === page
-                    ? 'bg-rose-500 text-white'
-                    : 'border border-gray-300 dark:border-gray-600 hover:border-rose-500 hover:text-rose-600 dark:hover:text-rose-400'
+                    ? 'bg-[#464C45] text-white'
+                    : 'border border-gray-300 dark:border-gray-600 hover:border-[#464C45] hover:text-[#464C45] dark:hover:text-[#5a6259]'
                 }`}
               >
                 {page}
@@ -582,7 +548,7 @@ function ServicesPageContent() {
             <button
               onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-rose-500 hover:text-rose-600 dark:hover:text-rose-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-[#464C45] hover:text-[#464C45] dark:hover:text-[#5a6259] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next
             </button>
@@ -599,9 +565,9 @@ function ServicesPageContent() {
 export default function ServicesPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-[#f5f1e9] dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#464C45] mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Loading...</p>
         </div>
       </div>

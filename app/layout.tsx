@@ -116,8 +116,8 @@ export async function generateMetadata(): Promise<Metadata> {
     other: {
       "geo.region": "GB-LND",
       "geo.placename": "London",
-      "geo.position": "51.5074;-0.1278",
-      "ICBM": "51.5074, -0.1278",
+      "geo.position": "51.4708;-0.1389",
+      "ICBM": "51.4708, -0.1389",
       "DC.title": `${companyName} - Premium Aesthetic Clinic London`,
       "DC.description": `Premier aesthetic treatments in South West London with ${responseTimeNormalized}-minute response time.`,
       "DC.subject": "Aesthetic Clinic London, Aesthetic Treatments, Facial Aesthetics",
@@ -198,16 +198,16 @@ export default async function RootLayout({
     },
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": adminProfile?.company_address?.split(',')[1]?.trim() || "85 Hassocks Road",
+      "streetAddress": adminProfile?.company_address?.split(',')[0]?.trim() || "809 Wandsworth Road",
       "addressLocality": settingsMap.businessCity || "London",
       "addressRegion": "South West London",
-      "postalCode": settingsMap.businessPostcode || "SW16 5HA",
+      "postalCode": settingsMap.businessPostcode || "SW8 3JH",
       "addressCountry": "GB"
     },
     "geo": {
       "@type": "GeoCoordinates",
-      "latitude": 51.5074,
-      "longitude": -0.1278
+      "latitude": 51.4708,
+      "longitude": -0.1389
     },
     "areaServed": areas?.map(area => ({
       "@type": "City",

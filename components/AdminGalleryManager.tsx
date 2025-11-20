@@ -2,10 +2,9 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { useGallery } from "@/hooks/useGallery";
-import { useGallerySections } from "@/hooks/useGallerySections";
 import { useAreas } from "@/hooks/useAreas";
 import { useServices } from "@/hooks/useServices";
-import { GalleryItem, GallerySection } from "@/types";
+import { GalleryItem } from "@/types";
 import { useToast, ToastMessages } from "@/components/Toast";
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { ConfirmationModal } from "@/components/ConfirmationModal";
@@ -13,11 +12,9 @@ import { getSupportedFormatsText, processImageFile, getImageDimensions, compress
 import Pagination from "@/components/Pagination";
 
 export function AdminGalleryManager({ 
-  triggerModal, 
-  defaultTab = "items" 
+  triggerModal
 }: { 
   triggerModal?: boolean;
-  defaultTab?: "items" | "sections";
 }) {
   const {
     galleryItems,
@@ -27,49 +24,29 @@ export function AdminGalleryManager({
     updateGalleryItem,
     deleteGalleryItem,
   } = useGallery();
-  const {
-    gallerySections,
-    isLoading: sectionsLoading,
-    error: sectionsError,
-    addGallerySection,
-    updateGallerySection,
-    deleteGallerySection,
-  } = useGallerySections();
   const { areas, loading: areasLoading } = useAreas();
   const { services, isLoading: servicesLoading } = useServices();
   const { showSuccess, showError } = useToast();
   const { confirm, modalProps } = useConfirmation();
 
-  const [activeTab, setActiveTab] = useState<"items" | "sections">(defaultTab);
   const [editingItem, setEditingItem] = useState<GalleryItem | null>(null);
-  const [editingSection, setEditingSection] = useState<GallerySection | null>(
-    null
-  );
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showAddSectionForm, setShowAddSectionForm] = useState(false);
 
   // Handle trigger from parent component
   useEffect(() => {
     if (triggerModal) {
-      // Set the active tab based on the defaultTab prop
-      setActiveTab(defaultTab);
-      if (defaultTab === "items") {
-        // Clear editing state and reset form
-        setEditingItem(null);
-        setEditingSection(null);
-        setFormData({ ...defaultItem });
-        setBeforeImage(null);
-        setAfterImage(null);
-        setBeforeImagePreview("");
-        setAfterImagePreview("");
-        setImageErrors({});
-        setUseCustomLocation(false);
-        setShowAddForm(true);
-      } else {
-        setShowAddSectionForm(true);
-      }
+      // Clear editing state and reset form
+      setEditingItem(null);
+      setFormData({ ...defaultItem });
+      setBeforeImage(null);
+      setAfterImage(null);
+      setBeforeImagePreview("");
+      setAfterImagePreview("");
+      setImageErrors({});
+      setUseCustomLocation(false);
+      setShowAddForm(true);
     }
-  }, [triggerModal, defaultTab]);
+  }, [triggerModal]);
 
   // Image file states
   const [beforeImage, setBeforeImage] = useState<File | null>(null);
@@ -113,23 +90,13 @@ export function AdminGalleryManager({
     project_type: "",
     location: "",
     completion_date: "",
-    section_id: undefined as string | undefined,
     service_id: undefined as string | undefined,
     category_id: undefined as string | undefined,
     order: 0,
     is_featured: false,
   };
 
-  const defaultSection = {
-    title: "",
-    description: "",
-    color: "#3B82F6",
-    order: 0,
-    is_active: true,
-  };
-
   const [formData, setFormData] = useState(defaultItem);
-  const [sectionFormData, setSectionFormData] = useState(defaultSection);
 
   // Group categories by main tab
   const categoriesByMainTab = useMemo(() => {
@@ -467,7 +434,6 @@ export function AdminGalleryManager({
   const handleAdd = () => {
     // Clear editing state
     setEditingItem(null);
-    setEditingSection(null);
     
     // Reset form data to defaults
     setFormData({ ...defaultItem });
@@ -518,7 +484,6 @@ export function AdminGalleryManager({
       project_type: item.project_type || "",
       location: item.location || "",
       completion_date: item.completion_date || "",
-      section_id: item.section_id,
       service_id: item.service_id,
       category_id: item.category_id,
       order: item.order,
@@ -562,64 +527,6 @@ export function AdminGalleryManager({
     }
   };
 
-  const handleSaveSection = async () => {
-    try {
-      if (editingSection) {
-        await updateGallerySection(Number(editingSection.id), sectionFormData);
-        showSuccess(
-          "Section updated successfully!",
-          "The gallery section has been updated."
-        );
-        setEditingSection(null);
-      } else {
-        await addGallerySection(sectionFormData);
-        showSuccess(
-          "Section added successfully!",
-          "A new gallery section has been created."
-        );
-        setShowAddSectionForm(false);
-      }
-      setSectionFormData({ ...defaultSection });
-    } catch (err) {
-      showError("Error", "Failed to save gallery section. Please try again.");
-    }
-  };
-
-  const handleEditSection = (section: GallerySection) => {
-    setEditingSection(section);
-    setSectionFormData({
-      title: section.title,
-      description: section.description || "",
-      color: section.color,
-      order: section.order,
-      is_active: section.is_active,
-    });
-    setShowAddSectionForm(true);
-  };
-
-  const handleDeleteSection = async (id: number) => {
-    try {
-      await confirm(
-        {
-          title: "Delete Gallery Section",
-          message:
-            "Are you sure you want to delete this gallery section? All items in this section will be moved to 'No Section'.",
-          confirmText: "Delete",
-          cancelText: "Cancel",
-          isDestructive: true,
-        },
-        async () => {
-          await deleteGallerySection(id);
-          showSuccess(
-            "Section deleted successfully!",
-            "The gallery section has been removed."
-          );
-        }
-      );
-    } catch (err) {
-      showError("Error", "Failed to delete gallery section. Please try again.");
-    }
-  };
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -627,7 +534,7 @@ export function AdminGalleryManager({
   const totalPages = Math.ceil(galleryItems.length / itemsPerPage);
   const paginatedItems = galleryItems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  if (loading || sectionsLoading) {
+  if (loading) {
     return (
       <div className="space-y-6">
         <div className="text-center py-8">Loading...</div>
@@ -636,70 +543,51 @@ export function AdminGalleryManager({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-8 lg:p-10">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        {/* Tabs */}
-        <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-          <button
-            onClick={() => setActiveTab("items")}
-            className={`px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors ${
-              activeTab === "items"
-                ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
-                : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-            }`}
-          >
-            Gallery Items
-          </button>
-          <button
-            onClick={() => setActiveTab("sections")}
-            className={`px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors ${
-              activeTab === "sections"
-                ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
-                : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-            }`}
-          >
-            Sections
-          </button>
-        </div>
-
-        {/* Add New Transformation Button */}
-        {activeTab === "items" && (
+      <div className="mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              Gallery
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Manage your before & after transformations
+            </p>
+          </div>
           <button
             onClick={handleAdd}
-            className="px-6 py-2.5 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 hover:from-rose-600 hover:via-pink-600 hover:to-purple-700 text-white rounded-lg transition-all shadow-lg hover:shadow-xl flex items-center gap-2 text-sm font-semibold"
+            className="px-6 py-3 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 hover:from-rose-600 hover:via-pink-600 hover:to-purple-700 text-white rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center gap-2 font-semibold whitespace-nowrap"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             Add Transformation
           </button>
-        )}
+        </div>
       </div>
 
-      {/* Gallery Items Tab */}
-      {activeTab === "items" && (
-        <>
+      {/* Gallery Items */}
+      <>
           {/* Existing Gallery Items */}
           {/* Gallery Items List */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
             {paginatedItems.map((item) => (
               <div
                 key={item.id}
-                className="relative bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 p-6 flex flex-col group overflow-hidden"
-                style={{ minHeight: 280 }}
+                className="relative bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-5 flex flex-col group overflow-hidden hover:border-rose-300 dark:hover:border-rose-700"
               >
                 {/* Floating Action Buttons */}
-                <div className="absolute top-4 right-4 flex gap-2 z-10">
+                <div className="absolute top-3 right-3 flex gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
-                    className="p-2 bg-blue-500/90 hover:bg-blue-600 text-white rounded-full shadow-lg transition-all duration-200 flex items-center justify-center group-hover:scale-110"
+                    className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center hover:scale-110"
                     title="Edit"
                     onClick={() => handleEdit(item)}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                   </button>
                   <button
-                    className="p-2 bg-red-500/90 hover:bg-red-600 text-white rounded-full shadow-lg transition-all duration-200 flex items-center justify-center group-hover:scale-110"
+                    className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center hover:scale-110"
                     title="Delete"
                     onClick={async () => {
                       await confirm(
@@ -720,54 +608,52 @@ export function AdminGalleryManager({
                   </button>
                 </div>
                 {/* Title */}
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 truncate pr-12">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 truncate pr-16">
                   {item.title || <span className="italic text-gray-400">(No title)</span>}
                 </h3>
-                {/* Description */}
-                {item.description && (
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">{item.description}</p>
-                )}
-                {/* Before/After Images (modern cards) */}
-                <div className="flex gap-4 mb-4">
+                
+                {/* Before/After Images */}
+                <div className="flex gap-3 mb-4">
                   {/* Before Card */}
-                  <div className="flex-1 group relative bg-gradient-to-br from-gray-100 via-white to-blue-50 dark:from-gray-800 dark:via-gray-900 dark:to-blue-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
-                    <div className="absolute top-3 left-3 flex items-center gap-1 bg-red-500/90 text-white px-3 py-1 rounded-full text-xs font-semibold shadow">
-                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                  <div className="flex-1 relative bg-gray-100 dark:bg-gray-700 rounded-xl border-2 border-red-200 dark:border-red-800 overflow-hidden group/image">
+                    <div className="absolute top-2 left-2 z-10 bg-red-500 text-white px-2.5 py-1 rounded-lg text-xs font-bold shadow-lg">
                       Before
                     </div>
                     {item.before_image_url ? (
                       <img
                         src={item.before_image_url}
                         alt="Before"
-                        className="w-full h-32 object-cover rounded-2xl group-hover:scale-105 transition-transform duration-300"
-                        style={{ minHeight: 96, background: 'linear-gradient(135deg, #f3f4f6 0%, #e0e7ef 100%)' }}
+                        className="w-full h-36 object-cover group-hover/image:scale-105 transition-transform duration-300"
                       />
                     ) : (
-                      <div className="w-full h-32 flex items-center justify-center text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-2xl">
+                      <div className="w-full h-36 flex items-center justify-center text-gray-400">
                         <span className="text-xs">No image</span>
                       </div>
                     )}
                   </div>
                   {/* After Card */}
-                  <div className="flex-1 group relative bg-gradient-to-br from-gray-100 via-white to-green-50 dark:from-gray-800 dark:via-gray-900 dark:to-green-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
-                    <div className="absolute top-3 left-3 flex items-center gap-1 bg-green-500/90 text-white px-3 py-1 rounded-full text-xs font-semibold shadow">
-                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                  <div className="flex-1 relative bg-gray-100 dark:bg-gray-700 rounded-xl border-2 border-green-200 dark:border-green-800 overflow-hidden group/image">
+                    <div className="absolute top-2 left-2 z-10 bg-green-500 text-white px-2.5 py-1 rounded-lg text-xs font-bold shadow-lg">
                       After
                     </div>
                     {item.after_image_url ? (
                       <img
                         src={item.after_image_url}
                         alt="After"
-                        className="w-full h-32 object-cover rounded-2xl group-hover:scale-105 transition-transform duration-300"
-                        style={{ minHeight: 96, background: 'linear-gradient(135deg, #f3f4f6 0%, #e0e7ef 100%)' }}
+                        className="w-full h-36 object-cover group-hover/image:scale-105 transition-transform duration-300"
                       />
                     ) : (
-                      <div className="w-full h-32 flex items-center justify-center text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-2xl">
+                      <div className="w-full h-36 flex items-center justify-center text-gray-400">
                         <span className="text-xs">No image</span>
                       </div>
                     )}
                   </div>
                 </div>
+                
+                {/* Description */}
+                {item.description && (
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">{item.description}</p>
+                )}
                 {/* Service & Category Badges */}
                 <div className="flex flex-wrap gap-2 mb-2">
                   {item.category && (
@@ -932,31 +818,6 @@ export function AdminGalleryManager({
                     </p>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Gallery Section
-                    </label>
-                    <select
-                      value={formData.section_id || ""}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          section_id: e.target.value || undefined,
-                        }))
-                      }
-                      className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all"
-                    >
-                      <option value="">General Gallery</option>
-                      {gallerySections.map((section) => (
-                        <option key={section.id} value={section.id}>
-                          {section.title}
-                        </option>
-                      ))}
-                    </select>
-                    <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                      Optional: Organize into a specific gallery section
-                    </p>
-                  </div>
                 </div>
 
                 {/* Right Column - Description & Media */}
@@ -1449,189 +1310,7 @@ export function AdminGalleryManager({
               </div>
             </div>
           )}
-        </>
-      )}
-
-      {/* Gallery Sections Tab */}
-      {activeTab === "sections" && (
-        <>
-          {/* Existing Gallery Sections */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {gallerySections.map((section) => (
-              <div
-                key={section.id}
-                className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h4 className="text-lg font-bold text-gray-900 dark:text-white">
-                      {section.title}
-                    </h4>
-                    {section.description && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {section.description}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-2 mt-2">
-                      <div
-                        className="w-4 h-4 rounded-full"
-                        style={{ backgroundColor: section.color }}
-                      ></div>
-                      <span className="text-xs text-gray-500">
-                        Order: {section.order}
-                      </span>
-                      {!section.is_active && (
-                        <span className="inline-block px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
-                          Inactive
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleEditSection(section)}
-                      className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteSection(Number(section.id))}
-                      className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Add/Edit Section Form */}
-          {showAddSectionForm && (
-            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-              <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                {editingSection
-                  ? "Edit Gallery Section"
-                  : "Add New Gallery Section"}
-              </h4>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Section Title *
-                  </label>
-                  <input
-                    type="text"
-                    value={sectionFormData.title}
-                    onChange={(e) =>
-                      setSectionFormData((prev) => ({
-                        ...prev,
-                        title: e.target.value,
-                      }))
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g., Bathroom Projects"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Color
-                  </label>
-                  <input
-                    type="color"
-                    value={sectionFormData.color}
-                    onChange={(e) =>
-                      setSectionFormData((prev) => ({
-                        ...prev,
-                        color: e.target.value,
-                      }))
-                    }
-                    className="w-full h-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Order
-                  </label>
-                  <input
-                    type="number"
-                    value={sectionFormData.order}
-                    onChange={(e) =>
-                      setSectionFormData((prev) => ({
-                        ...prev,
-                        order: parseInt(e.target.value) || 0,
-                      }))
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500"
-                    min="0"
-                  />
-                </div>
-
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="section_is_active"
-                    checked={sectionFormData.is_active}
-                    onChange={(e) =>
-                      setSectionFormData((prev) => ({
-                        ...prev,
-                        is_active: e.target.checked,
-                      }))
-                    }
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <label
-                    htmlFor="section_is_active"
-                    className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
-                  >
-                    Active
-                  </label>
-                </div>
-              </div>
-
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Description
-                </label>
-                <textarea
-                  value={sectionFormData.description}
-                  onChange={(e) =>
-                    setSectionFormData((prev) => ({
-                      ...prev,
-                      description: e.target.value,
-                    }))
-                  }
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="Describe this gallery section..."
-                />
-              </div>
-
-              {/* Form Actions */}
-              <div className="flex gap-3 mt-6">
-                <button
-                  onClick={handleSaveSection}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  {editingSection ? "Update Section" : "Add Section"}
-                </button>
-                <button
-                  onClick={() => {
-                    setShowAddSectionForm(false);
-                    setEditingSection(null);
-                    setSectionFormData({ ...defaultSection });
-                  }}
-                  className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
-        </>
-      )}
+      </>
 
       {/* Confirmation Modal */}
       <ConfirmationModal {...modalProps} />

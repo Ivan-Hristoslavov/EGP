@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useFAQ } from "@/hooks/useFAQ";
+import { aestheticsColors } from "@/config/colors";
+import { badgeBackgroundClass } from "@/config/badge-styles";
+import { HelpCircle } from "lucide-react";
 
 export function FAQSection() {
   const { faqItems, isLoading, error } = useFAQ();
@@ -15,7 +18,7 @@ export function FAQSection() {
 
   if (isLoading) {
     return (
-      <section className="py-20 bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-500" id="faq">
+      <section className="py-20 bg-[#f5f1e9] dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-500" id="faq">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="text-gray-600 dark:text-gray-300">Loading FAQ...</div>
@@ -27,9 +30,13 @@ export function FAQSection() {
 
   if (error || faqItems.length === 0) {
     return (
-      <section className="py-20 bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-500" id="faq">
+      <section className="py-20 bg-[#f5f1e9] dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-500" id="faq">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
+            <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-sm sm:text-base font-semibold mb-3 sm:mb-4`}>
+              <HelpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span>Questions & Answers</span>
+            </div>
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
               Frequently Asked Questions
             </h2>
@@ -43,9 +50,13 @@ export function FAQSection() {
   }
 
   return (
-    <section className="py-20 bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-500" id="faq">
+    <section className="py-20 bg-[#f5f1e9] dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-500" id="faq">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
+          <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-sm sm:text-base font-semibold mb-3 sm:mb-4`}>
+            <HelpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span>Questions & Answers</span>
+          </div>
           <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Frequently Asked Questions
           </h2>
@@ -68,9 +79,10 @@ export function FAQSection() {
                   {item.question}
                 </h3>
                 <div
-                  className={`flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center transition-transform duration-300 ${
+                  className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-transform duration-300 ${
                     openItems.includes(index) ? "rotate-180" : ""
                   }`}
+                  style={{ backgroundColor: aestheticsColors.green.DEFAULT }}
                 >
                   <svg
                     className="w-4 h-4 text-white"

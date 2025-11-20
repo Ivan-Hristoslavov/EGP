@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { 
   MapPin, 
@@ -13,11 +14,75 @@ import {
 } from "lucide-react";
 import { siteConfig } from "@/config/site";
 
+type WorkingHoursData = {
+  [key: string]: {
+    isOpen: boolean;
+    open: string | null;
+    close: string | null;
+  };
+};
+
 export default function FooterAesthetics() {
   const currentYear = new Date().getFullYear();
+  const [workingHours, setWorkingHours] = useState<WorkingHoursData | null>(null);
+  const [loadingHours, setLoadingHours] = useState(true);
+
+  useEffect(() => {
+    // Fetch working hours from public API
+    const fetchWorkingHours = async () => {
+      try {
+        const response = await fetch('/api/working-hours');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.normalized) {
+            setWorkingHours(data.normalized);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching working hours:', error);
+      } finally {
+        setLoadingHours(false);
+      }
+    };
+
+    fetchWorkingHours();
+  }, []);
+
+  // Helper function to format hours
+  const formatHours = (day: string) => {
+    if (!workingHours || !workingHours[day]) {
+      // Fallback to siteConfig
+      const dayConfig = siteConfig.businessHours[day as keyof typeof siteConfig.businessHours];
+      if (dayConfig && dayConfig.isOpen) {
+        return `${dayConfig.open} - ${dayConfig.close}`;
+      }
+      return "Closed";
+    }
+
+    const dayHours = workingHours[day];
+    if (dayHours.isOpen && dayHours.open && dayHours.close) {
+      return `${dayHours.open} - ${dayHours.close}`;
+    }
+    return "Closed";
+  };
+
+  // Helper to check if day is open
+  const isDayOpen = (day: string) => {
+    if (!workingHours || !workingHours[day]) {
+      const dayConfig = siteConfig.businessHours[day as keyof typeof siteConfig.businessHours];
+      return dayConfig?.isOpen || false;
+    }
+    return workingHours[day].isOpen;
+  };
+
+  // Get Monday-Friday hours (assuming they're the same)
+  const mondayFridayHours = formatHours('monday');
+  const saturdayHours = formatHours('saturday');
+  const sundayHours = formatHours('sunday');
+  const isSundayOpen = isDayOpen('sunday');
 
   return (
-    <footer className="relative bg-[#ddd5c3] dark:bg-gray-900 text-gray-900 dark:text-gray-300">
+    <footer className="relative bg-[#ddd5c3] dark:bg-gray-900 text-gray-900 dark:text-gray-300 border-t border-gray-200 dark:border-gray-700">
       <div className="relative">
         {/* Main Footer Content */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
@@ -170,24 +235,30 @@ export default function FooterAesthetics() {
                   <h4 className="font-semibold text-gray-900 dark:text-white text-sm">Opening Hours</h4>
                 </div>
                 <ul className="space-y-1.5 text-xs text-gray-700 dark:text-gray-400">
-                  <li className="flex justify-between">
-                    <span>Monday - Friday:</span>
-                    <span className="text-gray-900 dark:text-white font-medium">
-                      {siteConfig.businessHours.monday.open} - {siteConfig.businessHours.monday.close}
-                    </span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span>Saturday:</span>
-                    <span className="text-gray-900 dark:text-white font-medium">
-                      {siteConfig.businessHours.saturday.open} - {siteConfig.businessHours.saturday.close}
-                    </span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span>Sunday:</span>
-                    <span className="text-gray-700 dark:text-gray-400 font-medium">
-                      {siteConfig.businessHours.sunday.isOpen ? `${siteConfig.businessHours.sunday.open} - ${siteConfig.businessHours.sunday.close}` : "Closed"}
-                    </span>
-                  </li>
+                  {loadingHours ? (
+                    <li className="text-gray-500 dark:text-gray-500">Loading hours...</li>
+                  ) : (
+                    <>
+                      <li className="flex justify-between">
+                        <span>Monday - Friday:</span>
+                        <span className="text-gray-900 dark:text-white font-medium">
+                          {mondayFridayHours}
+                        </span>
+                      </li>
+                      <li className="flex justify-between">
+                        <span>Saturday:</span>
+                        <span className="text-gray-900 dark:text-white font-medium">
+                          {saturdayHours}
+                        </span>
+                      </li>
+                      <li className="flex justify-between">
+                        <span>Sunday:</span>
+                        <span className="text-gray-700 dark:text-gray-400 font-medium">
+                          {sundayHours}
+                        </span>
+                      </li>
+                    </>
+                  )}
                 </ul>
               </div>
             </div>
@@ -226,6 +297,23 @@ export default function FooterAesthetics() {
                   >
                     <Youtube className="w-6 h-6 text-gray-700 dark:text-gray-300" />
                   </a>
+                  {siteConfig.social.tiktok && (
+                    <a
+                      href={siteConfig.social.tiktok}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm hover:shadow"
+                      aria-label="TikTok"
+                    >
+                      <svg
+                        className="w-6 h-6 text-gray-700 dark:text-gray-300"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+                      </svg>
+                    </a>
+                  )}
                 </div>
               </div>
 

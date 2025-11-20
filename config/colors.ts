@@ -121,6 +121,14 @@ export const aestheticsColors = {
     dark: "#059669",
   },
 
+  // Green - Primary button/badge color (change this value to update all green buttons/badges)
+  green: {
+    DEFAULT: "#464C45",  // Main green color for buttons, badges, and accents
+    light: "#5a6259",   // Lighter variant
+    dark: "#3a4039",    // Darker variant
+    hover: "#3a4039",   // Hover state
+  },
+
   // Status Colors
   status: {
     error: "#ef4444",
