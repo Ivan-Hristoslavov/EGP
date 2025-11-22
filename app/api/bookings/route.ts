@@ -136,7 +136,9 @@ export async function POST(request: NextRequest) {
       time,
       amount,
       address,
-      notes
+      notes,
+      team_member_id,
+      service_duration_minutes
     } = body;
 
     // Validate required fields
@@ -189,6 +191,8 @@ export async function POST(request: NextRequest) {
           amount: parseFloat(amount),
           address: address || null,
           notes: notes || null,
+          team_member_id: team_member_id || null,
+          service_duration_minutes: service_duration_minutes || null,
           status: "pending",
           payment_status: "pending",
         },

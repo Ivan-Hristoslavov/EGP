@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Phone, Play, Calendar, MessageCircle, X, Menu, Minimize2 } from "lucide-react";
+import { Phone, Play, Calendar, MessageCircle, X, Menu, Minimize2, Instagram } from "lucide-react";
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
 
@@ -54,6 +54,15 @@ export default function FloatingContactButtons() {
       href: siteConfig.social.youtube,
       gradient: "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700",
       icon: Play,
+      external: true,
+    },
+    {
+      id: "instagram",
+      labelDesktop: "Instagram",
+      labelMobile: "Instagram",
+      href: siteConfig.social.instagram,
+      gradient: "bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700",
+      icon: Instagram,
       external: true,
     },
   ];

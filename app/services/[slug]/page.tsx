@@ -356,7 +356,7 @@ export default async function ServicePage({ params }: PageProps) {
     {
       step: "2",
       title: "Treatment Planning",
-      description: "Customized plan tailored to your individual requirements"
+      description: "Customised plan tailored to your individual requirements"
     },
     {
       step: "3",

@@ -2,6 +2,7 @@
 
 import { useGallery } from "@/hooks/useGallery";
 import BeforeAfterSlideLine from "./BeforeAfterSlideLine";
+import { badgeBackgroundClass } from "@/config/badge-styles";
 
 export default function SectionBeforeAfter() {
   const { galleryItems, loading, error } = useGallery();
@@ -30,7 +31,7 @@ export default function SectionBeforeAfter() {
   // If no gallery items, show placeholder
   if (loading) {
     return (
-      <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      <section className="py-12 sm:py-16 md:py-20 bg-[#f5f1e9] dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="animate-pulse">
@@ -46,10 +47,10 @@ export default function SectionBeforeAfter() {
 
   if (error || beforeAfterItems.length === 0) {
     return (
-      <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      <section className="py-12 sm:py-16 md:py-20 bg-[#f5f1e9] dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <div className="inline-block px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-100 dark:bg-blue-900/30 rounded-full text-blue-600 dark:text-blue-400 text-sm sm:text-base font-semibold mb-3 sm:mb-4">
+            <div className={`inline-block px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-sm sm:text-base font-semibold mb-3 sm:mb-4 text-[#6b5f4b] dark:text-gray-200`}>
               Real Results
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 px-4">

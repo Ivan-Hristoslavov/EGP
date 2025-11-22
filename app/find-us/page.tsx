@@ -4,92 +4,87 @@ import { useState } from 'react';
 import { siteConfig } from "@/config/site";
 import { MapPin, Phone, Mail, Clock, Navigation, Car, Train, Bus, ArrowLeft, ExternalLink } from "lucide-react";
 import Link from 'next/link';
+import { useSiteData } from "@/contexts/SiteDataContext";
 
 export default function FindUsPage() {
   const [activeTab, setActiveTab] = useState<'location' | 'contact' | 'hours'>('location');
+  const { contactInfo, openingHours, findUsData, loading } = useSiteData();
 
-  const contactInfo = {
-    address: "123 Harley Street, London W1G 6BA, United Kingdom",
+  // Use default values if data is still loading or not available
+  const displayContactInfo = contactInfo || {
+    address: "809 Wandsworth Road, SW8 3JH, London, UK",
     phone: "+44 20 7123 4567",
     email: "info@egpaesthetics.com",
-    whatsapp: "+44 20 7123 4567"
+    whatsapp: "+44 20 7123 4567",
+    googleMapsAddress: "809 Wandsworth Road, SW8 3JH, London, UK"
   };
 
-  const openingHours = {
-    monday: { day: "Monday", hours: "9:00 AM - 7:00 PM", isOpen: true },
-    tuesday: { day: "Tuesday", hours: "9:00 AM - 7:00 PM", isOpen: true },
-    wednesday: { day: "Wednesday", hours: "9:00 AM - 7:00 PM", isOpen: true },
-    thursday: { day: "Thursday", hours: "9:00 AM - 8:00 PM", isOpen: true },
-    friday: { day: "Friday", hours: "9:00 AM - 7:00 PM", isOpen: true },
-    saturday: { day: "Saturday", hours: "10:00 AM - 5:00 PM", isOpen: true },
-    sunday: { day: "Sunday", hours: "Closed", isOpen: false }
+  const displayFindUsData = findUsData || {
+    howToFindUs: "Our clinic is located in the heart of London's medical district, easily accessible by public transport and car.",
+    howToReachUs: "We are conveniently located near major transport links and landmarks.",
+    transportOptions: {},
+    nearbyLandmarks: []
   };
 
-  const transportOptions = [
-    {
+  // Build transport options from database
+  const transportOptions = [];
+  if (displayFindUsData.transportOptions.tube && displayFindUsData.transportOptions.tube.length > 0) {
+    transportOptions.push({
       type: "Tube/Underground",
       icon: <Train className="w-5 h-5" />,
-      details: [
-        "Bond Street Station (Central & Jubilee lines) - 5 min walk",
-        "Oxford Circus Station (Central, Bakerloo & Victoria lines) - 7 min walk",
-        "Regent's Park Station (Bakerloo line) - 10 min walk"
-      ]
-    },
-    {
+      details: displayFindUsData.transportOptions.tube.map(t => 
+        `${t.station} (${t.lines})${t.distance ? ` - ${t.distance}` : ''}`
+      )
+    });
+  }
+  if (displayFindUsData.transportOptions.bus && displayFindUsData.transportOptions.bus.length > 0) {
+    transportOptions.push({
       type: "Bus",
       icon: <Bus className="w-5 h-5" />,
-      details: [
-        "Bus routes 2, 13, 74, 113, 139, 159, 453 - Harley Street stop",
-        "Bus routes 88, 453 - Cavendish Square stop",
-        "Bus routes 2, 13, 74, 139, 159 - Oxford Circus stop"
-      ]
-    },
-    {
+      details: displayFindUsData.transportOptions.bus.map(b => 
+        `Bus routes ${b.route} - ${b.stop}${b.distance ? ` - ${b.distance}` : ''}`
+      )
+    });
+  }
+  if (displayFindUsData.transportOptions.car && displayFindUsData.transportOptions.car.length > 0) {
+    transportOptions.push({
       type: "Car/Parking",
       icon: <Car className="w-5 h-5" />,
-      details: [
-        "Q-Park Oxford Street - 5 min walk",
-        "NCP Car Park Cavendish Square - 3 min walk",
-        "Meter parking available on surrounding streets",
-        "Valet parking service available (advance booking required)"
-      ]
-    },
-    {
+      details: displayFindUsData.transportOptions.car.map(c => 
+        `${c.parking}${c.distance ? ` - ${c.distance}` : ''}${c.notes ? ` (${c.notes})` : ''}`
+      )
+    });
+  }
+  if (displayFindUsData.transportOptions.walking && displayFindUsData.transportOptions.walking.length > 0) {
+    transportOptions.push({
       type: "Walking",
       icon: <Navigation className="w-5 h-5" />,
-      details: [
-        "5 minutes from Oxford Street",
-        "7 minutes from Regent Street",
-        "10 minutes from Bond Street",
-        "Located in the heart of London's medical district"
-      ]
-    }
-  ];
+      details: displayFindUsData.transportOptions.walking.map(w => 
+        `${w.distance} from ${w.from}`
+      )
+    });
+  }
 
-  const nearbyLandmarks = [
-    { name: "Oxford Street", distance: "5 min walk", type: "Shopping" },
-    { name: "Regent Street", distance: "7 min walk", type: "Shopping" },
-    { name: "Bond Street", distance: "5 min walk", type: "Shopping" },
-    { name: "Regent's Park", distance: "10 min walk", type: "Park" },
-    { name: "Marylebone High Street", distance: "8 min walk", type: "Shopping" },
-    { name: "Selfridges", distance: "6 min walk", type: "Department Store" }
-  ];
+  // Use nearby landmarks from database
+  const nearbyLandmarks = displayFindUsData.nearbyLandmarks || [];
+
+
+  const handleDirections = () => {
+    const addressToUse = displayContactInfo.googleMapsAddress || displayContactInfo.address;
+    const encodedAddress = encodeURIComponent(addressToUse);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+  };
 
   const handleCall = () => {
-    window.open(`tel:${contactInfo.phone}`, '_self');
+    window.open(`tel:${displayContactInfo.phone}`, '_self');
   };
 
   const handleEmail = () => {
-    window.open(`mailto:${contactInfo.email}`, '_self');
+    window.open(`mailto:${displayContactInfo.email}`, '_self');
   };
 
   const handleWhatsApp = () => {
-    window.open(`https://wa.me/${contactInfo.whatsapp.replace(/\s/g, '')}`, '_blank');
-  };
-
-  const handleDirections = () => {
-    const encodedAddress = encodeURIComponent(contactInfo.address);
-    window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+    window.open(`https://wa.me/${displayContactInfo.whatsapp.replace(/\s/g, '')}`, '_blank');
   };
 
   return (
@@ -111,7 +106,7 @@ export default function FindUsPage() {
             Find Us
           </h1>
           <p className="text-2xl text-[#6f6652] dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto">
-            Visit our clinic in the heart of London's prestigious Harley Street medical district
+            Visit our clinic in Wandsworth, South West London
           </p>
         </div>
 
@@ -168,7 +163,7 @@ export default function FindUsPage() {
                     Our Location
                   </h2>
                   <p className="text-lg text-[#524a3a] dark:text-gray-300 mb-4 leading-relaxed">
-                    {contactInfo.address}
+                    {displayContactInfo.address}
                   </p>
                   <button
                     onClick={handleDirections}
@@ -182,21 +177,25 @@ export default function FindUsPage() {
               </div>
             </div>
 
-            {/* Map Placeholder */}
+            {/* Interactive Google Map */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
               <h3 className="text-2xl font-bold text-[#3a3428] dark:text-white mb-6">
                 Interactive Map
               </h3>
-              <div className="bg-gradient-to-br from-[#f0e8d8] to-[#ddd5c3] dark:from-[#3a3428] dark:to-[#2a241a] rounded-xl h-96 flex items-center justify-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#9d8c6b]/10 to-[#6f6652]/10"></div>
-                <div className="text-center z-10">
-                  <MapPin className="w-16 h-16 text-[#9d8c6b] dark:text-[#d8c5a7] mx-auto mb-4" />
-                  <h4 className="text-xl font-bold text-[#3a3428] dark:text-white mb-2">
-                    Interactive Map Coming Soon
-                  </h4>
-                  <p className="text-[#6f6652] dark:text-gray-400 mb-4">
-                    We're working on integrating a live map to help you find us easily
-                  </p>
+              <div className="rounded-xl overflow-hidden h-96 shadow-lg border border-[#e1d8c7] dark:border-gray-700">
+                <iframe
+                  src={`https://www.google.com/maps?q=${encodeURIComponent(displayContactInfo.googleMapsAddress || displayContactInfo.address)}&output=embed`}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="w-full h-full"
+                  title={`EGP Aesthetics Location - ${displayContactInfo.googleMapsAddress || displayContactInfo.address}`}
+                />
+              </div>
+              <div className="mt-4 text-center">
                   <button
                     onClick={handleDirections}
                     className="inline-flex items-center gap-2 bg-[#3a3428] text-[#f5f1e9] px-6 py-3 rounded-lg hover:bg-[#2c261c] transition-all font-medium shadow-md hover:shadow-lg"
@@ -206,13 +205,29 @@ export default function FindUsPage() {
                   </button>
                 </div>
               </div>
+
+            {/* How to Find Us */}
+            {displayFindUsData.howToFindUs && (
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
+                <h3 className="text-2xl font-bold text-[#3a3428] dark:text-white mb-4">
+                  How to Find Us
+                </h3>
+                <p className="text-lg text-[#524a3a] dark:text-gray-300 leading-relaxed">
+                  {displayFindUsData.howToFindUs}
+                </p>
             </div>
+            )}
 
             {/* Transport Options */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
-              <h3 className="text-2xl font-bold text-[#3a3428] dark:text-white mb-6">
+              <h3 className="text-2xl font-bold text-[#3a3428] dark:text-white mb-4">
                 How to Reach Us
               </h3>
+              {displayFindUsData.howToReachUs && (
+                <p className="text-lg text-[#524a3a] dark:text-gray-300 mb-6 leading-relaxed">
+                  {displayFindUsData.howToReachUs}
+                </p>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {transportOptions.map((option, index) => (
                   <div key={index} className="border border-[#e1d8c7] dark:border-gray-700 rounded-xl p-6 hover:shadow-md transition-shadow">
@@ -239,21 +254,24 @@ export default function FindUsPage() {
 
             {/* Nearby Landmarks */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
-              <h3 className="text-2xl font-bold text-[#3a3428] dark:text-white mb-6">
+              <h3 className="text-2xl font-bold text-[#3a3428] dark:text-white mb-4">
                 Nearby Landmarks
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <p className="text-[#6f6652] dark:text-gray-400 mb-6 text-sm">
+                Our clinic at {displayContactInfo.address} is surrounded by some of London's most iconic locations:
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {nearbyLandmarks.map((landmark, index) => (
                   <div key={index} className="border border-[#e1d8c7] dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-semibold text-[#3a3428] dark:text-white">
+                      <h4 className="font-semibold text-[#3a3428] dark:text-white text-sm">
                         {landmark.name}
                       </h4>
-                      <span className="bg-[#f0e8d8] dark:bg-[#3a3428] text-[#6f6652] dark:text-[#d8c5a7] px-2 py-1 rounded-full text-xs">
+                      <span className="bg-[#f0e8d8] dark:bg-[#3a3428] text-[#6f6652] dark:text-[#d8c5a7] px-2 py-1 rounded-full text-[10px]">
                         {landmark.type}
                       </span>
                     </div>
-                    <p className="text-sm text-[#6f6652] dark:text-gray-400">
+                    <p className="text-xs text-[#6f6652] dark:text-gray-400">
                       {landmark.distance}
                     </p>
                   </div>
@@ -277,7 +295,7 @@ export default function FindUsPage() {
                   Call Us
                 </h3>
                 <p className="text-[#6f6652] dark:text-gray-400 mb-4">
-                  {contactInfo.phone}
+                  {displayContactInfo.phone}
                 </p>
                 <button
                   onClick={handleCall}
@@ -296,7 +314,7 @@ export default function FindUsPage() {
                   Email Us
                 </h3>
                 <p className="text-[#6f6652] dark:text-gray-400 mb-4 text-sm">
-                  {contactInfo.email}
+                  {displayContactInfo.email}
                 </p>
                 <button
                   onClick={handleEmail}
@@ -317,7 +335,7 @@ export default function FindUsPage() {
                   WhatsApp
                 </h3>
                 <p className="text-[#6f6652] dark:text-gray-400 mb-4">
-                  {contactInfo.whatsapp}
+                  {displayContactInfo.whatsapp}
                 </p>
                 <button
                   onClick={handleWhatsApp}
@@ -336,7 +354,7 @@ export default function FindUsPage() {
                   Visit Us
                 </h3>
                 <p className="text-[#6f6652] dark:text-gray-400 mb-4 text-sm">
-                  {contactInfo.address}
+                  {displayContactInfo.address}
                 </p>
                 <button
                   onClick={handleDirections}
@@ -361,7 +379,7 @@ export default function FindUsPage() {
                     onClick={handleCall}
                     className="bg-white text-[#3a3428] px-8 py-3 rounded-lg font-semibold hover:bg-[#f0e8d8] transition-colors"
                   >
-                    Call {contactInfo.phone}
+                    Call {displayContactInfo.phone}
                   </button>
                   <button
                     onClick={handleWhatsApp}
@@ -394,6 +412,12 @@ export default function FindUsPage() {
                 </div>
               </div>
 
+              {loading ? (
+                <div className="text-center py-12">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#6f6652]"></div>
+                  <p className="mt-4 text-[#6f6652] dark:text-gray-400">Loading opening hours...</p>
+                </div>
+              ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {Object.entries(openingHours).map(([key, dayInfo]) => (
                   <div
@@ -424,31 +448,7 @@ export default function FindUsPage() {
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Special Hours Notice */}
-            <div className="bg-[#f0e8d8] dark:bg-[#2a241a] border border-[#e1d8c7] dark:border-[#3a3428] rounded-2xl p-8">
-              <h3 className="text-xl font-bold text-[#3a3428] dark:text-white mb-4">
-                Important Notes
-              </h3>
-              <ul className="space-y-3 text-[#524a3a] dark:text-gray-300">
-                <li className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-[#9d8c6b] rounded-full mt-2 flex-shrink-0"></div>
-                  <span>We recommend booking appointments in advance to secure your preferred time slot</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-[#9d8c6b] rounded-full mt-2 flex-shrink-0"></div>
-                  <span>Last appointment bookings are accepted 30 minutes before closing time</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-[#9d8c6b] rounded-full mt-2 flex-shrink-0"></div>
-                  <span>Consultations outside regular hours may be available - please call us to inquire</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-[#9d8c6b] rounded-full mt-2 flex-shrink-0"></div>
-                  <span>Holiday hours may vary - please check with us for specific dates</span>
-                </li>
-              </ul>
+              )}
             </div>
 
             {/* Booking CTA */}

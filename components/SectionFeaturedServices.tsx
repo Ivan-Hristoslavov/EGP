@@ -6,6 +6,8 @@ import { ArrowRight, Sparkles, Filter, X, Clock, CheckCircle, Info, Calendar } f
 import { useServices } from "@/hooks/useServices";
 import Pagination from "@/components/Pagination";
 import type { Service } from "@/hooks/useServices";
+import { aestheticsColors } from "@/config/colors";
+import { badgeBackgroundClass } from "@/config/badge-styles";
 
 // Gradient colors for different categories
 const categoryGradients: Record<string, string> = {
@@ -34,26 +36,14 @@ export default function SectionFeaturedServices() {
   const availableCategories = useMemo(() => {
     const categoriesMap = new Map<string, { id: string; name: string }>();
     
-    // First get featured services from both 'book-now' and 'by-condition' tabs
+    // Only get featured services from both 'book-now' and 'by-condition' tabs
     const featuredServices = services.filter(s => 
       s.is_featured && 
       (s.main_tab?.slug === 'book-now' || s.main_tab?.slug === 'by-condition')
     );
     
-    // If no featured services, use top services by display_order from both tabs
-    const servicesToUse = featuredServices.length > 0 
-      ? featuredServices 
-      : [...services]
-          .filter(s => s.main_tab?.slug === 'book-now' || s.main_tab?.slug === 'by-condition')
-          .sort((a, b) => {
-            if (a.display_order !== b.display_order) {
-              return a.display_order - b.display_order;
-            }
-            return a.name.localeCompare(b.name);
-          });
-    
-    // Build category list from the services we're actually displaying
-    servicesToUse.forEach(service => {
+    // Build category list from featured services only
+    featuredServices.forEach(service => {
       if (!categoriesMap.has(service.category.id)) {
         categoriesMap.set(service.category.id, {
           id: service.category.id,
@@ -65,26 +55,13 @@ export default function SectionFeaturedServices() {
     return Array.from(categoriesMap.values()).sort((a, b) => a.name.localeCompare(b.name));
   }, [services]);
 
-  // Filter services based on selected category
+  // Filter services based on selected category - only show featured services
   const filteredServices = useMemo(() => {
-    // Include services from both 'book-now' and 'by-condition' main tabs
-    // First try to get featured services from both tabs
+    // Only include featured services from both 'book-now' and 'by-condition' main tabs
     let featured = services.filter(s => 
       s.is_featured && 
       (s.main_tab?.slug === 'book-now' || s.main_tab?.slug === 'by-condition')
     );
-    
-    // If no featured services, fallback to top services by display_order from both tabs
-    if (featured.length === 0) {
-      featured = [...services]
-        .filter(s => s.main_tab?.slug === 'book-now' || s.main_tab?.slug === 'by-condition')
-        .sort((a, b) => {
-          if (a.display_order !== b.display_order) {
-            return a.display_order - b.display_order;
-          }
-          return a.name.localeCompare(b.name);
-        });
-    }
     
     // Apply category filter if selected
     if (selectedCategory !== "all") {
@@ -113,10 +90,10 @@ export default function SectionFeaturedServices() {
 
   if (isLoading) {
     return (
-      <section className="py-12 sm:py-16 md:py-20 bg-[#ddd5c3] dark:bg-gray-900">
+      <section className="py-12 sm:py-16 md:py-20 bg-[#f5f1e9] dark:bg-gray-900">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12 md:mb-16">
-            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-[#c9c1b0] dark:bg-gray-800 rounded-full text-gray-900 dark:text-gray-200 text-sm sm:text-base font-semibold mb-3 sm:mb-4">
+            <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-sm sm:text-base font-semibold mb-3 sm:mb-4`}>
               <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>Popular Treatments</span>
             </div>
@@ -145,10 +122,10 @@ export default function SectionFeaturedServices() {
 
   if (!isLoading && filteredServices.length === 0) {
     return (
-      <section className="py-12 sm:py-16 md:py-20 bg-[#ddd5c3] dark:bg-gray-900">
+      <section className="py-12 sm:py-16 md:py-20 bg-[#f5f1e9] dark:bg-gray-900">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12 md:mb-16">
-            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-[#c9c1b0] dark:bg-gray-800 rounded-full text-gray-900 dark:text-gray-200 text-sm sm:text-base font-semibold mb-3 sm:mb-4">
+            <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-sm sm:text-base font-semibold mb-3 sm:mb-4`}>
               <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>Popular Treatments</span>
             </div>
@@ -171,11 +148,11 @@ export default function SectionFeaturedServices() {
   }
 
   return (
-    <section id="featured-services" className="py-12 sm:py-16 md:py-20 bg-gradient-to-br from-[#f0ede7] via-[#ddd5c3] to-[#c9c1b0] dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <section id="featured-services" className="py-12 sm:py-16 md:py-20 bg-[#f5f1e9] dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-8 sm:mb-12 md:mb-16">
-          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-[#c9c1b0] dark:bg-gray-800 rounded-full text-gray-900 dark:text-gray-200 text-sm sm:text-base font-semibold mb-3 sm:mb-4 shadow-md">
+          <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-sm sm:text-base font-semibold mb-3 sm:mb-4`}>
             <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>Popular Treatments</span>
           </div>
@@ -232,7 +209,7 @@ export default function SectionFeaturedServices() {
             return (
               <div
                 key={service.id}
-                className="group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-100 dark:border-gray-700 cursor-pointer"
+                className="group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-100 dark:border-gray-700 cursor-pointer flex flex-col"
                 onClick={() => setSelectedService(service)}
               >
                 {/* Image */}
@@ -259,7 +236,7 @@ export default function SectionFeaturedServices() {
                   
                   {/* Featured Badge */}
                   <div className="absolute top-3 left-3 z-10">
-                    <span className="inline-flex items-center px-2.5 py-1 bg-[#b5ad9d]/90 dark:bg-[#9d9585]/90 text-white text-[10px] font-bold rounded-full shadow-lg backdrop-blur-sm">
+                    <span className="inline-flex items-center px-2.5 py-1 text-white text-[10px] font-bold rounded-full shadow-lg backdrop-blur-sm" style={{ backgroundColor: aestheticsColors.green.DEFAULT }}>
                       <Sparkles className="w-3 h-3 mr-1" />
                       FEATURED
                     </span>
@@ -274,7 +251,7 @@ export default function SectionFeaturedServices() {
                 </div>
 
                 {/* Content */}
-                <div className="p-5 sm:p-6">
+                <div className="p-5 sm:p-6 flex flex-col flex-1">
                   {/* Category */}
                   <div className="flex items-center gap-2 mb-2">
                     <span className="inline-flex items-center px-2.5 py-0.5 bg-[#ddd5c3]/50 dark:bg-[#c9c1b0]/30 text-gray-800 dark:text-gray-200 border border-[#c9c1b0]/50 dark:border-gray-600/50 rounded-full text-xs font-semibold">
@@ -320,18 +297,23 @@ export default function SectionFeaturedServices() {
                     )}
                   </div>
 
-                  {/* Price & CTA */}
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                  {/* Spacer to push price and button to bottom */}
+                  <div className="flex-1"></div>
+
+                  {/* Price & CTA - Fixed at bottom */}
+                  <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
+                    {/* Price */}
+                    <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white text-center">
                       £{service.price.toFixed(0)}
                     </div>
+                    {/* Button */}
                     <button
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         setSelectedService(service);
                       }}
-                      className="flex items-center gap-2 text-[#9d9585] dark:text-[#c9c1b0] font-semibold hover:gap-3 transition-all hover:text-[#b5ad9d] dark:hover:text-[#ddd5c3]"
+                      className="w-full flex items-center justify-center gap-2 bg-[#9d9585] hover:bg-[#b5ad9d] dark:bg-[#b5ad9d] dark:hover:bg-[#9d9585] text-white font-semibold py-2.5 px-4 rounded-lg transition-all hover:shadow-lg"
                     >
                       <span className="text-sm">Learn More</span>
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -389,10 +371,10 @@ export default function SectionFeaturedServices() {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white px-6 sm:px-8 py-6 flex items-start justify-between rounded-t-2xl flex-shrink-0">
+            <div className="bg-[#464C45] text-white px-6 sm:px-8 py-6 flex items-start justify-between rounded-t-2xl flex-shrink-0">
               <div className="flex-1">
                 <h2 className="text-2xl sm:text-3xl font-bold mb-3">{selectedService.name}</h2>
-                <div className="flex flex-wrap items-center gap-4 text-blue-100">
+                <div className="flex flex-wrap items-center gap-4 text-white/90">
                   <span className="flex items-center gap-2">
                     <Clock className="w-5 h-5" />
                     <span className="text-base sm:text-lg">{selectedService.duration} minutes</span>
@@ -423,7 +405,7 @@ export default function SectionFeaturedServices() {
               {selectedService.description && (
                 <div>
                   <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                    <Info className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    <Info className="w-5 h-5" style={{ color: aestheticsColors.green.DEFAULT }} />
                     Overview
                   </h3>
                   <p className="text-base sm:text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -434,7 +416,7 @@ export default function SectionFeaturedServices() {
 
               {/* Details */}
               {selectedService.details && (
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
+                <div className="bg-[#f5f1e9] dark:bg-gray-800 rounded-xl p-6">
                   <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3">
                     Treatment Details
                   </h3>
@@ -448,13 +430,13 @@ export default function SectionFeaturedServices() {
               {selectedService.benefits && selectedService.benefits.length > 0 && (
                 <div>
                   <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    <CheckCircle className="w-5 h-5" style={{ color: aestheticsColors.green.DEFAULT }} />
                     Key Benefits
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {selectedService.benefits.map((benefit: string, index: number) => (
-                      <div key={index} className="flex items-start gap-3 bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
-                        <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                      <div key={index} className="flex items-start gap-3 rounded-lg p-4 border" style={{ backgroundColor: '#e8f5e9', borderColor: '#c8e6c9' }}>
+                        <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: aestheticsColors.green.DEFAULT }} />
                         <span className="text-gray-700 dark:text-gray-300">{benefit}</span>
                       </div>
                     ))}
@@ -465,9 +447,9 @@ export default function SectionFeaturedServices() {
               {/* Service Information Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {selectedService.downtime_days > 0 && (
-                  <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 border border-amber-200 dark:border-amber-800">
+                  <div className="rounded-lg p-4 border" style={{ backgroundColor: '#f5f1e9', borderColor: '#ddd5c3' }}>
                     <div className="flex items-center gap-2 mb-2">
-                      <svg className="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5" style={{ color: aestheticsColors.green.DEFAULT }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                       </svg>
                       <span className="font-semibold text-gray-900 dark:text-white">Downtime</span>
@@ -477,9 +459,9 @@ export default function SectionFeaturedServices() {
                 )}
                 
                 {selectedService.results_duration_weeks && (
-                  <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
+                  <div className="rounded-lg p-4 border" style={{ backgroundColor: '#f5f1e9', borderColor: '#ddd5c3' }}>
                     <div className="flex items-center gap-2 mb-2">
-                      <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5" style={{ color: aestheticsColors.green.DEFAULT }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                       </svg>
                       <span className="font-semibold text-gray-900 dark:text-white">Results Duration</span>
@@ -489,9 +471,9 @@ export default function SectionFeaturedServices() {
                 )}
 
                 {selectedService.requires_consultation && (
-                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                  <div className="rounded-lg p-4 border" style={{ backgroundColor: '#e8f5e9', borderColor: '#c8e6c9' }}>
                     <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                      <CheckCircle className="w-5 h-5" style={{ color: aestheticsColors.green.DEFAULT }} />
                       <span className="font-semibold text-gray-900 dark:text-white">Consultation Required</span>
                     </div>
                     <p className="text-gray-700 dark:text-gray-300">Initial consultation needed before treatment</p>
@@ -501,9 +483,9 @@ export default function SectionFeaturedServices() {
 
               {/* Preparation */}
               {selectedService.preparation && (
-                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6 border-l-4 border-blue-500">
+                <div className="rounded-xl p-6 border-l-4" style={{ backgroundColor: '#f5f1e9', borderLeftColor: aestheticsColors.green.DEFAULT }}>
                   <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5" style={{ color: aestheticsColors.green.DEFAULT }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
                     Preparation
@@ -516,9 +498,9 @@ export default function SectionFeaturedServices() {
 
               {/* Aftercare */}
               {selectedService.aftercare && (
-                <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-6 border-l-4 border-purple-500">
+                <div className="rounded-xl p-6 border-l-4" style={{ backgroundColor: '#f5f1e9', borderLeftColor: aestheticsColors.green.DEFAULT }}>
                   <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5" style={{ color: aestheticsColors.green.DEFAULT }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     Aftercare Instructions
@@ -534,7 +516,10 @@ export default function SectionFeaturedServices() {
                 <Link
                   href={`/book?service=${selectedService.id}`}
                   onClick={() => setSelectedService(null)}
-                  className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-4 rounded-xl font-semibold text-base sm:text-lg transition-all duration-200 shadow-lg hover:shadow-xl text-center"
+                  className="flex-1 flex items-center justify-center gap-2 text-white py-4 rounded-xl font-semibold text-base sm:text-lg transition-all duration-200 shadow-lg hover:shadow-xl text-center"
+                  style={{ backgroundColor: aestheticsColors.green.DEFAULT }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = aestheticsColors.green.hover}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = aestheticsColors.green.DEFAULT}
                 >
                   <Calendar className="w-5 h-5" />
                   Book This Treatment - £{selectedService.price.toFixed(0)}

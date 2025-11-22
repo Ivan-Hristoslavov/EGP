@@ -11,6 +11,7 @@ export function FirstVisitDiscountForm() {
   const [isOpen, setIsOpen] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
+  const [mobile, setMobile] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [discountCode, setDiscountCode] = useState<string | null>(null);
 
@@ -85,8 +86,8 @@ export function FirstVisitDiscountForm() {
               <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">Congratulations!</h3>
               <p className="text-gray-700 dark:text-gray-300 text-base sm:text-lg mb-5">Here's your exclusive discount code:</p>
               <div className="inline-block bg-gradient-to-br from-[#9d9585]/15 to-[#c9c1b0]/15 dark:from-[#9d9585]/20 dark:to-[#b5ad9d]/20 backdrop-blur-sm border-2 border-[#b5ad9d]/30 dark:border-[#c9c1b0]/40 rounded-xl px-6 sm:px-8 py-3 sm:py-4 mb-5">
-                <div className="text-xs sm:text-sm text-rose-700 dark:text-rose-300 mb-1 font-medium">Your Discount Code</div>
-                <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-rose-600 dark:from-rose-400 dark:via-pink-400 dark:to-rose-400 bg-clip-text text-transparent tracking-wider">{discountCode}</div>
+                <div className="text-xs sm:text-sm text-[#464C45] dark:text-[#5a6259] mb-1 font-medium">Your Discount Code</div>
+                <div className="text-2xl sm:text-3xl font-bold text-[#464C45] dark:text-[#5a6259] tracking-wider">{discountCode}</div>
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">Check your email for details. Valid for 30 days!</p>
               <button
@@ -94,7 +95,7 @@ export function FirstVisitDiscountForm() {
                   setIsOpen(false);
                   setCookie(COOKIE_NAMES.DISCOUNT_SHOWN, 'true', 365);
                 }}
-                className="px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 dark:from-rose-600 dark:to-pink-600 text-white font-semibold rounded-full hover:from-rose-600 hover:to-pink-600 dark:hover:from-rose-700 dark:hover:to-pink-700 transition-all shadow-lg hover:shadow-xl"
+                className="px-6 py-3 bg-[#464C45] hover:bg-[#3a4039] text-white font-semibold rounded-full transition-all shadow-lg hover:shadow-xl"
               >
                 Close
               </button>
@@ -105,8 +106,8 @@ export function FirstVisitDiscountForm() {
                 {/* Content */}
                 <div className="flex-1 text-gray-900 dark:text-white">
                   <div className="flex items-center gap-2 mb-4">
-                    <Gift className="w-7 h-7 text-rose-600 dark:text-rose-400" />
-                    <span className="px-3 py-1 bg-gradient-to-r from-rose-500 to-pink-500 dark:from-rose-600 dark:to-pink-600 text-white text-xs sm:text-sm font-bold rounded-full shadow-lg">EXCLUSIVE OFFER</span>
+                    <Gift className="w-7 h-7 text-[#464C45] dark:text-[#5a6259]" />
+                    <span className="px-3 py-1 bg-[#464C45] hover:bg-[#3a4039] text-white text-xs sm:text-sm font-bold rounded-full shadow-lg transition-colors">EXCLUSIVE OFFER</span>
                   </div>
                   <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-gray-100 dark:to-white bg-clip-text text-transparent">
                     Get {siteConfig.newsletter.welcomeDiscountPercent}% Off Your First Visit
@@ -133,11 +134,18 @@ export function FirstVisitDiscountForm() {
                         placeholder="Your email address"
                         className="w-full px-4 py-3 text-base rounded-lg bg-white/95 dark:bg-gray-800/95 border border-gray-300/50 dark:border-gray-600/50 focus:bg-white dark:focus:bg-gray-700 focus:ring-2 focus:ring-[#b5ad9d] focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                       />
+                      <input
+                        type="tel"
+                        value={mobile}
+                        onChange={(e) => setMobile(e.target.value)}
+                        placeholder="Mobile Number (optional)"
+                        className="w-full px-4 py-3 text-base rounded-lg bg-white/95 dark:bg-gray-800/95 border border-gray-300/50 dark:border-gray-600/50 focus:bg-white dark:focus:bg-gray-700 focus:ring-2 focus:ring-[#b5ad9d] focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                      />
                     </div>
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full px-8 py-3 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 dark:from-rose-600 dark:via-pink-600 dark:to-rose-700 text-white text-lg font-bold rounded-lg hover:from-rose-600 hover:via-pink-600 hover:to-rose-700 dark:hover:from-rose-700 dark:hover:via-pink-700 dark:hover:to-rose-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl hover:shadow-2xl active:scale-95"
+                      className="w-full px-8 py-3 bg-[#464C45] hover:bg-[#3a4039] text-white text-lg font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl hover:shadow-2xl active:scale-95"
                     >
                       {isSubmitting ? (
                         <div className="flex items-center justify-center gap-2">
@@ -154,13 +162,13 @@ export function FirstVisitDiscountForm() {
                   </form>
 
                   <p className="mt-4 text-sm text-gray-600 dark:text-gray-400 text-center lg:text-left">
-                    By subscribing, you agree to receive marketing emails. Unsubscribe anytime. <span className="underline hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer">Privacy Policy</span>
+                    By subscribing, you agree to receive marketing emails. Unsubscribe anytime. <span className="underline hover:text-[#464C45] dark:hover:text-[#5a6259] transition-colors cursor-pointer">Privacy Policy</span>
                   </p>
                 </div>
 
                 {/* Badge with improved colors */}
                 <div className="hidden lg:block">
-                  <div className="w-48 h-48 bg-gradient-to-br from-rose-500 via-pink-500 to-rose-600 dark:from-rose-600 dark:via-pink-600 dark:to-rose-700 rounded-full flex items-center justify-center border-4 border-white/50 dark:border-gray-700/50 shadow-2xl">
+                  <div className="w-48 h-48 bg-[#464C45] hover:bg-[#3a4039] rounded-full flex items-center justify-center border-4 border-white/50 dark:border-gray-700/50 shadow-2xl transition-colors">
                     <div className="text-center">
                       <div className="text-5xl font-bold bg-gradient-to-br from-white via-gray-100 to-white dark:from-gray-100 dark:via-white dark:to-gray-100 bg-clip-text text-transparent mb-2">
                         {siteConfig.newsletter.welcomeDiscountPercent}%

@@ -35,6 +35,7 @@ export async function PUT(request: NextRequest) {
       lastName, 
       businessEmail, 
       phone, 
+      whatsapp,
       about, 
       companyName, 
       companyAddress, 
@@ -45,7 +46,12 @@ export async function PUT(request: NextRequest) {
       responseTime,
       bankName, 
       accountNumber, 
-      sortCode 
+      sortCode,
+      howToFindUs,
+      howToReachUs,
+      googleMapsAddress,
+      transportOptions,
+      nearbyLandmarks,
     } = body;
 
     // First get the current profile to get the ID
@@ -63,25 +69,43 @@ export async function PUT(request: NextRequest) {
     }
 
     // Update the profile using the ID
+    const updateData: any = {
+      name: `${firstName} ${lastName}`,
+      phone,
+      about,
+      business_email: businessEmail,
+      company_name: companyName,
+      company_address: companyAddress,
+      insurance_provider: insuranceProvider,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Add optional fields that exist in the base schema
+    if (bankName !== undefined && bankName !== null) updateData.bank_name = bankName;
+    if (accountNumber !== undefined && accountNumber !== null) updateData.account_number = accountNumber;
+    if (sortCode !== undefined && sortCode !== null) updateData.sort_code = sortCode;
+    
+    // Add professional fields (only if provided and not empty - these columns may not exist yet)
+    // These will work after running the migration: 20250212_add_missing_admin_profile_fields.sql
+    // For now, we skip them to avoid errors if columns don't exist
+    // Uncomment after migration is applied:
+    // if (yearsOfExperience !== undefined && yearsOfExperience !== null) updateData.years_of_experience = yearsOfExperience;
+    // if (specializations !== undefined && specializations !== null) updateData.specializations = specializations;
+    // if (certifications !== undefined && certifications !== null) updateData.certifications = certifications;
+    // if (responseTime !== undefined && responseTime !== null) updateData.response_time = responseTime;
+    
+    // Add new fields from find-us migration (only if provided and not empty)
+    // These will work after running the migration: 20250212_add_find_us_fields_to_admin_profile.sql
+    if (whatsapp !== undefined && whatsapp !== null) updateData.whatsapp = whatsapp;
+    if (howToFindUs !== undefined && howToFindUs !== null) updateData.how_to_find_us = howToFindUs;
+    if (howToReachUs !== undefined && howToReachUs !== null) updateData.how_to_reach_us = howToReachUs;
+    if (googleMapsAddress !== undefined && googleMapsAddress !== null) updateData.google_maps_address = googleMapsAddress;
+    if (transportOptions !== undefined && transportOptions !== null) updateData.transport_options = transportOptions;
+    if (nearbyLandmarks !== undefined && nearbyLandmarks !== null) updateData.nearby_landmarks = nearbyLandmarks;
+
     const { data, error } = await supabase
       .from('admin_profile')
-      .update({
-        name: `${firstName} ${lastName}`,
-        phone,
-        about,
-        business_email: businessEmail,
-        company_name: companyName,
-        company_address: companyAddress,
-        insurance_provider: insuranceProvider,
-        years_of_experience: yearsOfExperience,
-        specializations: specializations,
-        certifications: certifications,
-        response_time: responseTime,
-        bank_name: bankName,
-        account_number: accountNumber,
-        sort_code: sortCode,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq('id', currentProfile.id)
       .select()
       .single();

@@ -8,6 +8,7 @@ import StripePaymentForm from '@/components/StripePaymentForm';
 import { useServices } from '@/hooks/useServices';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 import { Button } from "@heroui/button";
+import { useToast } from '@/components/Toast';
 
 type OrderItem = {
   serviceId: string;
@@ -24,24 +25,53 @@ type CalendarDay = {
   timeSlots: string[];
   allSlots: string[];
   bookedSlots: string[];
+  workingHours?: {
+    start: string;
+    end: string;
+  };
 };
 
 type BookingStepKey = 'services' | 'date' | 'preview' | 'payment';
 
+type TeamMember = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  is_active: boolean;
+};
+
 function BookingPageContent() {
   const searchParams = useSearchParams();
   const { services, isLoading: servicesLoading } = useServices();
+  const { showError } = useToast();
   const [selectedServices, setSelectedServices] = useState<OrderItem[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
+  const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([]); // All time slots for the selected duration
+  const [selectedTeamMember, setSelectedTeamMember] = useState<string>('');
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [teamMembersLoading, setTeamMembersLoading] = useState(false);
   const [availableDates, setAvailableDates] = useState<CalendarDay[]>([]);
+  const [selectedDateSlots, setSelectedDateSlots] = useState<CalendarDay | null>(null); // Time slots for selected date only
   const [availabilityLoading, setAvailabilityLoading] = useState(true);
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<'services' | 'date' | 'preview' | 'payment'>('services');
   const [showServiceSelector, setShowServiceSelector] = useState(false);
   const [serviceInfoModal, setServiceInfoModal] = useState<string | null>(null);
   const [hoveredDate, setHoveredDate] = useState<string | null>(null);
-  const [hoverTooltip, setHoverTooltip] = useState<{ x: number; y: number; content: string } | null>(null);
+  const [hoverTooltip, setHoverTooltip] = useState<{ 
+    x: number; 
+    y: number; 
+    content: string;
+    date: string;
+    slots: string[];
+    bookedSlots: string[];
+    totalSlots: number;
+    status: 'available' | 'full' | 'closed';
+    showAbove: boolean;
+  } | null>(null);
 
   const bookingSteps = useMemo(() => ([
     { key: 'services', label: 'Services', icon: CheckCircle },
@@ -65,11 +95,11 @@ function BookingPageContent() {
       case 'services':
         return true;
       case 'date':
-        return selectedServices.length > 0;
+        return selectedServices.length > 0 && Boolean(selectedTeamMember);
       case 'preview':
-        return selectedServices.length > 0 && Boolean(selectedDate) && Boolean(selectedTime);
+        return selectedServices.length > 0 && Boolean(selectedTeamMember) && Boolean(selectedDate) && Boolean(selectedTime);
       case 'payment':
-        return selectedServices.length > 0 && Boolean(selectedDate) && Boolean(selectedTime);
+        return selectedServices.length > 0 && Boolean(selectedTeamMember) && Boolean(selectedDate) && Boolean(selectedTime);
       default:
         return false;
     }
@@ -120,35 +150,114 @@ function BookingPageContent() {
     return grouped;
   }, [services, servicesDataMap]);
 
+  // Load team members
+  useEffect(() => {
+    const loadTeamMembers = async () => {
+      setTeamMembersLoading(true);
+      try {
+        const response = await fetch('/api/admin/team');
+        const data = await response.json();
+        console.log('Team API response:', data);
+        if (response.ok && data.team) {
+          const activeMembers = data.team.filter((member: TeamMember) => member.is_active === true);
+          console.log('Active team members:', activeMembers);
+          setTeamMembers(activeMembers);
+        } else {
+          console.error('Failed to load team members:', data.error || 'Unknown error');
+        }
+      } catch (error) {
+        console.error('Error loading team members:', error);
+      } finally {
+        setTeamMembersLoading(false);
+      }
+    };
+    loadTeamMembers();
+  }, []);
+
+  // Calculate total service duration in minutes
+  const totalServiceDuration = useMemo(() => {
+    return selectedServices.reduce((total, service) => {
+      return total + (service.duration * service.quantity);
+    }, 0);
+  }, [selectedServices]);
+
   const loadAvailability = useCallback(async () => {
     setAvailabilityLoading(true);
     setAvailabilityError(null);
 
     try {
-      const start = new Date();
-      const startISO = start.toISOString().split('T')[0];
+      // Create start date at local midnight to avoid timezone issues
+      const now = new Date();
+      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const end = new Date(start);
       end.setDate(start.getDate() + 30);
-      const endISO = end.toISOString().split('T')[0];
 
-      const response = await fetch(`/api/booking/availability?start=${startISO}&end=${endISO}`);
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Failed to load availability');
+      // Team member is required - only show availability if team member is selected
+      if (selectedTeamMember && totalServiceDuration > 0) {
+        // Helper function to format date without timezone issues
+        const formatDateLocal = (date: Date): string => {
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        };
+        
+        const startDateStr = formatDateLocal(start);
+        const endDateStr = formatDateLocal(end);
+          
+        // Make single API call for all dates in range
+        try {
+          const response = await fetch(
+            `/api/bookings/availability/team/range?team_member_id=${selectedTeamMember}&start_date=${startDateStr}&end_date=${endDateStr}&service_duration_minutes=${totalServiceDuration}`
+          );
+          
+              if (response.ok) {
+                const data = await response.json();
+            const availability = data.availability || {};
+            
+            // Convert to CalendarDay array
+            const dates: CalendarDay[] = [];
+            const dayCount = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+            
+            for (let i = 0; i < dayCount; i++) {
+              const currentDate = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+              const dateStr = formatDateLocal(currentDate);
+              
+              const dateAvailability = availability[dateStr];
+              if (dateAvailability) {
+                dates.push({
+                    date: dateStr,
+                  status: dateAvailability.status,
+                  timeSlots: dateAvailability.availableSlots || [],
+                  allSlots: [...(dateAvailability.availableSlots || []), ...(dateAvailability.bookedSlots || [])],
+                  bookedSlots: dateAvailability.bookedSlots || [],
+                  workingHours: dateAvailability.workingHours,
+                });
+                } else {
+                dates.push({
+                    date: dateStr,
+                    status: 'closed' as const,
+                    timeSlots: [],
+                    allSlots: [],
+                    bookedSlots: [],
+                });
+                }
+            }
+            
+            setAvailableDates(dates);
+          } else {
+            throw new Error('Failed to fetch availability');
+          }
+        } catch (error) {
+          console.error('Error fetching availability range:', error);
+          setAvailabilityError('Unable to load availability. Please try again later.');
+        }
+      } else {
+        // No team member selected or no services - show empty calendar
+        setAvailableDates([]);
       }
 
-      const mapped: CalendarDay[] = (data.days ?? []).map((day: any) => ({
-        date: day.date,
-        status: day.status,
-        timeSlots: day.availableSlots ?? [],
-        allSlots: day.allSlots ?? [],
-        bookedSlots: day.bookedSlots ?? [],
-      }));
-
-      setAvailableDates(mapped);
-
-      if (mapped.length && selectedDate && !mapped.some((day) => day.date === selectedDate)) {
+      if (availableDates.length && selectedDate && !availableDates.some((day) => day.date === selectedDate)) {
         setSelectedDate('');
         setSelectedTime('');
       }
@@ -158,11 +267,22 @@ function BookingPageContent() {
     } finally {
       setAvailabilityLoading(false);
     }
-  }, [selectedDate]);
+  }, [selectedDate, selectedTeamMember, totalServiceDuration]);
 
   useEffect(() => {
     loadAvailability();
   }, [loadAvailability]);
+
+  // Reload availability when team member or services change
+  useEffect(() => {
+    if (selectedServices.length > 0) {
+      // Small delay to avoid too many requests
+      const timeoutId = setTimeout(() => {
+        loadAvailability();
+      }, 300);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [selectedTeamMember, totalServiceDuration, loadAvailability]);
 
   // Auto-select service from URL parameter
   useEffect(() => {
@@ -204,9 +324,44 @@ function BookingPageContent() {
   const totalAmount = selectedServices.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const totalDuration = selectedServices.reduce((sum, item) => sum + (item.duration * item.quantity), 0);
 
-  const addService = (serviceId: string) => {
+  // Helper function to check if adding a service would exceed working hours
+  const wouldExceedWorkingHours = useCallback((additionalDuration: number): boolean => {
+    // Only check if date and time are already selected
+    if (!selectedDate || !selectedTime || !selectedDateSlots?.workingHours) {
+      return false; // Allow if no date/time selected yet
+    }
+
+    const currentTotalDuration = selectedServices.reduce((sum, item) => sum + (item.duration * item.quantity), 0);
+    const newTotalDuration = currentTotalDuration + additionalDuration;
+
+    // Parse selected time
+    const [startHour, startMin] = selectedTime.split(':').map(Number);
+    const startMinutes = startHour * 60 + startMin;
+
+    // Calculate end time with new duration
+    const endMinutes = startMinutes + newTotalDuration;
+
+    // Parse working hours end time
+    const [endHour, endMin] = selectedDateSlots.workingHours.end.split(':').map(Number);
+    const workingHoursEndMinutes = endHour * 60 + endMin;
+
+    // Check if the service would extend past working hours
+    return endMinutes > workingHoursEndMinutes;
+  }, [selectedDate, selectedTime, selectedDateSlots, selectedServices]);
+
+  const addService = (serviceId: string): boolean => {
     const service = servicesDataMap[serviceId];
-    if (!service) return;
+    if (!service) return false;
+
+    // Check if adding this service would exceed working hours
+    const additionalDuration = service.duration;
+    if (wouldExceedWorkingHours(additionalDuration)) {
+      showError(
+        "Cannot Add Service",
+        `Adding this service would exceed working hours. The appointment would end after closing time.`
+      );
+      return false;
+    }
 
     const existingIndex = selectedServices.findIndex(item => item.serviceId === serviceId);
     
@@ -224,6 +379,7 @@ function BookingPageContent() {
         quantity: 1
       }]);
     }
+    return true;
   };
 
   const removeService = (serviceId: string) => {
@@ -235,6 +391,19 @@ function BookingPageContent() {
       removeService(serviceId);
       return;
     }
+
+    // Check if increasing quantity would exceed working hours
+    const service = selectedServices.find(item => item.serviceId === serviceId);
+    if (service && quantity > service.quantity) {
+      const additionalDuration = service.duration * (quantity - service.quantity);
+      if (wouldExceedWorkingHours(additionalDuration)) {
+        showError(
+          "Cannot Increase Quantity",
+          `Increasing the quantity would exceed working hours. The appointment would end after closing time.`
+        );
+        return;
+      }
+    }
     
     const updated = selectedServices.map(item => 
       item.serviceId === serviceId ? { ...item, quantity } : item
@@ -242,21 +411,81 @@ function BookingPageContent() {
     setSelectedServices(updated);
   };
 
-  const handleDateSelect = (date: string) => {
+  const handleDateSelect = async (date: string) => {
     if (availabilityLoading) return;
 
-    const info = availableDates.find((item) => item.date === date);
-    if (!info || info.status === 'closed' || info.timeSlots.length === 0) {
+    // Check if we already have this date's data
+    const existingInfo = availableDates.find((item) => item.date === date);
+    if (existingInfo && existingInfo.status !== 'closed' && existingInfo.timeSlots.length > 0) {
+      setSelectedDate(date);
+      setSelectedTime('');
+      setSelectedTimeSlots([]);
+      setSelectedDateSlots(existingInfo);
+      setCurrentStep('date');
       return;
     }
 
+    // If not in cache, fetch only this date's availability
+    if (selectedTeamMember && totalServiceDuration > 0) {
+      setAvailabilityLoading(true);
+      try {
+        const response = await fetch(
+          `/api/bookings/availability/team?team_member_id=${selectedTeamMember}&date=${date}&service_duration_minutes=${totalServiceDuration}`
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          const availableSlots = data.availableSlots || [];
+          const bookedSlots = data.bookedSlots || [];
+          
+          const dateInfo: CalendarDay = {
+            date: date,
+            status: availableSlots.length > 0 ? 'available' as const : 'full' as const,
+            timeSlots: availableSlots,
+            allSlots: [...availableSlots, ...bookedSlots],
+            bookedSlots: bookedSlots,
+            workingHours: data.workingHours || undefined,
+          };
+
     setSelectedDate(date);
     setSelectedTime('');
+          setSelectedTimeSlots([]);
+          setSelectedDateSlots(dateInfo);
     setCurrentStep('date');
+          
+          // Also update the availableDates cache
+          const updatedDates = availableDates.map(d => d.date === date ? dateInfo : d);
+          if (!updatedDates.find(d => d.date === date)) {
+            updatedDates.push(dateInfo);
+          }
+          setAvailableDates(updatedDates);
+        }
+      } catch (error) {
+        console.error('Error fetching date availability:', error);
+      } finally {
+        setAvailabilityLoading(false);
+      }
+    }
   };
 
-  const handleTimeSelect = (time: string) => {
-    setSelectedTime(time);
+  const handleTimeSelect = (startTime: string) => {
+    // Calculate all time slots needed based on duration
+    // Duration is in minutes, we need to mark consecutive hours
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const durationHours = Math.ceil(totalServiceDuration / 60); // Round up to get full hours needed
+    
+    const selectedSlots: string[] = [];
+    
+    // Add all consecutive hours starting from the selected time
+    for (let i = 0; i < durationHours; i++) {
+      const hour = startHour + i;
+      if (hour >= 24) break; // Don't go past midnight
+      const timeStr = `${String(hour).padStart(2, '0')}:${String(startMinute).padStart(2, '0')}`;
+      selectedSlots.push(timeStr);
+    }
+    
+    setSelectedTime(startTime);
+    setSelectedTimeSlots(selectedSlots);
     setCurrentStep('preview');
   };
 
@@ -645,8 +874,10 @@ function BookingPageContent() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                        addService(serviceId);
+                              const success = addService(serviceId);
+                              if (success) {
                         setShowServiceSelector(false);
+                              }
                       }}
                             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#9d9585] to-[#c9c1b0] text-[#3f3a31] rounded-lg hover:from-[#8c846f] hover:to-[#b5ad9d] transition-all font-medium shadow-md hover:shadow-lg text-sm sm:text-base min-h-[44px] touch-manipulation active:scale-95"
                           >
@@ -701,141 +932,549 @@ function BookingPageContent() {
     );
   }
 
-  if (!availableDates.length) {
+  if (!availableDates.length && !availabilityLoading && selectedTeamMember) {
     return (
       <div className="space-y-4">
         <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Select Date &amp; Time</h3>
         <div className="bg-[#f5f1e9] dark:bg-gray-900/60 border border-[#e4d9c8] dark:border-gray-700 rounded-xl px-4 py-6 space-y-4 text-center">
-          <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300">No availability found for the next 30 days.</p>
-          <Button
-            onPress={loadAvailability}
-            color="primary"
-            variant="light"
-            className="mx-auto"
-          >
-            Refresh availability
-          </Button>
+          <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300">
+            {selectedTeamMember 
+              ? "No availability found for the next 30 days. This may be because working hours are not configured or all days are closed."
+              : "Please select a team member to view availability."
+            }
+          </p>
+          {selectedTeamMember && (
+            <Button
+              onPress={loadAvailability}
+              color="primary"
+              variant="light"
+              className="mx-auto"
+            >
+              Refresh availability
+            </Button>
+          )}
         </div>
       </div>
     );
   }
 
-    const gridDays = availableDates.slice(0, 28);
+    // Build calendar grid with proper alignment
+    const calendarGrid: (CalendarDay | null)[] = [];
+    
+    if (availableDates.length > 0) {
+      // Get the first date to determine starting day of week
+      const firstDate = new Date(availableDates[0].date);
+      // Convert to UTC to avoid timezone issues
+      const firstDateUTC = new Date(Date.UTC(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate()));
+      // Get day of week: 0 = Sunday, 1 = Monday, etc.
+      // Adjust to Monday = 0: (dayOfWeek + 6) % 7
+      let firstDayOfWeek = firstDateUTC.getUTCDay();
+      // Convert Sunday (0) to 6, Monday (1) to 0, etc. for Monday-first calendar
+      firstDayOfWeek = (firstDayOfWeek + 6) % 7;
+      
+      // Add empty cells before the first date
+      for (let i = 0; i < firstDayOfWeek; i++) {
+        calendarGrid.push(null);
+      }
+      
+      // Add all available dates (limit to 28 days for 4 weeks)
+      const daysToShow = Math.min(availableDates.length, 28 - firstDayOfWeek);
+      for (let i = 0; i < daysToShow; i++) {
+        calendarGrid.push(availableDates[i]);
+      }
+      
+      // Fill remaining cells to complete the grid (up to 35 cells for 5 weeks)
+      while (calendarGrid.length < 35 && calendarGrid.length % 7 !== 0) {
+        calendarGrid.push(null);
+      }
+    }
 
   return (
     <div className="space-y-6">
       <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Select Date &amp; Time</h3>
-      <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-          <span className="inline-flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#d9534f]"></span> Fully booked</span>
-          <span className="inline-flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#80c48f]"></span> Slots available</span>
-          <span className="inline-flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-gray-200"></span> Clinic closed</span>
+      
+      {/* Team Member Selection - REQUIRED FIRST */}
+      <div className="space-y-2">
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+          Select Team Member <span className="text-red-500">*</span>
+          {selectedServices.length > 0 && totalServiceDuration > 0 && (
+            <span className="text-xs font-normal text-gray-500 dark:text-gray-400 ml-2">
+              (Service duration: {Math.floor(totalServiceDuration / 60)}h {totalServiceDuration % 60}m)
+            </span>
+          )}
+        </label>
+        {teamMembersLoading ? (
+          <div className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-800 text-center">
+            <span className="text-sm text-gray-500 dark:text-gray-400">Loading team members...</span>
+          </div>
+        ) : (
+          <select
+            value={selectedTeamMember}
+            onChange={(e) => {
+              setSelectedTeamMember(e.target.value);
+              setSelectedDate('');
+              setSelectedTime('');
+            }}
+            required
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+          >
+            <option value="">-- Please select a team member --</option>
+            {teamMembers.length === 0 ? (
+              <option value="" disabled>No team members available</option>
+            ) : (
+              teamMembers.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.name} - {member.role}
+                </option>
+              ))
+            )}
+          </select>
+        )}
+        {!teamMembersLoading && teamMembers.length === 0 && (
+          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+            No active team members found. Please contact support.
+          </p>
+        )}
+        {!selectedTeamMember && !teamMembersLoading && teamMembers.length > 0 && (
+          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+            Please select a team member to view available dates and times
+          </p>
+        )}
+        {selectedTeamMember && selectedServices.length > 0 && totalServiceDuration > 0 && (
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            Only time slots with {Math.floor(totalServiceDuration / 60)}h {totalServiceDuration % 60}m consecutive availability will be shown
+          </p>
+        )}
+      </div>
+
+      {/* Only show calendar if team member is selected */}
+      {!selectedTeamMember && !teamMembersLoading && teamMembers.length > 0 && (
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-6 text-center">
+          <p className="text-sm text-amber-700 dark:text-amber-300">
+            Please select a team member above to view available dates and times
+          </p>
         </div>
+      )}
 
-      <div className="grid grid-cols-7 gap-1.5 sm:gap-2 relative">
-          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
-            <div key={day} className="text-center text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400 py-2">
-              {day}
-            </div>
-          ))}
+      {/* Only show calendar if team member is selected */}
+      {selectedTeamMember && (
+        <>
+          <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+            <span className="inline-flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#d9534f]"></span> Fully booked</span>
+            <span className="inline-flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#80c48f]"></span> Slots available</span>
+            <span className="inline-flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-gray-200"></span> Clinic closed</span>
+          </div>
 
-          {gridDays.map((dateInfo) => {
-            const date = new Date(dateInfo.date);
-            const isSelected = selectedDate === dateInfo.date;
-            const isToday = date.toDateString() === new Date().toDateString();
-            const isClosed = dateInfo.status === 'closed';
-            const isFull = dateInfo.status === 'full';
-            const hasSlots = dateInfo.timeSlots.length > 0;
-            const disabled = isClosed || isFull || !hasSlots;
+          <div className="grid grid-cols-7 gap-1.5 sm:gap-2 relative">
+            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
+              <div key={day} className="text-center text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400 py-2">
+                {day}
+              </div>
+            ))}
 
-            let statusClasses = '';
-            if (isSelected) {
-              statusClasses = 'bg-gradient-to-br from-[#9d9585] to-[#c9c1b0] text-white shadow-lg border border-transparent';
-            } else if (isClosed) {
-              statusClasses = 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border border-transparent cursor-not-allowed';
-            } else if (isFull) {
-              statusClasses = 'bg-[#fce8e8] text-[#7f2b27] border border-[#f3b3b0]';
-            } else {
-              statusClasses = 'bg-[#e7f4eb] text-[#2f6b3d] border border-[#b4dfc1] hover:bg-[#d7eddc]';
-            }
+            {calendarGrid.map((dateInfo, index) => {
+              if (!dateInfo) {
+                return <div key={`empty-${index}`} className="aspect-square" />;
+              }
+              
+              // Parse date using UTC to avoid timezone issues
+              const [year, month, day] = dateInfo.date.split('-').map(Number);
+              const date = new Date(Date.UTC(year, month - 1, day));
+              const isSelected = selectedDate === dateInfo.date;
+              const today = new Date();
+              const todayUTC = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
+              const isToday = date.getTime() === todayUTC.getTime();
+              const isClosed = dateInfo.status === 'closed';
+              const isFull = dateInfo.status === 'full';
+              const hasSlots = dateInfo.timeSlots.length > 0;
+              const disabled = isClosed || isFull || !hasSlots;
 
-            return (
-              <button
-                key={dateInfo.date}
-                onClick={() => handleDateSelect(dateInfo.date)}
-                disabled={disabled}
-                className={`
-                  aspect-square rounded-lg text-xs sm:text-sm font-medium transition-all touch-manipulation min-h-[36px] sm:min-h-[44px]
-                  ${statusClasses}
-                  ${isToday ? 'ring-2 ring-[#d8c5a7] dark:ring-[#b5ad9d]' : ''}
-                `}
-                onMouseEnter={(event) => {
-                  setHoveredDate(dateInfo.date);
-                  const rect = (event.currentTarget as HTMLButtonElement).getBoundingClientRect();
-                  const tooltipContent = hasSlots
-                    ? `${dateInfo.timeSlots.length} available slot${dateInfo.timeSlots.length === 1 ? '' : 's'}`
-                    : isFull
-                      ? 'Fully booked'
-                      : 'Clinic closed';
-                  setHoverTooltip({
-                    x: rect.left + rect.width / 2,
-                    y: rect.top,
-                    content: tooltipContent,
-                  });
-                }}
-                onMouseMove={(event) => {
-                  if (!hoverTooltip) return;
-                  setHoverTooltip({ ...hoverTooltip, x: event.clientX, y: event.clientY });
-                }}
-                onMouseLeave={() => {
-                  setHoveredDate(null);
-                  setHoverTooltip(null);
+              let statusClasses = '';
+              if (isSelected) {
+                statusClasses = 'bg-gradient-to-br from-[#9d9585] to-[#c9c1b0] text-white shadow-lg border border-transparent';
+              } else if (isClosed) {
+                statusClasses = 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border border-transparent cursor-not-allowed';
+              } else if (isFull) {
+                statusClasses = 'bg-[#fce8e8] text-[#7f2b27] border border-[#f3b3b0]';
+              } else {
+                statusClasses = 'bg-[#e7f4eb] text-[#2f6b3d] border border-[#b4dfc1] hover:bg-[#d7eddc]';
+              }
+
+              return (
+                <button
+                  key={dateInfo.date}
+                  onClick={() => handleDateSelect(dateInfo.date)}
+                  disabled={disabled}
+                  className={`
+                    aspect-square rounded-lg text-xs sm:text-sm font-medium transition-all touch-manipulation min-h-[36px] sm:min-h-[44px]
+                    ${statusClasses}
+                    ${isToday ? 'border-2 border-green-500 dark:border-green-400' : ''}
+                  `}
+                  onMouseEnter={(event) => {
+                    setHoveredDate(dateInfo.date);
+                    const rect = (event.currentTarget as HTMLButtonElement).getBoundingClientRect();
+                    
+                    // Position tooltip below the button, centered horizontally
+                    // Use getBoundingClientRect for accurate positioning
+                    const tooltipX = rect.left + rect.width / 2;
+                    // Check if there's enough space below, otherwise show above
+                    const spaceBelow = window.innerHeight - rect.bottom;
+                    const showAbove = spaceBelow < 150; // Show above if less than 150px space below
+                    const tooltipY = showAbove ? rect.top - 8 : rect.bottom + 8; // 8px gap
+                    
+                    // Format date for display
+                    const dateObj = new Date(dateInfo.date);
+                    const formattedDate = dateObj.toLocaleDateString('en-GB', {
+                      weekday: 'short',
+                      day: 'numeric',
+                      month: 'short'
+                    });
+                    
+                    // Create tooltip content based on status
+                    let tooltipContent = '';
+                    if (hasSlots) {
+                      const slotCount = dateInfo.timeSlots.length;
+                      tooltipContent = `${slotCount} available time slot${slotCount === 1 ? '' : 's'}`;
+                    } else if (isFull) {
+                      tooltipContent = 'Fully booked';
+                    } else {
+                      tooltipContent = 'Clinic closed';
+                    }
+                    
+                    setHoverTooltip({
+                      x: tooltipX,
+                      y: tooltipY,
+                      content: tooltipContent,
+                      date: formattedDate,
+                      slots: dateInfo.timeSlots, // Show all available slots
+                      bookedSlots: dateInfo.bookedSlots || [], // Show all booked slots
+                      totalSlots: dateInfo.timeSlots.length,
+                      status: dateInfo.status,
+                      showAbove: showAbove,
+                    });
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredDate(null);
+                    setHoverTooltip(null);
+                  }}
+                >
+                  {day}
+                </button>
+              );
+            })}
+
+            {hoverTooltip && (
+              <div
+                className="pointer-events-none fixed z-50 bg-gray-900 dark:bg-gray-800 text-white text-xs sm:text-sm rounded-lg shadow-xl border border-gray-700 max-w-[280px]"
+                style={{
+                  top: hoverTooltip.showAbove ? 'auto' : `${hoverTooltip.y}px`,
+                  bottom: hoverTooltip.showAbove ? `${window.innerHeight - hoverTooltip.y}px` : 'auto',
+                  left: `${hoverTooltip.x}px`,
+                  transform: 'translateX(-50%)', // Center horizontally
                 }}
               >
-                {date.getDate()}
-              </button>
-            );
-          })}
-
-          {hoverTooltip && (
-            <div
-              className="pointer-events-none fixed z-50 bg-[#3f3a31] text-white text-xs sm:text-sm px-3 py-2 rounded-md shadow-lg"
-              style={{
-                top: hoverTooltip.y + 16,
-                left: hoverTooltip.x + 16,
-              }}
-            >
-              {hoverTooltip.content}
-            </div>
-          )}
-        </div>
-
-        {selectedDayInfo && (
-          <div>
-            <h4 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">Available Times</h4>
-            {selectedDayInfo.timeSlots.length === 0 ? (
-              <p className="text-sm text-gray-500 dark:text-gray-400">This day is fully booked. Please select another date.</p>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-                {selectedDayInfo.timeSlots.map(time => (
-                  <button
-                    key={time}
-                    onClick={() => handleTimeSelect(time)}
-                    className={`px-3 sm:px-4 py-2.5 sm:py-3 min-h-[44px] rounded-lg text-sm sm:text-base font-medium transition-all touch-manipulation active:scale-95 border
-                      ${selectedTime === time
-                        ? 'bg-gradient-to-r from-[#9d9585] to-[#c9c1b0] text-[#3f3a31] shadow-md border-transparent'
-                        : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-[#b5ad9d] hover:text-[#8c846f] dark:hover:text-[#c9c1b0] hover:bg-[#f5f1e9] dark:hover:bg-gray-800/40'}
-                    `}
-                  >
-                    {time}
-                  </button>
-                ))}
+                {/* Arrow pointing to the cell */}
+                {hoverTooltip.showAbove ? (
+                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-800"></div>
+                ) : (
+                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-900 dark:border-b-gray-800"></div>
+                )}
+                
+                <div className="px-3 py-2.5">
+                  {/* Date */}
+                  <div className="font-semibold text-white mb-1.5 border-b border-gray-700 pb-1.5">
+                    {hoverTooltip.date}
+                  </div>
+                  
+                  {/* Status */}
+                  <div className="mb-2">
+                    <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium ${
+                      hoverTooltip.status === 'available' 
+                        ? 'bg-green-500/20 text-green-300' 
+                        : hoverTooltip.status === 'full'
+                        ? 'bg-red-500/20 text-red-300'
+                        : 'bg-gray-500/20 text-gray-400'
+                    }`}>
+                      {hoverTooltip.status === 'available' && (
+                        <span className="w-2 h-2 rounded-full bg-green-400"></span>
+                      )}
+                      {hoverTooltip.status === 'full' && (
+                        <span className="w-2 h-2 rounded-full bg-red-400"></span>
+                      )}
+                      {hoverTooltip.status === 'closed' && (
+                        <span className="w-2 h-2 rounded-full bg-gray-400"></span>
+                      )}
+                {hoverTooltip.content}
+                    </span>
+                  </div>
+                  
+                  {/* Show all time slots if available */}
+                  {hoverTooltip.slots.length > 0 && (
+                    <div className="space-y-1">
+                      <div className="text-gray-400 text-xs font-medium">Available times:</div>
+                      <div className="flex flex-wrap gap-1 max-h-[200px] overflow-y-auto pr-1">
+                        {hoverTooltip.slots.map((slot, idx) => (
+                          <span key={idx} className="px-2 py-0.5 bg-gray-700 rounded text-xs font-mono whitespace-nowrap">
+                            {slot}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Show booked slots if any */}
+                  {hoverTooltip.status === 'available' && hoverTooltip.bookedSlots && hoverTooltip.bookedSlots.length > 0 && (
+                    <div className="space-y-1 mt-2 pt-2 border-t border-gray-700">
+                      <div className="text-gray-400 text-xs font-medium">Booked times:</div>
+                      <div className="flex flex-wrap gap-1 max-h-[200px] overflow-y-auto pr-1">
+                        {hoverTooltip.bookedSlots.map((slot: string, idx: number) => (
+                          <span key={idx} className="px-2 py-0.5 bg-gray-700/50 rounded text-xs font-mono text-gray-500 line-through whitespace-nowrap">
+                            {slot}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
-        )}
-      </div>
-    );
-  };
+
+          {selectedDateSlots && (
+            <div>
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <h4 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Available Times</h4>
+                {selectedTimeSlots.length > 0 && (
+                    <button
+                    onClick={() => {
+                      setSelectedTime('');
+                      setSelectedTimeSlots([]);
+                    }}
+                    className="px-3 py-1.5 text-xs sm:text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg border border-red-300 dark:border-red-700 transition-colors"
+                  >
+                    Clear Selection
+                    </button>
+                )}
+                </div>
+              {(() => {
+                const bookedSlotsSet = new Set(selectedDateSlots.bookedSlots || []);
+                const availableSlotsSet = new Set(selectedDateSlots.timeSlots || []);
+                const durationHours = Math.ceil(totalServiceDuration / 60);
+                
+                // Generate all time slots from working hours start to end
+                let allTimeSlots: string[] = [];
+                
+                if (selectedDateSlots.workingHours) {
+                  const [startHour, startMin] = selectedDateSlots.workingHours.start.split(':').map(Number);
+                  const [endHour, endMin] = selectedDateSlots.workingHours.end.split(':').map(Number);
+                  const startMinutes = startHour * 60 + startMin;
+                  const endMinutes = endHour * 60 + endMin;
+                  const slotInterval = 60; // 1 hour intervals
+                  
+                  // Generate all hourly slots from start to end
+                  for (let timeMinutes = startMinutes; timeMinutes < endMinutes; timeMinutes += slotInterval) {
+                    const hours = Math.floor(timeMinutes / 60);
+                    const minutes = timeMinutes % 60;
+                    const timeString = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+                    allTimeSlots.push(timeString);
+                  }
+                } else {
+                  // Fallback: use available and booked slots, but generate full range
+                  const allSlots = [...(selectedDateSlots.timeSlots || []), ...(selectedDateSlots.bookedSlots || [])];
+                  if (allSlots.length > 0) {
+                    // Find min and max hours
+                    const hours = allSlots.map(slot => {
+                      const [h] = slot.split(':').map(Number);
+                      return h;
+                    });
+                    const minHour = Math.min(...hours);
+                    const maxHour = Math.max(...hours);
+                    
+                    // Generate all slots from min to max
+                    for (let h = minHour; h <= maxHour; h++) {
+                      allTimeSlots.push(`${String(h).padStart(2, '0')}:00`);
+                    }
+                  }
+                }
+                
+                if (allTimeSlots.length === 0) {
+                  return (
+                    <p className="text-sm text-gray-500 dark:text-gray-400">No time slots available. Please select another date.</p>
+                  );
+                }
+                
+                // Helper function to check if any booked slot overlaps with an hour
+                // Since booked slots might be in 15-minute intervals, we need to check if any booking
+                // overlaps with the hour range [hour:00 to hour+1:00)
+                const isHourBooked = (hour: number): boolean => {
+                  const hourStartMinutes = hour * 60;
+                  const hourEndMinutes = (hour + 1) * 60;
+                  
+                  // Check all booked slots to see if any overlap with this hour
+                  for (const bookedSlot of selectedDateSlots.bookedSlots || []) {
+                    const [bookedHour, bookedMin] = bookedSlot.split(':').map(Number);
+                    const bookedMinutes = bookedHour * 60 + bookedMin;
+                    
+                    // If the booked slot is within this hour range, the hour is booked
+                    // We check if booked slot starts before hour ends and ends after hour starts
+                    // Since booked slots are 15-minute intervals, we check if it's within the hour
+                    if (bookedMinutes >= hourStartMinutes && bookedMinutes < hourEndMinutes) {
+                      return true;
+                    }
+                  }
+                  
+                  return false;
+                };
+                
+                // Helper function to check if a time slot has enough consecutive hours available
+                const hasEnoughConsecutiveHours = (startTime: string): boolean => {
+                  const [startHour, startMin] = startTime.split(':').map(Number);
+                  
+                  // First, check if the end time would be within working hours
+                  if (selectedDateSlots.workingHours) {
+                    const [whStartHour, whStartMin] = selectedDateSlots.workingHours.start.split(':').map(Number);
+                    const [whEndHour, whEndMin] = selectedDateSlots.workingHours.end.split(':').map(Number);
+                    const whStartMinutes = whStartHour * 60 + whStartMin;
+                    const whEndMinutes = whEndHour * 60 + whEndMin;
+                    
+                    // Calculate end time
+                    const startMinutes = startHour * 60 + startMin;
+                    const endMinutes = startMinutes + totalServiceDuration;
+                    
+                    // Check if start time is within working hours
+                    if (startMinutes < whStartMinutes || startMinutes >= whEndMinutes) {
+                      return false; // Start time is outside working hours
+                    }
+                    
+                    // Check if end time would exceed or equal working hours end time
+                    // Service must end BEFORE closing time, not at closing time
+                    if (endMinutes >= whEndMinutes) {
+                      return false; // End time is at or exceeds working hours end
+                    }
+                  }
+                  
+                  // Check each hour in the required duration
+                  for (let i = 0; i < durationHours; i++) {
+                    const checkHour = startHour + i;
+                    if (checkHour >= 24) {
+                      return false; // Goes past midnight
+                    }
+                    
+                    const checkTime = `${String(checkHour).padStart(2, '0')}:${String(startMin).padStart(2, '0')}`;
+                    
+                    // Check if this hour is within working hours
+                    if (selectedDateSlots.workingHours) {
+                      const [whStartHour, whStartMin] = selectedDateSlots.workingHours.start.split(':').map(Number);
+                      const [whEndHour, whEndMin] = selectedDateSlots.workingHours.end.split(':').map(Number);
+                      const checkMinutes = checkHour * 60 + startMin;
+                      const whStartMinutes = whStartHour * 60 + whStartMin;
+                      const whEndMinutes = whEndHour * 60 + whEndMin;
+                      
+                      // Check if this hour is within working hours
+                      if (checkMinutes < whStartMinutes || checkMinutes >= whEndMinutes) {
+                        return false; // Outside working hours
+                      }
+                    }
+                    
+                    // Check if this hour has any bookings (using the hour-level check)
+                    if (isHourBooked(checkHour)) {
+                      return false;
+                    }
+                    
+                    // Also check if the exact time slot is booked
+                    if (bookedSlotsSet.has(checkTime)) {
+                      return false;
+                    }
+                    
+                    // If we have working hours and the slot is within them and not booked,
+                    // it should be available (even if not explicitly in availableSlots)
+                    // The API filters availableSlots based on consecutive availability,
+                    // but we're doing that check here, so we can be more lenient
+                    if (selectedDateSlots.workingHours) {
+                      const [whStartHour, whStartMin] = selectedDateSlots.workingHours.start.split(':').map(Number);
+                      const [whEndHour, whEndMin] = selectedDateSlots.workingHours.end.split(':').map(Number);
+                      const checkMinutes = checkHour * 60 + startMin;
+                      const whStartMinutes = whStartHour * 60 + whStartMin;
+                      const whEndMinutes = whEndHour * 60 + whEndMin;
+                      
+                      // If within working hours and not booked, it's available
+                      if (checkMinutes >= whStartMinutes && checkMinutes < whEndMinutes) {
+                        continue; // This hour is available, check next
+                      } else {
+                        return false; // Outside working hours
+                      }
+                    } else {
+                      // Without working hours, require it to be in availableSlots
+                      if (!availableSlotsSet.has(checkTime)) {
+                        return false;
+                      }
+                    }
+                  }
+                  
+                  return true; // All consecutive hours are available
+                };
+                
+                return (
+                  <>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                      {allTimeSlots.map(time => {
+                        const isBooked = bookedSlotsSet.has(time);
+                        const isSelected = selectedTimeSlots.includes(time);
+                        const isStartTime = selectedTime === time;
+                        
+                        // Check if this slot has enough consecutive hours available
+                        const isActuallyAvailable = !isBooked && hasEnoughConsecutiveHours(time);
+                        
+                        // Show as unavailable (red) if booked or doesn't have enough consecutive hours
+                        if (!isActuallyAvailable) {
+                          return (
+                      <div
+                        key={time}
+                              className="px-3 sm:px-4 py-2.5 sm:py-3 min-h-[44px] rounded-lg text-sm sm:text-base font-medium border-2 border-red-400 dark:border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 cursor-not-allowed opacity-60"
+                      >
+                        {time}
+                      </div>
+                          );
+                        }
+                        
+                        // Show as available (green) if it has enough consecutive hours
+                        return (
+                          <button
+                            key={time}
+                            onClick={() => handleTimeSelect(time)}
+                            className={`px-3 sm:px-4 py-2.5 sm:py-3 min-h-[44px] rounded-lg text-sm sm:text-base font-medium transition-all touch-manipulation active:scale-95 border-2
+                              ${isStartTime
+                                ? 'bg-gradient-to-r from-[#9d9585] to-[#c9c1b0] text-[#3f3a31] shadow-md border-[#9d9585] font-bold'
+                                : isSelected
+                                ? 'bg-[#d4c5a0] dark:bg-[#b5ad9d] text-[#3f3a31] border-[#9d9585]'
+                                : 'border-green-500 dark:border-green-400 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 hover:border-green-600 dark:hover:border-green-300'}
+                            `}
+                          >
+                            {time}
+                          </button>
+                        );
+                      })}
+                  </div>
+                    {selectedTimeSlots.length > 0 && (
+                      <div className="mt-4 p-3 bg-[#f5f1e9] dark:bg-gray-800/40 border border-[#e4d9c8] dark:border-gray-700 rounded-lg">
+                        <p className="text-sm text-gray-700 dark:text-gray-300">
+                          <span className="font-semibold">Selected time slots:</span> {selectedTimeSlots.join(' → ')}
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                          Total duration: {Math.floor(totalServiceDuration / 60)}h {totalServiceDuration % 60}m
+                        </p>
+                </div>
+              )}
+                  </>
+                );
+              })()}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
 
   const renderOrderPreview = () => {
     const formattedAppointmentDate = selectedDate
@@ -848,6 +1487,29 @@ function BookingPageContent() {
       : 'Select a date';
 
     const formattedAppointmentTime = selectedTime || 'Select a time';
+    
+    // Calculate end time based on start time and total duration
+    let timeRange = formattedAppointmentTime;
+    if (selectedTime && totalServiceDuration > 0) {
+      const [startHour, startMin] = selectedTime.split(':').map(Number);
+      const durationHours = Math.floor(totalServiceDuration / 60);
+      const durationMinutes = totalServiceDuration % 60;
+      
+      let endHour = startHour + durationHours;
+      let endMin = startMin + durationMinutes;
+      
+      if (endMin >= 60) {
+        endHour += Math.floor(endMin / 60);
+        endMin = endMin % 60;
+      }
+      
+      if (endHour >= 24) {
+        endHour = endHour % 24;
+      }
+      
+      const endTime = `${String(endHour).padStart(2, '0')}:${String(endMin).padStart(2, '0')}`;
+      timeRange = `${selectedTime} to ${endTime}`;
+    }
 
     return (
       <div className="space-y-6">
@@ -940,7 +1602,7 @@ function BookingPageContent() {
           </div>
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400 flex-shrink-0" />
-            <span className="text-sm sm:text-base text-gray-900 dark:text-white font-semibold">{formattedAppointmentTime}</span>
+            <span className="text-sm sm:text-base text-gray-900 dark:text-white font-semibold">{timeRange}</span>
           </div>
         </div>
         
@@ -1001,6 +1663,12 @@ function BookingPageContent() {
           }))}
           selectedDate={selectedDate}
           selectedTime={selectedTime}
+          teamMemberId={selectedTeamMember || undefined}
+          teamMemberName={selectedTeamMember ? teamMembers.find(m => m.id === selectedTeamMember)?.name : undefined}
+          teamMemberRole={selectedTeamMember ? teamMembers.find(m => m.id === selectedTeamMember)?.role : undefined}
+          teamMemberPhone={selectedTeamMember ? teamMembers.find(m => m.id === selectedTeamMember)?.phone : undefined}
+          teamMemberEmail={selectedTeamMember ? teamMembers.find(m => m.id === selectedTeamMember)?.email : undefined}
+          serviceDurationMinutes={totalServiceDuration || undefined}
           onPaymentSuccess={handlePaymentSuccess}
           onPaymentError={handlePaymentError}
         />
@@ -1024,7 +1692,7 @@ function BookingPageContent() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Header */}
-        <div className="text-center mb-8 sm:mb-12 px-4">
+        <div className="text-center mb-8 sm:mb-12 px-4 mt-8 sm:mt-12 md:mt-16">
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 md:mb-6 font-playfair">
             Book Your Treatment
           </h1>
@@ -1033,47 +1701,9 @@ function BookingPageContent() {
           </p>
         </div>
 
-        {/* Progress Steps */}
-        <div className="mb-8 sm:mb-12 px-4">
-          <div className="hidden sm:flex justify-center">
-            <div className="flex items-center space-x-4">
-              {bookingSteps.map((step, index) => {
-                const Icon = step.icon;
-                const isActive = currentStep === step.key;
-                const isCompleted = currentStepIndex > index;
-
-                return (
-                  <div key={step.key} className="flex items-center">
-                    <div className={`
-                      w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0
-                      ${isCompleted ? 'bg-[#6bb18d] text-white' : 
-                        isActive ? 'bg-[#9d9585] text-white' : 
-                        'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}
-                    `}>
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <span className={`ml-2 font-medium text-sm md:text-base whitespace-nowrap ${
-                      isActive ? 'text-[#9d9585] dark:text-[#c9c1b0]' : 
-                      isCompleted ? 'text-[#6bb18d] dark:text-[#6bb18d]' :
-                      'text-gray-600 dark:text-gray-400'
-                    }`}>
-                      {step.label}
-                    </span>
-                    {index < bookingSteps.length - 1 && (
-                      <div className={`w-8 h-0.5 mx-4 flex-shrink-0 ${
-                        isCompleted ? 'bg-[#6bb18d]' : 'bg-gray-200 dark:bg-gray-700'
-                      }`} />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-        </div>
 
         {/* Main Content */}
-        <div className="grid lg:grid-cols-3 gap-6 sm:gap-8 px-4 sm:px-0">
+        <div className="grid lg:grid-cols-3 gap-6 sm:gap-8 px-4 sm:px-0 items-start">
           <div className="lg:col-span-2 space-y-5">
             {bookingSteps.map((step, index) => {
               const Icon = step.icon;
@@ -1157,13 +1787,15 @@ function BookingPageContent() {
           
           {/* Right Column - Order Summary */}
           <div className="lg:col-span-1">
-            <div className="sticky top-8">
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
-                <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-4">Order Summary</h3>
+            <div className="sticky top-8 z-20">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg max-h-[calc(100vh-4rem)] overflow-y-auto">
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-4 text-center">Order Summary</h3>
                 
                 {selectedServices.length > 0 && (
                   <>
+                    {/* Services */}
                     <div className="space-y-3 mb-4">
+                      <h4 className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 font-semibold mb-2">Services</h4>
                       {selectedServices.map(item => (
                         <div key={item.serviceId} className="flex justify-between text-sm">
                           <span className="text-gray-600 dark:text-gray-400">{item.name} × {item.quantity}</span>
@@ -1172,30 +1804,95 @@ function BookingPageContent() {
                       ))}
                     </div>
                     
-                    <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
-                      <div className="flex justify-between text-lg font-bold">
-                        <span className="text-gray-900 dark:text-white">Total:</span>
-                        <span className="text-[#9d9585] dark:text-[#c9c1b0]">£{totalAmount}</span>
+                    {/* Team Member */}
+                    {selectedTeamMember && (
+                      <div className="mb-4 pb-4 border-b border-gray-200 dark:border-gray-600">
+                        <h4 className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 font-semibold mb-2">Team Member</h4>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                          <span className="text-sm text-gray-900 dark:text-white font-medium">
+                            {teamMembers.find(m => m.id === selectedTeamMember)?.name || 'Selected Team Member'}
+                          </span>
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        Duration: {totalDuration} minutes
+                        {teamMembers.find(m => m.id === selectedTeamMember)?.role && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-6">
+                            {teamMembers.find(m => m.id === selectedTeamMember)?.role}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Appointment Details */}
+                    {selectedDate && selectedTime && (() => {
+                      // Calculate end time for right column summary
+                      let timeRangeDisplay = selectedTime;
+                      if (totalServiceDuration > 0) {
+                        const [startHour, startMin] = selectedTime.split(':').map(Number);
+                        const durationHours = Math.floor(totalServiceDuration / 60);
+                        const durationMinutes = totalServiceDuration % 60;
+                        
+                        let endHour = startHour + durationHours;
+                        let endMin = startMin + durationMinutes;
+                        
+                        if (endMin >= 60) {
+                          endHour += Math.floor(endMin / 60);
+                          endMin = endMin % 60;
+                        }
+                        
+                        if (endHour >= 24) {
+                          endHour = endHour % 24;
+                        }
+                        
+                        const endTime = `${String(endHour).padStart(2, '0')}:${String(endMin).padStart(2, '0')}`;
+                        timeRangeDisplay = `${selectedTime} to ${endTime}`;
+                      }
+                      
+                      const formattedDate = new Date(selectedDate).toLocaleDateString('en-GB', {
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      });
+                      
+                      return (
+                        <div className="mb-4 pb-4 border-b border-gray-200 dark:border-gray-600">
+                          <h4 className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 font-semibold mb-2">Appointment</h4>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                              <span className="text-gray-900 dark:text-white">{formattedDate}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                              <span className="text-gray-900 dark:text-white font-medium">{timeRangeDisplay}</span>
+                      </div>
+                    </div>
+                  </div>
+                      );
+                    })()}
+                    
+                    {/* Total */}
+                    <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
+                      <div className="space-y-2 mb-3">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600 dark:text-gray-400">Total Duration:</span>
+                          <span className="text-gray-900 dark:text-white font-semibold">
+                            {Math.floor(totalDuration / 60)}h {totalDuration % 60}m
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-lg font-bold">
+                          <span className="text-gray-900 dark:text-white">Total Amount:</span>
+                          <span className="text-[#9d9585] dark:text-[#c9c1b0]">£{totalAmount.toFixed(0)}</span>
+                        </div>
                       </div>
                     </div>
                   </>
                 )}
                 
-                {selectedDate && selectedTime && (
-                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Calendar className="w-4 h-4" />
-                        <span>{new Date(selectedDate).toLocaleDateString('en-GB')}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4" />
-                        <span>{selectedTime}</span>
-                      </div>
-                    </div>
+                {selectedServices.length === 0 && (
+                  <div className="text-center py-8">
+                    <Calendar className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+                    <p className="text-sm text-gray-500 dark:text-gray-400">No services selected yet</p>
                   </div>
                 )}
               </div>
