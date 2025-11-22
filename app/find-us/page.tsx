@@ -196,15 +196,15 @@ export default function FindUsPage() {
                 />
               </div>
               <div className="mt-4 text-center">
-                <button
-                  onClick={handleDirections}
-                  className="inline-flex items-center gap-2 bg-[#3a3428] text-[#f5f1e9] px-6 py-3 rounded-lg hover:bg-[#2c261c] transition-all font-medium shadow-md hover:shadow-lg"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  Open in Google Maps
-                </button>
+                  <button
+                    onClick={handleDirections}
+                    className="inline-flex items-center gap-2 bg-[#3a3428] text-[#f5f1e9] px-6 py-3 rounded-lg hover:bg-[#2c261c] transition-all font-medium shadow-md hover:shadow-lg"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    Open in Google Maps
+                  </button>
+                </div>
               </div>
-            </div>
 
             {/* How to Find Us */}
             {displayFindUsData.howToFindUs && (
@@ -215,7 +215,7 @@ export default function FindUsPage() {
                 <p className="text-lg text-[#524a3a] dark:text-gray-300 leading-relaxed">
                   {displayFindUsData.howToFindUs}
                 </p>
-              </div>
+            </div>
             )}
 
             {/* Transport Options */}
@@ -418,36 +418,36 @@ export default function FindUsPage() {
                   <p className="mt-4 text-[#6f6652] dark:text-gray-400">Loading opening hours...</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {Object.entries(openingHours).map(([key, dayInfo]) => (
-                    <div
-                      key={key}
-                      className={`p-4 rounded-lg border-2 transition-all ${
-                        dayInfo.isOpen
-                          ? 'border-[#d8c5a7] dark:border-[#5c5442] bg-[#f7f1e5] dark:bg-[#3a3428]/60'
-                          : 'border-[#c9c1b0] dark:border-[#4c4536] bg-[#ebe3d4] dark:bg-[#2a241a]/60'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-[#3a3428] dark:text-white">
-                          {dayInfo.day}
-                        </h3>
-                        <span
-                          className={`px-3 py-1 rounded-full text-sm font-medium ${
-                            dayInfo.isOpen
-                              ? 'bg-[#e8e1d4] dark:bg-[#3a3428] text-[#6f6652] dark:text-[#d8c5a7]'
-                              : 'bg-[#dcd2c0] dark:bg-[#2f281e] text-[#544c3d] dark:text-[#d8c5a7]'
-                          }`}
-                        >
-                          {dayInfo.isOpen ? 'Open' : 'Closed'}
-                        </span>
-                      </div>
-                      <p className="text-[#6f6652] dark:text-gray-400 mt-2">
-                        {dayInfo.hours}
-                      </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {Object.entries(openingHours).map(([key, dayInfo]) => (
+                  <div
+                    key={key}
+                    className={`p-4 rounded-lg border-2 transition-all ${
+                      dayInfo.isOpen
+                        ? 'border-[#d8c5a7] dark:border-[#5c5442] bg-[#f7f1e5] dark:bg-[#3a3428]/60'
+                        : 'border-[#c9c1b0] dark:border-[#4c4536] bg-[#ebe3d4] dark:bg-[#2a241a]/60'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-[#3a3428] dark:text-white">
+                        {dayInfo.day}
+                      </h3>
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          dayInfo.isOpen
+                            ? 'bg-[#e8e1d4] dark:bg-[#3a3428] text-[#6f6652] dark:text-[#d8c5a7]'
+                            : 'bg-[#dcd2c0] dark:bg-[#2f281e] text-[#544c3d] dark:text-[#d8c5a7]'
+                        }`}
+                      >
+                        {dayInfo.isOpen ? 'Open' : 'Closed'}
+                      </span>
                     </div>
-                  ))}
-                </div>
+                    <p className="text-[#6f6652] dark:text-gray-400 mt-2">
+                      {dayInfo.hours}
+                    </p>
+                  </div>
+                ))}
+              </div>
               )}
             </div>
 

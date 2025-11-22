@@ -195,8 +195,9 @@ export default function HeaderAesthetics() {
       >
         <div className="bg-[#c9c1b0] dark:bg-gray-800 text-gray-900 dark:text-gray-100">
           <div className="container mx-auto px-3 sm:px-4">
-            <div className="flex flex-wrap items-center justify-between gap-y-2 py-3 text-[10px] sm:text-xs md:text-sm">
-              <div className="w-1/2 sm:w-auto flex items-center justify-center sm:justify-start">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-0 py-3 text-[10px] sm:text-xs md:text-sm">
+              {/* Left: Find Us */}
+              <div className="flex items-center justify-start sm:justify-start order-1 sm:order-1">
                 <Link
                   href="/find-us"
                   className="group relative inline-flex items-center gap-1.5 sm:gap-2 font-semibold tracking-[0.18em] sm:tracking-[0.14em] uppercase text-[#3a3428] dark:text-[#f5f1e9] hover:text-[#1f1b15] dark:hover:text-[#f8efdf] transition-colors pb-1"
@@ -209,7 +210,8 @@ export default function HeaderAesthetics() {
                 </Link>
               </div>
 
-              <div className="w-1/2 sm:w-auto flex items-center justify-center gap-3 sm:gap-4 lg:gap-6 text-center sm:text-left">
+              {/* Middle: Email and Phone */}
+              <div className="flex items-center justify-center gap-3 sm:gap-4 lg:gap-6 text-center sm:text-left order-2 sm:order-2">
                 <span
                   className="hidden sm:inline text-gray-700/70 dark:text-gray-200/60"
                   aria-hidden="true"
@@ -246,8 +248,12 @@ export default function HeaderAesthetics() {
                     <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-all duration-300 ease-out group-hover:w-full"></span>
                   </span>
                 </a>
+              </div>
+
+              {/* Right: Social Links - Separated */}
+              <div className="flex items-center justify-end sm:justify-end gap-3 sm:gap-4 order-3 sm:order-3">
                 <span
-                  className="text-gray-700/70 dark:text-gray-200/60"
+                  className="hidden sm:inline text-gray-700/70 dark:text-gray-200/60"
                   aria-hidden="true"
                 >
                   |

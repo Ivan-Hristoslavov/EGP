@@ -32,7 +32,7 @@ export default function BabyBotoxPage() {
     {
       step: "2",
       title: "Treatment Planning", 
-      description: "Customized injection plan for natural-looking results"
+      description: "Customised injection plan for natural-looking results"
     },
     {
       step: "3",

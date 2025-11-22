@@ -36,7 +36,7 @@ export function Providers({ children, themeProps }: ProvidersProps) {
       <HeroUIProvider navigate={router.push}>
         <AdminProfileProvider>
           <SiteDataProvider>
-            {children}
+          {children}
           </SiteDataProvider>
         </AdminProfileProvider>
       </HeroUIProvider>

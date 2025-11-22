@@ -121,7 +121,8 @@ export default function ProfilePage() {
       const [firstName, ...lastNameParts] = dbProfile.name.split(" ");
       const lastName = lastNameParts.join(" ");
 
-      setProfileData({
+      // Use functional update to access current state and preserve avatar value
+      setProfileData((prev) => ({
         firstName: firstName || "Admin",
         lastName: lastName || "User",
         email: dbProfile.email || process.env.NEXT_PUBLIC_ADMIN_EMAIL || "",
@@ -134,13 +135,14 @@ export default function ProfilePage() {
         yearsOfExperience: dbProfile.years_of_experience || "",
         specializations: dbProfile.specializations || "",
         insuranceProvider: dbProfile.insurance_provider || "",
-        avatar: profileData.avatar || "",
+        // Preserve existing avatar value from previous state (avatar is not stored in database)
+        avatar: prev.avatar || "",
         howToFindUs: (dbProfile as any).how_to_find_us || "",
         howToReachUs: (dbProfile as any).how_to_reach_us || "",
         googleMapsAddress: (dbProfile as any).google_maps_address || dbProfile.company_address || "809 Wandsworth Road, SW8 3JH, London, UK",
         transportOptions: (dbProfile as any).transport_options || {},
         nearbyLandmarks: (dbProfile as any).nearby_landmarks || [],
-      });
+      }));
     }
   }, [dbProfile, loading]);
 

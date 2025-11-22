@@ -20,7 +20,7 @@ export default function BookTreatmentNowPage() {
     "Transparent pricing information",
     "No-obligation consultation",
     "Professional advice from qualified practitioners",
-    "Customized treatment plan creation"
+    "Customised treatment plan creation"
   ];
 
   const whatToExpect = [

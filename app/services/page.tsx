@@ -428,31 +428,31 @@ function ServicesPageContent() {
                       </span>
                     </div>
                   )}
-                  
+                    
                   {/* Duration Badge - Top Right */}
                   <div className="absolute top-2 right-2">
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-[#ddd5c3]/60 dark:border-gray-700/60 rounded-full text-[10px] font-semibold text-[#464C45] dark:text-gray-200">
                       <Clock className="w-3 h-3" />
-                      {service.duration} min
-                    </span>
-                  </div>
-                  
+                          {service.duration} min
+                        </span>
+                      </div>
+                      
                   {/* Price - Centered */}
                   <div className="text-center pt-6 pb-2">
                     <div className="text-3xl font-bold text-[#464C45] dark:text-[#5a6259]">
                       £{service.price}
                     </div>
-                  </div>
-                </div>
-                
+                      </div>
+                    </div>
+                    
                 {/* Content */}
                 <div className="p-4 flex flex-col flex-1">
                   {/* Category Badge */}
                   <div className="mb-2">
                     <span className="inline-flex items-center px-2.5 py-0.5 bg-[#464C45] dark:bg-[#464C45] text-white rounded-full text-xs font-semibold">
-                      {service.category}
-                    </span>
-                  </div>
+                          {service.category}
+                        </span>
+                      </div>
                   
                   {/* Service Name */}
                   <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-tight mb-2">
@@ -462,8 +462,8 @@ function ServicesPageContent() {
                   {/* Description */}
                   {service.description && (
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 leading-relaxed line-clamp-2">
-                      {service.description}
-                    </p>
+                        {service.description}
+                      </p>
                   )}
                   
                   {/* Service Details */}
@@ -490,7 +490,7 @@ function ServicesPageContent() {
                         <span>Results: {service.results_duration_weeks} week{service.results_duration_weeks !== 1 ? 's' : ''}</span>
                       </div>
                     )}
-                  </div>
+                    </div>
                   
                   {/* Spacer to push buttons to bottom */}
                   <div className="flex-1"></div>
