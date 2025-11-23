@@ -14,7 +14,7 @@ export default function SectionHeroAesthetics() {
     {
       title: "Transform Your Natural Beauty",
       subtitle: "Expert aesthetic treatments in the heart of London",
-      image: "/hero-images/owners.JPG",
+      image: "/hero-images/sisters.png",
     },
     {
       title: "Award-Winning Aesthetic Clinic",
@@ -57,7 +57,7 @@ export default function SectionHeroAesthetics() {
           />
           {/* Gradient Overlay - Lighter for owners slide */}
           <div className={`absolute inset-0 z-[1] ${
-            slide.image.includes("owners.JPG") 
+            slide.image.includes("sisters.png") 
               ? "bg-gradient-to-b sm:bg-gradient-to-r from-black/50 via-black/40 to-black/20 sm:to-transparent" 
               : "bg-gradient-to-b sm:bg-gradient-to-r from-black/80 via-black/60 to-black/40 sm:to-transparent"
           }`}></div>
