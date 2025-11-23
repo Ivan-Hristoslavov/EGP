@@ -14,7 +14,7 @@ export function SectionHero() {
 
   // Hero images in requested order: owners, egp, chair
   const heroImages = [
-    "/hero-images/owners.JPG",
+    "/hero-images/sisters.png",
     "/hero-images/egp.JPG",
     "/hero-images/chair.JPG",
   ];
