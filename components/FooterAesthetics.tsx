@@ -225,7 +225,7 @@ export default function FooterAesthetics() {
                   <div className="flex items-start gap-3 text-gray-700 dark:text-gray-400 text-sm">
                     <MapPin className="w-5 h-5 flex-shrink-0 text-gray-600 dark:text-gray-500 mt-0.5" />
                     <div>
-                      {contactAddress.split(',').map((part, index) => (
+                      {contactAddress.split(',').map((part: string, index: number) => (
                         <div key={index}>{part.trim()}</div>
                       ))}
                     </div>

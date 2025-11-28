@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
       // Get team member details if available
       let teamMemberName = null;
       if (teamMemberId) {
-        const { data: teamMember } = await supabase
+        const { data: teamMember } = await supabaseAdmin
           .from('team')
           .select('name, role')
           .eq('id', teamMemberId)
