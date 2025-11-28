@@ -1709,9 +1709,25 @@ export default function CalendarPage() {
                     ) : (
                       <div>
                         {loadingSlots ? (
-                          <div className="flex items-center justify-center py-8">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-                            <span className="ml-2 text-gray-600 dark:text-gray-400">Loading available slots...</span>
+                          <div className="space-y-3">
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              Available time slots for {new Date(moveTargetDate).toLocaleDateString()}:
+                            </div>
+                            <div className="grid grid-cols-4 gap-2 max-h-64 overflow-y-auto p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border">
+                              {/* Skeleton loaders */}
+                              {Array.from({ length: 8 }).map((_, idx) => (
+                                <div
+                                  key={idx}
+                                  className="px-3 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"
+                                >
+                                  <div className="h-4 w-12 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-purple-600"></div>
+                              <span>Loading available slots...</span>
+                            </div>
                           </div>
                         ) : moveAvailableSlots.length > 0 ? (
                           <div className="space-y-3">
@@ -1892,9 +1908,17 @@ export default function CalendarPage() {
                         Time *
                       </label>
                       {loadingEditSlots ? (
-                        <div className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-700">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                          <span className="text-sm text-gray-600 dark:text-gray-400">Loading available times...</span>
+                        <div className="relative">
+                          <select
+                            name="time"
+                            disabled
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                          >
+                            <option>Loading available times...</option>
+                          </select>
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                          </div>
                         </div>
                       ) : editAvailableSlots.length > 0 ? (
                         <select

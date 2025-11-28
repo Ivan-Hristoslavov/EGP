@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Phone, Play, Calendar, MessageCircle, X, Menu, Minimize2, Instagram } from "lucide-react";
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
+import { useAdminProfile } from "@/components/AdminProfileContext";
 
 type QuickAction = {
   id: string;
@@ -17,8 +18,10 @@ type QuickAction = {
 export default function FloatingContactButtons() {
   const [isExpanded, setIsExpanded] = useState(false);
   const handleActionClick = () => setIsExpanded(false);
-
-  const whatsappNumber = siteConfig.contact.whatsapp.replace(/\s/g, "").replace(/\+/g, "");
+  const adminProfile = useAdminProfile();
+  
+  const contactPhone = adminProfile?.phone || siteConfig.contact.phone;
+  const whatsappNumber = (adminProfile?.whatsapp || adminProfile?.phone || siteConfig.contact.whatsapp).replace(/\s/g, "").replace(/\+/g, "");
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hi! I'd like to book a treatment.")}`;
 
   const quickActions: QuickAction[] = [
@@ -34,7 +37,7 @@ export default function FloatingContactButtons() {
       id: "call",
       labelDesktop: "Call Now",
       labelMobile: "Call",
-      href: `tel:${siteConfig.contact.phone}`,
+      href: `tel:${contactPhone}`,
       gradient: "bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700",
       icon: Phone,
     },

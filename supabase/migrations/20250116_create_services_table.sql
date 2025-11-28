@@ -104,15 +104,18 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Create triggers for updated_at
+-- Create triggers for updated_at (drop if exists first)
+DROP TRIGGER IF EXISTS update_main_tabs_updated_at ON main_tabs;
 CREATE TRIGGER update_main_tabs_updated_at 
     BEFORE UPDATE ON main_tabs 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_service_categories_updated_at ON service_categories;
 CREATE TRIGGER update_service_categories_updated_at 
     BEFORE UPDATE ON service_categories 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_services_updated_at ON services;
 CREATE TRIGGER update_services_updated_at 
     BEFORE UPDATE ON services 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -133,7 +136,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger to auto-generate slug before insert
+-- Trigger to auto-generate slug before insert (drop if exists first)
+DROP TRIGGER IF EXISTS generate_service_slug_trigger ON services;
 CREATE TRIGGER generate_service_slug_trigger
   BEFORE INSERT OR UPDATE ON services
   FOR EACH ROW

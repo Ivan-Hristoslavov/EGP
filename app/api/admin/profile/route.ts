@@ -70,14 +70,14 @@ export async function PUT(request: NextRequest) {
 
     // Update the profile using the ID
     const updateData: any = {
-      name: `${firstName} ${lastName}`,
-      phone,
-      about,
-      business_email: businessEmail,
-      company_name: companyName,
-      company_address: companyAddress,
-      insurance_provider: insuranceProvider,
-      updated_at: new Date().toISOString(),
+        name: `${firstName} ${lastName}`,
+        phone,
+        about,
+        business_email: businessEmail,
+        company_name: companyName,
+        company_address: companyAddress,
+        insurance_provider: insuranceProvider,
+        updated_at: new Date().toISOString(),
     };
 
     // Add optional fields that exist in the base schema

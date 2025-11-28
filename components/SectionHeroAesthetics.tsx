@@ -6,8 +6,11 @@ import { Star, CheckCircle } from "lucide-react";
 import ButtonBookNow from "./ButtonBookNow";
 import ButtonWhatsApp from "./ButtonWhatsApp";
 import { siteConfig } from "@/config/site";
+import { useAdminProfile } from "@/components/AdminProfileContext";
 
 export default function SectionHeroAesthetics() {
+  const adminProfile = useAdminProfile();
+  const contactPhone = adminProfile?.phone || siteConfig.contact.phone;
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const slides = [
@@ -122,10 +125,10 @@ export default function SectionHeroAesthetics() {
           <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 text-white/90 text-sm sm:text-base">
             <span>Or call us now:</span>
             <a
-              href={`tel:${siteConfig.contact.phone}`}
+              href={`tel:${contactPhone}`}
               className="text-lg sm:text-xl font-bold text-white hover:text-yellow-300 transition-colors"
             >
-              {siteConfig.contact.phone}
+              {contactPhone}
             </a>
           </div>
         </div>

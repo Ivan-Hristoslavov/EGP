@@ -34,21 +34,15 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://egp.com'),
     title: {
-      default: `${companyName} - Premium Aesthetic Treatments London | Clapham, Chelsea, Battersea`,
+      default: `${companyName} - Premium Aesthetic Treatments London`,
       template: `%s | ${companyName} - Aesthetic Clinic London`
     },
-    description: `Premier aesthetic clinic in South West London. Expert treatments in Clapham, Balham, Chelsea, Battersea, Wandsworth, Streatham. ${responseTimeNormalized}-minute response time, ${yearsExperience} experience. Fully insured.`,
+    description: `Premier aesthetic clinic in South West London. Expert treatments with ${responseTimeNormalized}-minute response time, ${yearsExperience} experience. Fully insured.`,
     keywords: [
       "aesthetic clinic London",
       "botox London",
       "dermal fillers London",
       "anti-wrinkle injections London",
-      "aesthetic treatments Clapham",
-      "aesthetic treatments Chelsea", 
-      "aesthetic treatments Battersea",
-      "aesthetic treatments Balham",
-      "aesthetic treatments Wandsworth",
-      "aesthetic treatments Streatham",
       "skin treatments London",
       "facial aesthetics London",
       "cosmetic clinic London",
@@ -56,12 +50,6 @@ export async function generateMetadata(): Promise<Metadata> {
       "aesthetic practitioner London",
       "body contouring London",
       "skin rejuvenation London",
-      "aesthetic clinic SW4",
-      "aesthetic clinic SW12", 
-      "aesthetic clinic SW3",
-      "aesthetic clinic SW8",
-      "aesthetic clinic SW18",
-      "aesthetic clinic SW16",
       "egp",
       "egp aesthetics",
       "professional aesthetic treatments London"

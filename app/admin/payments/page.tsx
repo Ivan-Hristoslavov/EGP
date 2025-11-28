@@ -121,15 +121,15 @@ export default function PaymentsPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'paid':
-        return 'text-green-600 bg-green-100';
+        return 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30';
       case 'pending':
-        return 'text-yellow-600 bg-yellow-100';
+        return 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30';
       case 'refunded':
-        return 'text-red-600 bg-red-100';
+        return 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30';
       case 'failed':
-        return 'text-red-600 bg-red-100';
+        return 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30';
       default:
-        return 'text-gray-600 bg-gray-100';
+        return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700';
     }
   };
 
@@ -269,52 +269,52 @@ export default function PaymentsPage() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Payments</h1>
-          <p className="text-gray-600">Manage customer payments and transactions</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Payments</h1>
+          <p className="text-gray-600 dark:text-gray-400">Manage customer payments and transactions</p>
         </div>
       </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Received</p>
-              <p className="text-2xl font-bold text-green-600">£{getTotalAmount().toFixed(2)}</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Received</p>
+              <p className="text-2xl font-bold text-green-600 dark:text-green-400">£{getTotalAmount().toFixed(2)}</p>
             </div>
-            <div className="p-3 bg-green-100 rounded-full">
-              <CheckCircle className="w-6 h-6 text-green-600" />
+            <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
+              <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
         </div>
         
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Pending Payments</p>
-              <p className="text-2xl font-bold text-yellow-600">£{getPendingAmount().toFixed(2)}</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pending Payments</p>
+              <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">£{getPendingAmount().toFixed(2)}</p>
             </div>
-            <div className="p-3 bg-yellow-100 rounded-full">
-              <AlertCircle className="w-6 h-6 text-yellow-600" />
+            <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-full">
+              <AlertCircle className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
             </div>
           </div>
         </div>
         
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Transactions</p>
-              <p className="text-2xl font-bold text-blue-600">{filteredPayments.length}</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Transactions</p>
+              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{filteredPayments.length}</p>
             </div>
-            <div className="p-3 bg-blue-100 rounded-full">
-              <CreditCard className="w-6 h-6 text-blue-600" />
+            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+              <CreditCard className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border">
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -323,14 +323,14 @@ export default function PaymentsPage() {
               placeholder="Search payments..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
           
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">All Status</option>
             <option value="paid">Paid</option>
@@ -342,7 +342,7 @@ export default function PaymentsPage() {
           <select
             value={methodFilter}
             onChange={(e) => setMethodFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">All Methods</option>
             <option value="card">Card</option>
@@ -354,7 +354,7 @@ export default function PaymentsPage() {
           <select
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">All Dates</option>
             <option value="today">Today</option>
@@ -362,7 +362,7 @@ export default function PaymentsPage() {
             <option value="this_month">This Month</option>
           </select>
           
-          <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2">
+          <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600 flex items-center gap-2">
             <Filter className="w-4 h-4" />
             More Filters
           </button>
@@ -370,15 +370,15 @@ export default function PaymentsPage() {
       </div>
 
       {/* Payments Table */}
-      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         {filteredPayments.length === 0 ? (
           <div className="text-center py-12">
-            <CreditCard className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No payments found</h3>
-            <p className="text-gray-600 mb-4">Get started by recording your first payment.</p>
+            <CreditCard className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No payments found</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">Get started by recording your first payment.</p>
             <button
               onClick={() => setShowAddModal(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+              className="bg-blue-600 dark:bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600"
             >
               Record Payment
             </button>
@@ -386,65 +386,65 @@ export default function PaymentsPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b">
+              <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Customer
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Service
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Amount
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Method
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Date
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Reference
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {filteredPayments.map((payment) => (
-                  <tr key={payment.id} className="hover:bg-gray-50">
+                  <tr key={payment.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">
                           {payment.customers?.name || 'Unknown Customer'}
                         </div>
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
                           {payment.customers?.email || 'No email'}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
+                      <div className="text-sm text-gray-900 dark:text-white">
                         {payment.bookings?.service || 'Manual Payment'}
                       </div>
                       {payment.bookings?.date && (
-                        <div className="text-sm text-gray-500 flex items-center gap-1">
+                        <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
                           {new Date(payment.bookings.date).toLocaleDateString()}
                         </div>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                       £{payment.amount.toFixed(2)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         {getMethodIcon(payment.payment_method)}
-                        <span className="text-sm text-gray-900 capitalize">
+                        <span className="text-sm text-gray-900 dark:text-white capitalize">
                           {payment.payment_method.replace('_', ' ')}
                         </span>
                       </div>
@@ -455,17 +455,17 @@ export default function PaymentsPage() {
                         {payment.payment_status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {new Date(payment.payment_date).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {payment.reference || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => setSelectedPayment(payment)}
-                          className="text-blue-600 hover:text-blue-900"
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
@@ -474,7 +474,7 @@ export default function PaymentsPage() {
                             setEditingPayment(payment);
                             setShowEditModal(true);
                           }}
-                          className="text-indigo-600 hover:text-indigo-900"
+                          className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
@@ -483,7 +483,7 @@ export default function PaymentsPage() {
                             setPaymentToDelete(payment);
                             setShowDeleteModal(true);
                           }}
-                          className="text-red-600 hover:text-red-900"
+                          className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -500,14 +500,14 @@ export default function PaymentsPage() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-700">
+          <div className="text-sm text-gray-700 dark:text-gray-300">
             Showing {((currentPage - 1) * limit) + 1} to {Math.min(currentPage * limit, totalCount)} of {totalCount} results
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-600"
             >
               Previous
             </button>
@@ -517,8 +517,8 @@ export default function PaymentsPage() {
                 onClick={() => setCurrentPage(page)}
                 className={`px-3 py-1 border rounded-md text-sm ${
                   currentPage === page
-                    ? 'bg-blue-600 text-white border-blue-600'
-                    : 'border-gray-300 hover:bg-gray-50'
+                    ? 'bg-blue-600 dark:bg-blue-500 text-white border-blue-600 dark:border-blue-500'
+                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600'
                 }`}
               >
                 {page}
@@ -527,7 +527,7 @@ export default function PaymentsPage() {
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-600"
             >
               Next
             </button>
@@ -537,17 +537,17 @@ export default function PaymentsPage() {
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && paymentToDelete && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+        <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
             <div className="p-6">
               <div className="flex items-center mb-4">
-                <div className="p-2 bg-red-100 rounded-full mr-3">
-                  <Trash2 className="w-6 h-6 text-red-600" />
+                <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-full mr-3">
+                  <Trash2 className="w-6 h-6 text-red-600 dark:text-red-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900">Delete Payment</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Delete Payment</h3>
               </div>
-              <p className="text-gray-600 mb-6">
-                Are you sure you want to delete the payment of <strong>£{paymentToDelete.amount}</strong> for <strong>{paymentToDelete.customers?.name || 'Unknown Customer'}</strong>? 
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                Are you sure you want to delete the payment of <strong className="text-gray-900 dark:text-white">£{paymentToDelete.amount}</strong> for <strong className="text-gray-900 dark:text-white">{paymentToDelete.customers?.name || 'Unknown Customer'}</strong>? 
                 This action cannot be undone.
               </p>
               <div className="flex justify-end space-x-3">
@@ -556,7 +556,7 @@ export default function PaymentsPage() {
                     setShowDeleteModal(false);
                     setPaymentToDelete(null);
                   }}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
                   Cancel
                 </button>
@@ -574,11 +574,11 @@ export default function PaymentsPage() {
 
       {/* Add/Edit Payment Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {editingPayment ? 'Edit Payment' : 'Add New Payment'}
                 </h3>
                 <button
@@ -586,22 +586,22 @@ export default function PaymentsPage() {
                     setShowAddModal(false);
                     setEditingPayment(null);
                   }}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   <XCircle className="w-6 h-6" />
                 </button>
               </div>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
                 {editingPayment ? 'Update the payment details below.' : 'Fill in the payment details below.'}
               </p>
               <div className="text-center py-8">
-                <p className="text-gray-500">Payment form will be implemented here</p>
+                <p className="text-gray-500 dark:text-gray-400">Payment form will be implemented here</p>
                 <button
                   onClick={() => {
                     setShowAddModal(false);
                     setEditingPayment(null);
                   }}
-                  className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="mt-4 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
                 >
                   Close
                 </button>
@@ -613,74 +613,74 @@ export default function PaymentsPage() {
 
       {/* View Payment Modal */}
       {selectedPayment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">Payment Details</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Payment Details</h3>
                 <button
                   onClick={() => setSelectedPayment(null)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   <XCircle className="w-6 h-6" />
                 </button>
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Customer</label>
-                  <p className="text-gray-900">{selectedPayment.customers?.name || 'Unknown Customer'}</p>
-                  <p className="text-sm text-gray-500">{selectedPayment.customers?.email || 'No email'}</p>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Customer</label>
+                  <p className="text-gray-900 dark:text-white">{selectedPayment.customers?.name || 'Unknown Customer'}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{selectedPayment.customers?.email || 'No email'}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Service</label>
-                  <p className="text-gray-900">{selectedPayment.bookings?.service || 'Manual Payment'}</p>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Service</label>
+                  <p className="text-gray-900 dark:text-white">{selectedPayment.bookings?.service || 'Manual Payment'}</p>
                   {selectedPayment.bookings?.date && (
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       {new Date(selectedPayment.bookings.date).toLocaleDateString()}
                     </p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Amount</label>
-                  <p className="text-gray-900">£{selectedPayment.amount.toFixed(2)}</p>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Amount</label>
+                  <p className="text-gray-900 dark:text-white">£{selectedPayment.amount.toFixed(2)}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Payment Method</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Payment Method</label>
                   <div className="flex items-center gap-2">
                     {getMethodIcon(selectedPayment.payment_method)}
-                    <span className="text-gray-900 capitalize">
+                    <span className="text-gray-900 dark:text-white capitalize">
                       {selectedPayment.payment_method.replace('_', ' ')}
                     </span>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Status</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
                   <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedPayment.payment_status)}`}>
                     {getStatusIcon(selectedPayment.payment_status)}
                     {selectedPayment.payment_status}
                   </span>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Payment Date</label>
-                  <p className="text-gray-900">{new Date(selectedPayment.payment_date).toLocaleDateString()}</p>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Payment Date</label>
+                  <p className="text-gray-900 dark:text-white">{new Date(selectedPayment.payment_date).toLocaleDateString()}</p>
                 </div>
                 {selectedPayment.reference && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Reference</label>
-                    <p className="text-gray-900">{selectedPayment.reference}</p>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Reference</label>
+                    <p className="text-gray-900 dark:text-white">{selectedPayment.reference}</p>
                   </div>
                 )}
                 {selectedPayment.notes && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Notes</label>
-                    <p className="text-gray-900">{selectedPayment.notes}</p>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Notes</label>
+                    <p className="text-gray-900 dark:text-white">{selectedPayment.notes}</p>
                   </div>
                 )}
               </div>
               <div className="flex justify-end mt-6">
                 <button
                   onClick={() => setSelectedPayment(null)}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                  className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
                   Close
                 </button>

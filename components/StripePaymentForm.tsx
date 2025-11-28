@@ -31,6 +31,7 @@ interface StripePaymentFormProps {
   serviceDurationMinutes?: number;
   onPaymentSuccess: (bookingId: string) => void;
   onPaymentError: (error: string) => void;
+  onTestBooking?: (bookingId: string) => void;
 }
 
 interface PaymentFormProps {
@@ -46,6 +47,7 @@ interface PaymentFormProps {
   serviceDurationMinutes?: number;
   onPaymentSuccess: (bookingId: string) => void;
   onPaymentError: (error: string) => void;
+  onTestBooking?: (bookingId: string) => void;
 }
 
 function PaymentForm({
@@ -61,12 +63,59 @@ function PaymentForm({
   serviceDurationMinutes,
   onPaymentSuccess,
   onPaymentError,
+  onTestBooking,
 }: PaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [isLoading, setIsLoading] = useState(false);
+  const [isTestBooking, setIsTestBooking] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+
+  const handleTestBooking = async () => {
+    if (!onTestBooking) return;
+    
+    setIsTestBooking(true);
+    setErrorMessage('');
+
+    try {
+      // Create booking without payment
+      const response = await fetch('/api/bookings/test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          services: services.map(service => ({
+            name: service.name,
+            price: service.price,
+            quantity: service.quantity,
+            duration: service.duration,
+          })),
+          selectedDate,
+          selectedTime,
+          teamMemberId: teamMemberId || null,
+          serviceDurationMinutes: serviceDurationMinutes || null,
+          amount,
+          notes: 'Test booking - No payment required',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.bookingId) {
+        onTestBooking(data.bookingId);
+      } else {
+        throw new Error(data.error || 'Failed to create test booking');
+      }
+    } catch (error) {
+      console.error('Test booking error:', error);
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to create test booking');
+      onPaymentError(error instanceof Error ? error.message : 'Failed to create test booking');
+    } finally {
+      setIsTestBooking(false);
+    }
+  };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -295,7 +344,7 @@ function PaymentForm({
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={!stripe || !elements || isLoading}
+          disabled={!stripe || !elements || isLoading || isTestBooking}
           className="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px] touch-manipulation active:scale-95"
         >
           {isLoading ? (
@@ -312,6 +361,36 @@ function PaymentForm({
         </button>
       </form>
 
+      {/* Test Booking Button (for development/testing) */}
+      {onTestBooking && (
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+          <div className="text-center mb-3">
+            <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+              🧪 Development Testing Only
+            </p>
+          </div>
+          <button
+            onClick={handleTestBooking}
+            disabled={isLoading || isTestBooking}
+            className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px] touch-manipulation active:scale-95"
+          >
+            {isTestBooking ? (
+              <>
+                <Loader className="w-5 h-5 animate-spin" />
+                <span>Creating Test Booking...</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Book Without Payment (Test)</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
+
       {/* Security Notice */}
       <div className="text-center px-4">
         <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
@@ -325,7 +404,54 @@ function PaymentForm({
 export default function StripePaymentForm(props: StripePaymentFormProps) {
   const [clientSecret, setClientSecret] = useState<string>('');
   const [isInitializing, setIsInitializing] = useState(false);
+  const [isTestBooking, setIsTestBooking] = useState(false);
   const [initError, setInitError] = useState<string>('');
+
+  const handleTestBookingMain = async () => {
+    if (!props.onTestBooking) return;
+    
+    setIsTestBooking(true);
+    setInitError('');
+
+    try {
+      // Create booking without payment
+      const response = await fetch('/api/bookings/test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          services: props.services.map(service => ({
+            name: service.name,
+            price: service.price,
+            quantity: service.quantity,
+            duration: service.duration,
+          })),
+          selectedDate: props.selectedDate,
+          selectedTime: props.selectedTime,
+          teamMemberId: props.teamMemberId || null,
+          serviceDurationMinutes: props.serviceDurationMinutes || null,
+          amount: props.amount,
+          notes: 'Test booking - No payment required',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.bookingId) {
+        props.onTestBooking(data.bookingId);
+      } else {
+        throw new Error(data.error || 'Failed to create test booking');
+      }
+    } catch (error) {
+      console.error('Test booking error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create test booking';
+      setInitError(errorMessage);
+      props.onPaymentError(errorMessage);
+    } finally {
+      setIsTestBooking(false);
+    }
+  };
 
   const handleInitializePayment = async () => {
     // Validate required data
@@ -526,7 +652,7 @@ export default function StripePaymentForm(props: StripePaymentFormProps) {
         {/* Initialize Payment Button */}
         <button
           onClick={handleInitializePayment}
-          disabled={isInitializing}
+          disabled={isInitializing || isTestBooking}
           className="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px] touch-manipulation active:scale-95"
         >
           {isInitializing ? (
@@ -541,6 +667,36 @@ export default function StripePaymentForm(props: StripePaymentFormProps) {
             </>
           )}
         </button>
+
+        {/* Test Booking Button (for development/testing) */}
+        {props.onTestBooking && (
+          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+            <div className="text-center mb-3">
+              <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                🧪 Development Testing Only
+              </p>
+            </div>
+            <button
+              onClick={handleTestBookingMain}
+              disabled={isInitializing || isTestBooking}
+              className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px] touch-manipulation active:scale-95"
+            >
+              {isTestBooking ? (
+                <>
+                  <Loader className="w-5 h-5 animate-spin" />
+                  <span>Creating Test Booking...</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>Book Without Payment (Test)</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
 
         {/* Security Notice */}
         <div className="text-center px-4">
