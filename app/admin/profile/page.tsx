@@ -268,11 +268,11 @@ export default function ProfilePage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-pink-50/50 to-purple-50/50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4">
-            <div className="absolute inset-0 rounded-full border-4 border-rose-200 dark:border-rose-800"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-rose-500 dark:border-t-rose-400 animate-spin"></div>
+          <div className="w-8 h-8 mx-auto mb-4 relative">
+            <div className="absolute inset-0 rounded-full border-2 border-rose-200 dark:border-rose-800"></div>
+            <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-rose-500 dark:border-t-rose-400 animate-spin"></div>
           </div>
-          <p className="text-gray-600 dark:text-gray-300">Loading profile...</p>
+          <p className="text-gray-600 dark:text-gray-300 text-sm">Loading profile...</p>
         </div>
       </div>
     );

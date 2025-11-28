@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Calendar, X, Clock, User, Mail, Phone } from "lucide-react";
 import { siteConfig } from "@/config/site";
+import { useAdminProfile } from "@/components/AdminProfileContext";
 
 interface ButtonBookNowProps {
   variant?: "primary" | "secondary" | "outline";
@@ -17,6 +18,8 @@ export default function ButtonBookNow({
   className = "",
   showIcon = true,
 }: ButtonBookNowProps) {
+  const adminProfile = useAdminProfile();
+  const contactPhone = adminProfile?.phone || siteConfig.contact.phone;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -292,10 +295,10 @@ export default function ButtonBookNow({
                   <div className="text-center pt-4 border-t border-rose-100">
                     <p className="text-sm text-gray-600 mb-2">Prefer to speak to us?</p>
                     <a
-                      href={`tel:${siteConfig.contact.phone}`}
+                      href={`tel:${contactPhone}`}
                       className="bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent hover:from-rose-700 hover:to-pink-700 font-bold text-sm"
                     >
-                      Call {siteConfig.contact.phone}
+                      Call {contactPhone}
                     </a>
                   </div>
                 </form>

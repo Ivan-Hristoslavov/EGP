@@ -9,10 +9,16 @@ import { Phone, Mail, MapPin, X, ChevronDown } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import { useConditions } from "@/hooks/useConditions";
 import type { Condition } from "@/hooks/useConditions";
+import { useAdminProfile } from "@/components/AdminProfileContext";
 
 export default function HeaderAesthetics() {
   const { services } = useServices();
   const { conditions } = useConditions();
+  const adminProfile = useAdminProfile();
+  
+  // Get contact info from admin profile, fallback to siteConfig
+  const contactPhone = adminProfile?.phone || siteConfig.contact.phone;
+  const contactEmail = adminProfile?.business_email || adminProfile?.email || siteConfig.contact.email;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -210,8 +216,8 @@ export default function HeaderAesthetics() {
                 </Link>
               </div>
 
-              {/* Middle: Email and Phone */}
-              <div className="flex items-center justify-center gap-3 sm:gap-4 lg:gap-6 text-center sm:text-left order-2 sm:order-2">
+              {/* Middle: Email and Phone - Only on mobile */}
+              <div className="flex items-center justify-center gap-3 sm:gap-4 lg:gap-6 text-center sm:text-left order-2 sm:order-2 lg:hidden">
                 <span
                   className="hidden sm:inline text-gray-700/70 dark:text-gray-200/60"
                   aria-hidden="true"
@@ -219,13 +225,13 @@ export default function HeaderAesthetics() {
                   |
                 </span>
                 <a
-                  href={`mailto:${siteConfig.contact.email}`}
+                  href={`mailto:${contactEmail}`}
                   className="group relative inline-flex items-center gap-1.5 hover:text-[#f5f1e9] transition-colors pb-1"
                 >
                   <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                   <span className="relative inline-block">
                     <span className="hidden sm:inline relative z-10">
-                      {siteConfig.contact.email}
+                      {contactEmail}
                     </span>
                     <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-all duration-300 ease-out group-hover:w-full"></span>
                   </span>
@@ -237,21 +243,61 @@ export default function HeaderAesthetics() {
                   |
                 </span>
                 <a
-                  href={`tel:${siteConfig.contact.phone}`}
+                  href={`tel:${contactPhone}`}
                   className="group relative inline-flex items-center gap-1.5 font-semibold hover:text-[#f5f1e9] transition-colors pb-1"
                 >
                   <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                   <span className="relative inline-block">
                     <span className="hidden sm:inline relative z-10">
-                      {siteConfig.contact.phone}
+                      {contactPhone}
                     </span>
                     <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-all duration-300 ease-out group-hover:w-full"></span>
                   </span>
                 </a>
               </div>
 
-              {/* Right: Social Links - Separated */}
+              {/* Right: Email, Phone, and Social Links - Combined on desktop */}
               <div className="flex items-center justify-end sm:justify-end gap-3 sm:gap-4 order-3 sm:order-3">
+                {/* Email and Phone - Only visible on desktop (lg+) */}
+                <div className="hidden lg:flex items-center gap-4">
+                  <span
+                    className="text-gray-700/70 dark:text-gray-200/60"
+                    aria-hidden="true"
+                  >
+                    |
+                  </span>
+                  <a
+                    href={`mailto:${contactEmail}`}
+                    className="group relative inline-flex items-center gap-1.5 hover:text-[#f5f1e9] transition-colors pb-1"
+                  >
+                    <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                    <span className="relative inline-block">
+                      <span className="relative z-10">
+                        {contactEmail}
+                      </span>
+                      <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-all duration-300 ease-out group-hover:w-full"></span>
+                    </span>
+                  </a>
+                  <span
+                    className="text-gray-700/70 dark:text-gray-200/60"
+                    aria-hidden="true"
+                  >
+                    |
+                  </span>
+                  <a
+                    href={`tel:${contactPhone}`}
+                    className="group relative inline-flex items-center gap-1.5 font-semibold hover:text-[#f5f1e9] transition-colors pb-1"
+                  >
+                    <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                    <span className="relative inline-block">
+                      <span className="relative z-10">
+                        {contactPhone}
+                      </span>
+                      <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-all duration-300 ease-out group-hover:w-full"></span>
+                    </span>
+                  </a>
+                </div>
+                
                 <span
                   className="hidden sm:inline text-gray-700/70 dark:text-gray-200/60"
                   aria-hidden="true"

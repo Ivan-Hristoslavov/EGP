@@ -260,6 +260,14 @@ export default function AdminServicesPage() {
   };
 
   const handleToggleFeatured = async (service: Service) => {
+    // Optimistically update local state first to prevent reordering
+    const newFeaturedStatus = !service.is_featured;
+    setServices((prevServices) =>
+      prevServices.map((s) =>
+        s.id === service.id ? { ...s, is_featured: newFeaturedStatus } : s
+      )
+    );
+
     try {
       const response = await fetch(`/api/services/${service.id}`, {
         method: "PUT",
@@ -278,15 +286,27 @@ export default function AdminServicesPage() {
           requires_consultation: service.requires_consultation,
           downtime_days: service.downtime_days,
           results_duration_weeks: service.results_duration_weeks,
-          is_featured: !service.is_featured,
+          is_featured: newFeaturedStatus,
           image_url: service.image_url,
         }),
       });
 
-      if (response.ok) {
-        await loadServices();
+      if (!response.ok) {
+        // Revert on error
+        setServices((prevServices) =>
+          prevServices.map((s) =>
+            s.id === service.id ? { ...s, is_featured: service.is_featured } : s
+          )
+        );
+        console.error("Error toggling featured status:", response.statusText);
       }
     } catch (error) {
+      // Revert on error
+      setServices((prevServices) =>
+        prevServices.map((s) =>
+          s.id === service.id ? { ...s, is_featured: service.is_featured } : s
+        )
+      );
       console.error("Error toggling featured status:", error);
     }
   };
@@ -481,7 +501,7 @@ export default function AdminServicesPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#f5f1e9] dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#f5f1e9] dark:bg-gray-950 flex items-center justify-center p-4">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#464C45] mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">
@@ -493,7 +513,7 @@ export default function AdminServicesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f1e9] dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-[#f5f1e9] dark:bg-gray-950">
       <div className="max-w-7xl mx-auto p-4 sm:p-6">
         {/* Mobile-Optimized Header */}
         <div className="mb-6 sm:mb-8">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense, useMemo, useCallback } from 'react';
+import { useState, useEffect, Suspense, useMemo, useCallback, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { siteConfig } from "@/config/site";
 import { Calendar, Clock, CreditCard, CheckCircle, Plus, Minus, X, ArrowLeft, Info, Shield, ChevronDown, Lock } from "lucide-react";
@@ -56,6 +56,7 @@ function BookingPageContent() {
   const [availableDates, setAvailableDates] = useState<CalendarDay[]>([]);
   const [selectedDateSlots, setSelectedDateSlots] = useState<CalendarDay | null>(null); // Time slots for selected date only
   const [availabilityLoading, setAvailabilityLoading] = useState(true);
+  const [dateSelectionLoading, setDateSelectionLoading] = useState(false);
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<'services' | 'date' | 'preview' | 'payment'>('services');
   const [showServiceSelector, setShowServiceSelector] = useState(false);
@@ -71,6 +72,7 @@ function BookingPageContent() {
     totalSlots: number;
     status: 'available' | 'full' | 'closed';
     showAbove: boolean;
+    showLeft: boolean;
   } | null>(null);
 
   const bookingSteps = useMemo(() => ([
@@ -181,7 +183,16 @@ function BookingPageContent() {
     }, 0);
   }, [selectedServices]);
 
+  const isLoadingRef = useRef(false);
+
   const loadAvailability = useCallback(async () => {
+    // Prevent concurrent calls - but allow if previous call completed
+    if (isLoadingRef.current) {
+      console.log('loadAvailability: Already loading, skipping...');
+      return;
+    }
+    
+    isLoadingRef.current = true;
     setAvailabilityLoading(true);
     setAvailabilityError(null);
 
@@ -255,34 +266,36 @@ function BookingPageContent() {
       } else {
         // No team member selected or no services - show empty calendar
         setAvailableDates([]);
-      }
-
-      if (availableDates.length && selectedDate && !availableDates.some((day) => day.date === selectedDate)) {
-        setSelectedDate('');
-        setSelectedTime('');
+        // Let finally block handle cleanup
       }
     } catch (error) {
       console.error('Error loading availability:', error);
       setAvailabilityError('Unable to load availability. Please try again later.');
     } finally {
       setAvailabilityLoading(false);
+      isLoadingRef.current = false;
     }
-  }, [selectedDate, selectedTeamMember, totalServiceDuration]);
+  }, [selectedTeamMember, totalServiceDuration]);
 
+  // Load availability when team member or services change
   useEffect(() => {
-    loadAvailability();
-  }, [loadAvailability]);
-
-  // Reload availability when team member or services change
-  useEffect(() => {
-    if (selectedServices.length > 0) {
-      // Small delay to avoid too many requests
-      const timeoutId = setTimeout(() => {
-        loadAvailability();
-      }, 300);
-      return () => clearTimeout(timeoutId);
+    if (selectedTeamMember && totalServiceDuration > 0) {
+      loadAvailability();
+    } else {
+      // If no team member or services, ensure loading is false and reset ref
+      setAvailabilityLoading(false);
+      isLoadingRef.current = false;
+      setAvailableDates([]);
     }
   }, [selectedTeamMember, totalServiceDuration, loadAvailability]);
+
+  // Clear selected date if it's no longer in available dates
+  useEffect(() => {
+    if (availableDates.length && selectedDate && !availableDates.some((day) => day.date === selectedDate)) {
+      setSelectedDate('');
+      setSelectedTime('');
+    }
+  }, [availableDates, selectedDate]);
 
   // Auto-select service from URL parameter
   useEffect(() => {
@@ -411,61 +424,32 @@ function BookingPageContent() {
     setSelectedServices(updated);
   };
 
-  const handleDateSelect = async (date: string) => {
+  const handleDateSelect = (date: string) => {
+    // No server calls - only filter from cached data
     if (availabilityLoading) return;
 
-    // Check if we already have this date's data
-    const existingInfo = availableDates.find((item) => item.date === date);
-    if (existingInfo && existingInfo.status !== 'closed' && existingInfo.timeSlots.length > 0) {
-      setSelectedDate(date);
-      setSelectedTime('');
-      setSelectedTimeSlots([]);
-      setSelectedDateSlots(existingInfo);
-      setCurrentStep('date');
-      return;
-    }
-
-    // If not in cache, fetch only this date's availability
-    if (selectedTeamMember && totalServiceDuration > 0) {
-      setAvailabilityLoading(true);
-      try {
-        const response = await fetch(
-          `/api/bookings/availability/team?team_member_id=${selectedTeamMember}&date=${date}&service_duration_minutes=${totalServiceDuration}`
-        );
-        
-        if (response.ok) {
-          const data = await response.json();
-          const availableSlots = data.availableSlots || [];
-          const bookedSlots = data.bookedSlots || [];
-          
-          const dateInfo: CalendarDay = {
-            date: date,
-            status: availableSlots.length > 0 ? 'available' as const : 'full' as const,
-            timeSlots: availableSlots,
-            allSlots: [...availableSlots, ...bookedSlots],
-            bookedSlots: bookedSlots,
-            workingHours: data.workingHours || undefined,
-          };
-
+    // Always set the selected date first to show it's selected
     setSelectedDate(date);
     setSelectedTime('');
-          setSelectedTimeSlots([]);
-          setSelectedDateSlots(dateInfo);
-    setCurrentStep('date');
-          
-          // Also update the availableDates cache
-          const updatedDates = availableDates.map(d => d.date === date ? dateInfo : d);
-          if (!updatedDates.find(d => d.date === date)) {
-            updatedDates.push(dateInfo);
-          }
-          setAvailableDates(updatedDates);
-        }
-      } catch (error) {
-        console.error('Error fetching date availability:', error);
-      } finally {
-        setAvailabilityLoading(false);
-      }
+    setSelectedTimeSlots([]);
+
+    // Find date in cached availability data
+    const existingInfo = availableDates.find((item) => item.date === date);
+    
+    if (existingInfo) {
+      // Use cached data - no loading, no server call
+      setSelectedDateSlots(existingInfo);
+    } else {
+      // Date not in cache - show as closed/unavailable
+      setSelectedDateSlots({
+        date: date,
+        status: 'closed' as const,
+        timeSlots: [],
+        allSlots: [],
+        bookedSlots: [],
+      });
     }
+    // Never change step - just update the time slots from cache
   };
 
   const handleTimeSelect = (startTime: string) => {
@@ -502,6 +486,7 @@ function BookingPageContent() {
     console.error('Payment error:', error);
     // You could show a toast notification here
   };
+
 
   const renderStepContent = (stepKey: BookingStepKey) => {
     switch (stepKey) {
@@ -1114,9 +1099,16 @@ function BookingPageContent() {
                     setHoveredDate(dateInfo.date);
                     const rect = (event.currentTarget as HTMLButtonElement).getBoundingClientRect();
                     
-                    // Position tooltip below the button, centered horizontally
+                    // Position tooltip below the button, offset to the right to avoid hiding the day
                     // Use getBoundingClientRect for accurate positioning
-                    const tooltipX = rect.left + rect.width / 2;
+                    const tooltipOffset = 20; // 20px to the right of the button
+                    const tooltipWidth = 280; // max-w-[280px] from the tooltip class
+                    const spaceRight = window.innerWidth - rect.right;
+                    
+                    // If not enough space on the right, position to the left of the button
+                    const tooltipX = spaceRight < (tooltipWidth + tooltipOffset) 
+                      ? rect.left - tooltipWidth - tooltipOffset 
+                      : rect.right + tooltipOffset;
                     // Check if there's enough space below, otherwise show above
                     const spaceBelow = window.innerHeight - rect.bottom;
                     const showAbove = spaceBelow < 150; // Show above if less than 150px space below
@@ -1151,6 +1143,7 @@ function BookingPageContent() {
                       totalSlots: dateInfo.timeSlots.length,
                       status: dateInfo.status,
                       showAbove: showAbove,
+                      showLeft: spaceRight < (tooltipWidth + tooltipOffset), // Track if tooltip is on the left
                     });
                   }}
                   onMouseLeave={() => {
@@ -1170,14 +1163,18 @@ function BookingPageContent() {
                   top: hoverTooltip.showAbove ? 'auto' : `${hoverTooltip.y}px`,
                   bottom: hoverTooltip.showAbove ? `${window.innerHeight - hoverTooltip.y}px` : 'auto',
                   left: `${hoverTooltip.x}px`,
-                  transform: 'translateX(-50%)', // Center horizontally
+                  // No transform needed since we position it to the right of the button
                 }}
               >
                 {/* Arrow pointing to the cell */}
                 {hoverTooltip.showAbove ? (
-                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-800"></div>
+                  <div className={`absolute -bottom-2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-800 ${
+                    hoverTooltip.showLeft ? '-right-2' : '-left-2'
+                  }`}></div>
                 ) : (
-                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-900 dark:border-b-gray-800"></div>
+                  <div className={`absolute -top-2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-900 dark:border-b-gray-800 ${
+                    hoverTooltip.showLeft ? '-right-2' : '-left-2'
+                  }`}></div>
                 )}
                 
                 <div className="px-3 py-2.5">
@@ -1240,12 +1237,23 @@ function BookingPageContent() {
             )}
           </div>
 
-          {selectedDateSlots && (
-            <div>
+          {/* Time Slots Section - Only this section reloads, calendar stays stable */}
+          {selectedDate && (
+            <div className="mt-6">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <h4 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Available Times</h4>
+                <div>
+                  <h4 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Available Times</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    {new Date(selectedDate).toLocaleDateString('en-GB', {
+                      weekday: 'long',
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric'
+                    })}
+                  </p>
+                </div>
                 {selectedTimeSlots.length > 0 && (
-                    <button
+                  <button
                     onClick={() => {
                       setSelectedTime('');
                       setSelectedTimeSlots([]);
@@ -1253,10 +1261,12 @@ function BookingPageContent() {
                     className="px-3 py-1.5 text-xs sm:text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg border border-red-300 dark:border-red-700 transition-colors"
                   >
                     Clear Selection
-                    </button>
+                  </button>
                 )}
-                </div>
-              {(() => {
+              </div>
+              
+              {/* Hours section - filtered from cached data, no loading needed */}
+              {selectedDateSlots ? (() => {
                 const bookedSlotsSet = new Set(selectedDateSlots.bookedSlots || []);
                 const availableSlotsSet = new Set(selectedDateSlots.timeSlots || []);
                 const durationHours = Math.ceil(totalServiceDuration / 60);
@@ -1467,7 +1477,7 @@ function BookingPageContent() {
               )}
                   </>
                 );
-              })()}
+              })() : null}
             </div>
           )}
         </>
@@ -1671,6 +1681,7 @@ function BookingPageContent() {
           serviceDurationMinutes={totalServiceDuration || undefined}
           onPaymentSuccess={handlePaymentSuccess}
           onPaymentError={handlePaymentError}
+          onTestBooking={handlePaymentSuccess} // Use same success handler for test bookings
         />
       </div>
     );
@@ -1900,6 +1911,7 @@ function BookingPageContent() {
           </div>
         </div>
       </div>
+      
       
       {/* Service Selector Modal */}
       {showServiceSelector && renderServiceSelector()}

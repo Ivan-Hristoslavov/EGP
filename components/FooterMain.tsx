@@ -50,8 +50,8 @@ export default function FooterMain() {
   // Get business data from admin profile
   const businessData = {
     businessName: adminProfile?.company_name || "EGP",
-    businessEmail: adminProfile?.business_email || process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "",
-    businessPhone: adminProfile?.phone || "+44 7541777225",
+    businessEmail: adminProfile?.business_email || adminProfile?.email || process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "",
+    businessPhone: adminProfile?.phone || process.env.NEXT_PUBLIC_PHONE_NUMBER || "+44 7541777225",
     businessAddress: adminProfile?.company_address || "London, UK",
     companyStatus: adminProfile?.company_status || ""
   };

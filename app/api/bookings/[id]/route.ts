@@ -2,23 +2,73 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { supabase, supabaseAdmin } from "../../../../lib/supabase";
 
-// GET - Fetch single booking by ID
+// GET - Fetch single booking by ID (UUID) or booking_number
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
   try {
-    const { data: booking, error } = await supabase
+    // Use admin client to bypass RLS and ensure we can fetch any booking
+    // Try to fetch by UUID first
+    let { data: booking, error } = await supabaseAdmin
       .from("bookings")
       .select("*")
       .eq("id", id)
       .single();
+    
+    // Fetch team member if team_member_id exists
+    if (booking && booking.team_member_id) {
+      const { data: teamMember } = await supabaseAdmin
+        .from("team")
+        .select("id, name, role")
+        .eq("id", booking.team_member_id)
+        .single();
+      
+      if (teamMember) {
+        booking.team = teamMember;
+      }
+    }
+
+    // If not found by UUID, try booking_number
+    if (error && error.code === 'PGRST116') {
+      const { data: bookingByNumber, error: bookingNumberError } = await supabaseAdmin
+        .from("bookings")
+        .select("*")
+        .eq("booking_number", id)
+        .single();
+      
+      if (bookingByNumber) {
+        booking = bookingByNumber;
+        error = null;
+        
+        // Fetch team member if team_member_id exists
+        if (booking.team_member_id) {
+          const { data: teamMember } = await supabaseAdmin
+            .from("team")
+            .select("id, name, role")
+            .eq("id", booking.team_member_id)
+            .single();
+          
+          if (teamMember) {
+            booking.team = teamMember;
+          }
+        }
+      } else if (bookingNumberError && bookingNumberError.code === 'PGRST116') {
+        // Both lookups failed - booking not found
+        return NextResponse.json(
+          { error: "Booking not found" },
+          { status: 404 }
+        );
+      } else if (bookingNumberError) {
+        error = bookingNumberError;
+      }
+    }
 
     if (error) {
       console.error("Error fetching booking:", error);
       return NextResponse.json(
-        { error: "Failed to fetch booking" },
+        { error: "Failed to fetch booking", details: error.message },
         { status: 500 }
       );
     }

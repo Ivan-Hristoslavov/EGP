@@ -350,7 +350,7 @@ export default function SectionContact() {
                   </div>
                 ) : (
                   <div className="text-purple-600 dark:text-purple-400 font-semibold text-sm">
-                    {isLoadingAreas ? "Loading..." : "Clapham, Balham, Chelsea"}
+                    {isLoadingAreas ? "Loading..." : "South West London"}
                   </div>
                 )}
               </div>

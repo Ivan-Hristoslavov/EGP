@@ -13,6 +13,7 @@ import {
   Heart
 } from "lucide-react";
 import { siteConfig } from "@/config/site";
+import { useAdminProfile } from "@/components/AdminProfileContext";
 
 type WorkingHoursData = {
   [key: string]: {
@@ -26,6 +27,12 @@ export default function FooterAesthetics() {
   const currentYear = new Date().getFullYear();
   const [workingHours, setWorkingHours] = useState<WorkingHoursData | null>(null);
   const [loadingHours, setLoadingHours] = useState(true);
+  const adminProfile = useAdminProfile();
+  
+  // Get contact info from admin profile, fallback to siteConfig
+  const contactPhone = adminProfile?.phone || siteConfig.contact.phone;
+  const contactEmail = adminProfile?.business_email || adminProfile?.email || siteConfig.contact.email;
+  const contactAddress = adminProfile?.company_address || siteConfig.contact.address.full || `${siteConfig.contact.address.city}, ${siteConfig.contact.address.country}`;
 
   useEffect(() => {
     // Fetch working hours from public API
@@ -198,31 +205,29 @@ export default function FooterAesthetics() {
               <ul className="space-y-3">
                 <li>
                   <a 
-                    href={`tel:${siteConfig.contact.phone}`}
+                    href={`tel:${contactPhone}`}
                     className="flex items-center gap-3 text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm group"
                   >
                     <Phone className="w-5 h-5 flex-shrink-0 text-gray-600 dark:text-gray-500" />
-                    <span>{siteConfig.contact.phone}</span>
+                    <span>{contactPhone}</span>
                   </a>
                 </li>
                 <li>
                   <a 
-                    href={`mailto:${siteConfig.contact.email}`}
+                    href={`mailto:${contactEmail}`}
                     className="flex items-center gap-3 text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm group"
                   >
                     <Mail className="w-5 h-5 flex-shrink-0 text-gray-600 dark:text-gray-500" />
-                    <span>{siteConfig.contact.email}</span>
+                    <span>{contactEmail}</span>
                   </a>
                 </li>
                 <li>
                   <div className="flex items-start gap-3 text-gray-700 dark:text-gray-400 text-sm">
                     <MapPin className="w-5 h-5 flex-shrink-0 text-gray-600 dark:text-gray-500 mt-0.5" />
                     <div>
-                      {siteConfig.contact.address.street && <div>{siteConfig.contact.address.street}</div>}
-                      {siteConfig.contact.address.postcode 
-                        ? <div>{siteConfig.contact.address.city}, {siteConfig.contact.address.postcode}<br />{siteConfig.contact.address.country}</div>
-                        : <div>{siteConfig.contact.address.city}, {siteConfig.contact.address.country}</div>
-                      }
+                      {contactAddress.split(',').map((part, index) => (
+                        <div key={index}>{part.trim()}</div>
+                      ))}
                     </div>
                   </div>
                 </li>
