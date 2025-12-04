@@ -72,7 +72,7 @@ export default function AntiWrinklePage() {
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                   <div>
                     <span className="text-sm text-gray-600">From</span>
-                    <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-violet-600 bg-clip-text text-transparent">£{service.price}</div>
+                    <div className="text-2xl font-bold text-[#9d9585] dark:text-[#c9c1b0]">£{service.price}</div>
                   </div>
                   <div className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-violet-600 bg-clip-text text-transparent font-semibold group-hover:gap-3 transition-all">
                     <span>Book</span>

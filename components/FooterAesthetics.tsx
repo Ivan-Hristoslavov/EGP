@@ -13,7 +13,7 @@ import {
   Heart
 } from "lucide-react";
 import { siteConfig } from "@/config/site";
-import { useAdminProfile } from "@/components/AdminProfileContext";
+import { useAdminProfile, useAdminProfileContext } from "@/components/AdminProfileContext";
 
 type WorkingHoursData = {
   [key: string]: {
@@ -28,6 +28,7 @@ export default function FooterAesthetics() {
   const [workingHours, setWorkingHours] = useState<WorkingHoursData | null>(null);
   const [loadingHours, setLoadingHours] = useState(true);
   const adminProfile = useAdminProfile();
+  const { loading: profileLoading } = useAdminProfileContext();
   
   // Get contact info from admin profile, fallback to siteConfig
   const contactPhone = adminProfile?.phone || siteConfig.contact.phone;
@@ -204,32 +205,56 @@ export default function FooterAesthetics() {
               </h3>
               <ul className="space-y-3">
                 <li>
-                  <a 
-                    href={`tel:${contactPhone}`}
-                    className="flex items-center gap-3 text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm group"
-                  >
-                    <Phone className="w-5 h-5 flex-shrink-0 text-gray-600 dark:text-gray-500" />
-                    <span>{contactPhone}</span>
-                  </a>
-                </li>
-                <li>
-                  <a 
-                    href={`mailto:${contactEmail}`}
-                    className="flex items-center gap-3 text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm group"
-                  >
-                    <Mail className="w-5 h-5 flex-shrink-0 text-gray-600 dark:text-gray-500" />
-                    <span>{contactEmail}</span>
-                  </a>
-                </li>
-                <li>
-                  <div className="flex items-start gap-3 text-gray-700 dark:text-gray-400 text-sm">
-                    <MapPin className="w-5 h-5 flex-shrink-0 text-gray-600 dark:text-gray-500 mt-0.5" />
-                    <div>
-                      {contactAddress.split(',').map((part: string, index: number) => (
-                        <div key={index}>{part.trim()}</div>
-                      ))}
+                  {profileLoading ? (
+                    <div className="flex items-center gap-3">
+                      <Phone className="w-5 h-5 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+                      <div className="h-4 w-32 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
                     </div>
-                  </div>
+                  ) : (
+                    <a 
+                      href={`tel:${contactPhone}`}
+                      className="flex items-center gap-3 text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm group"
+                    >
+                      <Phone className="w-5 h-5 flex-shrink-0 text-gray-600 dark:text-gray-500" />
+                      <span>{contactPhone}</span>
+                    </a>
+                  )}
+                </li>
+                <li>
+                  {profileLoading ? (
+                    <div className="flex items-center gap-3">
+                      <Mail className="w-5 h-5 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+                      <div className="h-4 w-40 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+                    </div>
+                  ) : (
+                    <a 
+                      href={`mailto:${contactEmail}`}
+                      className="flex items-center gap-3 text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm group"
+                    >
+                      <Mail className="w-5 h-5 flex-shrink-0 text-gray-600 dark:text-gray-500" />
+                      <span>{contactEmail}</span>
+                    </a>
+                  )}
+                </li>
+                <li>
+                  {profileLoading ? (
+                    <div className="flex items-start gap-3">
+                      <MapPin className="w-5 h-5 flex-shrink-0 text-gray-400 dark:text-gray-500 mt-0.5" />
+                      <div className="space-y-1.5">
+                        <div className="h-4 w-36 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+                        <div className="h-4 w-28 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-start gap-3 text-gray-700 dark:text-gray-400 text-sm">
+                      <MapPin className="w-5 h-5 flex-shrink-0 text-gray-600 dark:text-gray-500 mt-0.5" />
+                      <div>
+                        {contactAddress.split(',').map((part: string, index: number) => (
+                          <div key={index}>{part.trim()}</div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </li>
               </ul>
 

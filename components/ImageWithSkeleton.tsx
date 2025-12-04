@@ -12,6 +12,9 @@ export default function ImageWithSkeleton({
   containerClassName = "",
   skeletonClassName = "",
   className = "",
+  fill,
+  width,
+  height,
   ...props
 }: ImageWithSkeletonProps) {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -25,6 +28,9 @@ export default function ImageWithSkeleton({
       />
       <Image
         {...props}
+        fill={fill}
+        width={fill ? undefined : (width || 800)}
+        height={fill ? undefined : (height || 600)}
         className={`transition-opacity duration-700 ease-out ${
           isLoaded ? "opacity-100" : "opacity-0"
         } ${className}`}

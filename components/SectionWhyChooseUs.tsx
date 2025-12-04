@@ -69,10 +69,10 @@ export default function SectionWhyChooseUs() {
             return (
               <div
                 key={reason.title}
-                className="group bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-8 shadow-md hover:shadow-2xl transition-all duration-300 sm:hover:-translate-y-2 border border-gray-100 dark:border-gray-700"
+                className="group bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-8 shadow-md hover:shadow-2xl transition-all duration-300 sm:hover:-translate-y-2 border border-gray-100 dark:border-gray-700 text-center"
               >
                 <div 
-                  className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 sm:mb-5 md:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg"
+                  className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 sm:mb-5 md:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg mx-auto"
                   style={{ backgroundColor: aestheticsColors.green.DEFAULT }}
                 >
                   <Icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
@@ -90,17 +90,17 @@ export default function SectionWhyChooseUs() {
 
         {/* Trust Badges */}
         <div className="mt-8 sm:mt-12 md:mt-16 flex justify-center">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl w-full mx-auto px-4">
             {siteConfig.trust.certifications.map((cert) => (
               <div
                 key={cert}
-                className="text-center px-6 py-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
-                style={{ 
-                  backgroundColor: '#e8f5e9',
-                  border: '1px solid #c8e6c9'
-                }}
+                className="text-center px-3 sm:px-4 md:px-6 py-3 sm:py-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center justify-center bg-[#4b5563] dark:bg-[#1f2937] border border-[#374151] dark:border-[#111827]"
               >
-                <div className="text-sm font-bold" style={{ color: aestheticsColors.green.DEFAULT }}>{cert}</div>
+                <div 
+                  className="text-xs sm:text-sm font-bold leading-tight text-white dark:text-gray-200"
+                >
+                  {cert}
+                </div>
               </div>
             ))}
           </div>

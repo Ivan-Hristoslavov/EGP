@@ -794,7 +794,7 @@ function BookingPageContent() {
                   {servicesList.map(([serviceId, service]) => (
                     <div
                       key={serviceId}
-                      className="border border-[#e4d9c8] dark:border-gray-700 rounded-xl p-4 sm:p-5 hover:border-[#c9c1b0] dark:hover:border-[#b5ad9d] transition-all duration-200 hover:shadow-lg relative group bg-white/95 dark:bg-gray-900/70"
+                      className="border-2 border-[#d4c9b8] dark:border-gray-700 rounded-xl p-4 sm:p-5 hover:border-[#c9c1b0] dark:hover:border-[#b5ad9d] transition-all duration-200 hover:shadow-lg relative group bg-white dark:bg-gray-900/70"
                     >
                       <div className="space-y-3 sm:space-y-4">
                       <div className="flex flex-col gap-3">
@@ -1700,10 +1700,10 @@ function BookingPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
-      <div className="container mx-auto px-4 max-w-7xl">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-4 pt-24 pb-16 max-w-7xl">
         {/* Header */}
-        <div className="text-center mb-8 sm:mb-12 px-4 mt-8 sm:mt-12 md:mt-16">
+        <div className="text-center mb-8 sm:mb-12 px-4">
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 md:mb-6 font-playfair">
             Book Your Treatment
           </h1>

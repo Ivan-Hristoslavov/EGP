@@ -420,7 +420,7 @@ function BookingSuccessContent() {
           <h1 className="text-4xl font-bold text-[#464C45] dark:text-[#c9c1b0] mb-4 font-playfair">
             Booking Confirmed!
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 font-montserrat font-light">
+          <p className="text-xl text-gray-600 dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto">
             Thank you for choosing EGP Aesthetics London
           </p>
         </div>
@@ -579,10 +579,18 @@ function BookingSuccessContent() {
         </div>
 
         {/* Action Buttons */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 no-print">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 no-print">
+          <Link
+            href="/book"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white rounded-lg hover:from-[#857d68] hover:via-[#aea693] hover:to-[#c9c1b0] transition-all shadow-lg hover:shadow-xl"
+          >
+            <ArrowRight className="w-4 h-4 rotate-180" />
+            Back to Booking
+          </Link>
+
           <Link
             href="/"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white rounded-lg hover:from-[#857d68] hover:via-[#aea693] hover:to-[#c9c1b0] transition-all shadow-lg hover:shadow-xl"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-[#9d9585] text-[#9d9585] dark:text-[#b5ad9d] rounded-lg hover:bg-[#9d9585] hover:text-white dark:hover:bg-[#b5ad9d] transition-all"
           >
             <ArrowRight className="w-4 h-4" />
             Back to Home

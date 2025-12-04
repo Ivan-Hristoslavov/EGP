@@ -42,7 +42,7 @@ export default function BodyTreatmentsPage() {
               <Link
                 key={service.slug}
                 href={`/services/${service.slug}`}
-                className="group relative bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-emerald-600 hover:shadow-xl transition-all duration-300"
+                className="group relative bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-xl p-6 hover:border-emerald-600 dark:hover:border-emerald-500 hover:shadow-xl transition-all duration-300"
               >
                 {service.featured && (
                   <span className="absolute top-4 right-4 px-3 py-1 bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-xs font-bold rounded-full">
@@ -73,11 +73,11 @@ export default function BodyTreatmentsPage() {
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                   <div>
                     <span className="text-sm text-gray-600">From</span>
-                    <div className="text-2xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">£{service.price}</div>
+                    <div className="text-2xl font-bold text-[#9d9585] dark:text-[#c9c1b0]">£{service.price}</div>
                   </div>
-                  <div className="flex items-center gap-2 bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent font-semibold group-hover:gap-3 transition-all">
+                  <div className="flex items-center gap-2 text-[#9d9585] dark:text-[#c9c1b0] font-semibold group-hover:gap-3 transition-all">
                     <span>Book</span>
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-rose-600" />
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-[#9d9585] dark:text-[#c9c1b0]" />
                   </div>
                 </div>
               </Link>

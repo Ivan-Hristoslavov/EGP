@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useAdminProfile } from "@/components/AdminProfileContext";
+import { useAdminProfile, useAdminProfileContext } from "@/components/AdminProfileContext";
 
 // Import navigation structure from NavigationNavbar
 const navigation = [
@@ -46,6 +46,7 @@ export default function FooterMain() {
   const pathname = usePathname();
   const router = useRouter();
   const adminProfile = useAdminProfile();
+  const { loading: profileLoading } = useAdminProfileContext();
 
   // Get business data from admin profile
   const businessData = {
@@ -155,12 +156,27 @@ export default function FooterMain() {
                 </div>
               ) : (
                 <>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300">
-                    📞 Contact: <span className="font-semibold text-blue-600 dark:text-blue-400">{businessData.businessPhone}</span>
-                  </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300">
-                    📧 Email: <span className="font-semibold">{businessData.businessEmail}</span>
-                  </p>
+                  {profileLoading ? (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <span>📞</span>
+                        <div className="h-4 w-32 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span>📧</span>
+                        <div className="h-4 w-40 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300">
+                        📞 Contact: <span className="font-semibold text-blue-600 dark:text-blue-400">{businessData.businessPhone}</span>
+                      </p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300">
+                        📧 Email: <span className="font-semibold">{businessData.businessEmail}</span>
+                      </p>
+                    </>
+                  )}
                 </>
               )}
             </div>

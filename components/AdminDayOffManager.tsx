@@ -169,7 +169,7 @@ export function AdminDayOffManager() {
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-8 text-white shadow-xl">
+      <div className="mt-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-8 text-white shadow-xl">
         <div>
           <h2 className="text-4xl font-extrabold tracking-tight mb-2">Day Off Periods</h2>
           <p className="text-blue-100">Manage your business's non-working days and holiday periods</p>

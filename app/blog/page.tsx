@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useBlog } from "@/hooks/useBlog";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ArrowLeft } from "lucide-react";
 
 function truncateText(text: string, maxLength: number = 150): string {
   if (text.length <= maxLength) return text;
@@ -41,13 +41,26 @@ export default function BlogPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-10 py-16">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-8 font-playfair">
-          Our Blog
-        </h1>
-        <p className="text-xl text-gray-600 dark:text-gray-300 mb-12 max-w-3xl">
-          Stay informed about the latest in aesthetic treatments, skincare tips, and beauty insights.
-        </p>
+      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-10 pt-24 pb-16">
+        {/* Back to Home Button */}
+        <div className="flex items-center gap-4 mb-8">
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#b5ad9d] transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Back to Home
+          </Link>
+        </div>
+        
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 font-playfair">
+            Our Blog
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto">
+            Stay informed about the latest in aesthetic treatments, skincare tips, and beauty insights.
+          </p>
+        </div>
 
         {posts.length === 0 ? (
           <div className="text-center py-12">
@@ -62,19 +75,20 @@ export default function BlogPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             {featuredPosts.map((post) => (
               <Link key={post.id} href={`/blog/${post.slug}`}>
-                <article className="group relative flex h-full flex-col rounded-[28px] border border-[#e4d9c8] dark:border-gray-700 bg-[#fdfbf8] dark:bg-gray-900/70 shadow-xl transition-all duration-300 hover:shadow-2xl md:col-span-2 xl:col-span-3">
+                <article className="group relative flex h-full flex-col rounded-[28px] border-2 border-gray-300 dark:border-gray-600 bg-[#fdfbf8] dark:bg-gray-900/70 shadow-xl transition-all duration-300 hover:shadow-2xl md:col-span-2 xl:col-span-3">
                   <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:from-[#9d9585]/10 group-hover:via-[#b5ad9d]/10 group-hover:to-[#ddd5c3]/10 group-hover:opacity-100" />
-                  <div className="absolute right-6 top-6 flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-xs font-semibold text-[#6b5f4b] shadow-md backdrop-blur transition-all duration-300 group-hover:bg-[#9d9585] group-hover:text-white dark:bg-gray-900/80 dark:text-[#c9c1b0]">
-                    <ArrowRight className="h-4 w-4" />
-                    <span>Read article</span>
+                  <div className="absolute right-3 top-3 sm:right-6 sm:top-6 flex items-center gap-1.5 sm:gap-2 rounded-full border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-2.5 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-xs font-semibold text-[#6b5f4b] dark:text-[#c9c1b0] shadow-md backdrop-blur transition-all duration-300 group-hover:bg-[#9d9585] group-hover:text-white group-hover:border-[#9d9585] dark:group-hover:border-[#9d9585]">
+                    <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Read article</span>
+                    <span className="sm:hidden">Read</span>
                   </div>
 
-                  <div className="relative z-10 flex flex-col gap-6 p-9 md:p-12">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span className="rounded-full bg-[#f5f1e9] px-4 py-2 text-sm font-semibold text-[#6b5f4b] dark:bg-gray-800/40 dark:text-[#c9c1b0]">
+                  <div className="relative z-10 flex flex-col gap-4 sm:gap-6 p-6 sm:p-9 md:p-12">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                      <span className="rounded-full bg-[#f5f1e9] px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-[#6b5f4b] dark:bg-gray-800/40 dark:text-[#c9c1b0]">
                         {post.category}
                       </span>
-                      <span className="rounded-full bg-[#9d9585] px-4 py-2 text-sm font-semibold text-white shadow-sm">
+                      <span className="rounded-full bg-[#9d9585] px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white shadow-sm">
                         Featured
                       </span>
                     </div>
@@ -111,15 +125,16 @@ export default function BlogPage() {
 
             {regularPosts.map((post) => (
               <Link key={post.id} href={`/blog/${post.slug}`}>
-                <article className="group relative flex h-full flex-col rounded-[28px] border border-[#e4d9c8] dark:border-gray-700 bg-[#fdfbf8] dark:bg-gray-900/70 p-8 shadow-lg transition-all duration-300 hover:shadow-2xl">
+                <article className="group relative flex h-full flex-col rounded-xl sm:rounded-[28px] border-2 border-gray-300 dark:border-gray-600 bg-[#fdfbf8] dark:bg-gray-900/70 p-5 sm:p-8 shadow-lg transition-all duration-300 hover:shadow-2xl">
                   <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:from-[#9d9585]/10 group-hover:via-[#b5ad9d]/10 group-hover:to-[#ddd5c3]/10 group-hover:opacity-100" />
-                  <div className="absolute right-6 top-6 flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-xs font-semibold text-[#6b5f4b] shadow-md backdrop-blur transition-all duration-300 group-hover:bg-[#9d9585] group-hover:text-white dark:bg-gray-900/80 dark:text-[#c9c1b0]">
-                    <ArrowRight className="h-4 w-4" />
-                    <span>Read article</span>
+                  <div className="absolute right-3 top-3 sm:right-6 sm:top-6 flex items-center gap-1.5 sm:gap-2 rounded-full border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-2.5 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-xs font-semibold text-[#6b5f4b] dark:text-[#c9c1b0] shadow-md backdrop-blur transition-all duration-300 group-hover:bg-[#9d9585] group-hover:text-white group-hover:border-[#9d9585] dark:group-hover:border-[#9d9585]">
+                    <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Read article</span>
+                    <span className="sm:hidden">Read</span>
                   </div>
 
                   <div className="relative z-10 flex flex-1 flex-col">
-                    <span className="mb-4 inline-flex w-fit items-center rounded-full bg-[#f5f1e9] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-[#6b5f4b] dark:bg-gray-800/40 dark:text-[#c9c1b0]">
+                    <span className="mb-3 sm:mb-4 inline-flex w-fit items-center rounded-full bg-[#f5f1e9] px-3 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-[#6b5f4b] dark:bg-gray-800/40 dark:text-[#c9c1b0]">
                       {post.category}
                     </span>
                     <h2 className="text-2xl font-semibold text-gray-900 transition-colors duration-300 group-hover:text-[#7b715f] dark:text-white dark:group-hover:text-[#d9d1c1]">

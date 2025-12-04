@@ -245,7 +245,7 @@ export default function CustomersPage() {
     <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-pink-50/50 to-purple-50/50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800">
       <div className="max-w-7xl mx-auto p-6 space-y-8">
         {/* Luxury Header */}
-        <div className="relative overflow-hidden bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 rounded-3xl shadow-2xl">
+        <div className="mt-6 relative overflow-hidden bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 rounded-3xl shadow-2xl">
           <div className="absolute inset-0 bg-black/10"></div>
           <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl"></div>
