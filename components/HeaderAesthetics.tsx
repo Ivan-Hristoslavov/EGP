@@ -9,12 +9,13 @@ import { Phone, Mail, MapPin, X, ChevronDown } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import { useConditions } from "@/hooks/useConditions";
 import type { Condition } from "@/hooks/useConditions";
-import { useAdminProfile } from "@/components/AdminProfileContext";
+import { useAdminProfile, useAdminProfileContext } from "@/components/AdminProfileContext";
 
 export default function HeaderAesthetics() {
   const { services } = useServices();
   const { conditions } = useConditions();
   const adminProfile = useAdminProfile();
+  const { loading: profileLoading } = useAdminProfileContext();
   
   // Get contact info from admin profile, fallback to siteConfig
   const contactPhone = adminProfile?.phone || siteConfig.contact.phone;
@@ -201,9 +202,151 @@ export default function HeaderAesthetics() {
       >
         <div className="bg-[#c9c1b0] dark:bg-gray-800 text-gray-900 dark:text-gray-100">
           <div className="container mx-auto px-3 sm:px-4">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-0 py-3 text-[10px] sm:text-xs md:text-sm">
+            {/* Mobile: Three sections - Find Us | Contacts | Social Networks */}
+            <div className="lg:hidden flex items-center justify-center gap-2 sm:gap-3 py-2.5 sm:py-3 text-[10px] sm:text-xs md:text-sm">
+              {/* Find Us */}
+              <div className="flex items-center flex-shrink-0">
+                <Link
+                  href="/find-us"
+                  className="group relative inline-flex items-center gap-1.5 sm:gap-2 font-semibold tracking-[0.18em] sm:tracking-[0.14em] uppercase text-[#3a3428] dark:text-[#f5f1e9] hover:text-[#1f1b15] dark:hover:text-[#f8efdf] transition-colors pb-1 px-2 sm:px-2.5 py-1.5 min-h-[44px] touch-manipulation"
+                >
+                  <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="relative inline-block">
+                    <span className="relative z-10">Find Us</span>
+                    <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#b09a7d] via-[#c9b79b] to-[#ddd5c3] transition-all duration-300 ease-out group-hover:w-full"></span>
+                  </span>
+                </Link>
+              </div>
+
+              {/* Separator */}
+              <span
+                className="text-gray-700/70 dark:text-gray-200/60 text-xs flex-shrink-0 px-1"
+                aria-hidden="true"
+              >
+                |
+              </span>
+
+              {/* Contacts (Email and Phone) */}
+              <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                {profileLoading ? (
+                  <div className="inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 min-h-[44px] touch-manipulation">
+                    <Mail className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+                    <div className="hidden sm:block h-3 w-20 sm:w-24 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+                  </div>
+                ) : (
+                  <a
+                    href={`mailto:${contactEmail}`}
+                    className="group relative inline-flex items-center gap-1.5 sm:gap-2 hover:text-[#f5f1e9] transition-colors pb-1 px-2 sm:px-2.5 py-1.5 min-h-[44px] touch-manipulation"
+                  >
+                    <Mail className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                    <span className="relative inline-block">
+                      <span className="hidden sm:inline relative z-10 text-xs">
+                        {contactEmail}
+                      </span>
+                      <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-all duration-300 ease-out group-hover:w-full"></span>
+                    </span>
+                  </a>
+                )}
+                {profileLoading ? (
+                  <div className="inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 min-h-[44px] touch-manipulation">
+                    <Phone className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+                    <div className="hidden sm:block h-3 w-16 sm:w-20 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+                  </div>
+                ) : (
+                  <a
+                    href={`tel:${contactPhone}`}
+                    className="group relative inline-flex items-center gap-1.5 sm:gap-2 font-semibold hover:text-[#f5f1e9] transition-colors pb-1 px-2 sm:px-2.5 py-1.5 min-h-[44px] touch-manipulation"
+                  >
+                    <Phone className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                    <span className="relative inline-block">
+                      <span className="hidden sm:inline relative z-10 text-xs">
+                        {contactPhone}
+                      </span>
+                      <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-all duration-300 ease-out group-hover:w-full"></span>
+                    </span>
+                  </a>
+                )}
+              </div>
+
+              {/* Separator */}
+              <span
+                className="text-gray-700/70 dark:text-gray-200/60 text-xs flex-shrink-0 px-1"
+                aria-hidden="true"
+              >
+                |
+              </span>
+
+              {/* Social Networks */}
+              <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                <a
+                  href={siteConfig.social.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/80 hover:text-white transition-all duration-300 hover:scale-125 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
+                  aria-label="Facebook"
+                >
+                  <svg
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                  </svg>
+                </a>
+                <a
+                  href={siteConfig.social.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/80 hover:text-white transition-all duration-300 hover:scale-125 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
+                  aria-label="Instagram"
+                >
+                  <svg
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                  </svg>
+                </a>
+                <a
+                  href={siteConfig.social.youtube}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/80 hover:text-white transition-all duration-300 hover:scale-125 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
+                  aria-label="YouTube"
+                >
+                  <svg
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                  </svg>
+                </a>
+                {siteConfig.social.tiktok && (
+                  <a
+                    href={siteConfig.social.tiktok}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white/80 hover:text-white transition-all duration-300 hover:scale-125 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
+                    aria-label="TikTok"
+                  >
+                    <svg
+                      className="w-4 h-4 sm:w-5 sm:h-5"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+                    </svg>
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* Desktop: Original layout */}
+            <div className="hidden lg:flex items-center justify-between py-2.5 sm:py-3 text-[10px] sm:text-xs md:text-sm">
               {/* Left: Find Us */}
-              <div className="flex items-center justify-start sm:justify-start order-1 sm:order-1">
+              <div className="flex items-center justify-start">
                 <Link
                   href="/find-us"
                   className="group relative inline-flex items-center gap-1.5 sm:gap-2 font-semibold tracking-[0.18em] sm:tracking-[0.14em] uppercase text-[#3a3428] dark:text-[#f5f1e9] hover:text-[#1f1b15] dark:hover:text-[#f8efdf] transition-colors pb-1"
@@ -216,56 +359,20 @@ export default function HeaderAesthetics() {
                 </Link>
               </div>
 
-              {/* Middle: Email and Phone - Only on mobile */}
-              <div className="flex items-center justify-center gap-3 sm:gap-4 lg:gap-6 text-center sm:text-left order-2 sm:order-2 lg:hidden">
-                <span
-                  className="hidden sm:inline text-gray-700/70 dark:text-gray-200/60"
-                  aria-hidden="true"
-                >
-                  |
-                </span>
-                <a
-                  href={`mailto:${contactEmail}`}
-                  className="group relative inline-flex items-center gap-1.5 hover:text-[#f5f1e9] transition-colors pb-1"
-                >
-                  <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                  <span className="relative inline-block">
-                    <span className="hidden sm:inline relative z-10">
-                      {contactEmail}
-                    </span>
-                    <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-all duration-300 ease-out group-hover:w-full"></span>
-                  </span>
-                </a>
+              {/* Right: Email, Phone, and Social Links */}
+              <div className="flex items-center justify-end gap-4">
                 <span
                   className="text-gray-700/70 dark:text-gray-200/60"
                   aria-hidden="true"
                 >
                   |
                 </span>
-                <a
-                  href={`tel:${contactPhone}`}
-                  className="group relative inline-flex items-center gap-1.5 font-semibold hover:text-[#f5f1e9] transition-colors pb-1"
-                >
-                  <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                  <span className="relative inline-block">
-                    <span className="hidden sm:inline relative z-10">
-                      {contactPhone}
-                    </span>
-                    <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-all duration-300 ease-out group-hover:w-full"></span>
-                  </span>
-                </a>
-              </div>
-
-              {/* Right: Email, Phone, and Social Links - Combined on desktop */}
-              <div className="flex items-center justify-end sm:justify-end gap-3 sm:gap-4 order-3 sm:order-3">
-                {/* Email and Phone - Only visible on desktop (lg+) */}
-                <div className="hidden lg:flex items-center gap-4">
-                  <span
-                    className="text-gray-700/70 dark:text-gray-200/60"
-                    aria-hidden="true"
-                  >
-                    |
-                  </span>
+                {profileLoading ? (
+                  <div className="inline-flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+                    <div className="h-3 w-24 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+                  </div>
+                ) : (
                   <a
                     href={`mailto:${contactEmail}`}
                     className="group relative inline-flex items-center gap-1.5 hover:text-[#f5f1e9] transition-colors pb-1"
@@ -278,12 +385,19 @@ export default function HeaderAesthetics() {
                       <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-all duration-300 ease-out group-hover:w-full"></span>
                     </span>
                   </a>
-                  <span
-                    className="text-gray-700/70 dark:text-gray-200/60"
-                    aria-hidden="true"
-                  >
-                    |
-                  </span>
+                )}
+                <span
+                  className="text-gray-700/70 dark:text-gray-200/60"
+                  aria-hidden="true"
+                >
+                  |
+                </span>
+                {profileLoading ? (
+                  <div className="inline-flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+                    <div className="h-3 w-20 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+                  </div>
+                ) : (
                   <a
                     href={`tel:${contactPhone}`}
                     className="group relative inline-flex items-center gap-1.5 font-semibold hover:text-[#f5f1e9] transition-colors pb-1"
@@ -296,15 +410,14 @@ export default function HeaderAesthetics() {
                       <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-all duration-300 ease-out group-hover:w-full"></span>
                     </span>
                   </a>
-                </div>
-                
+                )}
                 <span
-                  className="hidden sm:inline text-gray-700/70 dark:text-gray-200/60"
+                  className="text-gray-700/70 dark:text-gray-200/60"
                   aria-hidden="true"
                 >
                   |
                 </span>
-                <div className="flex items-center gap-3 sm:gap-4">
+                <div className="flex items-center gap-4">
                   <a
                     href={siteConfig.social.facebook}
                     target="_blank"
@@ -368,7 +481,7 @@ export default function HeaderAesthetics() {
                     </a>
                   )}
                 </div>
-                <div className="hidden lg:flex pl-3 ml-1 border-l border-gray-700/40 dark:border-gray-200/20">
+                <div className="flex pl-3 ml-1 border-l border-gray-700/40 dark:border-gray-200/20">
                   <ThemeToggleButton />
                 </div>
               </div>
@@ -702,9 +815,9 @@ export default function HeaderAesthetics() {
                           <Link
                             href="/conditions"
                             onClick={() => setActiveMenu(null)}
-                            className="group relative text-xs font-medium transition-all duration-300"
+                            className="group relative text-xs font-medium text-[#9d9585] dark:text-[#b5ad9d] hover:text-[#857d68] dark:hover:text-[#c9c1b0] transition-all duration-300"
                           >
-                            <span className="relative z-10 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] bg-clip-text text-transparent group-hover:from-[#857d68] group-hover:via-[#aea693] group-hover:to-[#c9c1b0] transition-all duration-300">
+                            <span className="relative z-10">
                               View All
                             </span>
                             <span className="relative z-10 ml-1 inline-block group-hover:translate-x-1 transition-transform duration-300">
@@ -846,9 +959,21 @@ export default function HeaderAesthetics() {
                             bookNowServices[category.id]?.services || [];
                           return (
                             <div key={category.id} className="space-y-2">
-                              <h4 className="text-xs font-semibold text-gray-900 dark:text-gray-200 mb-3 uppercase tracking-wider font-montserrat px-2">
-                                {category.name}
-                              </h4>
+                              <div className="flex items-center justify-between mb-3 px-2">
+                                <h4 className="text-xs font-semibold text-gray-900 dark:text-gray-200 uppercase tracking-wider font-montserrat">
+                                  {category.name}
+                                </h4>
+                                <Link
+                                  href={`/services?category=${encodeURIComponent(category.name)}`}
+                                  onClick={() => {
+                                    setMobileMenuOpen(false);
+                                    setActiveMenu(null);
+                                  }}
+                                  className="text-xs text-[#9d9585] dark:text-[#c9c1b0] hover:text-gray-900 dark:hover:text-white transition-colors font-medium"
+                                >
+                                  View All →
+                                </Link>
+                              </div>
                               <ul className="space-y-1 max-h-[300px] overflow-y-auto menu-scroll pr-2">
                                 {categoryServices.map((item) => (
                                   <li key={item.name}>
@@ -904,7 +1029,10 @@ export default function HeaderAesthetics() {
                             </h4>
                             <Link
                               href="/conditions"
-                              onClick={() => setActiveMenu(null)}
+                              onClick={() => {
+                                setMobileMenuOpen(false);
+                                setActiveMenu(null);
+                              }}
                               className="text-xs text-[#9d9585] dark:text-[#c9c1b0] hover:text-gray-900 dark:hover:text-white transition-colors font-medium"
                             >
                               View All →
@@ -937,7 +1065,10 @@ export default function HeaderAesthetics() {
                             </h4>
                             <Link
                               href="/conditions?category=Body"
-                              onClick={() => setActiveMenu(null)}
+                              onClick={() => {
+                                setMobileMenuOpen(false);
+                                setActiveMenu(null);
+                              }}
                               className="text-xs text-[#9d9585] dark:text-[#c9c1b0] hover:text-gray-900 dark:hover:text-white transition-colors font-medium"
                             >
                               View All →
@@ -985,15 +1116,6 @@ export default function HeaderAesthetics() {
                       <span className="relative z-10">Awards/ Press</span>
                       <span className="absolute left-4 right-4 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
                     </Link>
-                  </li>
-                  <li>
-                    <span
-                      className="group relative flex px-4 py-3.5 min-h-[44px] text-base text-gray-400 dark:text-gray-600 rounded-lg font-light font-montserrat uppercase tracking-widest items-center pb-1 cursor-not-allowed pointer-events-none"
-                      aria-disabled="true"
-                    >
-                      <span className="relative z-10">Skin Membership</span>
-                      <span className="absolute left-4 right-4 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gray-300 dark:bg-gray-700 transition-transform duration-300 ease-out"></span>
-                    </span>
                   </li>
                   <li>
                     <Link

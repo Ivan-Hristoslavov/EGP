@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { siteConfig } from "@/config/site";
-import { Search, Filter, Grid, List, ArrowLeft, Info, Plus, Clock, CheckCircle } from "lucide-react";
+import { Search, Filter, ArrowLeft, Info, Plus, CheckCircle } from "lucide-react";
 import Link from 'next/link';
 import { useConditions } from "@/hooks/useConditions";
 import type { Condition } from "@/hooks/useConditions";
@@ -32,7 +32,6 @@ function ConditionsPageContent() {
   const { conditions, isLoading } = useConditions();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCondition, setSelectedCondition] = useState<string | null>(null);
@@ -106,10 +105,10 @@ function ConditionsPageContent() {
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
           {/* Header */}
-          <div className="bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 text-white px-8 py-6 flex items-center justify-between rounded-t-2xl flex-shrink-0">
+          <div className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white px-8 py-6 flex items-center justify-between rounded-t-2xl flex-shrink-0">
             <div>
               <h2 className="text-3xl font-bold mb-2">{condition.title}</h2>
-              <div className="flex items-center gap-4 text-rose-100">
+              <div className="flex items-center gap-4 text-white/90">
                 <span className="bg-white/20 px-3 py-1 rounded-full text-sm">{getCategoryDisplayName(condition.category)}</span>
               </div>
             </div>
@@ -128,7 +127,7 @@ function ConditionsPageContent() {
             {/* Description */}
             <div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                <Info className="w-5 h-5 text-rose-500" />
+                <Info className="w-5 h-5 text-[#9d9585]" />
                 Overview
               </h3>
               <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -159,7 +158,7 @@ function ConditionsPageContent() {
               <Link
                 href={`/book?condition=${selectedCondition}`}
                 onClick={() => setSelectedCondition(null)}
-                className="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white py-4 rounded-xl font-semibold text-lg hover:from-rose-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl block text-center"
+                className="w-full bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white py-4 rounded-xl font-semibold text-lg hover:from-[#857d68] hover:via-[#aea693] hover:to-[#c9c1b0] transition-all duration-200 shadow-lg hover:shadow-xl block text-center"
               >
                 Book Treatment for This Condition
               </Link>
@@ -175,7 +174,7 @@ function ConditionsPageContent() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="text-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#9d9585] mx-auto mb-4"></div>
             <p className="text-gray-600 dark:text-gray-400">Loading conditions...</p>
           </div>
         </div>
@@ -184,13 +183,13 @@ function ConditionsPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="container mx-auto px-4 max-w-7xl">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-4 pt-24 pb-16 max-w-7xl">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <Link
             href="/"
-            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
+            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#b5ad9d] transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
             Back to Home
@@ -217,42 +216,19 @@ function ConditionsPageContent() {
                 placeholder="Search conditions..."
                 value={searchTerm}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-[#9d9585] focus:ring-2 focus:ring-[#9d9585]/20 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
             </div>
 
             {/* Filter Toggle */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-rose-500 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
+              className="flex items-center gap-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-[#9d9585] hover:text-[#9d9585] dark:hover:text-[#b5ad9d] transition-colors"
             >
               <Filter className="w-5 h-5" />
               Filters
             </button>
 
-            {/* View Mode */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'grid' 
-                    ? 'bg-rose-500 text-white' 
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-600'
-                }`}
-              >
-                <Grid className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'list' 
-                    ? 'bg-rose-500 text-white' 
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-600'
-                }`}
-              >
-                <List className="w-5 h-5" />
-              </button>
-            </div>
           </div>
 
           {/* Filter Options */}
@@ -267,7 +243,7 @@ function ConditionsPageContent() {
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-[#9d9585] focus:ring-2 focus:ring-[#9d9585]/20 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     {categories.map(category => (
                       <option key={category} value={category}>{category}</option>
@@ -291,7 +267,7 @@ function ConditionsPageContent() {
                 setSearchTerm('');
                 setCurrentPage(1);
               }}
-              className="text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors"
+              className="text-[#9d9585] dark:text-[#b5ad9d] hover:text-[#857d68] dark:hover:text-[#c9c1b0] transition-colors"
             >
               Clear all filters
             </button>
@@ -312,113 +288,62 @@ function ConditionsPageContent() {
                 setSearchTerm('');
                 setCurrentPage(1);
               }}
-              className="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all"
+              className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white px-6 py-3 rounded-lg hover:from-[#857d68] hover:via-[#aea693] hover:to-[#c9c1b0] transition-all"
             >
               Show All Conditions
             </button>
           </div>
         ) : (
-          <div className={`grid gap-6 ${
-            viewMode === 'grid' 
-              ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
-              : 'grid-cols-1'
-          }`}>
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
             {paginatedConditions.map((condition) => (
               <div
                 key={condition.id}
-                className={`bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden ${
-                  viewMode === 'list' ? 'flex items-center p-8' : 'p-0'
-                }`}
+                className="bg-white dark:bg-gray-800 rounded-xl border border-gray-300 dark:border-gray-600 shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-col h-full"
               >
-                {viewMode === 'grid' ? (
-                  <>
-                    {/* Image Placeholder */}
-                    <div className="h-48 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 flex items-center justify-center relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-500/10"></div>
-                      <div className="text-center z-10">
-                        <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
-                          <svg className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                          </svg>
-                        </div>
-                        <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">Condition Image</p>
-                      </div>
-                    </div>
+                {/* Header (similar to services but without price) */}
+                <div className="bg-[#f5f1e9] dark:bg-gray-800 px-4 py-3 border-b border-[#ddd5c3]/60 dark:border-gray-700 relative rounded-t-xl">
+                  {/* Category Badge - Top Left */}
+                  <div className="absolute top-2 left-2">
+                    <span className="inline-flex items-center px-2 py-0.5 bg-[#464C45] text-white text-[10px] font-semibold rounded-full">
+                      {getCategoryDisplayName(condition.category)}
+                    </span>
+                  </div>
+                  
+                  {/* Title - Centered */}
+                  <div className="text-center pt-6 pb-2">
+                    <h3 className="text-lg font-bold text-[#464C45] dark:text-[#5a6259] leading-tight line-clamp-2">
+                      {condition.title}
+                    </h3>
+                  </div>
+                </div>
                     
-                    {/* Content */}
-                    <div className="p-6">
-                      <div className="flex items-start justify-between mb-3">
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{condition.title}</h3>
-                        <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full text-xs font-medium flex-shrink-0 ml-3">
-                          {getCategoryDisplayName(condition.category)}
-                        </span>
-                      </div>
-                      <p className="text-gray-600 dark:text-gray-400 mb-4 leading-relaxed text-sm line-clamp-2">
-                        {condition.description}
-                      </p>
-                      
-                      {/* Buttons */}
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => setSelectedCondition(condition.slug)}
-                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border border-blue-500 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors font-medium text-sm"
-                        >
-                          <Info className="w-4 h-4" />
-                          Details
-                        </button>
-                        <Link
-                          href={`/book?condition=${condition.slug}`}
-                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all font-medium text-sm shadow-md hover:shadow-lg"
-                        >
-                          <Plus className="w-4 h-4" />
-                          Book
-                        </Link>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    {/* List View with Image */}
-                    <div className="w-32 h-24 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg flex items-center justify-center mr-6 flex-shrink-0">
-                      <div className="text-center">
-                        <div className="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-1">
-                          <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                          </svg>
-                        </div>
-                        <p className="text-xs text-blue-600 dark:text-blue-400">Image</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-3">
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">{condition.title}</h3>
-                        <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full text-xs font-medium flex-shrink-0 ml-4">
-                          {getCategoryDisplayName(condition.category)}
-                        </span>
-                      </div>
-                      <p className="text-gray-600 dark:text-gray-400 mb-3 leading-relaxed">
-                        {condition.description}
-                      </p>
-                    </div>
-                    <div className="flex gap-2 ml-6 flex-shrink-0">
-                      <button
-                        onClick={() => setSelectedCondition(condition.slug)}
-                        className="flex items-center justify-center gap-2 px-4 py-2.5 border border-blue-500 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors font-medium text-sm"
-                      >
-                        <Info className="w-4 h-4" />
-                        Details
-                      </button>
-                      <Link
-                        href={`/book?condition=${condition.slug}`}
-                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all font-medium text-sm shadow-md hover:shadow-lg"
-                      >
-                        <Plus className="w-4 h-4" />
-                        Book
-                      </Link>
-                    </div>
-                  </>
-                )}
+                {/* Content */}
+                <div className="p-4 flex flex-col flex-1">
+                  {/* Description */}
+                  {condition.description && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed line-clamp-3 flex-1">
+                      {condition.description}
+                    </p>
+                  )}
+                  
+                  {/* Buttons */}
+                  <div className="flex gap-2 mt-auto">
+                    <button
+                      onClick={() => setSelectedCondition(condition.slug)}
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-[#464C45] text-[#464C45] dark:text-[#5a6259] dark:border-[#5a6259] rounded-lg hover:bg-[#464C45]/10 dark:hover:bg-[#5a6259]/10 transition-colors font-medium text-sm"
+                    >
+                      <Info className="w-4 h-4" />
+                      Details
+                    </button>
+                    <Link
+                      href={`/book?condition=${condition.slug}`}
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white rounded-lg hover:from-[#857d68] hover:via-[#aea693] hover:to-[#c9c1b0] transition-all font-medium text-sm shadow-md hover:shadow-lg"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Book
+                    </Link>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -430,7 +355,7 @@ function ConditionsPageContent() {
             <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-rose-500 hover:text-rose-600 dark:hover:text-rose-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-[#9d9585] hover:text-[#9d9585] dark:hover:text-[#b5ad9d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Previous
             </button>
@@ -441,8 +366,8 @@ function ConditionsPageContent() {
                 onClick={() => setCurrentPage(page)}
                 className={`px-4 py-2 rounded-lg transition-colors ${
                   currentPage === page
-                    ? 'bg-rose-500 text-white'
-                    : 'border border-gray-300 dark:border-gray-600 hover:border-rose-500 hover:text-rose-600 dark:hover:text-rose-400'
+                    ? 'bg-[#9d9585] text-white'
+                    : 'border border-gray-300 dark:border-gray-600 hover:border-[#9d9585] hover:text-[#9d9585] dark:hover:text-[#b5ad9d]'
                 }`}
               >
                 {page}
@@ -452,7 +377,7 @@ function ConditionsPageContent() {
             <button
               onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-rose-500 hover:text-rose-600 dark:hover:text-rose-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-[#9d9585] hover:text-[#9d9585] dark:hover:text-[#b5ad9d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next
             </button>

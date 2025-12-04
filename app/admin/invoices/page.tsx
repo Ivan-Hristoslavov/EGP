@@ -329,7 +329,7 @@ export default function InvoicesPage() {
 
   return (
     <div className="p-6">
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="mt-6 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
             Invoices

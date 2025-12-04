@@ -516,7 +516,7 @@ export default function AdminServicesPage() {
     <div className="min-h-screen bg-[#f5f1e9] dark:bg-gray-950">
       <div className="max-w-7xl mx-auto p-4 sm:p-6">
         {/* Mobile-Optimized Header */}
-        <div className="mb-6 sm:mb-8">
+        <div className="mt-6 mb-6 sm:mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">
             Services Management
           </h1>

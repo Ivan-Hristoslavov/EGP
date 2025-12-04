@@ -51,7 +51,7 @@ export default function FaceTreatmentsPage() {
               <Link
                 key={service.slug}
                 href={`/services/${service.slug}`}
-                className="group relative bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-pink-500 hover:shadow-xl transition-all duration-300"
+                className="group relative bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-xl p-6 hover:border-pink-500 dark:hover:border-pink-400 hover:shadow-xl transition-all duration-300"
               >
                 {/* Badges */}
                 <div className="flex gap-2 mb-4">
@@ -76,14 +76,14 @@ export default function FaceTreatmentsPage() {
                 </div>
 
                 {/* Price & CTA */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                   <div>
-                    <span className="text-sm text-gray-600">From</span>
-                    <div className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">£{service.price}</div>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">From</span>
+                    <div className="text-2xl font-bold text-[#9d9585] dark:text-[#c9c1b0]">£{service.price}</div>
                   </div>
-                  <div className="flex items-center gap-2 bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent font-semibold group-hover:gap-3 transition-all">
+                  <div className="flex items-center gap-2 text-[#9d9585] dark:text-[#c9c1b0] font-semibold group-hover:gap-3 transition-all">
                     <span>Learn More</span>
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-pink-600" />
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-[#9d9585] dark:text-[#c9c1b0]" />
                   </div>
                 </div>
               </Link>

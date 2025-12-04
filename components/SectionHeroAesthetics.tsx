@@ -6,10 +6,11 @@ import { Star, CheckCircle } from "lucide-react";
 import ButtonBookNow from "./ButtonBookNow";
 import ButtonWhatsApp from "./ButtonWhatsApp";
 import { siteConfig } from "@/config/site";
-import { useAdminProfile } from "@/components/AdminProfileContext";
+import { useAdminProfile, useAdminProfileContext } from "@/components/AdminProfileContext";
 
 export default function SectionHeroAesthetics() {
   const adminProfile = useAdminProfile();
+  const { loading: profileLoading } = useAdminProfileContext();
   const contactPhone = adminProfile?.phone || siteConfig.contact.phone;
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -55,8 +56,13 @@ export default function SectionHeroAesthetics() {
             fill
             priority={index === 0}
             sizes="100vw 100vh"
-            className="object-cover"
-            style={{ objectPosition: slide.image.includes("owners.JPG") ? "center 30%" : "center center" }}
+            className={`object-cover ${
+              slide.image.includes("sisters.png") 
+                ? "sm:object-center object-[60%_center]" 
+                : slide.image.includes("owners.JPG") 
+                  ? "object-center sm:object-[center_30%]" 
+                  : "object-center"
+            }`}
           />
           {/* Gradient Overlay - Lighter for owners slide */}
           <div className={`absolute inset-0 z-[1] ${
@@ -68,8 +74,8 @@ export default function SectionHeroAesthetics() {
       ))}
 
       {/* Content */}
-      <div className="relative z-30 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-start pt-24 sm:pt-32 pb-16">
-        <div className="w-full max-w-3xl">
+      <div className="relative z-30 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center sm:items-start sm:pt-32 pb-16 -mt-16 sm:mt-0">
+        <div className="w-full max-w-3xl text-center sm:text-left">
           {/* Badge */}
           <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 backdrop-blur-md rounded-full text-white mb-4 sm:mb-6 border border-white/20">
             <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
@@ -89,7 +95,7 @@ export default function SectionHeroAesthetics() {
           </p>
 
           {/* Trust Indicators */}
-          <div className="flex flex-wrap gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8 text-white text-sm sm:text-base">
+          <div className="flex flex-wrap justify-center sm:justify-start gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8 text-white text-sm sm:text-base">
             <div className="flex items-center gap-1.5 sm:gap-2">
               <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 flex-shrink-0" />
               <span className="font-medium">
@@ -109,7 +115,7 @@ export default function SectionHeroAesthetics() {
           </div>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full max-w-lg sm:max-w-none">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full max-w-lg sm:max-w-none justify-center sm:justify-start">
             <ButtonBookNow
               size="lg"
               showIcon
@@ -122,14 +128,18 @@ export default function SectionHeroAesthetics() {
           </div>
 
           {/* Quick Contact */}
-          <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 text-white/90 text-sm sm:text-base">
+          <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-center sm:justify-start sm:items-center gap-2 sm:gap-4 text-white/90 text-sm sm:text-base whitespace-nowrap">
             <span>Or call us now:</span>
-            <a
-              href={`tel:${contactPhone}`}
-              className="text-lg sm:text-xl font-bold text-white hover:text-yellow-300 transition-colors"
-            >
-              {contactPhone}
-            </a>
+            {profileLoading ? (
+              <div className="h-6 sm:h-7 w-32 sm:w-40 bg-white/20 dark:bg-white/10 rounded animate-pulse"></div>
+            ) : (
+              <a
+                href={`tel:${contactPhone}`}
+                className="text-lg sm:text-xl font-bold text-white hover:text-yellow-300 transition-colors"
+              >
+                {contactPhone}
+              </a>
+            )}
           </div>
         </div>
       </div>

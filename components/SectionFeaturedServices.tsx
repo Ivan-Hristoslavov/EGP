@@ -209,11 +209,11 @@ export default function SectionFeaturedServices() {
             return (
               <div
                 key={service.id}
-                className="group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-100 dark:border-gray-700 cursor-pointer flex flex-col"
+                className="group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-300 dark:border-gray-700 cursor-pointer flex flex-col"
                 onClick={() => setSelectedService(service)}
               >
                 {/* Image */}
-                <div className="aspect-[4/3] relative overflow-hidden bg-gradient-to-br">
+                <div className="h-32 sm:h-36 md:h-40 lg:h-44 relative overflow-hidden bg-gradient-to-br">
                   {service.image_url ? (
                     <>
                       <img
@@ -228,8 +228,8 @@ export default function SectionFeaturedServices() {
                   )}
                   
                   {/* Service Name Overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center p-4 z-10">
-                    <h3 className="text-xl sm:text-2xl font-bold text-white text-center drop-shadow-lg">
+                  <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-5 md:p-6 z-10">
+                    <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white text-center drop-shadow-lg line-clamp-2 leading-tight">
                       {service.name}
                     </h3>
                   </div>

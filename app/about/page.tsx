@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 import { siteConfig } from "@/config/site";
 import { createClient } from '@/lib/supabase/server';
 import ImageWithSkeleton from "@/components/ImageWithSkeleton";
@@ -144,7 +146,7 @@ export default async function AboutPage() {
                 <ul className="space-y-3">
                   {section.bullet_points.map((bullet: string, idx: number) => (
                     <li key={idx} className="flex items-start gap-3 text-gray-600 dark:text-gray-300">
-                      <span className="text-rose-500 mt-1">✓</span>
+                      <span className="text-[#9d9585] dark:text-[#b5ad9d] mt-1 font-bold">✓</span>
                       <span>{bullet}</span>
                     </li>
                   ))}
@@ -171,11 +173,27 @@ export default async function AboutPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 pt-24 pb-16">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-8 font-playfair">
-            About EGP Aesthetics London
-          </h1>
+          {/* Back to Home Button */}
+          <div className="flex items-center gap-4 mb-8">
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#b5ad9d] transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Back to Home
+            </Link>
+          </div>
+          
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 font-playfair">
+              About EGP Aesthetics London
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto">
+              Learn about our story, values, and commitment to providing exceptional aesthetic treatments.
+            </p>
+          </div>
           
           {sections.length > 0 ? (
             <div>

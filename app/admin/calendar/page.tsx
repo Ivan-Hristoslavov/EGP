@@ -727,11 +727,11 @@ export default function CalendarPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-                  <div>
+      <div className="mt-6 flex justify-between items-center">
+        <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Calendar</h1>
           <p className="text-gray-600 dark:text-gray-300">Manage your appointments and bookings</p>
-                  </div>
+        </div>
                       <button
           onClick={() => setShowAddModal(true)}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"

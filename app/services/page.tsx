@@ -264,18 +264,18 @@ function ServicesPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f1e9] dark:bg-gray-900 py-8">
-      <div className="container mx-auto px-4 max-w-7xl">
+    <div className="min-h-screen bg-[#f5f1e9] dark:bg-gray-900">
+      <div className="container mx-auto px-4 pt-24 pb-16 max-w-7xl">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <Link
-            href="/book"
+            href="/"
             className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-[#464C45] dark:hover:text-[#5a6259] transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
-            Back to Booking
+            Back to Home
           </Link>
-                </div>
+        </div>
 
         <div className="text-center mb-12">
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6 font-playfair">
@@ -415,7 +415,7 @@ function ServicesPageContent() {
             {paginatedServices.map(([serviceId, service]) => (
               <div
                 key={serviceId}
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-col h-full"
+                className="bg-white dark:bg-gray-800 rounded-xl border border-gray-300 dark:border-gray-600 shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-col h-full"
               >
                 {/* Price Header */}
                 <div className="bg-[#f5f1e9] dark:bg-gray-800 px-4 py-3 border-b border-[#ddd5c3]/60 dark:border-gray-700 relative rounded-t-xl">
