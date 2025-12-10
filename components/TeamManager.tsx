@@ -69,10 +69,11 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
   });
   const [serviceSearchQuery, setServiceSearchQuery] = useState("");
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>("all");
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>("all"); // "all", "selected", "unselected"
   const { services, isLoading: servicesLoading } = useServices();
 
   // Get all unique categories for filter
-  const allCategories = useMemo(() => {
+  const allCategories = useMemo<string[]>(() => {
     if (!services || services.length === 0) return [];
     const categories = new Set(services.map(s => s.category.name));
     return Array.from(categories).sort();
@@ -93,6 +94,13 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
       filtered = filtered.filter(service => service.category.name === selectedCategoryFilter);
     }
 
+    // Apply selected status filter
+    if (selectedStatusFilter === "selected") {
+      filtered = filtered.filter(service => formData.service_ids.includes(service.id));
+    } else if (selectedStatusFilter === "unselected") {
+      filtered = filtered.filter(service => !formData.service_ids.includes(service.id));
+    }
+
     // Group services by category
     const grouped = filtered.reduce((acc, service) => {
       const categoryName = service.category.name;
@@ -104,7 +112,7 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
     }, {} as Record<string, Service[]>);
 
     return grouped;
-  }, [services, serviceSearchQuery, selectedCategoryFilter]);
+  }, [services, serviceSearchQuery, selectedCategoryFilter, selectedStatusFilter, formData.service_ids]);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [shouldDeleteImage, setShouldDeleteImage] = useState(false);
@@ -485,13 +493,13 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
   const handleEdit = (member: TeamMember) => {
     setEditingMember(member);
     setFormData({
-      name: member.name,
-      email: member.email,
-      phone: member.phone,
-      role: member.role,
-      specializations: member.specializations,
-      experience_years: member.experience_years,
-      certifications: member.certifications,
+      name: member.name || "",
+      email: member.email || "",
+      phone: member.phone || "",
+      role: member.role || "",
+      specializations: member.specializations || "",
+      experience_years: member.experience_years || "",
+      certifications: member.certifications || "",
       image_url: member.image_url || "",
       service_ids: member.service_ids || [],
       is_active: member.is_active
@@ -515,20 +523,20 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
         confirmText: "Delete",
       },
       async () => {
-        try {
-          const response = await fetch(`/api/admin/team/${id}`, {
-            method: "DELETE",
-          });
+    try {
+      const response = await fetch(`/api/admin/team/${id}`, {
+        method: "DELETE",
+      });
 
-          if (response.ok) {
-            showSuccess("Success", "Team member deleted successfully!");
-            loadTeam();
-          } else {
-            showError("Error", "Failed to delete team member");
-          }
-        } catch (error) {
-          showError("Error", "Error deleting team member");
-        }
+      if (response.ok) {
+        showSuccess("Success", "Team member deleted successfully!");
+        loadTeam();
+      } else {
+        showError("Error", "Failed to delete team member");
+      }
+    } catch (error) {
+      showError("Error", "Error deleting team member");
+    }
       }
     );
   };
@@ -714,14 +722,14 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
     return (
       <Card className={className}>
         <CardBody className="p-6">
-          <div className="animate-pulse">
+        <div className="animate-pulse">
             <div className="h-6 bg-default-200 rounded w-1/3 mb-4"></div>
-            <div className="space-y-3">
+          <div className="space-y-3">
               <div className="h-4 bg-default-200 rounded"></div>
               <div className="h-4 bg-default-200 rounded w-5/6"></div>
               <div className="h-4 bg-default-200 rounded w-4/6"></div>
-            </div>
           </div>
+        </div>
         </CardBody>
       </Card>
     );
@@ -731,17 +739,17 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
     <div className={className}>
       <Card>
         <CardBody className="p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
             <h3 className="text-xl font-bold flex items-center gap-2">
               <User className="w-5 h-5 text-primary" />
-              Team Members
-            </h3>
+            Team Members
+          </h3>
             <p className="text-default-500 text-sm">
-              Manage your team members for booking assignments
-            </p>
-          </div>
+            Manage your team members for booking assignments
+          </p>
+        </div>
           <Button
             color="primary"
             startContent={<Plus className="w-4 h-4" />}
@@ -765,9 +773,9 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
               setShowAddModal(true);
             }}
           >
-            Add Team Member
+          Add Team Member
           </Button>
-        </div>
+      </div>
 
       {/* Add/Edit Modal */}
       <Modal
@@ -800,32 +808,32 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
                   }} 
                   className="space-y-6"
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
                       label="Full Name"
                       placeholder="Enter full name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  value={formData.name || ""}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       isRequired
                       isClearable
                     />
 
                     <Input
-                      type="email"
+                  type="email"
                       label="Email Address"
                       placeholder="member@email.com"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  value={formData.email || ""}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       isRequired
                       isClearable
                     />
 
                     <Input
-                      type="tel"
+                  type="tel"
                       label="Phone Number"
                       placeholder="+44 7700 900123"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  value={formData.phone || ""}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       isClearable
                     />
 
@@ -839,7 +847,7 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
                       }}
                       isRequired
                     >
-                      {roles.map((role) => (
+                  {roles.map((role) => (
                         <SelectItem key={role}>
                           {role}
                         </SelectItem>
@@ -849,7 +857,7 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
                     <Input
                       label="Specializations"
                       placeholder="Anti-wrinkle, Dermal Fillers, etc."
-                      value={formData.specializations}
+                      value={formData.specializations || ""}
                       onChange={(e) => setFormData({ ...formData, specializations: e.target.value })}
                       isClearable
                     />
@@ -857,7 +865,7 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
                     <Input
                       label="Years of Experience"
                       placeholder="5+ years"
-                      value={formData.experience_years}
+                      value={formData.experience_years || ""}
                       onChange={(e) => setFormData({ ...formData, experience_years: e.target.value })}
                       isClearable
                     />
@@ -866,19 +874,19 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
                       <Textarea
                         label="Certifications"
                         placeholder="List relevant certifications and qualifications..."
-                        value={formData.certifications}
+                        value={formData.certifications || ""}
                         onChange={(e) => setFormData({ ...formData, certifications: e.target.value })}
                         minRows={3}
                         classNames={{
                           input: "resize-none"
                         }}
                       />
-                    </div>
+              </div>
 
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium mb-2">
                         Profile Image
-                      </label>
+                </label>
                       <div className="space-y-3">
                         {(imagePreview || (editingMember && editingMember.image_url && !imageFile)) && (
                           <div className="relative inline-block group">
@@ -912,7 +920,7 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
                           </div>
                         )}
                         <div className="flex items-center gap-3">
-                          <input
+                <input
                             ref={fileInputRef}
                             type="file"
                             accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
@@ -937,16 +945,16 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
                           JPEG, PNG, WebP, or GIF. Max 10MB.
                         </p>
                       </div>
-                    </div>
+              </div>
 
                     {/* Services Selection - Compact View */}
                     <div className="md:col-span-2">
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <div>
+              <div>
                             <label className="block text-sm font-medium mb-1">
                               Available Services *
-                            </label>
+                </label>
                             <p className="text-xs text-default-500">
                               Select which services this team member can perform
                             </p>
@@ -1051,8 +1059,9 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
           setShowServicesModal(false);
           setServiceSearchQuery("");
           setSelectedCategoryFilter("all");
+          setSelectedStatusFilter("all");
         }}
-        size="3xl"
+        size="5xl"
         scrollBehavior="inside"
         classNames={{
           base: "max-h-[90vh]",
@@ -1074,32 +1083,117 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
               </ModalHeader>
               <ModalBody>
                 <div className="space-y-4">
-                  {/* Search Bar and Category Filter */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <Input
-                      type="text"
-                      placeholder="Search services..."
-                      value={serviceSearchQuery}
-                      onChange={(e) => setServiceSearchQuery(e.target.value)}
-                      startContent={<Search className="w-4 h-4 text-default-400" />}
-                      isClearable
-                    />
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Filter by Category
-                      </label>
-                      <select
-                        value={selectedCategoryFilter}
-                        onChange={(e) => setSelectedCategoryFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-divider rounded-lg bg-default-50 text-default-foreground focus:ring-2 focus:ring-primary focus:border-primary text-sm"
-                      >
-                        <option value="all">All Categories</option>
-                        {allCategories.map(category => (
-                          <option key={category} value={category}>{category}</option>
-                        ))}
-                      </select>
+                  {/* Search Bar and Filters */}
+                  <div className="flex flex-col sm:flex-row gap-4">
+                      <div className="flex-1">
+                        <Input
+                          type="text"
+                          placeholder="Search services..."
+                          value={serviceSearchQuery}
+                          onChange={(e) => setServiceSearchQuery(e.target.value)}
+                          startContent={<Search className="w-4 h-4 text-default-400" />}
+                          isClearable
+                          size="lg"
+                          variant="bordered"
+                          classNames={{
+                            input: "text-sm",
+                            inputWrapper: "h-12"
+                          }}
+                        />
+                      </div>
+                      <div className="w-full sm:w-64">
+                        <Select
+                          label="Filter by Category"
+                          placeholder="All Categories"
+                          selectedKeys={selectedCategoryFilter === "all" ? ["all"] : [selectedCategoryFilter]}
+                          onSelectionChange={(keys) => {
+                            const selected = Array.from(keys)[0] as string;
+                            setSelectedCategoryFilter(selected || "all");
+                          }}
+                          size="lg"
+                          variant="bordered"
+                          classNames={{
+                            trigger: "h-12",
+                            value: "text-sm"
+                          }}
+                        >
+                          <SelectItem key="all">
+                            All Categories
+                          </SelectItem>
+                          {(allCategories.map((category) => (
+                            <SelectItem key={category}>
+                              {category}
+                            </SelectItem>
+                          )) as any)}
+                        </Select>
+                      </div>
+                      <div className="w-full sm:w-64">
+                        <Select
+                          label="Filter by Status"
+                          placeholder="All Services"
+                          selectedKeys={[selectedStatusFilter]}
+                          onSelectionChange={(keys) => {
+                            const selected = Array.from(keys)[0] as string;
+                            setSelectedStatusFilter(selected || "all");
+                          }}
+                          size="lg"
+                          variant="bordered"
+                          classNames={{
+                            trigger: "h-12",
+                            value: "text-sm"
+                          }}
+                        >
+                          <SelectItem key="all">
+                            All Services
+                          </SelectItem>
+                          <SelectItem key="selected">
+                            Selected Only
+                          </SelectItem>
+                          <SelectItem key="unselected">
+                            Unselected Only
+                          </SelectItem>
+                        </Select>
+                      </div>
                     </div>
-                  </div>
+                    
+                    {/* Select All / Clear All */}
+                    <div className="flex items-center justify-between gap-2 pb-2 border-b border-divider">
+                      <div className="flex items-center gap-2">
+                        <Chip size="sm" variant="flat" color="primary">
+                          {formData.service_ids.length} selected
+                        </Chip>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          color="primary"
+                          variant="flat"
+                          onPress={() => {
+                            const allServiceIds = Object.values(filteredAndGroupedServices).flat().map(s => s.id);
+                            setFormData(prev => ({
+                              ...prev,
+                              service_ids: allServiceIds
+                            }));
+                          }}
+                        >
+                          Select All
+                        </Button>
+                        <Button
+                          size="sm"
+                          color="default"
+                          variant="flat"
+                          onPress={() => {
+                            const allServiceIds = Object.values(filteredAndGroupedServices).flat().map(s => s.id);
+                            setFormData(prev => ({
+                              ...prev,
+                              service_ids: prev.service_ids.filter(id => !allServiceIds.includes(id))
+                            }));
+                          }}
+                        >
+                          Clear All
+                        </Button>
+                      </div>
+                    </div>
 
                   {/* Services List by Category */}
                   {servicesLoading ? (
@@ -1107,7 +1201,7 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
                   ) : services.length === 0 ? (
                     <div className="text-sm text-default-500 py-8 text-center">No services available</div>
                   ) : (
-                    <div className="max-h-[60vh] overflow-y-auto border border-divider rounded-lg p-4 space-y-4 bg-default-50">
+                    <div className="max-h-[65vh] overflow-y-auto border border-divider rounded-lg p-6 space-y-6 bg-default-50">
                       {Object.keys(filteredAndGroupedServices).length === 0 ? (
                         <div className="text-sm text-default-500 text-center py-8">
                           {serviceSearchQuery ? (
@@ -1118,45 +1212,6 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
                         </div>
                       ) : (
                         <>
-                          {/* Select All / Clear All */}
-                          <div className="flex items-center justify-between gap-2 pb-3 border-b border-divider sticky top-0 bg-default-50 z-10">
-                            <div className="flex items-center gap-2">
-                              <Chip size="sm" variant="flat" color="primary">
-                                {formData.service_ids.length} selected
-                              </Chip>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                size="sm"
-                                color="primary"
-                                variant="flat"
-                                onPress={() => {
-                                  const allServiceIds = Object.values(filteredAndGroupedServices).flat().map(s => s.id);
-                                  setFormData(prev => ({
-                                    ...prev,
-                                    service_ids: allServiceIds
-                                  }));
-                                }}
-                              >
-                                Select All
-                              </Button>
-                              <Button
-                                size="sm"
-                                color="default"
-                                variant="flat"
-                                onPress={() => {
-                                  const allServiceIds = Object.values(filteredAndGroupedServices).flat().map(s => s.id);
-                                  setFormData(prev => ({
-                                    ...prev,
-                                    service_ids: prev.service_ids.filter(id => !allServiceIds.includes(id))
-                                  }));
-                                }}
-                              >
-                                Clear All
-                              </Button>
-                            </div>
-                          </div>
-
                           {Object.keys(filteredAndGroupedServices)
                             .sort()
                             .map(categoryName => {
@@ -1210,7 +1265,7 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
                                       </Button>
                                     </div>
                                   </div>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3">
                                     {filteredAndGroupedServices[categoryName].map(service => {
                                       const isSelected = formData.service_ids.includes(service.id);
                                       return (
@@ -1235,36 +1290,16 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
                                           }}
                                           className={`cursor-pointer transition-all ${
                                             isSelected
-                                              ? 'border-2 border-primary bg-primary-50'
-                                              : 'border border-divider hover:border-primary/50'
+                                              ? 'border-2 border-green-500 bg-green-50 dark:bg-green-950/20'
+                                              : 'border-2 border-red-300 bg-red-50 dark:bg-red-950/20 hover:border-red-400'
                                           }`}
                                         >
-                                          <CardBody className="p-3">
-                                            <div className="flex items-center gap-2">
-                                              <Checkbox
-                                                isSelected={isSelected}
-                                                onValueChange={() => {
-                                                  setFormData(prev => {
-                                                    const isCurrentlySelected = prev.service_ids.includes(service.id);
-                                                    if (isCurrentlySelected) {
-                                                      return {
-                                                        ...prev,
-                                                        service_ids: prev.service_ids.filter(id => id !== service.id)
-                                                      };
-                                                    } else {
-                                                      return {
-                                                        ...prev,
-                                                        service_ids: [...prev.service_ids, service.id]
-                                                      };
-                                                    }
-                                                  });
-                                                }}
-                                                size="sm"
-                                              />
-                                              <span className={`text-sm flex-1 ${
+                                          <CardBody className="p-4">
+                                            <div className="flex items-center">
+                                              <span className={`text-sm flex-1 font-medium ${
                                                 isSelected
-                                                  ? 'text-primary font-medium'
-                                                  : 'text-default-700'
+                                                  ? 'text-green-700 dark:text-green-300'
+                                                  : 'text-red-700 dark:text-red-300'
                                               }`}>
                                                 {service.name}
                                               </span>
@@ -1413,7 +1448,7 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
                     <div>
                       <label className="block text-sm font-medium mb-3">
                         Date Range
-                      </label>
+                </label>
                       <div className="flex justify-center bg-default-50 dark:bg-default-100 rounded-lg p-4">
                         <RangeCalendar
                           aria-label="Day off date range"
@@ -1429,9 +1464,9 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
                             }
                           }}
                           minValue={today(getLocalTimeZone())}
-                        />
-                      </div>
-                    </div>
+                />
+              </div>
+            </div>
 
                     <div>
                       <Textarea
@@ -1597,7 +1632,7 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Zoom: {Math.round(cropData.scale * 100)}%
-                  </label>
+              </label>
                   <input
                     type="range"
                     min="0.5"
@@ -1607,23 +1642,23 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
                     onChange={(e) => setCropData(prev => ({ ...prev, scale: parseFloat(e.target.value) }))}
                     className="w-full"
                   />
-                </div>
+            </div>
 
-                <div className="flex gap-3">
-                  <button
+            <div className="flex gap-3">
+              <button
                     onClick={handleCropCancel}
                     className="flex-1 px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
-                  >
+              >
                     Cancel
-                  </button>
-                  <button
+              </button>
+              <button
                     onClick={handleCropComplete}
                     disabled={isUploadingImage}
                     className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isUploadingImage ? 'Uploading...' : 'Apply Crop & Upload'}
-                  </button>
-                </div>
+              </button>
+            </div>
               </div>
             </div>
           </div>
@@ -1631,7 +1666,7 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
       )}
 
       <ConfirmationModal {...modalProps} />
-    </div>
+          </div>
   );
 }
 
@@ -1699,54 +1734,54 @@ function TeamMemberCard({
       <CardBody className="p-5">
         <div className="mb-4">
           <h4 className="text-xl font-bold mb-1">
-            {member.name}
-          </h4>
+                      {member.name}
+                    </h4>
           <div className="flex items-center gap-2 text-primary">
             <Award className="w-4 h-4" />
             <span className="text-sm font-medium">{member.role}</span>
           </div>
-        </div>
-          
+                  </div>
+                  
         <div className="space-y-2 mb-4 text-sm">
           <div className="flex items-center gap-2 text-default-500">
             <Mail className="w-4 h-4 flex-shrink-0" />
             <span className="truncate">{member.email}</span>
-          </div>
-          {member.phone && (
+                    </div>
+                    {member.phone && (
             <div className="flex items-center gap-2 text-default-500">
               <Phone className="w-4 h-4 flex-shrink-0" />
-              <span>{member.phone}</span>
-            </div>
-          )}
-          {member.experience_years && (
+                        <span>{member.phone}</span>
+                      </div>
+                    )}
+                    {member.experience_years && (
             <div className="flex items-center gap-2 text-default-500">
               <User className="w-4 h-4 flex-shrink-0" />
-              <span>{member.experience_years} experience</span>
-            </div>
-          )}
-        </div>
+                        <span>{member.experience_years} experience</span>
+                      </div>
+                    )}
+                  </div>
 
-        {member.specializations && (
+                  {member.specializations && (
           <div className="mb-3">
             <p className="text-xs font-semibold text-default-400 uppercase mb-1">
               Specializations
             </p>
             <p className="text-sm text-default-700 line-clamp-2">
               {member.specializations}
-            </p>
-          </div>
-        )}
+                      </p>
+                    </div>
+                  )}
 
-        {member.certifications && (
+                  {member.certifications && (
           <div className="mb-4">
             <p className="text-xs font-semibold text-default-400 uppercase mb-1">
               Certifications
             </p>
             <p className="text-sm text-default-700 line-clamp-3">
               {member.certifications}
-            </p>
-          </div>
-        )}
+                      </p>
+                    </div>
+                  )}
 
         {/* Action Buttons */}
         <div className="flex gap-2 pt-4 border-t border-divider">
@@ -1776,10 +1811,10 @@ function TeamMemberCard({
             variant="flat"
             size="sm"
             onPress={() => onDelete(member.id)}
-          >
-            <Trash2 className="w-4 h-4" />
+                  >
+                    <Trash2 className="w-4 h-4" />
           </Button>
-        </div>
+                </div>
       </CardBody>
     </Card>
   );

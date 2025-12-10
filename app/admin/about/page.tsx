@@ -207,17 +207,17 @@ export default function AdminAboutPage() {
         confirmText: "Delete",
       },
       async () => {
-        try {
-          const response = await fetch(`/api/about-content/${id}`, {
-            method: 'DELETE',
-          });
+    try {
+      const response = await fetch(`/api/about-content/${id}`, {
+        method: 'DELETE',
+      });
 
-          if (response.ok) {
-            await loadSections();
-          }
-        } catch (error) {
-          console.error('Error deleting section:', error);
-        }
+      if (response.ok) {
+        await loadSections();
+      }
+    } catch (error) {
+      console.error('Error deleting section:', error);
+    }
       }
     );
   };
@@ -306,18 +306,18 @@ export default function AdminAboutPage() {
 
   return (
     <div className="w-full">
-      {/* Add Button */}
-      <div className="mb-6">
-        <Button
-          onClick={openAddModal}
-          className="bg-gradient-to-r from-rose-500 to-pink-500 text-white"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Add Section
-        </Button>
-      </div>
+        {/* Add Button */}
+        <div className="mb-6">
+          <Button
+            onClick={openAddModal}
+            className="bg-gradient-to-r from-rose-500 to-pink-500 text-white"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Add Section
+          </Button>
+        </div>
 
-      {/* Sections List */}
+        {/* Sections List */}
       <div>
           {sections.length === 0 ? (
             <div className="text-center py-12">
@@ -338,42 +338,42 @@ export default function AdminAboutPage() {
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2 flex-wrap">
-                            <Chip size="sm" variant="flat" color="danger">
-                              {section.section_type}
-                            </Chip>
-                            {!section.is_active && (
-                              <Chip size="sm" variant="flat" color="default">
-                                Inactive
-                              </Chip>
-                            )}
+                        <Chip size="sm" variant="flat" color="danger">
+                          {section.section_type}
+                        </Chip>
+                        {!section.is_active && (
+                          <Chip size="sm" variant="flat" color="default">
+                            Inactive
+                          </Chip>
+                        )}
                             <span className="text-xs text-default-500">#{section.order}</span>
-                          </div>
-                          {section.heading && (
-                            <h3 className="text-base font-bold text-foreground mb-1 line-clamp-2">
-                              {section.heading}
-                            </h3>
-                          )}
-                        </div>
-                        <div className="flex gap-1 ml-2 flex-shrink-0">
-                          <Button
-                            isIconOnly
-                            size="sm"
-                            variant="light"
-                            onPress={() => handleEditSection(section)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            isIconOnly
-                            size="sm"
-                            variant="light"
-                            color="danger"
-                            onPress={() => handleDeleteSection(section.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
                       </div>
+                      {section.heading && (
+                            <h3 className="text-base font-bold text-foreground mb-1 line-clamp-2">
+                          {section.heading}
+                        </h3>
+                      )}
+                    </div>
+                        <div className="flex gap-1 ml-2 flex-shrink-0">
+                      <Button
+                            isIconOnly
+                        size="sm"
+                            variant="light"
+                        onPress={() => handleEditSection(section)}
+                      >
+                            <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                            isIconOnly
+                        size="sm"
+                            variant="light"
+                        color="danger"
+                        onPress={() => handleDeleteSection(section.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
 
                       <div className="mb-3">
                         <p className="text-sm text-default-600 line-clamp-3">
@@ -409,42 +409,42 @@ export default function AdminAboutPage() {
                         )}
                       </div>
 
-                      {section.bullet_points && section.bullet_points.length > 0 && (
+                  {section.bullet_points && section.bullet_points.length > 0 && (
                         <div className="mb-3">
                           <div className="flex flex-wrap gap-1">
                             {section.bullet_points.slice(0, 3).map((bullet, idx) => (
                               <Chip key={idx} size="sm" variant="flat" color="success" className="text-xs">
                                 {bullet.length > 20 ? bullet.substring(0, 20) + '...' : bullet}
-                              </Chip>
-                            ))}
+                          </Chip>
+                        ))}
                             {section.bullet_points.length > 3 && (
                               <Chip size="sm" variant="flat" color="default" className="text-xs">
                                 +{section.bullet_points.length - 3} more
                               </Chip>
                             )}
-                          </div>
-                        </div>
-                      )}
+                      </div>
+                    </div>
+                  )}
 
-                      {section.image_url && (
+                  {section.image_url && (
                         <div className="mb-3">
-                          <img
-                            src={section.image_url}
-                            alt={section.heading || section.section_type}
+                      <img
+                        src={section.image_url}
+                        alt={section.heading || section.section_type}
                             className="w-full h-32 object-cover rounded-md border border-divider"
-                          />
-                        </div>
-                      )}
+                      />
+                    </div>
+                  )}
                     </CardBody>
                   </Card>
                 );
               })}
             </div>
           )}
-      </div>
+        </div>
 
-      {/* Modal */}
-      <Modal
+        {/* Modal */}
+        <Modal
           isOpen={isModalOpen}
           onClose={() => {
             setIsModalOpen(false);
@@ -627,7 +627,7 @@ export default function AdminAboutPage() {
               </>
             )}
           </ModalContent>
-      </Modal>
+        </Modal>
 
       <ConfirmationModal {...modalProps} />
     </div>

@@ -90,8 +90,8 @@ export function FAQSection() {
               }
             >
               <p className="text-default-600 dark:text-default-400 leading-relaxed">
-                {item.answer}
-              </p>
+                      {item.answer}
+                    </p>
             </AccordionItem>
           ))}
         </Accordion>

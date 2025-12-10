@@ -256,17 +256,17 @@ export default function AdminServicesPage() {
         confirmText: "Delete",
       },
       async () => {
-        try {
-          const response = await fetch(`/api/services/${id}`, {
-            method: "DELETE",
-          });
+    try {
+      const response = await fetch(`/api/services/${id}`, {
+        method: "DELETE",
+      });
 
-          if (response.ok) {
-            await loadServices();
-          }
-        } catch (error) {
-          console.error("Error deleting service:", error);
-        }
+      if (response.ok) {
+        await loadServices();
+      }
+    } catch (error) {
+      console.error("Error deleting service:", error);
+    }
       }
     );
   };
@@ -399,17 +399,17 @@ export default function AdminServicesPage() {
         confirmText: "Delete",
       },
       async () => {
-        try {
-          const response = await fetch(`/api/service-categories/${id}`, {
-            method: "DELETE",
-          });
+    try {
+      const response = await fetch(`/api/service-categories/${id}`, {
+        method: "DELETE",
+      });
 
-          if (response.ok) {
-            await loadCategories();
-          }
-        } catch (error) {
-          console.error("Error deleting category:", error);
-        }
+      if (response.ok) {
+        await loadCategories();
+      }
+    } catch (error) {
+      console.error("Error deleting category:", error);
+    }
       }
     );
   };

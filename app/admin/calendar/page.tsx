@@ -958,7 +958,7 @@ export default function CalendarPage() {
         >
           New Booking
         </Button>
-      </div>
+                    </div>
 
       {/* Filters */}
       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
@@ -1034,10 +1034,10 @@ export default function CalendarPage() {
           {/* Calendar Header */}
           <div className="p-4 border-b dark:border-gray-700">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-              </h2>
-              <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+            </h2>
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => navigateDate('prev')}
                 className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300"
@@ -1056,7 +1056,7 @@ export default function CalendarPage() {
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
-              </div>
+                </div>
             </div>
             {/* Booking Statistics */}
             {monthStats.total > 0 && (
@@ -1116,7 +1116,7 @@ export default function CalendarPage() {
                 )}
               </div>
             )}
-          </div>
+              </div>
 
               {/* Calendar Grid */}
           <div className="grid grid-cols-7">
@@ -1206,10 +1206,10 @@ export default function CalendarPage() {
           {/* Week Header */}
           <div className="p-4 border-b dark:border-gray-700">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {getWeekRange(currentDate)}
-              </h2>
-              <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {getWeekRange(currentDate)}
+            </h2>
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => navigateWeek('prev')}
                 className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300"
@@ -1228,7 +1228,7 @@ export default function CalendarPage() {
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
-              </div>
+            </div>
             </div>
             {/* Booking Statistics */}
             {weekStats.total > 0 && (
@@ -1314,13 +1314,13 @@ export default function CalendarPage() {
                     setView('day');
                   }}
                 >
-                  <div className="font-semibold">{day.toLocaleDateString('en-US', { weekday: 'short' })}</div>
-                  <div className={`text-xs mt-1 ${
+                <div className="font-semibold">{day.toLocaleDateString('en-US', { weekday: 'short' })}</div>
+                <div className={`text-xs mt-1 ${
                     isToday(day) ? 'text-blue-600 dark:text-blue-400 font-bold' : isSelected ? 'text-blue-700 dark:text-blue-300' : 'text-gray-500 dark:text-gray-400'
-                  }`}>
-                    {day.getDate()}
-                  </div>
+                }`}>
+                  {day.getDate()}
                 </div>
+              </div>
               );
             })}
 
@@ -1341,25 +1341,25 @@ export default function CalendarPage() {
                   
                   {/* 30-minute slots for this hour */}
                   {hourSlots.map(timeSlot => (
-                    <React.Fragment key={timeSlot}>
-                      {/* Time label */}
+              <React.Fragment key={timeSlot}>
+                {/* Time label */}
                       <div className="p-2 text-xs font-medium text-gray-600 dark:text-gray-400 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-center">
-                        {timeSlot}
-                      </div>
-                      
-                      {/* Day columns */}
-                      {getWeekDays(currentDate).map(day => {
+                  {timeSlot}
+                </div>
+                
+                {/* Day columns */}
+                {getWeekDays(currentDate).map(day => {
                         const dayDateStr = day.toISOString().split('T')[0];
-                        const dayBookings = getBookingsForDate(day.getDate(), day.getMonth(), day.getFullYear())
+                  const dayBookings = getBookingsForDate(day.getDate(), day.getMonth(), day.getFullYear())
                           .filter(booking => {
                             // Normalize booking time for comparison
                             const bookingTime = booking.time ? booking.time.split(':').slice(0, 2).join(':') : '';
                             return bookingTime === timeSlot;
                           });
-                        
-                        return (
-                          <div
-                            key={`${day.toISOString()}-${timeSlot}`}
+                  
+                  return (
+                    <div
+                      key={`${day.toISOString()}-${timeSlot}`}
                             className={`min-h-[60px] p-1 border-b border-r dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors relative ${
                               selectedDate === dayDateStr ? 'bg-blue-50 dark:bg-blue-900/20' : ''
                             }`}
@@ -1419,28 +1419,28 @@ export default function CalendarPage() {
                               const statusClasses = getStatusClasses();
                               
                               return (
-                                <div
-                                  key={booking.id}
+                        <div
+                          key={booking.id}
                                   className={`${statusClasses.bg} border ${statusClasses.border} rounded p-1 mb-1 cursor-pointer ${statusClasses.hover} transition-colors`}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleBookingClick(booking);
-                                  }}
-                                >
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleBookingClick(booking);
+                          }}
+                        >
                                   <div className={`text-xs font-medium ${statusClasses.text} truncate`}>
-                                    {booking.customer_name}
-                                  </div>
+                            {booking.customer_name}
+                          </div>
                                   <div className={`text-xs ${statusClasses.textSecondary} truncate`}>
-                                    {booking.service}
-                                  </div>
-                                </div>
+                            {booking.service}
+                          </div>
+                        </div>
                               );
                             })}
-                          </div>
-                        );
-                      })}
-                    </React.Fragment>
-                  ))}
+                    </div>
+                  );
+                })}
+              </React.Fragment>
+            ))}
                 </React.Fragment>
               );
             })}
@@ -1453,14 +1453,14 @@ export default function CalendarPage() {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700">
           <div className="p-4 border-b dark:border-gray-700">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {new Date(selectedDate).toLocaleDateString('en-US', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}
-              </h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {new Date(selectedDate).toLocaleDateString('en-US', { 
+                      weekday: 'long', 
+                year: 'numeric', 
+                    month: 'long', 
+                day: 'numeric' 
+              })}
+            </h2>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => {
@@ -1617,11 +1617,11 @@ export default function CalendarPage() {
                 };
                 
                 return (
-                  <div 
-                    key={booking.id} 
+                <div 
+                  key={booking.id} 
                     className={`border dark:border-gray-700 rounded-lg p-4 transition-colors cursor-pointer ${getStatusBorderColor()} ${getStatusBgColor()} hover:shadow-md`}
-                    onClick={() => handleBookingClick(booking)}
-                  >
+                  onClick={() => handleBookingClick(booking)}
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="text-lg font-medium text-gray-900 dark:text-white">{formatTime(booking.time)}</div>
@@ -1646,7 +1646,7 @@ export default function CalendarPage() {
                         )}
               </div>
                     </div>
-                  </div>
+              </div>
                     </div>
                   );
                 })}
@@ -1798,9 +1798,9 @@ export default function CalendarPage() {
                           ) : (
                             <div className="px-3 py-2 border border-divider rounded-lg bg-default-50 text-default-500 text-sm">
                               No available time slots for this date
-                            </div>
-                          )}
                         </div>
+                )}
+                </div>
                       </div>
                       <div className="mt-3 text-xs text-default-500 bg-default-50 dark:bg-default-100 p-2 rounded">
                         💡 Change date to see available time slots for that day. Time will be cleared when date changes.
@@ -1954,11 +1954,11 @@ export default function CalendarPage() {
                         variant="flat"
                         startContent={
                           selectedBookingDetails.payment_status === 'paid' ? (
-                            <CheckCircle className="w-3 h-3" />
-                          ) : selectedBookingDetails.payment_status === 'pending' ? (
-                            <Clock className="w-3 h-3" />
-                          ) : (
-                            <XCircle className="w-3 h-3" />
+                          <CheckCircle className="w-3 h-3" />
+                        ) : selectedBookingDetails.payment_status === 'pending' ? (
+                          <Clock className="w-3 h-3" />
+                        ) : (
+                          <XCircle className="w-3 h-3" />
                           )
                         }
                       >
@@ -2180,16 +2180,16 @@ export default function CalendarPage() {
                       Close
                     </Button>
                     {selectedBookingDetails && selectedBookingDetails.status !== 'cancelled' && (
-                      <Button 
-                        color="primary" 
-                        onPress={() => {
-                          setEditingBooking(selectedBookingDetails);
-                          setShowEditModal(true);
-                          onClose();
-                        }}
-                      >
-                        Edit Booking
-                      </Button>
+                    <Button 
+                      color="primary" 
+                      onPress={() => {
+                        setEditingBooking(selectedBookingDetails);
+                        setShowEditModal(true);
+                        onClose();
+                      }}
+                    >
+                      Edit Booking
+                    </Button>
                     )}
                   </div>
                 </div>
@@ -2623,14 +2623,14 @@ export default function CalendarPage() {
             <div className="flex items-center gap-2">
               <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
                 <CalendarIcon className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-              </div>
+            </div>
               <div>
                 <h2 className="text-2xl font-bold">Edit Booking</h2>
-                {editingBooking && (
+            {editingBooking && (
                   <p className="text-sm font-normal text-default-500">
-                    Editing: {editingBooking.customer_name} - {editingBooking.service}
-                  </p>
-                )}
+                Editing: {editingBooking.customer_name} - {editingBooking.service}
+              </p>
+            )}
               </div>
             </div>
           </ModalHeader>
@@ -2665,7 +2665,7 @@ export default function CalendarPage() {
               )}
 
             <div className="space-y-6">
-              {/* Customer Information */}
+                {/* Customer Information */}
               <Card className="border border-divider">
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-2">
@@ -2677,37 +2677,37 @@ export default function CalendarPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
                       label="Customer Name"
-                      name="customer_name"
-                      value={editFormData.customer_name}
-                      onChange={handleEditInputChange}
+                        name="customer_name"
+                        value={editFormData.customer_name}
+                        onChange={handleEditInputChange}
                       isRequired
                       placeholder="Enter customer name"
                     />
                     <Input
                       label="Email"
-                      name="customer_email"
+                        name="customer_email"
                       type="email"
-                      value={editFormData.customer_email}
-                      onChange={handleEditInputChange}
+                        value={editFormData.customer_email}
+                        onChange={handleEditInputChange}
                       placeholder="Enter email address"
                     />
                     <Input
                       label="Phone"
-                      name="customer_phone"
+                        name="customer_phone"
                       type="tel"
-                      value={editFormData.customer_phone}
-                      onChange={handleEditInputChange}
+                        value={editFormData.customer_phone}
+                        onChange={handleEditInputChange}
                       placeholder="Enter phone number"
                     />
                     <Input
                       label="Service"
-                      name="service"
-                      value={editFormData.service}
-                      onChange={handleEditInputChange}
+                        name="service"
+                        value={editFormData.service}
+                        onChange={handleEditInputChange}
                       isRequired
                       placeholder="Enter service name"
-                    />
-                  </div>
+                      />
+                    </div>
                 </CardBody>
               </Card>
 
@@ -2723,13 +2723,13 @@ export default function CalendarPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
                       label="Date"
-                      name="date"
+                        name="date"
                       type="date"
-                      value={editFormData.date}
-                      onChange={handleEditDateChange}
+                        value={editFormData.date}
+                        onChange={handleEditDateChange}
                       isRequired
                       min={getCurrentToday()}
-                    />
+                      />
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-2">
                         Time *
@@ -2792,18 +2792,18 @@ export default function CalendarPage() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Input
                       label="Amount (£)"
-                      name="amount"
+                        name="amount"
                       type="number"
-                      value={editFormData.amount}
-                      onChange={handleEditInputChange}
+                        value={editFormData.amount}
+                        onChange={handleEditInputChange}
                       isRequired
-                      step="0.01"
-                      min="0"
+                        step="0.01"
+                        min="0"
                       placeholder="0.00"
                     />
                     <Select
                       label="Status"
-                      name="status"
+                        name="status"
                       selectedKeys={[editFormData.status]}
                       onSelectionChange={(keys) => {
                         const selectedStatus = Array.from(keys)[0] as string;
@@ -2818,7 +2818,7 @@ export default function CalendarPage() {
                     </Select>
                     <Select
                       label="Payment Status"
-                      name="payment_status"
+                        name="payment_status"
                       selectedKeys={[editFormData.payment_status]}
                       onSelectionChange={(keys) => {
                         const selectedPaymentStatus = Array.from(keys)[0] as string;
@@ -2829,7 +2829,7 @@ export default function CalendarPage() {
                       <SelectItem key="paid">Paid</SelectItem>
                       <SelectItem key="refunded">Refunded</SelectItem>
                     </Select>
-                  </div>
+                    </div>
                 </CardBody>
               </Card>
 
@@ -2844,23 +2844,23 @@ export default function CalendarPage() {
                 <CardBody className="pt-0 space-y-4">
                   <Textarea
                     label="Address"
-                    name="address"
-                    value={editFormData.address}
-                    onChange={handleEditInputChange}
+                      name="address"
+                      value={editFormData.address}
+                      onChange={handleEditInputChange}
                     placeholder="Enter service address (optional)"
-                    rows={3}
+                      rows={3}
                   />
                   <Textarea
                     label="Notes"
-                    name="notes"
-                    value={editFormData.notes}
-                    onChange={handleEditInputChange}
+                      name="notes"
+                      value={editFormData.notes}
+                      onChange={handleEditInputChange}
                     placeholder="Enter any additional notes (optional)"
-                    rows={3}
-                  />
+                      rows={3}
+                    />
                 </CardBody>
               </Card>
-            </div>
+                  </div>
             </div>
           </ModalBody>
           <ModalFooter>

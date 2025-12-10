@@ -77,7 +77,7 @@ export async function PUT(
       role, 
       specializations, 
       experience_years, 
-      certifications,
+      certifications, 
       image_url,
       service_ids,
       is_active,

@@ -70,7 +70,7 @@ export default function SectionNewsletter() {
                   variant="flat"
                   className="text-2xl sm:text-3xl font-bold text-[#464C45] dark:text-[#464C45] tracking-wider bg-transparent"
                 >
-                  {discountCode}
+                {discountCode}
                 </Chip>
               </CardBody>
             </Card>

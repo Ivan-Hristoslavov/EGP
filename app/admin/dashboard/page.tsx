@@ -171,14 +171,14 @@ export default function DashboardPage() {
 
   return (
     <div className="w-full space-y-6">
-      {/* Stats Cards */}
+        {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
+          {statCards.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
             <Card key={index} className="border border-divider">
               <CardBody className="p-6">
-                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-4">
                   <div className={`p-3 rounded-lg ${
                     stat.color === "primary" ? "bg-primary-100 dark:bg-primary-900/20" :
                     stat.color === "success" ? "bg-success-100 dark:bg-success-900/20" :
@@ -193,7 +193,7 @@ export default function DashboardPage() {
                       stat.color === "danger" ? "text-danger-600 dark:text-danger-400" :
                       "text-default-600 dark:text-default-400"
                     }`} />
-                  </div>
+                    </div>
                   {stat.changeType !== "neutral" && (
                     <Chip
                       size="sm"
@@ -201,9 +201,9 @@ export default function DashboardPage() {
                       variant="flat"
                       startContent={
                         stat.changeType === "up" ? (
-                          <ArrowUpRight className="w-3 h-3" />
-                        ) : (
-                          <ArrowDownRight className="w-3 h-3" />
+                        <ArrowUpRight className="w-3 h-3" />
+                      ) : (
+                        <ArrowDownRight className="w-3 h-3" />
                         )
                       }
                     >
@@ -215,46 +215,46 @@ export default function DashboardPage() {
                 <p className="text-sm text-default-500">{stat.title}</p>
               </CardBody>
             </Card>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Today's Bookings */}
+          {/* Today's Bookings */}
         <Card className="lg:col-span-2 border border-divider">
           <CardHeader className="flex items-center justify-between p-6 border-b border-divider">
             <h2 className="text-xl font-bold">Today's Bookings</h2>
             <div className="flex items-center gap-3">
               <Input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
+                      type="date"
+                      value={selectedDate}
+                      onChange={(e) => setSelectedDate(e.target.value)}
                 size="sm"
                 classNames={{
                   input: "w-40",
                 }}
-              />
+                    />
               <Button
                 color="primary"
                 startContent={<Plus className="w-4 h-4" />}
                 size="sm"
               >
-                New Booking
+                      New Booking
               </Button>
-            </div>
+                  </div>
           </CardHeader>
           <CardBody className="p-6">
-            {todayBookings.length === 0 ? (
-              <div className="text-center py-12">
+                {todayBookings.length === 0 ? (
+                  <div className="text-center py-12">
                 <Calendar className="w-16 h-16 text-default-300 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No bookings today</h3>
                 <p className="text-sm text-default-500">
-                  You have no appointments scheduled for this date.
-                </p>
-              </div>
-            ) : (
+                      You have no appointments scheduled for this date.
+                    </p>
+                  </div>
+                ) : (
               <div className="space-y-3">
-                {todayBookings.map((booking) => (
+                    {todayBookings.map((booking) => (
                   <Card key={booking.id} isPressable className="border border-divider hover:shadow-md transition-shadow">
                     <CardBody className="p-4">
                       <div className="flex items-center justify-between">
@@ -295,13 +295,13 @@ export default function DashboardPage() {
                       </div>
                     </CardBody>
                   </Card>
-                ))}
-              </div>
-            )}
+                    ))}
+                  </div>
+                )}
           </CardBody>
         </Card>
 
-        {/* Recent Activity */}
+          {/* Recent Activity */}
         <Card className="border border-divider">
           <CardHeader className="p-6 border-b border-divider">
             <h2 className="text-xl font-bold">Recent Activity</h2>
@@ -313,8 +313,8 @@ export default function DashboardPage() {
                 <p className="text-sm text-default-500">No recent activity</p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {recentActivity.map((activity) => (
+                <div className="space-y-4">
+                  {recentActivity.map((activity) => (
                   <div key={activity.id} className="flex items-start gap-3">
                     <Chip
                       color={getStatusColor(activity.status)}
@@ -325,9 +325,9 @@ export default function DashboardPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{activity.message}</p>
                       <p className="text-xs text-default-500">{activity.time}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             )}
             <Button
@@ -339,25 +339,25 @@ export default function DashboardPage() {
             </Button>
           </CardBody>
         </Card>
-      </div>
+        </div>
 
-      {/* Quick Actions */}
+        {/* Quick Actions */}
       <Card className="border border-divider">
         <CardHeader className="p-6 border-b border-divider">
           <h2 className="text-xl font-bold">Quick Actions</h2>
         </CardHeader>
         <CardBody className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Button
               className="h-auto p-4 justify-start"
               variant="flat"
               color="primary"
               startContent={<Plus className="w-5 h-5" />}
             >
-              <div className="text-left">
+                  <div className="text-left">
                 <h3 className="font-semibold">New Booking</h3>
                 <p className="text-xs text-default-500">Add appointment</p>
-              </div>
+                  </div>
             </Button>
 
             <Button
@@ -366,10 +366,10 @@ export default function DashboardPage() {
               color="secondary"
               startContent={<Users className="w-5 h-5" />}
             >
-              <div className="text-left">
+                  <div className="text-left">
                 <h3 className="font-semibold">Manage Clients</h3>
                 <p className="text-xs text-default-500">View all clients</p>
-              </div>
+                  </div>
             </Button>
 
             <Button
@@ -378,10 +378,10 @@ export default function DashboardPage() {
               color="success"
               startContent={<DollarSign className="w-5 h-5" />}
             >
-              <div className="text-left">
+                  <div className="text-left">
                 <h3 className="font-semibold">View Reports</h3>
                 <p className="text-xs text-default-500">Financial overview</p>
-              </div>
+                  </div>
             </Button>
 
             <Button
@@ -390,7 +390,7 @@ export default function DashboardPage() {
               color="secondary"
               startContent={<Calendar className="w-5 h-5" />}
             >
-              <div className="text-left">
+                  <div className="text-left">
                 <h3 className="font-semibold">Calendar View</h3>
                 <p className="text-xs text-default-500">Full calendar</p>
               </div>

@@ -361,56 +361,56 @@ export default function HeaderAesthetics() {
 
               {/* Right: Email, Phone, and Social Links */}
               <div className="flex items-center justify-end gap-4">
-                <span
-                  className="text-gray-700/70 dark:text-gray-200/60"
-                  aria-hidden="true"
-                >
-                  |
-                </span>
-                {profileLoading ? (
-                  <div className="inline-flex items-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 text-gray-400 dark:text-gray-500" />
-                    <div className="h-3 w-24 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
-                  </div>
-                ) : (
-                  <a
-                    href={`mailto:${contactEmail}`}
-                    className="group relative inline-flex items-center gap-1.5 hover:text-[#f5f1e9] transition-colors pb-1"
+                  <span
+                    className="text-gray-700/70 dark:text-gray-200/60"
+                    aria-hidden="true"
                   >
-                    <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                    <span className="relative inline-block">
-                      <span className="relative z-10">
-                        {contactEmail}
+                    |
+                  </span>
+                  {profileLoading ? (
+                    <div className="inline-flex items-center gap-1.5">
+                      <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+                      <div className="h-3 w-24 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+                    </div>
+                  ) : (
+                    <a
+                      href={`mailto:${contactEmail}`}
+                      className="group relative inline-flex items-center gap-1.5 hover:text-[#f5f1e9] transition-colors pb-1"
+                    >
+                      <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                      <span className="relative inline-block">
+                        <span className="relative z-10">
+                          {contactEmail}
+                        </span>
+                        <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-all duration-300 ease-out group-hover:w-full"></span>
                       </span>
-                      <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-all duration-300 ease-out group-hover:w-full"></span>
-                    </span>
-                  </a>
-                )}
-                <span
-                  className="text-gray-700/70 dark:text-gray-200/60"
-                  aria-hidden="true"
-                >
-                  |
-                </span>
-                {profileLoading ? (
-                  <div className="inline-flex items-center gap-1.5">
-                    <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 text-gray-400 dark:text-gray-500" />
-                    <div className="h-3 w-20 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
-                  </div>
-                ) : (
-                  <a
-                    href={`tel:${contactPhone}`}
-                    className="group relative inline-flex items-center gap-1.5 font-semibold hover:text-[#f5f1e9] transition-colors pb-1"
+                    </a>
+                  )}
+                  <span
+                    className="text-gray-700/70 dark:text-gray-200/60"
+                    aria-hidden="true"
                   >
-                    <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                    <span className="relative inline-block">
-                      <span className="relative z-10">
-                        {contactPhone}
+                    |
+                  </span>
+                  {profileLoading ? (
+                    <div className="inline-flex items-center gap-1.5">
+                      <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+                      <div className="h-3 w-20 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+                    </div>
+                  ) : (
+                    <a
+                      href={`tel:${contactPhone}`}
+                      className="group relative inline-flex items-center gap-1.5 font-semibold hover:text-[#f5f1e9] transition-colors pb-1"
+                    >
+                      <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                      <span className="relative inline-block">
+                        <span className="relative z-10">
+                          {contactPhone}
+                        </span>
+                        <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-all duration-300 ease-out group-hover:w-full"></span>
                       </span>
-                      <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-all duration-300 ease-out group-hover:w-full"></span>
-                    </span>
-                  </a>
-                )}
+                    </a>
+                  )}
                 <span
                   className="text-gray-700/70 dark:text-gray-200/60"
                   aria-hidden="true"
@@ -961,8 +961,8 @@ export default function HeaderAesthetics() {
                             <div key={category.id} className="space-y-2">
                               <div className="flex items-center justify-between mb-3 px-2">
                                 <h4 className="text-xs font-semibold text-gray-900 dark:text-gray-200 uppercase tracking-wider font-montserrat">
-                                  {category.name}
-                                </h4>
+                                {category.name}
+                              </h4>
                                 <Link
                                   href={`/services?category=${encodeURIComponent(category.name)}`}
                                   onClick={() => {

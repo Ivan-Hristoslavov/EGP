@@ -79,7 +79,7 @@ export function AdminReviewsManager() {
   };
 
   const getStatusBadge = (isApproved: boolean) => {
-    return (
+      return (
       <Chip
         color={isApproved ? "success" : "warning"}
         variant="flat"
@@ -88,7 +88,7 @@ export function AdminReviewsManager() {
       >
         {isApproved ? "Approved" : "Pending"}
       </Chip>
-    );
+      );
   };
 
   if (isLoading) {
@@ -104,10 +104,10 @@ export function AdminReviewsManager() {
     return (
       <Card className="border-danger-200 dark:border-danger-800 bg-danger-50 dark:bg-danger-900/20">
         <CardBody className="p-4">
-          <div className="flex items-center">
+        <div className="flex items-center">
             <AlertCircle className="w-5 h-5 text-danger-500 mr-2" />
             <span className="text-danger-700 dark:text-danger-300">{error}</span>
-          </div>
+        </div>
         </CardBody>
       </Card>
     );
@@ -137,7 +137,7 @@ export function AdminReviewsManager() {
               <div>
                 <p className="text-2xl font-bold mb-1">{approvedReviews}</p>
                 <p className="text-xs text-default-500">Approved</p>
-              </div>
+          </div>
               <div className="p-3 bg-success-100 dark:bg-success-900/20 rounded-xl">
                 <CheckCircle className="w-5 h-5 text-success-600 dark:text-success-400" />
               </div>
@@ -151,7 +151,7 @@ export function AdminReviewsManager() {
               <div>
                 <p className="text-2xl font-bold mb-1">{pendingReviews}</p>
                 <p className="text-xs text-default-500">Pending</p>
-              </div>
+          </div>
               <div className="p-3 bg-warning-100 dark:bg-warning-900/20 rounded-xl">
                 <AlertCircle className="w-5 h-5 text-warning-600 dark:text-warning-400" />
               </div>
@@ -163,9 +163,9 @@ export function AdminReviewsManager() {
           <Button
             color="primary"
             startContent={
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
             }
             onPress={() => refetch()}
           >
@@ -180,9 +180,9 @@ export function AdminReviewsManager() {
           <CardBody className="p-12 text-center">
             <div className="w-16 h-16 mx-auto mb-4 bg-default-100 rounded-full flex items-center justify-center">
               <svg className="w-8 h-8 text-default-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
-            </div>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+          </div>
             <h3 className="text-lg font-semibold mb-2">No reviews yet</h3>
             <p className="text-default-500">Customer reviews will appear here once they're submitted.</p>
           </CardBody>
@@ -222,35 +222,35 @@ export function AdminReviewsManager() {
                     {getStatusBadge(review.is_approved)}
                   </div>
 
-                  {/* Rating */}
-                  <div className="flex items-center gap-1 mb-3">
-                    {Array.from({ length: 5 }).map((_, i) => (
+                {/* Rating */}
+                <div className="flex items-center gap-1 mb-3">
+                  {Array.from({ length: 5 }).map((_, i) => (
                       <Star
-                        key={i}
-                        className={`w-4 h-4 ${
+                      key={i}
+                      className={`w-4 h-4 ${
                           i < review.rating ? 'text-warning fill-warning' : 'text-default-300'
-                        }`}
+                      }`}
                       />
-                    ))}
+                  ))}
                     <span className="text-sm font-medium text-default-600 ml-2">
-                      {review.rating}/5
-                    </span>
-                  </div>
+                    {review.rating}/5
+                  </span>
+                </div>
 
-                  {/* Comment */}
+                {/* Comment */}
                   <p className="text-default-700 text-sm leading-relaxed mb-4 line-clamp-3">
-                    {review.comment}
-                  </p>
+                  {review.comment}
+                </p>
 
-                  {/* Customer Email */}
-                  {review.customer_email && (
+                {/* Customer Email */}
+                {review.customer_email && (
                     <div className="flex items-center gap-2 mb-4 text-xs text-default-500">
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                      {review.customer_email}
-                    </div>
-                  )}
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    {review.customer_email}
+                  </div>
+                )}
 
                   {/* Actions */}
                   <div className="flex items-center gap-2 pt-4 border-t border-divider">

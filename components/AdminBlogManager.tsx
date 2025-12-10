@@ -48,7 +48,7 @@ function BlogModal({
           <>
             <ModalHeader className="flex flex-col gap-1">
               <h2 className="text-2xl font-bold">
-                {editingPost ? "Edit Blog Post" : "Add New Blog Post"}
+            {editingPost ? "Edit Blog Post" : "Add New Blog Post"}
               </h2>
               <p className="text-sm text-default-500 font-normal">
                 {editingPost ? "Update your blog post details" : "Create a new blog post for your website"}
@@ -59,8 +59,8 @@ function BlogModal({
                 <Input
                   label="Title"
                   placeholder="Enter blog post title"
-                  value={formData.title}
-                  onChange={(e) => setFormData((prev: any) => ({ ...prev, title: e.target.value }))}
+                value={formData.title}
+                onChange={(e) => setFormData((prev: any) => ({ ...prev, title: e.target.value }))}
                   isRequired
                   size="lg"
                 />
@@ -69,11 +69,11 @@ function BlogModal({
                   <Input
                     label="Slug"
                     placeholder="url-friendly-slug"
-                    value={formData.slug}
-                    onChange={(e) => setFormData((prev: any) => ({ ...prev, slug: e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') }))}
+                value={formData.slug}
+                onChange={(e) => setFormData((prev: any) => ({ ...prev, slug: e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') }))}
                     isRequired
                     description="URL-friendly version of the title"
-                  />
+              />
 
                   <Select
                     label="Category"
@@ -83,65 +83,65 @@ function BlogModal({
                       setFormData((prev: any) => ({ ...prev, category: selected || "General" }));
                     }}
                     isRequired
-                  >
-                    {categories.map((cat) => (
+              >
+                {categories.map((cat) => (
                       <SelectItem key={cat}>{cat}</SelectItem>
-                    ))}
+                ))}
                   </Select>
-                </div>
+          </div>
 
                 <Textarea
                   label="Excerpt"
                   placeholder="Brief description of the blog post"
-                  value={formData.excerpt || ''}
-                  onChange={(e) => setFormData((prev: any) => ({ ...prev, excerpt: e.target.value }))}
-                  rows={3}
-                />
+              value={formData.excerpt || ''}
+              onChange={(e) => setFormData((prev: any) => ({ ...prev, excerpt: e.target.value }))}
+              rows={3}
+            />
 
                 <Card>
                   <CardBody>
                     <label className="block text-sm font-medium text-foreground mb-2">
-                      Content * (Markdown supported)
-                    </label>
-                    <MarkdownEditor
-                      value={formData.content || ''}
-                      onChange={(value) => setFormData((prev: any) => ({ ...prev, content: value }))}
-                      placeholder="Write your blog post content here..."
-                    />
+              Content * (Markdown supported)
+            </label>
+            <MarkdownEditor
+              value={formData.content || ''}
+              onChange={(value) => setFormData((prev: any) => ({ ...prev, content: value }))}
+              placeholder="Write your blog post content here..."
+            />
                   </CardBody>
                 </Card>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
                     label="Featured Image URL"
                     placeholder="https://example.com/image.jpg"
-                    value={formData.featured_image_url || ''}
-                    onChange={(e) => setFormData((prev: any) => ({ ...prev, featured_image_url: e.target.value }))}
+                value={formData.featured_image_url || ''}
+                onChange={(e) => setFormData((prev: any) => ({ ...prev, featured_image_url: e.target.value }))}
                     type="url"
                   />
 
                   <Input
                     label="Author Name"
                     placeholder="EGP Aesthetics Team"
-                    value={formData.author_name || 'EGP Aesthetics Team'}
-                    onChange={(e) => setFormData((prev: any) => ({ ...prev, author_name: e.target.value }))}
-                  />
-                </div>
+                value={formData.author_name || 'EGP Aesthetics Team'}
+                onChange={(e) => setFormData((prev: any) => ({ ...prev, author_name: e.target.value }))}
+              />
+          </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Input
                     label="Read Time (minutes)"
-                    type="number"
+                type="number"
                     value={formData.read_time_minutes?.toString() || '5'}
-                    onChange={(e) => setFormData((prev: any) => ({ ...prev, read_time_minutes: parseInt(e.target.value) || 5 }))}
-                    min="1"
-                  />
+                onChange={(e) => setFormData((prev: any) => ({ ...prev, read_time_minutes: parseInt(e.target.value) || 5 }))}
+                min="1"
+              />
 
                   <Input
                     label="Display Order"
-                    type="number"
+                type="number"
                     value={formData.display_order?.toString() || '0'}
-                    onChange={(e) => setFormData((prev: any) => ({ ...prev, display_order: parseInt(e.target.value) || 0 }))}
+                onChange={(e) => setFormData((prev: any) => ({ ...prev, display_order: parseInt(e.target.value) || 0 }))}
                   />
 
                   <Select
@@ -159,7 +159,7 @@ function BlogModal({
                     <SelectItem key="draft">Draft (Not visible)</SelectItem>
                     <SelectItem key="published">Published (Visible to public)</SelectItem>
                   </Select>
-                </div>
+          </div>
 
                 <Checkbox
                   isSelected={formData.featured || false}
@@ -172,31 +172,31 @@ function BlogModal({
                   <Input
                     label="SEO Title"
                     placeholder="SEO optimized title"
-                    value={formData.seo_title || ''}
-                    onChange={(e) => setFormData((prev: any) => ({ ...prev, seo_title: e.target.value }))}
+              value={formData.seo_title || ''}
+              onChange={(e) => setFormData((prev: any) => ({ ...prev, seo_title: e.target.value }))}
                     description="Optional: Custom title for search engines"
                   />
 
                   <Textarea
                     label="SEO Description"
                     placeholder="SEO meta description"
-                    value={formData.seo_description || ''}
-                    onChange={(e) => setFormData((prev: any) => ({ ...prev, seo_description: e.target.value }))}
-                    rows={2}
+              value={formData.seo_description || ''}
+              onChange={(e) => setFormData((prev: any) => ({ ...prev, seo_description: e.target.value }))}
+              rows={2}
                     description="Optional: Meta description for search engines"
-                  />
-                </div>
-              </div>
+            />
+          </div>
+        </div>
             </ModalBody>
             <ModalFooter>
               <Button variant="light" onPress={onClose}>
-                Cancel
+            Cancel
               </Button>
               <Button 
                 color="primary" 
                 onPress={onSubmit}
-              >
-                {editingPost ? "Update Post" : "Create Post"}
+          >
+            {editingPost ? "Update Post" : "Create Post"}
               </Button>
             </ModalFooter>
           </>

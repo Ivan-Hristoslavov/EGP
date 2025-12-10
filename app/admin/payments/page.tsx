@@ -277,42 +277,42 @@ export default function PaymentsPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="border border-divider">
           <CardBody className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
+          <div className="flex items-center justify-between">
+            <div>
                 <p className="text-sm font-medium text-default-500">Total Received</p>
                 <p className="text-2xl font-bold text-success">£{getTotalAmount().toFixed(2)}</p>
               </div>
               <div className="p-3 bg-success-100 dark:bg-success-900/20 rounded-full">
                 <CheckCircle className="w-6 h-6 text-success-600 dark:text-success-400" />
-              </div>
+            </div>
             </div>
           </CardBody>
         </Card>
         
         <Card className="border border-divider">
           <CardBody className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
+          <div className="flex items-center justify-between">
+            <div>
                 <p className="text-sm font-medium text-default-500">Pending Payments</p>
                 <p className="text-2xl font-bold text-warning">£{getPendingAmount().toFixed(2)}</p>
               </div>
               <div className="p-3 bg-warning-100 dark:bg-warning-900/20 rounded-full">
                 <AlertCircle className="w-6 h-6 text-warning-600 dark:text-warning-400" />
-              </div>
+            </div>
             </div>
           </CardBody>
         </Card>
         
         <Card className="border border-divider">
           <CardBody className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
+          <div className="flex items-center justify-between">
+            <div>
                 <p className="text-sm font-medium text-default-500">Total Transactions</p>
                 <p className="text-2xl font-bold text-primary">{filteredPayments.length}</p>
               </div>
               <div className="p-3 bg-primary-100 dark:bg-primary-900/20 rounded-full">
                 <CreditCard className="w-6 h-6 text-primary-600 dark:text-primary-400" />
-              </div>
+            </div>
             </div>
           </CardBody>
         </Card>
@@ -321,7 +321,7 @@ export default function PaymentsPage() {
       {/* Filters */}
       <Card className="border border-divider">
         <CardBody className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <Input
               type="text"
               placeholder="Search payments..."
@@ -338,7 +338,7 @@ export default function PaymentsPage() {
                 const selected = Array.from(keys)[0] as string;
                 setStatusFilter(selected || "all");
               }}
-            >
+          >
               <SelectItem key="all">All Status</SelectItem>
               <SelectItem key="paid">Paid</SelectItem>
               <SelectItem key="pending">Pending</SelectItem>
@@ -353,7 +353,7 @@ export default function PaymentsPage() {
                 const selected = Array.from(keys)[0] as string;
                 setMethodFilter(selected || "all");
               }}
-            >
+          >
               <SelectItem key="all">All Methods</SelectItem>
               <SelectItem key="card">Card</SelectItem>
               <SelectItem key="bank_transfer">Bank Transfer</SelectItem>
@@ -368,7 +368,7 @@ export default function PaymentsPage() {
                 const selected = Array.from(keys)[0] as string;
                 setDateFilter(selected || "all");
               }}
-            >
+          >
               <SelectItem key="all">All Dates</SelectItem>
               <SelectItem key="today">Today</SelectItem>
               <SelectItem key="this_week">This Week</SelectItem>
@@ -378,17 +378,17 @@ export default function PaymentsPage() {
               variant="bordered"
               startContent={<Filter className="w-4 h-4" />}
             >
-              More Filters
+            More Filters
             </Button>
-          </div>
+        </div>
         </CardBody>
       </Card>
 
       {/* Payments Table */}
       <Card className="border border-divider">
         <CardBody className="p-0">
-          {filteredPayments.length === 0 ? (
-            <div className="text-center py-12">
+        {filteredPayments.length === 0 ? (
+          <div className="text-center py-12">
               <CreditCard className="w-12 h-12 text-default-300 mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">No payments found</h3>
               <p className="text-default-500 mb-4">Get started by recording your first payment.</p>
@@ -396,11 +396,11 @@ export default function PaymentsPage() {
                 color="primary"
                 startContent={<Plus className="w-4 h-4" />}
                 onPress={() => setShowAddModal(true)}
-              >
-                Record Payment
+            >
+              Record Payment
               </Button>
-            </div>
-          ) : (
+          </div>
+        ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-default-100 border-b border-divider">
@@ -586,8 +586,8 @@ export default function PaymentsPage() {
               <ModalBody>
                 <p className="text-default-600">
                   Are you sure you want to delete the payment of <strong>£{paymentToDelete?.amount.toFixed(2)}</strong> for <strong>{paymentToDelete?.customers?.name || 'Unknown Customer'}</strong>? 
-                  This action cannot be undone.
-                </p>
+                This action cannot be undone.
+              </p>
               </ModalBody>
               <ModalFooter>
                 <Button variant="light" onPress={onClose}>
@@ -631,9 +631,9 @@ export default function PaymentsPage() {
               </ModalHeader>
               <ModalBody>
                 <p className="text-default-500 mb-4">
-                  {editingPayment ? 'Update the payment details below.' : 'Fill in the payment details below.'}
-                </p>
-                <div className="text-center py-8">
+                {editingPayment ? 'Update the payment details below.' : 'Fill in the payment details below.'}
+              </p>
+              <div className="text-center py-8">
                   <p className="text-default-500">Payment form will be implemented here</p>
                 </div>
               </ModalBody>
@@ -661,57 +661,57 @@ export default function PaymentsPage() {
                 <h3 className="text-xl font-bold">Payment Details</h3>
               </ModalHeader>
               <ModalBody>
-                {selectedPayment && (
-                  <div className="space-y-4">
-                    <div>
+      {selectedPayment && (
+              <div className="space-y-4">
+                <div>
                       <label className="text-sm font-medium text-default-500">Customer</label>
                       <p className="text-base font-semibold">{selectedPayment.customers?.name || 'Unknown Customer'}</p>
                       <p className="text-sm text-default-500">{selectedPayment.customers?.email || 'No email'}</p>
-                    </div>
-                    <div>
+                </div>
+                <div>
                       <label className="text-sm font-medium text-default-500">Service</label>
                       <p className="text-base font-semibold">{selectedPayment.bookings?.service || 'Manual Payment'}</p>
-                      {selectedPayment.bookings?.date && (
+                  {selectedPayment.bookings?.date && (
                         <p className="text-sm text-default-500">
-                          {new Date(selectedPayment.bookings.date).toLocaleDateString()}
-                        </p>
-                      )}
-                    </div>
-                    <div>
+                      {new Date(selectedPayment.bookings.date).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
+                <div>
                       <label className="text-sm font-medium text-default-500">Amount</label>
                       <p className="text-2xl font-bold text-success">£{selectedPayment.amount.toFixed(2)}</p>
-                    </div>
-                    <div>
+                </div>
+                <div>
                       <label className="text-sm font-medium text-default-500 mb-2 block">Payment Method</label>
-                      <div className="flex items-center gap-2">
-                        {getMethodIcon(selectedPayment.payment_method)}
+                  <div className="flex items-center gap-2">
+                    {getMethodIcon(selectedPayment.payment_method)}
                         <span className="text-base capitalize">
-                          {selectedPayment.payment_method.replace('_', ' ')}
-                        </span>
-                      </div>
-                    </div>
-                    <div>
+                      {selectedPayment.payment_method.replace('_', ' ')}
+                    </span>
+                  </div>
+                </div>
+                <div>
                       <label className="text-sm font-medium text-default-500 mb-2 block">Status</label>
                       <Chip
                         color={getStatusColor(selectedPayment.payment_status)}
                         variant="flat"
                         startContent={getStatusIcon(selectedPayment.payment_status)}
                       >
-                        {selectedPayment.payment_status}
+                    {selectedPayment.payment_status}
                       </Chip>
-                    </div>
-                    <div>
+                </div>
+                <div>
                       <label className="text-sm font-medium text-default-500">Payment Date</label>
                       <p className="text-base">{new Date(selectedPayment.payment_date).toLocaleDateString()}</p>
-                    </div>
-                    {selectedPayment.reference && (
-                      <div>
+                </div>
+                {selectedPayment.reference && (
+                  <div>
                         <label className="text-sm font-medium text-default-500">Reference</label>
                         <p className="text-base">{selectedPayment.reference}</p>
-                      </div>
-                    )}
-                    {selectedPayment.notes && (
-                      <div>
+                  </div>
+                )}
+                {selectedPayment.notes && (
+                  <div>
                         <label className="text-sm font-medium text-default-500">Notes</label>
                         <p className="text-base">{selectedPayment.notes}</p>
                       </div>

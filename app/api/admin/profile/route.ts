@@ -12,6 +12,10 @@ export async function GET() {
       .single();
 
     if (error) {
+      // If no profile exists (PGRST116), return null instead of error
+      if (error.code === 'PGRST116') {
+        return NextResponse.json(null);
+      }
       console.error('Error fetching admin profile:', error);
       return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 });
     }
