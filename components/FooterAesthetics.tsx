@@ -141,42 +141,26 @@ export default function FooterAesthetics() {
               <ul className="space-y-2.5">
                 <li>
                   <Link 
+                    href="/book" 
+                    className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
+                  >
+                    Book Appointment
+                  </Link>
+                </li>
+                <li>
+                  <Link 
                     href="/services" 
                     className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
                   >
-                    All Treatments
+                    Our Services
                   </Link>
                 </li>
                 <li>
                   <Link 
-                    href="/services/face" 
+                    href="/conditions" 
                     className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
                   >
-                    Face Treatments
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    href="/services/anti-wrinkle" 
-                    className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
-                  >
-                    Anti-Wrinkle Injections
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    href="/services/fillers" 
-                    className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
-                  >
-                    Dermal Fillers
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    href="/services/body" 
-                    className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
-                  >
-                    Body Treatments
+                    Conditions We Treat
                   </Link>
                 </li>
                 <li>
@@ -189,10 +173,26 @@ export default function FooterAesthetics() {
                 </li>
                 <li>
                   <Link 
+                    href="/press" 
+                    className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
+                  >
+                    Awards & Press
+                  </Link>
+                </li>
+                <li>
+                  <Link 
                     href="/blog" 
                     className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
                   >
                     Blog
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    href="/find-us" 
+                    className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
+                  >
+                    Find Us
                   </Link>
                 </li>
               </ul>

@@ -149,6 +149,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get working hours for this date to check max appointments
+    const bookingDate = new Date(date);
+    const dayOfWeek = bookingDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    
+    const { data: workingHour, error: workingHourError } = await supabaseAdmin
+      .from("working_hours")
+      .select("max_appointments")
+      .eq("day_of_week", dayOfWeek)
+      .single();
+    
+    const maxAppointments = workingHour?.max_appointments || 12;
+
     // Check for booking conflicts - same date and time
     const { data: existingBookings, error: conflictError } = await supabaseAdmin
       .from("bookings")
@@ -171,6 +183,33 @@ export async function POST(request: NextRequest) {
           error: "Time slot already booked", 
           conflict: true,
           message: `This time slot is already booked by ${existingBookings[0].customer_name}. Please select a different time.`
+        },
+        { status: 409 }
+      );
+    }
+
+    // Check max appointments limit for this date
+    const { data: dayBookings, error: dayBookingsError } = await supabaseAdmin
+      .from("bookings")
+      .select("id")
+      .eq("date", date)
+      .in("status", ["scheduled", "pending", "confirmed"]);
+
+    if (dayBookingsError) {
+      console.error("Error checking day bookings:", dayBookingsError);
+      return NextResponse.json(
+        { error: "Failed to check booking availability" },
+        { status: 500 }
+      );
+    }
+
+    const currentBookingsCount = (dayBookings || []).length;
+    if (currentBookingsCount >= maxAppointments) {
+      return NextResponse.json(
+        { 
+          error: "Maximum appointments reached", 
+          conflict: true,
+          message: `This day has reached the maximum of ${maxAppointments} appointments. Please select a different date.`
         },
         { status: 409 }
       );

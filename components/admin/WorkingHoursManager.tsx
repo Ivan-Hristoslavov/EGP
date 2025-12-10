@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Clock, Save, RefreshCw, Calendar, Settings } from "lucide-react";
+import { Clock, Save, RefreshCw, Calendar } from "lucide-react";
 import { Button } from "@heroui/react";
 import { useToast } from "@/components/Toast";
 
@@ -15,12 +15,6 @@ interface WorkingHour {
   max_appointments: number;
 }
 
-interface ServiceDuration {
-  id: string;
-  service_name: string;
-  duration_minutes: number;
-  buffer_minutes: number;
-}
 
 const DAYS = [
   { value: 1, label: "Monday", short: "Mon" },
@@ -58,12 +52,8 @@ const mergeWithDefaults = (hours: WorkingHour[]) =>
 export default function WorkingHoursManager() {
   const { showSuccess, showError } = useToast();
   const [workingHours, setWorkingHours] = useState<WorkingHour[]>([]);
-  const [serviceDurations, setServiceDurations] = useState<ServiceDuration[]>([]);
-  const [serviceDurationsOriginal, setServiceDurationsOriginal] = useState<ServiceDuration[]>([]);
-  const [serviceDurationsDirty, setServiceDurationsDirty] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [savingDurations, setSavingDurations] = useState(false);
   const [generatingSlots, setGeneratingSlots] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -95,17 +85,6 @@ export default function WorkingHoursManager() {
         : mergeWithDefaults([]);
 
       setWorkingHours(normalizedHours);
-
-      const servicesResponse = await fetch('/api/admin/service-durations');
-      const servicesData = await servicesResponse.json();
-      
-      if (!servicesResponse.ok) {
-        throw new Error(servicesData.error || 'Failed to load service durations');
-      }
-
-      setServiceDurations(servicesData.services || []);
-      setServiceDurationsOriginal((servicesData.services || []).map((svc: ServiceDuration) => ({ ...svc })));
-      setServiceDurationsDirty(false);
       succeeded = true;
     } catch (error) {
       console.error('Error loading data:', error);
@@ -121,7 +100,7 @@ export default function WorkingHoursManager() {
       }
 
       if (succeeded && options?.showToast) {
-        showSuccess('Schedule refreshed', 'Working hours and durations are up to date.');
+        showSuccess('Schedule refreshed', 'Working hours are up to date.');
       }
     }
   };
@@ -161,29 +140,6 @@ export default function WorkingHoursManager() {
     );
   };
 
-  const getChangedServiceDurations = (list: ServiceDuration[] = serviceDurations) => {
-    const originalById = new Map(serviceDurationsOriginal.map((item) => [item.id, item]));
-    return list.filter((service) => {
-      const original = originalById.get(service.id);
-      if (!original) return true;
-      return (
-        service.duration_minutes !== original.duration_minutes ||
-        service.buffer_minutes !== original.buffer_minutes
-      );
-    });
-  };
-
-  const handleServiceDurationChange = (id: string, field: keyof ServiceDuration, value: any) => {
-    setServiceDurations(prev => {
-      const next = prev.map(service =>
-        service.id === id
-          ? { ...service, [field]: value }
-          : service
-      );
-      setServiceDurationsDirty(getChangedServiceDurations(next).length > 0);
-      return next;
-    });
-  };
 
   const saveWorkingHours = async () => {
     try {
@@ -219,51 +175,6 @@ export default function WorkingHoursManager() {
     }
   };
 
-  const saveServiceDurations = async () => {
-    const changes = getChangedServiceDurations();
-    if (changes.length === 0) {
-      setServiceDurationsDirty(false);
-      showSuccess('Nothing to save', 'Service durations are already up to date.');
-      return;
-    }
-
-    try {
-      setSavingDurations(true);
-      await Promise.all(
-        changes.map((service) =>
-          fetch('/api/admin/service-durations', {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              id: service.id,
-              duration_minutes: service.duration_minutes,
-              buffer_minutes: service.buffer_minutes,
-            }),
-          }).then(async (response) => {
-            const payload = await response.json();
-            if (!response.ok || !payload.success) {
-              throw new Error(payload.error || 'Failed to update service duration');
-            }
-            return payload.service;
-          })
-        )
-      );
-
-      setServiceDurationsOriginal(serviceDurations.map((svc) => ({ ...svc })));
-      setServiceDurationsDirty(false);
-      showSuccess('Service durations saved', 'Updated treatment timings have been applied.');
-    } catch (error) {
-      console.error('Error saving service durations:', error);
-      showError(
-        'Save failed',
-        error instanceof Error ? error.message : 'Unable to update service durations right now.'
-      );
-    } finally {
-      setSavingDurations(false);
-    }
-  };
 
   const generateTimeSlots = async () => {
     try {
@@ -331,10 +242,10 @@ export default function WorkingHoursManager() {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Working Hours & Time Slots
+              Working Hours
             </h2>
             <p className="text-gray-600 dark:text-gray-400">
-              Manage your clinic hours and appointment availability
+              Manage your clinic hours and generate appointment availability
             </p>
           </div>
         </div>
@@ -360,21 +271,8 @@ export default function WorkingHoursManager() {
       </div>
 
       {/* Working Hours */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-[#e4d9c8] dark:border-gray-700 overflow-hidden shadow-sm">
-        <div className="px-6 py-4 border-b border-[#e4d9c8] dark:border-gray-700 flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-[#f5f1e9] dark:bg-gray-900/60">
-            <Settings className="w-5 h-5 text-[#6b5f4b] dark:text-[#c9c1b0]" />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Working Hours</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Set the availability for each day of the week
-            </p>
-          </div>
-        </div>
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {workingHours.map((hour) => {
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {workingHours.map((hour) => {
               const dayInfo = DAYS.find((d) => d.value === hour.day_of_week);
               const isToday = hour.day_of_week === todayDow;
               const isClosed = !hour.is_working_day;
@@ -385,83 +283,96 @@ export default function WorkingHoursManager() {
               return (
                 <div
                   key={hour.day_of_week}
-                  className={`rounded-2xl border ${
+                  className={`rounded-2xl border-2 ${
                     isToday
-                      ? 'border-[#c4b5a0] ring-2 ring-[#c4b5a0]/30 shadow-lg'
-                      : 'border-[#e4d9c8] dark:border-gray-700'
-                  } bg-[#fdfbf8] dark:bg-gray-900/40 px-5 py-6 transition-shadow duration-200`}
+                      ? 'border-[#c4b5a0] ring-2 ring-[#c4b5a0]/30 shadow-xl bg-gradient-to-br from-[#fdfbf8] to-[#faf7f1] dark:from-gray-900/50 dark:to-gray-800/50'
+                      : 'border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-800'
+                  } px-6 py-6 transition-all duration-200 hover:shadow-lg`}
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold uppercase tracking-wide text-[#9d9585] dark:text-[#c9c1b0]">
+                  <div className="flex items-center justify-between gap-4 mb-6">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2.5 mb-2">
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#9d9585] dark:text-[#c9c1b0] px-2 py-1 rounded-md bg-[#f5f1e9] dark:bg-gray-700/50">
                           {dayInfo?.short}
                         </span>
                         {isToday && (
-                          <span className="text-xs font-semibold text-[#6b5f4b] dark:text-[#c9c1b0] bg-[#f0ede7] dark:bg-gray-800 px-2 py-1 rounded-full">
+                          <span className="text-xs font-bold text-white bg-gradient-to-r from-[#9d9585] to-[#b5ad9d] dark:from-[#6b5f4b] dark:to-[#9d9585] px-3 py-1 rounded-full shadow-sm">
                             Today
                           </span>
                         )}
                       </div>
-                      <h4 className="text-xl font-bold text-gray-900 dark:text-white mt-1">
+                      <h4 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                         {dayInfo?.label ?? 'Day'}
                       </h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{summaryText}</p>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{summaryText}</p>
                     </div>
 
-                    <label className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300">
+                    <label className="inline-flex items-center gap-2.5 px-4 py-2 rounded-lg border-2 border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-[#c9c1b0] dark:hover:border-gray-600 transition-colors cursor-pointer flex-shrink-0">
                       <input
                         type="checkbox"
                         checked={hour.is_working_day}
                         onChange={(e) =>
                           handleWorkingHourChange(hour.day_of_week, 'is_working_day', e.target.checked)
                         }
-                        className="h-4 w-4 rounded border-gray-300 text-[#9d9585] focus:ring-[#c9c1b0]"
+                        className="h-5 w-5 rounded border-2 border-gray-300 dark:border-gray-600 text-[#9d9585] focus:ring-2 focus:ring-[#c9c1b0]/40 cursor-pointer"
                       />
-                      <span>{hour.is_working_day ? 'Open' : 'Closed'}</span>
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{hour.is_working_day ? 'Open' : 'Closed'}</span>
                     </label>
                   </div>
 
                   {isClosed ? (
-                    <div className="mt-4 rounded-xl border border-dashed border-[#e4d9c8] dark:border-gray-700 bg-white/70 dark:bg-gray-900/40 px-4 py-5 text-sm text-gray-600 dark:text-gray-400">
-                      Clients cannot book this day. Toggle to "Open" to enable appointments.
+                    <div className="rounded-xl border-2 border-dashed border-[#e4d9c8] dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-800/50 px-5 py-6 text-center">
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center mb-1">
+                          <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </div>
+                        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Clinic Closed</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Toggle to "Open" to enable appointments</p>
+                      </div>
                     </div>
                   ) : (
-                    <div className="mt-5 space-y-5">
+                    <div className="space-y-5">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <span className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                            Opens at
-                          </span>
+                        <div className="flex flex-col">
+                          <label className="text-xs font-bold uppercase tracking-wide text-gray-600 dark:text-gray-400 mb-2.5 h-6 flex items-center gap-1.5">
+                            <Clock className="w-3.5 h-3.5 text-[#9d9585] dark:text-[#c9c1b0] flex-shrink-0" />
+                            <span>Opens at</span>
+                          </label>
                           <input
                             type="time"
                             value={hour.start_time}
                             onChange={(e) =>
                               handleWorkingHourChange(hour.day_of_week, 'start_time', e.target.value)
                             }
-                            className="w-full rounded-lg border border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm font-medium text-gray-900 dark:text-white focus:border-[#c9c1b0] focus:ring-2 focus:ring-[#c9c1b0]/40"
+                            className="w-full rounded-xl border-2 border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 text-base font-semibold text-gray-900 dark:text-white focus:border-[#c9c1b0] focus:ring-2 focus:ring-[#c9c1b0]/40 transition-all h-12"
                           />
                         </div>
-                        <div className="space-y-2">
-                          <span className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                            Closes at
-                          </span>
+                        <div className="flex flex-col">
+                          <label className="text-xs font-bold uppercase tracking-wide text-gray-600 dark:text-gray-400 mb-2.5 h-6 flex items-center gap-1.5">
+                            <Clock className="w-3.5 h-3.5 text-[#9d9585] dark:text-[#c9c1b0] flex-shrink-0" />
+                            <span>Closes at</span>
+                          </label>
                           <input
                             type="time"
                             value={hour.end_time}
                             onChange={(e) =>
                               handleWorkingHourChange(hour.day_of_week, 'end_time', e.target.value)
                             }
-                            className="w-full rounded-lg border border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm font-medium text-gray-900 dark:text-white focus:border-[#c9c1b0] focus:ring-2 focus:ring-[#c9c1b0]/40"
+                            className="w-full rounded-xl border-2 border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 text-base font-semibold text-gray-900 dark:text-white focus:border-[#c9c1b0] focus:ring-2 focus:ring-[#c9c1b0]/40 transition-all h-12"
                           />
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <span className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                            Buffer between appointments (min)
-                          </span>
+                        <div className="flex flex-col">
+                          <label className="text-xs font-bold uppercase tracking-wide text-gray-600 dark:text-gray-400 mb-2.5 h-6 flex items-center gap-1.5">
+                            <svg className="w-3.5 h-3.5 text-[#9d9585] dark:text-[#c9c1b0] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Buffer (min)</span>
+                          </label>
                           <input
                             type="number"
                             min="0"
@@ -474,13 +385,16 @@ export default function WorkingHoursManager() {
                                 Math.max(0, parseInt(e.target.value, 10) || 0)
                               )
                             }
-                            className="w-full rounded-lg border border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-[#c9c1b0] focus:ring-2 focus:ring-[#c9c1b0]/40"
+                            className="w-full rounded-xl border-2 border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 text-base font-semibold text-gray-900 dark:text-white focus:border-[#c9c1b0] focus:ring-2 focus:ring-[#c9c1b0]/40 transition-all h-12"
                           />
                         </div>
-                        <div className="space-y-2">
-                          <span className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                            Maximum appointments per day
-                          </span>
+                        <div className="flex flex-col">
+                          <label className="text-xs font-bold uppercase tracking-wide text-gray-600 dark:text-gray-400 mb-2.5 h-6 flex items-center gap-1.5">
+                            <svg className="w-3.5 h-3.5 text-[#9d9585] dark:text-[#c9c1b0] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            <span>Max Appointments</span>
+                          </label>
                           <input
                             type="number"
                             min="1"
@@ -493,7 +407,7 @@ export default function WorkingHoursManager() {
                                 Math.max(1, parseInt(e.target.value, 10) || 1)
                               )
                             }
-                            className="w-full rounded-lg border border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-[#c9c1b0] focus:ring-2 focus:ring-[#c9c1b0]/40"
+                            className="w-full rounded-xl border-2 border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 text-base font-semibold text-gray-900 dark:text-white focus:border-[#c9c1b0] focus:ring-2 focus:ring-[#c9c1b0]/40 transition-all h-12"
                           />
                         </div>
                       </div>
@@ -502,125 +416,6 @@ export default function WorkingHoursManager() {
                 </div>
               );
             })}
-          </div>
-        </div>
-      </div>
-
-      {/* Service Durations */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-[#e4d9c8] dark:border-gray-700 overflow-hidden shadow-sm">
-        <div className="px-6 py-4 border-b border-[#e4d9c8] dark:border-gray-700 flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-[#f5f1e9] dark:bg-gray-900/60">
-            <Clock className="w-5 h-5 text-[#6b5f4b] dark:text-[#c9c1b0]" />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Service Durations</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Set duration and buffer time for each service
-            </p>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-[#f5f1e9] dark:bg-gray-800">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">
-                  Service
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">
-                  Duration (min)
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">
-                  Buffer (min)
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">
-                  Total Time
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#f0ede7] dark:divide-gray-700">
-              {serviceDurations.map((service) => (
-                <tr key={service.id} className="hover:bg-[#fdfbf8] dark:hover:bg-gray-900/40">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="font-medium text-gray-900 dark:text-white">
-                      {service.service_name}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <input
-                      type="number"
-                      min="15"
-                      max="300"
-                      value={service.duration_minutes}
-                      onChange={(e) =>
-                        handleServiceDurationChange(service.id, 'duration_minutes', parseInt(e.target.value, 10) || service.duration_minutes)
-                      }
-                      className="border border-[#e4d9c8] dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white w-20 focus:border-[#c9c1b0] focus:ring-2 focus:ring-[#c9c1b0]/40"
-                    />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <input
-                      type="number"
-                      min="0"
-                      max="60"
-                      value={service.buffer_minutes}
-                      onChange={(e) =>
-                        handleServiceDurationChange(service.id, 'buffer_minutes', Math.max(0, parseInt(e.target.value, 10) || 0))
-                      }
-                      className="border border-[#e4d9c8] dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white w-20 focus:border-[#c9c1b0] focus:ring-2 focus:ring-[#c9c1b0]/40"
-                    />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                    {service.duration_minutes + service.buffer_minutes} min
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-[#e4d9c8] dark:border-gray-700 shadow-sm px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h3 className="text-sm font-semibold text-[#6b5f4b] dark:text-[#c9c1b0] uppercase tracking-wide">Quick actions</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Manage availability, durations and cached slots from one place.</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            size="sm"
-            onPress={generateTimeSlots}
-            isLoading={generatingSlots}
-            className="bg-gradient-to-r from-[#b5ad9d] to-[#ddd5c3] text-[#3f3a31] hover:from-[#9d9585] hover:to-[#c9c1b0]"
-          >
-            Generate slots
-          </Button>
-          <Button
-            size="sm"
-            onPress={saveWorkingHours}
-            isLoading={saving}
-            className="bg-gradient-to-r from-[#9d9585] to-[#c9c1b0] text-[#3f3a31] hover:from-[#8c846f] hover:to-[#b5ad9d]"
-          >
-            Save hours
-          </Button>
-          <Button
-            size="sm"
-            onPress={saveServiceDurations}
-            isLoading={savingDurations}
-            isDisabled={!serviceDurationsDirty && !savingDurations}
-            className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-[#3f3a31] hover:from-[#8c846f] hover:to-[#b5ad9d] disabled:opacity-60"
-          >
-            Save durations
-          </Button>
-          <Button
-            size="sm"
-            onPress={() => loadData({ silent: true, showToast: true })}
-            isLoading={refreshing}
-            className="bg-white dark:bg-gray-900 text-[#6b5f4b] dark:text-[#c9c1b0] border border-[#e4d9c8] dark:border-gray-700 hover:bg-[#f0ede7] dark:hover:bg-gray-800"
-          >
-            Refresh
-          </Button>
-        </div>
       </div>
     </div>
   );

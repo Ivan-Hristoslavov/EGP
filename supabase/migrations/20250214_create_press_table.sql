@@ -22,12 +22,16 @@ CREATE INDEX IF NOT EXISTS idx_press_display_order ON press(display_order);
 
 -- Create function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_press_updated_at()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 -- Create trigger to automatically update updated_at
 DROP TRIGGER IF EXISTS update_press_updated_at ON press;

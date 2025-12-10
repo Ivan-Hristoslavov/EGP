@@ -3,7 +3,16 @@ import { useState, useEffect } from "react";
 import NextImage from "next/image";
 import { useToast } from "@/components/Toast";
 import { ConfirmationModal } from "@/components/ConfirmationModal";
-import { Upload, X, Edit2, Trash2, Star, Award, FileText, ChevronDown } from "lucide-react";
+import { Card, CardBody, CardHeader } from "@heroui/card";
+import { Button } from "@heroui/button";
+import { Chip } from "@heroui/chip";
+import { Spinner } from "@heroui/spinner";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
+import { Input } from "@heroui/input";
+import { Textarea } from "@heroui/react";
+import { Select, SelectItem } from "@heroui/select";
+import { Tabs, Tab } from "@heroui/tabs";
+import { Upload, X, Edit2, Trash2, Star, Award, FileText, ChevronDown, Plus, AlertCircle } from "lucide-react";
 
 interface PressItem {
   id: string;
@@ -400,253 +409,251 @@ export function AdminPressManager() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <span className="ml-3 text-gray-600 dark:text-gray-400">Loading press items...</span>
+        <Spinner size="lg" />
+        <span className="ml-3 text-default-500">Loading press items...</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-        <div className="flex items-center">
-          <svg className="w-5 h-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-          </svg>
-          <span className="text-red-700 dark:text-red-300">{error}</span>
-        </div>
-      </div>
+      <Card className="border-danger-200 dark:border-danger-800 bg-danger-50 dark:bg-danger-900/20">
+        <CardBody className="p-4">
+          <div className="flex items-center">
+            <AlertCircle className="w-5 h-5 text-danger-500 mr-2" />
+            <span className="text-danger-700 dark:text-danger-300">{error}</span>
+          </div>
+        </CardBody>
+      </Card>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="w-full space-y-6">
       {/* Header with Add Button */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-default-500">
             Manage awards and press features displayed on your press page
           </p>
         </div>
-        <button
-          onClick={handleAddClick}
-          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all"
+        <Button
+          color="primary"
+          startContent={<Plus className="w-5 h-5" />}
+          onPress={handleAddClick}
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
           Add Press Item
-        </button>
+        </Button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-              <Award className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+        <Card className="border border-divider">
+          <CardBody className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary-100 dark:bg-primary-900/20 rounded-lg">
+                <Award className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{awards.length}</p>
+                <p className="text-sm text-default-500">Awards</p>
+              </div>
             </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{awards.length}</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Awards</p>
+          </CardBody>
+        </Card>
+        <Card className="border border-divider">
+          <CardBody className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-secondary-100 dark:bg-secondary-900/20 rounded-lg">
+                <FileText className="w-5 h-5 text-secondary-600 dark:text-secondary-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{pressFeatures.length}</p>
+                <p className="text-sm text-default-500">Press Features</p>
+              </div>
             </div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-              <FileText className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+          </CardBody>
+        </Card>
+        <Card className="border border-divider">
+          <CardBody className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-warning-100 dark:bg-warning-900/20 rounded-lg">
+                <Star className="w-5 h-5 text-warning-600 dark:text-warning-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">
+                  {pressItems.filter(item => item.is_featured).length}
+                </p>
+                <p className="text-sm text-default-500">Featured</p>
+              </div>
             </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{pressFeatures.length}</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Press Features</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
-              <Star className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {pressItems.filter(item => item.is_featured).length}
-              </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Featured</p>
-            </div>
-          </div>
-        </div>
+          </CardBody>
+        </Card>
       </div>
 
       {/* Tabs */}
       {pressItems.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-          <div className="border-b border-gray-200 dark:border-gray-700">
-            <nav className="flex -mb-px">
-              <button
-                onClick={() => {
-                  setActiveTab('awards');
-                  setAwardsPage(1);
-                }}
-                className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'awards'
-                    ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-                }`}
-              >
-                <Award className="w-4 h-4" />
-                Awards & Recognition
-                <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
-                  {awards.length}
-                </span>
-              </button>
-              <button
-                onClick={() => {
-                  setActiveTab('press');
-                  setPressPage(1);
-                }}
-                className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'press'
-                    ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-                }`}
-              >
-                <FileText className="w-4 h-4" />
-                Press Features
-                <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
-                  {pressFeatures.length}
-                </span>
-              </button>
-            </nav>
-          </div>
-
-          {/* Tab Content */}
-          <div className="p-6">
-            {activeTab === 'awards' ? (
-              awards.length === 0 ? (
-                <div className="text-center py-12">
-                  <Award className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No awards yet</h3>
-                  <p className="text-gray-500 dark:text-gray-400 mb-4">Add awards to showcase your achievements.</p>
-                  <button
-                    onClick={handleAddClick}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    Add First Award
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {paginatedAwards.map((item) => (
-                      <PressItemCard
-                        key={item.id}
-                        item={item}
-                        onEdit={handleEditClick}
-                        onDelete={handleDeleteClick}
-                        isLarge={false}
-                      />
-                    ))}
+        <Card className="border border-divider">
+          <CardBody className="p-0">
+            <Tabs
+              selectedKey={activeTab}
+              onSelectionChange={(key) => {
+                const tab = key as 'awards' | 'press';
+                setActiveTab(tab);
+                if (tab === 'awards') setAwardsPage(1);
+                else setPressPage(1);
+              }}
+              aria-label="Press items tabs"
+            >
+              <Tab
+                key="awards"
+                title={
+                  <div className="flex items-center gap-2">
+                    <Award className="w-4 h-4" />
+                    <span>Awards & Recognition</span>
+                    <Chip size="sm" variant="flat">{awards.length}</Chip>
                   </div>
-                  {awardsTotalPages > 1 && (
-                    <div className="flex items-center justify-center gap-2 mt-6">
-                      <button
-                        onClick={() => setAwardsPage(prev => Math.max(1, prev - 1))}
-                        disabled={awardsPage === 1}
-                        className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                }
+              >
+                <div className="p-6">
+                  {awards.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Award className="w-12 h-12 text-default-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No awards yet</h3>
+                      <p className="text-default-500 mb-4">Add awards to showcase your achievements.</p>
+                      <Button
+                        color="primary"
+                        startContent={<Plus className="w-5 h-5" />}
+                        onPress={handleAddClick}
                       >
-                        Previous
-                      </button>
-                      <span className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
-                        Page {awardsPage} of {awardsTotalPages}
-                      </span>
-                      <button
-                        onClick={() => setAwardsPage(prev => Math.min(awardsTotalPages, prev + 1))}
-                        disabled={awardsPage === awardsTotalPages}
-                        className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Next
-                      </button>
+                        Add First Award
+                      </Button>
                     </div>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {paginatedAwards.map((item) => (
+                          <PressItemCard
+                            key={item.id}
+                            item={item}
+                            onEdit={handleEditClick}
+                            onDelete={handleDeleteClick}
+                            isLarge={false}
+                          />
+                        ))}
+                      </div>
+                      {awardsTotalPages > 1 && (
+                        <div className="flex items-center justify-center gap-2 mt-6">
+                          <Button
+                            variant="bordered"
+                            size="sm"
+                            onPress={() => setAwardsPage(prev => Math.max(1, prev - 1))}
+                            isDisabled={awardsPage === 1}
+                          >
+                            Previous
+                          </Button>
+                          <span className="px-4 py-2 text-sm text-default-600">
+                            Page {awardsPage} of {awardsTotalPages}
+                          </span>
+                          <Button
+                            variant="bordered"
+                            size="sm"
+                            onPress={() => setAwardsPage(prev => Math.min(awardsTotalPages, prev + 1))}
+                            isDisabled={awardsPage === awardsTotalPages}
+                          >
+                            Next
+                          </Button>
+                        </div>
+                      )}
+                    </>
                   )}
-                </>
-              )
-            ) : (
-              pressFeatures.length === 0 ? (
-                <div className="text-center py-12">
-                  <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No press features yet</h3>
-                  <p className="text-gray-500 dark:text-gray-400 mb-4">Add press features to showcase your media coverage.</p>
-                  <button
-                    onClick={handleAddClick}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    Add First Press Feature
-                  </button>
                 </div>
-              ) : (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {paginatedPress.map((item) => (
-                      <PressItemCard
-                        key={item.id}
-                        item={item}
-                        onEdit={handleEditClick}
-                        onDelete={handleDeleteClick}
-                        isLarge={false}
-                      />
-                    ))}
+              </Tab>
+              <Tab
+                key="press"
+                title={
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    <span>Press Features</span>
+                    <Chip size="sm" variant="flat">{pressFeatures.length}</Chip>
                   </div>
-                  {pressTotalPages > 1 && (
-                    <div className="flex items-center justify-center gap-2 mt-6">
-                      <button
-                        onClick={() => setPressPage(prev => Math.max(1, prev - 1))}
-                        disabled={pressPage === 1}
-                        className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                }
+              >
+                <div className="p-6">
+                  {pressFeatures.length === 0 ? (
+                    <div className="text-center py-12">
+                      <FileText className="w-12 h-12 text-default-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No press features yet</h3>
+                      <p className="text-default-500 mb-4">Add press features to showcase your media coverage.</p>
+                      <Button
+                        color="primary"
+                        startContent={<Plus className="w-5 h-5" />}
+                        onPress={handleAddClick}
                       >
-                        Previous
-                      </button>
-                      <span className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
-                        Page {pressPage} of {pressTotalPages}
-                      </span>
-                      <button
-                        onClick={() => setPressPage(prev => Math.min(pressTotalPages, prev + 1))}
-                        disabled={pressPage === pressTotalPages}
-                        className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Next
-                      </button>
+                        Add First Press Feature
+                      </Button>
                     </div>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {paginatedPress.map((item) => (
+                          <PressItemCard
+                            key={item.id}
+                            item={item}
+                            onEdit={handleEditClick}
+                            onDelete={handleDeleteClick}
+                            isLarge={false}
+                          />
+                        ))}
+                      </div>
+                      {pressTotalPages > 1 && (
+                        <div className="flex items-center justify-center gap-2 mt-6">
+                          <Button
+                            variant="bordered"
+                            size="sm"
+                            onPress={() => setPressPage(prev => Math.max(1, prev - 1))}
+                            isDisabled={pressPage === 1}
+                          >
+                            Previous
+                          </Button>
+                          <span className="px-4 py-2 text-sm text-default-600">
+                            Page {pressPage} of {pressTotalPages}
+                          </span>
+                          <Button
+                            variant="bordered"
+                            size="sm"
+                            onPress={() => setPressPage(prev => Math.min(pressTotalPages, prev + 1))}
+                            isDisabled={pressPage === pressTotalPages}
+                          >
+                            Next
+                          </Button>
+                        </div>
+                      )}
+                    </>
                   )}
-                </>
-              )
-            )}
-          </div>
-        </div>
+                </div>
+              </Tab>
+            </Tabs>
+          </CardBody>
+        </Card>
       )}
 
       {/* Empty State */}
       {pressItems.length === 0 && (
-        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-          <Award className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No press items yet</h3>
-          <p className="text-gray-500 dark:text-gray-400 mb-4">Add awards and press features to showcase your achievements.</p>
-          <button
-            onClick={handleAddClick}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Add First Press Item
-          </button>
-        </div>
+        <Card className="border border-divider">
+          <CardBody className="p-12 text-center">
+            <Award className="w-12 h-12 text-default-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No press items yet</h3>
+            <p className="text-default-500 mb-4">Add awards and press features to showcase your achievements.</p>
+            <Button
+              color="primary"
+              startContent={<Plus className="w-5 h-5" />}
+              onPress={handleAddClick}
+            >
+              Add First Press Item
+            </Button>
+          </CardBody>
+        </Card>
       )}
 
       {/* Add/Edit Modal */}

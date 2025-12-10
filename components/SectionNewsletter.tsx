@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Mail, CheckCircle, Gift } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { badgeBackgroundClass } from "@/config/badge-styles";
+import { Input, Button, Card, CardBody, Chip, Spinner } from "@heroui/react";
 
 export default function SectionNewsletter() {
   const [email, setEmail] = useState("");
@@ -61,21 +62,29 @@ export default function SectionNewsletter() {
             <p className="text-lg sm:text-xl text-gray-700 dark:text-gray-300 mb-4 sm:mb-6 px-4">
               Check your email for your exclusive discount code:
             </p>
-            <div className="inline-block bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-2 border-[#c9c1b0] dark:border-gray-700 rounded-xl px-6 sm:px-8 py-3 sm:py-4 mb-4 sm:mb-6 shadow-lg">
-              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-1 font-medium">Your Discount Code</div>
-              <div className="text-2xl sm:text-3xl font-bold text-[#464C45] dark:text-[#464C45] tracking-wider">
-                {discountCode}
-              </div>
-            </div>
+            <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-2 border-[#c9c1b0] dark:border-gray-700 shadow-lg">
+              <CardBody className="px-6 sm:px-8 py-3 sm:py-4">
+                <div className="text-xs sm:text-sm text-default-500 mb-1 font-medium">Your Discount Code</div>
+                <Chip 
+                  size="lg"
+                  variant="flat"
+                  className="text-2xl sm:text-3xl font-bold text-[#464C45] dark:text-[#464C45] tracking-wider bg-transparent"
+                >
+                  {discountCode}
+                </Chip>
+              </CardBody>
+            </Card>
             <p className="text-base sm:text-lg text-gray-700 dark:text-gray-300 mb-6 sm:mb-8 px-4">
               Use this code to get <strong className="text-gray-900 dark:text-white">{siteConfig.newsletter.welcomeDiscountPercent}% off</strong> your first treatment!
             </p>
-            <button
-              onClick={() => setStatus("idle")}
-              className="px-6 py-3 bg-[#464C45] dark:bg-[#464C45] text-white font-semibold rounded-full hover:bg-[#3a4039] dark:hover:bg-[#3a4039] transition-colors touch-manipulation active:scale-95"
+            <Button
+              onPress={() => setStatus("idle")}
+              color="primary"
+              size="lg"
+              className="bg-[#464C45] dark:bg-[#464C45] text-white font-semibold"
             >
               Close
-            </button>
+            </Button>
           </div>
         </div>
       </section>
@@ -102,48 +111,56 @@ export default function SectionNewsletter() {
                 </p>
 
                 {/* Form */}
-                <form onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-3">
-                  <div className="flex flex-col gap-2.5 sm:gap-3">
-                    <input
+                <form onSubmit={handleSubmit} className="space-y-3">
+                  <div className="flex flex-col gap-3">
+                    <Input
                       type="text"
                       value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
+                      onValueChange={setFirstName}
                       placeholder="First Name (optional)"
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg bg-white/85 dark:bg-gray-900/70 border border-[#d8cbb1]/70 dark:border-gray-700 focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-[#c4b5a0]/60 outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-500"
+                      variant="bordered"
+                      size="lg"
+                      classNames={{
+                        input: "bg-white/85 dark:bg-gray-900/70",
+                        inputWrapper: "bg-white/85 dark:bg-gray-900/70 border-[#d8cbb1]/70 dark:border-gray-700",
+                      }}
                     />
-                    <input
+                    <Input
                       type="email"
-                      required
+                      isRequired
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onValueChange={setEmail}
                       placeholder="Your email address"
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg bg-white/85 dark:bg-gray-900/70 border border-[#d8cbb1]/70 dark:border-gray-700 focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-[#c4b5a0]/60 outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-500"
+                      variant="bordered"
+                      size="lg"
+                      classNames={{
+                        input: "bg-white/85 dark:bg-gray-900/70",
+                        inputWrapper: "bg-white/85 dark:bg-gray-900/70 border-[#d8cbb1]/70 dark:border-gray-700",
+                      }}
                     />
-                    <input
+                    <Input
                       type="tel"
                       value={mobile}
-                      onChange={(e) => setMobile(e.target.value)}
+                      onValueChange={setMobile}
                       placeholder="Mobile Number (optional)"
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg bg-white/85 dark:bg-gray-900/70 border border-[#d8cbb1]/70 dark:border-gray-700 focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-[#c4b5a0]/60 outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-500"
+                      variant="bordered"
+                      size="lg"
+                      classNames={{
+                        input: "bg-white/85 dark:bg-gray-900/70",
+                        inputWrapper: "bg-white/85 dark:bg-gray-900/70 border-[#d8cbb1]/70 dark:border-gray-700",
+                      }}
                     />
                   </div>
-                  <button
+                  <Button
                     type="submit"
+                    isLoading={isSubmitting}
                     disabled={isSubmitting}
-                    className="w-full px-6 sm:px-8 py-3 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-[#3f3a31] text-base sm:text-lg font-bold rounded-xl hover:shadow-2xl hover:from-[#8c846f] hover:via-[#aea693] hover:to-[#c4b5a0] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl active:scale-95 touch-manipulation"
+                    size="lg"
+                    className="w-full bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-[#3f3a31] font-bold shadow-xl hover:shadow-2xl"
+                    startContent={!isSubmitting && <Mail className="w-5 h-5" />}
                   >
-                    {isSubmitting ? (
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="w-5 h-5 border-2 border-[#b5ad9d] dark:border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>Subscribing...</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center gap-2">
-                        <Mail className="w-5 h-5" />
-                        <span>Get My Discount Code</span>
-                      </div>
-                    )}
-                  </button>
+                    {isSubmitting ? "Subscribing..." : "Get My Discount Code"}
+                  </Button>
                 </form>
 
                 {status === "error" && (

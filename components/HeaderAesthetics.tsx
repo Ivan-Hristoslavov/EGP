@@ -282,7 +282,7 @@ export default function HeaderAesthetics() {
                   href={siteConfig.social.facebook}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white/80 hover:text-white transition-all duration-300 hover:scale-125 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
+                  className="text-gray-900 dark:text-white/80 hover:text-gray-900 dark:hover:text-white transition-all duration-300 hover:scale-125 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
                   aria-label="Facebook"
                 >
                   <svg
@@ -297,7 +297,7 @@ export default function HeaderAesthetics() {
                   href={siteConfig.social.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white/80 hover:text-white transition-all duration-300 hover:scale-125 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
+                  className="text-gray-900 dark:text-white/80 hover:text-gray-900 dark:hover:text-white transition-all duration-300 hover:scale-125 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
                   aria-label="Instagram"
                 >
                   <svg
@@ -312,7 +312,7 @@ export default function HeaderAesthetics() {
                   href={siteConfig.social.youtube}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white/80 hover:text-white transition-all duration-300 hover:scale-125 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
+                  className="text-gray-900 dark:text-white/80 hover:text-gray-900 dark:hover:text-white transition-all duration-300 hover:scale-125 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
                   aria-label="YouTube"
                 >
                   <svg
@@ -328,7 +328,7 @@ export default function HeaderAesthetics() {
                     href={siteConfig.social.tiktok}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-white/80 hover:text-white transition-all duration-300 hover:scale-125 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
+                    className="text-gray-900 dark:text-white/80 hover:text-gray-900 dark:hover:text-white transition-all duration-300 hover:scale-125 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
                     aria-label="TikTok"
                   >
                     <svg
@@ -422,7 +422,7 @@ export default function HeaderAesthetics() {
                     href={siteConfig.social.facebook}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-white/80 hover:text-white transition-all duration-300 hover:scale-125"
+                    className="text-gray-900 dark:text-white/80 hover:text-gray-900 dark:hover:text-white transition-all duration-300 hover:scale-125"
                     aria-label="Facebook"
                   >
                     <svg
@@ -437,7 +437,7 @@ export default function HeaderAesthetics() {
                     href={siteConfig.social.instagram}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-white/80 hover:text-white transition-all duration-300 hover:scale-125"
+                    className="text-gray-900 dark:text-white/80 hover:text-gray-900 dark:hover:text-white transition-all duration-300 hover:scale-125"
                     aria-label="Instagram"
                   >
                     <svg
@@ -452,7 +452,7 @@ export default function HeaderAesthetics() {
                     href={siteConfig.social.youtube}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-white/80 hover:text-white transition-all duration-300 hover:scale-125"
+                    className="text-gray-900 dark:text-white/80 hover:text-gray-900 dark:hover:text-white transition-all duration-300 hover:scale-125"
                     aria-label="YouTube"
                   >
                     <svg
@@ -468,7 +468,7 @@ export default function HeaderAesthetics() {
                       href={siteConfig.social.tiktok}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-white/80 hover:text-white transition-all duration-300 hover:scale-125"
+                      className="text-gray-900 dark:text-white/80 hover:text-gray-900 dark:hover:text-white transition-all duration-300 hover:scale-125"
                       aria-label="TikTok"
                     >
                       <svg

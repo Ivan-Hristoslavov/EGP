@@ -16,6 +16,8 @@ import {
   Star,
 } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
+import { useConfirmation } from "@/hooks/useConfirmation";
+import { ConfirmationModal } from "@/components/ConfirmationModal";
 import { Input, Textarea } from "@heroui/input";
 import { Button } from "@heroui/button";
 import {
@@ -40,6 +42,8 @@ interface ExtendedServiceCategory extends ServiceCategory {
 }
 
 export default function AdminServicesPage() {
+  const { confirm, modalProps } = useConfirmation();
+  
   // Main state
   const [activeView, setActiveView] = useState<"services" | "categories">(
     "services"
@@ -244,19 +248,27 @@ export default function AdminServicesPage() {
   };
 
   const handleDeleteService = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this service?")) return;
+    await confirm(
+      {
+        title: "Delete Service",
+        message: "Are you sure you want to delete this service? This action cannot be undone.",
+        isDestructive: true,
+        confirmText: "Delete",
+      },
+      async () => {
+        try {
+          const response = await fetch(`/api/services/${id}`, {
+            method: "DELETE",
+          });
 
-    try {
-      const response = await fetch(`/api/services/${id}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        await loadServices();
+          if (response.ok) {
+            await loadServices();
+          }
+        } catch (error) {
+          console.error("Error deleting service:", error);
+        }
       }
-    } catch (error) {
-      console.error("Error deleting service:", error);
-    }
+    );
   };
 
   const handleToggleFeatured = async (service: Service) => {
@@ -379,19 +391,27 @@ export default function AdminServicesPage() {
   };
 
   const handleDeleteCategory = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this category?")) return;
+    await confirm(
+      {
+        title: "Delete Category",
+        message: "Are you sure you want to delete this category? This action cannot be undone.",
+        isDestructive: true,
+        confirmText: "Delete",
+      },
+      async () => {
+        try {
+          const response = await fetch(`/api/service-categories/${id}`, {
+            method: "DELETE",
+          });
 
-    try {
-      const response = await fetch(`/api/service-categories/${id}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        await loadCategories();
+          if (response.ok) {
+            await loadCategories();
+          }
+        } catch (error) {
+          console.error("Error deleting category:", error);
+        }
       }
-    } catch (error) {
-      console.error("Error deleting category:", error);
-    }
+    );
   };
 
   // Form utilities
@@ -513,18 +533,8 @@ export default function AdminServicesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f1e9] dark:bg-gray-950">
-      <div className="max-w-7xl mx-auto p-4 sm:p-6">
-        {/* Mobile-Optimized Header */}
-        <div className="mt-6 mb-6 sm:mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            Services Management
-          </h1>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-            Manage your aesthetic treatments and service categories
-          </p>
-        </div>
-
+    <div className="w-full">
+      <div className="space-y-6">
         {/* Mobile-Optimized Main Tabs */}
         <div className="flex gap-2 sm:gap-3 mb-4 sm:mb-6">
           <button
@@ -583,7 +593,7 @@ export default function AdminServicesPage() {
 
         {/* Services View */}
         {activeView === "services" && (
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6">
+          <div className="space-y-6">
             {/* Mobile-Optimized Actions Bar */}
             <div className="mb-6">
               {/* Search, Filter and Add Button - All in one line */}
@@ -939,7 +949,7 @@ export default function AdminServicesPage() {
 
         {/* Categories View */}
         {activeView === "categories" && (
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6">
+          <div className="space-y-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                 Categories
@@ -1351,6 +1361,8 @@ export default function AdminServicesPage() {
             )}
           </ModalContent>
         </Modal>
+
+      <ConfirmationModal {...modalProps} />
       </div>
     </div>
   );

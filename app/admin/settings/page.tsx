@@ -5,6 +5,7 @@ import { useAdminProfile } from "@/hooks/useAdminProfile";
 import { useToast } from "@/components/Toast";
 import WorkingHoursManager from "@/components/admin/WorkingHoursManager";
 import { Building2, DollarSign, Settings, Shield, Save } from "lucide-react";
+import { Card, CardBody, CardHeader, Button, Input, Textarea, Checkbox, Tabs, Tab, Spinner } from "@heroui/react";
 
 type SettingsState = {
   // Business Information
@@ -134,109 +135,69 @@ export default function AdminSettingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-pink-50/50 to-purple-50/50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800 flex items-center justify-center">
+      <div className="w-full flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="w-10 h-10 mx-auto mb-4">
-            <div className="absolute inset-0 rounded-full border-2 border-rose-200 dark:border-rose-800"></div>
-            <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-rose-500 dark:border-t-rose-400 animate-spin"></div>
-          </div>
-          <p className="text-gray-600 dark:text-gray-300 text-sm">Loading settings...</p>
+          <Spinner size="lg" />
+          <p className="mt-4 text-default-500">Loading settings...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-pink-50/50 to-purple-50/50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800">
-      <div className="w-full max-w-[95%] 2xl:max-w-[1600px] mx-auto p-6 lg:p-8">
-        {/* Header */}
-        <div className="mt-6 mb-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent font-playfair mb-2">
-            Settings
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Manage your clinic settings and preferences
-          </p>
-        </div>
-
-        {/* Settings Card */}
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-rose-100/50 dark:border-gray-700/50 overflow-hidden">
-          {/* Settings Header */}
-          <div className="bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 p-8">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/30">
-                <Settings className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-white font-playfair mb-1">
-                  Clinic Configuration
-                </h2>
-                <p className="text-white/90">Configure your aesthetic clinic settings</p>
-              </div>
+    <div className="w-full">
+      <Card>
+        <CardHeader className="bg-gradient-to-r from-primary-500 via-secondary-500 to-danger-500 p-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30">
+              <Settings className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <p className="text-white/90 text-sm">Configure your aesthetic clinic settings</p>
             </div>
           </div>
+        </CardHeader>
+        <CardBody className="p-0">
+          <Tabs
+            selectedKey={activeTab}
+            onSelectionChange={(key) => setActiveTab(key as any)}
+            className="w-full"
+          >
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <Tab
+                  key={tab.id}
+                  title={
+                    <div className="flex items-center gap-2">
+                      <Icon className="w-4 h-4" />
+                      <span>{tab.label}</span>
+                    </div>
+                  }
+                />
+              );
+            })}
+          </Tabs>
 
-          {/* Tabs */}
-          <div className="border-b border-gray-200 dark:border-gray-700">
-            <nav className="flex space-x-8 px-8 overflow-x-auto">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
-                    className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm transition-all whitespace-nowrap ${
-                      activeTab === tab.id
-                        ? "border-rose-500 text-rose-600 dark:text-rose-400"
-                        : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-
-          {/* Tab Content */}
-          <div className="p-8">
+          <div className="p-6">
             {activeTab === "business" && (
               <div className="space-y-8">
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Business Location</h3>
-                
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Business City
-                    </label>
-                    <input
-                      type="text"
-                      value={settings.businessCity}
-                      onChange={(e) => handleInputChange("businessCity", e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                      placeholder="Enter city"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Postcode
-                    </label>
-                    <input
-                      type="text"
-                      value={settings.businessPostcode}
-                      onChange={(e) => handleInputChange("businessPostcode", e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                      placeholder="Enter postcode"
-                    />
-                  </div>
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  <Input
+                    label="Business City"
+                    value={settings.businessCity}
+                    onChange={(e) => handleInputChange("businessCity", e.target.value)}
+                    placeholder="Enter city"
+                  />
+                  <Input
+                    label="Postcode"
+                    value={settings.businessPostcode}
+                    onChange={(e) => handleInputChange("businessPostcode", e.target.value)}
+                    placeholder="Enter postcode"
+                  />
                 </div>
 
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-8">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Working Hours</h3>
+                <div className="border-t border-divider pt-8">
                   <WorkingHoursManager />
                 </div>
               </div>
@@ -244,120 +205,84 @@ export default function AdminSettingsPage() {
 
             {activeTab === "pricing" && (
               <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Pricing Configuration</h3>
-                
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Consultation Rate (per session)
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">£</span>
-                      <input
-                        type="number"
-                        value={settings.consultationRate}
-                        onChange={(e) => handleInputChange("consultationRate", e.target.value)}
-                        className="w-full pl-8 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                        placeholder="150"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Standard Treatment Rate (per session)
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">£</span>
-                      <input
-                        type="number"
-                        value={settings.standardRate}
-                        onChange={(e) => handleInputChange("standardRate", e.target.value)}
-                        className="w-full pl-8 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                        placeholder="75"
-                      />
-                    </div>
-                  </div>
+                  <Input
+                    label="Consultation Rate (per session)"
+                    type="number"
+                    value={settings.consultationRate}
+                    onChange={(e) => handleInputChange("consultationRate", e.target.value)}
+                    placeholder="150"
+                    startContent={<span className="text-default-500">£</span>}
+                  />
+                  <Input
+                    label="Standard Treatment Rate (per session)"
+                    type="number"
+                    value={settings.standardRate}
+                    onChange={(e) => handleInputChange("standardRate", e.target.value)}
+                    placeholder="75"
+                    startContent={<span className="text-default-500">£</span>}
+                  />
+                </div>
+                <div className="mt-8 pt-6 border-t border-divider">
+                  <Button
+                    color="primary"
+                    onPress={handleSave}
+                    isLoading={isSaving}
+                    startContent={<Save className="w-4 h-4" />}
+                  >
+                    {isSaving ? "Saving..." : "Save Settings"}
+                  </Button>
                 </div>
               </div>
             )}
 
             {activeTab === "professional" && (
               <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Professional Information</h3>
-                
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Years of Experience
-                    </label>
-                    <input
-                      type="text"
-                      value={settings.yearsOfExperience}
-                      onChange={(e) => handleInputChange("yearsOfExperience", e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                      placeholder="e.g., 10+ years"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Insurance Provider
-                    </label>
-                    <input
-                      type="text"
-                      value={settings.insuranceProvider}
-                      onChange={(e) => handleInputChange("insuranceProvider", e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                      placeholder="Enter insurance provider"
-                    />
-                  </div>
-
+                  <Input
+                    label="Years of Experience"
+                    value={settings.yearsOfExperience}
+                    onChange={(e) => handleInputChange("yearsOfExperience", e.target.value)}
+                    placeholder="e.g., 10+ years"
+                  />
+                  <Input
+                    label="Insurance Provider"
+                    value={settings.insuranceProvider}
+                    onChange={(e) => handleInputChange("insuranceProvider", e.target.value)}
+                    placeholder="Enter insurance provider"
+                  />
                   <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="fullyInsured"
-                      checked={settings.fullyInsured}
-                      onChange={(e) => handleInputChange("fullyInsured", e.target.checked)}
-                      className="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor="fullyInsured" className="ml-2 block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    <Checkbox
+                      isSelected={settings.fullyInsured}
+                      onValueChange={(checked) => handleInputChange("fullyInsured", checked)}
+                    >
                       Fully Insured
-                    </label>
+                    </Checkbox>
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Specializations
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={settings.specializations}
-                    onChange={(e) => handleInputChange("specializations", e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all resize-none"
-                    placeholder="e.g., Botox, Fillers, Skin Treatments"
-                  />
+                <Textarea
+                  label="Specializations"
+                  rows={3}
+                  value={settings.specializations}
+                  onChange={(e) => handleInputChange("specializations", e.target.value)}
+                  placeholder="e.g., Botox, Fillers, Skin Treatments"
+                />
+                <div className="mt-8 pt-6 border-t border-divider">
+                  <Button
+                    color="primary"
+                    onPress={handleSave}
+                    isLoading={isSaving}
+                    startContent={<Save className="w-4 h-4" />}
+                  >
+                    {isSaving ? "Saving..." : "Save Settings"}
+                  </Button>
                 </div>
               </div>
             )}
-
-            {/* Save Button - Only show for tabs that need it (pricing and professional) */}
-            {(activeTab === "pricing" || activeTab === "professional") && (
-            <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-              <button
-                onClick={handleSave}
-                disabled={isSaving}
-                className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 text-white font-semibold rounded-xl hover:from-rose-600 hover:via-pink-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Save className="w-5 h-5 mr-2" />
-                {isSaving ? "Saving..." : "Save Settings"}
-              </button>
-            </div>
-            )}
           </div>
-        </div>
-      </div>
+        </CardBody>
+      </Card>
     </div>
   );
 }

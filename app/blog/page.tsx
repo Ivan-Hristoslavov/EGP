@@ -3,6 +3,10 @@
 import Link from 'next/link';
 import { useBlog } from "@/hooks/useBlog";
 import { ArrowRight, ArrowLeft } from "lucide-react";
+import { Button } from "@heroui/button";
+import { Card, CardBody } from "@heroui/react";
+import { Chip } from "@heroui/react";
+import { Spinner } from "@heroui/react";
 
 function truncateText(text: string, maxLength: number = 150): string {
   if (text.length <= maxLength) return text;
@@ -14,24 +18,27 @@ export default function BlogPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#9d9585]"></div>
+      <div className="min-h-screen bg-default-50 flex items-center justify-center">
+        <Spinner size="lg" color="primary" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-6 py-3 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-[#3f3a31] rounded-lg hover:shadow-lg transition-all"
-          >
-            Retry
-          </button>
-        </div>
+      <div className="min-h-screen bg-default-50 flex items-center justify-center">
+        <Card>
+          <CardBody className="text-center">
+            <p className="text-danger mb-4">{error}</p>
+            <Button
+              onPress={() => window.location.reload()}
+              color="primary"
+              className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-white"
+            >
+              Retry
+            </Button>
+          </CardBody>
+        </Card>
       </div>
     );
   }
@@ -44,13 +51,14 @@ export default function BlogPage() {
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-10 pt-24 pb-16">
         {/* Back to Home Button */}
         <div className="flex items-center gap-4 mb-8">
-          <Link
+          <Button
+            as={Link}
             href="/"
-            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#b5ad9d] transition-colors"
+            variant="light"
+            startContent={<ArrowLeft className="w-5 h-5" />}
           >
-            <ArrowLeft className="w-5 h-5" />
             Back to Home
-          </Link>
+          </Button>
         </div>
         
         <div className="text-center mb-12">
@@ -63,46 +71,60 @@ export default function BlogPage() {
         </div>
 
         {posts.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
-              No blog posts available at the moment.
-            </p>
-            <p className="text-gray-500 dark:text-gray-400">
-              Check back soon for updates!
-            </p>
-          </div>
+          <Card className="py-12">
+            <CardBody className="text-center">
+              <p className="text-default-600 mb-4">
+                No blog posts available at the moment.
+              </p>
+              <p className="text-default-500">
+                Check back soon for updates!
+              </p>
+            </CardBody>
+          </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             {featuredPosts.map((post) => (
               <Link key={post.id} href={`/blog/${post.slug}`}>
-                <article className="group relative flex h-full flex-col rounded-[28px] border-2 border-gray-300 dark:border-gray-600 bg-[#fdfbf8] dark:bg-gray-900/70 shadow-xl transition-all duration-300 hover:shadow-2xl md:col-span-2 xl:col-span-3">
-                  <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:from-[#9d9585]/10 group-hover:via-[#b5ad9d]/10 group-hover:to-[#ddd5c3]/10 group-hover:opacity-100" />
-                  <div className="absolute right-3 top-3 sm:right-6 sm:top-6 flex items-center gap-1.5 sm:gap-2 rounded-full border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-2.5 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-xs font-semibold text-[#6b5f4b] dark:text-[#c9c1b0] shadow-md backdrop-blur transition-all duration-300 group-hover:bg-[#9d9585] group-hover:text-white group-hover:border-[#9d9585] dark:group-hover:border-[#9d9585]">
-                    <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Read article</span>
-                    <span className="sm:hidden">Read</span>
-                  </div>
-
-                  <div className="relative z-10 flex flex-col gap-4 sm:gap-6 p-6 sm:p-9 md:p-12">
+                <Card className="group relative flex h-full flex-col md:col-span-2 xl:col-span-3" shadow="lg" isPressable>
+                  <CardBody className="relative z-10 flex flex-col gap-4 sm:gap-6 p-6 sm:p-9 md:p-12">
+                    <div className="absolute right-3 top-3 sm:right-6 sm:top-6 z-20">
+                      <Chip
+                        size="sm"
+                        variant="flat"
+                        className="border-2 border-divider bg-background shadow-md backdrop-blur transition-all duration-300 group-hover:bg-[#9d9585] group-hover:text-white group-hover:border-[#9d9585]"
+                        endContent={<ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />}
+                      >
+                        <span className="hidden sm:inline">Read article</span>
+                        <span className="sm:hidden">Read</span>
+                      </Chip>
+                    </div>
                     <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                      <span className="rounded-full bg-[#f5f1e9] px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-[#6b5f4b] dark:bg-gray-800/40 dark:text-[#c9c1b0]">
+                      <Chip
+                        size="sm"
+                        variant="flat"
+                        className="bg-[#f5f1e9] dark:bg-gray-800/40 text-[#6b5f4b] dark:text-[#c9c1b0]"
+                      >
                         {post.category}
-                      </span>
-                      <span className="rounded-full bg-[#9d9585] px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white shadow-sm">
+                      </Chip>
+                      <Chip
+                        size="sm"
+                        color="primary"
+                        className="bg-[#9d9585] text-white"
+                      >
                         Featured
-                      </span>
+                      </Chip>
                     </div>
                     <div>
-                      <h2 className="text-2xl md:text-3xl font-bold text-gray-900 transition-colors duration-300 group-hover:text-[#7b715f] dark:text-white dark:group-hover:text-[#d9d1c1]">
+                      <h2 className="text-2xl md:text-3xl font-bold text-foreground transition-colors duration-300 group-hover:text-[#7b715f]">
                         {post.title}
                       </h2>
                       {post.excerpt && (
-                        <p className="mt-4 text-lg leading-relaxed text-gray-600 dark:text-gray-300">
+                        <p className="mt-4 text-lg leading-relaxed text-default-600">
                           {truncateText(post.excerpt, 220)}
                         </p>
                       )}
                     </div>
-                    <div className="flex flex-wrap items-center gap-6 text-sm text-gray-500 dark:text-gray-400">
+                    <div className="flex flex-wrap items-center gap-6 text-sm text-default-500">
                       <time>
                         {post.published_at
                           ? new Date(post.published_at).toLocaleDateString('en-GB', {
@@ -118,34 +140,42 @@ export default function BlogPage() {
                       </time>
                       <span>{post.read_time_minutes} min read</span>
                     </div>
-                  </div>
-                </article>
+                  </CardBody>
+                </Card>
               </Link>
             ))}
 
             {regularPosts.map((post) => (
               <Link key={post.id} href={`/blog/${post.slug}`}>
-                <article className="group relative flex h-full flex-col rounded-xl sm:rounded-[28px] border-2 border-gray-300 dark:border-gray-600 bg-[#fdfbf8] dark:bg-gray-900/70 p-5 sm:p-8 shadow-lg transition-all duration-300 hover:shadow-2xl">
-                  <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:from-[#9d9585]/10 group-hover:via-[#b5ad9d]/10 group-hover:to-[#ddd5c3]/10 group-hover:opacity-100" />
-                  <div className="absolute right-3 top-3 sm:right-6 sm:top-6 flex items-center gap-1.5 sm:gap-2 rounded-full border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-2.5 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-xs font-semibold text-[#6b5f4b] dark:text-[#c9c1b0] shadow-md backdrop-blur transition-all duration-300 group-hover:bg-[#9d9585] group-hover:text-white group-hover:border-[#9d9585] dark:group-hover:border-[#9d9585]">
-                    <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Read article</span>
-                    <span className="sm:hidden">Read</span>
-                  </div>
-
-                  <div className="relative z-10 flex flex-1 flex-col">
-                    <span className="mb-3 sm:mb-4 inline-flex w-fit items-center rounded-full bg-[#f5f1e9] px-3 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-[#6b5f4b] dark:bg-gray-800/40 dark:text-[#c9c1b0]">
+                <Card className="group relative flex h-full flex-col" shadow="lg" isPressable>
+                  <CardBody className="relative z-10 flex flex-1 flex-col p-5 sm:p-8">
+                    <div className="absolute right-3 top-3 sm:right-6 sm:top-6 z-20">
+                      <Chip
+                        size="sm"
+                        variant="flat"
+                        className="border-2 border-divider bg-background shadow-md backdrop-blur transition-all duration-300 group-hover:bg-[#9d9585] group-hover:text-white group-hover:border-[#9d9585]"
+                        endContent={<ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />}
+                      >
+                        <span className="hidden sm:inline">Read article</span>
+                        <span className="sm:hidden">Read</span>
+                      </Chip>
+                    </div>
+                    <Chip
+                      size="sm"
+                      variant="flat"
+                      className="mb-3 sm:mb-4 w-fit bg-[#f5f1e9] dark:bg-gray-800/40 text-[#6b5f4b] dark:text-[#c9c1b0] uppercase tracking-wide"
+                    >
                       {post.category}
-                    </span>
-                    <h2 className="text-2xl font-semibold text-gray-900 transition-colors duration-300 group-hover:text-[#7b715f] dark:text-white dark:group-hover:text-[#d9d1c1]">
+                    </Chip>
+                    <h2 className="text-2xl font-semibold text-foreground transition-colors duration-300 group-hover:text-[#7b715f]">
                       {post.title}
                     </h2>
                     {post.excerpt && (
-                      <p className="mt-4 flex-1 text-base leading-relaxed text-gray-600 dark:text-gray-300">
+                      <p className="mt-4 flex-1 text-base leading-relaxed text-default-600">
                         {truncateText(post.excerpt, 160)}
                       </p>
                     )}
-                    <div className="mt-6 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                    <div className="mt-6 flex items-center justify-between text-sm text-default-500">
                       <time>
                         {post.published_at
                           ? new Date(post.published_at).toLocaleDateString('en-GB', {
@@ -161,8 +191,8 @@ export default function BlogPage() {
                       </time>
                       <span>{post.read_time_minutes} min read</span>
                     </div>
-                  </div>
-                </article>
+                  </CardBody>
+                </Card>
               </Link>
             ))}
           </div>

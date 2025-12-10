@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAdminProfile } from "@/hooks/useAdminProfile";
 import { useToast } from "@/components/Toast";
-import { User, Building2, Shield, Eye, EyeOff, Mail, Phone, Users, HelpCircle, DollarSign, Settings, Save, Plus, X, Train, Bus, Car, Navigation } from "lucide-react";
-import { TeamManager } from "@/components/TeamManager";
+import { User, Building2, Shield, Eye, EyeOff, Mail, Phone, HelpCircle, DollarSign, Settings, Save, Plus, X, Train, Bus, Car, Navigation } from "lucide-react";
 import { AdminFAQManager } from "@/components/AdminFAQManager";
 import WorkingHoursManager from "@/components/admin/WorkingHoursManager";
 
@@ -47,12 +46,6 @@ type SettingsState = {
   businessAddress: string;
   businessPhone: string;
   businessEmail: string;
-  
-  // Pricing
-  consultationRate: string;
-  standardRate: string;
-  depositRequired: boolean;
-  depositPercentage: string;
 
   // Professional Settings
   fullyInsured: boolean;
@@ -67,11 +60,6 @@ const defaultSettings: SettingsState = {
   businessAddress: "",
   businessPhone: "+44 7700 900123",
   businessEmail: "info@egp.com",
-  
-  consultationRate: "150",
-  standardRate: "75",
-  depositRequired: false,
-  depositPercentage: "20",
 
   fullyInsured: true,
   insuranceProvider: "Professional Indemnity Insurance",
@@ -80,7 +68,7 @@ const defaultSettings: SettingsState = {
 };
 
 export default function ProfilePage() {
-  const [activeTab, setActiveTab] = useState<"personal" | "company" | "team" | "faq" | "security" | "business" | "pricing" | "professional">("personal");
+  const [activeTab, setActiveTab] = useState<"personal" | "company" | "faq" | "security" | "business">("personal");
   const [isSaving, setIsSaving] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -254,12 +242,9 @@ export default function ProfilePage() {
   };
 
   const tabs = [
-    { id: "personal", label: "Personal Info", icon: User },
+    { id: "personal", label: "Personal & Professional", icon: User },
     { id: "company", label: "Company & Business", icon: Building2 },
     { id: "business", label: "Business & Hours", icon: Settings },
-    { id: "pricing", label: "Pricing", icon: DollarSign },
-    { id: "professional", label: "Professional", icon: Shield },
-    { id: "team", label: "Team", icon: Users },
     { id: "faq", label: "FAQ", icon: HelpCircle },
     { id: "security", label: "Security", icon: Eye },
   ];
@@ -279,78 +264,63 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-pink-50/50 to-purple-50/50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800">
-      <div className="w-full max-w-[95%] 2xl:max-w-[1600px] mx-auto p-6 lg:p-8">
-        {/* Header */}
-        <div className="mt-6 mb-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent font-playfair mb-2">
-            Profile Settings
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Manage your personal and professional information
-          </p>
-        </div>
-
-        {/* Profile Card */}
-        <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl border border-rose-100/50 dark:border-gray-700/50 overflow-hidden">
-          {/* Profile Header */}
-          <div className="bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 px-8 py-6">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div className="flex items-center gap-6">
-                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30 flex-shrink-0">
-                  <User className="w-8 h-8 text-white" />
+    <div className="w-full">
+      {/* Profile Header */}
+      <div className="mb-6 p-6 bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 rounded-lg">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-6">
+            <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30 flex-shrink-0">
+              <User className="w-8 h-8 text-white" />
+            </div>
+            <div className="flex items-center gap-6 flex-wrap">
+              <div>
+                <h2 className="text-xl font-bold text-white font-playfair">
+                  {profileData.firstName} {profileData.lastName}
+                </h2>
+                <p className="text-white/90 text-sm">{profileData.companyName}</p>
+              </div>
+              <div className="flex items-center gap-4 text-white/80 text-sm">
+                <div className="flex items-center gap-1.5">
+                  <Mail className="w-4 h-4" />
+                  <span>{profileData.email}</span>
                 </div>
-                <div className="flex items-center gap-6 flex-wrap">
-                  <div>
-                    <h2 className="text-xl font-bold text-white font-playfair">
-                      {profileData.firstName} {profileData.lastName}
-                    </h2>
-                    <p className="text-white/90 text-sm">{profileData.companyName}</p>
-                  </div>
-                  <div className="flex items-center gap-4 text-white/80 text-sm">
-                    <div className="flex items-center gap-1.5">
-                      <Mail className="w-4 h-4" />
-                      <span>{profileData.email}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Phone className="w-4 h-4" />
-                      <span>{profileData.phone}</span>
-                    </div>
-                  </div>
+                <div className="flex items-center gap-1.5">
+                  <Phone className="w-4 h-4" />
+                  <span>{profileData.phone}</span>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Tabs */}
-          <div className="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
-            <nav className="flex space-x-1 px-8 overflow-x-auto">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
-                    className={`flex items-center space-x-2 py-4 px-6 border-b-2 font-medium text-sm transition-all whitespace-nowrap ${
-                      activeTab === tab.id
-                        ? "border-rose-500 text-rose-600 dark:text-rose-400 bg-white dark:bg-gray-800"
-                        : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-800/50"
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
+      {/* Tabs Navigation - Moved to Top */}
+      <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
+        <nav className="flex space-x-1 overflow-x-auto">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`flex items-center space-x-2 py-3 px-4 border-b-2 font-medium text-sm transition-all whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? "border-rose-500 text-rose-600 dark:text-rose-400 bg-gray-50 dark:bg-gray-800"
+                    : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+      </div>
 
-          {/* Tab Content */}
-          <div className="p-8 lg:p-10">
+      {/* Tab Content */}
+      <div className="space-y-6">
             {activeTab === "personal" && (
               <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Personal Information</h3>
-                
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
@@ -435,6 +405,63 @@ export default function ProfilePage() {
                   />
                 </div>
 
+                {/* Professional Information Section */}
+                <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Years of Experience
+                      </label>
+                      <input
+                        type="text"
+                        value={settings.yearsOfExperience}
+                        onChange={(e) => handleSettingsInputChange("yearsOfExperience", e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                        placeholder="e.g., 10+ years"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Insurance Provider
+                      </label>
+                      <input
+                        type="text"
+                        value={settings.insuranceProvider}
+                        onChange={(e) => handleSettingsInputChange("insuranceProvider", e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                        placeholder="Enter insurance provider"
+                      />
+                    </div>
+
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="fullyInsured"
+                        checked={settings.fullyInsured}
+                        onChange={(e) => handleSettingsInputChange("fullyInsured", e.target.checked)}
+                        className="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor="fullyInsured" className="ml-2 block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        Fully Insured
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="mt-6">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Specializations
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={settings.specializations}
+                      onChange={(e) => handleSettingsInputChange("specializations", e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all resize-none"
+                      placeholder="e.g., Botox, Fillers, Skin Treatments"
+                    />
+                  </div>
+                </div>
+
                 <div className="pt-4">
                   <button
                     onClick={handleSave}
@@ -449,8 +476,6 @@ export default function ProfilePage() {
 
             {activeTab === "company" && (
               <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Company & Business Information</h3>
-                
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
@@ -1006,8 +1031,6 @@ export default function ProfilePage() {
             {activeTab === "business" && (
               <div className="space-y-8">
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Business Location</h3>
-                  
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
@@ -1038,136 +1061,9 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-8">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Working Hours</h3>
                   <WorkingHoursManager />
                 </div>
               </div>
-            )}
-
-            {activeTab === "pricing" && (
-              <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Pricing Configuration</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Consultation Rate (per session)
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">£</span>
-                      <input
-                        type="number"
-                        value={settings.consultationRate}
-                        onChange={(e) => handleSettingsInputChange("consultationRate", e.target.value)}
-                        className="w-full pl-8 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                        placeholder="150"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Standard Treatment Rate (per session)
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">£</span>
-                      <input
-                        type="number"
-                        value={settings.standardRate}
-                        onChange={(e) => handleSettingsInputChange("standardRate", e.target.value)}
-                        className="w-full pl-8 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                        placeholder="75"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-                  <button
-                    onClick={handleSettingsSave}
-                    disabled={isSaving}
-                    className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 text-white font-semibold rounded-xl hover:from-rose-600 hover:via-pink-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Save className="w-5 h-5 mr-2" />
-                    {isSaving ? "Saving..." : "Save Settings"}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "professional" && (
-              <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Professional Information</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Years of Experience
-                    </label>
-                    <input
-                      type="text"
-                      value={settings.yearsOfExperience}
-                      onChange={(e) => handleSettingsInputChange("yearsOfExperience", e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                      placeholder="e.g., 10+ years"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Insurance Provider
-                    </label>
-                    <input
-                      type="text"
-                      value={settings.insuranceProvider}
-                      onChange={(e) => handleSettingsInputChange("insuranceProvider", e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                      placeholder="Enter insurance provider"
-                    />
-                  </div>
-
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="fullyInsured"
-                      checked={settings.fullyInsured}
-                      onChange={(e) => handleSettingsInputChange("fullyInsured", e.target.checked)}
-                      className="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor="fullyInsured" className="ml-2 block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                      Fully Insured
-                    </label>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Specializations
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={settings.specializations}
-                    onChange={(e) => handleSettingsInputChange("specializations", e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all resize-none"
-                    placeholder="e.g., Botox, Fillers, Skin Treatments"
-                  />
-                </div>
-
-                <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-                  <button
-                    onClick={handleSettingsSave}
-                    disabled={isSaving}
-                    className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 text-white font-semibold rounded-xl hover:from-rose-600 hover:via-pink-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Save className="w-5 h-5 mr-2" />
-                    {isSaving ? "Saving..." : "Save Settings"}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "team" && (
-              <TeamManager />
             )}
 
             {activeTab === "faq" && (
@@ -1178,8 +1074,6 @@ export default function ProfilePage() {
 
             {activeTab === "security" && (
               <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Security Settings</h3>
-                
                 {!showPasswordForm ? (
                   <div className="text-center py-10">
                     <Shield className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -1274,8 +1168,6 @@ export default function ProfilePage() {
                 )}
               </div>
             )}
-          </div>
-        </div>
       </div>
     </div>
   );
