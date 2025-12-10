@@ -14,6 +14,11 @@ import { ConfirmationModal } from "@/components/ConfirmationModal";
 import { useVATSettings } from "@/hooks/useVATSettings";
 import Pagination from "@/components/Pagination";
 import { generateInvoicePDF } from "@/lib/invoice-pdf-generator";
+import { Card, CardBody, CardHeader } from "@heroui/card";
+import { Button } from "@heroui/button";
+import { Chip } from "@heroui/chip";
+import { Spinner } from "@heroui/spinner";
+import { Table2, Grid3x3, Plus, Download, Mail, Eye, Edit, Trash2 } from "lucide-react";
 
 import Tooltip from "../../../components/Tooltip";
 import { Invoice as BaseInvoice, Customer, Booking } from "@/types";
@@ -285,20 +290,19 @@ export default function InvoicesPage() {
     setShowDetailsModal(true);
   };
 
-  const getStatusColor = (status: Invoice["status"]) => {
+  const getStatusColor = (status: Invoice["status"]): "success" | "warning" | "danger" | "default" | "primary" => {
     switch (status) {
-      case "pending":
-        return "bg-yellow-100 dark:bg-yellow-800/50 text-yellow-800 dark:text-yellow-300";
-      case "sent":
-        return "bg-blue-100 dark:bg-blue-800/50 text-blue-800 dark:text-blue-300";
       case "paid":
-        return "bg-green-100 dark:bg-green-800/50 text-green-800 dark:text-green-300";
+        return "success";
+      case "sent":
+        return "primary";
+      case "pending":
+        return "warning";
       case "overdue":
-        return "bg-red-100 dark:bg-red-800/50 text-red-800 dark:text-red-300";
       case "cancelled":
-        return "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300";
+        return "danger";
       default:
-        return "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300";
+        return "default";
     }
   };
 
@@ -322,252 +326,221 @@ export default function InvoicesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+        <Spinner size="lg" />
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      <div className="mt-6 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
-            Invoices
-          </h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">
-            Manage and generate UK-compliant invoices for your services
-          </p>
-        </div>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+    <div className="w-full space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
           {/* View Toggle */}
-          <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1 transition-colors duration-300">
-            <button
-              className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
-                viewMode === "table"
-                  ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
-                  : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-              }`}
-              onClick={() => handleViewModeChange("table")}
+          <div className="flex bg-default-100 rounded-lg p-1">
+            <Button
+              size="sm"
+              variant={viewMode === "table" ? "solid" : "light"}
+              color={viewMode === "table" ? "primary" : "default"}
+              startContent={<Table2 className="w-4 h-4" />}
+              onPress={() => handleViewModeChange("table")}
+              className="min-w-0"
             >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 6h18m-9 8h9m-9 4h9m-9-8h9" />
-              </svg>
               Table
-            </button>
-            <button
-              className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
-                viewMode === "cards"
-                  ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
-                  : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-              }`}
-              onClick={() => handleViewModeChange("cards")}
+            </Button>
+            <Button
+              size="sm"
+              variant={viewMode === "cards" ? "solid" : "light"}
+              color={viewMode === "cards" ? "primary" : "default"}
+              startContent={<Grid3x3 className="w-4 h-4" />}
+              onPress={() => handleViewModeChange("cards")}
+              className="min-w-0"
             >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14-7H5a2 2 0 00-2 2v12a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2z" />
-              </svg>
               Cards
-            </button>
+            </Button>
           </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors duration-300"
+          <Button
+            color="primary"
+            startContent={<Plus className="w-4 h-4" />}
+            onPress={() => setShowCreateModal(true)}
           >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
             <span className="hidden sm:inline">Create Invoice</span>
             <span className="sm:hidden">Create</span>
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Invoices Table */}
       {viewMode === "table" && (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors duration-300">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-700">
+        <Card className="border border-divider">
+          <CardBody className="p-0">
+            <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-divider">
+              <thead className="bg-default-100 border-b border-divider">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
                     Invoice
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
                     Customer
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
                     Service
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
                     Amount
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
                     Date
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-semibold text-default-600 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody className="divide-y divide-divider">
                 {invoices.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="px-6 py-12 text-center">
-                      <div className="text-gray-500 dark:text-gray-400">
+                      <div className="text-default-500">
                         <svg className="mx-auto h-12 w-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        <p className="text-lg font-medium">No invoices yet</p>
-                        <p className="text-sm">Create your first invoice to get started</p>
+                        <p className="text-lg font-semibold mb-2">No invoices yet</p>
+                        <p className="text-sm mb-4">Create your first invoice to get started</p>
+                        <Button
+                          color="primary"
+                          startContent={<Plus className="w-4 h-4" />}
+                          onPress={() => setShowCreateModal(true)}
+                        >
+                          Create Invoice
+                        </Button>
                       </div>
                     </td>
                   </tr>
                 ) : (
                   invoices.map((invoice) => (
-                    <tr key={invoice.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                    <tr key={invoice.id} className="hover:bg-default-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                          <div className="text-sm font-medium text-foreground">
                             {invoice.invoice_number}
                           </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                          <div className="text-sm text-default-500">
                             {format(new Date(invoice.invoice_date), "dd/MM/yyyy")}
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                          <div className="text-sm font-medium text-foreground">
                             {invoice.customer?.name || "N/A"}
                           </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                          <div className="text-sm text-default-500">
                             {invoice.customer?.email || "N/A"}
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900 dark:text-white">
+                        <div className="text-sm text-foreground">
                           {invoice.booking?.service || "Manual Entry"}
                         </div>
                         {invoice.booking?.date && (
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                          <div className="text-sm text-default-500">
                             {format(new Date(invoice.booking.date), "dd/MM/yyyy")}
                           </div>
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">
+                        <div className="text-sm font-medium text-foreground">
                           £{invoice.total_amount.toFixed(2)}
                         </div>
                         {vatSettings?.is_enabled && invoice.vat_amount > 0 && (
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                        <div className="text-xs text-default-500">
                           VAT: £{invoice.vat_amount.toFixed(2)}
                         </div>
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(invoice.status)}`}>
+                        <Chip
+                          color={getStatusColor(invoice.status)}
+                          variant="flat"
+                          size="sm"
+                        >
                           <span className="mr-1">{getStatusIcon(invoice.status)}</span>
                           {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
-                        </span>
+                        </Chip>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-default-500">
                         {invoice.due_date ? format(new Date(invoice.due_date), "dd/MM/yyyy") : "N/A"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex items-center justify-end space-x-2">
-                          {/* Download PDF Button */}
+                        <div className="flex items-center justify-end gap-2">
                           <Tooltip content="Download PDF">
-                            <button
-                              onClick={() => handleDownloadInvoice(invoice)}
-                              disabled={downloadingId === invoice.id}
-                              className="group relative p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            <Button
+                              isIconOnly
+                              variant="light"
+                              size="sm"
+                              onPress={() => handleDownloadInvoice(invoice)}
+                              isLoading={downloadingId === invoice.id}
                             >
-                              {downloadingId === invoice.id ? (
-                                <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                </svg>
-                              ) : (
-                                <svg className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                              )}
-                            </button>
+                              <Download className="w-4 h-4" />
+                            </Button>
                           </Tooltip>
-
-                          {/* Send Email Button */}
                           <Tooltip content="Send via Email">
-                            <button
-                              onClick={() => {
+                            <Button
+                              isIconOnly
+                              variant="light"
+                              color="success"
+                              size="sm"
+                              onPress={() => {
                                 setSelectedInvoice(invoice);
                                 setShowSendModal(true);
                               }}
-                              disabled={sendingId === invoice.id}
-                              className="group relative p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                              isLoading={sendingId === invoice.id}
                             >
-                              {sendingId === invoice.id ? (
-                                <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                </svg>
-                              ) : (
-                                <svg className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 7.89a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                              )}
-                            </button>
+                              <Mail className="w-4 h-4" />
+                            </Button>
                           </Tooltip>
-
-                          {/* View Button */}
                           <Tooltip content="View Details">
-                            <button
-                              onClick={() => handleViewDetails(invoice)}
-                              className="group relative p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200"
+                            <Button
+                              isIconOnly
+                              variant="light"
+                              color="primary"
+                              size="sm"
+                              onPress={() => handleViewDetails(invoice)}
                             >
-                              <svg className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                              </svg>
-                            </button>
+                              <Eye className="w-4 h-4" />
+                            </Button>
                           </Tooltip>
-
-                          {/* Edit Button */}
                           <Tooltip content="Edit Invoice">
-                            <button
-                              onClick={() => {
+                            <Button
+                              isIconOnly
+                              variant="light"
+                              color="warning"
+                              size="sm"
+                              onPress={() => {
                                 setSelectedInvoice(invoice);
                                 setShowEditModal(true);
                               }}
-                              disabled={editingInvoice}
-                              className="group relative p-2 text-gray-600 dark:text-gray-400 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                              isDisabled={editingInvoice}
                             >
-                              <svg className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                              </svg>
-                            </button>
+                              <Edit className="w-4 h-4" />
+                            </Button>
                           </Tooltip>
-
-                          {/* Delete Button */}
                           <Tooltip content="Delete Invoice">
-                            <button
-                              onClick={() => handleDeleteInvoice(invoice.id)}
-                              disabled={deletingId === invoice.id}
-                              className="group relative p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            <Button
+                              isIconOnly
+                              variant="light"
+                              color="danger"
+                              size="sm"
+                              onPress={() => handleDeleteInvoice(invoice.id)}
+                              isLoading={deletingId === invoice.id}
                             >
-                              {deletingId === invoice.id ? (
-                                <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                </svg>
-                              ) : (
-                                <svg className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                              )}
-                            </button>
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </Tooltip>
                         </div>
                       </td>
@@ -577,155 +550,145 @@ export default function InvoicesPage() {
               </tbody>
             </table>
           </div>
-        </div>
+        </CardBody>
+      </Card>
       )}
 
       {/* Cards View */}
       {viewMode === "cards" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {invoices.length === 0 ? (
-            <div className="col-span-full text-center py-12">
-              <div className="text-gray-500 dark:text-gray-400">
-                <svg className="mx-auto h-12 w-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <p className="text-lg font-medium">No invoices yet</p>
-                <p className="text-sm">Create your first invoice to get started</p>
-              </div>
-            </div>
+            <Card className="col-span-full border border-divider">
+              <CardBody className="p-12 text-center">
+                <div className="text-default-500">
+                  <svg className="mx-auto h-12 w-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <p className="text-lg font-semibold mb-2">No invoices yet</p>
+                  <p className="text-sm mb-4">Create your first invoice to get started</p>
+                  <Button
+                    color="primary"
+                    startContent={<Plus className="w-4 h-4" />}
+                    onPress={() => setShowCreateModal(true)}
+                  >
+                    Create Invoice
+                  </Button>
+                </div>
+              </CardBody>
+            </Card>
           ) : (
             invoices.map((invoice) => (
-              <div
-                key={invoice.id}
-                className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300"
-              >
+              <Card key={invoice.id} className="border border-divider hover:shadow-lg transition-shadow">
+                <CardBody className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white transition-colors duration-300">
+                    <h3 className="text-lg font-semibold mb-1">
                       {invoice.invoice_number}
                     </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">
+                    <p className="text-sm text-default-500">
                       {format(new Date(invoice.invoice_date), "dd MMM yyyy")}
                     </p>
                   </div>
-                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(invoice.status)}`}>
+                  <Chip
+                    color={getStatusColor(invoice.status)}
+                    variant="flat"
+                    size="sm"
+                  >
                     <span className="mr-1">{getStatusIcon(invoice.status)}</span>
                     {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
-                  </span>
+                  </Chip>
                 </div>
                 
                 <div className="space-y-3 mb-4">
-                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
-                    <svg className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center text-sm text-default-600">
+                    <svg className="w-4 h-4 mr-2 text-default-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                     <span className="truncate">{invoice.customer?.name || "N/A"}</span>
                   </div>
-                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
-                    <svg className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center text-sm text-default-600">
+                    <svg className="w-4 h-4 mr-2 text-default-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                     <span className="truncate">{invoice.booking?.service || "Manual Entry"}</span>
                   </div>
-                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
-                    <svg className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center text-sm text-default-600">
+                    <svg className="w-4 h-4 mr-2 text-default-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                     </svg>
-                    <span className="font-medium text-gray-900 dark:text-white">£{invoice.total_amount.toFixed(2)}</span>
+                    <span className="font-semibold">£{invoice.total_amount.toFixed(2)}</span>
                     {vatSettings?.is_enabled && invoice.vat_amount > 0 && (
-                      <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">
+                      <span className="text-xs text-default-500 ml-1">
                         (VAT: £{invoice.vat_amount.toFixed(2)})
                       </span>
                     )}
                   </div>
                 </div>
 
-                <div className="flex justify-end space-x-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex justify-end gap-2 pt-4 border-t border-divider">
                   <Tooltip content="Download PDF">
-                  <button
-                      className="p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-300"
-                    onClick={() => handleDownloadInvoice(invoice)}
-                    disabled={downloadingId === invoice.id}
-                  >
-                    {downloadingId === invoice.id ? (
-                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                    ) : (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                    )}
-                  </button>
+                    <Button
+                      isIconOnly
+                      variant="bordered"
+                      size="sm"
+                      onPress={() => handleDownloadInvoice(invoice)}
+                      isLoading={downloadingId === invoice.id}
+                    >
+                      <Download className="w-4 h-4" />
+                    </Button>
                   </Tooltip>
                   <Tooltip content="Send via Email">
-                  <button
-                      className="p-2 bg-green-600 dark:bg-green-500 text-white rounded-md hover:bg-green-700 dark:hover:bg-green-600 transition-colors duration-300"
-                      onClick={() => {
+                    <Button
+                      isIconOnly
+                      color="success"
+                      size="sm"
+                      onPress={() => {
                         setSelectedInvoice(invoice);
                         setShowSendModal(true);
                       }}
-                      disabled={sendingId === invoice.id}
+                      isLoading={sendingId === invoice.id}
                     >
-                      {sendingId === invoice.id ? (
-                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                        </svg>
-                      ) : (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                      )}
-                    </button>
+                      <Mail className="w-4 h-4" />
+                    </Button>
                   </Tooltip>
-                  {/* View Button */}
                   <Tooltip content="View Details">
-                    <button
-                      onClick={() => handleViewDetails(invoice)}
-                      className="p-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors duration-300"
+                    <Button
+                      isIconOnly
+                      color="primary"
+                      size="sm"
+                      onPress={() => handleViewDetails(invoice)}
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                    </button>
+                      <Eye className="w-4 h-4" />
+                    </Button>
                   </Tooltip>
                   <Tooltip content="Edit Invoice">
-                    <button
-                      className="p-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors duration-300"
-                    onClick={() => {
-                      setSelectedInvoice(invoice);
-                      setShowEditModal(true);
-                    }}
-                    disabled={editingInvoice}
-                  >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                  </button>
+                    <Button
+                      isIconOnly
+                      color="warning"
+                      size="sm"
+                      onPress={() => {
+                        setSelectedInvoice(invoice);
+                        setShowEditModal(true);
+                      }}
+                      isDisabled={editingInvoice}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
                   </Tooltip>
                   <Tooltip content="Delete Invoice">
-                    <button
-                      className="p-2 bg-red-600 dark:bg-red-500 text-white rounded-md hover:bg-red-700 dark:hover:bg-red-600 transition-colors duration-300"
-                      onClick={() => handleDeleteInvoice(invoice.id)}
-                      disabled={deletingId === invoice.id}
+                    <Button
+                      isIconOnly
+                      color="danger"
+                      size="sm"
+                      onPress={() => handleDeleteInvoice(invoice.id)}
+                      isLoading={deletingId === invoice.id}
                     >
-                      {deletingId === invoice.id ? (
-                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                        </svg>
-                      ) : (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      )}
-                    </button>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </Tooltip>
                 </div>
-              </div>
+              </CardBody>
+            </Card>
             ))
           )}
         </div>

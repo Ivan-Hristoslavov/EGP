@@ -4,10 +4,11 @@ import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { siteConfig } from "@/config/site";
-import { Search, Filter, ArrowLeft, Info, Plus, CheckCircle } from "lucide-react";
+import { Search, Filter, ArrowLeft, Info, Plus, CheckCircle, X } from "lucide-react";
 import Link from 'next/link';
 import { useConditions } from "@/hooks/useConditions";
 import type { Condition } from "@/hooks/useConditions";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Card, CardBody, Chip, Spinner, Select, SelectItem } from "@heroui/react";
 
 // Category mapping: display name -> filter value
 const categoryMapping: Record<string, string> = {
@@ -102,70 +103,79 @@ function ConditionsPageContent() {
         : [];
 
     return (
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white px-8 py-6 flex items-center justify-between rounded-t-2xl flex-shrink-0">
-            <div>
-              <h2 className="text-3xl font-bold mb-2">{condition.title}</h2>
-              <div className="flex items-center gap-4 text-white/90">
-                <span className="bg-white/20 px-3 py-1 rounded-full text-sm">{getCategoryDisplayName(condition.category)}</span>
-              </div>
-            </div>
-            <button
-              onClick={() => setSelectedCondition(null)}
-              className="p-2 hover:bg-white/20 rounded-full transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Content */}
-          <div className="p-8 space-y-6 overflow-y-auto flex-1">
-            {/* Description */}
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                <Info className="w-5 h-5 text-[#9d9585]" />
-                Overview
-              </h3>
-              <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-                {condition.description}
-              </p>
-            </div>
-
-            {/* Treatments */}
-            {condition.treatments && condition.treatments.length > 0 && (
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-500" />
-                  Available Treatments
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {condition.treatments.map((treatment, index) => (
-                    <div key={index} className="flex items-start gap-3 bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
-                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-700 dark:text-gray-300">{treatment}</span>
-                    </div>
-                  ))}
+      <Modal 
+        isOpen={!!selectedCondition} 
+        onClose={() => setSelectedCondition(null)}
+        size="4xl"
+        scrollBehavior="inside"
+        backdrop="blur"
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white flex flex-col gap-2">
+                <h2 className="text-3xl font-bold">{condition.title}</h2>
+                <div className="flex items-center gap-4 text-white/90">
+                  <Chip 
+                    variant="flat"
+                    className="bg-white/20 text-white"
+                  >
+                    {getCategoryDisplayName(condition.category)}
+                  </Chip>
                 </div>
-              </div>
-            )}
+              </ModalHeader>
+              <ModalBody className="space-y-6">
+                {/* Description */}
+                <div>
+                  <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-2">
+                    <Info className="w-5 h-5 text-[#9d9585]" />
+                    Overview
+                  </h3>
+                  <p className="text-lg text-default-600 leading-relaxed">
+                    {condition.description}
+                  </p>
+                </div>
 
-            {/* CTA Button */}
-            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-              <Link
-                href={`/book?condition=${selectedCondition}`}
-                onClick={() => setSelectedCondition(null)}
-                className="w-full bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white py-4 rounded-xl font-semibold text-lg hover:from-[#857d68] hover:via-[#aea693] hover:to-[#c9c1b0] transition-all duration-200 shadow-lg hover:shadow-xl block text-center"
-              >
-                Book Treatment for This Condition
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
+                {/* Treatments */}
+                {condition.treatments && condition.treatments.length > 0 && (
+                  <div>
+                    <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 text-success" />
+                      Available Treatments
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {condition.treatments.map((treatment, index) => (
+                        <Card key={index} className="bg-success-50 dark:bg-success-900/20">
+                          <CardBody className="p-3">
+                            <div className="flex items-start gap-3">
+                              <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
+                              <span className="text-default-700">{treatment}</span>
+                            </div>
+                          </CardBody>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </ModalBody>
+              <ModalFooter>
+                <Button variant="light" onPress={onClose}>
+                  Close
+                </Button>
+                <Button
+                  as={Link}
+                  href={`/book?condition=${selectedCondition}`}
+                  onPress={onClose}
+                  className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white"
+                  size="lg"
+                >
+                  Book Treatment for This Condition
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     );
   };
 
@@ -174,8 +184,8 @@ function ConditionsPageContent() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="text-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#9d9585] mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-400">Loading conditions...</p>
+            <Spinner size="lg" />
+            <p className="mt-4 text-default-500">Loading conditions...</p>
           </div>
         </div>
       </div>
@@ -209,25 +219,28 @@ function ConditionsPageContent() {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
             {/* Search */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
+            <div className="flex-1 max-w-md">
+              <Input
                 type="text"
                 placeholder="Search conditions..."
                 value={searchTerm}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-[#9d9585] focus:ring-2 focus:ring-[#9d9585]/20 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                onValueChange={handleSearch}
+                startContent={<Search className="w-5 h-5 text-default-400" />}
+                variant="bordered"
+                size="lg"
+                isClearable
+                onClear={() => handleSearch('')}
               />
             </div>
 
             {/* Filter Toggle */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-[#9d9585] hover:text-[#9d9585] dark:hover:text-[#b5ad9d] transition-colors"
+            <Button
+              variant="bordered"
+              onPress={() => setShowFilters(!showFilters)}
+              startContent={<Filter className="w-5 h-5" />}
             >
-              <Filter className="w-5 h-5" />
               Filters
-            </button>
+            </Button>
 
           </div>
 
@@ -236,20 +249,19 @@ function ConditionsPageContent() {
             <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Category Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Category
-                  </label>
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-[#9d9585] focus:ring-2 focus:ring-[#9d9585]/20 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  >
-                    {categories.map(category => (
-                      <option key={category} value={category}>{category}</option>
-                    ))}
-                  </select>
-                </div>
+                <Select
+                  label="Category"
+                  selectedKeys={[selectedCategory]}
+                  onSelectionChange={(keys) => {
+                    const selected = Array.from(keys)[0] as string;
+                    setSelectedCategory(selected || 'All');
+                  }}
+                  variant="bordered"
+                >
+                  {categories.map(category => (
+                    <SelectItem key={category}>{category}</SelectItem>
+                  ))}
+                </Select>
               </div>
             </div>
           )}

@@ -5,12 +5,11 @@ import { supabaseAdmin } from "@/lib/supabase";
 // GET - Fetch all team members (public access for booking)
 export async function GET() {
   try {
-    // Use admin client to bypass RLS for public booking access
-    // This allows unauthenticated users to see team members for booking
+    // Use admin client to bypass RLS for admin panel access
+    // Return all team members (both active and inactive) for admin management
     const { data: team, error } = await supabaseAdmin
       .from("team")
       .select("*")
-      .eq("is_active", true)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -39,7 +38,9 @@ export async function POST(request: NextRequest) {
       role, 
       specializations, 
       experience_years, 
-      certifications, 
+      certifications,
+      image_url,
+      service_ids,
       is_active 
     } = body;
 
@@ -74,6 +75,8 @@ export async function POST(request: NextRequest) {
         specializations: specializations || null,
         experience_years: experience_years || null,
         certifications: certifications || null,
+        image_url: image_url || null,
+        service_ids: service_ids && Array.isArray(service_ids) ? service_ids : [],
         is_active: is_active !== undefined ? is_active : true
       })
       .select()

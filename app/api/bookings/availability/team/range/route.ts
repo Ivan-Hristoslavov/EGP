@@ -31,6 +31,34 @@ export async function GET(request: NextRequest) {
         : adminSettingsData.value;
     }
 
+    // Get all day off periods for the team member in the date range
+    const { data: dayOffPeriods, error: dayOffError } = await supabaseAdmin
+      .from("team_day_off_periods")
+      .select("start_date, end_date, reason")
+      .eq("team_member_id", teamMemberId)
+      .or(`end_date.gte.${startDate},start_date.lte.${endDate}`);
+
+    if (dayOffError) {
+      console.error("Error checking day off periods:", dayOffError);
+    }
+
+    // Create a helper function to check if a date is in any day off period
+    const isDateOnDayOff = (dateStr: string): { isOnDayOff: boolean; reason?: string } => {
+      if (!dayOffPeriods || dayOffPeriods.length === 0) {
+        return { isOnDayOff: false };
+      }
+      
+      const checkDate = new Date(dateStr);
+      for (const period of dayOffPeriods) {
+        const startDate = new Date(period.start_date);
+        const endDate = new Date(period.end_date);
+        if (checkDate >= startDate && checkDate <= endDate) {
+          return { isOnDayOff: true, reason: period.reason || undefined };
+        }
+      }
+      return { isOnDayOff: false };
+    };
+
     // Get all bookings for the team member in the date range
     const { data: existingBookings, error: bookingsError } = await supabaseAdmin
       .from("bookings")
@@ -64,8 +92,10 @@ export async function GET(request: NextRequest) {
     const results: Record<string, {
       availableSlots: string[];
       bookedSlots: string[];
-      workingHours?: { start: string; end: string };
-      status: 'available' | 'full' | 'closed';
+      workingHours?: { start: string; end: string; buffer_minutes?: number; max_appointments?: number };
+      status: 'available' | 'full' | 'closed' | 'day_off';
+      isOnDayOff?: boolean;
+      dayOffReason?: string;
     }> = {};
 
     const start = new Date(startDate);
@@ -87,6 +117,7 @@ export async function GET(request: NextRequest) {
       let startTime = null;
       let endTime = null;
       let bufferMinutes = 15;
+      let maxAppointments = 12;
 
       if (businessHours && businessHours[currentDayKey]) {
         const dayHours = businessHours[currentDayKey];
@@ -94,13 +125,19 @@ export async function GET(request: NextRequest) {
         startTime = dayHours.open;
         endTime = dayHours.close;
         bufferMinutes = dayHours.bufferMinutes || 15;
+        maxAppointments = dayHours.maxAppointments || 12;
       }
 
-      if (!isWorkingDay || !startTime || !endTime) {
+      // Check if team member is on day off for this date
+      const dayOffCheck = isDateOnDayOff(dateStr);
+      
+      if (!isWorkingDay || !startTime || !endTime || dayOffCheck.isOnDayOff) {
         results[dateStr] = {
           availableSlots: [],
           bookedSlots: [],
-          status: 'closed',
+          status: dayOffCheck.isOnDayOff ? 'day_off' : 'closed',
+          isOnDayOff: dayOffCheck.isOnDayOff,
+          dayOffReason: dayOffCheck.reason,
         };
         currentDate.setDate(currentDate.getDate() + 1);
         continue;
@@ -115,12 +152,13 @@ export async function GET(request: NextRequest) {
       const startTimeMinutes = startHour * 60 + startMinute;
       const endTimeMinutes = endHour * 60 + endMinute;
 
-      // Create booked ranges for this date
+      // Create booked ranges for this date (including buffer after each booking)
       const bookedRanges: Array<{ start: number; end: number }> = [];
       dateBookings.forEach((booking) => {
         const [hour, minute] = booking.time.split(":").map(Number);
         const bookingStartMinutes = hour * 60 + minute;
-        const bookingEndMinutes = bookingStartMinutes + booking.duration;
+        // Add buffer after the booking ends
+        const bookingEndMinutes = bookingStartMinutes + booking.duration + bufferMinutes;
         bookedRanges.push({
           start: bookingStartMinutes,
           end: bookingEndMinutes,
@@ -128,6 +166,10 @@ export async function GET(request: NextRequest) {
       });
 
       bookedRanges.sort((a, b) => a.start - b.start);
+
+      // Check if max appointments limit is reached for this date
+      const existingBookingsCount = dateBookings.length;
+      const isMaxAppointmentsReached = existingBookingsCount >= maxAppointments;
 
       // Generate available and booked slots
       const availableSlots: string[] = [];
@@ -147,8 +189,15 @@ export async function GET(request: NextRequest) {
         if (isBooked) {
           bookedSlots.push(timeString);
         } else {
-          const slotEndMinutes = timeMinutes + requiredDuration;
+          // Skip if max appointments reached
+          if (isMaxAppointmentsReached) {
+            continue;
+          }
+          
+          // Check if this slot can accommodate the required duration + buffer
+          const slotEndMinutes = timeMinutes + requiredDuration + bufferMinutes;
           if (slotEndMinutes <= endTimeMinutes) {
+            // Check if the full duration + buffer is available (no overlap with booked times)
             const isAvailable = !bookedRanges.some((booked) => {
               return timeMinutes < booked.end && slotEndMinutes > booked.start;
             });
@@ -166,8 +215,11 @@ export async function GET(request: NextRequest) {
         workingHours: {
           start: startTime,
           end: endTime,
+          buffer_minutes: bufferMinutes,
+          max_appointments: maxAppointments,
         },
         status: availableSlots.length > 0 ? 'available' : 'full',
+        isOnDayOff: false,
       };
 
       currentDate.setDate(currentDate.getDate() + 1);

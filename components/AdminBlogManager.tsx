@@ -7,6 +7,8 @@ import { useConfirmation } from "@/hooks/useConfirmation";
 import { ConfirmationModal } from "@/components/ConfirmationModal";
 import { MarkdownEditor } from "@/components/MarkdownEditor";
 import Pagination from "@/components/Pagination";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Select, SelectItem, Checkbox, Card, CardBody, Spinner } from "@heroui/react";
+import { X } from "lucide-react";
 
 // Modal Component
 function BlogModal({
@@ -24,8 +26,6 @@ function BlogModal({
   formData: any;
   setFormData: (data: any) => void;
 }) {
-  if (!isOpen) return null;
-
   const categories = [
     "Anti-wrinkle",
     "Fillers",
@@ -36,217 +36,173 @@ function BlogModal({
   ];
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Modal Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-            {editingPost ? "Edit Blog Post" : "Add New Blog Post"}
-          </h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+    <Modal 
+      isOpen={isOpen} 
+      onClose={onClose}
+      size="4xl"
+      scrollBehavior="inside"
+      backdrop="blur"
+    >
+      <ModalContent>
+        {(onClose) => (
+          <>
+            <ModalHeader className="flex flex-col gap-1">
+              <h2 className="text-2xl font-bold">
+                {editingPost ? "Edit Blog Post" : "Add New Blog Post"}
+              </h2>
+              <p className="text-sm text-default-500 font-normal">
+                {editingPost ? "Update your blog post details" : "Create a new blog post for your website"}
+              </p>
+            </ModalHeader>
+            <ModalBody>
+              <div className="space-y-6">
+                <Input
+                  label="Title"
+                  placeholder="Enter blog post title"
+                  value={formData.title}
+                  onChange={(e) => setFormData((prev: any) => ({ ...prev, title: e.target.value }))}
+                  isRequired
+                  size="lg"
+                />
 
-        {/* Modal Content */}
-        <div className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Title *
-              </label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={(e) => setFormData((prev: any) => ({ ...prev, title: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
-                placeholder="Enter blog post title"
-              />
-            </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    label="Slug"
+                    placeholder="url-friendly-slug"
+                    value={formData.slug}
+                    onChange={(e) => setFormData((prev: any) => ({ ...prev, slug: e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') }))}
+                    isRequired
+                    description="URL-friendly version of the title"
+                  />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Slug *
-              </label>
-              <input
-                type="text"
-                value={formData.slug}
-                onChange={(e) => setFormData((prev: any) => ({ ...prev, slug: e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') }))}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
-                placeholder="url-friendly-slug"
-              />
-            </div>
+                  <Select
+                    label="Category"
+                    selectedKeys={[formData.category]}
+                    onSelectionChange={(keys) => {
+                      const selected = Array.from(keys)[0] as string;
+                      setFormData((prev: any) => ({ ...prev, category: selected || "General" }));
+                    }}
+                    isRequired
+                  >
+                    {categories.map((cat) => (
+                      <SelectItem key={cat}>{cat}</SelectItem>
+                    ))}
+                  </Select>
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Category *
-              </label>
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData((prev: any) => ({ ...prev, category: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
+                <Textarea
+                  label="Excerpt"
+                  placeholder="Brief description of the blog post"
+                  value={formData.excerpt || ''}
+                  onChange={(e) => setFormData((prev: any) => ({ ...prev, excerpt: e.target.value }))}
+                  rows={3}
+                />
+
+                <Card>
+                  <CardBody>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Content * (Markdown supported)
+                    </label>
+                    <MarkdownEditor
+                      value={formData.content || ''}
+                      onChange={(value) => setFormData((prev: any) => ({ ...prev, content: value }))}
+                      placeholder="Write your blog post content here..."
+                    />
+                  </CardBody>
+                </Card>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    label="Featured Image URL"
+                    placeholder="https://example.com/image.jpg"
+                    value={formData.featured_image_url || ''}
+                    onChange={(e) => setFormData((prev: any) => ({ ...prev, featured_image_url: e.target.value }))}
+                    type="url"
+                  />
+
+                  <Input
+                    label="Author Name"
+                    placeholder="EGP Aesthetics Team"
+                    value={formData.author_name || 'EGP Aesthetics Team'}
+                    onChange={(e) => setFormData((prev: any) => ({ ...prev, author_name: e.target.value }))}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Input
+                    label="Read Time (minutes)"
+                    type="number"
+                    value={formData.read_time_minutes?.toString() || '5'}
+                    onChange={(e) => setFormData((prev: any) => ({ ...prev, read_time_minutes: parseInt(e.target.value) || 5 }))}
+                    min="1"
+                  />
+
+                  <Input
+                    label="Display Order"
+                    type="number"
+                    value={formData.display_order?.toString() || '0'}
+                    onChange={(e) => setFormData((prev: any) => ({ ...prev, display_order: parseInt(e.target.value) || 0 }))}
+                  />
+
+                  <Select
+                    label="Status"
+                    selectedKeys={[formData.is_published ? "published" : "draft"]}
+                    onSelectionChange={(keys) => {
+                      const selected = Array.from(keys)[0] as string;
+                      setFormData((prev: any) => ({ 
+                        ...prev, 
+                        is_published: selected === "published",
+                        published_at: selected === "published" && !prev.published_at ? new Date().toISOString() : prev.published_at
+                      }));
+                    }}
+                  >
+                    <SelectItem key="draft">Draft (Not visible)</SelectItem>
+                    <SelectItem key="published">Published (Visible to public)</SelectItem>
+                  </Select>
+                </div>
+
+                <Checkbox
+                  isSelected={formData.featured || false}
+                  onValueChange={(checked) => setFormData((prev: any) => ({ ...prev, featured: checked }))}
+                >
+                  Featured Post
+                </Checkbox>
+
+                <div className="space-y-4">
+                  <Input
+                    label="SEO Title"
+                    placeholder="SEO optimized title"
+                    value={formData.seo_title || ''}
+                    onChange={(e) => setFormData((prev: any) => ({ ...prev, seo_title: e.target.value }))}
+                    description="Optional: Custom title for search engines"
+                  />
+
+                  <Textarea
+                    label="SEO Description"
+                    placeholder="SEO meta description"
+                    value={formData.seo_description || ''}
+                    onChange={(e) => setFormData((prev: any) => ({ ...prev, seo_description: e.target.value }))}
+                    rows={2}
+                    description="Optional: Meta description for search engines"
+                  />
+                </div>
+              </div>
+            </ModalBody>
+            <ModalFooter>
+              <Button variant="light" onPress={onClose}>
+                Cancel
+              </Button>
+              <Button 
+                color="primary" 
+                onPress={onSubmit}
               >
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Excerpt
-            </label>
-            <textarea
-              value={formData.excerpt || ''}
-              onChange={(e) => setFormData((prev: any) => ({ ...prev, excerpt: e.target.value }))}
-              rows={3}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors resize-none"
-              placeholder="Brief description of the blog post"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Content * (Markdown supported)
-            </label>
-            <MarkdownEditor
-              value={formData.content || ''}
-              onChange={(value) => setFormData((prev: any) => ({ ...prev, content: value }))}
-              placeholder="Write your blog post content here..."
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Featured Image URL
-              </label>
-              <input
-                type="url"
-                value={formData.featured_image_url || ''}
-                onChange={(e) => setFormData((prev: any) => ({ ...prev, featured_image_url: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
-                placeholder="https://example.com/image.jpg"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Author Name
-              </label>
-              <input
-                type="text"
-                value={formData.author_name || 'EGP Aesthetics Team'}
-                onChange={(e) => setFormData((prev: any) => ({ ...prev, author_name: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
-                placeholder="EGP Aesthetics Team"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Read Time (minutes)
-              </label>
-              <input
-                type="number"
-                value={formData.read_time_minutes || 5}
-                onChange={(e) => setFormData((prev: any) => ({ ...prev, read_time_minutes: parseInt(e.target.value) || 5 }))}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
-                min="1"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Display Order
-              </label>
-              <input
-                type="number"
-                value={formData.display_order || 0}
-                onChange={(e) => setFormData((prev: any) => ({ ...prev, display_order: parseInt(e.target.value) || 0 }))}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Status
-              </label>
-              <select
-                value={formData.is_published ? "published" : "draft"}
-                onChange={(e) => setFormData((prev: any) => ({ ...prev, is_published: e.target.value === "published", published_at: e.target.value === "published" && !prev.published_at ? new Date().toISOString() : prev.published_at }))}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
-              >
-                <option value="draft">Draft (Not visible)</option>
-                <option value="published">Published (Visible to public)</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.featured || false}
-                onChange={(e) => setFormData((prev: any) => ({ ...prev, featured: e.target.checked }))}
-                className="w-4 h-4 text-rose-600 border-gray-300 rounded focus:ring-rose-500"
-              />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Featured Post</span>
-            </label>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              SEO Title
-            </label>
-            <input
-              type="text"
-              value={formData.seo_title || ''}
-              onChange={(e) => setFormData((prev: any) => ({ ...prev, seo_title: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
-              placeholder="SEO optimized title"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              SEO Description
-            </label>
-            <textarea
-              value={formData.seo_description || ''}
-              onChange={(e) => setFormData((prev: any) => ({ ...prev, seo_description: e.target.value }))}
-              rows={2}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors resize-none"
-              placeholder="SEO meta description"
-            />
-          </div>
-        </div>
-
-        {/* Modal Footer */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-700 sticky bottom-0 bg-white dark:bg-gray-800">
-          <button
-            onClick={onClose}
-            className="px-6 py-3 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors font-medium"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onSubmit}
-            className="px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg hover:from-rose-600 hover:to-pink-600 transition-colors font-medium"
-          >
-            {editingPost ? "Update Post" : "Create Post"}
-          </button>
-        </div>
-      </div>
-    </div>
+                {editingPost ? "Update Post" : "Create Post"}
+              </Button>
+            </ModalFooter>
+          </>
+        )}
+      </ModalContent>
+    </Modal>
   );
 }
 
@@ -361,8 +317,8 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-600"></div>
+      <div className="w-full flex items-center justify-center py-12">
+        <Spinner size="lg" />
       </div>
     );
   }
@@ -377,13 +333,7 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Blog Posts</h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Manage your blog posts ({posts.length} total)
-          </p>
-        </div>
+      <div className="flex items-center justify-end mb-6">
         <button
           onClick={handleAddNew}
           className="px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg hover:from-rose-600 hover:to-pink-600 transition-colors font-medium flex items-center gap-2"

@@ -75,6 +75,7 @@ export async function GET(request: NextRequest) {
     let startTime = null;
     let endTime = null;
     let bufferMinutes = 15; // Default
+    let maxAppointments = 12; // Default
     
     if (!adminSettingsError && adminSettingsData?.value) {
       // Parse the JSON value from admin_settings
@@ -104,6 +105,7 @@ export async function GET(request: NextRequest) {
         startTime = dayHours.open;
         endTime = dayHours.close;
         bufferMinutes = dayHours.bufferMinutes || 15;
+        maxAppointments = dayHours.maxAppointments || 12;
         
         // Validate that we have times when isOpen is true
         if (!startTime || !endTime) {
@@ -150,6 +152,7 @@ export async function GET(request: NextRequest) {
         startTime = whData.start_time;
         endTime = whData.end_time;
         bufferMinutes = whData.buffer_minutes || 15;
+        maxAppointments = whData.max_appointments || 12;
         console.log(`[Availability] Using working_hours table for ${date} (${dayNames[dayOfWeek]}): is_working_day=true, ${startTime}-${endTime}`);
       } else {
         console.log(`[Availability] No working hours found in either admin_settings or working_hours for ${date} (${dayNames[dayOfWeek]})`);
@@ -167,7 +170,43 @@ export async function GET(request: NextRequest) {
       end_time: endTime,
       is_working_day: isWorkingDay,
       buffer_minutes: bufferMinutes,
+      max_appointments: maxAppointments,
     };
+
+    // Check if team member is on day off for this date
+    const { data: dayOffPeriods, error: dayOffError } = await supabaseAdmin
+      .from("team_day_off_periods")
+      .select("start_date, end_date, reason")
+      .eq("team_member_id", teamMemberId)
+      .lte("start_date", date)
+      .gte("end_date", date);
+
+    if (dayOffError) {
+      console.error("Error checking day off periods:", dayOffError);
+    }
+
+    const isOnDayOff = dayOffPeriods && dayOffPeriods.length > 0;
+    const dayOffReason = isOnDayOff ? dayOffPeriods[0].reason : null;
+
+    // If team member is on day off, return no available slots
+    if (isOnDayOff) {
+      return NextResponse.json({
+        availableSlots: [],
+        bookedSlots: [],
+        workingHours: {
+          start: workingHours.start_time,
+          end: workingHours.end_time,
+          buffer_minutes: bufferMinutes,
+          max_appointments: maxAppointments
+        },
+        serviceDuration: durationMinutes,
+        dayOfWeek: dayOfWeek,
+        isWorkingDay: workingHours.is_working_day,
+        isOnDayOff: true,
+        dayOffReason: dayOffReason,
+        message: `Team member is on day off from ${dayOffPeriods[0].start_date} to ${dayOffPeriods[0].end_date}`
+      });
+    }
 
     // Get existing bookings for this team member on this date
     const { data: existingBookings, error: bookingsError } = await supabaseAdmin
@@ -191,14 +230,15 @@ export async function GET(request: NextRequest) {
     const startTimeMinutes = startHour * 60 + startMinute;
     const endTimeMinutes = endHour * 60 + endMinute;
 
-    // Create a set of booked time ranges
+    // Create a set of booked time ranges (including buffer after each booking)
     const bookedRanges: Array<{ start: number; end: number }> = [];
     
     (existingBookings || []).forEach((booking) => {
       const [hour, minute] = booking.time.split(":").map(Number);
       const bookingStartMinutes = hour * 60 + minute;
       const bookingDuration = booking.service_duration_minutes || 30;
-      const bookingEndMinutes = bookingStartMinutes + bookingDuration;
+      // Add buffer after the booking ends
+      const bookingEndMinutes = bookingStartMinutes + bookingDuration + bufferMinutes;
       
       bookedRanges.push({
         start: bookingStartMinutes,
@@ -208,6 +248,10 @@ export async function GET(request: NextRequest) {
 
     // Sort booked ranges by start time
     bookedRanges.sort((a, b) => a.start - b.start);
+
+    // Check if max appointments limit is reached
+    const existingBookingsCount = (existingBookings || []).length;
+    const isMaxAppointmentsReached = existingBookingsCount >= maxAppointments;
 
     // Generate available time slots and booked slots
     const availableSlots: string[] = [];
@@ -230,10 +274,15 @@ export async function GET(request: NextRequest) {
       if (isBooked) {
         bookedSlots.push(timeString);
       } else {
-        // Check if this slot can accommodate the required duration
-        const slotEndMinutes = timeMinutes + requiredDuration;
+        // Skip if max appointments reached
+        if (isMaxAppointmentsReached) {
+          continue;
+        }
+        
+        // Check if this slot can accommodate the required duration + buffer
+        const slotEndMinutes = timeMinutes + requiredDuration + bufferMinutes;
         if (slotEndMinutes <= endTimeMinutes) {
-          // Check if the full duration is available (no overlap with booked times)
+          // Check if the full duration + buffer is available (no overlap with booked times)
           const isAvailable = !bookedRanges.some((booked) => {
             return timeMinutes < booked.end && slotEndMinutes > booked.start;
           });
@@ -250,11 +299,15 @@ export async function GET(request: NextRequest) {
       bookedSlots,
       workingHours: {
         start: workingHours.start_time,
-        end: workingHours.end_time
+        end: workingHours.end_time,
+        buffer_minutes: bufferMinutes,
+        max_appointments: maxAppointments
       },
       serviceDuration: durationMinutes,
       dayOfWeek: dayOfWeek,
-      isWorkingDay: workingHours.is_working_day
+      isWorkingDay: workingHours.is_working_day,
+      currentBookingsCount: existingBookingsCount,
+      maxAppointmentsReached: isMaxAppointmentsReached
     });
   } catch (error) {
     console.error("Error in availability GET:", error);

@@ -3,10 +3,11 @@
 import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { siteConfig } from "@/config/site";
-import { Search, Filter, ArrowLeft, Info, Plus, Clock, CheckCircle } from "lucide-react";
+import { Search, Filter, ArrowLeft, Info, Plus, Clock, CheckCircle, X } from "lucide-react";
 import Link from 'next/link';
 import { useServices } from '@/hooks/useServices';
 import { aestheticsColors } from "@/config/colors";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Card, CardBody, Chip, Spinner, Select, SelectItem } from "@heroui/react";
 
 const categories = [
   'All',
@@ -136,118 +137,133 @@ function ServicesPageContent() {
     const service = servicesDataMap[selectedService];
     if (!service) return null;
 
-  return (
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-          {/* Header */}
-          <div className="bg-[#464C45] dark:bg-[#464C45] text-white px-8 py-6 flex items-center justify-between rounded-t-2xl flex-shrink-0">
-            <div>
-              <h2 className="text-3xl font-bold mb-2">{service.name}</h2>
-              <div className="flex items-center gap-4 text-white/90">
-                <span className="flex items-center gap-1 text-lg">
-                <Clock className="w-5 h-5" />
-                  {service.duration} minutes
-                </span>
-                <span className="text-2xl font-bold">£{service.price}</span>
-                <span className="bg-white/20 px-3 py-1 rounded-full text-sm">{service.category}</span>
-              </div>
-            </div>
-            <button
-              onClick={() => setSelectedService(null)}
-              className="p-2 hover:bg-white/20 rounded-full transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Content */}
-          <div className="p-8 space-y-6 overflow-y-auto flex-1">
-            {/* Description */}
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                <Info className="w-5 h-5" style={{ color: aestheticsColors.green.DEFAULT }} />
-                Overview
-              </h3>
-              <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-                {service.description}
-            </p>
-          </div>
-
-            {/* Details */}
-            {service.details && (
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                  Treatment Details
-                      </h3>
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {service.details}
-                </p>
-              </div>
-            )}
-
-            {/* Benefits */}
-            {service.benefits && service.benefits.length > 0 && (
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-500" />
-                  Key Benefits
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {service.benefits.map((benefit: string, index: number) => (
-                    <div key={index} className="flex items-start gap-3 bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
-                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-700 dark:text-gray-300">{benefit}</span>
-                    </div>
-                  ))}
+    return (
+      <Modal 
+        isOpen={!!selectedService} 
+        onClose={() => setSelectedService(null)}
+        size="4xl"
+        scrollBehavior="inside"
+        backdrop="blur"
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="bg-[#464C45] dark:bg-[#464C45] text-white flex flex-col gap-2">
+                <h2 className="text-3xl font-bold">{service.name}</h2>
+                <div className="flex items-center gap-4 text-white/90 flex-wrap">
+                  <Chip 
+                    startContent={<Clock className="w-4 h-4" />}
+                    variant="flat"
+                    className="bg-white/20 text-white"
+                  >
+                    {service.duration} minutes
+                  </Chip>
+                  <span className="text-2xl font-bold">£{service.price}</span>
+                  <Chip 
+                    variant="flat"
+                    className="bg-white/20 text-white"
+                  >
+                    {service.category}
+                  </Chip>
                 </div>
+              </ModalHeader>
+
+              <ModalBody className="space-y-6">
+                {/* Description */}
+                <div>
+                  <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-2">
+                    <Info className="w-5 h-5" style={{ color: aestheticsColors.green.DEFAULT }} />
+                    Overview
+                  </h3>
+                  <p className="text-lg text-default-600 leading-relaxed">
+                    {service.description}
+                  </p>
+                </div>
+
+                {/* Details */}
+                {service.details && (
+                  <Card>
+                    <CardBody>
+                      <h3 className="text-xl font-bold text-foreground mb-3">
+                        Treatment Details
+                      </h3>
+                      <p className="text-default-600 leading-relaxed">
+                        {service.details}
+                      </p>
+                    </CardBody>
+                  </Card>
+                )}
+
+                {/* Benefits */}
+                {service.benefits && service.benefits.length > 0 && (
+                  <div>
+                    <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 text-success" />
+                      Key Benefits
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {service.benefits.map((benefit: string, index: number) => (
+                        <Card key={index} className="bg-success-50 dark:bg-success-900/20">
+                          <CardBody className="p-3">
+                            <div className="flex items-start gap-3">
+                              <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
+                              <span className="text-default-700">{benefit}</span>
+                            </div>
+                          </CardBody>
+                        </Card>
+                      ))}
                     </div>
-            )}
+                  </div>
+                )}
 
-            {/* Preparation */}
-            {service.preparation && (
-              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6 border-l-4 border-blue-500">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
-                  Preparation
-                </h3>
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {service.preparation}
-                </p>
-                      </div>
-            )}
+                {/* Preparation */}
+                {service.preparation && (
+                  <Card className="bg-primary-50 dark:bg-primary-900/20 border-l-4 border-primary">
+                    <CardBody>
+                      <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-2">
+                        <Info className="w-5 h-5 text-primary" />
+                        Preparation
+                      </h3>
+                      <p className="text-default-600 leading-relaxed">
+                        {service.preparation}
+                      </p>
+                    </CardBody>
+                  </Card>
+                )}
 
-            {/* Aftercare */}
-            {service.aftercare && (
-              <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-6 border-l-4 border-purple-500">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  Aftercare
-                </h3>
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {service.aftercare}
-                </p>
-                    </div>
-            )}
-
-            {/* CTA Button */}
-            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-              <Link
-                href={`/book?service=${selectedService}`}
-                onClick={() => setSelectedService(null)}
-                className="w-full bg-[#464C45] hover:bg-[#3a4039] dark:bg-[#464C45] dark:hover:bg-[#3a4039] text-white py-4 rounded-xl font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl block text-center"
-              >
-                Book This Treatment - £{service.price}
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
+                {/* Aftercare */}
+                {service.aftercare && (
+                  <Card className="bg-secondary-50 dark:bg-secondary-900/20 border-l-4 border-secondary">
+                    <CardBody>
+                      <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-2">
+                        <Info className="w-5 h-5 text-secondary" />
+                        Aftercare
+                      </h3>
+                      <p className="text-default-600 leading-relaxed">
+                        {service.aftercare}
+                      </p>
+                    </CardBody>
+                  </Card>
+                )}
+              </ModalBody>
+              <ModalFooter>
+                <Button variant="light" onPress={onClose}>
+                  Close
+                </Button>
+                <Button
+                  as={Link}
+                  href={`/book?service=${selectedService}`}
+                  onPress={onClose}
+                  className="bg-[#464C45] dark:bg-[#464C45] text-white"
+                  size="lg"
+                >
+                  Book This Treatment - £{service.price}
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     );
   };
 
@@ -256,8 +272,8 @@ function ServicesPageContent() {
     return (
       <div className="min-h-screen bg-[#f5f1e9] dark:bg-gray-900 flex items-center justify-center py-8">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#464C45] mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading services...</p>
+          <Spinner size="lg" />
+          <p className="mt-4 text-default-500">Loading services...</p>
         </div>
       </div>
     );
@@ -290,25 +306,28 @@ function ServicesPageContent() {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
             {/* Search */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
+            <div className="flex-1 max-w-md">
+              <Input
                 type="text"
                 placeholder="Search services..."
                 value={searchTerm}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-[#464C45] focus:ring-2 focus:ring-[#464C45]/20 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                onValueChange={handleSearch}
+                startContent={<Search className="w-5 h-5 text-default-400" />}
+                variant="bordered"
+                size="lg"
+                isClearable
+                onClear={() => handleSearch('')}
               />
             </div>
 
             {/* Filter Toggle */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-[#464C45] hover:text-[#464C45] dark:hover:text-[#5a6259] transition-colors"
+            <Button
+              variant="bordered"
+              onPress={() => setShowFilters(!showFilters)}
+              startContent={<Filter className="w-5 h-5" />}
             >
-              <Filter className="w-5 h-5" />
               Filters
-            </button>
+            </Button>
 
           </div>
 
@@ -317,52 +336,49 @@ function ServicesPageContent() {
             <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Category Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Category
-                  </label>
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => handleFilterChange('category', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-[#464C45] focus:ring-2 focus:ring-[#464C45]/20 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  >
-                    {categories.map(category => (
-                      <option key={category} value={category}>{category}</option>
-                    ))}
-                  </select>
-                </div>
+                <Select
+                  label="Category"
+                  selectedKeys={[selectedCategory]}
+                  onSelectionChange={(keys) => {
+                    const selected = Array.from(keys)[0] as string;
+                    handleFilterChange('category', selected || 'All');
+                  }}
+                  variant="bordered"
+                >
+                  {categories.map(category => (
+                    <SelectItem key={category}>{category}</SelectItem>
+                  ))}
+                </Select>
 
                 {/* Price Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Price Range
-                  </label>
-                  <select
-                    value={selectedPriceRange}
-                    onChange={(e) => handleFilterChange('price', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-[#464C45] focus:ring-2 focus:ring-[#464C45]/20 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  >
-                    {priceRanges.map(range => (
-                      <option key={range.label} value={range.label}>{range.label}</option>
-                    ))}
-                  </select>
-              </div>
+                <Select
+                  label="Price Range"
+                  selectedKeys={[selectedPriceRange]}
+                  onSelectionChange={(keys) => {
+                    const selected = Array.from(keys)[0] as string;
+                    handleFilterChange('price', selected || 'All Prices');
+                  }}
+                  variant="bordered"
+                >
+                  {priceRanges.map(range => (
+                    <SelectItem key={range.label}>{range.label}</SelectItem>
+                  ))}
+                </Select>
 
                 {/* Duration Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Duration
-                  </label>
-                  <select
-                    value={selectedDurationRange}
-                    onChange={(e) => handleFilterChange('duration', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-[#464C45] focus:ring-2 focus:ring-[#464C45]/20 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  >
-                    {durationRanges.map(range => (
-                      <option key={range.label} value={range.label}>{range.label}</option>
-                    ))}
-                  </select>
-                </div>
+                <Select
+                  label="Duration"
+                  selectedKeys={[selectedDurationRange]}
+                  onSelectionChange={(keys) => {
+                    const selected = Array.from(keys)[0] as string;
+                    handleFilterChange('duration', selected || 'All Durations');
+                  }}
+                  variant="bordered"
+                >
+                  {durationRanges.map(range => (
+                    <SelectItem key={range.label}>{range.label}</SelectItem>
+                  ))}
+                </Select>
               </div>
             </div>
           )}
@@ -417,53 +433,42 @@ function ServicesPageContent() {
                 key={serviceId}
                 className="bg-white dark:bg-gray-800 rounded-xl border border-gray-300 dark:border-gray-600 shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-col h-full"
               >
-                {/* Price Header */}
+                {/* Header (similar to conditions but with category badge) */}
                 <div className="bg-[#f5f1e9] dark:bg-gray-800 px-4 py-3 border-b border-[#ddd5c3]/60 dark:border-gray-700 relative rounded-t-xl">
-                  {/* Featured Badge */}
-                  {service.is_featured && (
-                    <div className="absolute top-2 left-2">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#464C45] text-white text-[10px] font-bold rounded-full">
-                        <CheckCircle className="w-3 h-3" />
-                        FEATURED
-                      </span>
-                    </div>
-                  )}
-                    
+                  {/* Category Badge - Top Left */}
+                  <div className="absolute top-2 left-2">
+                    <span className="inline-flex items-center px-2 py-0.5 bg-[#464C45] text-white text-[10px] font-semibold rounded-full">
+                      {service.category}
+                    </span>
+                  </div>
+                  
                   {/* Duration Badge - Top Right */}
                   <div className="absolute top-2 right-2">
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-[#ddd5c3]/60 dark:border-gray-700/60 rounded-full text-[10px] font-semibold text-[#464C45] dark:text-gray-200">
                       <Clock className="w-3 h-3" />
-                          {service.duration} min
-                        </span>
-                      </div>
-                      
-                  {/* Price - Centered */}
+                      {service.duration} min
+                    </span>
+                  </div>
+                  
+                  {/* Service Name - Centered */}
                   <div className="text-center pt-6 pb-2">
-                    <div className="text-3xl font-bold text-[#464C45] dark:text-[#5a6259]">
+                    <h3 className="text-lg font-bold text-[#464C45] dark:text-[#5a6259] leading-tight line-clamp-2 mb-1">
+                      {service.name}
+                    </h3>
+                    {/* Price */}
+                    <div className="text-2xl font-bold text-[#464C45] dark:text-[#5a6259]">
                       £{service.price}
                     </div>
-                      </div>
-                    </div>
+                  </div>
+                </div>
                     
                 {/* Content */}
                 <div className="p-4 flex flex-col flex-1">
-                  {/* Category Badge */}
-                  <div className="mb-2">
-                    <span className="inline-flex items-center px-2.5 py-0.5 bg-[#464C45] dark:bg-[#464C45] text-white rounded-full text-xs font-semibold">
-                          {service.category}
-                        </span>
-                      </div>
-                  
-                  {/* Service Name */}
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-tight mb-2">
-                    {service.name}
-                  </h3>
-                  
                   {/* Description */}
                   {service.description && (
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 leading-relaxed line-clamp-2">
-                        {service.description}
-                      </p>
+                      {service.description}
+                    </p>
                   )}
                   
                   {/* Service Details */}
@@ -490,29 +495,24 @@ function ServicesPageContent() {
                         <span>Results: {service.results_duration_weeks} week{service.results_duration_weeks !== 1 ? 's' : ''}</span>
                       </div>
                     )}
-                    </div>
+                  </div>
                   
-                  {/* Spacer to push buttons to bottom */}
-                  <div className="flex-1"></div>
-                  
-                  {/* Buttons - Fixed at bottom */}
-                  <div className="pt-3 border-t border-[#ddd5c3]/60 dark:border-gray-700">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setSelectedService(serviceId)}
-                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border-2 border-[#464C45] text-[#464C45] dark:border-[#5a6259] dark:text-[#5a6259] rounded-lg hover:bg-[#f5f1e9] dark:hover:bg-gray-700/50 transition-colors font-medium text-xs"
-                      >
-                        <Info className="w-3.5 h-3.5" />
-                        Details
-                      </button>
-                      <Link
-                        href={`/book?service=${serviceId}`}
-                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-[#464C45] hover:bg-[#3a4039] dark:bg-[#464C45] dark:hover:bg-[#3a4039] text-white rounded-lg transition-all font-medium text-xs shadow-sm hover:shadow-md"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        Book
-                      </Link>
-                    </div>
+                  {/* Buttons */}
+                  <div className="flex gap-2 mt-auto">
+                    <button
+                      onClick={() => setSelectedService(serviceId)}
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-[#464C45] text-[#464C45] dark:text-[#5a6259] dark:border-[#5a6259] rounded-lg hover:bg-[#464C45]/10 dark:hover:bg-[#5a6259]/10 transition-colors font-medium text-sm"
+                    >
+                      <Info className="w-4 h-4" />
+                      Details
+                    </button>
+                    <Link
+                      href={`/book?service=${serviceId}`}
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white rounded-lg hover:from-[#857d68] hover:via-[#aea693] hover:to-[#c9c1b0] transition-all font-medium text-sm shadow-md hover:shadow-lg"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Book
+                    </Link>
                   </div>
                 </div>
               </div>

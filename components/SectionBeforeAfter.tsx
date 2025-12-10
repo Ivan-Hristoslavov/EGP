@@ -3,6 +3,8 @@
 import { useGallery } from "@/hooks/useGallery";
 import BeforeAfterSlideLine from "./BeforeAfterSlideLine";
 import { badgeBackgroundClass } from "@/config/badge-styles";
+import { Spinner } from "@heroui/react";
+import { Card, CardBody } from "@heroui/react";
 
 export default function SectionBeforeAfter() {
   const { galleryItems, loading, error } = useGallery();
@@ -34,11 +36,7 @@ export default function SectionBeforeAfter() {
       <section className="py-12 sm:py-16 md:py-20 bg-[#f5f1e9] dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <div className="animate-pulse">
-              <div className="h-8 bg-gray-300 dark:bg-gray-700 rounded w-48 mx-auto mb-4"></div>
-              <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-96 mx-auto mb-8"></div>
-              <div className="aspect-[16/10] bg-gray-300 dark:bg-gray-700 rounded-3xl mx-auto max-w-6xl"></div>
-            </div>
+            <Spinner size="lg" color="primary" />
           </div>
         </div>
       </section>
@@ -59,15 +57,17 @@ export default function SectionBeforeAfter() {
             <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-4 mb-8">
               See the natural, beautiful transformations we've achieved for our clients
             </p>
-            <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-12 max-w-2xl mx-auto">
-              <div className="text-6xl mb-4">✨</div>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                Gallery Coming Soon
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                We're currently updating our before and after gallery. Check back soon to see our amazing results!
-              </p>
-            </div>
+            <Card className="max-w-2xl mx-auto" shadow="lg">
+              <CardBody className="p-12 text-center">
+                <div className="text-6xl mb-4">✨</div>
+                <h3 className="text-2xl font-bold text-foreground mb-4">
+                  Gallery Coming Soon
+                </h3>
+                <p className="text-default-600">
+                  We're currently updating our before and after gallery. Check back soon to see our amazing results!
+                </p>
+              </CardBody>
+            </Card>
           </div>
         </div>
       </section>

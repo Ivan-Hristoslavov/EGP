@@ -1,12 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Upload, AlertCircle, Image as ImageIcon, Save, X } from "lucide-react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
-import { Button } from "@heroui/button";
-import { Input, Textarea } from "@heroui/input";
-import { Switch } from "@heroui/switch";
-import { Chip } from "@heroui/chip";
+import { Plus, Edit, Trash2, Upload, AlertCircle, Image as ImageIcon, Save, X, ChevronDown, ChevronUp } from "lucide-react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Switch, Chip, Card, CardBody, Spinner } from "@heroui/react";
+import { useConfirmation } from "@/hooks/useConfirmation";
+import { ConfirmationModal } from "@/components/ConfirmationModal";
 
 interface AboutSection {
   id: string;
@@ -22,6 +20,7 @@ interface AboutSection {
 }
 
 export default function AdminAboutPage() {
+  const { confirm, modalProps } = useConfirmation();
   const [sections, setSections] = useState<AboutSection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -31,6 +30,7 @@ export default function AdminAboutPage() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [isSavingSection, setIsSavingSection] = useState(false);
   const [compressionQuality, setCompressionQuality] = useState(80);
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
   const [formData, setFormData] = useState({
     section_type: "hero",
@@ -199,19 +199,27 @@ export default function AdminAboutPage() {
   };
 
   const handleDeleteSection = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this section?')) return;
+    await confirm(
+      {
+        title: "Delete Section",
+        message: "Are you sure you want to delete this section? This action cannot be undone.",
+        isDestructive: true,
+        confirmText: "Delete",
+      },
+      async () => {
+        try {
+          const response = await fetch(`/api/about-content/${id}`, {
+            method: 'DELETE',
+          });
 
-    try {
-      const response = await fetch(`/api/about-content/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        await loadSections();
+          if (response.ok) {
+            await loadSections();
+          }
+        } catch (error) {
+          console.error('Error deleting section:', error);
+        }
       }
-    } catch (error) {
-      console.error('Error deleting section:', error);
-    }
+    );
   };
 
   const resetForm = () => {
@@ -287,129 +295,156 @@ export default function AdminAboutPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+      <div className="w-full flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-rose-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading content...</p>
+          <Spinner size="lg" />
+          <p className="mt-4 text-default-500">Loading content...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="max-w-7xl mx-auto p-4 sm:p-6">
-        {/* Header */}
-        <div className="mt-6 mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent mb-2">
-            About Page Content
-          </h1>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-            Manage your about us page sections and content
-          </p>
-        </div>
+    <div className="w-full">
+      {/* Add Button */}
+      <div className="mb-6">
+        <Button
+          onClick={openAddModal}
+          className="bg-gradient-to-r from-rose-500 to-pink-500 text-white"
+        >
+          <Plus className="w-5 h-5 mr-2" />
+          Add Section
+        </Button>
+      </div>
 
-        {/* Add Button */}
-        <div className="mb-6">
-          <Button
-            onClick={openAddModal}
-            className="bg-gradient-to-r from-rose-500 to-pink-500 text-white"
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            Add Section
-          </Button>
-        </div>
-
-        {/* Sections List */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6">
+      {/* Sections List */}
+      <div>
           {sections.length === 0 ? (
             <div className="text-center py-12">
               <AlertCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-600 dark:text-gray-400">No sections found</p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {sections.map((section) => (
-                <div
-                  key={section.id}
-                  className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-all"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <Chip size="sm" variant="flat" color="danger">
-                          {section.section_type}
-                        </Chip>
-                        {!section.is_active && (
-                          <Chip size="sm" variant="flat" color="default">
-                            Inactive
-                          </Chip>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {sections.map((section) => {
+                const isExpanded = expandedSections.has(section.id);
+                const contentPreview = section.content.length > 150 
+                  ? section.content.substring(0, 150) + '...' 
+                  : section.content;
+                
+                return (
+                  <Card key={section.id} className="hover:shadow-md transition-all">
+                    <CardBody className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                            <Chip size="sm" variant="flat" color="danger">
+                              {section.section_type}
+                            </Chip>
+                            {!section.is_active && (
+                              <Chip size="sm" variant="flat" color="default">
+                                Inactive
+                              </Chip>
+                            )}
+                            <span className="text-xs text-default-500">#{section.order}</span>
+                          </div>
+                          {section.heading && (
+                            <h3 className="text-base font-bold text-foreground mb-1 line-clamp-2">
+                              {section.heading}
+                            </h3>
+                          )}
+                        </div>
+                        <div className="flex gap-1 ml-2 flex-shrink-0">
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="light"
+                            onPress={() => handleEditSection(section)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="light"
+                            color="danger"
+                            onPress={() => handleDeleteSection(section.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="mb-3">
+                        <p className="text-sm text-default-600 line-clamp-3">
+                          {isExpanded ? section.content : contentPreview}
+                        </p>
+                        {section.content.length > 150 && (
+                          <Button
+                            size="sm"
+                            variant="light"
+                            className="mt-1 -ml-2"
+                            onPress={() => {
+                              const newExpanded = new Set(expandedSections);
+                              if (isExpanded) {
+                                newExpanded.delete(section.id);
+                              } else {
+                                newExpanded.add(section.id);
+                              }
+                              setExpandedSections(newExpanded);
+                            }}
+                          >
+                            {isExpanded ? (
+                              <>
+                                <ChevronUp className="w-3 h-3 mr-1" />
+                                Show Less
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDown className="w-3 h-3 mr-1" />
+                                Show More
+                              </>
+                            )}
+                          </Button>
                         )}
                       </div>
-                      {section.heading && (
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                          {section.heading}
-                        </h3>
+
+                      {section.bullet_points && section.bullet_points.length > 0 && (
+                        <div className="mb-3">
+                          <div className="flex flex-wrap gap-1">
+                            {section.bullet_points.slice(0, 3).map((bullet, idx) => (
+                              <Chip key={idx} size="sm" variant="flat" color="success" className="text-xs">
+                                {bullet.length > 20 ? bullet.substring(0, 20) + '...' : bullet}
+                              </Chip>
+                            ))}
+                            {section.bullet_points.length > 3 && (
+                              <Chip size="sm" variant="flat" color="default" className="text-xs">
+                                +{section.bullet_points.length - 3} more
+                              </Chip>
+                            )}
+                          </div>
+                        </div>
                       )}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="flat"
-                        onPress={() => handleEditSection(section)}
-                      >
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="flat"
-                        color="danger"
-                        onPress={() => handleDeleteSection(section.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
 
-                  <p className="text-gray-600 dark:text-gray-300 mb-4">
-                    {section.content}
-                  </p>
-
-                  {section.bullet_points && section.bullet_points.length > 0 && (
-                    <div className="mb-4">
-                      <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-2">Bullet Points:</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {section.bullet_points.map((bullet, idx) => (
-                          <Chip key={idx} size="sm" variant="flat" color="success">
-                            {bullet}
-                          </Chip>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {section.image_url && (
-                    <div className="mb-4">
-                      <img
-                        src={section.image_url}
-                        alt={section.heading || section.section_type}
-                        className="max-w-sm rounded-lg border border-gray-200 dark:border-gray-700"
-                      />
-                    </div>
-                  )}
-
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
-                    Order: {section.order}
-                  </div>
-                </div>
-              ))}
+                      {section.image_url && (
+                        <div className="mb-3">
+                          <img
+                            src={section.image_url}
+                            alt={section.heading || section.section_type}
+                            className="w-full h-32 object-cover rounded-md border border-divider"
+                          />
+                        </div>
+                      )}
+                    </CardBody>
+                  </Card>
+                );
+              })}
             </div>
           )}
-        </div>
+      </div>
 
-        {/* Modal */}
-        <Modal
+      {/* Modal */}
+      <Modal
           isOpen={isModalOpen}
           onClose={() => {
             setIsModalOpen(false);
@@ -592,8 +627,9 @@ export default function AdminAboutPage() {
               </>
             )}
           </ModalContent>
-        </Modal>
-      </div>
+      </Modal>
+
+      <ConfirmationModal {...modalProps} />
     </div>
   );
 }

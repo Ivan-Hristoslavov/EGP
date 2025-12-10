@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { siteConfig } from "@/config/site";
 import Link from "next/link";
 import { Calendar, Clock, Star, CheckCircle, ArrowRight } from "lucide-react";
+import { Card, CardBody, CardHeader, Button, Chip } from "@heroui/react";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
