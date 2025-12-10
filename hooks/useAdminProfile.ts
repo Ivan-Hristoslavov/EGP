@@ -51,11 +51,17 @@ export function useAdminProfile() {
       ]);
 
       if (!profileResponse.ok) {
-        throw new Error('Failed to fetch profile');
+        // If 404 or other error, set profile to null (profile doesn't exist yet)
+        if (profileResponse.status === 404) {
+          setProfile(null);
+        } else {
+          throw new Error('Failed to fetch profile');
+        }
+      } else {
+        const profileData = await profileResponse.json();
+        // Handle null response (profile doesn't exist)
+        setProfile(profileData || null);
       }
-
-      const profileData = await profileResponse.json();
-      setProfile(profileData);
 
       // Settings are optional, don't fail if they don't exist
       if (settingsResponse.ok) {

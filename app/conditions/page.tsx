@@ -115,48 +115,48 @@ function ConditionsPageContent() {
             <>
               <ModalHeader className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white flex flex-col gap-2">
                 <h2 className="text-3xl font-bold">{condition.title}</h2>
-                <div className="flex items-center gap-4 text-white/90">
+              <div className="flex items-center gap-4 text-white/90">
                   <Chip 
                     variant="flat"
                     className="bg-white/20 text-white"
                   >
                     {getCategoryDisplayName(condition.category)}
                   </Chip>
-                </div>
+          </div>
               </ModalHeader>
               <ModalBody className="space-y-6">
-                {/* Description */}
-                <div>
+            {/* Description */}
+            <div>
                   <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-2">
-                    <Info className="w-5 h-5 text-[#9d9585]" />
-                    Overview
-                  </h3>
+                <Info className="w-5 h-5 text-[#9d9585]" />
+                Overview
+              </h3>
                   <p className="text-lg text-default-600 leading-relaxed">
-                    {condition.description}
-                  </p>
-                </div>
+                {condition.description}
+              </p>
+            </div>
 
-                {/* Treatments */}
-                {condition.treatments && condition.treatments.length > 0 && (
-                  <div>
+            {/* Treatments */}
+            {condition.treatments && condition.treatments.length > 0 && (
+              <div>
                     <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
                       <CheckCircle className="w-5 h-5 text-success" />
-                      Available Treatments
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {condition.treatments.map((treatment, index) => (
+                  Available Treatments
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {condition.treatments.map((treatment, index) => (
                         <Card key={index} className="bg-success-50 dark:bg-success-900/20">
                           <CardBody className="p-3">
                             <div className="flex items-start gap-3">
                               <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
                               <span className="text-default-700">{treatment}</span>
-                            </div>
+                    </div>
                           </CardBody>
                         </Card>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                  ))}
+                </div>
+              </div>
+            )}
               </ModalBody>
               <ModalFooter>
                 <Button variant="light" onPress={onClose}>
@@ -164,12 +164,12 @@ function ConditionsPageContent() {
                 </Button>
                 <Button
                   as={Link}
-                  href={`/book?condition=${selectedCondition}`}
+                href={`/book?condition=${selectedCondition}`}
                   onPress={onClose}
                   className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white"
                   size="lg"
-                >
-                  Book Treatment for This Condition
+              >
+                Book Treatment for This Condition
                 </Button>
               </ModalFooter>
             </>
@@ -257,10 +257,10 @@ function ConditionsPageContent() {
                     setSelectedCategory(selected || 'All');
                   }}
                   variant="bordered"
-                >
-                  {categories.map(category => (
+                  >
+                    {categories.map(category => (
                     <SelectItem key={category}>{category}</SelectItem>
-                  ))}
+                    ))}
                 </Select>
               </div>
             </div>
@@ -319,43 +319,43 @@ function ConditionsPageContent() {
                     <span className="inline-flex items-center px-2 py-0.5 bg-[#464C45] text-white text-[10px] font-semibold rounded-full">
                       {getCategoryDisplayName(condition.category)}
                     </span>
-                  </div>
+                        </div>
                   
                   {/* Title - Centered */}
                   <div className="text-center pt-6 pb-2">
                     <h3 className="text-lg font-bold text-[#464C45] dark:text-[#5a6259] leading-tight line-clamp-2">
                       {condition.title}
                     </h3>
-                  </div>
-                </div>
+                      </div>
+                    </div>
                     
-                {/* Content */}
+                    {/* Content */}
                 <div className="p-4 flex flex-col flex-1">
                   {/* Description */}
                   {condition.description && (
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed line-clamp-3 flex-1">
-                      {condition.description}
-                    </p>
+                        {condition.description}
+                      </p>
                   )}
-                  
-                  {/* Buttons */}
+                      
+                      {/* Buttons */}
                   <div className="flex gap-2 mt-auto">
-                    <button
-                      onClick={() => setSelectedCondition(condition.slug)}
+                        <button
+                          onClick={() => setSelectedCondition(condition.slug)}
                       className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-[#464C45] text-[#464C45] dark:text-[#5a6259] dark:border-[#5a6259] rounded-lg hover:bg-[#464C45]/10 dark:hover:bg-[#5a6259]/10 transition-colors font-medium text-sm"
-                    >
-                      <Info className="w-4 h-4" />
-                      Details
-                    </button>
-                    <Link
-                      href={`/book?condition=${condition.slug}`}
+                        >
+                          <Info className="w-4 h-4" />
+                          Details
+                        </button>
+                        <Link
+                          href={`/book?condition=${condition.slug}`}
                       className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white rounded-lg hover:from-[#857d68] hover:via-[#aea693] hover:to-[#c9c1b0] transition-all font-medium text-sm shadow-md hover:shadow-lg"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Book
-                    </Link>
-                  </div>
-                </div>
+                        >
+                          <Plus className="w-4 h-4" />
+                          Book
+                        </Link>
+                      </div>
+                    </div>
               </div>
             ))}
           </div>

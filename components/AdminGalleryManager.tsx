@@ -702,15 +702,15 @@ export function AdminGalleryManager({
                 <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                      <svg className="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      {editingItem ? "Edit Transformation" : "Add New Before & After"}
+                  <svg className="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  {editingItem ? "Edit Transformation" : "Add New Before & After"}
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      {editingItem ? "Update transformation details and images" : "Create a new before & after transformation showcase"}
-                    </p>
-                  </div>
+                  {editingItem ? "Update transformation details and images" : "Create a new before & after transformation showcase"}
+                </p>
+              </div>
                   <button
                     onClick={() => {
                       setShowAddForm(false);
@@ -1300,53 +1300,53 @@ export function AdminGalleryManager({
                 />
               </div>
 
-                  {/* Form Actions */}
+              {/* Form Actions */}
                   <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700 sticky bottom-0 bg-white dark:bg-gray-800">
-                    <button
-                      onClick={() => {
-                        setShowAddForm(false);
-                        setEditingItem(null);
-                        setFormData({ ...defaultItem });
-                        setBeforeImage(null);
-                        setAfterImage(null);
-                        
-                        // Revoke object URLs before clearing
-                        if (beforeImagePreview && beforeImagePreview.startsWith('blob:')) {
-                          URL.revokeObjectURL(beforeImagePreview);
-                        }
-                        if (afterImagePreview && afterImagePreview.startsWith('blob:')) {
-                          URL.revokeObjectURL(afterImagePreview);
-                        }
-                        
-                        setBeforeImagePreview("");
-                        setUseCustomLocation(false);
-                        setAfterImagePreview("");
-                        setImageErrors({});
-                        
-                        // Reset image settings
-                        setBeforeImageSettings({
-                          quality: 0.85,
-                          originalFile: null,
-                          compressedFile: null,
-                          originalSize: 0,
-                          compressedSize: 0,
-                          originalDimensions: { width: 0, height: 0 },
-                          compressedDimensions: { width: 0, height: 0 }
-                        });
-                        setAfterImageSettings({
-                          quality: 0.85,
-                          originalFile: null,
-                          compressedFile: null,
-                          originalSize: 0,
-                          compressedSize: 0,
-                          originalDimensions: { width: 0, height: 0 },
-                          compressedDimensions: { width: 0, height: 0 }
-                        });
-                      }}
+                <button
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setEditingItem(null);
+                    setFormData({ ...defaultItem });
+                    setBeforeImage(null);
+                    setAfterImage(null);
+                    
+                    // Revoke object URLs before clearing
+                    if (beforeImagePreview && beforeImagePreview.startsWith('blob:')) {
+                      URL.revokeObjectURL(beforeImagePreview);
+                    }
+                    if (afterImagePreview && afterImagePreview.startsWith('blob:')) {
+                      URL.revokeObjectURL(afterImagePreview);
+                    }
+                    
+                    setBeforeImagePreview("");
+                    setUseCustomLocation(false);
+                    setAfterImagePreview("");
+                    setImageErrors({});
+                    
+                    // Reset image settings
+                    setBeforeImageSettings({
+                      quality: 0.85,
+                      originalFile: null,
+                      compressedFile: null,
+                      originalSize: 0,
+                      compressedSize: 0,
+                      originalDimensions: { width: 0, height: 0 },
+                      compressedDimensions: { width: 0, height: 0 }
+                    });
+                    setAfterImageSettings({
+                      quality: 0.85,
+                      originalFile: null,
+                      compressedFile: null,
+                      originalSize: 0,
+                      compressedSize: 0,
+                      originalDimensions: { width: 0, height: 0 },
+                      compressedDimensions: { width: 0, height: 0 }
+                    });
+                  }}
                       className="px-6 py-3 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors font-medium"
-                    >
-                      Cancel
-                    </button>
+                >
+                  Cancel
+                </button>
                     <button
                       onClick={handleSave}
                       className="px-6 py-3 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 text-white rounded-lg hover:from-rose-600 hover:via-pink-600 hover:to-purple-700 transition-colors font-medium"

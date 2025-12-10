@@ -137,7 +137,7 @@ function ServicesPageContent() {
     const service = servicesDataMap[selectedService];
     if (!service) return null;
 
-    return (
+  return (
       <Modal 
         isOpen={!!selectedService} 
         onClose={() => setSelectedService(null)}
@@ -156,95 +156,95 @@ function ServicesPageContent() {
                     variant="flat"
                     className="bg-white/20 text-white"
                   >
-                    {service.duration} minutes
+                  {service.duration} minutes
                   </Chip>
-                  <span className="text-2xl font-bold">£{service.price}</span>
+                <span className="text-2xl font-bold">£{service.price}</span>
                   <Chip 
                     variant="flat"
                     className="bg-white/20 text-white"
                   >
                     {service.category}
                   </Chip>
-                </div>
+          </div>
               </ModalHeader>
 
               <ModalBody className="space-y-6">
-                {/* Description */}
-                <div>
+            {/* Description */}
+            <div>
                   <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-2">
-                    <Info className="w-5 h-5" style={{ color: aestheticsColors.green.DEFAULT }} />
-                    Overview
-                  </h3>
+                <Info className="w-5 h-5" style={{ color: aestheticsColors.green.DEFAULT }} />
+                Overview
+              </h3>
                   <p className="text-lg text-default-600 leading-relaxed">
-                    {service.description}
-                  </p>
-                </div>
+                {service.description}
+            </p>
+          </div>
 
-                {/* Details */}
-                {service.details && (
+            {/* Details */}
+            {service.details && (
                   <Card>
                     <CardBody>
                       <h3 className="text-xl font-bold text-foreground mb-3">
-                        Treatment Details
+                  Treatment Details
                       </h3>
                       <p className="text-default-600 leading-relaxed">
-                        {service.details}
-                      </p>
+                  {service.details}
+                </p>
                     </CardBody>
                   </Card>
-                )}
+            )}
 
-                {/* Benefits */}
-                {service.benefits && service.benefits.length > 0 && (
-                  <div>
+            {/* Benefits */}
+            {service.benefits && service.benefits.length > 0 && (
+              <div>
                     <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
                       <CheckCircle className="w-5 h-5 text-success" />
-                      Key Benefits
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {service.benefits.map((benefit: string, index: number) => (
+                  Key Benefits
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {service.benefits.map((benefit: string, index: number) => (
                         <Card key={index} className="bg-success-50 dark:bg-success-900/20">
                           <CardBody className="p-3">
                             <div className="flex items-start gap-3">
                               <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
                               <span className="text-default-700">{benefit}</span>
-                            </div>
+                    </div>
                           </CardBody>
                         </Card>
-                      ))}
+                  ))}
+                </div>
                     </div>
-                  </div>
-                )}
+            )}
 
-                {/* Preparation */}
-                {service.preparation && (
+            {/* Preparation */}
+            {service.preparation && (
                   <Card className="bg-primary-50 dark:bg-primary-900/20 border-l-4 border-primary">
                     <CardBody>
                       <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-2">
                         <Info className="w-5 h-5 text-primary" />
-                        Preparation
-                      </h3>
+                  Preparation
+                </h3>
                       <p className="text-default-600 leading-relaxed">
-                        {service.preparation}
-                      </p>
+                  {service.preparation}
+                </p>
                     </CardBody>
                   </Card>
-                )}
+            )}
 
-                {/* Aftercare */}
-                {service.aftercare && (
+            {/* Aftercare */}
+            {service.aftercare && (
                   <Card className="bg-secondary-50 dark:bg-secondary-900/20 border-l-4 border-secondary">
                     <CardBody>
                       <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-2">
                         <Info className="w-5 h-5 text-secondary" />
-                        Aftercare
-                      </h3>
+                  Aftercare
+                </h3>
                       <p className="text-default-600 leading-relaxed">
-                        {service.aftercare}
-                      </p>
+                  {service.aftercare}
+                </p>
                     </CardBody>
                   </Card>
-                )}
+            )}
               </ModalBody>
               <ModalFooter>
                 <Button variant="light" onPress={onClose}>
@@ -252,12 +252,12 @@ function ServicesPageContent() {
                 </Button>
                 <Button
                   as={Link}
-                  href={`/book?service=${selectedService}`}
+                href={`/book?service=${selectedService}`}
                   onPress={onClose}
                   className="bg-[#464C45] dark:bg-[#464C45] text-white"
                   size="lg"
-                >
-                  Book This Treatment - £{service.price}
+              >
+                Book This Treatment - £{service.price}
                 </Button>
               </ModalFooter>
             </>
@@ -344,10 +344,10 @@ function ServicesPageContent() {
                     handleFilterChange('category', selected || 'All');
                   }}
                   variant="bordered"
-                >
-                  {categories.map(category => (
+                  >
+                    {categories.map(category => (
                     <SelectItem key={category}>{category}</SelectItem>
-                  ))}
+                    ))}
                 </Select>
 
                 {/* Price Filter */}
@@ -359,10 +359,10 @@ function ServicesPageContent() {
                     handleFilterChange('price', selected || 'All Prices');
                   }}
                   variant="bordered"
-                >
-                  {priceRanges.map(range => (
+                  >
+                    {priceRanges.map(range => (
                     <SelectItem key={range.label}>{range.label}</SelectItem>
-                  ))}
+                    ))}
                 </Select>
 
                 {/* Duration Filter */}
@@ -374,10 +374,10 @@ function ServicesPageContent() {
                     handleFilterChange('duration', selected || 'All Durations');
                   }}
                   variant="bordered"
-                >
-                  {durationRanges.map(range => (
+                  >
+                    {durationRanges.map(range => (
                     <SelectItem key={range.label}>{range.label}</SelectItem>
-                  ))}
+                    ))}
                 </Select>
               </div>
             </div>
@@ -436,20 +436,20 @@ function ServicesPageContent() {
                 {/* Header (similar to conditions but with category badge) */}
                 <div className="bg-[#f5f1e9] dark:bg-gray-800 px-4 py-3 border-b border-[#ddd5c3]/60 dark:border-gray-700 relative rounded-t-xl">
                   {/* Category Badge - Top Left */}
-                  <div className="absolute top-2 left-2">
+                    <div className="absolute top-2 left-2">
                     <span className="inline-flex items-center px-2 py-0.5 bg-[#464C45] text-white text-[10px] font-semibold rounded-full">
                       {service.category}
-                    </span>
-                  </div>
-                  
+                      </span>
+                    </div>
+                    
                   {/* Duration Badge - Top Right */}
                   <div className="absolute top-2 right-2">
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-[#ddd5c3]/60 dark:border-gray-700/60 rounded-full text-[10px] font-semibold text-[#464C45] dark:text-gray-200">
                       <Clock className="w-3 h-3" />
-                      {service.duration} min
-                    </span>
-                  </div>
-                  
+                          {service.duration} min
+                        </span>
+                      </div>
+                      
                   {/* Service Name - Centered */}
                   <div className="text-center pt-6 pb-2">
                     <h3 className="text-lg font-bold text-[#464C45] dark:text-[#5a6259] leading-tight line-clamp-2 mb-1">
@@ -459,16 +459,16 @@ function ServicesPageContent() {
                     <div className="text-2xl font-bold text-[#464C45] dark:text-[#5a6259]">
                       £{service.price}
                     </div>
-                  </div>
-                </div>
+                      </div>
+                    </div>
                     
                 {/* Content */}
                 <div className="p-4 flex flex-col flex-1">
                   {/* Description */}
                   {service.description && (
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 leading-relaxed line-clamp-2">
-                      {service.description}
-                    </p>
+                        {service.description}
+                      </p>
                   )}
                   
                   {/* Service Details */}
@@ -495,24 +495,24 @@ function ServicesPageContent() {
                         <span>Results: {service.results_duration_weeks} week{service.results_duration_weeks !== 1 ? 's' : ''}</span>
                       </div>
                     )}
-                  </div>
+                    </div>
                   
                   {/* Buttons */}
                   <div className="flex gap-2 mt-auto">
-                    <button
-                      onClick={() => setSelectedService(serviceId)}
+                      <button
+                        onClick={() => setSelectedService(serviceId)}
                       className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-[#464C45] text-[#464C45] dark:text-[#5a6259] dark:border-[#5a6259] rounded-lg hover:bg-[#464C45]/10 dark:hover:bg-[#5a6259]/10 transition-colors font-medium text-sm"
-                    >
+                      >
                       <Info className="w-4 h-4" />
-                      Details
-                    </button>
-                    <Link
-                      href={`/book?service=${serviceId}`}
+                        Details
+                      </button>
+                      <Link
+                        href={`/book?service=${serviceId}`}
                       className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white rounded-lg hover:from-[#857d68] hover:via-[#aea693] hover:to-[#c9c1b0] transition-all font-medium text-sm shadow-md hover:shadow-lg"
-                    >
+                      >
                       <Plus className="w-4 h-4" />
-                      Book
-                    </Link>
+                        Book
+                      </Link>
                   </div>
                 </div>
               </div>

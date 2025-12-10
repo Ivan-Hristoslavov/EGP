@@ -271,8 +271,8 @@ export default function WorkingHoursManager() {
       </div>
 
       {/* Working Hours */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {workingHours.map((hour) => {
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {workingHours.map((hour) => {
               const dayInfo = DAYS.find((d) => d.value === hour.day_of_week);
               const isToday = hour.day_of_week === todayDow;
               const isClosed = !hour.is_working_day;

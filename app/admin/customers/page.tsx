@@ -279,7 +279,7 @@ export default function CustomersPage() {
             color="primary"
             startContent={<Plus className="w-4 h-4" />}
             onPress={() => setShowAddModal(true)}
-          >
+                >
                   Add Customer
           </Button>
           </div>
@@ -295,8 +295,8 @@ export default function CustomersPage() {
                   <div>
               <p className="text-3xl font-bold">{totalCount}</p>
               <p className="text-sm text-default-500">Total Customers</p>
-            </div>
-          </div>
+                  </div>
+                </div>
         </CardBody>
       </Card>
 
@@ -518,7 +518,7 @@ export default function CustomersPage() {
                           }}
                         className="flex-1"
                       >
-                        Edit
+                          Edit
                       </Button>
                       <Button
                         isIconOnly
@@ -530,7 +530,7 @@ export default function CustomersPage() {
                         >
                         <Trash2 className="w-4 h-4" />
                       </Button>
-                    </div>
+                      </div>
                   </CardBody>
                 </Card>
                 ))}
@@ -656,14 +656,14 @@ export default function CustomersPage() {
                     <Card className="border border-divider">
                       <CardBody className="p-6">
                         <div className="flex items-center gap-4">
-                          <div className="relative">
+                <div className="relative">
                             <div className="w-20 h-20 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-2xl flex items-center justify-center shadow-lg">
                               <span className="text-white font-bold text-2xl">
                                 {selectedCustomer.name.charAt(0).toUpperCase()}
-                              </span>
-                            </div>
+                    </span>
+                  </div>
                             <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-success-500 rounded-full border-2 border-background"></div>
-                          </div>
+                </div>
                           <div>
                             <h3 className="text-2xl font-bold mb-1">{selectedCustomer.name}</h3>
                             <p className="text-sm text-default-500">
@@ -672,41 +672,41 @@ export default function CustomersPage() {
                                 month: 'long',
                                 day: 'numeric'
                               })}
-                            </p>
-                          </div>
-                        </div>
+                    </p>
+                </div>
+              </div>
                       </CardBody>
                     </Card>
 
-                    {/* Contact Information */}
+              {/* Contact Information */}
                     <Card className="border border-divider">
                       <CardHeader>
                         <h4 className="text-lg font-semibold">Contact Information</h4>
                       </CardHeader>
                       <CardBody>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
+              <div>
                             <label className="text-sm font-medium text-default-500 mb-1 block">Email</label>
                             <div className="flex items-center gap-2">
                               <Mail className="w-4 h-4 text-default-400" />
                               <p className="text-base">{selectedCustomer.email}</p>
-                            </div>
-                          </div>
-                          <div>
+                    </div>
+                    </div>
+                    <div>
                             <label className="text-sm font-medium text-default-500 mb-1 block">Phone</label>
                             <div className="flex items-center gap-2">
                               <Phone className="w-4 h-4 text-default-400" />
                               <p className="text-base">{selectedCustomer.phone}</p>
-                            </div>
-                          </div>
+                    </div>
+                  </div>
                           <div className="md:col-span-2">
                             <label className="text-sm font-medium text-default-500 mb-1 block">Address</label>
                             <div className="flex items-start gap-2">
                               <MapPin className="w-4 h-4 text-default-400 mt-1 flex-shrink-0" />
                               <p className="text-base break-words">{selectedCustomer.address}</p>
-                            </div>
-                          </div>
-                        </div>
+                    </div>
+                    </div>
+                  </div>
                       </CardBody>
                     </Card>
 
@@ -729,7 +729,7 @@ export default function CustomersPage() {
                       </CardHeader>
                       <CardBody>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
+                <div>
                             <label className="text-sm font-medium text-default-500 mb-1 block">Created</label>
                             <p className="text-base">
                               {new Date(selectedCustomer.created_at).toLocaleDateString('en-GB', {
@@ -740,7 +740,7 @@ export default function CustomersPage() {
                                 minute: '2-digit'
                               })}
                             </p>
-                          </div>
+                        </div>
                           {selectedCustomer.updated_at && selectedCustomer.updated_at !== selectedCustomer.created_at && (
                             <div>
                               <label className="text-sm font-medium text-default-500 mb-1 block">Last Updated</label>
@@ -753,13 +753,13 @@ export default function CustomersPage() {
                                   minute: '2-digit'
                                 })}
                               </p>
-                            </div>
+                      </div>
                           )}
-                        </div>
+                  </div>
                       </CardBody>
                     </Card>
-                  </div>
-                )}
+                </div>
+              )}
               </ModalBody>
               <ModalFooter>
                 <Button variant="light" onPress={onClose}>
@@ -777,7 +777,7 @@ export default function CustomersPage() {
                 </Button>
               </ModalFooter>
             </>
-          )}
+      )}
         </ModalContent>
       </Modal>
 

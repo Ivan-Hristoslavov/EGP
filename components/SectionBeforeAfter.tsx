@@ -59,13 +59,13 @@ export default function SectionBeforeAfter() {
             </p>
             <Card className="max-w-2xl mx-auto" shadow="lg">
               <CardBody className="p-12 text-center">
-                <div className="text-6xl mb-4">✨</div>
+              <div className="text-6xl mb-4">✨</div>
                 <h3 className="text-2xl font-bold text-foreground mb-4">
-                  Gallery Coming Soon
-                </h3>
+                Gallery Coming Soon
+              </h3>
                 <p className="text-default-600">
-                  We're currently updating our before and after gallery. Check back soon to see our amazing results!
-                </p>
+                We're currently updating our before and after gallery. Check back soon to see our amazing results!
+              </p>
               </CardBody>
             </Card>
           </div>

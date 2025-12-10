@@ -126,15 +126,15 @@ export function EditCustomerModal({
                     Please fix the errors below
                   </Chip>
                 )}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
                     label="Full Name"
                     placeholder="e.g., John Smith"
-                    value={formData.name}
-                    onChange={(e) => {
-                      setFormData({ ...formData, name: e.target.value });
-                      setErrors(prev => ({ ...prev, name: '' }));
-                    }}
+                  value={formData.name}
+                  onChange={(e) => {
+                    setFormData({ ...formData, name: e.target.value });
+                    setErrors(prev => ({ ...prev, name: '' }));
+                  }}
                     isRequired
                     isClearable
                     isInvalid={!!errors.name}
@@ -142,14 +142,14 @@ export function EditCustomerModal({
                     isDisabled={isLoading}
                   />
                   <Input
-                    type="email"
+                  type="email"
                     label="Email Address"
                     placeholder="e.g., john@example.com"
-                    value={formData.email}
-                    onChange={(e) => {
-                      setFormData({ ...formData, email: e.target.value });
-                      setErrors(prev => ({ ...prev, email: '' }));
-                    }}
+                  value={formData.email}
+                  onChange={(e) => {
+                    setFormData({ ...formData, email: e.target.value });
+                    setErrors(prev => ({ ...prev, email: '' }));
+                  }}
                     isRequired
                     isClearable
                     isInvalid={!!errors.email}
@@ -157,63 +157,63 @@ export function EditCustomerModal({
                     isDisabled={isLoading}
                   />
                   <Input
-                    type="tel"
+                  type="tel"
                     label="Phone Number"
                     placeholder="e.g., +44 7700 123456"
-                    value={formData.phone}
-                    onChange={(e) => {
-                      setFormData({ ...formData, phone: e.target.value });
-                      setErrors(prev => ({ ...prev, phone: '' }));
-                    }}
+                  value={formData.phone}
+                  onChange={(e) => {
+                    setFormData({ ...formData, phone: e.target.value });
+                    setErrors(prev => ({ ...prev, phone: '' }));
+                  }}
                     isRequired
                     isClearable
                     isInvalid={!!errors.phone}
                     errorMessage={errors.phone}
                     isDisabled={isLoading}
                   />
-                  <div className="md:col-span-2">
+              <div className="md:col-span-2">
                     <Textarea
                       label="Address"
                       placeholder="Full address including postcode"
-                      value={formData.address}
-                      onChange={(e) => {
-                        setFormData({ ...formData, address: e.target.value });
-                        setErrors(prev => ({ ...prev, address: '' }));
-                      }}
-                      rows={3}
+                  value={formData.address}
+                  onChange={(e) => {
+                    setFormData({ ...formData, address: e.target.value });
+                    setErrors(prev => ({ ...prev, address: '' }));
+                  }}
+                  rows={3}
                       isRequired
                       isInvalid={!!errors.address}
                       errorMessage={errors.address}
                       isDisabled={isLoading}
                     />
-                  </div>
+              </div>
                   <div className="md:col-span-2">
                     <Textarea
                       label="Notes"
                       placeholder="Any additional notes about this customer..."
-                      value={formData.notes}
-                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      rows={3}
+              value={formData.notes}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              rows={3}
                       isDisabled={isLoading}
-                    />
-                  </div>
+            />
+          </div>
                 </div>
               </div>
             </ModalBody>
             <ModalFooter>
               <Button variant="light" onPress={onClose} isDisabled={isLoading}>
-                Cancel
+              Cancel
               </Button>
               <Button
                 color="primary"
                 onPress={handleSubmit}
                 isLoading={isLoading}
               >
-                Update Customer
+                  Update Customer
               </Button>
             </ModalFooter>
-          </>
-        )}
+                </>
+              )}
       </ModalContent>
     </Modal>
   );

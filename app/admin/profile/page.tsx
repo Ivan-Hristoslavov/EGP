@@ -72,7 +72,7 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { profile: dbProfile, loading } = useAdminProfile();
+  const { profile: dbProfile, loading, error: profileError } = useAdminProfile();
   const { showSuccess, showError } = useToast();
   
   const [settings, setSettings] = useState<SettingsState>(defaultSettings);
@@ -105,32 +105,46 @@ export default function ProfilePage() {
   });
 
   useEffect(() => {
-    if (dbProfile && !loading) {
-      const [firstName, ...lastNameParts] = dbProfile.name.split(" ");
-      const lastName = lastNameParts.join(" ");
+    if (!loading) {
+      if (dbProfile) {
+        const [firstName, ...lastNameParts] = (dbProfile.name || "").split(" ");
+        const lastName = lastNameParts.join(" ");
 
-      // Use functional update to access current state and preserve avatar value
-      setProfileData((prev) => ({
-        firstName: firstName || "Admin",
-        lastName: lastName || "User",
-        email: dbProfile.email || process.env.NEXT_PUBLIC_ADMIN_EMAIL || "",
-        businessEmail: dbProfile.business_email || process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "",
-        phone: dbProfile.phone || "+44 7700 900123",
-        whatsapp: (dbProfile as any).whatsapp || dbProfile.phone || "+44 7700 900123",
-        about: dbProfile.about || "",
-        companyName: dbProfile.company_name || "EGP Aesthetics",
-        companyAddress: dbProfile.company_address || "809 Wandsworth Road, SW8 3JH, London, UK",
-        yearsOfExperience: dbProfile.years_of_experience || "",
-        specializations: dbProfile.specializations || "",
-        insuranceProvider: dbProfile.insurance_provider || "",
-        // Preserve existing avatar value from previous state (avatar is not stored in database)
-        avatar: prev.avatar || "",
-        howToFindUs: (dbProfile as any).how_to_find_us || "",
-        howToReachUs: (dbProfile as any).how_to_reach_us || "",
-        googleMapsAddress: (dbProfile as any).google_maps_address || dbProfile.company_address || "809 Wandsworth Road, SW8 3JH, London, UK",
-        transportOptions: (dbProfile as any).transport_options || {},
-        nearbyLandmarks: (dbProfile as any).nearby_landmarks || [],
-      }));
+        // Use functional update to access current state and preserve avatar value
+        setProfileData((prev) => ({
+          firstName: firstName || "Admin",
+          lastName: lastName || "User",
+          email: dbProfile.email || process.env.NEXT_PUBLIC_ADMIN_EMAIL || "",
+          businessEmail: dbProfile.business_email || process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "",
+          phone: dbProfile.phone || "+44 7700 900123",
+          whatsapp: (dbProfile as any).whatsapp || dbProfile.phone || "+44 7700 900123",
+          about: dbProfile.about || "",
+          companyName: dbProfile.company_name || "EGP Aesthetics",
+          companyAddress: dbProfile.company_address || "809 Wandsworth Road, SW8 3JH, London, UK",
+          yearsOfExperience: dbProfile.years_of_experience || "",
+          specializations: dbProfile.specializations || "",
+          insuranceProvider: dbProfile.insurance_provider || "",
+          // Preserve existing avatar value from previous state (avatar is not stored in database)
+          avatar: prev.avatar || "",
+          howToFindUs: (dbProfile as any).how_to_find_us || "",
+          howToReachUs: (dbProfile as any).how_to_reach_us || "",
+          googleMapsAddress: (dbProfile as any).google_maps_address || dbProfile.company_address || "809 Wandsworth Road, SW8 3JH, London, UK",
+          transportOptions: (dbProfile as any).transport_options || {},
+          nearbyLandmarks: (dbProfile as any).nearby_landmarks || [],
+        }));
+      } else {
+        // Initialize with default values if no profile exists
+        setProfileData((prev) => ({
+          ...prev,
+          firstName: prev.firstName || "Admin",
+          lastName: prev.lastName || "User",
+          email: prev.email || process.env.NEXT_PUBLIC_ADMIN_EMAIL || "",
+          businessEmail: prev.businessEmail || process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "",
+          phone: prev.phone || "+44 7700 900123",
+          companyName: prev.companyName || "EGP Aesthetics",
+          companyAddress: prev.companyAddress || "809 Wandsworth Road, SW8 3JH, London, UK",
+        }));
+      }
     }
   }, [dbProfile, loading]);
 
@@ -263,61 +277,75 @@ export default function ProfilePage() {
     );
   }
 
+  if (profileError) {
+    return (
+      <div className="w-full p-6">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-red-800 dark:text-red-300 mb-2">Error Loading Profile</h3>
+          <p className="text-red-600 dark:text-red-400">{profileError}</p>
+          <p className="text-sm text-red-500 dark:text-red-400 mt-2">
+            Please check that the admin profile exists in the database. You may need to initialize it first.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full">
-      {/* Profile Header */}
+          {/* Profile Header */}
       <div className="mb-6 p-6 bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 rounded-lg">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-6">
-            <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30 flex-shrink-0">
-              <User className="w-8 h-8 text-white" />
-            </div>
-            <div className="flex items-center gap-6 flex-wrap">
-              <div>
-                <h2 className="text-xl font-bold text-white font-playfair">
-                  {profileData.firstName} {profileData.lastName}
-                </h2>
-                <p className="text-white/90 text-sm">{profileData.companyName}</p>
-              </div>
-              <div className="flex items-center gap-4 text-white/80 text-sm">
-                <div className="flex items-center gap-1.5">
-                  <Mail className="w-4 h-4" />
-                  <span>{profileData.email}</span>
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="flex items-center gap-6">
+                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30 flex-shrink-0">
+                  <User className="w-8 h-8 text-white" />
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <Phone className="w-4 h-4" />
-                  <span>{profileData.phone}</span>
+                <div className="flex items-center gap-6 flex-wrap">
+                  <div>
+                    <h2 className="text-xl font-bold text-white font-playfair">
+                      {profileData.firstName} {profileData.lastName}
+                    </h2>
+                    <p className="text-white/90 text-sm">{profileData.companyName}</p>
+                  </div>
+                  <div className="flex items-center gap-4 text-white/80 text-sm">
+                    <div className="flex items-center gap-1.5">
+                      <Mail className="w-4 h-4" />
+                      <span>{profileData.email}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Phone className="w-4 h-4" />
+                      <span>{profileData.phone}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
       {/* Tabs Navigation - Moved to Top */}
       <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
         <nav className="flex space-x-1 overflow-x-auto">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center space-x-2 py-3 px-4 border-b-2 font-medium text-sm transition-all whitespace-nowrap ${
-                  activeTab === tab.id
+                      activeTab === tab.id
                     ? "border-rose-500 text-rose-600 dark:text-rose-400 bg-gray-50 dark:bg-gray-800"
                     : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </nav>
-      </div>
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
 
-      {/* Tab Content */}
+          {/* Tab Content */}
       <div className="space-y-6">
             {activeTab === "personal" && (
               <div className="space-y-6">

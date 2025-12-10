@@ -662,7 +662,7 @@ function BookingPageContent() {
                       </Card>
               );
             })}
-          </div>
+                      </div>
 
           <div className="border-t border-divider pt-5 mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
                       <Button
@@ -831,7 +831,7 @@ function BookingPageContent() {
               className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-white"
               endContent={<ArrowLeft className="w-4 h-4 rotate-180" />}
             >
-                Continue to Date Selection
+              Continue to Date Selection
             </Button>
         </div>
           )}
@@ -1538,8 +1538,8 @@ function BookingPageContent() {
                         >
                           Continue to Preview
                         </Button>
-                      </div>
-                    )}
+                </div>
+              )}
                   </>
                 );
               })() : null}
@@ -1549,8 +1549,8 @@ function BookingPageContent() {
                   <p className="text-sm text-gray-500 dark:text-gray-400 text-center px-4">
                     Select a day to show available hours
                   </p>
-                </div>
-              )}
+            </div>
+          )}
             </div>
           </div>
         </>
@@ -1617,14 +1617,14 @@ function BookingPageContent() {
                 ) : (
                   <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#f5f1e9] to-[#e4d9c8] dark:from-gray-800 dark:to-gray-700 flex items-center justify-center border-2 border-[#e4d9c8] dark:border-gray-700 flex-shrink-0 shadow-sm">
                     <Shield className="w-7 h-7 text-[#9d9585] dark:text-[#c9c1b0]" />
-                  </div>
+                    </div>
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Practitioner</p>
                   <p className="text-base font-bold text-gray-900 dark:text-white truncate leading-tight">{selectedTeamMemberData.name}</p>
                   <p className="text-xs text-gray-600 dark:text-gray-400 truncate mt-0.5">{selectedTeamMemberData.role}</p>
-                </div>
-              </div>
+                    </div>
+                  </div>
             </div>
           )}
           
@@ -1637,16 +1637,16 @@ function BookingPageContent() {
               <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Date</p>
             </div>
             <p className="text-sm font-bold text-gray-900 dark:text-white leading-tight">{formattedAppointmentDate}</p>
-          </div>
+                    </div>
 
           {/* Time */}
           <div className="p-4 rounded-xl border border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-all duration-200">
             <div className="flex items-center gap-2 mb-2">
               <div className="p-1.5 rounded-lg bg-[#f5f1e9] dark:bg-gray-700">
                 <Clock className="w-4 h-4 text-[#9d9585] dark:text-[#c9c1b0]" />
-              </div>
+                      </div>
               <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Time</p>
-            </div>
+                    </div>
             <p className="text-sm font-bold text-gray-900 dark:text-white leading-tight mb-2">{timeRange}</p>
             {selectedTimeSlots.length > 0 && (
               <p className="text-xs text-gray-600 dark:text-gray-400 font-mono bg-gray-50 dark:bg-gray-900/50 px-2 py-1 rounded inline-block">{selectedTimeSlots.join(' → ')}</p>
@@ -1663,18 +1663,18 @@ function BookingPageContent() {
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-500 dark:text-gray-400">Max Appointments</span>
                     <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{selectedDateSlots.workingHours.max_appointments}</span>
-                  </div>
+                </div>
                 )}
               </div>
             )}
-          </div>
-          
+        </div>
+        
           {/* Total */}
           <div className="p-4 rounded-xl border-2 border-[#9d9585] dark:border-[#c9c1b0] bg-gradient-to-br from-[#f5f1e9] via-white to-[#faf7f1] dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 shadow-md hover:shadow-lg transition-all duration-200">
-            <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-2">
               <div className="p-1.5 rounded-lg bg-[#9d9585]/20 dark:bg-[#c9c1b0]/20">
                 <CreditCard className="w-4 h-4 text-[#9d9585] dark:text-[#c9c1b0]" />
-              </div>
+          </div>
               <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total</p>
             </div>
             <p className="text-3xl font-bold text-[#9d9585] dark:text-[#c9c1b0] mb-1">£{totalAmount.toFixed(0)}</p>
@@ -1705,7 +1705,7 @@ function BookingPageContent() {
                     >
                       {item.duration}
                     </Chip>
-                  </div>
+          </div>
 
                   <div className="flex items-center justify-between mb-3 pb-3 border-b border-divider">
                     <span className="text-xs font-medium text-default-500 uppercase tracking-wide">Subtotal</span>

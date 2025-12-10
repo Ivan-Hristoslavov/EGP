@@ -34,8 +34,8 @@ export default function BlogPage() {
               onPress={() => window.location.reload()}
               color="primary"
               className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-white"
-            >
-              Retry
+          >
+            Retry
             </Button>
           </CardBody>
         </Card>
@@ -74,11 +74,11 @@ export default function BlogPage() {
           <Card className="py-12">
             <CardBody className="text-center">
               <p className="text-default-600 mb-4">
-                No blog posts available at the moment.
-              </p>
+              No blog posts available at the moment.
+            </p>
               <p className="text-default-500">
-                Check back soon for updates!
-              </p>
+              Check back soon for updates!
+            </p>
             </CardBody>
           </Card>
         ) : (
@@ -97,7 +97,7 @@ export default function BlogPage() {
                         <span className="hidden sm:inline">Read article</span>
                         <span className="sm:hidden">Read</span>
                       </Chip>
-                    </div>
+                  </div>
                     <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                       <Chip
                         size="sm"
@@ -159,7 +159,7 @@ export default function BlogPage() {
                         <span className="hidden sm:inline">Read article</span>
                         <span className="sm:hidden">Read</span>
                       </Chip>
-                    </div>
+                  </div>
                     <Chip
                       size="sm"
                       variant="flat"

@@ -151,8 +151,8 @@ export default function AdminSettingsPage() {
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30">
               <Settings className="w-6 h-6 text-white" />
-            </div>
-            <div>
+              </div>
+              <div>
               <p className="text-white/90 text-sm">Configure your aesthetic clinic settings</p>
             </div>
           </div>
@@ -163,20 +163,20 @@ export default function AdminSettingsPage() {
             onSelectionChange={(key) => setActiveTab(key as any)}
             className="w-full"
           >
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
                 <Tab
-                  key={tab.id}
+                    key={tab.id}
                   title={
                     <div className="flex items-center gap-2">
-                      <Icon className="w-4 h-4" />
-                      <span>{tab.label}</span>
+                    <Icon className="w-4 h-4" />
+                    <span>{tab.label}</span>
                     </div>
                   }
                 />
-              );
-            })}
+                );
+              })}
           </Tabs>
 
           <div className="p-6">
@@ -185,16 +185,16 @@ export default function AdminSettingsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   <Input
                     label="Business City"
-                    value={settings.businessCity}
-                    onChange={(e) => handleInputChange("businessCity", e.target.value)}
-                    placeholder="Enter city"
-                  />
+                      value={settings.businessCity}
+                      onChange={(e) => handleInputChange("businessCity", e.target.value)}
+                      placeholder="Enter city"
+                    />
                   <Input
                     label="Postcode"
-                    value={settings.businessPostcode}
-                    onChange={(e) => handleInputChange("businessPostcode", e.target.value)}
-                    placeholder="Enter postcode"
-                  />
+                      value={settings.businessPostcode}
+                      onChange={(e) => handleInputChange("businessPostcode", e.target.value)}
+                      placeholder="Enter postcode"
+                    />
                 </div>
 
                 <div className="border-t border-divider pt-8">
@@ -208,21 +208,21 @@ export default function AdminSettingsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   <Input
                     label="Consultation Rate (per session)"
-                    type="number"
-                    value={settings.consultationRate}
-                    onChange={(e) => handleInputChange("consultationRate", e.target.value)}
-                    placeholder="150"
+                        type="number"
+                        value={settings.consultationRate}
+                        onChange={(e) => handleInputChange("consultationRate", e.target.value)}
+                        placeholder="150"
                     startContent={<span className="text-default-500">£</span>}
                   />
                   <Input
                     label="Standard Treatment Rate (per session)"
-                    type="number"
-                    value={settings.standardRate}
-                    onChange={(e) => handleInputChange("standardRate", e.target.value)}
-                    placeholder="75"
+                        type="number"
+                        value={settings.standardRate}
+                        onChange={(e) => handleInputChange("standardRate", e.target.value)}
+                        placeholder="75"
                     startContent={<span className="text-default-500">£</span>}
-                  />
-                </div>
+                      />
+                    </div>
                 <div className="mt-8 pt-6 border-t border-divider">
                   <Button
                     color="primary"
@@ -241,16 +241,16 @@ export default function AdminSettingsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   <Input
                     label="Years of Experience"
-                    value={settings.yearsOfExperience}
-                    onChange={(e) => handleInputChange("yearsOfExperience", e.target.value)}
-                    placeholder="e.g., 10+ years"
-                  />
+                      value={settings.yearsOfExperience}
+                      onChange={(e) => handleInputChange("yearsOfExperience", e.target.value)}
+                      placeholder="e.g., 10+ years"
+                    />
                   <Input
                     label="Insurance Provider"
-                    value={settings.insuranceProvider}
-                    onChange={(e) => handleInputChange("insuranceProvider", e.target.value)}
-                    placeholder="Enter insurance provider"
-                  />
+                      value={settings.insuranceProvider}
+                      onChange={(e) => handleInputChange("insuranceProvider", e.target.value)}
+                      placeholder="Enter insurance provider"
+                    />
                   <div className="flex items-center">
                     <Checkbox
                       isSelected={settings.fullyInsured}
@@ -263,11 +263,11 @@ export default function AdminSettingsPage() {
 
                 <Textarea
                   label="Specializations"
-                  rows={3}
-                  value={settings.specializations}
-                  onChange={(e) => handleInputChange("specializations", e.target.value)}
-                  placeholder="e.g., Botox, Fillers, Skin Treatments"
-                />
+                    rows={3}
+                    value={settings.specializations}
+                    onChange={(e) => handleInputChange("specializations", e.target.value)}
+                    placeholder="e.g., Botox, Fillers, Skin Treatments"
+                  />
                 <div className="mt-8 pt-6 border-t border-divider">
                   <Button
                     color="primary"
@@ -278,7 +278,7 @@ export default function AdminSettingsPage() {
                     {isSaving ? "Saving..." : "Save Settings"}
                   </Button>
                 </div>
-              </div>
+            </div>
             )}
           </div>
         </CardBody>

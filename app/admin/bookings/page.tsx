@@ -515,11 +515,11 @@ export default function BookingsPage() {
   }, [editingBooking]);
 
   if (loading) {
-    return (
+        return (
       <div className="flex items-center justify-center h-64">
         <Spinner size="lg" />
-      </div>
-    );
+    </div>
+  );
   }
 
   return (
@@ -531,14 +531,14 @@ export default function BookingsPage() {
           startContent={<Plus className="w-4 h-4" />}
           onPress={() => setShowAddModal(true)}
         >
-          New Booking
+                  New Booking
         </Button>
-      </div>
+        </div>
 
       {/* Filters */}
       <Card className="border border-divider">
         <CardBody className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Input
               type="text"
               placeholder="Search bookings..."
@@ -555,7 +555,7 @@ export default function BookingsPage() {
                 const selected = Array.from(keys)[0] as string;
                 setStatusFilter(selected || "all");
               }}
-            >
+          >
               <SelectItem key="all">All Status</SelectItem>
               <SelectItem key="pending">Pending</SelectItem>
               <SelectItem key="scheduled">Scheduled</SelectItem>
@@ -570,7 +570,7 @@ export default function BookingsPage() {
                 const selected = Array.from(keys)[0] as string;
                 setDateFilter(selected || "all");
               }}
-            >
+          >
               <SelectItem key="all">All Dates</SelectItem>
               <SelectItem key="today">Today</SelectItem>
               <SelectItem key="tomorrow">Tomorrow</SelectItem>
@@ -581,17 +581,17 @@ export default function BookingsPage() {
               variant="bordered"
               startContent={<Filter className="w-4 h-4" />}
             >
-              More Filters
+            More Filters
             </Button>
-          </div>
+        </div>
         </CardBody>
       </Card>
 
       {/* Bookings Table */}
       <Card className="border border-divider">
         <CardBody className="p-0">
-          {filteredBookings.length === 0 ? (
-            <div className="text-center py-12">
+        {filteredBookings.length === 0 ? (
+          <div className="text-center py-12">
               <Calendar className="w-12 h-12 text-default-300 mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">No bookings found</h3>
               <p className="text-default-500 mb-4">Get started by creating your first booking.</p>
@@ -599,11 +599,11 @@ export default function BookingsPage() {
                 color="primary"
                 startContent={<Plus className="w-4 h-4" />}
                 onPress={() => setShowAddModal(true)}
-              >
-                Create Booking
+            >
+              Create Booking
               </Button>
-            </div>
-          ) : (
+        </div>
+      ) : (
               <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-default-100 border-b border-divider">
@@ -695,7 +695,7 @@ export default function BookingsPage() {
                             startContent={getStatusIcon(booking.status)}
                             size="sm"
                           >
-                            {booking.status}
+                        {booking.status}
                           </Chip>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-center">
@@ -724,9 +724,9 @@ export default function BookingsPage() {
                                 variant="light"
                                 size="sm"
                               >
-                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                  <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                                </svg>
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                                  </svg>
                               </Button>
                             </DropdownTrigger>
                             <DropdownMenu aria-label="Booking actions">
@@ -815,9 +815,9 @@ export default function BookingsPage() {
       <Modal
         isOpen={showDeleteModal}
         onClose={() => {
-          setShowDeleteModal(false);
-          setBookingToDelete(null);
-        }}
+                    setShowDeleteModal(false);
+                    setBookingToDelete(null);
+                  }}
         size="md"
       >
         <ModalContent>
@@ -860,9 +860,9 @@ export default function BookingsPage() {
       <Modal
         isOpen={showAddModal || showEditModal}
         onClose={() => {
-          setShowAddModal(false);
-          setShowEditModal(false);
-          setEditingBooking(null);
+                    setShowAddModal(false);
+                    setShowEditModal(false);
+                    setEditingBooking(null);
           resetForm();
         }}
         size="2xl"
@@ -884,26 +884,26 @@ export default function BookingsPage() {
                     <Input
                       label="Customer Name"
                       placeholder="Enter customer name or search..."
-                      value={formData.customer_name}
-                      onChange={(e) => {
-                        handleInputChange(e);
-                        setCustomerSearchTerm(e.target.value);
-                        if (e.target.value.length > 2) {
-                          searchCustomers(e.target.value);
-                          setShowCustomerSearch(true);
-                        } else {
-                          setShowCustomerSearch(false);
-                          setCustomerSearchResults([]);
-                        }
-                      }}
+                        value={formData.customer_name}
+                        onChange={(e) => {
+                          handleInputChange(e);
+                          setCustomerSearchTerm(e.target.value);
+                          if (e.target.value.length > 2) {
+                            searchCustomers(e.target.value);
+                            setShowCustomerSearch(true);
+                          } else {
+                            setShowCustomerSearch(false);
+                            setCustomerSearchResults([]);
+                          }
+                        }}
                       isRequired
                       isClearable
                       errorMessage={formErrors.customer_name}
                       isInvalid={!!formErrors.customer_name}
                       startContent={<Search className="w-4 h-4 text-default-400" />}
                     />
-                    {/* Customer Search Results */}
-                    {showCustomerSearch && (customerSearchResults.length > 0 || isSearchingCustomers) && (
+                      {/* Customer Search Results */}
+                      {showCustomerSearch && (customerSearchResults.length > 0 || isSearchingCustomers) && (
                       <Card className="absolute z-10 w-full mt-1 max-h-60 overflow-y-auto">
                         <CardBody className="p-0">
                           {isSearchingCustomers ? (
@@ -921,11 +921,11 @@ export default function BookingsPage() {
                               >
                                 <div className="text-left">
                                   <div className="font-medium">
-                                    {customer.first_name} {customer.last_name}
-                                  </div>
+                                  {customer.first_name} {customer.last_name}
+                                </div>
                                   <div className="text-xs text-default-500">
-                                    {customer.email} • {customer.phone}
-                                  </div>
+                                  {customer.email} • {customer.phone}
+                                </div>
                                 </div>
                               </Button>
                             ))
@@ -937,73 +937,73 @@ export default function BookingsPage() {
                         </CardBody>
                       </Card>
                     )}
-                  </div>
+                    </div>
 
                   <Input
-                    type="email"
+                          type="email"
                     label="Email"
                     placeholder="customer@email.com"
-                    value={formData.customer_email}
-                    onChange={handleInputChange}
+                      value={formData.customer_email}
+                      onChange={handleInputChange}
                     isClearable
                     errorMessage={formErrors.customer_email}
                     isInvalid={!!formErrors.customer_email}
                   />
 
                   <Input
-                    type="tel"
+                          type="tel"
                     label="Phone"
                     placeholder="+44 7700 900123"
-                    value={formData.customer_phone}
-                    onChange={handleInputChange}
+                      value={formData.customer_phone}
+                      onChange={handleInputChange}
                     isClearable
                   />
 
                   <Input
                     label="Service"
                     placeholder="Enter service name"
-                    value={formData.service}
-                    onChange={handleInputChange}
+                      value={formData.service}
+                      onChange={handleInputChange}
                     isRequired
                     isClearable
                     errorMessage={formErrors.service}
                     isInvalid={!!formErrors.service}
                   />
-                </div>
+                    </div>
 
                 {/* Date and Time */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
-                    type="date"
+                          type="date"
                     label="Date"
-                    value={formData.date}
-                    onChange={handleInputChange}
+                      value={formData.date}
+                      onChange={handleInputChange}
                     isRequired
                     errorMessage={formErrors.date}
                     isInvalid={!!formErrors.date}
                   />
 
                   <Input
-                    type="time"
+                          type="time"
                     label="Time"
-                    value={formData.time}
-                    onChange={handleInputChange}
+                      value={formData.time}
+                      onChange={handleInputChange}
                     isRequired
                     errorMessage={formErrors.time}
                     isInvalid={!!formErrors.time}
                   />
-                </div>
+                    </div>
 
                 {/* Amount and Status */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Input
-                    type="number"
+                        type="number"
                     label="Amount (£)"
                     placeholder="0.00"
-                    value={formData.amount}
-                    onChange={handleInputChange}
-                    step="0.01"
-                    min="0"
+                      value={formData.amount}
+                      onChange={handleInputChange}
+                        step="0.01"
+                        min="0"
                     isRequired
                     errorMessage={formErrors.amount}
                     isInvalid={!!formErrors.amount}
@@ -1016,7 +1016,7 @@ export default function BookingsPage() {
                       const selected = Array.from(keys)[0] as string;
                       handleInputChange({ target: { name: 'status', value: selected } } as any);
                     }}
-                  >
+                    >
                     <SelectItem key="pending">Pending</SelectItem>
                     <SelectItem key="scheduled">Scheduled</SelectItem>
                     <SelectItem key="completed">Completed</SelectItem>
@@ -1030,7 +1030,7 @@ export default function BookingsPage() {
                       const selected = Array.from(keys)[0] as string;
                       handleInputChange({ target: { name: 'payment_status', value: selected } } as any);
                     }}
-                  >
+                    >
                     <SelectItem key="pending">Pending</SelectItem>
                     <SelectItem key="paid">Paid</SelectItem>
                     <SelectItem key="refunded">Refunded</SelectItem>
@@ -1041,17 +1041,17 @@ export default function BookingsPage() {
                 <Textarea
                   label="Address"
                   placeholder="Enter service address"
-                  value={formData.address}
-                  onChange={handleInputChange}
+                    value={formData.address}
+                    onChange={handleInputChange}
                   minRows={3}
-                />
+                      />
 
                 {/* Notes */}
                 <Textarea
                   label="Notes"
                   placeholder="Enter any additional notes"
-                  value={formData.notes}
-                  onChange={handleInputChange}
+                    value={formData.notes}
+                    onChange={handleInputChange}
                   minRows={3}
                 />
               </form>
@@ -1061,10 +1061,10 @@ export default function BookingsPage() {
                   variant="light"
                   onPress={() => {
                     onClose();
-                    resetForm();
-                  }}
-                >
-                  Cancel
+                      resetForm();
+                    }}
+                  >
+                    Cancel
                 </Button>
                 <Button
                   color="primary"
@@ -1085,9 +1085,9 @@ export default function BookingsPage() {
       <Modal
         isOpen={showViewModal}
         onClose={() => {
-          setShowViewModal(false);
-          setSelectedBooking(null);
-        }}
+                    setShowViewModal(false);
+                    setSelectedBooking(null);
+                  }}
         size="2xl"
         scrollBehavior="inside"
       >
@@ -1104,41 +1104,41 @@ export default function BookingsPage() {
                       <label className="text-sm font-medium text-default-500">Customer Name</label>
                       <p className="text-base font-semibold">{selectedBooking.customer_name}</p>
                     </div>
-                    <div>
+                      <div>
                       <label className="text-sm font-medium text-default-500">Email</label>
                       <p className="text-base">{selectedBooking.customer_email || 'N/A'}</p>
-                    </div>
-                    <div>
+                      </div>
+                      <div>
                       <label className="text-sm font-medium text-default-500">Phone</label>
                       <p className="text-base">{selectedBooking.customer_phone || 'N/A'}</p>
-                    </div>
+                      </div>
                     <div>
                       <label className="text-sm font-medium text-default-500">Service</label>
                       <p className="text-base font-semibold">{selectedBooking.service}</p>
                     </div>
-                    <div>
+                      <div>
                       <label className="text-sm font-medium text-default-500">Date & Time</label>
                       <p className="text-base">
-                        {new Date(selectedBooking.date).toLocaleDateString()} at {formatTime(selectedBooking.time)}
-                      </p>
-                    </div>
-                    <div>
+                    {new Date(selectedBooking.date).toLocaleDateString()} at {formatTime(selectedBooking.time)}
+                  </p>
+                      </div>
+                      <div>
                       <label className="text-sm font-medium text-default-500 mb-2 block">Status</label>
                       <Chip
                         color={getStatusColor(selectedBooking.status)}
                         variant="flat"
                         startContent={getStatusIcon(selectedBooking.status)}
                       >
-                        {selectedBooking.status}
+                    {selectedBooking.status}
                       </Chip>
-                    </div>
+                      </div>
                     <div>
                       <label className="text-sm font-medium text-default-500 mb-2 block">Payment Status</label>
                       <Chip
                         color={getPaymentStatusColor(selectedBooking.payment_status)}
                         variant="flat"
                       >
-                        {selectedBooking.payment_status}
+                    {selectedBooking.payment_status}
                       </Chip>
                     </div>
                     <div>
@@ -1151,18 +1151,18 @@ export default function BookingsPage() {
                         £{selectedBooking.amount}
                       </p>
                     </div>
-                    {selectedBooking.address && (
-                      <div>
+                {selectedBooking.address && (
+                    <div>
                         <label className="text-sm font-medium text-default-500">Address</label>
                         <p className="text-base">{selectedBooking.address}</p>
-                      </div>
-                    )}
-                    {selectedBooking.notes && (
-                      <div>
+        </div>
+      )}
+                {selectedBooking.notes && (
+                    <div>
                         <label className="text-sm font-medium text-default-500">Notes</label>
                         <p className="text-base">{selectedBooking.notes}</p>
-                      </div>
-                    )}
+                    </div>
+                )}
                   </div>
                 )}
               </ModalBody>

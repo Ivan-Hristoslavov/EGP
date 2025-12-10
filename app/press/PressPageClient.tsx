@@ -232,11 +232,11 @@ export function PressPageClient({ awards, pressFeatures }: PressPageClientProps)
               <CardBody className="text-center">
                 <Award className="w-16 h-16 text-default-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-foreground mb-2">
-                  No press items available
-                </h3>
+                No press items available
+              </h3>
                 <p className="text-default-500">
-                  Check back soon for awards and press features.
-                </p>
+                Check back soon for awards and press features.
+              </p>
               </CardBody>
             </Card>
           ) : (
@@ -282,7 +282,7 @@ export function PressPageClient({ awards, pressFeatures }: PressPageClientProps)
 
                     {/* Badges - Top Right */}
                     <div className="absolute top-3 right-3 z-20 flex flex-col gap-2 items-end">
-                      {item.is_featured && (
+                    {item.is_featured && (
                         <span className="px-2.5 py-1.5 bg-yellow-500/90 text-white text-[10px] font-bold rounded-full flex items-center gap-1.5 shadow-lg">
                           <Star className="w-3 h-3" />
                           Featured
@@ -299,8 +299,8 @@ export function PressPageClient({ awards, pressFeatures }: PressPageClientProps)
                           <FileText className="w-3 h-3" />
                         )}
                         {item.type === 'award' ? 'Award' : 'Press'}
-                      </span>
-                    </div>
+                        </span>
+                      </div>
 
                     {/* Content Overlay */}
                     <div className="absolute inset-0 z-10 flex flex-col justify-between p-4 sm:p-5 md:p-6">
@@ -336,8 +336,8 @@ export function PressPageClient({ awards, pressFeatures }: PressPageClientProps)
                                 }`}
                               />
                             )}
+                            </div>
                           </div>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -382,7 +382,7 @@ export function PressPageClient({ awards, pressFeatures }: PressPageClientProps)
 
                     {/* Badges - Top Right */}
                     <div className="absolute top-3 right-3 z-20 flex flex-col gap-2 items-end">
-                      {item.is_featured && (
+                    {item.is_featured && (
                         <Chip
                           size="sm"
                           color="warning"
@@ -404,7 +404,7 @@ export function PressPageClient({ awards, pressFeatures }: PressPageClientProps)
                       >
                         {item.type === 'award' ? 'Award' : 'Press'}
                       </Chip>
-                    </div>
+                      </div>
 
                     {/* Content Overlay */}
                     <div className="absolute inset-0 z-10 flex flex-col justify-between p-4 sm:p-5 md:p-6">
@@ -417,20 +417,20 @@ export function PressPageClient({ awards, pressFeatures }: PressPageClientProps)
 
                       {/* Footer */}
                       <div className="bg-white/10 dark:bg-black/30 backdrop-blur-md rounded-lg sm:rounded-xl p-3 sm:p-4 border border-white/20 dark:border-white/10">
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex flex-col flex-1">
-                            <p className="text-white/90 font-semibold text-xs sm:text-sm">
-                              {item.type === 'award' 
-                                ? item.organisation || 'Award Recognition'
-                                : item.publication || 'Media Feature'}
-                            </p>
-                            <p className="text-white/70 text-[10px] sm:text-xs">
-                              {item.type === 'award' 
-                                ? item.year || new Date(item.date || '').getFullYear() || ''
-                                : item.date ? new Date(item.date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long' }) : ''}
-                            </p>
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex flex-col flex-1">
+                              <p className="text-white/90 font-semibold text-xs sm:text-sm">
+                                {item.type === 'award' 
+                                  ? item.organisation || 'Award Recognition'
+                                  : item.publication || 'Media Feature'}
+                              </p>
+                              <p className="text-white/70 text-[10px] sm:text-xs">
+                                {item.type === 'award' 
+                                  ? item.year || new Date(item.date || '').getFullYear() || ''
+                                  : item.date ? new Date(item.date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long' }) : ''}
+                              </p>
+                            </div>
                           </div>
-                        </div>
                       </div>
                     </div>
                   </div>
