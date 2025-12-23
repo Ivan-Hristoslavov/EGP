@@ -378,7 +378,7 @@ WHERE mt.slug = 'by-condition' AND sc.slug = 'pigmentation'
 ON CONFLICT (slug) DO NOTHING;
 
 INSERT INTO services (category_id, name, slug, description, duration, price, is_active, requires_consultation, downtime_days, results_duration_weeks, display_order)
-SELECT sc.id, 'Melasma Treatment', 'melasma-treatment', 'Target melasma and hormonal pigmentation with specialized treatments.', 90, 250.00, TRUE, TRUE, 5, 12, 2
+SELECT sc.id, 'Melasma Treatment', 'melasma-treatment', 'Target melasma and hormonal pigmentation with specialised treatments.', 90, 250.00, TRUE, TRUE, 5, 12, 2
 FROM service_categories sc
 JOIN main_tabs mt ON sc.main_tab_id = mt.id
 WHERE mt.slug = 'by-condition' AND sc.slug = 'pigmentation'
@@ -408,7 +408,7 @@ WHERE mt.slug = 'by-condition' AND sc.slug = 'hair-loss'
 ON CONFLICT (slug) DO NOTHING;
 
 INSERT INTO services (category_id, name, slug, description, duration, price, is_active, requires_consultation, downtime_days, results_duration_weeks, display_order)
-SELECT sc.id, 'Female Hair Loss Treatment', 'female-hair-loss-treatment', 'Specialized treatment for female hair loss and thinning.', 90, 400.00, TRUE, TRUE, 1, 12, 2
+SELECT sc.id, 'Female Hair Loss Treatment', 'female-hair-loss-treatment', 'Specialised treatment for female hair loss and thinning.', 90, 400.00, TRUE, TRUE, 1, 12, 2
 FROM service_categories sc
 JOIN main_tabs mt ON sc.main_tab_id = mt.id
 WHERE mt.slug = 'by-condition' AND sc.slug = 'hair-loss'

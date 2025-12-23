@@ -7,7 +7,7 @@ import { Card, CardBody, CardHeader, Button, Chip } from "@heroui/react";
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `Book Consultation | ${siteConfig.name}`,
-    description: "Book your consultation at EGP Aesthetics London. Expert aesthetic treatments with personalized care.",
+    description: "Book your consultation at EGP Aesthetics London. Expert aesthetic treatments with personalised care.",
     alternates: {
       canonical: `${siteConfig.url}/book-consultation`,
     },
@@ -24,7 +24,7 @@ export default function BookConsultationPage() {
       features: [
         "Skin analysis",
         "Treatment recommendations",
-        "Personalized plan",
+        "Personalised plan",
         "Price transparency"
       ],
       popular: true,
@@ -101,7 +101,7 @@ export default function BookConsultationPage() {
               Book Your Consultation
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
-              Start your aesthetic journey with a personalized consultation
+              Start your aesthetic journey with a personalised consultation
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link

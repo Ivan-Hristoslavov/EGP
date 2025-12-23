@@ -27,7 +27,7 @@ export default function SectionHeroAesthetics() {
     },
     {
       title: "Your Journey to Confidence",
-      subtitle: "Personalized treatments tailored to your unique goals",
+      subtitle: "Personalised treatments tailored to your unique goals",
       image: "/hero-images/chair.JPG",
     },
   ];

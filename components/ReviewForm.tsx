@@ -28,7 +28,7 @@ export function ReviewForm() {
     name: "",
     email: "",
     message: "",
-    rating: 0,
+    rating: 5,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitResult, setSubmitResult] = useState<null | {
@@ -76,7 +76,7 @@ export function ReviewForm() {
 
       setTimeout(() => {
         setSubmitResult(null);
-        setFormData({ name: "", email: "", message: "", rating: 0 });
+        setFormData({ name: "", email: "", message: "", rating: 5 });
       }, 5000);
     } catch (err: any) {
       showError(
@@ -136,10 +136,17 @@ export function ReviewForm() {
       <div className="max-w-2xl mx-auto px-6 sm:px-8">
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-[#3f3a31] shadow-lg mb-3 sm:mb-4">
-            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-            </svg>
+          <div className="flex items-center justify-center gap-1 sm:gap-1.5 mb-3 sm:mb-4">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <svg
+                key={star}
+                className="w-6 h-6 sm:w-7 sm:h-7 text-amber-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            ))}
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
             Share Your Experience

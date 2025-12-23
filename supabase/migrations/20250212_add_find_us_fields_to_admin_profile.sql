@@ -41,45 +41,47 @@ ADD COLUMN IF NOT EXISTS google_maps_address TEXT;
 -- Insert default data for existing records (if any)
 UPDATE admin_profile
 SET 
-  whatsapp = phone,
-  how_to_find_us = 'Our clinic is located in the heart of London''s medical district, easily accessible by public transport and car.',
-  how_to_reach_us = 'We are conveniently located near major transport links and landmarks.',
-  google_maps_address = '809 Wandsworth Road, SW8 3JH, London, UK',
-  transport_options = '{
-    "tube": [
-      {"station": "Bond Street Station", "lines": "Central & Jubilee lines", "distance": "5 min walk"},
-      {"station": "Oxford Circus Station", "lines": "Central, Bakerloo & Victoria lines", "distance": "7 min walk"},
-      {"station": "Regent''s Park Station", "lines": "Bakerloo line", "distance": "10 min walk"}
-    ],
-    "bus": [
-      {"route": "2, 13, 74, 113, 139, 159, 453", "stop": "Harley Street stop", "distance": ""},
-      {"route": "88, 453", "stop": "Cavendish Square stop", "distance": ""},
-      {"route": "2, 13, 74, 139, 159", "stop": "Oxford Circus stop", "distance": ""}
-    ],
-    "car": [
-      {"parking": "Q-Park Oxford Street", "distance": "5 min walk", "notes": ""},
-      {"parking": "NCP Car Park Cavendish Square", "distance": "3 min walk", "notes": ""},
-      {"parking": "Meter parking", "distance": "", "notes": "Available on surrounding streets"},
-      {"parking": "Valet parking service", "distance": "", "notes": "Advance booking required"}
-    ],
-    "walking": [
-      {"from": "Oxford Street", "distance": "5 minutes"},
-      {"from": "Regent Street", "distance": "7 minutes"},
-      {"from": "Bond Street", "distance": "10 minutes"},
-      {"from": "London''s medical district", "distance": "Located in the heart"}
-    ]
-  }'::jsonb,
-  nearby_landmarks = '[
-    {"name": "Vauxhall Bridge", "type": "Landmark", "distance": "~5 min walk"},
-    {"name": "Battersea Power Station", "type": "Landmark", "distance": "~10–12 min walk / ~5 min taxi"},
-    {"name": "St George''s Wharf", "type": "Residential", "distance": "~8–9 min walk"},
-    {"name": "King''s Road, Chelsea", "type": "Shopping", "distance": "~12–15 min by car"},
-    {"name": "Harrods", "type": "Department Store", "distance": "~15–18 min by public transport / ~10–12 min by car"},
-    {"name": "Big Ben (Elizabeth Tower)", "type": "Landmark", "distance": "~16–20 min by public transport"},
-    {"name": "Palace of Westminster", "type": "Landmark", "distance": "~16–20 min by public transport"},
-    {"name": "Westminster Abbey", "type": "Landmark", "distance": "~16–20 min by public transport"}
-  ]'::jsonb
-WHERE whatsapp IS NULL;
+  whatsapp = COALESCE(whatsapp, phone),
+  how_to_find_us = COALESCE(NULLIF(how_to_find_us, ''), 'Our clinic is located in South West London, easily accessible by public transport and car. We are situated on Hassocks Road in the SW16 area, close to Streatham and Tooting.'),
+  how_to_reach_us = COALESCE(NULLIF(how_to_reach_us, ''), 'We are conveniently located near major transport links. The clinic is easily reachable by bus, train, and car, with good parking options available nearby.'),
+  google_maps_address = COALESCE(NULLIF(google_maps_address, ''), company_address),
+  transport_options = CASE 
+    WHEN transport_options IS NULL OR transport_options::text = '{}' OR transport_options::text = '{"tube":[]}' OR transport_options::text = '"{\"tube\":[]}"' THEN '{
+      "tube": [
+        {"station": "Streatham Station", "lines": "Southern Railway", "distance": "~10 min walk"},
+        {"station": "Tooting Station", "lines": "Northern line", "distance": "~15 min walk / ~5 min bus"},
+        {"station": "Balham Station", "lines": "Northern line", "distance": "~15 min walk / ~5 min bus"}
+      ],
+      "bus": [
+        {"route": "118, 250", "stop": "Hassocks Road stop", "distance": "2 min walk"},
+        {"route": "57, 159", "stop": "Streatham High Road stop", "distance": "~5 min walk"},
+        {"route": "118, 250, 333", "stop": "Tooting Bec stop", "distance": "~8 min walk"}
+      ],
+      "car": [
+        {"parking": "On-street parking", "distance": "", "notes": "Available on Hassocks Road and surrounding streets"},
+        {"parking": "Nearby car parks", "distance": "~3-5 min walk", "notes": "Various options in the area"},
+        {"parking": "Residential parking", "distance": "", "notes": "Please check parking restrictions"}
+      ],
+      "walking": [
+        {"from": "Streatham High Road", "distance": "~10 minutes"},
+        {"from": "Tooting Bec Common", "distance": "~8 minutes"},
+        {"from": "Streatham Common", "distance": "~12 minutes"}
+      ]
+    }'::jsonb
+    ELSE transport_options
+  END,
+  nearby_landmarks = CASE
+    WHEN nearby_landmarks IS NULL OR nearby_landmarks::text = '[]' OR nearby_landmarks::text = '"[]"' THEN '[
+      {"name": "Streatham Common", "type": "Park", "distance": "~12 min walk"},
+      {"name": "Tooting Bec Common", "type": "Park", "distance": "~8 min walk"},
+      {"name": "Streatham High Road", "type": "Shopping", "distance": "~10 min walk"},
+      {"name": "Tooting Broadway", "type": "Shopping", "distance": "~15 min walk / ~5 min bus"},
+      {"name": "Balham", "type": "Area", "distance": "~15 min walk / ~5 min bus"},
+      {"name": "Norbury Park", "type": "Park", "distance": "~20 min walk / ~10 min bus"}
+    ]'::jsonb
+    ELSE nearby_landmarks
+  END
+WHERE how_to_find_us IS NULL OR how_to_find_us = '' OR how_to_reach_us IS NULL OR how_to_reach_us = '';
 
 -- Add comment to columns
 COMMENT ON COLUMN admin_profile.whatsapp IS 'WhatsApp contact number';

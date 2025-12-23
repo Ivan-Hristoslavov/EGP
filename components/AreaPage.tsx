@@ -127,7 +127,7 @@ export function AreaPage({ areaName, postcode, description, localKeywords, nearb
                   </svg>
                 ),
                 title: `Skin Analysis ${areaName}`,
-                description: "Advanced digital skin analysis to assess your skin condition and create a personalized treatment plan."
+                description: "Advanced digital skin analysis to assess your skin condition and create a personalised treatment plan."
               },
               {
                 icon: (

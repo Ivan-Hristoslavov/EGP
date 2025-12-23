@@ -99,7 +99,7 @@ export default function FaceTreatmentsPage() {
             Not Sure Which Treatment is Right for You?
           </h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Book your treatment now and our experts will create a personalized treatment plan
+            Book your treatment now and our experts will create a personalised treatment plan
           </p>
           <ButtonBookNow size="lg" variant="secondary" />
         </div>

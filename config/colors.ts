@@ -122,11 +122,24 @@ export const aestheticsColors = {
   },
 
   // Green - Primary button/badge color (change this value to update all green buttons/badges)
+  // RGB: rgb(70 76 69) = #464C45
   green: {
-    DEFAULT: "#464C45",  // Main green color for buttons, badges, and accents
+    DEFAULT: "#464C45",  // Main green color for buttons, badges, and accents (rgb(70 76 69))
     light: "#5a6259",   // Lighter variant
     dark: "#3a4039",    // Darker variant
     hover: "#3a4039",   // Hover state
+    // Background variants for cards and sections
+    bg: {
+      light: "#f0f7f0",      // Very light green background
+      DEFAULT: "#e8f5e8",    // Light green background
+      dark: "#d1e8d1",      // Medium light green background
+    },
+    // Border variants
+    border: {
+      light: "#c3d9c3",      // Light green border
+      DEFAULT: "#9fbf9f",    // Default green border
+      dark: "#7a9f7a",      // Dark green border
+    },
   },
 
   // Status Colors

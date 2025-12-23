@@ -2,19 +2,31 @@
 
 import { MessageCircle } from "lucide-react";
 import { siteConfig } from "@/config/site";
+import { useAdminProfile } from "@/hooks/useAdminProfile";
 
 interface ButtonWhatsAppProps {
   message?: string;
   className?: string;
   floating?: boolean;
+  whatsappNumber?: string;
 }
 
 export default function ButtonWhatsApp({ 
   message = "Hi! I'd like to book a treatment.",
   className = "",
-  floating = false 
+  floating = false,
+  whatsappNumber: propWhatsAppNumber
 }: ButtonWhatsAppProps) {
-  const whatsappNumber = siteConfig.contact.whatsapp.replace(/\s/g, "").replace(/\+/g, "");
+  const adminProfile = useAdminProfile();
+  
+  // Use prop if provided, otherwise try database, otherwise fallback to config
+  const whatsappNumber = (
+    propWhatsAppNumber || 
+    adminProfile?.profile?.whatsapp || 
+    adminProfile?.profile?.phone || 
+    siteConfig.contact.whatsapp
+  ).replace(/\s/g, "").replace(/\+/g, "");
+  
   const encodedMessage = encodeURIComponent(message);
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
 

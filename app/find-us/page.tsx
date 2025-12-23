@@ -70,8 +70,10 @@ export default function FindUsPage() {
     });
   }
 
-  // Use nearby landmarks from database
-  const nearbyLandmarks = displayFindUsData.nearbyLandmarks || [];
+  // Use nearby landmarks from database - ensure it's always an array
+  const nearbyLandmarks = Array.isArray(displayFindUsData.nearbyLandmarks) 
+    ? displayFindUsData.nearbyLandmarks 
+    : [];
 
 
   const handleDirections = () => {
@@ -117,17 +119,24 @@ export default function FindUsPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex justify-center mb-8">
+        <div className="flex justify-center items-center mb-8 w-full">
           <Tabs
             selectedKey={activeTab}
             onSelectionChange={(key) => setActiveTab(key as 'location' | 'contact' | 'hours')}
             color="primary"
-            className="w-full max-w-2xl"
+            className="w-full max-w-2xl mx-auto"
+            classNames={{
+              base: "w-full flex flex-col items-center",
+              tabList: "gap-2 w-full relative rounded-lg p-1 bg-default-100/50 justify-center",
+              cursor: "w-full bg-[#3a3428] dark:bg-[#d8c5a7]",
+              tab: "flex-1 justify-center px-4 h-12",
+              tabContent: "group-data-[selected=true]:text-white flex items-center justify-center gap-2"
+            }}
           >
             <Tab
               key="location"
               title={
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center gap-2">
                   <MapPin className="w-5 h-5" />
                   <span>Location & Directions</span>
                 </div>
@@ -136,7 +145,7 @@ export default function FindUsPage() {
             <Tab
               key="contact"
               title={
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center gap-2">
                   <Phone className="w-5 h-5" />
                   <span>Contact Info</span>
                 </div>
@@ -145,10 +154,10 @@ export default function FindUsPage() {
             <Tab
               key="hours"
               title={
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center gap-2">
                   <Clock className="w-5 h-5" />
                   <span>Opening Hours</span>
-          </div>
+                </div>
               }
             />
           </Tabs>

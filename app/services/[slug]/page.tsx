@@ -11,13 +11,13 @@ const servicesData = {
     category: 'Face',
     price: 'From £50',
     duration: '30 minutes',
-    description: 'Start your aesthetic journey with a personalized consultation',
+    description: 'Start your aesthetic journey with a personalised consultation',
     benefits: [
       'Expert skin analysis and assessment',
-      'Personalized treatment recommendations',
+      'Personalised treatment recommendations',
       'Transparent pricing information',
       'Professional advice from qualified practitioners',
-      'Customized treatment plan creation'
+      'Customised treatment plan creation'
     ],
     popular: true
   },
@@ -31,7 +31,7 @@ const servicesData = {
     benefits: [
       'Comprehensive skin assessment',
       'Detailed analysis report',
-      'Personalized recommendations',
+      'Personalised recommendations',
       'Before/after tracking',
       'Professional skin mapping'
     ],
@@ -192,7 +192,7 @@ const servicesData = {
     category: 'Face',
     price: '£159',
     duration: '30 minutes',
-    description: 'Specialized under-eye skin booster for dark circles and fine lines',
+    description: 'Specialised under-eye skin booster for dark circles and fine lines',
     benefits: [
       'Targeted under-eye treatment',
       'Reduces dark circles',
@@ -291,7 +291,7 @@ const servicesData = {
       'Immediate improvement',
       'Minimal downtime',
       'Results last 6-12 months',
-      'Customized to your facial features',
+      'Customised to your facial features',
       'Expert injection technique'
     ],
     popular: true

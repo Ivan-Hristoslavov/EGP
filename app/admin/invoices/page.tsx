@@ -44,12 +44,7 @@ export default function InvoicesPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<"table" | "cards">(() => {
-    if (typeof window !== "undefined") {
-      return (localStorage.getItem("invoices-view-mode") as "table" | "cards") || "table";
-    }
-    return "table";
-  });
+  const [viewMode, setViewMode] = useState<"table" | "cards">("table");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showSendModal, setShowSendModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -138,7 +133,6 @@ export default function InvoicesPage() {
 
   const handleViewModeChange = (mode: "table" | "cards") => {
     setViewMode(mode);
-    localStorage.setItem("invoices-view-mode", mode);
   };
 
   const handleCreateInvoice = async (invoiceData: FormData) => {

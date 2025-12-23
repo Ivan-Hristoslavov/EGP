@@ -263,7 +263,7 @@ export default function ButtonBookNow({
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-rose-500 font-bold">✓</span>
-                        <span>Personalized treatment plan</span>
+                        <span>Personalised treatment plan</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-rose-500 font-bold">✓</span>

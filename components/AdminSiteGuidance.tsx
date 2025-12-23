@@ -87,7 +87,7 @@ export function AdminSiteGuidance() {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
-              Site Guidance & Help Center
+              Site Guidance & Help Centre
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mt-1 transition-colors duration-300">
               Learn how to use your admin panel effectively with these comprehensive guides and tips.

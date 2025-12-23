@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Mail, CheckCircle, Gift } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { badgeBackgroundClass } from "@/config/badge-styles";
+import { aestheticsColors } from "@/config/colors";
 import { Input, Button, Card, CardBody, Chip, Spinner } from "@heroui/react";
 
 export default function SectionNewsletter() {
@@ -17,6 +18,13 @@ export default function SectionNewsletter() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!firstName.trim() || !email.trim() || !mobile.trim()) {
+      setStatus("error");
+      return;
+    }
+    
     setIsSubmitting(true);
     setStatus("idle");
 
@@ -92,21 +100,29 @@ export default function SectionNewsletter() {
   }
 
   return (
-    <section className="py-12 sm:py-16 md:py-20 bg-[#f5f1e9] dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white/12 dark:bg-gray-900/40 backdrop-blur-lg border border-[#e4d9c8]/60 dark:border-gray-700/60 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 shadow-2xl">
+      <section className="py-12 sm:py-16 md:py-20 bg-[#f5f1e9] dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto">
+            <div 
+              className="rounded-xl sm:rounded-2xl p-6 sm:p-8 shadow-lg"
+              style={{
+                backgroundColor: aestheticsColors.green.DEFAULT,
+                borderColor: aestheticsColors.green.border.dark,
+                borderWidth: '2px',
+                borderStyle: 'solid',
+              }}
+            >
             <div className="flex flex-col lg:flex-row lg:items-center gap-6 sm:gap-8">
               {/* Content */}
               <div className="flex-1">
-                <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-sm sm:text-base font-semibold mb-3 sm:mb-4`}>
+                <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/20 backdrop-blur-sm text-white text-sm sm:text-base font-semibold mb-3 sm:mb-4 rounded-full border border-white/30">
                   <Gift className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   <span>Exclusive Offer</span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3 sm:mb-4">
                   Get {siteConfig.newsletter.welcomeDiscountPercent}% Off Your First Visit
                 </h2>
-                <p className="text-base sm:text-lg md:text-xl text-gray-700 dark:text-gray-300 mb-4 sm:mb-6">
+                <p className="text-sm sm:text-base md:text-lg text-white/90 mb-4 sm:mb-6">
                   Subscribe to our newsletter and receive exclusive beauty tips, treatment guides, and special offers
                 </p>
 
@@ -115,14 +131,18 @@ export default function SectionNewsletter() {
                   <div className="flex flex-col gap-3">
                     <Input
                       type="text"
+                      isRequired
                       value={firstName}
                       onValueChange={setFirstName}
-                      placeholder="First Name (optional)"
+                      placeholder="First Name"
                       variant="bordered"
                       size="lg"
                       classNames={{
-                        input: "bg-white/85 dark:bg-gray-900/70",
-                        inputWrapper: "bg-white/85 dark:bg-gray-900/70 border-[#d8cbb1]/70 dark:border-gray-700",
+                        input: "bg-white dark:bg-gray-800",
+                        inputWrapper: "bg-white dark:bg-gray-800",
+                      }}
+                      style={{
+                        borderColor: aestheticsColors.green.border.DEFAULT,
                       }}
                     />
                     <Input
@@ -134,20 +154,27 @@ export default function SectionNewsletter() {
                       variant="bordered"
                       size="lg"
                       classNames={{
-                        input: "bg-white/85 dark:bg-gray-900/70",
-                        inputWrapper: "bg-white/85 dark:bg-gray-900/70 border-[#d8cbb1]/70 dark:border-gray-700",
+                        input: "bg-white dark:bg-gray-800",
+                        inputWrapper: "bg-white dark:bg-gray-800",
+                      }}
+                      style={{
+                        borderColor: aestheticsColors.green.border.DEFAULT,
                       }}
                     />
                     <Input
                       type="tel"
+                      isRequired
                       value={mobile}
                       onValueChange={setMobile}
-                      placeholder="Mobile Number (optional)"
+                      placeholder="Mobile Number"
                       variant="bordered"
                       size="lg"
                       classNames={{
-                        input: "bg-white/85 dark:bg-gray-900/70",
-                        inputWrapper: "bg-white/85 dark:bg-gray-900/70 border-[#d8cbb1]/70 dark:border-gray-700",
+                        input: "bg-white dark:bg-gray-800",
+                        inputWrapper: "bg-white dark:bg-gray-800",
+                      }}
+                      style={{
+                        borderColor: aestheticsColors.green.border.DEFAULT,
                       }}
                     />
                   </div>
@@ -170,23 +197,31 @@ export default function SectionNewsletter() {
                 )}
 
                 {/* Privacy */}
-                <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                <p className="mt-4 text-sm text-white/80">
                   By subscribing, you agree to receive marketing emails. Unsubscribe anytime. 
-                  <Link href="/privacy" className="underline hover:text-gray-900 dark:hover:text-gray-200 ml-1 font-semibold transition-colors">
+                  <Link href="/privacy" className="underline hover:text-white ml-1 font-semibold transition-colors">
                     Privacy Policy
                   </Link>
                 </p>
               </div>
 
-              {/* Visual Element - Rose/Pink Luxury Badge */}
+              {/* Visual Element - Green Badge */}
               <div className="hidden lg:block">
-                <div className="w-48 h-48 bg-gradient-to-br from-[#d8c5a7] via-[#c4b5a0] to-[#b59c74] dark:from-[#9d9585] dark:via-[#b5ad9d] dark:to-[#ddd5c3] rounded-full flex items-center justify-center border-4 border-white/50 dark:border-gray-700/50 shadow-2xl">
+                <div 
+                  className="w-32 h-32 rounded-full flex items-center justify-center shadow-lg"
+                  style={{
+                    background: `linear-gradient(to bottom right, ${aestheticsColors.green.DEFAULT}, ${aestheticsColors.green.dark})`,
+                    borderColor: aestheticsColors.green.border.light,
+                    borderWidth: '2px',
+                    borderStyle: 'solid',
+                  }}
+                >
                   <div className="text-center">
-                    <div className="text-5xl font-bold bg-gradient-to-br from-white via-gray-100 to-white dark:from-gray-100 dark:via-white dark:to-gray-100 bg-clip-text text-transparent mb-2">
+                    <div className="text-3xl font-bold text-white mb-1">
                       {siteConfig.newsletter.welcomeDiscountPercent}%
                     </div>
-                    <div className="text-white dark:text-gray-100 font-bold text-xl">OFF</div>
-                    <div className="text-white/90 dark:text-gray-200 text-sm mt-1 font-semibold">First Visit</div>
+                    <div className="text-white font-bold text-sm">OFF</div>
+                    <div className="text-white/90 text-xs mt-1 font-semibold">First Visit</div>
                   </div>
                 </div>
               </div>

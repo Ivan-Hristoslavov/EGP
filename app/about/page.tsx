@@ -209,7 +209,7 @@ export default async function AboutPage() {
                 Our Story
               </h2>
               <p className="text-gray-600 dark:text-gray-300 mb-6">
-                Founded with a passion for natural beauty enhancement, EGP Aesthetics has been serving clients in London with exceptional aesthetic treatments. Our clinic is built on the foundation of trust, expertise, and personalized care.
+                Founded with a passion for natural beauty enhancement, EGP Aesthetics has been serving clients in London with exceptional aesthetic treatments. Our clinic is built on the foundation of trust, expertise, and personalised care.
               </p>
               
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-6">
@@ -218,7 +218,7 @@ export default async function AboutPage() {
               <ul className="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-2">
                 <li>Safety and excellence in every treatment</li>
                 <li>Natural-looking results that enhance your beauty</li>
-                <li>Personalized care tailored to your unique needs</li>
+                <li>Personalised care tailored to your unique needs</li>
                 <li>Continuous education and training in latest techniques</li>
                 <li>Transparent pricing and honest consultations</li>
               </ul>

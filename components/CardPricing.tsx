@@ -19,7 +19,7 @@ const pricingTiers: PricingTier[] = [
     features: [
       "Same day availability",
       "Expert practitioner",
-      "Personalized treatment plan",
+      "Personalised treatment plan",
       "Product recommendations",
       "Free follow-up advice",
     ],

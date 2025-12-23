@@ -49,12 +49,7 @@ export default function CustomersPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
-  const [viewMode, setViewMode] = useState<"table" | "cards">(() => {
-    if (typeof window !== "undefined") {
-      return (localStorage.getItem("customers-view-mode") as "table" | "cards") || "table";
-    }
-    return "table";
-  });
+  const [viewMode, setViewMode] = useState<"table" | "cards">("table");
   const [newCustomer, setNewCustomer] = useState({
     name: "",
     email: "",
@@ -145,7 +140,6 @@ export default function CustomersPage() {
 
   const handleViewModeChange = (mode: "table" | "cards") => {
     setViewMode(mode);
-    localStorage.setItem("customers-view-mode", mode);
   };
 
   const handleAddCustomer = async () => {

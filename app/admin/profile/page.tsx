@@ -14,12 +14,8 @@ type ProfileData = {
   businessEmail: string;
   phone: string;
   whatsapp: string;
-  about: string;
   companyName: string;
   companyAddress: string;
-  yearsOfExperience: string;
-  specializations: string;
-  insuranceProvider: string;
   avatar: string;
   howToFindUs: string;
   howToReachUs: string;
@@ -47,11 +43,6 @@ type SettingsState = {
   businessPhone: string;
   businessEmail: string;
 
-  // Professional Settings
-  fullyInsured: boolean;
-  insuranceProvider: string;
-  yearsOfExperience: string;
-  specializations: string;
 };
 
 const defaultSettings: SettingsState = {
@@ -60,15 +51,10 @@ const defaultSettings: SettingsState = {
   businessAddress: "",
   businessPhone: "+44 7700 900123",
   businessEmail: "info@egp.com",
-
-  fullyInsured: true,
-  insuranceProvider: "Professional Indemnity Insurance",
-  yearsOfExperience: "",
-  specializations: "",
 };
 
 export default function ProfilePage() {
-  const [activeTab, setActiveTab] = useState<"personal" | "company" | "faq" | "security" | "business">("personal");
+  const [activeTab, setActiveTab] = useState<"company" | "faq" | "security" | "business">("company");
   const [isSaving, setIsSaving] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -84,12 +70,8 @@ export default function ProfilePage() {
     businessEmail: "",
     phone: "",
     whatsapp: "",
-    about: "",
     companyName: "",
     companyAddress: "",
-    yearsOfExperience: "",
-    specializations: "",
-    insuranceProvider: "",
     avatar: "",
     howToFindUs: "",
     howToReachUs: "",
@@ -110,28 +92,59 @@ export default function ProfilePage() {
         const [firstName, ...lastNameParts] = (dbProfile.name || "").split(" ");
         const lastName = lastNameParts.join(" ");
 
+        // Parse JSON strings for transport_options and nearby_landmarks
+        let transportOptions = {};
+        let nearbyLandmarks: Array<{ name: string; type: string; distance: string }> = [];
+        
+        try {
+          const transportOptionsRaw = (dbProfile as any).transport_options;
+          if (typeof transportOptionsRaw === 'string') {
+            transportOptions = JSON.parse(transportOptionsRaw);
+          } else if (transportOptionsRaw) {
+            transportOptions = transportOptionsRaw;
+          }
+        } catch (e) {
+          console.error('Error parsing transport_options:', e);
+        }
+
+        try {
+          const nearbyLandmarksRaw = (dbProfile as any).nearby_landmarks;
+          if (typeof nearbyLandmarksRaw === 'string') {
+            nearbyLandmarks = JSON.parse(nearbyLandmarksRaw);
+          } else if (Array.isArray(nearbyLandmarksRaw)) {
+            nearbyLandmarks = nearbyLandmarksRaw;
+          }
+        } catch (e) {
+          console.error('Error parsing nearby_landmarks:', e);
+        }
+
         // Use functional update to access current state and preserve avatar value
         setProfileData((prev) => ({
-          firstName: firstName || "Admin",
-          lastName: lastName || "User",
-          email: dbProfile.email || process.env.NEXT_PUBLIC_ADMIN_EMAIL || "",
+          firstName: firstName || "",
+          lastName: lastName || "",
+          email: dbProfile.email || "",
           businessEmail: dbProfile.business_email || process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "",
           phone: dbProfile.phone || "+44 7700 900123",
           whatsapp: (dbProfile as any).whatsapp || dbProfile.phone || "+44 7700 900123",
-          about: dbProfile.about || "",
           companyName: dbProfile.company_name || "EGP Aesthetics",
           companyAddress: dbProfile.company_address || "809 Wandsworth Road, SW8 3JH, London, UK",
-          yearsOfExperience: dbProfile.years_of_experience || "",
-          specializations: dbProfile.specializations || "",
-          insuranceProvider: dbProfile.insurance_provider || "",
           // Preserve existing avatar value from previous state (avatar is not stored in database)
           avatar: prev.avatar || "",
           howToFindUs: (dbProfile as any).how_to_find_us || "",
           howToReachUs: (dbProfile as any).how_to_reach_us || "",
           googleMapsAddress: (dbProfile as any).google_maps_address || dbProfile.company_address || "809 Wandsworth Road, SW8 3JH, London, UK",
-          transportOptions: (dbProfile as any).transport_options || {},
-          nearbyLandmarks: (dbProfile as any).nearby_landmarks || [],
+          transportOptions: transportOptions,
+          nearbyLandmarks: nearbyLandmarks,
         }));
+
+        // Load settings from database profile instead of localStorage
+        setSettings({
+          businessCity: (dbProfile.company_address || "").split(",").pop()?.trim() || "London",
+          businessPostcode: (dbProfile.company_address || "").match(/[A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2}/i)?.[0] || "SW1A 1AA",
+          businessAddress: dbProfile.company_address || "",
+          businessPhone: dbProfile.phone || "+44 7700 900123",
+          businessEmail: dbProfile.business_email || process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "",
+        });
       } else {
         // Initialize with default values if no profile exists
         setProfileData((prev) => ({
@@ -157,17 +170,11 @@ export default function ProfilePage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          firstName: profileData.firstName,
-          lastName: profileData.lastName,
           businessEmail: profileData.businessEmail,
           phone: profileData.phone,
           whatsapp: profileData.whatsapp,
-          about: profileData.about,
           companyName: profileData.companyName,
           companyAddress: profileData.companyAddress,
-          yearsOfExperience: profileData.yearsOfExperience,
-          specializations: profileData.specializations,
-          insuranceProvider: profileData.insuranceProvider,
           howToFindUs: profileData.howToFindUs,
           howToReachUs: profileData.howToReachUs,
           googleMapsAddress: profileData.googleMapsAddress,
@@ -226,24 +233,40 @@ export default function ProfilePage() {
     }
   };
 
-  useEffect(() => {
-    // Load settings from localStorage
-    const savedSettings = localStorage.getItem("admin-settings");
-    if (savedSettings) {
-      setSettings({ ...defaultSettings, ...JSON.parse(savedSettings) });
-    }
-  }, []);
+  const handleSettingsInputChange = (key: keyof SettingsState, value: any) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+  };
 
   const handleSettingsSave = async () => {
     setIsSaving(true);
     try {
-      // Save to localStorage (in real app, this would be API call)
-      localStorage.setItem("admin-settings", JSON.stringify(settings));
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      showSuccess("Success", "Settings saved successfully!");
+      // Save settings to database via profile API
+      const response = await fetch("/api/admin/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          businessEmail: settings.businessEmail,
+          phone: settings.businessPhone,
+          whatsapp: profileData.whatsapp,
+          companyName: profileData.companyName,
+          companyAddress: settings.businessAddress,
+          howToFindUs: profileData.howToFindUs,
+          howToReachUs: profileData.howToReachUs,
+          googleMapsAddress: profileData.googleMapsAddress,
+          transportOptions: profileData.transportOptions,
+          nearbyLandmarks: profileData.nearbyLandmarks,
+        }),
+      });
+
+      if (response.ok) {
+        showSuccess("Success", "Settings saved successfully!");
+        // Refresh profile data
+        window.location.reload();
+      } else {
+        showError("Error", "Failed to save settings. Please try again.");
+      }
     } catch (error) {
       showError("Error", "Failed to save settings. Please try again.");
     } finally {
@@ -251,12 +274,7 @@ export default function ProfilePage() {
     }
   };
 
-  const handleSettingsInputChange = (key: keyof SettingsState, value: any) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
-  };
-
   const tabs = [
-    { id: "personal", label: "Personal & Professional", icon: User },
     { id: "company", label: "Company & Business", icon: Building2 },
     { id: "business", label: "Business & Hours", icon: Settings },
     { id: "faq", label: "FAQ", icon: HelpCircle },
@@ -303,14 +321,14 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-6 flex-wrap">
                   <div>
                     <h2 className="text-xl font-bold text-white font-playfair">
-                      {profileData.firstName} {profileData.lastName}
+                      {dbProfile?.name || profileData.companyName}
                     </h2>
                     <p className="text-white/90 text-sm">{profileData.companyName}</p>
                   </div>
                   <div className="flex items-center gap-4 text-white/80 text-sm">
                     <div className="flex items-center gap-1.5">
                       <Mail className="w-4 h-4" />
-                      <span>{profileData.email}</span>
+                      <span>{dbProfile?.email || profileData.businessEmail}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Phone className="w-4 h-4" />
@@ -347,181 +365,55 @@ export default function ProfilePage() {
 
           {/* Tab Content */}
       <div className="space-y-6">
-            {activeTab === "personal" && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      First Name *
-                    </label>
-                    <input
-                      type="text"
-                      value={profileData.firstName}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, firstName: e.target.value }))}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                      placeholder="Enter your first name"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Last Name *
-                    </label>
-                    <input
-                      type="text"
-                      value={profileData.lastName}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, lastName: e.target.value }))}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                      placeholder="Enter your last name"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Email *
-                    </label>
-                    <input
-                      type="email"
-                      value={profileData.email}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                      placeholder="Enter your email"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Business Email
-                    </label>
-                    <input
-                      type="email"
-                      value={profileData.businessEmail}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, businessEmail: e.target.value }))}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                      placeholder="Enter business email"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Phone Number
-                    </label>
-                    <input
-                      type="tel"
-                      value={profileData.phone}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value }))}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                      placeholder="Enter your phone number"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    About You
-                  </label>
-                  <textarea
-                    rows={4}
-                    value={profileData.about}
-                    onChange={(e) => setProfileData(prev => ({ ...prev, about: e.target.value }))}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all resize-none"
-                    placeholder="Tell us about yourself and your expertise..."
-                  />
-                </div>
-
-                {/* Professional Information Section */}
-                <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        Years of Experience
-                      </label>
-                      <input
-                        type="text"
-                        value={settings.yearsOfExperience}
-                        onChange={(e) => handleSettingsInputChange("yearsOfExperience", e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                        placeholder="e.g., 10+ years"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        Insurance Provider
-                      </label>
-                      <input
-                        type="text"
-                        value={settings.insuranceProvider}
-                        onChange={(e) => handleSettingsInputChange("insuranceProvider", e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                        placeholder="Enter insurance provider"
-                      />
-                    </div>
-
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="fullyInsured"
-                        checked={settings.fullyInsured}
-                        onChange={(e) => handleSettingsInputChange("fullyInsured", e.target.checked)}
-                        className="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 rounded"
-                      />
-                      <label htmlFor="fullyInsured" className="ml-2 block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                        Fully Insured
-                      </label>
-                    </div>
-                  </div>
-
-                  <div className="mt-6">
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Specializations
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={settings.specializations}
-                      onChange={(e) => handleSettingsInputChange("specializations", e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all resize-none"
-                      placeholder="e.g., Botox, Fillers, Skin Treatments"
-                    />
-                  </div>
-                </div>
-
-                <div className="pt-4">
-                  <button
-                    onClick={handleSave}
-                    disabled={isSaving}
-                    className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 text-white font-semibold rounded-xl hover:from-rose-600 hover:via-pink-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isSaving ? "Saving..." : "Save Changes"}
-                  </button>
-                </div>
-              </div>
-            )}
-
             {activeTab === "company" && (
               <div className="space-y-6">
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Company Name *
-                    </label>
-                    <input
-                      type="text"
-                      value={profileData.companyName}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, companyName: e.target.value }))}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                      placeholder="Enter company name"
-                    />
-                  </div>
+                {/* Business Information Section */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Business Information</h3>
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Business Email
+                      </label>
+                      <input
+                        type="email"
+                        value={profileData.businessEmail}
+                        onChange={(e) => setProfileData(prev => ({ ...prev, businessEmail: e.target.value }))}
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                        placeholder="Enter business email"
+                      />
+                    </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      WhatsApp Number
-                    </label>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        value={profileData.phone}
+                        onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value }))}
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                        placeholder="Enter your phone number"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Company Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={profileData.companyName}
+                        onChange={(e) => setProfileData(prev => ({ ...prev, companyName: e.target.value }))}
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                        placeholder="Enter company name"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        WhatsApp Number
+                      </label>
                     <input
                       type="text"
                       value={profileData.whatsapp}
@@ -1042,6 +934,7 @@ export default function ProfilePage() {
                       Add Landmark
                     </button>
                   </div>
+                </div>
                 </div>
 
                 <div className="pt-4">
