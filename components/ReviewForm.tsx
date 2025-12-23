@@ -14,8 +14,8 @@ function isValidEmail(value: string) {
 function getValidationMessage(formData: { name: string; email: string; message: string; rating: number; }) {
   if (!formData.name.trim()) return "Name is required.";
   if (formData.name.trim().length < 2) return "Name must be at least 2 characters.";
-  if (!formData.email.trim()) return "Email is required.";
-  if (!isValidEmail(formData.email)) return "Please enter a valid email.";
+  // Email is optional, but if provided, it must be valid
+  if (formData.email.trim() && !isValidEmail(formData.email)) return "Please enter a valid email.";
   if (!formData.message.trim()) return "Review message is required.";
   if (formData.message.trim().length < 20) return "Review must be at least 20 characters.";
   if (formData.message.trim().length > 1000) return "Review cannot exceed 1000 characters.";
@@ -39,8 +39,8 @@ export function ReviewForm() {
   }>(null);
 
   const nameInvalid = formData.name !== "" && formData.name.trim().length < 2;
-  const emailEmpty = formData.email.trim() === "";
-  const emailInvalid = formData.email !== "" && !isValidEmail(formData.email);
+  // Email is optional, only validate format if provided
+  const emailInvalid = formData.email.trim() !== "" && !isValidEmail(formData.email);
   const messageTooShort = formData.message !== "" && formData.message.trim().length < 20;
   const messageTooLong = formData.message.trim().length > 1000;
   const messageInvalid = formData.message !== "" && (messageTooShort || messageTooLong);
@@ -192,13 +192,12 @@ export function ReviewForm() {
                 variant="bordered"
                 radius="lg"
                 type="email"
-                label="Email"
+                label="Email (Optional)"
                 placeholder="john@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-                isInvalid={emailEmpty || emailInvalid}
-                errorMessage={emailEmpty ? "Email is required" : emailInvalid ? "Invalid email format" : undefined}
-                isRequired
+                isInvalid={emailInvalid}
+                errorMessage={emailInvalid ? "Invalid email format" : undefined}
                 classNames={{
                   base: "w-full",
                   label: "text-sm font-semibold text-[#6b5f4b] dark:text-gray-200",

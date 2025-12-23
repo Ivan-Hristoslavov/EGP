@@ -183,7 +183,7 @@ export default function SectionNewsletter() {
                     isLoading={isSubmitting}
                     disabled={isSubmitting}
                     size="lg"
-                    className="w-full bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-[#3f3a31] font-bold shadow-xl hover:shadow-2xl"
+                    className="w-full bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white font-bold shadow-xl hover:shadow-2xl"
                     startContent={!isSubmitting && <Mail className="w-5 h-5" />}
                   >
                     {isSubmitting ? "Subscribing..." : "Get My Discount Code"}

@@ -450,55 +450,6 @@ export function AdminHeroManager() {
 
   return (
     <div className="w-full space-y-6">
-      {/* Luxury Header */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 rounded-3xl shadow-2xl">
-        <div className="absolute inset-0 bg-black/10"></div>
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl"></div>
-        
-        <div className="relative px-6 sm:px-8 py-8 sm:py-10">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30">
-                  <ImageIcon className="w-6 h-6 text-white" />
-                </div>
-                <h1 className="text-3xl sm:text-4xl font-bold text-white font-playfair">
-                  Hero Section Manager
-                </h1>
-              </div>
-              <p className="text-white/90 text-base sm:text-lg max-w-2xl">
-                Customize your homepage hero section with images, content, and call-to-action buttons
-              </p>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <Chip 
-                size="lg" 
-                variant="flat" 
-                className={`${
-                  formData.is_active 
-                    ? "bg-success-500/20 text-white border-success-300/30" 
-                    : "bg-warning-500/20 text-white border-warning-300/30"
-                } border backdrop-blur-sm`}
-              >
-                {formData.is_active ? (
-                  <>
-                    <CheckCircle2 className="w-4 h-4 mr-1" />
-                    Active
-                  </>
-                ) : (
-                  <>
-                    <AlertCircle className="w-4 h-4 mr-1" />
-                    Inactive
-                  </>
-                )}
-              </Chip>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="border border-divider hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
@@ -585,19 +536,30 @@ export function AdminHeroManager() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[0, 1, 2].map((index) => (
               <div key={index} className="space-y-4">
-                <div className="flex items-center justify-between mb-3">
-                  <label className="text-sm font-bold text-foreground flex items-center gap-2">
-                    <span className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 text-white flex items-center justify-center text-sm font-bold shadow-md">
-                      {index + 1}
-                    </span>
-                    <span className="text-base">Image {index + 1}</span>
-                  </label>
-                  {imagePreviews[index] && (
-                    <Chip size="sm" color="success" variant="flat" className="font-semibold">
-                      <CheckCircle2 className="w-3 h-3 mr-1" />
-                      Uploaded
-                    </Chip>
-                  )}
+                <div className="flex flex-col gap-1 mb-3 items-end">
+                  <div className="flex items-center justify-between gap-2 w-full">
+                    {/* Left side: index number badge + Image X */}
+                    <div className="flex items-center gap-2">
+                      <span className="w-9 h-9 flex items-center justify-center rounded-xl bg-gradient-to-br from-primary-500/80 to-secondary-400/80 shadow-lg border border-primary-200 dark:border-secondary-900 font-extrabold text-white text-lg">
+                        {index + 1}
+                      </span>
+                      <span className="text-base font-semibold text-white">
+                        Image {index + 1}
+                      </span>
+                    </div>
+                    {/* Right side: Uploaded chip */}
+                    {imagePreviews[index] && (
+                      <Chip
+                        size="sm"
+                        color="success"
+                        variant="solid"
+                        className="font-semibold px-2 py-0.5 ml-2 text-white"
+                        startContent={<CheckCircle2 className="w-3 h-3 text-white" />}
+                      >
+                        Uploaded
+                      </Chip>
+                    )}
+                  </div>
                 </div>
                 
                 <div className="relative">
