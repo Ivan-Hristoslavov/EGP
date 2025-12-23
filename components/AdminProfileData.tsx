@@ -103,7 +103,7 @@ function ListManager({ value, onChange, placeholder, label, description }: ListM
 }
 
 interface AdminProfileDataProps {
-  type: keyof AdminProfile | 'response_time' | 'company_status' | 'years_of_experience';
+  type: keyof AdminProfile | 'company_status';
   fallback?: string;
   className?: string;
   asList?: boolean;
@@ -117,30 +117,14 @@ export function AdminProfileData({ type, fallback = '', className, asList = fals
     return <span className={className}>{fallback}</span>;
   }
 
-  // Handle special cases that should come from admin settings
-  if (type === 'response_time') {
-    const value = adminSettings?.responseTime || profile?.response_time || fallback;
-    return <span className={className}>{value}</span>;
-  }
-
   // Handle company_status from admin settings
   if (type === 'company_status') {
     const value = adminSettings?.companyStatus || fallback;
     return <span className={className}>{value}</span>;
   }
 
-  // Handle years_of_experience to ensure it includes "Years"
-  if (type === 'years_of_experience') {
-    const value = profile?.years_of_experience || fallback;
-    // If the value doesn't already include "Years", add it
-    const displayValue = value && !value.toLowerCase().includes('years') 
-      ? `${value} Years` 
-      : value;
-    return <span className={className}>{displayValue}</span>;
-  }
-
-  // Handle list-based fields (certifications and specializations)
-  if (asList && (type === 'certifications' || type === 'specializations')) {
+  // Handle list-based fields (removed - no longer used)
+  if (asList && false) {
     const value = (profile as any)?.[type] || fallback;
     
     if (!value) {

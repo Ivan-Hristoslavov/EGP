@@ -1292,11 +1292,11 @@ export default function AdminServicesPage() {
             setIsCategoryModalOpen(false);
             resetCategoryForm();
           }}
-          size="full"
+          size="md"
           classNames={{
             backdrop: "bg-black/50 backdrop-blur-sm",
             base: "bg-white dark:bg-gray-800",
-            wrapper: "items-end sm:items-center",
+            wrapper: "items-center",
           }}
         >
           <ModalContent>

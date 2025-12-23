@@ -47,12 +47,12 @@ export default function BabyBotoxPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen bg-white dark:bg-egp-green-darker">
       {/* Hero Section */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-rose-50 to-pink-50 dark:from-gray-800 dark:to-gray-900">
+      <section className="py-16 md:py-24 bg-gradient-to-br from-egp-beige-lighter to-egp-beige-light dark:from-egp-green-dark dark:to-egp-green-darker">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-rose-100 dark:bg-rose-900/30 rounded-full text-rose-700 dark:text-rose-400 text-sm font-semibold mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-egp-green/20 dark:bg-egp-green-dark rounded-full text-egp-green dark:text-white text-sm font-semibold mb-6">
               <Star className="w-4 h-4" />
               <span>Anti-Wrinkle Injections</span>
             </div>
@@ -65,14 +65,14 @@ export default function BabyBotoxPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/book-consultation"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-lg font-semibold rounded-full hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-egp-green to-egp-green-dark text-white text-lg font-semibold rounded-full hover:from-egp-green-dark hover:to-egp-green-darker transition-all shadow-lg hover:shadow-xl"
               >
                 <Calendar className="w-5 h-5" />
                 Book Consultation - £199
               </Link>
               <Link
                 href={`tel:${siteConfig.contact.phone}`}
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-rose-500 text-rose-500 dark:text-rose-400 text-lg font-semibold rounded-full hover:bg-rose-500 hover:text-white transition-all"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-egp-green text-egp-green dark:text-white text-lg font-semibold rounded-full hover:bg-egp-green hover:text-white transition-all"
               >
                 <Phone className="w-5 h-5" />
                 Call Us
@@ -97,14 +97,14 @@ export default function BabyBotoxPage() {
                 </p>
                 <div className="grid grid-cols-2 gap-6 mb-8">
                   <div className="flex items-center gap-3">
-                    <Clock className="w-6 h-6 text-rose-500" />
+                    <Clock className="w-6 h-6 text-egp-green" />
                     <div>
                       <div className="font-semibold text-gray-900 dark:text-white">Duration</div>
                       <div className="text-sm text-gray-600 dark:text-gray-300">15-20 minutes</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Shield className="w-6 h-6 text-rose-500" />
+                    <Shield className="w-6 h-6 text-egp-green" />
                     <div>
                       <div className="font-semibold text-gray-900 dark:text-white">Results</div>
                       <div className="text-sm text-gray-600 dark:text-gray-300">3-4 months</div>
@@ -133,7 +133,7 @@ export default function BabyBotoxPage() {
       </section>
 
       {/* Procedure Steps */}
-      <section className="py-16 md:py-24 bg-gray-50 dark:bg-gray-800">
+      <section className="py-16 md:py-24 bg-egp-beige-lighter dark:bg-egp-green-dark">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white text-center mb-12">
@@ -143,9 +143,9 @@ export default function BabyBotoxPage() {
               {procedureSteps.map((step, index) => (
                 <div
                   key={index}
-                  className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all"
+                  className="bg-white dark:bg-egp-green rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all"
                 >
-                  <div className="w-12 h-12 bg-gradient-to-br from-rose-500 to-pink-500 rounded-full flex items-center justify-center mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-egp-green to-egp-green-dark rounded-full flex items-center justify-center mb-4">
                     <span className="text-white font-bold text-lg">{step.step}</span>
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
@@ -165,11 +165,11 @@ export default function BabyBotoxPage() {
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="bg-gradient-to-br from-rose-50 to-pink-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 mb-8">
+            <div className="bg-gradient-to-br from-egp-beige-lighter to-egp-beige-light dark:from-egp-green-dark dark:to-egp-green rounded-2xl p-8 mb-8">
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
                 Baby Botox Treatment
               </h2>
-              <div className="text-4xl font-bold text-rose-600 dark:text-rose-400 mb-4">
+              <div className="text-4xl font-bold text-egp-green dark:text-white mb-4">
                 £199
               </div>
               <p className="text-gray-600 dark:text-gray-300 mb-6">
@@ -185,7 +185,7 @@ export default function BabyBotoxPage() {
                 </Link>
                 <Link
                   href="/services"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-[#9d9585] text-[#9d9585] dark:text-[#b5ad9d] text-lg font-semibold rounded-full hover:bg-[#9d9585] hover:text-white transition-all"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-egp-green hover:bg-egp-green-dark text-white text-lg font-semibold rounded-full transition-all shadow-lg hover:shadow-xl"
                 >
                   <ArrowRight className="w-5 h-5" />
                   View All Services

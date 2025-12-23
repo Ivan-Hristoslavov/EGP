@@ -175,7 +175,7 @@ export default function BookTreatmentNowPage() {
               </Link>
               <Link
                 href="/services"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-rose-500 text-rose-500 dark:text-rose-400 text-lg font-semibold rounded-full hover:bg-rose-500 hover:text-white transition-all"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-egp-green hover:bg-egp-green-dark text-white text-lg font-semibold rounded-full transition-all shadow-lg hover:shadow-xl"
               >
                 <ArrowRight className="w-5 h-5" />
                 View All Services

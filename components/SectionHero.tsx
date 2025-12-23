@@ -127,7 +127,7 @@ export function SectionHero() {
                 </svg>
               </div>
               <span className="text-white text-lg font-medium whitespace-nowrap overflow-hidden text-ellipsis">
-                <AdminProfileData type="years_of_experience" fallback="10+ Years" />
+                10+ Years
               </span>
             </div>
           </div>
@@ -171,7 +171,7 @@ export function SectionHero() {
                   clipRule="evenodd"
                 />
               </svg>
-              <AdminProfileData type="response_time" fallback="45-minute" /> response time
+              45-minute response time
             </div>
           </div>
 

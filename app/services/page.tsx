@@ -7,7 +7,7 @@ import { Search, Filter, ArrowLeft, Info, Plus, Clock, CheckCircle, X } from "lu
 import Link from 'next/link';
 import { useServices } from '@/hooks/useServices';
 import { aestheticsColors } from "@/config/colors";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Card, CardBody, Chip, Spinner, Select, SelectItem } from "@heroui/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Card, CardBody, CardHeader, Chip, Spinner, Select, SelectItem } from "@heroui/react";
 
 const categories = [
   'All',
@@ -141,53 +141,55 @@ function ServicesPageContent() {
       <Modal 
         isOpen={!!selectedService} 
         onClose={() => setSelectedService(null)}
-        size="4xl"
+        size="3xl"
         scrollBehavior="inside"
         backdrop="blur"
       >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="bg-[#464C45] dark:bg-[#464C45] text-white flex flex-col gap-2">
-                <h2 className="text-3xl font-bold">{service.name}</h2>
-                <div className="flex items-center gap-4 text-white/90 flex-wrap">
+              <ModalHeader className="bg-egp-green dark:bg-egp-green text-white flex flex-col gap-2 py-4">
+                <h2 className="text-xl font-bold">{service.name}</h2>
+                <div className="flex items-center gap-3 text-white/90 flex-wrap text-sm">
                   <Chip 
-                    startContent={<Clock className="w-4 h-4" />}
+                    startContent={<Clock className="w-3 h-3" />}
                     variant="flat"
-                    className="bg-white/20 text-white"
+                    className="bg-white/20 text-white text-xs"
+                    size="sm"
                   >
-                  {service.duration} minutes
+                  {service.duration} min
                   </Chip>
-                <span className="text-2xl font-bold">£{service.price}</span>
+                <span className="text-lg font-bold">£{service.price}</span>
                   <Chip 
                     variant="flat"
-                    className="bg-white/20 text-white"
+                    className="bg-white/20 text-white text-xs"
+                    size="sm"
                   >
                     {service.category}
                   </Chip>
           </div>
               </ModalHeader>
 
-              <ModalBody className="space-y-6">
+              <ModalBody className="space-y-4 py-4">
             {/* Description */}
             <div>
-                  <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-2">
-                <Info className="w-5 h-5" style={{ color: aestheticsColors.green.DEFAULT }} />
+                  <h3 className="text-base font-semibold text-foreground mb-2 flex items-center gap-2">
+                <Info className="w-4 h-4 text-egp-green" />
                 Overview
               </h3>
-                  <p className="text-lg text-default-600 leading-relaxed">
+                  <p className="text-sm text-default-600 leading-relaxed">
                 {service.description}
             </p>
           </div>
 
             {/* Details */}
             {service.details && (
-                  <Card>
-                    <CardBody>
-                      <h3 className="text-xl font-bold text-foreground mb-3">
+                  <Card className="bg-egp-beige-lighter dark:bg-egp-green-dark/30">
+                    <CardBody className="p-3">
+                      <h3 className="text-base font-semibold text-foreground mb-2">
                   Treatment Details
                       </h3>
-                      <p className="text-default-600 leading-relaxed">
+                      <p className="text-sm text-default-600 leading-relaxed">
                   {service.details}
                 </p>
                     </CardBody>
@@ -197,17 +199,17 @@ function ServicesPageContent() {
             {/* Benefits */}
             {service.benefits && service.benefits.length > 0 && (
               <div>
-                    <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                      <CheckCircle className="w-5 h-5 text-success" />
+                    <h3 className="text-base font-semibold text-foreground mb-3 flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-egp-green" />
                   Key Benefits
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {service.benefits.map((benefit: string, index: number) => (
-                        <Card key={index} className="bg-success-50 dark:bg-success-900/20">
-                          <CardBody className="p-3">
-                            <div className="flex items-start gap-3">
-                              <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
-                              <span className="text-default-700">{benefit}</span>
+                        <Card key={index} className="bg-egp-beige-lighter dark:bg-egp-green-dark/30">
+                          <CardBody className="p-2.5">
+                            <div className="flex items-start gap-2">
+                              <CheckCircle className="w-4 h-4 text-egp-green flex-shrink-0 mt-0.5" />
+                              <span className="text-sm text-default-700">{benefit}</span>
                     </div>
                           </CardBody>
                         </Card>
@@ -218,13 +220,13 @@ function ServicesPageContent() {
 
             {/* Preparation */}
             {service.preparation && (
-                  <Card className="bg-primary-50 dark:bg-primary-900/20 border-l-4 border-primary">
-                    <CardBody>
-                      <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-2">
-                        <Info className="w-5 h-5 text-primary" />
+                  <Card className="bg-egp-beige-lighter dark:bg-egp-green-dark/30 border-l-3 border-egp-green">
+                    <CardBody className="p-3">
+                      <h3 className="text-base font-semibold text-foreground mb-2 flex items-center gap-2">
+                        <Info className="w-4 h-4 text-egp-green" />
                   Preparation
                 </h3>
-                      <p className="text-default-600 leading-relaxed">
+                      <p className="text-sm text-default-600 leading-relaxed">
                   {service.preparation}
                 </p>
                     </CardBody>
@@ -233,29 +235,42 @@ function ServicesPageContent() {
 
             {/* Aftercare */}
             {service.aftercare && (
-                  <Card className="bg-secondary-50 dark:bg-secondary-900/20 border-l-4 border-secondary">
-                    <CardBody>
-                      <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-2">
-                        <Info className="w-5 h-5 text-secondary" />
+                  <Card className="bg-egp-beige-lighter dark:bg-egp-green-dark/30 border-l-3 border-egp-green">
+                    <CardBody className="p-3">
+                      <h3 className="text-base font-semibold text-foreground mb-2 flex items-center gap-2">
+                        <Info className="w-4 h-4 text-egp-green" />
                   Aftercare
                 </h3>
-                      <p className="text-default-600 leading-relaxed">
+                      <p className="text-sm text-default-600 leading-relaxed">
                   {service.aftercare}
                 </p>
                     </CardBody>
                   </Card>
             )}
+
+            {/* Results Duration */}
+            {service.results_duration_weeks && (
+              <div className="bg-egp-beige-lighter dark:bg-egp-green-dark/30 rounded-lg px-4 py-3 border border-egp-beige-dark/30 dark:border-egp-green/30">
+                <div className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-egp-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  <span className="text-sm font-semibold text-foreground">Results Duration:</span>
+                  <span className="text-sm text-default-600">{service.results_duration_weeks} weeks</span>
+                </div>
+              </div>
+            )}
               </ModalBody>
-              <ModalFooter>
-                <Button variant="light" onPress={onClose}>
+              <ModalFooter className="gap-2">
+                <Button variant="light" onPress={onClose} size="sm">
                   Close
                 </Button>
                 <Button
                   as={Link}
                 href={`/book?service=${selectedService}`}
                   onPress={onClose}
-                  className="bg-[#464C45] dark:bg-[#464C45] text-white"
-                  size="lg"
+                  className="bg-egp-green hover:bg-egp-green-dark text-white"
+                  size="sm"
               >
                 Book This Treatment - £{service.price}
                 </Button>
@@ -390,18 +405,20 @@ function ServicesPageContent() {
             Showing {filteredServices.length} of {services.length} services
           </p>
           {selectedCategory !== 'All' && (
-            <button
-              onClick={() => {
+            <Button
+              onPress={() => {
                 setSelectedCategory('All');
                 setSelectedPriceRange('All Prices');
                 setSelectedDurationRange('All Durations');
                 setSearchTerm('');
                 setCurrentPage(1);
               }}
-              className="text-[#464C45] dark:text-[#5a6259] hover:text-[#3a4039] dark:hover:text-[#464C45] transition-colors"
+              variant="light"
+              size="sm"
+              className="text-egp-green dark:text-egp-green-light hover:text-egp-green-dark"
             >
               Clear all filters
-            </button>
+            </Button>
           )}
         </div>
 
@@ -413,83 +430,94 @@ function ServicesPageContent() {
             <p className="text-gray-600 dark:text-gray-400 mb-4">
               Try adjusting your filters or search terms
             </p>
-            <button
-              onClick={() => {
+            <Button
+              onPress={() => {
                 setSelectedCategory('All');
                 setSelectedPriceRange('All Prices');
                 setSelectedDurationRange('All Durations');
                 setSearchTerm('');
                 setCurrentPage(1);
               }}
-              className="bg-[#464C45] hover:bg-[#3a4039] dark:bg-[#464C45] dark:hover:bg-[#3a4039] text-white px-6 py-3 rounded-lg transition-all"
+              className="bg-egp-green hover:bg-egp-green-dark text-white"
+              size="md"
             >
               Show All Services
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
             {paginatedServices.map(([serviceId, service]) => (
-              <div
+              <Card
                 key={serviceId}
-                className="bg-white dark:bg-gray-800 rounded-xl border border-gray-300 dark:border-gray-600 shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-col h-full"
+                className="h-full"
+                shadow="md"
               >
-                {/* Header (similar to conditions but with category badge) */}
-                <div className="bg-[#f5f1e9] dark:bg-gray-800 px-4 py-3 border-b border-[#ddd5c3]/60 dark:border-gray-700 relative rounded-t-xl">
+                <CardHeader className="bg-egp-beige-lighter dark:bg-egp-green-dark px-3 py-2.5 border-b border-egp-beige-dark/60 dark:border-egp-green relative">
                   {/* Category Badge - Top Left */}
-                    <div className="absolute top-2 left-2">
-                    <span className="inline-flex items-center px-2 py-0.5 bg-[#464C45] text-white text-[10px] font-semibold rounded-full">
+                    <div className="absolute top-1 left-1">
+                    <Chip 
+                      size="sm"
+                      className="bg-egp-green text-white text-[9px]"
+                      variant="flat"
+                    >
                       {service.category}
-                      </span>
+                    </Chip>
                     </div>
                     
                   {/* Duration Badge - Top Right */}
-                  <div className="absolute top-2 right-2">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-[#ddd5c3]/60 dark:border-gray-700/60 rounded-full text-[10px] font-semibold text-[#464C45] dark:text-gray-200">
-                      <Clock className="w-3 h-3" />
-                          {service.duration} min
-                        </span>
+                  <div className="absolute top-1 right-1">
+                    <Chip
+                      size="sm"
+                      startContent={<Clock className="w-2.5 h-2.5" />}
+                      variant="flat"
+                      className="bg-white/90 dark:bg-egp-green-dark/90 text-egp-green dark:text-white text-[9px]"
+                    >
+                      {service.duration} min
+                    </Chip>
                       </div>
                       
                   {/* Service Name - Centered */}
-                  <div className="text-center pt-6 pb-2">
-                    <h3 className="text-lg font-bold text-[#464C45] dark:text-[#5a6259] leading-tight line-clamp-2 mb-1">
+                  <div className="text-center pt-4 pb-1.5 w-full">
+                    <h3 className="text-base font-bold text-egp-green dark:text-white leading-tight line-clamp-2 mb-1">
                       {service.name}
                     </h3>
                     {/* Price */}
-                    <div className="text-2xl font-bold text-[#464C45] dark:text-[#5a6259]">
+                    <div className="text-xl font-bold text-egp-green dark:text-white">
                       £{service.price}
                     </div>
                       </div>
-                    </div>
+                </CardHeader>
                     
-                {/* Content */}
-                <div className="p-4 flex flex-col flex-1">
+                <CardBody 
+                  className="p-3 flex flex-col flex-1 cursor-pointer" 
+                  onClick={() => setSelectedService(serviceId)}
+                >
                   {/* Description */}
                   {service.description && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 leading-relaxed line-clamp-2">
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-2.5 leading-relaxed line-clamp-2">
                         {service.description}
                       </p>
                   )}
                   
                   {/* Service Details */}
-                  <div className="space-y-1.5 mb-3 text-xs text-gray-500 dark:text-gray-400">
+                  <div className="space-y-1 mb-2.5 text-[10px] text-gray-500 dark:text-gray-400">
                     {service.requires_consultation && (
-                      <div className="flex items-center gap-1.5">
-                        <CheckCircle className="w-3.5 h-3.5 text-[#464C45]" />
+                      <div className="flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3 text-egp-green" />
                         <span>Consultation Required</span>
                       </div>
                     )}
                     {service.downtime_days > 0 && (
-                      <div className="flex items-center gap-1.5">
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                         </svg>
                         <span>Downtime: {service.downtime_days} day{service.downtime_days !== 1 ? 's' : ''}</span>
                       </div>
                     )}
                     {service.results_duration_weeks && (
-                      <div className="flex items-center gap-1.5">
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                         <span>Results: {service.results_duration_weeks} week{service.results_duration_weeks !== 1 ? 's' : ''}</span>
@@ -498,24 +526,28 @@ function ServicesPageContent() {
                     </div>
                   
                   {/* Buttons */}
-                  <div className="flex gap-2 mt-auto">
-                      <button
-                        onClick={() => setSelectedService(serviceId)}
-                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-[#464C45] text-[#464C45] dark:text-[#5a6259] dark:border-[#5a6259] rounded-lg hover:bg-[#464C45]/10 dark:hover:bg-[#5a6259]/10 transition-colors font-medium text-sm"
+                  <div className="flex gap-1.5 mt-auto" onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        onPress={() => setSelectedService(serviceId)}
+                        variant="bordered"
+                        size="sm"
+                        className="flex-1 border-egp-green text-egp-green dark:text-white dark:border-egp-green"
+                        startContent={<Info className="w-3 h-3" />}
                       >
-                      <Info className="w-4 h-4" />
                         Details
-                      </button>
-                      <Link
+                      </Button>
+                      <Button
+                        as={Link}
                         href={`/book?service=${serviceId}`}
-                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white rounded-lg hover:from-[#857d68] hover:via-[#aea693] hover:to-[#c9c1b0] transition-all font-medium text-sm shadow-md hover:shadow-lg"
+                        size="sm"
+                        className="flex-1 bg-egp-green text-white"
+                        startContent={<Plus className="w-3 h-3" />}
                       >
-                      <Plus className="w-4 h-4" />
                         Book
-                      </Link>
+                      </Button>
                   </div>
-                </div>
-              </div>
+                </CardBody>
+              </Card>
             ))}
           </div>
         )}
@@ -523,35 +555,40 @@ function ServicesPageContent() {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex justify-center items-center gap-2 mt-8">
-            <button
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-[#464C45] hover:text-[#464C45] dark:hover:text-[#5a6259] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            <Button
+              onPress={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              isDisabled={currentPage === 1}
+              variant="bordered"
+              size="sm"
+              className="border-gray-300 dark:border-gray-600 hover:border-egp-green hover:text-egp-green"
             >
               Previous
-            </button>
+            </Button>
             
             {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-              <button
+              <Button
                 key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  currentPage === page
-                    ? 'bg-[#464C45] text-white'
-                    : 'border border-gray-300 dark:border-gray-600 hover:border-[#464C45] hover:text-[#464C45] dark:hover:text-[#5a6259]'
-                }`}
+                onPress={() => setCurrentPage(page)}
+                size="sm"
+                variant={currentPage === page ? "solid" : "bordered"}
+                className={currentPage === page 
+                  ? 'bg-egp-green text-white' 
+                  : 'border-gray-300 dark:border-gray-600 hover:border-egp-green hover:text-egp-green'
+                }
               >
                 {page}
-              </button>
+              </Button>
             ))}
             
-            <button
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-[#464C45] hover:text-[#464C45] dark:hover:text-[#5a6259] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            <Button
+              onPress={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              isDisabled={currentPage === totalPages}
+              variant="bordered"
+              size="sm"
+              className="border-gray-300 dark:border-gray-600 hover:border-egp-green hover:text-egp-green"
             >
               Next
-            </button>
+            </Button>
           </div>
         )}
 

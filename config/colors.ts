@@ -11,13 +11,14 @@ export const aestheticsColors = {
     gradientHover: "from-[#8c846f] via-[#aea693] to-[#c9c1b0]",
   },
 
-  // Secondary - Deep Charcoal & Graphite
+  // Secondary - Green (Primary dark color for blocks and buttons)
   secondary: {
-    light: "#e5e7eb",      // Soft gray highlight
-    DEFAULT: "#4b5563",    // Graphite
-    dark: "#1f2937",       // Charcoal
-    gradient: "from-[#4b5563] via-[#374151] to-[#1f2937]",
-    gradientHover: "from-[#374151] via-[#1f2937] to-[#111827]",
+    light: "#e8f5e8",      // Light green background
+    DEFAULT: "#464C45",    // Main green (rgb(70 76 69))
+    dark: "#3a4039",       // Dark green
+    darker: "#2d322c",     // Darker green for dark mode
+    gradient: "from-[#3a4039] via-[#464C45] to-[#5a6259]",
+    gradientHover: "from-[#2d322c] via-[#3a4039] to-[#464C45]",
   },
 
   // Accent - Brushed Champagne
@@ -85,33 +86,40 @@ export const aestheticsColors = {
     },
   },
 
-  // Buttons - Luxury Gradients
+  // Buttons - Beige + Green Palette
   buttons: {
-    primary: "from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3]",
-    primaryHover: "from-[#857d68] via-[#aea693] to-[#c9c1b0]",
-    secondary: "from-[#4b5563] via-[#374151] to-[#1f2937]",
-    secondaryHover: "from-[#374151] via-[#1f2937] to-[#111827]",
-    gold: "from-[#d8c5a7] via-[#c4b5a0] to-[#b59c74]",
-    goldHover: "from-[#c4b5a0] via-[#b19775] to-[#8c744f]",
-    whatsapp: "from-emerald-500 to-green-600",
-    whatsappHover: "from-emerald-600 to-green-700",
+    primary: "from-[#464C45] via-[#5a6259] to-[#464C45]", // Green gradient
+    primaryHover: "from-[#3a4039] via-[#464C45] to-[#3a4039]",
+    secondary: "from-[#ddd5c3] via-[#c9c1b0] to-[#ddd5c3]", // Beige gradient
+    secondaryHover: "from-[#c9c1b0] via-[#b5ad9d] to-[#c9c1b0]",
+    accent: "from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3]", // Beige accent
+    accentHover: "from-[#857d68] via-[#aea693] to-[#c9c1b0]",
+    dark: "from-[#3a4039] via-[#464C45] to-[#2d322c]", // Dark green
+    darkHover: "from-[#2d322c] via-[#3a4039] to-[#464C45]",
+    whatsapp: "from-[#25D366] to-[#128C7E]", // WhatsApp green
+    whatsappHover: "from-[#128C7E] to-[#075E54]",
   },
 
-  // Backgrounds
+  // Backgrounds - Beige + Green Palette
   backgrounds: {
-    hero: "from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3]",
-    section: "from-[#f5f1e9] via-[#f0ede7] to-[#e4d9c8]",
+    hero: "from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3]", // Beige gradient
+    section: "from-[#f5f1e9] via-[#f0ede7] to-[#e4d9c8]", // Light beige
+    sectionDark: "from-[#3a4039] via-[#464C45] to-[#2d322c]", // Green dark (replaces gray-900)
     card: "from-white to-[#f5f1e9]/60",
+    cardDark: "from-[#464C45] to-[#3a4039]", // Green card (replaces gray-800)
     luxury: "from-[#d8c5a7] via-[#c4b5a0] to-[#b59c74]",
   },
 
-  // Text Colors
+  // Text Colors - Beige + Green Palette
   text: {
-    primary: "#1f2937",       // Dark gray
+    primary: "#1f2937",       // Dark gray/charcoal
     secondary: "#6b7280",     // Medium gray
     light: "#9ca3af",         // Light gray
-    onDark: "#ffffff",        // White
+    onDark: "#ffffff",        // White text on dark backgrounds
+    onGreen: "#ffffff",       // White text on green backgrounds
     accent: "#8c846f",        // Warm taupe accent
+    green: "#464C45",          // Green text
+    beige: "#9d9585",         // Beige text
   },
 
   // Trust & Success
@@ -165,22 +173,73 @@ export function getCategoryColor(category: string) {
 
 // Export color classes for Tailwind
 export const colorClasses = {
-  // Primary button
-  btnPrimary: `bg-gradient-to-r ${aestheticsColors.buttons.primary} hover:${aestheticsColors.buttons.primaryHover}`,
+  // Primary button (Green) - Solid color, no gradient
+  btnPrimary: `bg-egp-green hover:bg-egp-green-dark text-white`,
   
-  // Secondary button
-  btnSecondary: `bg-gradient-to-r ${aestheticsColors.buttons.secondary} hover:${aestheticsColors.buttons.secondaryHover}`,
+  // Secondary button (Beige) - Solid color, no gradient
+  btnSecondary: `bg-egp-beige hover:bg-egp-beige-dark text-gray-900`,
   
-  // Gold/Luxury button
-  btnGold: `bg-gradient-to-r ${aestheticsColors.buttons.gold} hover:${aestheticsColors.buttons.goldHover}`,
+  // Accent button (Beige) - Solid color, no gradient
+  btnAccent: `bg-egp-beige-darkest hover:bg-egp-beige-darker text-white`,
   
-  // WhatsApp
-  btnWhatsApp: `bg-gradient-to-r ${aestheticsColors.buttons.whatsapp} hover:${aestheticsColors.buttons.whatsappHover}`,
+  // Dark button (Dark green) - Solid color, no gradient
+  btnDark: `bg-egp-green-darker hover:bg-egp-green-dark text-white`,
+  
+  // WhatsApp - Keep gradient for WhatsApp brand colors
+  btnWhatsApp: `bg-gradient-to-r ${aestheticsColors.buttons.whatsapp} hover:${aestheticsColors.buttons.whatsappHover} text-white`,
 
   // Hero section
   hero: `bg-gradient-to-br ${aestheticsColors.backgrounds.hero}`,
   
   // Section backgrounds
   section: `bg-gradient-to-b ${aestheticsColors.backgrounds.section}`,
+  sectionDark: `bg-gradient-to-b ${aestheticsColors.backgrounds.sectionDark} text-white`,
+  
+  // Card backgrounds
+  card: `${aestheticsColors.backgrounds.card}`,
+  cardDark: `bg-gradient-to-br ${aestheticsColors.backgrounds.cardDark} text-white`,
+};
+
+// Typography System
+export const typography = {
+  // Headings
+  h1: "text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white",
+  h2: "text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white",
+  h3: "text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white",
+  h4: "text-xl md:text-2xl lg:text-3xl font-semibold text-gray-900 dark:text-white",
+  h5: "text-lg md:text-xl lg:text-2xl font-semibold text-gray-900 dark:text-white",
+  h6: "text-base md:text-lg lg:text-xl font-semibold text-gray-900 dark:text-white",
+  
+  // Body text
+  body: "text-base text-gray-700 dark:text-gray-300",
+  bodyLarge: "text-lg text-gray-700 dark:text-gray-300",
+  bodySmall: "text-sm text-gray-600 dark:text-gray-400",
+  
+  // Text on colored backgrounds
+  onDark: "text-white",
+  onGreen: "text-white",
+  onBeige: "text-gray-900",
+  
+  // Accent text
+  accent: `text-[${aestheticsColors.text.accent}]`,
+  green: `text-[${aestheticsColors.green.DEFAULT}]`,
+  beige: `text-[${aestheticsColors.text.beige}]`,
+};
+
+// Form System
+export const forms = {
+  // Input fields
+  input: "px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-[#464C45] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-[#464C45] transition-all",
+  inputError: "px-4 py-3 border border-red-500 rounded-xl bg-white dark:bg-[#464C45] text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-red-500",
+  
+  // Labels
+  label: "block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2",
+  labelRequired: "block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 after:content-['*'] after:ml-1 after:text-red-500",
+  
+  // Textarea
+  textarea: "px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-[#464C45] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-[#464C45] transition-all resize-none",
+  
+  // Select
+  select: "px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-[#464C45] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-[#464C45] transition-all",
 };
 

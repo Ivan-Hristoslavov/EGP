@@ -8,20 +8,15 @@ export interface AdminProfile {
   phone: string;
   company_name: string;
   company_address: string;
-  about: string;
-  years_of_experience: string;
-  specializations: string;
-  certifications: string;
-  response_time: string;
-  bank_name: string;
-  account_number: string;
-  sort_code: string;
-  gas_safe_number: string;
-  insurance_provider: string;
-  gas_safe_registered?: boolean;
-  fully_insured?: boolean;
-  terms_and_conditions?: string;
+  account_number?: string;
+  sort_code?: string;
   privacy_policy?: string;
+  whatsapp?: string;
+  how_to_find_us?: string;
+  how_to_reach_us?: string;
+  transport_options?: any;
+  nearby_landmarks?: any;
+  google_maps_address?: string;
   created_at: string;
   updated_at: string;
 }

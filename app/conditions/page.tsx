@@ -8,7 +8,7 @@ import { Search, Filter, ArrowLeft, Info, Plus, CheckCircle, X } from "lucide-re
 import Link from 'next/link';
 import { useConditions } from "@/hooks/useConditions";
 import type { Condition } from "@/hooks/useConditions";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Card, CardBody, Chip, Spinner, Select, SelectItem } from "@heroui/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Card, CardBody, Chip, Spinner, Select, SelectItem, Pagination } from "@heroui/react";
 
 // Category mapping: display name -> filter value
 const categoryMapping: Record<string, string> = {
@@ -363,36 +363,18 @@ function ConditionsPageContent() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex justify-center items-center gap-2 mt-8">
-            <button
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-[#9d9585] hover:text-[#9d9585] dark:hover:text-[#b5ad9d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Previous
-            </button>
-            
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  currentPage === page
-                    ? 'bg-[#9d9585] text-white'
-                    : 'border border-gray-300 dark:border-gray-600 hover:border-[#9d9585] hover:text-[#9d9585] dark:hover:text-[#b5ad9d]'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-            
-            <button
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-[#9d9585] hover:text-[#9d9585] dark:hover:text-[#b5ad9d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Next
-            </button>
+          <div className="flex justify-center items-center mt-8">
+            <Pagination
+              total={totalPages}
+              page={currentPage}
+              onChange={setCurrentPage}
+              color="primary"
+              classNames={{
+                wrapper: "gap-0",
+                item: "w-8 h-8 text-small rounded-lg",
+                cursor: "bg-gradient-to-br from-egp-beige-darkest to-egp-beige-dark text-white font-bold",
+              }}
+            />
           </div>
         )}
 

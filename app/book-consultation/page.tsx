@@ -1,18 +1,11 @@
-import type { Metadata } from 'next';
+"use client";
+
 import { siteConfig } from "@/config/site";
 import Link from "next/link";
 import { Calendar, Clock, Star, CheckCircle, ArrowRight } from "lucide-react";
 import { Card, CardBody, CardHeader, Button, Chip } from "@heroui/react";
-
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: `Book Consultation | ${siteConfig.name}`,
-    description: "Book your consultation at EGP Aesthetics London. Expert aesthetic treatments with personalised care.",
-    alternates: {
-      canonical: `${siteConfig.url}/book-consultation`,
-    },
-  };
-}
+import { aestheticsColors } from "@/config/colors";
+import ButtonPrimary from "@/components/ButtonPrimary";
 
 export default function BookConsultationPage() {
   const consultationTypes = [
@@ -92,9 +85,9 @@ export default function BookConsultationPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen bg-white dark:bg-egp-green-darker">
       {/* Hero Section */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-rose-50 to-pink-50 dark:from-gray-800 dark:to-gray-900">
+      <section className="py-16 md:py-24 bg-gradient-to-br from-egp-beige-lighter to-egp-beige-light dark:from-egp-green-dark dark:to-egp-green-darker">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
@@ -104,20 +97,25 @@ export default function BookConsultationPage() {
               Start your aesthetic journey with a personalised consultation
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/contact"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-lg font-semibold rounded-full hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl"
+              <Button
+                as={Link}
+                href="/book"
+                size="lg"
+                className="bg-gradient-to-r from-egp-green via-egp-green-light to-egp-green text-white"
+                startContent={<Calendar className="w-5 h-5" />}
               >
-                <Calendar className="w-5 h-5" />
                 Book Now
-              </Link>
-              <Link
+              </Button>
+              <Button
+                as={Link}
                 href={`tel:${siteConfig.contact.phone}`}
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-rose-500 text-rose-500 dark:text-rose-400 text-lg font-semibold rounded-full hover:bg-rose-500 hover:text-white transition-all"
+                variant="bordered"
+                size="lg"
+                className="border-egp-green text-egp-green dark:text-white dark:border-egp-green"
+                startContent={<Clock className="w-5 h-5" />}
               >
-                <Clock className="w-5 h-5" />
                 Call Now
-              </Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -132,50 +130,59 @@ export default function BookConsultationPage() {
             </h2>
             <div className="grid md:grid-cols-2 gap-8">
               {consultationTypes.map((consultation, index) => (
-                <div
+                <Card
                   key={index}
-                  className={`relative bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all ${
-                    consultation.popular ? 'ring-2 ring-rose-500 scale-105' : ''
-                  }`}
+                  className={`relative ${consultation.popular ? 'ring-2 ring-egp-green' : ''}`}
+                  shadow="lg"
                 >
                   {consultation.popular && (
-                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                      <span className="bg-rose-500 text-white px-4 py-2 rounded-full text-sm font-bold">
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
+                      <Chip
+                        className="bg-egp-green text-white"
+                        size="sm"
+                      >
                         Most Popular
-                      </span>
+                      </Chip>
                     </div>
                   )}
-                  
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                    {consultation.title}
-                  </h3>
-                  <div className="text-3xl font-bold text-rose-600 dark:text-rose-400 mb-4">
-                    {consultation.price}
-                  </div>
-                  <p className="text-gray-600 dark:text-gray-300 mb-6">
-                    {consultation.description}
-                  </p>
-                  
-                  <ul className="space-y-3 mb-8">
-                    {consultation.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-start">
-                        <CheckCircle className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                        <span className="text-gray-600 dark:text-gray-300">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  
-                  <Link
-                    href="/contact"
-                    className={`w-full py-3 px-6 rounded-lg font-semibold transition-all text-center block ${
-                      consultation.popular
-                        ? 'bg-rose-500 hover:bg-rose-600 text-white'
-                        : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white'
-                    }`}
-                  >
-                    Book This Consultation
-                  </Link>
-                </div>
+                  <CardHeader className="pb-2">
+                    <div className="flex flex-col gap-2 w-full">
+                      <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {consultation.title}
+                      </h3>
+                      <div className="text-3xl font-bold text-egp-green dark:text-white">
+                        {consultation.price}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardBody className="pt-0">
+                    <p className="text-gray-600 dark:text-gray-300 mb-6">
+                      {consultation.description}
+                    </p>
+                    
+                    <ul className="space-y-3 mb-8">
+                      {consultation.features.map((feature, featureIndex) => (
+                        <li key={featureIndex} className="flex items-start">
+                          <CheckCircle className="w-5 h-5 text-success mr-3 mt-0.5 flex-shrink-0" />
+                          <span className="text-gray-600 dark:text-gray-300">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    
+                    <Button
+                      as={Link}
+                      href="/book"
+                      className={`w-full ${
+                        consultation.popular
+                          ? 'bg-gradient-to-r from-egp-green via-egp-green-light to-egp-green text-white'
+                          : 'bg-egp-beige-light dark:bg-egp-green-dark text-gray-900 dark:text-white'
+                      }`}
+                      size="lg"
+                    >
+                      Book This Consultation
+                    </Button>
+                  </CardBody>
+                </Card>
               ))}
             </div>
           </div>
@@ -183,7 +190,7 @@ export default function BookConsultationPage() {
       </section>
 
       {/* Treatment Categories */}
-      <section className="py-16 md:py-24 bg-gray-50 dark:bg-gray-800">
+      <section className="py-16 md:py-24 bg-egp-beige-lighter dark:bg-egp-green-dark">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white text-center mb-12">
@@ -191,33 +198,42 @@ export default function BookConsultationPage() {
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               {treatmentCategories.map((category, index) => (
-                <div
+                <Card
                   key={index}
-                  className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all hover:scale-105"
+                  shadow="lg"
+                  isPressable
+                  as={Link}
+                  href={category.href}
+                  className="h-full"
                 >
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                    {category.title}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
-                    {category.description}
-                  </p>
-                  
-                  <ul className="space-y-2 mb-6">
-                    {category.treatments.map((treatment, treatmentIndex) => (
-                      <li key={treatmentIndex} className="text-sm text-gray-600 dark:text-gray-400">
-                        {treatment}
-                      </li>
-                    ))}
-                  </ul>
-                  
-                  <Link
-                    href={category.href}
-                    className="inline-flex items-center gap-2 text-rose-600 dark:text-rose-400 font-semibold hover:text-rose-700 dark:hover:text-rose-300 transition-colors"
-                  >
-                    <span>Learn More</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
+                  <CardHeader className="pb-2">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                      {category.title}
+                    </h3>
+                  </CardHeader>
+                  <CardBody className="pt-0">
+                    <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+                      {category.description}
+                    </p>
+                    
+                    <ul className="space-y-2 mb-6">
+                      {category.treatments.map((treatment, treatmentIndex) => (
+                        <li key={treatmentIndex} className="text-sm text-gray-600 dark:text-gray-400">
+                          {treatment}
+                        </li>
+                      ))}
+                    </ul>
+                    
+                    <ButtonPrimary
+                      as={Link}
+                      href={category.href}
+                      variant="primary"
+                      endContent={<ArrowRight className="w-4 h-4" />}
+                    >
+                      Learn More
+                    </ButtonPrimary>
+                  </CardBody>
+                </Card>
               ))}
             </div>
           </div>
@@ -232,39 +248,45 @@ export default function BookConsultationPage() {
               Why Choose EGP Aesthetics?
             </h2>
             <div className="grid md:grid-cols-3 gap-8">
-              <div className="flex flex-col items-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-rose-500 to-pink-500 rounded-full flex items-center justify-center mb-4">
-                  <Star className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                  Expert Practitioners
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Highly qualified and experienced professionals
-                </p>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center mb-4">
-                  <CheckCircle className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                  Fully Insured
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Comprehensive coverage for your peace of mind
-                </p>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center mb-4">
-                  <Calendar className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                  Flexible Booking
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Convenient appointment times to fit your schedule
-                </p>
-              </div>
+              <Card shadow="sm" className="bg-white dark:bg-egp-green-dark">
+                <CardBody className="flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-egp-beige-darkest to-egp-beige-dark rounded-full flex items-center justify-center mb-4">
+                    <Star className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                    Expert Practitioners
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Highly qualified and experienced professionals
+                  </p>
+                </CardBody>
+              </Card>
+              <Card shadow="sm" className="bg-white dark:bg-egp-green-dark">
+                <CardBody className="flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-egp-green to-egp-green-light rounded-full flex items-center justify-center mb-4">
+                    <CheckCircle className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                    Fully Insured
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Comprehensive coverage for your peace of mind
+                  </p>
+                </CardBody>
+              </Card>
+              <Card shadow="sm" className="bg-white dark:bg-egp-green-dark">
+                <CardBody className="flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-egp-green-dark to-egp-green rounded-full flex items-center justify-center mb-4">
+                    <Calendar className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                    Flexible Booking
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Convenient appointment times to fit your schedule
+                  </p>
+                </CardBody>
+              </Card>
             </div>
           </div>
         </div>

@@ -172,14 +172,14 @@ export default async function AboutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen bg-white dark:bg-egp-green-darker">
       <div className="container mx-auto px-4 pt-24 pb-16">
         <div className="max-w-4xl mx-auto">
           {/* Back to Home Button */}
           <div className="flex items-center gap-4 mb-8">
             <Link
               href="/"
-              className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#b5ad9d] transition-colors"
+              className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-egp-green dark:hover:text-egp-beige transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
               Back to Home

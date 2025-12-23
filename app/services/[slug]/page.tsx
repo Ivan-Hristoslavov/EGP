@@ -3,8 +3,62 @@ import { siteConfig } from "@/config/site";
 import Link from "next/link";
 import { Calendar, Clock, CheckCircle, Star, ArrowRight, Phone, Shield } from "lucide-react";
 import { notFound } from 'next/navigation';
+import { Button } from "@heroui/button";
 
-// Service data - this would typically come from a database
+// Fetch service from database
+async function getService(slug: string) {
+  try {
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = createClient();
+
+    const { data: service, error } = await supabase
+      .from('services')
+      .select(`
+        *,
+        category:service_categories!inner(
+          *,
+          main_tab:main_tabs!inner(*)
+        )
+      `)
+      .eq('slug', slug)
+      .eq('is_active', true)
+      .single();
+
+    if (error || !service) {
+      return null;
+    }
+
+    // Transform the data to flatten the structure
+    return {
+      id: service.id,
+      name: service.name,
+      slug: service.slug,
+      description: service.description,
+      details: service.details,
+      benefits: service.benefits,
+      preparation: service.preparation,
+      aftercare: service.aftercare,
+      duration: service.duration,
+      price: parseFloat(service.price.toString()),
+      is_featured: service.is_featured,
+      image_url: service.image_url,
+      requires_consultation: service.requires_consultation,
+      downtime_days: service.downtime_days,
+      results_duration_weeks: service.results_duration_weeks,
+      display_order: service.display_order,
+      category: {
+        id: service.category.id,
+        name: service.category.name,
+        slug: service.category.slug,
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching service:', error);
+    return null;
+  }
+}
+
+// Fallback service data for backwards compatibility
 const servicesData = {
   'book-treatment-now': {
     title: 'Book Treatment Now',
@@ -322,17 +376,17 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const service = servicesData[slug as keyof typeof servicesData];
   
-  if (!service) {
-    return {
-      title: `Service Not Found | ${siteConfig.name}`,
-    };
-  }
-
+  // Try to fetch service for metadata
+  const dbService = await getService(slug);
+  const staticService = servicesData[slug as keyof typeof servicesData];
+  
+  const serviceTitle = dbService?.name || staticService?.title || 'Service';
+  const serviceDescription = dbService?.description || staticService?.description || '';
+  
   return {
-    title: `${service.title} | ${siteConfig.name}`,
-    description: service.description,
+    title: `${serviceTitle} | ${siteConfig.name}`,
+    description: serviceDescription,
     alternates: {
       canonical: `${siteConfig.url}/services/${slug}`,
     },
@@ -341,11 +395,43 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ServicePage({ params }: PageProps) {
   const { slug } = await params;
-  const service = servicesData[slug as keyof typeof servicesData];
-
-  if (!service) {
-    notFound();
+  
+  // Try to fetch from database first
+  let service = await getService(slug);
+  
+  // Fallback to static data if not found in database
+  let normalizedService: any = service;
+  if (!normalizedService) {
+    const staticService = servicesData[slug as keyof typeof servicesData];
+    if (staticService) {
+      normalizedService = {
+        name: staticService.title,
+        category: {
+          name: staticService.category,
+          id: '',
+          slug: ''
+        },
+        price: typeof staticService.price === 'string' ? parseFloat(staticService.price.replace('£', '')) : staticService.price,
+        duration: staticService.duration,
+        description: staticService.description,
+        benefits: staticService.benefits || [],
+        is_featured: staticService.popular || false,
+        results_duration_weeks: null,
+        details: null
+      };
+    } else {
+      notFound();
+    }
   }
+  
+  // Normalize service data structure
+  const serviceTitle = normalizedService.name || '';
+  const serviceCategory = typeof normalizedService.category === 'object' ? normalizedService.category?.name : normalizedService.category || '';
+  const servicePrice = normalizedService.price || 0;
+  const serviceDuration = normalizedService.duration || '30 minutes';
+  const serviceDescription = normalizedService.description || '';
+  const serviceBenefits = Array.isArray(normalizedService.benefits) ? normalizedService.benefits : [];
+  const isPopular = normalizedService.is_featured || false;
 
   const procedureSteps = [
     {
@@ -371,154 +457,158 @@ export default async function ServicePage({ params }: PageProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen bg-white dark:bg-egp-green-darker flex flex-col">
       {/* Hero Section */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-rose-50 to-pink-50 dark:from-gray-800 dark:to-gray-900">
+      <section className="py-12 md:py-16 bg-gradient-to-br from-egp-beige-lighter to-egp-beige-light dark:from-egp-green-dark dark:to-egp-green-darker">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            {service.popular && (
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-rose-100 dark:bg-rose-900/30 rounded-full text-rose-700 dark:text-rose-400 text-sm font-semibold mb-6">
-                <Star className="w-4 h-4" />
+            {isPopular && (
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-egp-green/20 dark:bg-egp-green-dark rounded-full text-egp-green dark:text-white text-xs font-semibold mb-4">
+                <Star className="w-3 h-3" />
                 <span>Popular Treatment</span>
               </div>
             )}
-            <div className="inline-block px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-700 dark:text-gray-300 text-sm font-medium mb-6">
-              {service.category}
+            <div className="inline-block px-3 py-1.5 bg-white/80 dark:bg-egp-green-dark rounded-full text-egp-green dark:text-white text-xs font-medium mb-4">
+              {serviceCategory}
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-              {service.title}
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              {serviceTitle}
             </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
-              {service.description}
+            <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
+              {serviceDescription}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/book-consultation"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-lg font-semibold rounded-full hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl"
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button
+                as={Link}
+                href={`/book?service=${slug}`}
+                size="lg"
+                className="bg-egp-green hover:bg-egp-green-dark text-white"
+                startContent={<Calendar className="w-5 h-5" />}
               >
-                <Calendar className="w-5 h-5" />
-                Book Consultation - {service.price}
-              </Link>
-              <Link
+                Book Consultation - {typeof servicePrice === 'number' ? `£${servicePrice}` : servicePrice}
+              </Button>
+              <Button
+                as={Link}
                 href={`tel:${siteConfig.contact.phone}`}
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-rose-500 text-rose-500 dark:text-rose-400 text-lg font-semibold rounded-full hover:bg-rose-500 hover:text-white transition-all"
+                variant="bordered"
+                size="lg"
+                className="border-egp-green text-egp-green dark:text-white dark:border-egp-green"
+                startContent={<Phone className="w-5 h-5" />}
               >
-                <Phone className="w-5 h-5" />
                 Call Us
-              </Link>
+              </Button>
             </div>
           </div>
         </div>
       </section>
 
       {/* Service Details */}
-      <section className="py-16 md:py-24">
+      <section className="py-12 md:py-16 flex-1">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-            <div className="grid lg:grid-cols-2 gap-12">
+            <div className="grid lg:grid-cols-2 gap-8">
               {/* Service Info */}
               <div>
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                   About This Treatment
                 </h2>
-                <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
-                  {service.description}. Our expert practitioners use advanced techniques and premium products to deliver exceptional results tailored to your individual needs.
+                <p className="text-base text-gray-600 dark:text-gray-300 mb-4">
+                  {serviceDescription}. Our expert practitioners use advanced techniques and premium products to deliver exceptional results tailored to your individual needs.
                 </p>
-                <div className="grid grid-cols-2 gap-6 mb-8">
-                  <div className="flex items-center gap-3">
-                    <Clock className="w-6 h-6 text-rose-500" />
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-egp-green" />
                     <div>
-                      <div className="font-semibold text-gray-900 dark:text-white">Duration</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-300">{service.duration}</div>
+                      <div className="font-semibold text-sm text-gray-900 dark:text-white">Duration</div>
+                      <div className="text-xs text-gray-600 dark:text-gray-300">{serviceDuration}</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Shield className="w-6 h-6 text-rose-500" />
-                    <div>
-                      <div className="font-semibold text-gray-900 dark:text-white">Results</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-300">Long-lasting</div>
+                  {normalizedService.results_duration_weeks && (
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-egp-green" />
+                      <div>
+                        <div className="font-semibold text-sm text-gray-900 dark:text-white">Results</div>
+                        <div className="text-xs text-gray-600 dark:text-gray-300">{normalizedService.results_duration_weeks} weeks</div>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
 
               {/* Benefits */}
-              <div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                  Treatment Benefits
-                </h3>
-                <ul className="space-y-4">
-                  {service.benefits.map((benefit, index) => (
-                    <li key={index} className="flex items-start">
-                      <CheckCircle className="w-6 h-6 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-600 dark:text-gray-300">{benefit}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {serviceBenefits && serviceBenefits.length > 0 && (
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                    Treatment Benefits
+                  </h3>
+                  <ul className="space-y-3">
+                    {serviceBenefits.map((benefit: string, index: number) => (
+                      <li key={index} className="flex items-start">
+                        <CheckCircle className="w-5 h-5 text-egp-green mr-2 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm text-gray-600 dark:text-gray-300">{benefit}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </section>
 
       {/* Procedure Steps */}
-      <section className="py-16 md:py-24 bg-gray-50 dark:bg-gray-800">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white text-center mb-12">
-              Treatment Process
-            </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {procedureSteps.map((step, index) => (
-                <div
-                  key={index}
-                  className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all"
-                >
-                  <div className="w-12 h-12 bg-gradient-to-br from-rose-500 to-pink-500 rounded-full flex items-center justify-center mb-4">
-                    <span className="text-white font-bold text-lg">{step.step}</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                    {step.title}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    {step.description}
-                  </p>
-                </div>
-              ))}
+      {normalizedService.details && (
+        <section className="py-12 md:py-16 bg-egp-beige-lighter dark:bg-egp-green-dark">
+          <div className="container mx-auto px-4">
+            <div className="max-w-6xl mx-auto">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white text-center mb-8">
+                Treatment Process
+              </h2>
+              <div className="bg-white dark:bg-egp-green rounded-xl p-6 shadow-md">
+                <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
+                  {normalizedService.details}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* Pricing & CTA */}
-      <section className="py-16 md:py-24">
+      {/* Pricing & CTA - Fixed at bottom */}
+      <section className="py-12 md:py-16 bg-egp-beige-lighter dark:bg-egp-green-dark mt-auto">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="bg-gradient-to-br from-rose-50 to-pink-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                {service.title}
-              </h2>
-              <div className="text-4xl font-bold text-rose-600 dark:text-rose-400 mb-4">
-                {service.price}
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white dark:bg-egp-green rounded-2xl p-6 md:p-8 shadow-lg">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                  {serviceTitle}
+                </h2>
+                <div className="text-3xl font-bold text-egp-green dark:text-white mb-3">
+                  {typeof servicePrice === 'number' ? `£${servicePrice}` : servicePrice}
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
+                  Includes consultation, treatment, and aftercare instructions
+                </p>
               </div>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                Includes consultation, treatment, and aftercare instructions
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  href="/book-consultation"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#9d9585] hover:bg-[#857d68] text-white text-lg font-semibold rounded-full transition-all shadow-lg hover:shadow-xl"
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button
+                  as={Link}
+                  href={`/book?service=${slug}`}
+                  size="lg"
+                  className="bg-egp-green hover:bg-egp-green-dark text-white"
+                  startContent={<Calendar className="w-5 h-5" />}
                 >
-                  <Calendar className="w-5 h-5" />
                   Book Now
-                </Link>
-                <Link
+                </Button>
+                <Button
+                  as={Link}
                   href="/services"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-[#9d9585] text-[#9d9585] dark:text-[#b5ad9d] text-lg font-semibold rounded-full hover:bg-[#9d9585] hover:text-white transition-all"
+                  size="lg"
+                  className="bg-egp-green hover:bg-egp-green-dark text-white"
+                  startContent={<ArrowRight className="w-5 h-5" />}
                 >
-                  <ArrowRight className="w-5 h-5" />
                   View All Services
-                </Link>
+                </Button>
               </div>
             </div>
           </div>

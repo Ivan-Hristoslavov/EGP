@@ -12,6 +12,7 @@ import { Card, CardBody, CardHeader } from "@heroui/react";
 import { Chip } from "@heroui/react";
 import { Spinner } from "@heroui/react";
 import { useToast } from '@/components/Toast';
+import ButtonPrimary from '@/components/ButtonPrimary';
 
 type OrderItem = {
   serviceId: string;
@@ -373,13 +374,42 @@ function BookingPageContent() {
 
   // Auto-select service from URL parameter
   useEffect(() => {
-    if (servicesLoading || services.length === 0) return;
+    if (servicesLoading || services.length === 0 || Object.keys(servicesDataMap).length === 0) return;
     
     const serviceParam = searchParams.get('service');
     const conditionParam = searchParams.get('condition');
     
-    if (serviceParam && servicesDataMap[serviceParam]) {
-      addService(serviceParam);
+    if (serviceParam) {
+      // Check if service exists in the map
+      const service = servicesDataMap[serviceParam];
+      if (service) {
+        // Check if service is already added
+        const isAlreadyAdded = selectedServices.some(s => s.serviceId === serviceParam);
+        if (!isAlreadyAdded) {
+          // Add service directly without calling addService to avoid dependency issues
+          setSelectedServices(prev => {
+            // Double check it's not already added
+            if (prev.some(s => s.serviceId === serviceParam)) {
+              return prev;
+            }
+            return [...prev, {
+              serviceId: serviceParam,
+              name: service.name,
+              price: service.price,
+              duration: service.duration,
+              category: service.category,
+              quantity: 1
+            }];
+          });
+        }
+      } else {
+        console.error(`Service not found in servicesDataMap: ${serviceParam}`);
+        console.log('Available services:', Object.keys(servicesDataMap).slice(0, 10));
+        showError(
+          "Service Not Found",
+          `The service "${serviceParam}" could not be found. Please select a service from the list below.`
+        );
+      }
     }
     
     // If coming from condition, show service selector and suggest relevant services
@@ -406,7 +436,7 @@ function BookingPageContent() {
         addService(suggestedServices[0]);
       }
     }
-  }, [searchParams, servicesLoading, services, servicesDataMap]);
+  }, [searchParams, servicesLoading, services, servicesDataMap, selectedServices]);
 
   const totalAmount = selectedServices.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const totalDuration = selectedServices.reduce((sum, item) => sum + (item.duration * item.quantity), 0);
@@ -438,7 +468,15 @@ function BookingPageContent() {
 
   const addService = (serviceId: string): boolean => {
     const service = servicesDataMap[serviceId];
-    if (!service) return false;
+    if (!service) {
+      console.error(`Service not found in servicesDataMap: ${serviceId}`);
+      console.log('Available services:', Object.keys(servicesDataMap));
+      showError(
+        "Service Not Found",
+        `The service "${serviceId}" could not be found. Please try selecting it from the list.`
+      );
+      return false;
+    }
 
     // Check if service is already selected
     const existingIndex = selectedServices.findIndex(item => item.serviceId === serviceId);
@@ -597,14 +635,13 @@ function BookingPageContent() {
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
             Explore our treatments to build your bespoke experience. You can always adjust later.
           </p>
-          <Button
+          <ButtonPrimary
             onPress={() => setShowServiceSelector(true)}
-            color="primary"
-            className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-white"
+            variant="primary"
             startContent={<Plus className="w-4 h-4" />}
           >
             Browse Services
-          </Button>
+          </ButtonPrimary>
         </div>
       ) : (
         <>
@@ -633,7 +670,7 @@ function BookingPageContent() {
                     
                     <div className="mb-4 pb-4 border-b border-divider">
                       <p className="text-xs uppercase tracking-wide text-default-500 mb-1">Subtotal</p>
-                      <p className="text-xl sm:text-2xl font-bold text-[#9d9585] dark:text-[#c9c1b0]">£{item.price * item.quantity}</p>
+                      <p className="text-xl sm:text-2xl font-bold text-egp-green dark:text-white">£{item.price * item.quantity}</p>
                     </div>
                   </div>
 
@@ -665,23 +702,23 @@ function BookingPageContent() {
                       </div>
 
           <div className="border-t border-divider pt-5 mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
-                      <Button
+                      <ButtonPrimary
               onPress={() => setShowServiceSelector(true)}
-              variant="flat"
-              className="w-full sm:w-auto bg-gradient-to-r from-[#b8ae9b] via-[#d0c6b4] to-[#e3d8c4] text-white"
+              variant="primary"
+              className="w-full sm:w-auto"
               startContent={<Plus className="w-4 h-4" />}
             >
               Add Services
-            </Button>
-            <Button
+            </ButtonPrimary>
+            <ButtonPrimary
               onPress={() => setCurrentStep('team')}
               isDisabled={selectedServices.length === 0}
-              color="primary"
-              className="w-full sm:w-auto bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-white"
+              variant="primary"
+              className="w-full sm:w-auto"
               endContent={<ArrowLeft className="w-4 h-4 rotate-180" />}
             >
               Continue to Select Practitioner
-                      </Button>
+            </ButtonPrimary>
                     </div>
         </>
       )}
@@ -825,14 +862,13 @@ function BookingPageContent() {
 
           {selectedTeamMember && (
             <div className="border-t border-divider pt-5 mt-6 flex justify-end">
-            <Button
+            <ButtonPrimary
               onPress={() => setCurrentStep('date')}
-              color="primary"
-              className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-white"
+              variant="primary"
               endContent={<ArrowLeft className="w-4 h-4 rotate-180" />}
             >
               Continue to Date Selection
-            </Button>
+            </ButtonPrimary>
         </div>
           )}
         </>
@@ -883,18 +919,30 @@ function BookingPageContent() {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-white rounded-t-2xl">
+              <ModalHeader className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-white rounded-t-2xl [&>button]:hidden">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 w-full">
-                  <div>
+                  <div className="flex-1">
                     <p className="text-sm uppercase tracking-[0.3em] font-semibold text-[#3f3a31]/70">Treatment insight</p>
                     <h2 className="text-2xl sm:text-3xl font-bold mt-1">{service.name}</h2>
                     <p className="text-sm text-[#3f3a31]/80 mt-1">{service.category}</p>
                   </div>
-                  {service.imageUrl && (
-                    <div className="hidden sm:block w-20 h-20 rounded-xl overflow-hidden border border-white/40 shadow-lg">
-                      <img src={service.imageUrl} alt={service.name} className="w-full h-full object-cover" />
-                    </div>
-                  )}
+                  <div className="flex items-center gap-3">
+                    {service.imageUrl && (
+                      <div className="hidden sm:block w-20 h-20 rounded-xl overflow-hidden border border-white/40 shadow-lg">
+                        <img src={service.imageUrl} alt={service.name} className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                    <ButtonPrimary
+                      variant="secondary"
+                      onPress={onClose}
+                      isIconOnly
+                      size="sm"
+                      className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+                      aria-label="Close modal"
+                    >
+                      <X className="w-4 h-4" />
+                    </ButtonPrimary>
+                  </div>
                 </div>
               </ModalHeader>
 
@@ -970,13 +1018,14 @@ function BookingPageContent() {
               </ModalBody>
 
               <ModalFooter className="border-t border-gray-200 dark:border-gray-700">
-                <Button
-                  variant="light"
-                  onPress={onClose}
-                  className="w-full"
-                >
-                  Close
-                </Button>
+                <div className="flex justify-center w-full">
+                  <ButtonPrimary
+                    variant="secondary"
+                    onPress={onClose}
+                  >
+                    Close
+                  </ButtonPrimary>
+                </div>
               </ModalFooter>
             </>
           )}
@@ -988,7 +1037,7 @@ function BookingPageContent() {
   const renderServiceSelector = () => {
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start justify-center p-3 sm:p-4 pt-20 sm:pt-24 z-[9999] overflow-y-auto">
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-6xl max-h-[85vh] flex flex-col relative mt-4 sm:mt-8">
+        <div className="bg-white dark:bg-egp-green-darker rounded-2xl shadow-2xl w-full max-w-6xl max-h-[85vh] flex flex-col relative mt-4 sm:mt-8">
           <div className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-white px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between rounded-t-2xl flex-shrink-0 relative z-10">
             <h2 className="text-xl sm:text-2xl font-bold">Select Services</h2>
             <button
@@ -1012,88 +1061,136 @@ function BookingPageContent() {
               return (
               <div key={category} className="mb-6 sm:mb-8">
                 <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-5">{category}</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
                   {availableServices.map(([serviceId, service]) => (
-                    <div
+                    <Card
                       key={serviceId}
-                      className="border-2 border-[#d4c9b8] dark:border-gray-700 rounded-xl p-4 sm:p-5 hover:border-[#c9c1b0] dark:hover:border-[#b5ad9d] transition-all duration-200 hover:shadow-lg relative group bg-white dark:bg-gray-900/70 flex flex-col h-full"
+                      className="h-full flex flex-col"
+                      shadow="md"
                     >
-                      <div className="flex flex-col flex-1 space-y-3 sm:space-y-4">
-                      <div className="flex flex-col gap-3">
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-gray-900 dark:text-white text-base sm:text-lg mb-2 leading-tight">{service.name}</h4>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-2">
-                              {service.description}
-                            </p>
+                      <CardHeader className="bg-egp-beige-lighter dark:bg-egp-green-dark px-4 py-3 border-b border-egp-beige-dark/60 dark:border-egp-green relative">
+                        {/* Category Badge - Top Left */}
+                        <div className="absolute top-2 left-2">
+                          <Chip 
+                            size="sm"
+                            className="bg-egp-green text-white text-[10px] font-semibold"
+                            variant="flat"
+                          >
+                            {service.category}
+                          </Chip>
                         </div>
-                          <div className="flex items-center justify-between sm:justify-start sm:flex-col sm:items-start gap-2 pt-2 border-t border-gray-100 dark:border-gray-700">
-                            <div className="flex flex-col">
-                              <div className="text-xl sm:text-2xl font-bold text-[#9d9585] dark:text-[#c9c1b0]">£{service.price}</div>
-                              <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{service.duration} min</div>
-                            </div>
-                        </div>
-                      </div>
                         
-                        {service.details && (
-                          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 sm:p-4 mt-2">
-                            <h5 className="font-medium text-gray-900 dark:text-white mb-1.5 text-sm sm:text-base">Treatment Details</h5>
-                            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-2">{service.details}</p>
-                    </div>
+                        {/* Duration Badge - Top Right */}
+                        <div className="absolute top-2 right-2">
+                          <Chip
+                            size="sm"
+                            startContent={<Clock className="w-3 h-3" />}
+                            variant="flat"
+                            className="bg-white/90 dark:bg-egp-green-dark/90 text-egp-green dark:text-white text-[10px]"
+                          >
+                            {service.duration} min
+                          </Chip>
+                        </div>
+                        
+                        {/* Service Name - Centered */}
+                        <div className="text-center pt-5 pb-2 w-full">
+                          <h4 className="text-base sm:text-lg font-bold text-egp-green dark:text-white leading-tight line-clamp-2 mb-2">
+                            {service.name}
+                          </h4>
+                          {/* Price */}
+                          <div className="text-2xl sm:text-3xl font-bold text-egp-green dark:text-white">
+                            £{service.price}
+                          </div>
+                        </div>
+                      </CardHeader>
+                      
+                      <CardBody className="p-4 sm:p-5 flex flex-col flex-1">
+                        {/* Description */}
+                        {service.description && (
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed line-clamp-3">
+                            {service.description}
+                          </p>
                         )}
                         
+                        {/* Service Details */}
+                        <div className="space-y-2 mb-4 text-xs text-gray-500 dark:text-gray-400">
+                          {service.requires_consultation && (
+                            <div className="flex items-center gap-2">
+                              <CheckCircle className="w-4 h-4 text-success flex-shrink-0" />
+                              <span>Consultation Required</span>
+                            </div>
+                          )}
+                          {service.downtime_days > 0 && (
+                            <div className="flex items-center gap-2">
+                              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                              </svg>
+                              <span>Downtime: {service.downtime_days} day{service.downtime_days !== 1 ? 's' : ''}</span>
+                            </div>
+                          )}
+                          {service.results_duration_weeks && (
+                            <div className="flex items-center gap-2">
+                              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                              <span>Results: {service.results_duration_weeks} week{service.results_duration_weeks !== 1 ? 's' : ''}</span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Benefits */}
                         {service.benefits && service.benefits.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-2">
+                          <div className="flex flex-wrap gap-2 mb-4">
                             {service.benefits.slice(0, 3).map((benefit: string, index: number) => (
-                              <span key={index} className="bg-[#f5f1e9] dark:bg-gray-800/40 text-[#6b5f4b] dark:text-[#c9c1b0] px-2 sm:px-2.5 py-1 rounded-full text-xs">
+                              <Chip
+                                key={index}
+                                size="sm"
+                                variant="flat"
+                                className="bg-egp-beige-light dark:bg-gray-800/40 text-egp-green dark:text-egp-beige text-xs"
+                              >
                                 {benefit}
-                              </span>
+                              </Chip>
                             ))}
                             {service.benefits.length > 3 && (
-                              <span className="text-xs text-gray-500 dark:text-gray-400">+{service.benefits.length - 3} more</span>
+                              <Chip
+                                size="sm"
+                                variant="flat"
+                                className="text-xs text-gray-500 dark:text-gray-400"
+                              >
+                                +{service.benefits.length - 3} more
+                              </Chip>
                             )}
                           </div>
                         )}
                         
-                        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 pt-2 mt-2 border-t border-gray-200 dark:border-gray-700">
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            <span className="hidden sm:inline">{service.duration} minutes</span>
-                            <span className="sm:hidden">{service.duration}m</span>
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <CheckCircle className="w-3 h-3 text-green-500" />
-                            <span className="hidden sm:inline">Professional</span>
-                          </span>
-                        </div>
-                        </div>
-
-                      {/* Action Buttons - Always at bottom */}
-                      <div className="flex flex-col gap-2 pt-3 mt-auto border-t border-gray-200 dark:border-gray-700">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setServiceInfoModal(serviceId);
-                            }}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-[#c9c1b0] text-[#6b5f4b] dark:text-[#c9c1b0] rounded-lg hover:bg-[#f5f1e9] dark:hover:bg-gray-800/40 transition-colors font-medium text-sm sm:text-base min-h-[44px] touch-manipulation active:scale-95"
+                        {/* Action Buttons - Always at bottom */}
+                        <div className="flex flex-col gap-2 pt-4 mt-auto border-t border-gray-200 dark:border-gray-700">
+                          <Button
+                            onPress={() => setServiceInfoModal(serviceId)}
+                            variant="bordered"
+                            size="sm"
+                            className="w-full border-egp-green text-egp-green dark:text-white dark:border-egp-green"
+                            startContent={<Info className="w-4 h-4" />}
                           >
-                            <Info className="w-4 h-4" />
-                            <span>More Info</span>
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
+                            Details
+                          </Button>
+                          <ButtonPrimary
+                            onPress={() => {
                               const success = addService(serviceId);
                               if (success) {
-                        setShowServiceSelector(false);
+                                setShowServiceSelector(false);
                               }
-                      }}
-                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#9d9585] to-[#c9c1b0] text-white rounded-lg hover:from-[#8c846f] hover:to-[#b5ad9d] transition-all font-medium shadow-md hover:shadow-lg text-sm sm:text-base min-h-[44px] touch-manipulation active:scale-95"
+                            }}
+                            variant="primary"
+                            className="w-full"
+                            size="sm"
+                            startContent={<Plus className="w-4 h-4" />}
                           >
-                            <Plus className="w-4 h-4" />
-                            <span>Add Service</span>
-                          </button>
-                      </div>
-                    </div>
+                            Book
+                          </ButtonPrimary>
+                        </div>
+                      </CardBody>
+                    </Card>
                   ))}
                 </div>
               </div>
@@ -1130,13 +1227,12 @@ function BookingPageContent() {
         <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Select Date &amp; Time</h3>
         <div className="bg-[#fce8e8] dark:bg-red-900/20 border border-[#f3b3b0] dark:border-red-800 rounded-xl px-4 py-6 space-y-4">
           <p className="text-sm sm:text-base text-[#7f2b27] dark:text-red-200">{availabilityError}</p>
-          <Button
+          <ButtonPrimary
             onPress={loadAvailability}
-            color="primary"
-            className="bg-gradient-to-r from-[#9d9585] to-[#c9c1b0] text-white"
+            variant="primary"
           >
             Retry loading availability
-          </Button>
+          </ButtonPrimary>
         </div>
       </div>
     );
@@ -1154,14 +1250,13 @@ function BookingPageContent() {
             }
           </p>
           {selectedTeamMember && (
-            <Button
+            <ButtonPrimary
               onPress={loadAvailability}
-              color="primary"
-              variant="light"
+              variant="primary"
               className="mx-auto"
             >
               Refresh availability
-            </Button>
+            </ButtonPrimary>
           )}
         </div>
       </div>
@@ -1507,10 +1602,10 @@ function BookingPageContent() {
                             onClick={() => handleTimeSelect(time)}
                             className={`px-2 py-1.5 min-h-[36px] rounded-md text-xs sm:text-sm font-medium transition-all touch-manipulation active:scale-95 border-2 flex items-center justify-center
                               ${isStartTime
-                                ? 'bg-gradient-to-r from-[#9d9585] to-[#c9c1b0] text-white shadow-md border-[#9d9585] font-bold'
+                                ? 'bg-egp-green hover:bg-egp-green-dark text-white shadow-md border-egp-green font-bold'
                                 : isSelected
-                                ? 'bg-[#d4c5a0] dark:bg-[#b5ad9d] text-white dark:text-[#3f3a31] border-[#9d9585]'
-                                : 'border-green-500 dark:border-green-400 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 hover:border-green-600 dark:hover:border-green-300'}
+                                ? 'bg-egp-green-light dark:bg-egp-green-dark text-white border-egp-green'
+                                : 'border-egp-green dark:border-egp-green-light bg-egp-green/10 dark:bg-egp-green-dark/20 text-egp-green dark:text-white hover:bg-egp-green/20 dark:hover:bg-egp-green-dark/30 hover:border-egp-green-dark'}
                             `}
                           >
                             {time}
@@ -1530,14 +1625,14 @@ function BookingPageContent() {
               )}
                     {selectedTime && (
                       <div className="mt-4">
-                        <Button
+                        <ButtonPrimary
                           onPress={() => setCurrentStep('preview')}
-                          color="primary"
-                          className="w-full bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-white"
+                          variant="primary"
+                          className="w-full"
                           endContent={<ArrowLeft className="w-4 h-4 rotate-180" />}
                         >
                           Continue to Preview
-                        </Button>
+                        </ButtonPrimary>
                 </div>
               )}
                   </>
@@ -1670,14 +1765,14 @@ function BookingPageContent() {
         </div>
         
           {/* Total */}
-          <div className="p-4 rounded-xl border-2 border-[#9d9585] dark:border-[#c9c1b0] bg-gradient-to-br from-[#f5f1e9] via-white to-[#faf7f1] dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 shadow-md hover:shadow-lg transition-all duration-200">
+          <div className="p-4 rounded-xl border-2 border-egp-green dark:border-egp-green-light bg-gradient-to-br from-[#f5f1e9] via-white to-[#faf7f1] dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 shadow-md hover:shadow-lg transition-all duration-200">
           <div className="flex items-center gap-2 mb-2">
-              <div className="p-1.5 rounded-lg bg-[#9d9585]/20 dark:bg-[#c9c1b0]/20">
-                <CreditCard className="w-4 h-4 text-[#9d9585] dark:text-[#c9c1b0]" />
+              <div className="p-1.5 rounded-lg bg-egp-green/20 dark:bg-egp-green-light/20">
+                <CreditCard className="w-4 h-4 text-egp-green dark:text-white" />
           </div>
               <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total</p>
             </div>
-            <p className="text-3xl font-bold text-[#9d9585] dark:text-[#c9c1b0] mb-1">£{totalAmount.toFixed(0)}</p>
+            <p className="text-3xl font-bold text-egp-green dark:text-white mb-1">£{totalAmount.toFixed(0)}</p>
             <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">{totalDuration} min total</p>
           </div>
         </div>
@@ -1709,7 +1804,7 @@ function BookingPageContent() {
 
                   <div className="flex items-center justify-between mb-3 pb-3 border-b border-divider">
                     <span className="text-xs font-medium text-default-500 uppercase tracking-wide">Subtotal</span>
-                    <span className="text-xl font-bold text-[#9d9585] dark:text-[#c9c1b0]">£{item.price * item.quantity}</span>
+                    <span className="text-xl font-bold text-egp-green dark:text-white">£{item.price * item.quantity}</span>
                   </div>
 
                   <div className="flex items-center justify-end mt-auto">
@@ -1768,19 +1863,19 @@ function BookingPageContent() {
                 }
               }}
               variant="bordered"
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto border-egp-green text-egp-green dark:text-white dark:border-egp-green"
               startContent={<CheckCircle className="w-4 h-4" />}
             >
               Test Booking
             </Button>
-        <Button
+        <ButtonPrimary
           onPress={proceedToPayment}
-          color="primary"
-          className="w-full sm:w-auto bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-white"
+          variant="primary"
+          className="w-full sm:w-auto"
           startContent={<CreditCard className="w-4 h-4" />}
         >
           Proceed to Payment
-        </Button>
+        </ButtonPrimary>
           </div>
         ) : (
           <div className="mt-4 space-y-4">

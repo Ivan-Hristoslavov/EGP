@@ -558,7 +558,7 @@ export default function HeaderAesthetics() {
                   <ChevronDown
                     className={`relative z-10 w-2.5 h-2.5 transition-all duration-300 ${activeMenu === "treatments" ? "rotate-180 text-gray-900 dark:text-white" : "group-hover:text-gray-900 dark:group-hover:text-white"}`}
                   />
-                  <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
+                  <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-egp-green transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
                   {/* Blurred white/black background */}
                   <span
                     className={`absolute inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-md transition-all duration-300 border border-white/20 dark:border-gray-700/20 ${
@@ -571,9 +571,9 @@ export default function HeaderAesthetics() {
                       WebkitBackdropFilter: "blur(12px)",
                     }}
                   ></span>
-                  {/* Gradient overlay */}
+                  {/* Solid color overlay */}
                   <span
-                    className={`absolute inset-0 bg-gradient-to-r from-[#9d9585]/15 via-[#b5ad9d]/15 to-[#c9c1b0]/15 rounded-md transition-all duration-300 ${
+                    className={`absolute inset-0 bg-egp-green/10 rounded-md transition-all duration-300 ${
                       activeMenu === "treatments"
                         ? "opacity-100"
                         : "opacity-0 group-hover:opacity-100"
@@ -814,7 +814,7 @@ export default function HeaderAesthetics() {
                                       {/* Animated underline */}
                                       <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
                                     </span>
-                                    <span className="relative z-10 font-semibold bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] bg-clip-text text-transparent whitespace-nowrap group-hover:scale-110 transition-transform duration-300">
+                                    <span className="relative z-10 font-semibold text-egp-green dark:text-white whitespace-nowrap group-hover:scale-110 transition-transform duration-300">
                                       £{item.price}
                                     </span>
                                   </Link>

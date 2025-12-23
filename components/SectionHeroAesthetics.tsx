@@ -40,7 +40,7 @@ export default function SectionHeroAesthetics() {
   }, []);
 
   return (
-    <section className="relative h-screen min-h-[500px] sm:min-h-[600px] max-h-[900px] overflow-hidden" style={{ zIndex: 1 }}>
+    <section className="relative h-screen min-h-[500px] sm:min-h-[600px] max-h-[900px] overflow-hidden" style={{ zIndex: 1 }} suppressHydrationWarning>
       {/* Background Slides */}
       {slides.map((slide, index) => (
         <div

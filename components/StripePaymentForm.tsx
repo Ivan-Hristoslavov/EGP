@@ -9,6 +9,7 @@ import {
   useElements
 } from '@stripe/react-stripe-js';
 import { CreditCard, CheckCircle, AlertCircle, Loader, Calendar, Clock, Phone, Mail } from 'lucide-react';
+import ButtonPrimary from './ButtonPrimary';
 
 // Initialize Stripe
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -243,23 +244,18 @@ function PaymentForm({
         )}
 
         {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={!stripe || !elements || isLoading || isTestBooking}
-          className="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px] touch-manipulation active:scale-95"
-        >
-          {isLoading ? (
-            <>
-              <Loader className="w-5 h-5 animate-spin" />
-              <span>Processing Payment...</span>
-            </>
-          ) : (
-            <>
-              <CreditCard className="w-5 h-5" />
-              <span>Pay £{amount.toFixed(2)} Now</span>
-            </>
-          )}
-        </button>
+        <div className="flex justify-center">
+          <ButtonPrimary
+            type="submit"
+            variant="primary"
+            size="lg"
+            isDisabled={!stripe || !elements || isLoading || isTestBooking}
+            isLoading={isLoading}
+            startContent={!isLoading ? <CreditCard className="w-5 h-5" /> : undefined}
+          >
+            {isLoading ? "Processing Payment..." : `Pay £${amount.toFixed(2)} Now`}
+          </ButtonPrimary>
+        </div>
       </form>
 
       {/* Test Booking Button (for development/testing) */}
@@ -452,23 +448,18 @@ export default function StripePaymentForm(props: StripePaymentFormProps) {
         )}
 
         {/* Initialize Payment Button */}
-        <button
-          onClick={handleInitializePayment}
-          disabled={isInitializing || isTestBooking}
-          className="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px] touch-manipulation active:scale-95"
-        >
-          {isInitializing ? (
-            <>
-              <Loader className="w-5 h-5 animate-spin" />
-              <span>Initializing Payment...</span>
-            </>
-          ) : (
-            <>
-              <CreditCard className="w-5 h-5" />
-              <span>Pay £{props.amount.toFixed(2)} Now</span>
-            </>
-          )}
-        </button>
+        <div className="flex justify-center">
+          <ButtonPrimary
+            onPress={handleInitializePayment}
+            variant="primary"
+            size="lg"
+            isDisabled={isInitializing || isTestBooking}
+            isLoading={isInitializing}
+            startContent={!isInitializing ? <CreditCard className="w-5 h-5" /> : undefined}
+          >
+            {isInitializing ? "Initializing Payment..." : `Pay £${props.amount.toFixed(2)} Now`}
+          </ButtonPrimary>
+        </div>
 
         {/* Test Booking Button (for development/testing) */}
         {props.onTestBooking && (

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useAdminProfile } from "@/hooks/useAdminProfile";
 import { useToast } from "@/components/Toast";
 import WorkingHoursManager from "@/components/admin/WorkingHoursManager";
-import { Building2, DollarSign, Settings, Shield, Save } from "lucide-react";
+import { Building2, DollarSign, Settings, Save } from "lucide-react";
 import { Card, CardBody, CardHeader, Button, Input, Textarea, Checkbox, Tabs, Tab, Spinner } from "@heroui/react";
 
 type SettingsState = {
@@ -31,8 +31,6 @@ type SettingsState = {
   autoConfirmBookings: boolean;
   requirePaymentConfirmation: boolean;
 
-  // Professional Settings
-  gasSafeNumber: string;
 };
 
 const defaultSettings: SettingsState = {
@@ -54,8 +52,6 @@ const defaultSettings: SettingsState = {
   smsNotifications: false,
   autoConfirmBookings: false,
   requirePaymentConfirmation: true,
-
-  gasSafeNumber: "",
 };
 
 const workingDaysOptions = [
@@ -69,7 +65,7 @@ const workingDaysOptions = [
 ];
 
 export default function AdminSettingsPage() {
-  const [activeTab, setActiveTab] = useState<"business" | "pricing" | "professional">("business");
+  const [activeTab, setActiveTab] = useState<"business" | "pricing">("business");
   const [settings, setSettings] = useState<SettingsState>(defaultSettings);
   const [isSaving, setIsSaving] = useState(false);
   const { profile, loading } = useAdminProfile();
@@ -94,7 +90,6 @@ export default function AdminSettingsPage() {
         smsNotifications: false,
         autoConfirmBookings: false,
         requirePaymentConfirmation: true,
-        gasSafeNumber: profile.gas_safe_number || "",
       });
     }
   }, [profile]);
@@ -114,7 +109,6 @@ export default function AdminSettingsPage() {
           businessEmail: settings.businessEmail,
           phone: settings.businessPhone,
           whatsapp: profile?.whatsapp || settings.businessPhone,
-          about: profile?.about || "",
           companyName: profile?.company_name || "",
           companyAddress: settings.businessAddress,
           howToFindUs: (profile as any)?.how_to_find_us || "",
@@ -155,7 +149,6 @@ export default function AdminSettingsPage() {
   const tabs = [
     { id: "business", label: "Business & Hours", icon: Building2 },
     { id: "pricing", label: "Pricing", icon: DollarSign },
-    { id: "professional", label: "Professional", icon: Shield },
   ];
 
   if (loading) {
@@ -261,20 +254,6 @@ export default function AdminSettingsPage() {
               </div>
             )}
 
-            {activeTab === "professional" && (
-              <div className="space-y-6">
-                <div className="mt-8 pt-6 border-t border-divider">
-                  <Button
-                    color="primary"
-                    onPress={handleSave}
-                    isLoading={isSaving}
-                    startContent={<Save className="w-4 h-4" />}
-                  >
-                    {isSaving ? "Saving..." : "Save Settings"}
-                  </Button>
-                </div>
-            </div>
-            )}
           </div>
         </CardBody>
       </Card>

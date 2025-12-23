@@ -173,7 +173,7 @@ export function ReviewsSection() {
                 <button
                   onClick={() => setCurrentPage(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-[#f5f1e9] dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all border border-[#e4d9c8] dark:border-gray-700 text-sm font-medium shadow-sm hover:shadow"
+                  className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all border border-gray-300 dark:border-gray-700 text-sm font-medium shadow-sm hover:shadow"
                 >
                   Previous
                 </button>
@@ -184,8 +184,8 @@ export function ReviewsSection() {
                     onClick={() => setCurrentPage(page)}
                       className={`px-4 py-2 rounded-xl transition-all text-sm font-medium shadow-sm ${
                       page === currentPage
-                        ? 'bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-white shadow-md scale-105'
-                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-[#f5f1e9] dark:hover:bg-gray-700 border border-[#e4d9c8] dark:border-gray-700 hover:shadow'
+                        ? 'bg-gray-700 dark:bg-gray-600 text-white shadow-md scale-105'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-700 hover:shadow'
                     }`}
                   >
                     {page}
@@ -195,7 +195,7 @@ export function ReviewsSection() {
                 <button
                   onClick={() => setCurrentPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-[#f5f1e9] dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all border border-[#e4d9c8] dark:border-gray-700 text-sm font-medium shadow-sm hover:shadow"
+                  className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all border border-gray-300 dark:border-gray-700 text-sm font-medium shadow-sm hover:shadow"
                 >
                   Next
                 </button>

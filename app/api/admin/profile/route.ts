@@ -67,7 +67,6 @@ export async function PUT(request: NextRequest) {
       whatsapp,
       companyName, 
       companyAddress, 
-      bankName, 
       accountNumber, 
       sortCode,
       howToFindUs,
@@ -101,7 +100,6 @@ export async function PUT(request: NextRequest) {
     };
 
     // Add optional fields that exist in the base schema
-    if (bankName !== undefined && bankName !== null) updateData.bank_name = bankName;
     if (accountNumber !== undefined && accountNumber !== null) updateData.account_number = accountNumber;
     if (sortCode !== undefined && sortCode !== null) updateData.sort_code = sortCode;
     

@@ -18,9 +18,7 @@ export async function ServerAdminProfileMarkdown({ type, fallback = '', classNam
 
     const value = (profile as any)[type] || fallback;
     
-    if (type === 'about') {
-      return <MarkdownRenderer content={value} className={className} />;
-    }
+    // Removed 'about' field handling
     
     return <span className={className}>{value}</span>;
   } catch (error) {

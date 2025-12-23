@@ -17,6 +17,20 @@ const config = {
           lighter: '#f7f5f2',
           dark: '#c9c1b0',
         },
+        'egp-green': {
+          DEFAULT: '#464C45',
+          light: '#5a6259',
+          dark: '#3a4039',
+          darker: '#2d322c',
+        },
+        'egp-beige': {
+          DEFAULT: '#ddd5c3',
+          light: '#f0ede7',
+          lighter: '#f5f1e9',
+          dark: '#c9c1b0',
+          darker: '#b5ad9d',
+          darkest: '#9d9585',
+        },
       },
       fontFamily: {
         sans: ["var(--font-montserrat)", "system-ui", "sans-serif"],

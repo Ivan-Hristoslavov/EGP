@@ -8,6 +8,7 @@ import Pagination from "@/components/Pagination";
 import type { Service } from "@/hooks/useServices";
 import { aestheticsColors } from "@/config/colors";
 import { badgeBackgroundClass } from "@/config/badge-styles";
+import ButtonPrimary from "@/components/ButtonPrimary";
 
 // Gradient colors for different categories
 const categoryGradients: Record<string, string> = {
@@ -148,7 +149,7 @@ export default function SectionFeaturedServices() {
   }
 
   return (
-    <section id="featured-services" className="py-12 sm:py-16 md:py-20 bg-[#f5f1e9] dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <section id="featured-services" className="py-12 sm:py-16 md:py-20 bg-[#f5f1e9] dark:bg-gradient-to-b dark:from-egp-green-darker dark:via-egp-green-dark dark:to-egp-green-darker">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-8 sm:mb-12 md:mb-16">
@@ -177,8 +178,8 @@ export default function SectionFeaturedServices() {
                 onClick={() => setSelectedCategory("all")}
                 className={`px-4 sm:px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                   selectedCategory === "all"
-                    ? "bg-[#b5ad9d] dark:bg-[#9d9585] text-white shadow-lg scale-105"
-                    : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-[#ddd5c3] dark:hover:bg-gray-700 border border-[#c9c1b0] dark:border-gray-700"
+                    ? "bg-egp-green dark:bg-egp-green-dark text-white shadow-lg scale-105"
+                    : "bg-white dark:bg-egp-green text-gray-700 dark:text-white hover:bg-[#ddd5c3] dark:hover:bg-egp-green-light border border-[#c9c1b0] dark:border-egp-green-dark"
                 }`}
               >
                 All Services
@@ -209,7 +210,7 @@ export default function SectionFeaturedServices() {
             return (
               <div
                 key={service.id}
-                className="group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-300 dark:border-gray-700 cursor-pointer flex flex-col"
+                className="group relative bg-white dark:bg-egp-green rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-300 dark:border-egp-green-dark cursor-pointer flex flex-col"
                 onClick={() => setSelectedService(service)}
               >
                 {/* Image */}
@@ -307,17 +308,16 @@ export default function SectionFeaturedServices() {
                       £{service.price.toFixed(0)}
                     </div>
                     {/* Button */}
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
+                    <ButtonPrimary
+                      onPress={() => {
                         setSelectedService(service);
                       }}
-                      className="w-full flex items-center justify-center gap-2 bg-[#9d9585] hover:bg-[#b5ad9d] dark:bg-[#b5ad9d] dark:hover:bg-[#9d9585] text-white font-semibold py-2.5 px-4 rounded-lg transition-all hover:shadow-lg"
+                      variant="primary"
+                      className="w-full"
+                      endContent={<ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
                     >
-                      <span className="text-sm">Learn More</span>
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </button>
+                      Learn More
+                    </ButtonPrimary>
                   </div>
                 </div>
               </div>
@@ -350,13 +350,16 @@ export default function SectionFeaturedServices() {
 
         {/* View All Button */}
         <div className="text-center px-4">
-          <Link
+          <ButtonPrimary
+            as={Link}
             href="/services"
-            className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-[#b5ad9d] hover:bg-[#9d9585] dark:bg-[#9d9585] dark:hover:bg-[#b5ad9d] text-white text-base sm:text-lg font-bold rounded-full transition-all shadow-xl hover:shadow-2xl active:scale-95 w-full sm:w-auto touch-manipulation"
+            variant="primary"
+            size="lg"
+            className="w-full sm:w-auto"
+            endContent={<ArrowRight className="w-5 h-5" />}
           >
-            <span>View All Treatments</span>
-            <ArrowRight className="w-5 h-5" />
-          </Link>
+            View All Treatments
+          </ButtonPrimary>
         </div>
       </div>
 
@@ -514,7 +517,7 @@ export default function SectionFeaturedServices() {
               {/* CTA Buttons */}
               <div className="pt-4 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row gap-3">
                 <Link
-                  href={`/book?service=${selectedService.id}`}
+                  href={`/book?service=${selectedService.slug}`}
                   onClick={() => setSelectedService(null)}
                   className="flex-1 flex items-center justify-center gap-2 text-white py-4 rounded-xl font-semibold text-base sm:text-lg transition-all duration-200 shadow-lg hover:shadow-xl text-center"
                   style={{ backgroundColor: aestheticsColors.green.DEFAULT }}

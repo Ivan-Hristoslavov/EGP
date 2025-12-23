@@ -41,7 +41,7 @@ export default function ButtonBookNow({
       case "primary":
         return "bg-white/20 backdrop-blur-md border-2 border-white/50 text-white hover:bg-white/30 hover:border-white/70 shadow-lg hover:shadow-xl";
       case "secondary":
-        return "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700";
+        return "bg-gray-100 dark:bg-egp-green text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-egp-green-light";
       case "outline":
         return "bg-white/20 backdrop-blur-md border-2 border-white/50 text-white hover:bg-white/30 hover:border-white/70";
       default:

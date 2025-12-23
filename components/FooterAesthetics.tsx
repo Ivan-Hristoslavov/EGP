@@ -153,7 +153,7 @@ export default function FooterAesthetics() {
       if (!dayData) return;
 
       const hours = formatHours(dayKey);
-      const isOpen = dayData.isOpen && dayData.open && dayData.close;
+      const isOpen = !!(dayData.isOpen && dayData.open && dayData.close);
 
       // Check if this day matches the current group
       if (currentGroup && currentGroup.hours === hours && currentGroup.isOpen === isOpen) {

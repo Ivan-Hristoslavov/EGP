@@ -45,7 +45,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function HomePage() {
   return (
-    <main className="min-h-screen">
+    <>
       {/* Hero Section - Full Screen */}
       <SectionHeroAesthetics />
 
@@ -72,6 +72,6 @@ export default async function HomePage() {
 
       {/* Contact Section - COMMENTED OUT - Will use direct booking with payment instead */}
       {/* <SectionContact /> */}
-    </main>
+    </>
   );
 }

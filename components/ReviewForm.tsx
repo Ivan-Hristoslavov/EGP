@@ -3,16 +3,18 @@ import { useState } from "react";
 import { useReviews } from "@/hooks/useReviews";
 import { useToast, ToastMessages } from "@/components/Toast";
 import { Input, Textarea, Button } from "@heroui/react";
+import ButtonPrimary from "./ButtonPrimary";
 
 // Helpers
 function isValidEmail(value: string) {
-  if (!value) return true;
+  if (!value) return false;
   return /\S+@\S+\.\S+/.test(value.trim());
 }
 
 function getValidationMessage(formData: { name: string; email: string; message: string; rating: number; }) {
   if (!formData.name.trim()) return "Name is required.";
   if (formData.name.trim().length < 2) return "Name must be at least 2 characters.";
+  if (!formData.email.trim()) return "Email is required.";
   if (!isValidEmail(formData.email)) return "Please enter a valid email.";
   if (!formData.message.trim()) return "Review message is required.";
   if (formData.message.trim().length < 20) return "Review must be at least 20 characters.";
@@ -37,6 +39,7 @@ export function ReviewForm() {
   }>(null);
 
   const nameInvalid = formData.name !== "" && formData.name.trim().length < 2;
+  const emailEmpty = formData.email.trim() === "";
   const emailInvalid = formData.email !== "" && !isValidEmail(formData.email);
   const messageTooShort = formData.message !== "" && formData.message.trim().length < 20;
   const messageTooLong = formData.message.trim().length > 1000;
@@ -189,12 +192,13 @@ export function ReviewForm() {
                 variant="bordered"
                 radius="lg"
                 type="email"
-                label="Email (Optional)"
+                label="Email"
                 placeholder="john@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-                isInvalid={emailInvalid}
-                errorMessage={emailInvalid ? "Invalid email format" : undefined}
+                isInvalid={emailEmpty || emailInvalid}
+                errorMessage={emailEmpty ? "Email is required" : emailInvalid ? "Invalid email format" : undefined}
+                isRequired
                 classNames={{
                   base: "w-full",
                   label: "text-sm font-semibold text-[#6b5f4b] dark:text-gray-200",
@@ -277,17 +281,16 @@ export function ReviewForm() {
 
             {/* Submit Button */}
             <div className="pt-2">
-              <Button
+              <ButtonPrimary
                 type="submit"
-                color="default"
-                variant="solid"
+                variant="primary"
                 size="lg"
-                className="w-full font-semibold min-h-[48px] text-base sm:text-lg bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-[#3f3a31] shadow-lg hover:shadow-xl hover:from-[#8c846f] hover:via-[#aea693] hover:to-[#c4b5a0] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full font-semibold min-h-[48px] text-base sm:text-lg"
                 isDisabled={isSubmitting || !!getValidationMessage(formData)}
                 isLoading={isSubmitting}
               >
                 {isSubmitting ? "Submitting..." : "Submit Review"}
-              </Button>
+              </ButtonPrimary>
               <p className="text-xs sm:text-sm text-center text-gray-500 dark:text-gray-400 mt-3 px-2">
                 Your review will be published after our team approves it
               </p>
