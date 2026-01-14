@@ -82,19 +82,6 @@ export async function POST(request: NextRequest) {
         }, { status: 500 });
       }
 
-      // Get team member details if available
-      let teamMemberName = null;
-      if (teamMemberId) {
-        const { data: teamMember } = await supabaseAdmin
-          .from('team')
-          .select('name, role')
-          .eq('id', teamMemberId)
-          .single();
-        if (teamMember) {
-          teamMemberName = `${teamMember.name} (${teamMember.role})`;
-        }
-      }
-
       // Get customer email from payment intent or metadata
       let customerEmail = metadata.customerEmail;
       if (!customerEmail && paymentIntent.customer) {
@@ -105,6 +92,88 @@ export async function POST(request: NextRequest) {
           }
         } catch (error) {
           console.warn('Could not retrieve customer email from Stripe:', error);
+        }
+      }
+
+      // Find or create customer record for payment tracking
+      let customerId: string | null = null;
+      const customerPhone = metadata.customerPhone;
+      const customerName = metadata.customerName || 'Customer';
+
+      if (customerEmail) {
+        // Try to find existing customer by email
+        const { data: existingCustomer } = await supabaseAdmin
+          .from('customers')
+          .select('id')
+          .eq('email', customerEmail.toLowerCase())
+          .single();
+
+        if (existingCustomer) {
+          customerId = existingCustomer.id;
+        } else {
+          // Create new customer record
+          const nameParts = customerName.trim().split(' ');
+          const first_name = nameParts[0] || '';
+          const last_name = nameParts.slice(1).join(' ') || '';
+
+          const { data: newCustomer, error: customerError } = await supabaseAdmin
+            .from('customers')
+            .insert({
+              first_name,
+              last_name,
+              email: customerEmail.toLowerCase(),
+              phone: customerPhone || null,
+            })
+            .select('id')
+            .single();
+
+          if (!customerError && newCustomer) {
+            customerId = newCustomer.id;
+            console.log('Created new customer record:', customerId);
+          } else {
+            console.warn('Could not create customer record:', customerError);
+          }
+        }
+      }
+
+      // Create payment record in payments table
+      try {
+        const { data: payment, error: paymentError } = await supabaseAdmin
+          .from('payments')
+          .insert({
+            booking_id: booking.id,
+            customer_id: customerId,
+            amount: totalAmount,
+            payment_method: 'card',
+            payment_status: 'paid',
+            payment_date: new Date().toISOString().split('T')[0],
+            reference: paymentIntentId,
+            notes: `Payment via Stripe Payment Intent for booking ${booking.id || booking.booking_number || 'N/A'}`,
+          })
+          .select()
+          .single();
+
+        if (paymentError) {
+          console.error('Error creating payment record:', paymentError);
+          // Don't fail the booking if payment record creation fails
+        } else {
+          console.log('Payment record created:', payment.id);
+        }
+      } catch (paymentErr) {
+        console.error('Unexpected error creating payment record:', paymentErr);
+        // Don't fail the booking if payment record creation fails
+      }
+
+      // Get team member details if available
+      let teamMemberName = null;
+      if (teamMemberId) {
+        const { data: teamMember } = await supabaseAdmin
+          .from('team')
+          .select('name, role')
+          .eq('id', teamMemberId)
+          .single();
+        if (teamMember) {
+          teamMemberName = `${teamMember.name} (${teamMember.role})`;
         }
       }
 

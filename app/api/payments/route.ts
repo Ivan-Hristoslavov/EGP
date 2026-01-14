@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { supabase } from "../../../lib/supabase";
+import { supabase, supabaseAdmin } from "../../../lib/supabase";
 import { createCheckoutSession, createPaymentLink, STRIPE_TO_DB_STATUS, isStripeAvailable } from "../../../lib/stripe";
 
 // GET - Fetch payments with pagination
@@ -11,8 +11,9 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "10");
     const offset = (page - 1) * limit;
 
+    // Use admin client to bypass RLS
     // Get total count for pagination
-    const { count: totalCount, error: countError } = await supabase
+    const { count: totalCount, error: countError } = await supabaseAdmin
       .from("payments")
       .select("*", { count: "exact", head: true });
 
@@ -24,14 +25,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get paginated payments
-    const { data: payments, error } = await supabase
+    // Get paginated payments with joins
+    const { data: payments, error } = await supabaseAdmin
       .from("payments")
       .select(
         `
         *,
-        customers!inner(first_name, last_name, email),
-        bookings(service, date, customer_name)
+        customers(first_name, last_name, email),
+        bookings(service, date, customer_name, customer_email, booking_number)
       `,
       )
       .order("created_at", { ascending: false })
@@ -46,19 +47,49 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    console.log(`Fetched ${payments?.length || 0} payments from database`);
+
     // Transform payments to include name field from first_name + last_name
-    const transformedPayments = payments?.map((payment: any) => ({
-      ...payment,
-      customers: payment.customers
-        ? {
-            ...payment.customers,
-            name:
-              payment.customers.first_name && payment.customers.last_name
-                ? `${payment.customers.first_name} ${payment.customers.last_name}`
-                : payment.customers.first_name || payment.customers.last_name || "Unknown Customer",
-          }
-        : null,
-    }));
+    // If no customer, try to get customer info from booking
+    const transformedPayments = payments?.map((payment: any) => {
+      let customerData = null;
+      
+      // Check if customers is an array (Supabase returns array for joins)
+      const customer = Array.isArray(payment.customers) 
+        ? payment.customers[0] 
+        : payment.customers;
+      
+      // Check if bookings is an array
+      const booking = Array.isArray(payment.bookings) 
+        ? payment.bookings[0] 
+        : payment.bookings;
+      
+      if (customer) {
+        // Customer exists in customers table
+        customerData = {
+          ...customer,
+          name:
+            customer.first_name && customer.last_name
+              ? `${customer.first_name} ${customer.last_name}`
+              : customer.first_name || customer.last_name || "Unknown Customer",
+        };
+      } else if (booking && booking.customer_name) {
+        // No customer record, but booking has customer_name
+        customerData = {
+          name: booking.customer_name,
+          email: booking.customer_email || null,
+        };
+      }
+      
+      return {
+        ...payment,
+        customers: customerData,
+        bookings: booking ? {
+          ...booking,
+          booking_number: booking.booking_number || null,
+        } : null,
+      };
+    });
 
     const totalPages = Math.ceil((totalCount || 0) / limit);
 
