@@ -12,3 +12,4 @@ COMMENT ON COLUMN customers.password_hash IS 'Password hash for customer login. 
 
 
 
+

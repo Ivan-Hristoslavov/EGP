@@ -23,7 +23,8 @@ import {
   UsersRound,
   Ban,
   BookOpen,
-  Globe
+  Globe,
+  User
 } from "lucide-react";
 import { FirstVisitDiscountFormWrapper } from "@/components/FirstVisitDiscountFormWrapper";
 
@@ -92,6 +93,11 @@ const navigation = [
     name: "About",
     href: "/admin/about",
     icon: <Info className="w-5 h-5" />,
+  },
+  {
+    name: "Profile",
+    href: "/admin/profile",
+    icon: <User className="w-5 h-5" />,
   },
   {
     name: "Hero Section",
