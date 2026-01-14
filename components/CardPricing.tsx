@@ -19,7 +19,7 @@ const pricingTiers: PricingTier[] = [
     features: [
       "Same day availability",
       "Expert practitioner",
-      "Personalized treatment plan",
+      "Personalised treatment plan",
       "Product recommendations",
       "Free follow-up advice",
     ],
@@ -64,7 +64,7 @@ export function CardPricing() {
   };
 
   return (
-    <div className="py-12 bg-white dark:bg-gray-900 transition-colors duration-500">
+    <div className="py-12 bg-white dark:bg-egp-green-darker transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
@@ -79,7 +79,7 @@ export function CardPricing() {
           {pricingTiers.map((tier) => (
             <div
               key={tier.name}
-              className={`relative p-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-2xl shadow-sm flex flex-col transition-colors duration-300 ${
+              className={`relative p-8 bg-white dark:bg-egp-green border border-gray-200 dark:border-egp-green-dark rounded-2xl shadow-sm flex flex-col transition-colors duration-300 ${
                 tier.isPopular
                   ? "border-black ring-2 ring-black"
                   : "border-gray-200"

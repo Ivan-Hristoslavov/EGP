@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { CheckCircle, Calendar, Clock, Mail, Phone, ArrowRight, Download, X, User } from 'lucide-react';
 import { siteConfig } from '@/config/site';
 import { useAdminProfile } from '@/components/AdminProfileContext';
+import ButtonPrimary from '@/components/ButtonPrimary';
 
 function BookingSuccessContent() {
   const searchParams = useSearchParams();
@@ -580,29 +581,35 @@ function BookingSuccessContent() {
 
         {/* Action Buttons */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 no-print">
-          <Link
+          <ButtonPrimary
+            as={Link}
             href="/book"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white rounded-lg hover:from-[#857d68] hover:via-[#aea693] hover:to-[#c9c1b0] transition-all shadow-lg hover:shadow-xl"
+            variant="primary"
+            className="w-full"
+            startContent={<ArrowRight className="w-4 h-4 rotate-180" />}
           >
-            <ArrowRight className="w-4 h-4 rotate-180" />
             Back to Booking
-          </Link>
+          </ButtonPrimary>
 
-          <Link
+          <ButtonPrimary
+            as={Link}
             href="/"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-[#9d9585] text-[#9d9585] dark:text-[#b5ad9d] rounded-lg hover:bg-[#9d9585] hover:text-white dark:hover:bg-[#b5ad9d] transition-all"
+            variant="secondary"
+            className="w-full"
+            startContent={<ArrowRight className="w-4 h-4" />}
           >
-            <ArrowRight className="w-4 h-4" />
             Back to Home
-          </Link>
+          </ButtonPrimary>
 
-          <Link
+          <ButtonPrimary
+            as={Link}
             href="/book"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-[#9d9585] text-[#9d9585] dark:text-[#b5ad9d] rounded-lg hover:bg-[#9d9585] hover:text-white dark:hover:bg-[#b5ad9d] transition-all"
+            variant="primary"
+            className="w-full"
+            startContent={<Calendar className="w-4 h-4" />}
           >
-            <Calendar className="w-4 h-4" />
             Book Another
-          </Link>
+          </ButtonPrimary>
 
           <Link
             href={`tel:${contactPhone}`}

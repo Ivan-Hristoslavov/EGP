@@ -36,9 +36,7 @@ export function AdminProfileMarkdown({ type, fallback = '', className }: AdminPr
 
   const value = (profile as any)[type] || fallback;
   
-  if (type === 'about') {
-    return <MarkdownRenderer content={value} className={className} />;
-  }
+  // Removed 'about' field handling
   
   return <span className={className}>{value}</span>;
 } 

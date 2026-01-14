@@ -25,10 +25,30 @@ export default function HeaderAesthetics() {
   const [scrolled, setScrolled] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [isPressPageEnabled, setIsPressPageEnabled] = useState(true); // Default to true
 
   // Ensure component is mounted before rendering portal
   useEffect(() => {
     setIsMounted(true);
+  }, []);
+
+  // Fetch press page enabled setting
+  useEffect(() => {
+    const fetchPressPageSetting = async () => {
+      try {
+        const response = await fetch('/api/admin/press-settings');
+        if (response.ok) {
+          const data = await response.json();
+          setIsPressPageEnabled(data.enabled !== false); // Default to true if not set
+        }
+      } catch (error) {
+        console.error('Failed to fetch press page setting:', error);
+        // Default to true on error
+        setIsPressPageEnabled(true);
+      }
+    };
+
+    fetchPressPageSetting();
   }, []);
 
   // Group services by main_tab and category for mega menu
@@ -538,7 +558,7 @@ export default function HeaderAesthetics() {
                   <ChevronDown
                     className={`relative z-10 w-2.5 h-2.5 transition-all duration-300 ${activeMenu === "treatments" ? "rotate-180 text-gray-900 dark:text-white" : "group-hover:text-gray-900 dark:group-hover:text-white"}`}
                   />
-                  <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
+                  <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-egp-green transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
                   {/* Blurred white/black background */}
                   <span
                     className={`absolute inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-md transition-all duration-300 border border-white/20 dark:border-gray-700/20 ${
@@ -551,9 +571,9 @@ export default function HeaderAesthetics() {
                       WebkitBackdropFilter: "blur(12px)",
                     }}
                   ></span>
-                  {/* Gradient overlay */}
+                  {/* Solid color overlay */}
                   <span
-                    className={`absolute inset-0 bg-gradient-to-r from-[#9d9585]/15 via-[#b5ad9d]/15 to-[#c9c1b0]/15 rounded-md transition-all duration-300 ${
+                    className={`absolute inset-0 bg-egp-green/10 rounded-md transition-all duration-300 ${
                       activeMenu === "treatments"
                         ? "opacity-100"
                         : "opacity-0 group-hover:opacity-100"
@@ -650,24 +670,26 @@ export default function HeaderAesthetics() {
                     }}
                   ></span>
                 </Link>
-                <Link
-                  href="/press"
-                  className={`group relative font-montserrat text-gray-700 dark:text-gray-300 font-light transition-all duration-300 uppercase tracking-widest px-3 py-1.5 -mx-3 -my-1.5 rounded-md ${
-                    scrolled ? "text-xs" : "text-xs lg:text-sm"
-                  }`}
-                >
-                  <span className="relative z-10 transition-all duration-300 group-hover:text-gray-900 dark:group-hover:text-white">
-                    Awards/ Press
-                  </span>
-                  <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
-                  <span
-                    className="absolute inset-0 bg-white/75 dark:bg-gray-900/85 backdrop-blur-md rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-md group-hover:shadow-lg border border-white/30 dark:border-gray-700/20"
-                    style={{
-                      backdropFilter: "blur(8px)",
-                      WebkitBackdropFilter: "blur(8px)",
-                    }}
-                  ></span>
-                </Link>
+                {isPressPageEnabled && (
+                  <Link
+                    href="/press"
+                    className={`group relative font-montserrat text-gray-700 dark:text-gray-300 font-light transition-all duration-300 uppercase tracking-widest px-3 py-1.5 -mx-3 -my-1.5 rounded-md ${
+                      scrolled ? "text-xs" : "text-xs lg:text-sm"
+                    }`}
+                  >
+                    <span className="relative z-10 transition-all duration-300 group-hover:text-gray-900 dark:group-hover:text-white">
+                      Awards/ Press
+                    </span>
+                    <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
+                    <span
+                      className="absolute inset-0 bg-white/75 dark:bg-gray-900/85 backdrop-blur-md rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-md group-hover:shadow-lg border border-white/30 dark:border-gray-700/20"
+                      style={{
+                        backdropFilter: "blur(8px)",
+                        WebkitBackdropFilter: "blur(8px)",
+                      }}
+                    ></span>
+                  </Link>
+                )}
                 {/* <Link
                 href="/membership"
                 className={`group relative font-montserrat text-gray-400 dark:text-gray-600 font-light transition-all duration-300 uppercase tracking-widest px-3 py-1.5 -mx-3 -my-1.5 rounded-md cursor-not-allowed pointer-events-none ${
@@ -792,7 +814,7 @@ export default function HeaderAesthetics() {
                                       {/* Animated underline */}
                                       <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
                                     </span>
-                                    <span className="relative z-10 font-semibold bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] bg-clip-text text-transparent whitespace-nowrap group-hover:scale-110 transition-transform duration-300">
+                                    <span className="relative z-10 font-semibold text-egp-green dark:text-white whitespace-nowrap group-hover:scale-110 transition-transform duration-300">
                                       £{item.price}
                                     </span>
                                   </Link>
@@ -1107,16 +1129,18 @@ export default function HeaderAesthetics() {
                       <span className="absolute left-4 right-4 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
                     </Link>
                   </li>
-                  <li>
-                    <Link
-                      href="/press"
-                      className="group relative flex px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#c9c1b0] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 font-montserrat uppercase tracking-widest items-center pb-1"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <span className="relative z-10">Awards/ Press</span>
-                      <span className="absolute left-4 right-4 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
-                    </Link>
-                  </li>
+                  {isPressPageEnabled && (
+                    <li>
+                      <Link
+                        href="/press"
+                        className="group relative flex px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#c9c1b0] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 font-montserrat uppercase tracking-widest items-center pb-1"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <span className="relative z-10">Awards/ Press</span>
+                        <span className="absolute left-4 right-4 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
+                      </Link>
+                    </li>
+                  )}
                   <li>
                     <Link
                       href="/find-us"

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { siteConfig } from "@/config/site";
 import { PressPageClient } from "./PressPageClient";
 import { supabaseAdmin } from "@/lib/supabase";
+import { notFound } from 'next/navigation';
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -11,6 +12,27 @@ export async function generateMetadata(): Promise<Metadata> {
       canonical: `${siteConfig.url}/press`,
     },
   };
+}
+
+async function isPressPageEnabled() {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('admin_settings')
+      .select('value')
+      .eq('key', 'press_page_enabled')
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error checking press page setting:', error);
+      return true; // Default to enabled if error
+    }
+
+    // Default to true if setting doesn't exist
+    return data?.value === true || data?.value === 'true' || data === null;
+  } catch (error) {
+    console.error('Error in isPressPageEnabled:', error);
+    return true; // Default to enabled on error
+  }
 }
 
 async function getPressItems() {
@@ -37,6 +59,12 @@ async function getPressItems() {
 }
 
 export default async function PressPage() {
+  const isEnabled = await isPressPageEnabled();
+  
+  if (!isEnabled) {
+    notFound();
+  }
+
   const { awards, pressFeatures } = await getPressItems();
 
   return <PressPageClient awards={awards} pressFeatures={pressFeatures} />;

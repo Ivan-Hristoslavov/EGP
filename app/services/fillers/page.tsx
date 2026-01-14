@@ -44,44 +44,48 @@ export default function FillersPage() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {fillerServices.map((service) => (
-              <Link
+              <div
                 key={service.slug}
-                href={`/services/${service.slug}`}
-                className="group relative bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-fuchsia-500 hover:shadow-xl transition-all duration-300"
+                className="group relative bg-white border-2 border-gray-200 rounded-xl p-5 hover:border-egp-green hover:shadow-xl transition-all duration-300 flex flex-col"
               >
                 {service.featured && (
-                  <span className="absolute top-4 right-4 px-3 py-1 bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-xs font-bold rounded-full">
+                  <span className="absolute top-3 right-3 px-2 py-0.5 bg-gradient-to-r from-egp-green to-egp-green-dark text-white text-[10px] font-bold rounded-full">
                     FEATURED
                   </span>
                 )}
                 {service.popular && (
-                  <span className="absolute top-4 right-4 px-3 py-1 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-xs font-bold rounded-full">
+                  <span className="absolute top-3 right-3 px-2 py-0.5 bg-gradient-to-r from-egp-green to-egp-green-dark text-white text-[10px] font-bold rounded-full">
                     POPULAR
                   </span>
                 )}
 
-                <h3 className="text-xl font-bold text-gray-900 mb-3 pr-20 group-hover:text-blue-600 transition-colors">
-                  {service.name}
-                </h3>
+                <Link href={`/services/${service.slug}`} className="flex-1">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2 pr-16 group-hover:text-egp-green transition-colors">
+                    {service.name}
+                  </h3>
 
-                <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    <span>{service.duration} min</span>
+                  <div className="flex items-center gap-3 text-xs text-gray-600 mb-3">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      <span>{service.duration} min</span>
+                    </div>
                   </div>
-                </div>
+                </Link>
 
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                <div className="flex items-center justify-between pt-3 border-t border-gray-200 mt-auto">
                   <div>
-                    <span className="text-sm text-gray-600">From</span>
-                    <div className="text-2xl font-bold text-[#9d9585] dark:text-[#c9c1b0]">£{service.price}</div>
+                    <span className="text-xs text-gray-600">From</span>
+                    <div className="text-lg font-bold text-egp-green">£{service.price}</div>
                   </div>
-                  <div className="flex items-center gap-2 bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent font-semibold group-hover:gap-3 transition-all">
+                  <Link
+                    href={`/book?service=${service.slug}`}
+                    className="flex items-center gap-2 text-egp-green font-semibold hover:text-egp-green-dark hover:gap-3 transition-all"
+                  >
                     <span>Book</span>
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-fuchsia-600" />
-                  </div>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         </div>

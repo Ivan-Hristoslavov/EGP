@@ -12,7 +12,7 @@ import { Input } from "@heroui/input";
 import { Textarea } from "@heroui/react";
 import { Select, SelectItem } from "@heroui/select";
 import { Tabs, Tab } from "@heroui/tabs";
-import { Upload, X, Edit2, Trash2, Star, Award, FileText, ChevronDown, Plus, AlertCircle } from "lucide-react";
+import { Upload, X, Edit2, Trash2, Star, Award, FileText, ChevronDown, Plus, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 interface PressItem {
   id: string;
@@ -35,6 +35,8 @@ export function AdminPressManager() {
   const [pressItems, setPressItems] = useState<PressItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isPageEnabled, setIsPageEnabled] = useState(true);
+  const [isSavingSetting, setIsSavingSetting] = useState(false);
   
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -86,8 +88,49 @@ export function AdminPressManager() {
     }
   };
 
+  const loadPressPageSetting = async () => {
+    try {
+      const response = await fetch('/api/admin/press-settings');
+      const data = await response.json();
+      if (response.ok) {
+        setIsPageEnabled(data.enabled !== false); // Default to true
+      }
+    } catch (err) {
+      console.error('Failed to load press page setting:', err);
+    }
+  };
+
+  const handleTogglePageEnabled = async (enabled: boolean) => {
+    setIsSavingSetting(true);
+    try {
+      const response = await fetch('/api/admin/press-settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setIsPageEnabled(enabled);
+        showSuccess(
+          'Setting Updated',
+          `Press page is now ${enabled ? 'enabled' : 'disabled'}`
+        );
+      } else {
+        showError('Error', data.error || 'Failed to update setting');
+      }
+    } catch (err) {
+      showError('Error', 'Failed to update setting');
+      console.error(err);
+    } finally {
+      setIsSavingSetting(false);
+    }
+  };
+
   useEffect(() => {
     loadPressItems();
+    loadPressPageSetting();
   }, []);
 
   const handleAddClick = () => {
@@ -430,6 +473,41 @@ export function AdminPressManager() {
 
   return (
     <div className="w-full space-y-6">
+      {/* Page Visibility Toggle */}
+      <Card className="border border-divider">
+        <CardBody className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {isPageEnabled ? (
+                <Eye className="w-5 h-5 text-success-600 dark:text-success-400" />
+              ) : (
+                <EyeOff className="w-5 h-5 text-default-400" />
+              )}
+              <div>
+                <h3 className="text-base font-semibold text-foreground">
+                  Press Page Visibility
+                </h3>
+                <p className="text-sm text-default-500">
+                  {isPageEnabled 
+                    ? 'Press page is currently visible to visitors' 
+                    : 'Press page is currently hidden from visitors'}
+                </p>
+              </div>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isPageEnabled}
+                onChange={(e) => handleTogglePageEnabled(e.target.checked)}
+                disabled={isSavingSetting}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+            </label>
+          </div>
+        </CardBody>
+      </Card>
+
       {/* Header with Add Button */}
       <div className="flex items-center justify-between">
         <div>

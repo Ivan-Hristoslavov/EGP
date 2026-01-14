@@ -27,6 +27,7 @@ export default function FooterAesthetics() {
   const currentYear = new Date().getFullYear();
   const [workingHours, setWorkingHours] = useState<WorkingHoursData | null>(null);
   const [loadingHours, setLoadingHours] = useState(true);
+  const [isPressPageEnabled, setIsPressPageEnabled] = useState(true); // Default to true
   const adminProfile = useAdminProfile();
   const { loading: profileLoading } = useAdminProfileContext();
   
@@ -56,6 +57,45 @@ export default function FooterAesthetics() {
     fetchWorkingHours();
   }, []);
 
+  // Fetch press page enabled setting
+  useEffect(() => {
+    const fetchPressPageSetting = async () => {
+      try {
+        const response = await fetch('/api/admin/press-settings');
+        if (response.ok) {
+          const data = await response.json();
+          setIsPressPageEnabled(data.enabled !== false); // Default to true if not set
+        }
+      } catch (error) {
+        console.error('Failed to fetch press page setting:', error);
+        // Default to true on error
+        setIsPressPageEnabled(true);
+      }
+    };
+
+    fetchPressPageSetting();
+  }, []);
+
+  // Helper function to convert 24-hour time to 12-hour format
+  const formatTime12Hour = (time24: string | null): string => {
+    if (!time24) return "Closed";
+    
+    // Handle format like "10:00:00" or "10:00"
+    const parts = time24.split(':');
+    const hours = parseInt(parts[0], 10);
+    const minutes = parts[1] ? parseInt(parts[1], 10) : 0;
+    
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const hours12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+    
+    // Always show minutes if they exist, otherwise just show hour
+    if (minutes === 0) {
+      return `${hours12}:00 ${period}`;
+    }
+    
+    return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
+  };
+
   // Helper function to format hours
   const formatHours = (day: string) => {
     if (!workingHours || !workingHours[day]) {
@@ -69,7 +109,9 @@ export default function FooterAesthetics() {
 
     const dayHours = workingHours[day];
     if (dayHours.isOpen && dayHours.open && dayHours.close) {
-      return `${dayHours.open} - ${dayHours.close}`;
+      const openTime = formatTime12Hour(dayHours.open);
+      const closeTime = formatTime12Hour(dayHours.close);
+      return `${openTime} - ${closeTime}`;
     }
     return "Closed";
   };
@@ -83,11 +125,81 @@ export default function FooterAesthetics() {
     return workingHours[day].isOpen;
   };
 
-  // Get Monday-Friday hours (assuming they're the same)
-  const mondayFridayHours = formatHours('monday');
-  const saturdayHours = formatHours('saturday');
-  const sundayHours = formatHours('sunday');
-  const isSundayOpen = isDayOpen('sunday');
+  // Helper function to get day name with proper capitalization
+  const getDayName = (dayKey: string): string => {
+    const dayNames: Record<string, string> = {
+      monday: 'Monday',
+      tuesday: 'Tuesday',
+      wednesday: 'Wednesday',
+      thursday: 'Thursday',
+      friday: 'Friday',
+      saturday: 'Saturday',
+      sunday: 'Sunday'
+    };
+    return dayNames[dayKey] || dayKey;
+  };
+
+  // Function to group consecutive days with the same hours
+  const getGroupedWorkingHours = () => {
+    if (!workingHours) return [];
+
+    const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const groups: Array<{ days: string[], hours: string, isOpen: boolean }> = [];
+    
+    let currentGroup: { days: string[], hours: string, isOpen: boolean } | null = null;
+
+    dayOrder.forEach((dayKey) => {
+      const dayData = workingHours[dayKey];
+      if (!dayData) return;
+
+      const hours = formatHours(dayKey);
+      const isOpen = !!(dayData.isOpen && dayData.open && dayData.close);
+
+      // Check if this day matches the current group
+      if (currentGroup && currentGroup.hours === hours && currentGroup.isOpen === isOpen) {
+        // Add to current group
+        currentGroup.days.push(dayKey);
+      } else {
+        // Start a new group
+        if (currentGroup) {
+          groups.push(currentGroup);
+        }
+        currentGroup = {
+          days: [dayKey],
+          hours,
+          isOpen
+        };
+      }
+    });
+
+    // Add the last group
+    if (currentGroup) {
+      groups.push(currentGroup);
+    }
+
+    // Format day ranges
+    return groups.map(group => {
+      let dayLabel = '';
+      if (group.days.length === 1) {
+        dayLabel = getDayName(group.days[0]);
+      } else if (group.days.length === 2) {
+        dayLabel = `${getDayName(group.days[0])} - ${getDayName(group.days[1])}`;
+      } else {
+        // Format like "Monday - Wednesday"
+        const firstDay = getDayName(group.days[0]);
+        const lastDay = getDayName(group.days[group.days.length - 1]);
+        dayLabel = `${firstDay} - ${lastDay}`;
+      }
+
+      return {
+        label: dayLabel,
+        hours: group.hours,
+        isOpen: group.isOpen
+      };
+    });
+  };
+
+  const groupedHours = getGroupedWorkingHours();
 
   return (
     <footer className="relative bg-[#ddd5c3] dark:bg-gray-900 text-gray-900 dark:text-gray-300 border-t border-gray-200 dark:border-gray-700">
@@ -171,14 +283,16 @@ export default function FooterAesthetics() {
                     About Us
                   </Link>
                 </li>
-                <li>
-                  <Link 
-                    href="/press" 
-                    className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
-                  >
-                    Awards & Press
-                  </Link>
-                </li>
+                {isPressPageEnabled && (
+                  <li>
+                    <Link 
+                      href="/press" 
+                      className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
+                    >
+                      Awards & Press
+                    </Link>
+                  </li>
+                )}
                 <li>
                   <Link 
                     href="/blog" 
@@ -267,27 +381,17 @@ export default function FooterAesthetics() {
                 <ul className="space-y-1.5 text-xs text-gray-700 dark:text-gray-400">
                   {loadingHours ? (
                     <li className="text-gray-500 dark:text-gray-500">Loading hours...</li>
+                  ) : groupedHours.length === 0 ? (
+                    <li className="text-gray-500 dark:text-gray-500">No hours available</li>
                   ) : (
-                    <>
-                      <li className="flex justify-between">
-                        <span>Monday - Friday:</span>
-                        <span className="text-gray-900 dark:text-white font-medium">
-                          {mondayFridayHours}
+                    groupedHours.map((group, index) => (
+                      <li key={index} className="flex justify-between">
+                        <span>{group.label}:</span>
+                        <span className={`font-medium ${group.isOpen ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-400'}`}>
+                          {group.hours}
                         </span>
                       </li>
-                      <li className="flex justify-between">
-                        <span>Saturday:</span>
-                        <span className="text-gray-900 dark:text-white font-medium">
-                          {saturdayHours}
-                        </span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span>Sunday:</span>
-                        <span className="text-gray-700 dark:text-gray-400 font-medium">
-                          {sundayHours}
-                        </span>
-                      </li>
-                    </>
+                    ))
                   )}
                 </ul>
               </div>

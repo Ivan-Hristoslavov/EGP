@@ -5,137 +5,113 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import ThemeToggleButton from "../../components/ThemeToggleButton";
 import { AdminProfileData } from "@/components/AdminProfileData";
-import { Shield } from "lucide-react";
+import { 
+  Shield, 
+  LayoutDashboard, 
+  Package, 
+  Users, 
+  Calendar, 
+  FileText, 
+  CreditCard, 
+  Image as ImageIcon, 
+  FileEdit, 
+  Settings, 
+  Mail, 
+  Star,
+  Newspaper,
+  Info,
+  UsersRound,
+  Ban,
+  BookOpen,
+  Globe,
+  User
+} from "lucide-react";
 import { FirstVisitDiscountFormWrapper } from "@/components/FirstVisitDiscountFormWrapper";
 
+// Navigation definition
 const navigation = [
   {
     name: "Dashboard",
     href: "/admin/dashboard",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
-        <path d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
-      </svg>
-    ),
-  },
-  {
-    name: "Calendar",
-    href: "/admin/calendar",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
-      </svg>
-    ),
+    icon: <LayoutDashboard className="w-5 h-5" />,
   },
   {
     name: "Bookings",
     href: "/admin/bookings",
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
       </svg>
     ),
+  },
+  {
+    name: "Calendar",
+    href: "/admin/calendar",
+    icon: <Calendar className="w-5 h-5" />,
   },
   {
     name: "Customers",
     href: "/admin/customers",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
-      </svg>
-    ),
-  },
-  {
-    name: "Payments",
-    href: "/admin/payments",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
-      </svg>
-    ),
+    icon: <Users className="w-5 h-5" />,
   },
   {
     name: "Services",
     href: "/admin/services",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
-      </svg>
-    ),
+    icon: <Package className="w-5 h-5" />,
   },
   {
     name: "Team",
     href: "/admin/team",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
-      </svg>
-    ),
+    icon: <UsersRound className="w-5 h-5" />,
   },
   {
-    name: "Reviews",
-    href: "/admin/reviews",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
-      </svg>
-    ),
+    name: "Payments",
+    href: "/admin/payments",
+    icon: <CreditCard className="w-5 h-5" />,
   },
   {
     name: "Gallery",
     href: "/admin/gallery",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
-      </svg>
-    ),
+    icon: <ImageIcon className="w-5 h-5" />,
+  },
+  {
+    name: "Reviews",
+    href: "/admin/reviews",
+    icon: <Star className="w-5 h-5" />,
   },
   {
     name: "Blog",
     href: "/admin/blog",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
-      </svg>
-    ),
+    icon: <FileEdit className="w-5 h-5" />,
   },
   {
-    name: "About Page",
-    href: "/admin/about",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path d="M7 7h10m-9 4h5m-7 8h14a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
-        <path d="M5 17h.01M9 21h10a2 2 0 002-2v0-12a2 2 0 00-2-2H7a2 2 0 00-2 2v12" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
-      </svg>
-    ),
-  },
-  {
-    name: "Awards & Press",
+    name: "Press",
     href: "/admin/press",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
-      </svg>
-    ),
+    icon: <Newspaper className="w-5 h-5" />,
+  },
+  {
+    name: "About",
+    href: "/admin/about",
+    icon: <Info className="w-5 h-5" />,
   },
   {
     name: "Profile",
     href: "/admin/profile",
+    icon: <User className="w-5 h-5" />,
+  },
+  {
+    name: "Hero Section",
+    href: "/admin/hero-section",
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
       </svg>
     ),
   },
   {
     name: "Test Email",
     href: "/admin/test-email",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path d="M3 8l7.89 7.89a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
-      </svg>
-    ),
+    icon: <Mail className="w-5 h-5" />,
   },
 ];
 
@@ -149,47 +125,57 @@ export default function AdminLayout({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Used to delay rendering until after hydration, for hydration-safe DOM-dependent code
+  const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
-    // Check if we're on the login page
+    setHasMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (pathname === "/admin/login") {
       setIsLoading(false);
       return;
     }
-
-    // For admin pages, assume authenticated (middleware will handle redirects)
-    // Add a small delay to show the loading animation briefly
     const timer = setTimeout(() => {
       setIsAuthenticated(true);
       setIsLoading(false);
-    }, 300); // Reduced from default to make it faster
-
+    }, 300);
     return () => clearTimeout(timer);
   }, [pathname]);
 
+  if (!hasMounted) {
+    // Ensure nothing is rendered until after mount, for hydration safety
+    return null;
+  }
+
   // If we're on the login page, just render the children
   if (pathname === "/admin/login") {
-    return <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-800 transition-colors duration-500">{children}</div>;
+    return (
+      <div
+        className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-800 transition-colors duration-500"
+        suppressHydrationWarning
+      >
+        {children}
+      </div>
+    );
   }
 
   // Show loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-800 transition-colors duration-500">
+      <div
+        className="min-h-screen flex items-center justify-center bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-800 transition-colors duration-500"
+        suppressHydrationWarning
+      >
         <div className="text-center">
-          {/* Modern loading animation */}
           <div className="relative mb-6">
             <div className="w-20 h-20 mx-auto">
-              {/* Outer ring */}
               <div className="absolute inset-0 rounded-full border-4 border-rose-200 dark:border-rose-800"></div>
-              {/* Animated ring */}
               <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-rose-500 dark:border-t-rose-400 animate-spin"></div>
-              {/* Inner dot */}
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-rose-500 dark:bg-rose-400 rounded-full animate-pulse"></div>
             </div>
           </div>
-          
-          {/* Loading text with animation */}
           <div className="space-y-2">
             <p className="text-gray-600 dark:text-gray-300 font-medium transition-colors duration-300">
               Loading Admin Panel
@@ -205,13 +191,16 @@ export default function AdminLayout({
     );
   }
 
-  // If not authenticated, don't render the admin layout
   if (!isAuthenticated) {
     return null;
   }
 
+  // Render main layout only after hydration
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-800 transition-colors duration-500">
+    <div
+      className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-800 transition-colors duration-500"
+      suppressHydrationWarning
+    >
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
@@ -227,8 +216,8 @@ export default function AdminLayout({
         className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-xl transform transition-all duration-300 ease-in-out flex flex-col ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
+        suppressHydrationWarning
       >
-        {/* Sidebar Header */}
         <div className="flex items-center justify-between h-16 px-6 bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 flex-shrink-0">
           <Link className="flex items-center space-x-3" href="/admin/dashboard">
             <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30">
@@ -261,12 +250,11 @@ export default function AdminLayout({
           </button>
         </div>
 
-        {/* Navigation - Scrollable area */}
+        {/* Navigation */}
         <nav className="flex-1 overflow-y-auto px-4 py-6">
           <div className="space-y-2">
             {navigation.map((item) => {
               const isActive = pathname === item.href;
-
               return (
                 <Link
                   key={item.name}
@@ -297,7 +285,7 @@ export default function AdminLayout({
           </div>
         </nav>
 
-        {/* User section - Fixed at bottom */}
+        {/* User section */}
         <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
           <div className="flex items-center space-x-3 mb-4">
             <div className="w-10 h-10 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 rounded-full flex items-center justify-center">
@@ -305,6 +293,7 @@ export default function AdminLayout({
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                {/* Safe for hydration: This should be handled by the <AdminProfileData> */}
                 <AdminProfileData type="name" fallback="Admin User" />
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">Administrator</p>
@@ -340,8 +329,8 @@ export default function AdminLayout({
         </div>
       </div>
 
-      {/* Main content area with proper margin for fixed sidebar */}
-      <div className="lg:ml-64">
+      {/* Main content area with margin for fixed sidebar */}
+      <div className="lg:ml-64" suppressHydrationWarning>
         {/* Top bar */}
         <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm border-b border-rose-200/50 dark:border-gray-700 sticky top-0 z-30 transition-colors duration-300">
           <div className="flex items-center justify-between h-16 px-4 sm:px-6">
@@ -364,7 +353,6 @@ export default function AdminLayout({
                   />
                 </svg>
               </button>
-
               <div className="ml-4 lg:ml-0">
                 <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {navigation.find((item) => item.href === pathname)?.name ||
@@ -372,17 +360,16 @@ export default function AdminLayout({
                 </h1>
               </div>
             </div>
-
             <div className="flex items-center space-x-4">
-              {/* Theme Toggle in Header */}
               <ThemeToggleButton />
             </div>
           </div>
         </header>
-
-
         {/* Page content */}
-        <main className="min-h-screen bg-gradient-to-br from-rose-50/30 via-pink-50/30 to-purple-50/30 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800 transition-colors duration-300">
+        <main
+          className="min-h-screen bg-gradient-to-br from-rose-50/30 via-pink-50/30 to-purple-50/30 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800 transition-colors duration-300"
+          suppressHydrationWarning
+        >
           <div className="p-3 sm:p-4 lg:p-6 xl:p-8">{children}</div>
         </main>
         <FirstVisitDiscountFormWrapper />
@@ -390,3 +377,4 @@ export default function AdminLayout({
     </div>
   );
 }
+

@@ -20,6 +20,33 @@ export async function GET() {
       return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 });
     }
 
+    // Parse JSONB fields that might be double-encoded as strings
+    if (profile) {
+      try {
+        if (profile.transport_options && typeof profile.transport_options === 'string') {
+          const parsed = JSON.parse(profile.transport_options);
+          profile.transport_options = typeof parsed === 'string' ? JSON.parse(parsed) : parsed;
+        }
+      } catch (e) {
+        console.error('Error parsing transport_options:', e);
+        profile.transport_options = {};
+      }
+
+      try {
+        if (profile.nearby_landmarks && typeof profile.nearby_landmarks === 'string') {
+          const parsed = JSON.parse(profile.nearby_landmarks);
+          profile.nearby_landmarks = Array.isArray(parsed) 
+            ? parsed 
+            : (typeof parsed === 'string' ? JSON.parse(parsed) : []);
+        } else if (!Array.isArray(profile.nearby_landmarks)) {
+          profile.nearby_landmarks = [];
+        }
+      } catch (e) {
+        console.error('Error parsing nearby_landmarks:', e);
+        profile.nearby_landmarks = [];
+      }
+    }
+
     return NextResponse.json(profile);
   } catch (error) {
     console.error('Error in profile API:', error);
@@ -35,20 +62,11 @@ export async function PUT(request: NextRequest) {
     
     // Destructure the required fields from the request body
     const { 
-      firstName, 
-      lastName, 
       businessEmail, 
       phone, 
       whatsapp,
-      about, 
       companyName, 
       companyAddress, 
-      insuranceProvider, 
-      yearsOfExperience,
-      specializations,
-      certifications,
-      responseTime,
-      bankName, 
       accountNumber, 
       sortCode,
       howToFindUs,
@@ -74,29 +92,16 @@ export async function PUT(request: NextRequest) {
 
     // Update the profile using the ID
     const updateData: any = {
-        name: `${firstName} ${lastName}`,
         phone,
-        about,
         business_email: businessEmail,
         company_name: companyName,
         company_address: companyAddress,
-        insurance_provider: insuranceProvider,
         updated_at: new Date().toISOString(),
     };
 
     // Add optional fields that exist in the base schema
-    if (bankName !== undefined && bankName !== null) updateData.bank_name = bankName;
     if (accountNumber !== undefined && accountNumber !== null) updateData.account_number = accountNumber;
     if (sortCode !== undefined && sortCode !== null) updateData.sort_code = sortCode;
-    
-    // Add professional fields (only if provided and not empty - these columns may not exist yet)
-    // These will work after running the migration: 20250212_add_missing_admin_profile_fields.sql
-    // For now, we skip them to avoid errors if columns don't exist
-    // Uncomment after migration is applied:
-    // if (yearsOfExperience !== undefined && yearsOfExperience !== null) updateData.years_of_experience = yearsOfExperience;
-    // if (specializations !== undefined && specializations !== null) updateData.specializations = specializations;
-    // if (certifications !== undefined && certifications !== null) updateData.certifications = certifications;
-    // if (responseTime !== undefined && responseTime !== null) updateData.response_time = responseTime;
     
     // Add new fields from find-us migration (only if provided and not empty)
     // These will work after running the migration: 20250212_add_find_us_fields_to_admin_profile.sql
@@ -104,8 +109,18 @@ export async function PUT(request: NextRequest) {
     if (howToFindUs !== undefined && howToFindUs !== null) updateData.how_to_find_us = howToFindUs;
     if (howToReachUs !== undefined && howToReachUs !== null) updateData.how_to_reach_us = howToReachUs;
     if (googleMapsAddress !== undefined && googleMapsAddress !== null) updateData.google_maps_address = googleMapsAddress;
-    if (transportOptions !== undefined && transportOptions !== null) updateData.transport_options = transportOptions;
-    if (nearbyLandmarks !== undefined && nearbyLandmarks !== null) updateData.nearby_landmarks = nearbyLandmarks;
+    // Convert transportOptions to JSON string if it's an object
+    if (transportOptions !== undefined && transportOptions !== null) {
+      updateData.transport_options = typeof transportOptions === 'string' 
+        ? transportOptions 
+        : JSON.stringify(transportOptions);
+    }
+    // Convert nearbyLandmarks to JSON string if it's an array
+    if (nearbyLandmarks !== undefined && nearbyLandmarks !== null) {
+      updateData.nearby_landmarks = typeof nearbyLandmarks === 'string' 
+        ? nearbyLandmarks 
+        : JSON.stringify(nearbyLandmarks);
+    }
 
     const { data, error } = await supabase
       .from('admin_profile')

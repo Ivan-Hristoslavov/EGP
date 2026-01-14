@@ -6,7 +6,7 @@ import { Calendar, Clock, CheckCircle, Star, ArrowRight, Phone } from "lucide-re
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `Book Treatment Now | ${siteConfig.name}`,
-    description: "Book your treatment now at EGP Aesthetics London. Expert assessment and personalized treatment planning.",
+    description: "Book your treatment now at EGP Aesthetics London. Expert assessment and personalised treatment planning.",
     alternates: {
       canonical: `${siteConfig.url}/services/book-treatment-now`,
     },
@@ -16,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function BookTreatmentNowPage() {
   const consultationBenefits = [
     "Expert skin analysis and assessment",
-    "Personalized treatment recommendations",
+    "Personalised treatment recommendations",
     "Transparent pricing information",
     "No-obligation consultation",
     "Professional advice from qualified practitioners",
@@ -37,7 +37,7 @@ export default function BookTreatmentNowPage() {
     {
       step: "3",
       title: "Treatment Planning",
-      description: "Personalized recommendations based on your individual needs"
+      description: "Personalised recommendations based on your individual needs"
     },
     {
       step: "4",
@@ -60,7 +60,7 @@ export default function BookTreatmentNowPage() {
               Book Treatment Now
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
-              Start your aesthetic journey with a personalized 30-minute consultation
+              Start your aesthetic journey with a personalised 30-minute consultation
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -93,7 +93,7 @@ export default function BookTreatmentNowPage() {
                   About This Consultation
                 </h2>
                 <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
-                  Our consultation is designed to help you understand your aesthetic options and create a personalized treatment plan that aligns with your goals and budget.
+                  Our consultation is designed to help you understand your aesthetic options and create a personalised treatment plan that aligns with your goals and budget.
                 </p>
                 <div className="flex items-center gap-4 mb-8">
                   <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
@@ -175,7 +175,7 @@ export default function BookTreatmentNowPage() {
               </Link>
               <Link
                 href="/services"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-rose-500 text-rose-500 dark:text-rose-400 text-lg font-semibold rounded-full hover:bg-rose-500 hover:text-white transition-all"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-egp-green hover:bg-egp-green-dark text-white text-lg font-semibold rounded-full transition-all shadow-lg hover:shadow-xl"
               >
                 <ArrowRight className="w-5 h-5" />
                 View All Services

@@ -12,7 +12,7 @@ INSERT INTO services (category_id, name, slug, description, duration, price, is_
 SELECT sc.id, 
   'Free Discovery Consultation', 
   'free-discovery-consultation',
-  'Initial consultation to discuss your aesthetic goals and create a personalized treatment plan.',
+  'Initial consultation to discuss your aesthetic goals and create a personalised treatment plan.',
   30, 0.00, TRUE, FALSE, 0, NULL, 1
 FROM service_categories sc
 JOIN main_tabs mt ON sc.main_tab_id = mt.id
@@ -97,7 +97,7 @@ WHERE mt.slug = 'book-now' AND sc.slug = 'face'
 ON CONFLICT (slug) DO NOTHING;
 
 INSERT INTO services (category_id, name, slug, description, duration, price, is_active, requires_consultation, downtime_days, results_duration_weeks, display_order)
-SELECT sc.id, 'NCTF under-eye skin booster', 'nctf-under-eye-skin-booster', 'Specialized under-eye treatment with NCTF booster for brightening and hydration.', 30, 159.00, TRUE, FALSE, 1, 12, 13
+SELECT sc.id, 'NCTF under-eye skin booster', 'nctf-under-eye-skin-booster', 'Specialised under-eye treatment with NCTF booster for brightening and hydration.', 30, 159.00, TRUE, FALSE, 1, 12, 13
 FROM service_categories sc
 JOIN main_tabs mt ON sc.main_tab_id = mt.id
 WHERE mt.slug = 'book-now' AND sc.slug = 'face'

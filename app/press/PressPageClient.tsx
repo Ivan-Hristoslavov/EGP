@@ -142,31 +142,31 @@ export function PressPageClient({ awards, pressFeatures }: PressPageClientProps)
   // Function to get card size based on row type and position
   const getCardSizeFromRow = (rowType: string, positionInRow: number, isFeatured: boolean, isFirstFeatured: boolean, totalItemsInRow?: number) => {
     if (isFirstFeatured) {
-      return { colSpan: 'col-span-12 lg:col-span-8', height: 'h-[350px] sm:h-[420px] md:h-[480px] lg:h-[520px]', isLarge: true };
+      return { colSpan: 'col-span-12 lg:col-span-8', height: 'h-[280px] sm:h-[320px] md:h-[360px] lg:h-[400px]', isLarge: true };
     }
     
     if (isFeatured) {
-      return { colSpan: 'col-span-12 sm:col-span-6 lg:col-span-4', height: 'h-[320px] sm:h-[380px] md:h-[420px]', isLarge: false };
+      return { colSpan: 'col-span-12 sm:col-span-6 lg:col-span-4', height: 'h-[240px] sm:h-[280px] md:h-[320px]', isLarge: false };
     }
     
     // If only one item in row, make it full width to avoid empty space
     if (totalItemsInRow === 1) {
-      return { colSpan: 'col-span-12', height: 'h-[350px] sm:h-[420px] md:h-[480px]', isLarge: true };
+      return { colSpan: 'col-span-12', height: 'h-[280px] sm:h-[320px] md:h-[360px]', isLarge: true };
     }
     
     if (rowType === 'large-small') {
       if (positionInRow === 0) {
-        return { colSpan: 'col-span-12 lg:col-span-8', height: 'h-[350px] sm:h-[420px] md:h-[480px]', isLarge: true };
+        return { colSpan: 'col-span-12 lg:col-span-8', height: 'h-[280px] sm:h-[320px] md:h-[360px]', isLarge: true };
       } else {
-        return { colSpan: 'col-span-12 sm:col-span-6 lg:col-span-4', height: 'h-[320px] sm:h-[380px] md:h-[420px]', isLarge: false };
+        return { colSpan: 'col-span-12 sm:col-span-6 lg:col-span-4', height: 'h-[240px] sm:h-[280px] md:h-[320px]', isLarge: false };
       }
     } else if (rowType === 'three-small') {
-      return { colSpan: 'col-span-12 sm:col-span-6 lg:col-span-4', height: 'h-[320px] sm:h-[380px] md:h-[420px]', isLarge: false };
+      return { colSpan: 'col-span-12 sm:col-span-6 lg:col-span-4', height: 'h-[240px] sm:h-[280px] md:h-[320px]', isLarge: false };
     } else { // small-large
       if (positionInRow === 0) {
-        return { colSpan: 'col-span-12 sm:col-span-6 lg:col-span-4', height: 'h-[320px] sm:h-[380px] md:h-[420px]', isLarge: false };
+        return { colSpan: 'col-span-12 sm:col-span-6 lg:col-span-4', height: 'h-[240px] sm:h-[280px] md:h-[320px]', isLarge: false };
       } else {
-        return { colSpan: 'col-span-12 lg:col-span-8', height: 'h-[350px] sm:h-[420px] md:h-[480px]', isLarge: true };
+        return { colSpan: 'col-span-12 lg:col-span-8', height: 'h-[280px] sm:h-[320px] md:h-[360px]', isLarge: true };
       }
     }
   };
@@ -188,10 +188,10 @@ export function PressPageClient({ awards, pressFeatures }: PressPageClientProps)
           </div>
           
           <div className="text-center mb-6">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4 font-playfair">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 font-playfair">
               Awards & Press
             </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto mb-4">
+            <p className="text-lg text-gray-600 dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto mb-4">
               Recognition for our commitment to excellence in aesthetic medicine.
             </p>
             
@@ -306,7 +306,7 @@ export function PressPageClient({ awards, pressFeatures }: PressPageClientProps)
                     <div className="absolute inset-0 z-10 flex flex-col justify-between p-4 sm:p-5 md:p-6">
                       {/* Title - Top Left */}
                       <div className="flex flex-col items-start">
-                        <h3 className={`text-white font-bold mb-2 ${index === 0 ? 'text-xl sm:text-2xl md:text-3xl lg:text-4xl' : 'text-lg sm:text-xl md:text-2xl'} leading-tight drop-shadow-lg`}>
+                        <h3 className={`text-white font-bold mb-2 ${index === 0 ? 'text-lg sm:text-xl md:text-2xl lg:text-3xl' : 'text-base sm:text-lg md:text-xl'} leading-tight drop-shadow-lg`}>
                           {item.title}
                         </h3>
                       </div>
@@ -410,7 +410,7 @@ export function PressPageClient({ awards, pressFeatures }: PressPageClientProps)
                     <div className="absolute inset-0 z-10 flex flex-col justify-between p-4 sm:p-5 md:p-6">
                       {/* Title - Top Left */}
                       <div className="flex flex-col items-start">
-                        <h3 className={`text-white font-bold mb-2 leading-tight line-clamp-2 drop-shadow-lg ${isLarge ? 'text-lg sm:text-xl md:text-2xl lg:text-3xl' : 'text-base sm:text-lg md:text-xl'}`}>
+                        <h3 className={`text-white font-bold mb-2 leading-tight line-clamp-2 drop-shadow-lg ${isLarge ? 'text-base sm:text-lg md:text-xl lg:text-2xl' : 'text-sm sm:text-base md:text-lg'}`}>
                           {item.title}
                         </h3>
                       </div>
@@ -462,7 +462,7 @@ export function PressPageClient({ awards, pressFeatures }: PressPageClientProps)
             {(onClose) => (
               <>
                 <ModalHeader className="relative">
-                  <div className="relative w-full h-[250px] sm:h-[350px] md:h-[450px] lg:h-[550px] overflow-hidden -m-6 mb-0">
+                  <div className="relative w-full h-[200px] sm:h-[280px] md:h-[350px] lg:h-[400px] overflow-hidden -m-6 mb-0">
                     {selectedItem.image_url ? (
                       <Image
                         src={selectedItem.image_url}
@@ -478,7 +478,7 @@ export function PressPageClient({ awards, pressFeatures }: PressPageClientProps)
                     
                     {/* Title and Metadata - Top Left */}
                     <div className="absolute top-4 left-4 z-10 max-w-[70%] sm:max-w-[75%]">
-                      <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2 sm:mb-3 leading-tight drop-shadow-lg">
+                      <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-white mb-2 sm:mb-3 leading-tight drop-shadow-lg">
                         {selectedItem.title}
                       </h2>
                       <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-white/90">

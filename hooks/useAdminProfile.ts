@@ -8,27 +8,19 @@ interface AdminProfile {
   phone: string;
   company_name: string;
   company_address: string;
-  about: string;
-  years_of_experience: string;
-  specializations: string;
-  certifications: string;
-  response_time: string;
-  bank_name: string;
-  account_number: string;
-  sort_code: string;
-  gas_safe_number: string;
-  insurance_provider: string;
-  gas_safe_registered?: boolean;
-  fully_insured?: boolean;
+  account_number?: string;
+  sort_code?: string;
+  whatsapp?: string;
+  how_to_find_us?: string;
+  how_to_reach_us?: string;
+  google_maps_address?: string;
+  transport_options?: string | object;
+  nearby_landmarks?: string | Array<{ name: string; type: string; distance: string }>;
   created_at: string;
   updated_at: string;
 }
 
 interface AdminSettings {
-  gasSafeRegistered?: boolean;
-  gasSafeNumber?: string;
-  fullyInsured?: boolean;
-  insuranceProvider?: string;
   [key: string]: any;
 }
 
@@ -80,20 +72,10 @@ export function useAdminProfile() {
     fetchData();
   }, [fetchData, refreshTrigger]);
 
-  // Combine profile and settings data, with settings taking precedence for professional credentials
+  // Return profile as-is (no longer combining with settings)
   const combinedProfile = useMemo(() => {
-    if (!profile) return null;
-    
-    return {
-      ...profile,
-      // Use settings data for professional credentials if available
-      gas_safe_number: settings?.gasSafeNumber || profile.gas_safe_number,
-      insurance_provider: settings?.insuranceProvider || profile.insurance_provider,
-      // Add boolean flags for UI display
-      gas_safe_registered: settings?.gasSafeRegistered || false,
-      fully_insured: settings?.fullyInsured || false,
-    };
-  }, [profile, settings]);
+    return profile;
+  }, [profile]);
 
   const refresh = useCallback(() => {
     setRefreshTrigger(prev => prev + 1);

@@ -117,12 +117,44 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
           googleMapsAddress: profile.google_maps_address || profile.company_address || defaultContactInfo.googleMapsAddress
         });
         
+        // Parse transport_options and nearby_landmarks (they might be JSON strings)
+        let transportOptions = defaultFindUsData.transportOptions;
+        let nearbyLandmarks = defaultFindUsData.nearbyLandmarks;
+        
+        try {
+          if (profile.transport_options) {
+            if (typeof profile.transport_options === 'string') {
+              // Handle double-encoded JSON strings
+              const parsed = JSON.parse(profile.transport_options);
+              transportOptions = typeof parsed === 'string' ? JSON.parse(parsed) : parsed;
+            } else {
+              transportOptions = profile.transport_options;
+            }
+          }
+        } catch (e) {
+          console.error('Error parsing transport_options:', e);
+        }
+        
+        try {
+          if (profile.nearby_landmarks) {
+            if (typeof profile.nearby_landmarks === 'string') {
+              // Handle double-encoded JSON strings
+              const parsed = JSON.parse(profile.nearby_landmarks);
+              nearbyLandmarks = Array.isArray(parsed) ? parsed : (typeof parsed === 'string' ? JSON.parse(parsed) : []);
+            } else if (Array.isArray(profile.nearby_landmarks)) {
+              nearbyLandmarks = profile.nearby_landmarks;
+            }
+          }
+        } catch (e) {
+          console.error('Error parsing nearby_landmarks:', e);
+        }
+        
         // Set find-us data
         setFindUsData({
           howToFindUs: profile.how_to_find_us || defaultFindUsData.howToFindUs,
           howToReachUs: profile.how_to_reach_us || defaultFindUsData.howToReachUs,
-          transportOptions: profile.transport_options || defaultFindUsData.transportOptions,
-          nearbyLandmarks: profile.nearby_landmarks || defaultFindUsData.nearbyLandmarks
+          transportOptions: transportOptions,
+          nearbyLandmarks: nearbyLandmarks
         });
       } else {
         setContactInfo(defaultContactInfo);

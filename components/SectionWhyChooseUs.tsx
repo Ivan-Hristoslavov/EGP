@@ -20,7 +20,7 @@ const reasons = [
   },
   {
     icon: Heart,
-    title: "Personalized Care",
+    title: "Personalised Care",
     description: "Tailored treatment plans designed specifically for your unique aesthetic goals",
     gradient: "from-pink-500 to-rose-500",
   },

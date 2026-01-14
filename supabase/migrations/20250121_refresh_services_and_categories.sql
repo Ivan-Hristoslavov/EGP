@@ -79,7 +79,7 @@ ON CONFLICT (slug) DO UPDATE
 SET name = EXCLUDED.name, description = EXCLUDED.description, duration = EXCLUDED.duration, price = EXCLUDED.price, category_id = EXCLUDED.category_id, display_order = EXCLUDED.display_order;
 
 INSERT INTO services (category_id, name, slug, description, duration, price, is_active, requires_consultation, downtime_days, results_duration_weeks, display_order)
-SELECT sc.id, 'Digital Skin Analysis & Consultation', 'digital-skin-analysis-consultation', 'Advanced digital skin analysis to assess your skin condition and create a personalized treatment plan.', 60, 50.00, TRUE, FALSE, 0, NULL, 2
+SELECT sc.id, 'Digital Skin Analysis & Consultation', 'digital-skin-analysis-consultation', 'Advanced digital skin analysis to assess your skin condition and create a personalised treatment plan.', 60, 50.00, TRUE, FALSE, 0, NULL, 2
 FROM service_categories sc
 JOIN main_tabs mt ON sc.main_tab_id = mt.id
 WHERE mt.slug = 'book-now' AND sc.slug = 'face'

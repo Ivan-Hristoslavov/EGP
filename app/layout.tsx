@@ -20,24 +20,13 @@ export async function generateMetadata(): Promise<Metadata> {
   const profile = await getAdminProfile();
   const companyName = profile?.company_name || "EGP";
   
-  // Ensure years_of_experience includes "Years" if not already present
-  const yearsExperience = profile?.years_of_experience 
-    ? (profile.years_of_experience.toLowerCase().includes('years') 
-        ? profile.years_of_experience 
-        : `${profile.years_of_experience} Years`)
-    : "10+ Years";
-
-  const responseTime = profile?.response_time || "45 minutes";
-  // Normalize response time to avoid duplication (remove any existing "minute/minutes")
-  const responseTimeNormalized = responseTime.replace(/\s+(minutes?|mins?)\s*/gi, '').trim();
-  
   return {
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://egp.com'),
     title: {
       default: `${companyName} - Premium Aesthetic Treatments London`,
       template: `%s | ${companyName} - Aesthetic Clinic London`
     },
-    description: `Premier aesthetic clinic in South West London. Expert treatments with ${responseTimeNormalized}-minute response time, ${yearsExperience} experience. Fully insured.`,
+    description: `Premier aesthetic clinic in South West London. Expert treatments with professional care and attention to detail.`,
     keywords: [
       "aesthetic clinic London",
       "botox London",
@@ -70,7 +59,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     openGraph: {
       title: `${companyName} - Premium Aesthetic Clinic London`,
-      description: `Premier aesthetic treatments in South West London with ${responseTimeNormalized}-minute response time. Fully insured.`,
+      description: `Premier aesthetic treatments in South West London. Expert practitioners, proven results.`,
       type: "website",
       locale: "en_GB",
       siteName: companyName,
@@ -80,7 +69,7 @@ export async function generateMetadata(): Promise<Metadata> {
     twitter: {
       card: "summary_large_image",
       title: `${companyName} - Premium Aesthetic Clinic London`,
-      description: `Premier aesthetic treatments in South West London. Expert practitioners, proven results. ${responseTimeNormalized}-minute response time.`,
+      description: `Premier aesthetic treatments in South West London. Expert practitioners, proven results.`,
       images: [],
       creator: "@egp",
       site: "@egp",
@@ -107,7 +96,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "geo.position": "51.4708;-0.1389",
       "ICBM": "51.4708, -0.1389",
       "DC.title": `${companyName} - Premium Aesthetic Clinic London`,
-      "DC.description": `Premier aesthetic treatments in South West London with ${responseTimeNormalized}-minute response time.`,
+      "DC.description": `Premier aesthetic treatments in South West London. Expert practitioners, proven results.`,
       "DC.subject": "Aesthetic Clinic London, Aesthetic Treatments, Facial Aesthetics",
       "DC.creator": companyName,
       "DC.publisher": companyName,
@@ -166,10 +155,6 @@ export default async function RootLayout({
     }
   });
   
-  // Normalize response time to avoid duplication (remove any existing "minute/minutes")
-  const responseTime = adminProfile?.response_time || "45 minutes";
-  const responseTimeNormalized = responseTime.replace(/\s+(minutes?|mins?)\s*/gi, '').trim();
-  
   // Create structured data for the business
   const structuredData = {
     "@context": "https://schema.org",
@@ -227,12 +212,7 @@ export default async function RootLayout({
     "currenciesAccepted": "GBP",
     "vatNumber": settingsMap.vatNumber || "",
     "registrationNumber": settingsMap.registrationNumber || "",
-    "gasSafeNumber": adminProfile?.gas_safe_number || settingsMap.gasSafeNumber || "",
     "mcsNumber": settingsMap.mcsNumber || "",
-    "insuranceProvider": adminProfile?.insurance_provider || settingsMap.insuranceProvider || "",
-    "yearsOfExperience": adminProfile?.years_of_experience || "10+",
-    "specializations": adminProfile?.specializations?.split('. ') || [],
-    "certifications": adminProfile?.certifications?.split('. ') || [],
     "hasOfferCatalog": {
       "@type": "OfferCatalog",
       "name": "Aesthetic Treatments",
@@ -256,11 +236,9 @@ export default async function RootLayout({
     "sameAs": [],
     "bankDetails": {
       "@type": "BankAccount",
-      "bankName": adminProfile?.bank_name || "",
       "accountNumber": adminProfile?.account_number || "",
       "sortCode": adminProfile?.sort_code || ""
-    },
-    "about": adminProfile?.about || ""
+    }
   };
 
   return (

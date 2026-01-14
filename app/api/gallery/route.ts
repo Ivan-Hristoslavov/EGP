@@ -8,16 +8,12 @@ function transformImageUrl(url: string | null | undefined): string | undefined {
   
   // Replace '/gallery/' with '/egp/' in the URL path (handles both http and https)
   if (url.includes('/gallery/')) {
-    const transformed = url.replace('/gallery/', '/egp/');
-    console.log(`URL transformed: ${url} -> ${transformed}`);
-    return transformed;
+    return url.replace('/gallery/', '/egp/');
   }
   
   // Also handle cases where bucket name might be in different positions
   if (url.includes('/storage/v1/object/public/gallery/')) {
-    const transformed = url.replace('/storage/v1/object/public/gallery/', '/storage/v1/object/public/egp/');
-    console.log(`URL transformed (full path): ${url} -> ${transformed}`);
-    return transformed;
+    return url.replace('/storage/v1/object/public/gallery/', '/storage/v1/object/public/egp/');
   }
   
   return url;
@@ -68,16 +64,6 @@ export async function GET() {
       const beforeUrl = transformImageUrl(item.before_image_url) || item.before_image_url || '';
       const afterUrl = transformImageUrl(item.after_image_url) || item.after_image_url || '';
       const imageUrl = transformImageUrl(item.image_url) || item.image_url;
-      
-      // Log URLs for debugging
-      if (item.before_image_url || item.after_image_url) {
-        console.log(`Gallery item ${item.id} URLs:`, {
-          original_before: item.before_image_url,
-          transformed_before: beforeUrl,
-          original_after: item.after_image_url,
-          transformed_after: afterUrl
-        });
-      }
       
       return {
         ...item,
@@ -303,62 +289,35 @@ export async function DELETE(request: NextRequest) {
     const imagesToDelete = [];
     
     if (galleryItem.before_image_url) {
-      console.log('Before image URL:', galleryItem.before_image_url);
       // Extract filename from Supabase storage URL
       // URL format: https://[project].supabase.co/storage/v1/object/public/egp/filename
       const urlParts = galleryItem.before_image_url.split('/');
-      console.log('URL parts:', urlParts);
       const filename = urlParts[urlParts.length - 1];
-      console.log('Extracted filename:', filename);
       if (filename && filename !== 'egp' && filename.includes('.')) {
         imagesToDelete.push(filename);
-        console.log('Added before image to delete:', filename);
-      } else {
-        console.log('Skipped before image - invalid filename:', filename);
       }
     }
     
     if (galleryItem.after_image_url) {
-      console.log('After image URL:', galleryItem.after_image_url);
       // Extract filename from Supabase storage URL
       const urlParts = galleryItem.after_image_url.split('/');
-      console.log('URL parts:', urlParts);
       const filename = urlParts[urlParts.length - 1];
-      console.log('Extracted filename:', filename);
       if (filename && filename !== 'egp' && filename.includes('.')) {
         imagesToDelete.push(filename);
-        console.log('Added after image to delete:', filename);
-      } else {
-        console.log('Skipped after image - invalid filename:', filename);
       }
     }
 
-    console.log('Images to delete:', imagesToDelete);
-
-      // Delete images from storage
+    // Delete images from storage
     if (imagesToDelete.length > 0) {
-      console.log('Attempting to delete images from storage...');
-      console.log('Using Supabase client:', {
-        url: process.env.NEXT_PUBLIC_SUPABASE_URL,
-        hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY
-      });
-      
-      const { data: deleteResult, error: storageError } = await supabaseService.storage
+      const { error: storageError } = await supabaseService.storage
         .from('egp')
         .remove(imagesToDelete);
-
-      console.log('Storage deletion result:', { deleteResult, storageError });
 
       if (storageError) {
         console.error("Error deleting images from storage:", storageError);
         // Don't fail the request if storage deletion fails
         // The database record is already deleted
-      } else {
-        console.log('Successfully deleted images from storage');
-        console.log('Deleted files:', deleteResult);
       }
-    } else {
-      console.log('No images to delete from storage');
     }
 
     return NextResponse.json({ success: true });

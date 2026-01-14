@@ -328,7 +328,7 @@ INSERT INTO about_content (
 (
   'story',
   'Our Story',
-  'Founded with a passion for natural beauty enhancement, EGP Aesthetics has been serving clients in London with exceptional aesthetic treatments. Our clinic is built on the foundation of trust, expertise, and personalized care.',
+  'Founded with a passion for natural beauty enhancement, EGP Aesthetics has been serving clients in London with exceptional aesthetic treatments. Our clinic is built on the foundation of trust, expertise, and personalised care.',
   '[]',
   TRUE,
   2
@@ -337,7 +337,7 @@ INSERT INTO about_content (
   'values',
   'Our Values',
   'We are committed to providing the highest quality aesthetic treatments with a focus on safety, natural results, and patient satisfaction.',
-  '["Safety and excellence in every treatment", "Natural-looking results that enhance your beauty", "Personalized care tailored to your unique needs", "Continuous education and training in latest techniques", "Transparent pricing and honest consultations"]',
+  '["Safety and excellence in every treatment", "Natural-looking results that enhance your beauty", "Personalised care tailored to your unique needs", "Continuous education and training in latest techniques", "Transparent pricing and honest consultations"]',
   TRUE,
   3
 ),

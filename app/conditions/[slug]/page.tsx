@@ -75,7 +75,7 @@ export default async function ConditionPage({ params }: PageProps) {
     {
       step: "2",
       title: "Treatment Plan",
-      description: "Personalized treatment recommendations"
+      description: "Personalised treatment recommendations"
     },
     {
       step: "3",
@@ -147,7 +147,7 @@ export default async function ConditionPage({ params }: PageProps) {
                   <Target className="w-6 h-6 text-rose-500" />
                   <div>
                     <div className="font-semibold text-gray-900 dark:text-white">Treatment Focus</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-300">Personalized approach</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-300">Personalised approach</div>
                   </div>
                 </div>
               </div>
