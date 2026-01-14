@@ -306,6 +306,78 @@ async function handlePaymentIntentUpdate(paymentIntent: any) {
   if (!payment) {
     console.error("Payment not found for payment intent:", paymentIntentId);
     
+    // For succeeded payments, try to find a booking with this payment intent ID
+    if (status === "succeeded") {
+      // Check if there's a booking that references this payment intent
+      const { data: booking, error: bookingError } = await supabase
+        .from("bookings")
+        .select("*")
+        .like("notes", `%${paymentIntentId}%`)
+        .eq("payment_status", "paid")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (!bookingError && booking) {
+        console.log(`Found booking ${booking.id} for payment intent ${paymentIntentId}`);
+        
+        // Find or create customer
+        let customerId: string | null = null;
+        if (booking.customer_email) {
+          const { data: existingCustomer } = await supabase
+            .from("customers")
+            .select("id")
+            .eq("email", booking.customer_email.toLowerCase())
+            .single();
+
+          if (existingCustomer) {
+            customerId = existingCustomer.id;
+          } else if (booking.customer_name) {
+            // Create customer record
+            const nameParts = booking.customer_name.trim().split(' ');
+            const first_name = nameParts[0] || '';
+            const last_name = nameParts.slice(1).join(' ') || '';
+
+            const { data: newCustomer } = await supabase
+              .from("customers")
+              .insert({
+                first_name,
+                last_name,
+                email: booking.customer_email.toLowerCase(),
+                phone: booking.customer_phone || null,
+              })
+              .select("id")
+              .single();
+
+            if (newCustomer) {
+              customerId = newCustomer.id;
+            }
+          }
+        }
+
+        // Create payment record for this booking
+        const { error: paymentInsertError } = await supabase
+          .from("payments")
+          .insert({
+            booking_id: booking.id,
+            customer_id: customerId,
+            amount: booking.amount,
+            payment_method: "card",
+            payment_status: "paid",
+            payment_date: new Date().toISOString().split("T")[0],
+            reference: paymentIntentId,
+            notes: `Auto-created from webhook for booking ${booking.id || booking.booking_number || 'N/A'} | Payment Intent: ${paymentIntentId}`,
+          });
+
+        if (paymentInsertError) {
+          console.error("Error creating payment record from booking:", paymentInsertError);
+        } else {
+          console.log(`✅ Created payment record for booking ${booking.id} from webhook`);
+          return; // Successfully created payment record
+        }
+      }
+    }
+    
     // For succeeded payments, try to create a new payment record if we can find the customer
     if (status === "succeeded" && customerId) {
       await handleSucceededPaymentWithoutRecord(paymentIntent);

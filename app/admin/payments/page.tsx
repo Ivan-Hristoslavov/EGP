@@ -31,6 +31,7 @@ interface Payment {
     service: string;
     date: string;
     customer_name: string;
+    booking_number: string | null;
   };
 }
 
@@ -66,6 +67,7 @@ export default function PaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [methodFilter, setMethodFilter] = useState<string>("all");
   const [dateFilter, setDateFilter] = useState<string>("all");
@@ -82,17 +84,31 @@ export default function PaymentsPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [limit] = useState(10);
 
-  // Load payments on component mount
+  // Debounce search term to avoid blinking (only for UI filtering, not API calls)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Load payments on component mount or when filters change (but NOT on search - that's client-side only)
   useEffect(() => {
     loadPayments();
-  }, [currentPage, statusFilter, methodFilter, dateFilter, searchTerm]);
+  }, [currentPage, statusFilter, methodFilter, dateFilter]);
 
   const loadPayments = async () => {
     try {
       setLoading(true);
       
-      // Simulate API call - replace with actual Supabase call
-      const response = await fetch('/api/payments', {
+      // Fetch payments from API with pagination
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: limit.toString(),
+      });
+      
+      const response = await fetch(`/api/payments?${params.toString()}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -103,17 +119,17 @@ export default function PaymentsPage() {
         const data = await response.json();
         const fetchedPayments = data.payments || [];
         
-        // Use dummy data if no real payments exist
-        const paymentsToUse = fetchedPayments.length > 0 ? fetchedPayments : DUMMY_PAYMENTS;
+        console.log('Payments loaded:', fetchedPayments.length, fetchedPayments);
         
-        setPayments(paymentsToUse);
-        setTotalCount(data.totalCount || paymentsToUse.length);
-        setTotalPages(Math.ceil((data.totalCount || paymentsToUse.length) / limit));
+        setPayments(fetchedPayments);
+        setTotalCount(data.pagination?.totalCount || fetchedPayments.length);
+        setTotalPages(data.pagination?.totalPages || Math.ceil(fetchedPayments.length / limit));
       } else {
-        // Fallback to dummy data
-        setPayments(DUMMY_PAYMENTS);
-        setTotalCount(DUMMY_PAYMENTS.length);
-        setTotalPages(Math.ceil(DUMMY_PAYMENTS.length / limit));
+        const errorText = await response.text();
+        console.error('Error loading payments:', response.status, errorText);
+        setPayments([]);
+        setTotalCount(0);
+        setTotalPages(0);
       }
     } catch (error) {
       console.error('Error loading payments:', error);
@@ -171,10 +187,15 @@ export default function PaymentsPage() {
   };
 
   const filteredPayments = payments.filter(payment => {
-    const matchesSearch = payment.customers?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         payment.bookings?.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         payment.reference?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         payment.customers?.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const customerName = payment.customers?.name || payment.bookings?.customer_name || 'Unknown Customer';
+    const customerEmail = payment.customers?.email || '';
+    const serviceName = payment.bookings?.service || 'Manual Payment';
+    
+    const matchesSearch = customerName.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                         serviceName.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                         payment.reference?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                         customerEmail.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                         payment.bookings?.booking_number?.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || payment.payment_status === statusFilter;
     const matchesMethod = methodFilter === 'all' || payment.payment_method === methodFilter;
@@ -424,7 +445,7 @@ export default function PaymentsPage() {
                     Date
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
-                    Reference
+                    Booking Number
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-semibold text-default-600 uppercase tracking-wider">
                     Actions
@@ -437,7 +458,7 @@ export default function PaymentsPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
                         <div className="text-sm font-medium text-foreground">
-                          {payment.customers?.name || 'Unknown Customer'}
+                          {payment.customers?.name || payment.bookings?.customer_name || 'Unknown Customer'}
                         </div>
                         <div className="text-sm text-default-500">
                           {payment.customers?.email || 'No email'}
@@ -480,7 +501,7 @@ export default function PaymentsPage() {
                       {new Date(payment.payment_date).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-default-500">
-                      {payment.reference || '-'}
+                      {payment.bookings?.booking_number || payment.reference || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end gap-2">
@@ -704,12 +725,18 @@ export default function PaymentsPage() {
                       <label className="text-sm font-medium text-default-500">Payment Date</label>
                       <p className="text-base">{new Date(selectedPayment.payment_date).toLocaleDateString()}</p>
                 </div>
-                {selectedPayment.reference && (
-                  <div>
-                        <label className="text-sm font-medium text-default-500">Reference</label>
-                        <p className="text-base">{selectedPayment.reference}</p>
-                  </div>
-                )}
+                {(selectedPayment.bookings?.booking_number || selectedPayment.reference) && (
+                      <div>
+                        <label className="text-sm font-medium text-default-500">Booking Number</label>
+                        <p className="text-base font-semibold">{selectedPayment.bookings?.booking_number || selectedPayment.reference}</p>
+                      </div>
+                    )}
+                {selectedPayment.reference && selectedPayment.reference.startsWith('pi_') && (
+                      <div>
+                        <label className="text-sm font-medium text-default-500">Payment Reference</label>
+                        <p className="text-base text-xs text-default-400">{selectedPayment.reference}</p>
+                      </div>
+                    )}
                 {selectedPayment.notes && (
                   <div>
                         <label className="text-sm font-medium text-default-500">Notes</label>

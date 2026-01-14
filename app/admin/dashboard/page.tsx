@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Calendar,
   Users,
@@ -56,54 +57,50 @@ const getTodayString = () => {
   return today.toISOString().split("T")[0];
 };
 
-// Empty stats - will be populated from database
-const statCards: StatCard[] = [
-  {
-    title: "Today's Bookings",
-    value: "0",
-    change: "0%",
-    changeType: "neutral",
-    icon: Calendar,
-    color: "primary",
-  },
-  {
-    title: "Monthly Revenue",
-    value: "£0",
-    change: "0%",
-    changeType: "neutral",
-    icon: DollarSign,
-    color: "success",
-  },
-  {
-    title: "Active Clients",
-    value: "0",
-    change: "0%",
-    changeType: "neutral",
-    icon: Users,
-    color: "secondary",
-  },
-  {
-    title: "Avg. Rating",
-    value: "0.0",
-    change: "0%",
-    changeType: "neutral",
-    icon: Star,
-    color: "warning",
-  },
-];
-
-// Empty activity - will be populated from database
-const recentActivity: any[] = [];
-
 export default function DashboardPage() {
+  const router = useRouter();
   const [selectedDate, setSelectedDate] = useState(getTodayString());
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    today_bookings: 0,
+    monthly_revenue: 0,
+    active_clients: 0,
+    avg_rating: 0,
+  });
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
 
-  // Load bookings on component mount
+  // Load dashboard data on component mount
   useEffect(() => {
+    loadDashboardData();
     loadBookings();
   }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      const response = await fetch("/api/dashboard/stats", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setStats({
+          today_bookings: data.stats?.today_bookings || 0,
+          monthly_revenue: data.stats?.monthly_revenue || 0,
+          active_clients: data.stats?.active_clients || 0,
+          avg_rating: data.stats?.avg_rating || 0,
+        });
+        setRecentActivity(data.recentActivity || []);
+      } else {
+        console.error("Error loading dashboard stats:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error loading dashboard stats:", error);
+    }
+  };
 
   const loadBookings = async () => {
     try {
@@ -168,6 +165,42 @@ export default function DashboardPage() {
       </div>
     );
   }
+
+  // Create stat cards from loaded data
+  const statCards: StatCard[] = [
+    {
+      title: "Today's Bookings",
+      value: stats.today_bookings.toString(),
+      change: "0%",
+      changeType: "neutral",
+      icon: Calendar,
+      color: "primary",
+    },
+    {
+      title: "Monthly Revenue",
+      value: `£${stats.monthly_revenue.toFixed(2)}`,
+      change: "0%",
+      changeType: "neutral",
+      icon: DollarSign,
+      color: "success",
+    },
+    {
+      title: "Active Clients",
+      value: stats.active_clients.toString(),
+      change: "0%",
+      changeType: "neutral",
+      icon: Users,
+      color: "secondary",
+    },
+ {
+      title: "Avg. Rating",
+      value: stats.avg_rating.toFixed(1),
+      change: "0%",
+      changeType: "neutral",
+      icon: Star,
+      color: "warning",
+    },
+  ];
 
   return (
     <div className="w-full space-y-6">
@@ -238,6 +271,7 @@ export default function DashboardPage() {
                 color="primary"
                 startContent={<Plus className="w-4 h-4" />}
                 size="sm"
+                onPress={() => router.push("/admin/bookings")}
               >
                       New Booking
               </Button>
@@ -334,6 +368,7 @@ export default function DashboardPage() {
               variant="light"
               className="w-full mt-6"
               size="sm"
+              onPress={() => router.push("/admin/bookings")}
             >
               View All Activity
             </Button>
@@ -353,6 +388,7 @@ export default function DashboardPage() {
               variant="flat"
               color="primary"
               startContent={<Plus className="w-5 h-5" />}
+              onPress={() => router.push("/admin/bookings")}
             >
                   <div className="text-left">
                 <h3 className="font-semibold">New Booking</h3>
@@ -365,6 +401,7 @@ export default function DashboardPage() {
               variant="flat"
               color="secondary"
               startContent={<Users className="w-5 h-5" />}
+              onPress={() => router.push("/admin/customers")}
             >
                   <div className="text-left">
                 <h3 className="font-semibold">Manage Clients</h3>
@@ -377,9 +414,10 @@ export default function DashboardPage() {
               variant="flat"
               color="success"
               startContent={<DollarSign className="w-5 h-5" />}
+              onPress={() => router.push("/admin/payments")}
             >
                   <div className="text-left">
-                <h3 className="font-semibold">View Reports</h3>
+                <h3 className="font-semibold">View Payments</h3>
                 <p className="text-xs text-default-500">Financial overview</p>
                   </div>
             </Button>
@@ -389,6 +427,7 @@ export default function DashboardPage() {
               variant="flat"
               color="secondary"
               startContent={<Calendar className="w-5 h-5" />}
+              onPress={() => router.push("/admin/calendar")}
             >
                   <div className="text-left">
                 <h3 className="font-semibold">Calendar View</h3>
