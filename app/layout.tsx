@@ -9,6 +9,7 @@ import { ToastProvider } from "@/components/Toast";
 import HashNavigation from "@/components/HashNavigation";
 import { AdminProfileProvider } from "@/components/AdminProfileContext";
 import { FirstVisitDiscountFormWrapper } from "@/components/FirstVisitDiscountFormWrapper";
+import CookieConsentModal from "@/components/CookieConsentModal";
 
 import LayoutMain from "@/components/LayoutMain";
 import { getAdminProfile } from "@/lib/admin-profile";
@@ -294,6 +295,8 @@ export default async function RootLayout({
             <LayoutMain adminProfile={adminProfile}>{children}</LayoutMain>
             {/* First-visit discount popup (client) */}
             <FirstVisitDiscountFormWrapper />
+            {/* GDPR & Cookies Consent Modal */}
+            <CookieConsentModal />
           </Providers>
         </ToastProvider>
         <SpeedInsights />

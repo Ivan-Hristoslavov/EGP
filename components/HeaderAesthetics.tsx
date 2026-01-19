@@ -64,7 +64,7 @@ export default function HeaderAesthetics() {
             slug: string;
             display_order?: number;
           };
-          services: Array<{ name: string; price: number; slug: string }>;
+          services: Array<{ id: string; name: string; price: number; slug: string }>;
         }
       >
     > = {};
@@ -88,6 +88,7 @@ export default function HeaderAesthetics() {
         };
       }
       grouped[mainTabSlug][categoryId].services.push({
+        id: service.id,
         name: service.name,
         price: service.price,
         slug: service.slug,
@@ -805,9 +806,15 @@ export default function HeaderAesthetics() {
                               {categoryServices.map((item) => (
                                 <li key={item.name}>
                                   <Link
-                                    href={`/book?service=${item.slug}`}
+                                    href="/book/new"
+                                    onClick={() => {
+                                      // Store service ID in sessionStorage for booking page
+                                      if (typeof window !== 'undefined') {
+                                        sessionStorage.setItem('pendingServiceId', item.id);
+                                      }
+                                      setActiveMenu(null);
+                                    }}
                                     className="group relative flex items-start justify-between gap-2 px-2 py-2 -mx-2 rounded-md text-sm text-gray-700 dark:text-gray-300 font-montserrat transition-all duration-300 hover:bg-gradient-to-r hover:from-[#f5f1e9]/80 hover:via-[#eee6d9]/80 hover:to-[#e8decd]/80 dark:hover:from-[#1f1a14]/40 dark:hover:via-[#252018]/40 dark:hover:to-[#2b251c]/40"
-                                    onClick={() => setActiveMenu(null)}
                                   >
                                     <span className="relative z-10 group-hover:translate-x-1 group-hover:text-[#8c846f] dark:group-hover:text-[#b5ad9d] transition-all duration-300">
                                       {item.name}
@@ -1000,12 +1007,16 @@ export default function HeaderAesthetics() {
                                 {categoryServices.map((item) => (
                                   <li key={item.name}>
                                     <Link
-                                      href={`/book?service=${item.slug}`}
-                                      className="group relative flex items-center justify-between gap-3 px-3 py-2.5 min-h-[44px] text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md transition-all duration-200 active:scale-95 touch-manipulation font-montserrat pb-1"
+                                      href="/book/new"
                                       onClick={() => {
+                                        // Store service ID in sessionStorage for booking page
+                                        if (typeof window !== 'undefined') {
+                                          sessionStorage.setItem('pendingServiceId', item.id);
+                                        }
                                         setMobileMenuOpen(false);
                                         setActiveMenu(null);
                                       }}
+                                      className="group relative flex items-center justify-between gap-3 px-3 py-2.5 min-h-[44px] text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md transition-all duration-200 active:scale-95 touch-manipulation font-montserrat pb-1"
                                     >
                                       <span className="relative flex-1 text-left leading-tight">
                                         <span className="relative z-10">

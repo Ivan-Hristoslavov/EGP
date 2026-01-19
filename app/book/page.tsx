@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, Suspense, useMemo, useCallback, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { siteConfig } from "@/config/site";
 import { Calendar, Clock, CreditCard, CheckCircle, Plus, Minus, X, ArrowLeft, Info, Shield, ChevronDown, Lock, Trash2 } from "lucide-react";
 import StripePaymentForm from '@/components/StripePaymentForm';
@@ -11,11 +10,12 @@ import { Button } from "@heroui/button";
 import { Card, CardBody, CardHeader } from "@heroui/react";
 import { Chip } from "@heroui/react";
 import { Spinner } from "@heroui/react";
+import { Input } from "@heroui/react";
 import { useToast } from '@/components/Toast';
 import ButtonPrimary from '@/components/ButtonPrimary';
 
 type OrderItem = {
-  serviceId: string;
+  serviceId: string; // This will now be the service ID (UUID), not slug
   name: string;
   price: number;
   duration: number;
@@ -37,7 +37,7 @@ type CalendarDay = {
   };
 };
 
-type BookingStepKey = 'services' | 'team' | 'date' | 'preview';
+type BookingStepKey = 'services' | 'team' | 'date' | 'customer' | 'preview';
 
 type TeamMember = {
   id: string;
@@ -55,7 +55,6 @@ type TeamMember = {
 };
 
 function BookingPageContent() {
-  const searchParams = useSearchParams();
   const { services, isLoading: servicesLoading } = useServices();
   const { showError } = useToast();
   const [selectedServices, setSelectedServices] = useState<OrderItem[]>([]);
@@ -74,11 +73,26 @@ function BookingPageContent() {
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [showServiceSelector, setShowServiceSelector] = useState(false);
   const [serviceInfoModal, setServiceInfoModal] = useState<string | null>(null);
+  
+  // Customer data state
+  const [customerData, setCustomerData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: ''
+  });
+  const [customerDataErrors, setCustomerDataErrors] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: ''
+  });
 
   const bookingSteps = useMemo(() => ([
     { key: 'services', label: 'Services', icon: CheckCircle },
     { key: 'team', label: 'Select Practitioner', icon: Shield },
     { key: 'date', label: 'Date & Time', icon: Calendar },
+    { key: 'customer', label: 'Your Details', icon: Info },
     { key: 'preview', label: 'Review & Payment', icon: CreditCard }
   ] as const), []);
 
@@ -89,6 +103,7 @@ function BookingPageContent() {
     team: 'Choose your preferred practitioner',
     services: "Select treatments and tailor your session",
     date: "Choose the perfect date and time",
+    customer: "Enter your contact information",
     preview: "Review your booking details and complete payment"
   };
 
@@ -100,8 +115,11 @@ function BookingPageContent() {
         return selectedServices.length > 0;
       case 'date':
         return selectedServices.length > 0 && Boolean(selectedTeamMember);
-      case 'preview':
+      case 'customer':
         return selectedServices.length > 0 && Boolean(selectedTeamMember) && Boolean(selectedDate) && Boolean(selectedTime);
+      case 'preview':
+        return selectedServices.length > 0 && Boolean(selectedTeamMember) && Boolean(selectedDate) && Boolean(selectedTime) && 
+               Boolean(customerData.firstName) && Boolean(customerData.lastName) && Boolean(customerData.email) && Boolean(customerData.phone);
       default:
         return false;
     }
@@ -120,11 +138,11 @@ function BookingPageContent() {
     }
   };
 
-  // Create a lookup map from services for easy access
+  // Create a lookup map from services for easy access (using ID as key)
   const servicesDataMap = useMemo(() => {
     const map: Record<string, any> = {};
     services.forEach(service => {
-      map[service.slug] = {
+      map[service.id] = {
         name: service.name,
         price: service.price,
         category: service.category.name,
@@ -138,12 +156,13 @@ function BookingPageContent() {
         downtimeDays: service.downtime_days,
         resultsDurationWeeks: service.results_duration_weeks,
         imageUrl: service.image_url,
+        slug: service.slug, // Keep slug for backwards compatibility if needed
       };
     });
     return map;
   }, [services]);
 
-  // Group services by category
+  // Group services by category (using ID as key)
   const servicesByCategory = useMemo(() => {
     const grouped: Record<string, Array<[string, any]>> = {};
     services.forEach(service => {
@@ -151,7 +170,7 @@ function BookingPageContent() {
       if (!grouped[categoryName]) {
         grouped[categoryName] = [];
       }
-      grouped[categoryName].push([service.slug, servicesDataMap[service.slug]]);
+      grouped[categoryName].push([service.id, servicesDataMap[service.id]]);
     });
     return grouped;
   }, [services, servicesDataMap]);
@@ -189,11 +208,8 @@ function BookingPageContent() {
           // Filter team members based on selected services
           // Only show team members who can perform ALL selected services
           if (selectedServices.length > 0) {
-            const selectedServiceIds = selectedServices.map(s => {
-              // Find service ID from slug
-              const service = services.find(svc => svc.slug === s.serviceId);
-              return service?.id;
-            }).filter(Boolean) as string[];
+            // serviceId is now the actual ID, not slug
+            const selectedServiceIds = selectedServices.map(s => s.serviceId).filter(Boolean) as string[];
             
             if (selectedServiceIds.length > 0) {
               activeMembers = membersWithDayOff.filter((member: TeamMember) => {
@@ -218,10 +234,8 @@ function BookingPageContent() {
           
           // Clear selected team member if they can't perform all selected services
           if (selectedTeamMember && selectedServices.length > 0) {
-            const selectedServiceIds = selectedServices.map(s => {
-              const service = services.find(svc => svc.slug === s.serviceId);
-              return service?.id;
-            }).filter(Boolean) as string[];
+            // serviceId is now the actual ID, not slug
+            const selectedServiceIds = selectedServices.map(s => s.serviceId).filter(Boolean) as string[];
             
             if (selectedServiceIds.length > 0) {
               const currentMember = activeMembers.find((m: TeamMember) => m.id === selectedTeamMember);
@@ -372,71 +386,36 @@ function BookingPageContent() {
     }
   }, [availableDates, selectedDate]);
 
-  // Auto-select service from URL parameter
+  // Check for pending service from sessionStorage (from Book Now menu)
   useEffect(() => {
     if (servicesLoading || services.length === 0 || Object.keys(servicesDataMap).length === 0) return;
+    if (selectedServices.length > 0) return; // Don't add if services already selected
     
-    const serviceParam = searchParams.get('service');
-    const conditionParam = searchParams.get('condition');
-    
-    if (serviceParam) {
-      // Check if service exists in the map
-      const service = servicesDataMap[serviceParam];
-      if (service) {
-        // Check if service is already added
-        const isAlreadyAdded = selectedServices.some(s => s.serviceId === serviceParam);
-        if (!isAlreadyAdded) {
-          // Add service directly without calling addService to avoid dependency issues
-          setSelectedServices(prev => {
-            // Double check it's not already added
-            if (prev.some(s => s.serviceId === serviceParam)) {
-              return prev;
-            }
-            return [...prev, {
-              serviceId: serviceParam,
-              name: service.name,
-              price: service.price,
-              duration: service.duration,
-              category: service.category,
-              quantity: 1
-            }];
-          });
+    // Check sessionStorage for pending service
+    if (typeof window !== 'undefined') {
+      const pendingServiceId = sessionStorage.getItem('pendingServiceId');
+      if (pendingServiceId) {
+        // Check if service exists and is not already added
+        const service = servicesDataMap[pendingServiceId];
+        if (service && !selectedServices.some(s => s.serviceId === pendingServiceId)) {
+          // Add service automatically
+          setSelectedServices([{
+            serviceId: pendingServiceId,
+            name: service.name,
+            price: service.price,
+            duration: service.duration,
+            category: service.category,
+            quantity: 1
+          }]);
+          // Clear sessionStorage
+          sessionStorage.removeItem('pendingServiceId');
+        } else {
+          // Clear invalid service ID
+          sessionStorage.removeItem('pendingServiceId');
         }
-      } else {
-        console.error(`Service not found in servicesDataMap: ${serviceParam}`);
-        console.log('Available services:', Object.keys(servicesDataMap).slice(0, 10));
-        showError(
-          "Service Not Found",
-          `The service "${serviceParam}" could not be found. Please select a service from the list below.`
-        );
       }
     }
-    
-    // If coming from condition, show service selector and suggest relevant services
-    if (conditionParam) {
-      setShowServiceSelector(true);
-      
-      // Auto-suggest relevant services based on condition
-      const conditionServiceMapping: { [key: string]: string[] } = {
-        'cellulite-thighs-buttocks-abdomen': ['radiofrequency-ultrasound', 'ultrasound-lift-tighten', 'body-fat-burning-mesotherapy'],
-        'stubborn-belly-fat-abdominal-fat': ['fat-freezing-treatment', 'body-fat-burning-mesotherapy', 'radiofrequency-ultrasound'],
-        'love-handles-flanks': ['fat-freezing-treatment', 'radiofrequency-ultrasound', 'body-fat-burning-mesotherapy'],
-        'sagging-skin-skin-laxity': ['radiofrequency-ultrasound', 'ultrasound-lift-tighten', 'combined-treatment'],
-        'stretch-marks': ['microneedling-facial', 'radiofrequency-ultrasound', 'prp-treatment'],
-        'arm-fat-bingo-wings': ['fat-freezing-treatment', 'radiofrequency-ultrasound', 'ultrasound-lift-tighten'],
-        'thigh-fat-inner-thigh-laxity': ['fat-freezing-treatment', 'radiofrequency-ultrasound', 'ultrasound-lift-tighten'],
-        'double-chin-jawline-fat': ['fat-freezing-treatment', 'jaw-slimming', 'jawline-filler'],
-        'post-pregnancy-tummy': ['radiofrequency-ultrasound', 'ultrasound-lift-tighten', 'body-fat-burning-mesotherapy'],
-        'water-retention-bloating-swelling': ['body-fat-burning-mesotherapy', 'radiofrequency-ultrasound', 'combined-treatment']
-      };
-      
-      const suggestedServices = conditionServiceMapping[conditionParam] || [];
-      if (suggestedServices.length > 0) {
-        // Add first suggested service automatically
-        addService(suggestedServices[0]);
-      }
-    }
-  }, [searchParams, servicesLoading, services, servicesDataMap, selectedServices]);
+  }, [servicesLoading, services, servicesDataMap, selectedServices]);
 
   const totalAmount = selectedServices.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const totalDuration = selectedServices.reduce((sum, item) => sum + (item.duration * item.quantity), 0);
@@ -612,6 +591,8 @@ function BookingPageContent() {
         return renderTeamStep();
       case 'date':
         return renderCalendar();
+      case 'customer':
+        return renderCustomerDetails();
       case 'preview':
         return renderOrderPreview();
       default:
@@ -622,10 +603,10 @@ function BookingPageContent() {
   const renderServicesStep = () => (
     <div className="space-y-6">
       <div className="mb-6">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Selected Services</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Curate your treatment plan before choosing a date.
-          </p>
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Select Services</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          Curate your treatment plan before choosing a date.
+        </p>
       </div>
 
       {selectedServices.length === 0 ? (
@@ -645,67 +626,68 @@ function BookingPageContent() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          {selectedServices.map(item => {
-            const serviceData = servicesDataMap[item.serviceId];
-            return (
-              <Card
-                key={item.serviceId}
-                className="group"
-                shadow="sm"
-              >
-                <CardBody className="p-4 sm:p-5 flex flex-col">
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between gap-2 mb-3">
-                      <h4 className="text-base sm:text-lg font-semibold text-foreground leading-tight flex-1">{item.name}</h4>
-                      <Chip
-                        size="sm"
-                        variant="flat"
-                        startContent={<Clock className="w-3 h-3" />}
-                        className="flex-shrink-0"
-                      >
-                        {item.duration} min
-                      </Chip>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {selectedServices.map(item => {
+              const serviceData = servicesDataMap[item.serviceId];
+              return (
+                <Card
+                  key={item.serviceId}
+                  className="group hover:shadow-lg transition-all duration-200"
+                  shadow="md"
+                >
+                  <CardBody className="p-5 flex flex-col">
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between gap-3 mb-4">
+                        <h4 className="text-base sm:text-lg font-bold text-foreground leading-tight flex-1 line-clamp-2">{item.name}</h4>
+                        <Chip
+                          size="sm"
+                          variant="flat"
+                          startContent={<Clock className="w-3 h-3" />}
+                          className="flex-shrink-0 bg-egp-green/10 text-egp-green dark:bg-egp-green-dark/20 dark:text-white"
+                        >
+                          {item.duration} min
+                        </Chip>
+                      </div>
+                      
+                      <div className="mb-4 pb-4 border-b border-divider">
+                        <p className="text-xs uppercase tracking-wide text-default-500 mb-1">Subtotal</p>
+                        <p className="text-2xl font-bold text-egp-green dark:text-white">£{item.price * item.quantity}</p>
+                      </div>
                     </div>
-                    
-                    <div className="mb-4 pb-4 border-b border-divider">
-                      <p className="text-xs uppercase tracking-wide text-default-500 mb-1">Subtotal</p>
-                      <p className="text-xl sm:text-2xl font-bold text-egp-green dark:text-white">£{item.price * item.quantity}</p>
-                    </div>
-                  </div>
 
-                  <div className="flex items-center gap-2 sm:gap-3 mt-auto">
+                    <div className="flex items-center gap-2 mt-auto">
                       <Button
-                      onPress={() => setServiceInfoModal(item.serviceId)}
-                      variant="bordered"
-                      size="sm"
-                      className="flex-1"
-                      startContent={<Info className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-                    >
-                      Details
+                        onPress={() => setServiceInfoModal(item.serviceId)}
+                        variant="bordered"
+                        size="sm"
+                        className="flex-1 border-egp-green text-egp-green dark:border-egp-green dark:text-white hover:bg-egp-green/10"
+                        startContent={<Info className="w-4 h-4" />}
+                      >
+                        Details
                       </Button>
                       <Button
-                      onPress={() => removeService(item.serviceId)}
-                      isIconOnly
-                      variant="light"
-                      color="danger"
-                      size="sm"
-                      aria-label="Remove service"
+                        onPress={() => removeService(item.serviceId)}
+                        isIconOnly
+                        variant="light"
+                        color="danger"
+                        size="sm"
+                        className="hover:bg-danger-50 dark:hover:bg-danger-900/20"
+                        aria-label="Remove service"
                       >
-                      <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
-                </CardBody>
-                      </Card>
+                  </CardBody>
+                </Card>
               );
             })}
-                      </div>
+          </div>
 
-          <div className="border-t border-divider pt-5 mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
-                      <ButtonPrimary
+          <div className="border-t border-divider pt-5 mt-6 flex flex-row items-center justify-between gap-3">
+            <ButtonPrimary
               onPress={() => setShowServiceSelector(true)}
-              variant="primary"
-              className="w-full sm:w-auto"
+              variant="secondary"
+              className="flex-1 border-2 border-egp-beige-dark bg-egp-beige hover:bg-egp-beige-dark text-gray-900 dark:bg-egp-beige-darkest dark:text-white dark:border-egp-beige-darker dark:hover:bg-egp-beige-darker"
               startContent={<Plus className="w-4 h-4" />}
             >
               Add Services
@@ -714,15 +696,15 @@ function BookingPageContent() {
               onPress={() => setCurrentStep('team')}
               isDisabled={selectedServices.length === 0}
               variant="primary"
-              className="w-full sm:w-auto"
-              endContent={<ArrowLeft className="w-4 h-4 rotate-180" />}
+              className={`flex-1 ${selectedServices.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+              endContent={selectedServices.length === 0 ? <Lock className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4 rotate-180" />}
             >
-              Continue to Select Practitioner
+              {selectedServices.length === 0 ? 'Please add at least one service' : 'Continue to Select Practitioner'}
             </ButtonPrimary>
-                    </div>
+          </div>
         </>
       )}
-                  </div>
+    </div>
   );
 
   const renderTeamStep = () => (
@@ -1036,164 +1018,131 @@ function BookingPageContent() {
 
   const renderServiceSelector = () => {
     return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start justify-center p-3 sm:p-4 pt-20 sm:pt-24 z-[9999] overflow-y-auto">
-        <div className="bg-white dark:bg-egp-green-darker rounded-2xl shadow-2xl w-full max-w-6xl max-h-[85vh] flex flex-col relative mt-4 sm:mt-8">
-          <div className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-white px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between rounded-t-2xl flex-shrink-0 relative z-10">
-            <h2 className="text-xl sm:text-2xl font-bold">Select Services</h2>
+      <div 
+        className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-start justify-center p-3 sm:p-4 pt-24 sm:pt-28 z-[10000] overflow-y-auto"
+        onClick={(e) => {
+          // Close modal when clicking on backdrop
+          if (e.target === e.currentTarget) {
+            setShowServiceSelector(false);
+          }
+        }}
+      >
+        <div 
+          className="bg-gray-800 dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-7xl max-h-[85vh] flex flex-col relative z-[10001]"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="bg-gray-900 dark:bg-gray-950 text-white px-6 py-4 flex items-center justify-between rounded-t-2xl flex-shrink-0 border-b border-gray-700 relative z-[10002]">
+            <h2 className="text-2xl font-bold">Select Services</h2>
             <button
-              onClick={() => setShowServiceSelector(false)}
-              className="p-2 hover:bg-white/20 rounded-full transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center relative z-[100]"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowServiceSelector(false);
+              }}
+              className="p-2 hover:bg-gray-700 rounded-full transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center relative z-[10003]"
               aria-label="Close"
             >
-              <X className="w-5 h-5 sm:w-6 sm:h-6" />
+              <X className="w-6 h-6 text-white" />
             </button>
           </div>
           
-          <div className="p-4 sm:p-6 overflow-y-auto flex-1">
+          {/* Content */}
+          <div className="p-6 overflow-y-auto flex-1 bg-gray-800 dark:bg-gray-900">
             {Object.entries(servicesByCategory).map(([category, servicesList]) => {
               // Filter out services that are already selected
-              const availableServices = servicesList.filter(([serviceId]) => 
-                !selectedServices.some(item => item.serviceId === serviceId)
+              const availableServices = servicesList.filter(([serviceId, service]) => 
+                service && !selectedServices.some(item => item.serviceId === serviceId)
               );
               
               if (availableServices.length === 0) return null;
               
               return (
-              <div key={category} className="mb-6 sm:mb-8">
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-5">{category}</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-                  {availableServices.map(([serviceId, service]) => (
-                    <Card
-                      key={serviceId}
-                      className="h-full flex flex-col"
-                      shadow="md"
-                    >
-                      <CardHeader className="bg-egp-beige-lighter dark:bg-egp-green-dark px-4 py-3 border-b border-egp-beige-dark/60 dark:border-egp-green relative">
-                        {/* Category Badge - Top Left */}
-                        <div className="absolute top-2 left-2">
-                          <Chip 
-                            size="sm"
-                            className="bg-egp-green text-white text-[10px] font-semibold"
-                            variant="flat"
-                          >
-                            {service.category}
-                          </Chip>
-                        </div>
-                        
-                        {/* Duration Badge - Top Right */}
-                        <div className="absolute top-2 right-2">
-                          <Chip
-                            size="sm"
-                            startContent={<Clock className="w-3 h-3" />}
-                            variant="flat"
-                            className="bg-white/90 dark:bg-egp-green-dark/90 text-egp-green dark:text-white text-[10px]"
-                          >
-                            {service.duration} min
-                          </Chip>
-                        </div>
-                        
-                        {/* Service Name - Centered */}
-                        <div className="text-center pt-5 pb-2 w-full">
-                          <h4 className="text-base sm:text-lg font-bold text-egp-green dark:text-white leading-tight line-clamp-2 mb-2">
-                            {service.name}
-                          </h4>
-                          {/* Price */}
-                          <div className="text-2xl sm:text-3xl font-bold text-egp-green dark:text-white">
-                            £{service.price}
-                          </div>
-                        </div>
-                      </CardHeader>
-                      
-                      <CardBody className="p-4 sm:p-5 flex flex-col flex-1">
-                        {/* Description */}
-                        {service.description && (
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed line-clamp-3">
-                            {service.description}
-                          </p>
-                        )}
-                        
-                        {/* Service Details */}
-                        <div className="space-y-2 mb-4 text-xs text-gray-500 dark:text-gray-400">
-                          {service.requires_consultation && (
-                            <div className="flex items-center gap-2">
-                              <CheckCircle className="w-4 h-4 text-success flex-shrink-0" />
-                              <span>Consultation Required</span>
-                            </div>
-                          )}
-                          {service.downtime_days > 0 && (
-                            <div className="flex items-center gap-2">
-                              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                              </svg>
-                              <span>Downtime: {service.downtime_days} day{service.downtime_days !== 1 ? 's' : ''}</span>
-                            </div>
-                          )}
-                          {service.results_duration_weeks && (
-                            <div className="flex items-center gap-2">
-                              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                              </svg>
-                              <span>Results: {service.results_duration_weeks} week{service.results_duration_weeks !== 1 ? 's' : ''}</span>
-                            </div>
-                          )}
-                        </div>
-                        
-                        {/* Benefits */}
-                        {service.benefits && service.benefits.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            {service.benefits.slice(0, 3).map((benefit: string, index: number) => (
-                              <Chip
-                                key={index}
+                <div key={category} className="mb-8">
+                  <h3 className="text-xl font-bold text-white mb-5">{category}</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {availableServices.map(([serviceId, service]) => {
+                      if (!service) return null;
+                      return (
+                        <Card
+                          key={serviceId}
+                          className="h-full flex flex-col bg-gray-700 dark:bg-gray-800 border border-gray-600 dark:border-gray-700 hover:border-egp-green transition-all"
+                          shadow="lg"
+                        >
+                          <CardHeader className="bg-gray-700 dark:bg-gray-800 px-5 py-4 relative min-h-[140px]">
+                            {/* Category Badge - Top Left */}
+                            <div className="absolute top-3 left-3">
+                              <Chip 
                                 size="sm"
+                                className="bg-gray-600 dark:bg-gray-700 text-white text-xs font-semibold"
                                 variant="flat"
-                                className="bg-egp-beige-light dark:bg-gray-800/40 text-egp-green dark:text-egp-beige text-xs"
                               >
-                                {benefit}
+                                {service.category || category}
                               </Chip>
-                            ))}
-                            {service.benefits.length > 3 && (
+                            </div>
+                            
+                            {/* Duration Badge - Top Right */}
+                            <div className="absolute top-3 right-3">
                               <Chip
                                 size="sm"
+                                startContent={<Clock className="w-3 h-3" />}
                                 variant="flat"
-                                className="text-xs text-gray-500 dark:text-gray-400"
+                                className="bg-gray-600 dark:bg-gray-700 text-white text-xs"
                               >
-                                +{service.benefits.length - 3} more
+                                {service.duration} min
                               </Chip>
+                            </div>
+                            
+                            {/* Service Name and Price - Centered */}
+                            <div className="text-center pt-8 pb-3 w-full">
+                              <h4 className="text-lg font-bold text-white leading-tight line-clamp-2 mb-3">
+                                {service.name}
+                              </h4>
+                              <div className="text-3xl font-bold text-white">
+                                £{service.price}
+                              </div>
+                            </div>
+                          </CardHeader>
+                          
+                          <CardBody className="p-5 flex flex-col flex-1 bg-gray-700 dark:bg-gray-800">
+                            {/* Description */}
+                            {service.description && (
+                              <p className="text-sm text-gray-300 mb-4 leading-relaxed line-clamp-3">
+                                {service.description}
+                              </p>
                             )}
-                          </div>
-                        )}
-                        
-                        {/* Action Buttons - Always at bottom */}
-                        <div className="flex flex-col gap-2 pt-4 mt-auto border-t border-gray-200 dark:border-gray-700">
-                          <Button
-                            onPress={() => setServiceInfoModal(serviceId)}
-                            variant="bordered"
-                            size="sm"
-                            className="w-full border-egp-green text-egp-green dark:text-white dark:border-egp-green"
-                            startContent={<Info className="w-4 h-4" />}
-                          >
-                            Details
-                          </Button>
-                          <ButtonPrimary
-                            onPress={() => {
-                              const success = addService(serviceId);
-                              if (success) {
-                                setShowServiceSelector(false);
-                              }
-                            }}
-                            variant="primary"
-                            className="w-full"
-                            size="sm"
-                            startContent={<Plus className="w-4 h-4" />}
-                          >
-                            Book
-                          </ButtonPrimary>
-                        </div>
-                      </CardBody>
-                    </Card>
-                  ))}
+                            
+                            {/* Action Buttons - Stacked */}
+                            <div className="flex flex-col gap-2 pt-4 mt-auto border-t border-gray-600 dark:border-gray-700">
+                              <Button
+                                onPress={() => setServiceInfoModal(serviceId)}
+                                variant="bordered"
+                                size="sm"
+                                className="w-full border-gray-500 text-gray-300 hover:bg-gray-600 dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
+                                startContent={<Info className="w-4 h-4" />}
+                              >
+                                Details
+                              </Button>
+                              <ButtonPrimary
+                                onPress={() => {
+                                  const success = addService(serviceId);
+                                  if (success) {
+                                    setShowServiceSelector(false);
+                                  }
+                                }}
+                                variant="primary"
+                                className="w-full bg-gray-600 hover:bg-gray-500 dark:bg-gray-700 dark:hover:bg-gray-600 text-white"
+                                size="sm"
+                                startContent={<Plus className="w-4 h-4" />}
+                              >
+                                Book
+                              </ButtonPrimary>
+                            </div>
+                          </CardBody>
+                        </Card>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
               );
             })}
           </div>
@@ -1626,12 +1575,12 @@ function BookingPageContent() {
                     {selectedTime && (
                       <div className="mt-4">
                         <ButtonPrimary
-                          onPress={() => setCurrentStep('preview')}
+                          onPress={() => setCurrentStep('customer')}
                           variant="primary"
                           className="w-full"
                           endContent={<ArrowLeft className="w-4 h-4 rotate-180" />}
                         >
-                          Continue to Preview
+                          Continue to Your Details
                         </ButtonPrimary>
                 </div>
               )}
@@ -1652,7 +1601,154 @@ function BookingPageContent() {
       )}
     </div>
   );
-};
+  };
+
+  // Validate customer data
+  const validateCustomerData = (): boolean => {
+    const errors = {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: ''
+    };
+    let isValid = true;
+
+    if (!customerData.firstName.trim()) {
+      errors.firstName = 'First name is required';
+      isValid = false;
+    }
+
+    if (!customerData.lastName.trim()) {
+      errors.lastName = 'Last name is required';
+      isValid = false;
+    }
+
+    if (!customerData.email.trim()) {
+      errors.email = 'Email is required';
+      isValid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerData.email)) {
+      errors.email = 'Please enter a valid email address';
+      isValid = false;
+    }
+
+    // Phone is required
+    if (!customerData.phone.trim()) {
+      errors.phone = 'Phone number is required';
+      isValid = false;
+    } else if (!/^[\d\s\-\+\(\)]+$/.test(customerData.phone.trim())) {
+      errors.phone = 'Please enter a valid phone number';
+      isValid = false;
+    }
+
+    setCustomerDataErrors(errors);
+    return isValid;
+  };
+
+  const renderCustomerDetails = () => {
+    return (
+      <div className="space-y-6">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Your Details</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Please provide your contact information to complete your booking
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            label="First Name"
+            placeholder="Enter your first name"
+            value={customerData.firstName}
+            onValueChange={(value) => setCustomerData({ ...customerData, firstName: value })}
+            isRequired
+            isInvalid={!!customerDataErrors.firstName}
+            errorMessage={customerDataErrors.firstName}
+            variant="bordered"
+            size="lg"
+            classNames={{
+              input: "text-base",
+              label: "text-base"
+            }}
+          />
+          <Input
+            label="Last Name"
+            placeholder="Enter your last name"
+            value={customerData.lastName}
+            onValueChange={(value) => setCustomerData({ ...customerData, lastName: value })}
+            isRequired
+            isInvalid={!!customerDataErrors.lastName}
+            errorMessage={customerDataErrors.lastName}
+            variant="bordered"
+            size="lg"
+            classNames={{
+              input: "text-base",
+              label: "text-base"
+            }}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            label="Email"
+            type="email"
+            placeholder="your.email@example.com"
+            value={customerData.email}
+            onValueChange={(value) => setCustomerData({ ...customerData, email: value })}
+            isRequired
+            isInvalid={!!customerDataErrors.email}
+            errorMessage={customerDataErrors.email}
+            variant="bordered"
+            size="lg"
+            classNames={{
+              input: "text-base",
+              label: "text-base"
+            }}
+          />
+          <Input
+            label="Phone"
+            type="tel"
+            placeholder="+44 7XXX XXXXXX"
+            value={customerData.phone}
+            onValueChange={(value) => setCustomerData({ ...customerData, phone: value })}
+            isRequired
+            isInvalid={!!customerDataErrors.phone}
+            errorMessage={customerDataErrors.phone}
+            variant="bordered"
+            size="lg"
+            classNames={{
+              input: "text-base",
+              label: "text-base"
+            }}
+          />
+        </div>
+
+        <div className="flex gap-4 pt-4">
+          <Button
+            variant="bordered"
+            onPress={() => setCurrentStep('date')}
+            startContent={<ArrowLeft className="w-4 h-4" />}
+            className="flex-1"
+            size="lg"
+          >
+            Back
+          </Button>
+          <ButtonPrimary
+            onPress={() => {
+              if (validateCustomerData()) {
+                setCurrentStep('preview');
+              }
+            }}
+            variant="primary"
+            className="flex-1"
+            endContent={<ArrowLeft className="w-4 h-4 rotate-180" />}
+            size="lg"
+          >
+            Continue to Review
+          </ButtonPrimary>
+        </div>
+      </div>
+    );
+  };
 
   const renderOrderPreview = () => {
     const formattedAppointmentDate = selectedDate
@@ -1694,93 +1790,123 @@ function BookingPageContent() {
       : null;
 
             return (
-      <div className="space-y-4 max-w-5xl mx-auto">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white">Order Summary</h3>
-        
-        {/* Compact Header Row - Team Member, Date, Time, Total */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Team Member */}
-          {selectedTeamMemberData && (
-            <div className="p-4 rounded-xl border border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-all duration-200">
-              <div className="flex items-center gap-3">
-                {selectedTeamMemberData.image_url ? (
-                  <img
-                    src={selectedTeamMemberData.image_url}
-                    alt={selectedTeamMemberData.name}
-                    className="w-14 h-14 rounded-full object-cover border-2 border-[#e4d9c8] dark:border-gray-700 flex-shrink-0 shadow-sm"
-                  />
-                ) : (
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#f5f1e9] to-[#e4d9c8] dark:from-gray-800 dark:to-gray-700 flex items-center justify-center border-2 border-[#e4d9c8] dark:border-gray-700 flex-shrink-0 shadow-sm">
-                    <Shield className="w-7 h-7 text-[#9d9585] dark:text-[#c9c1b0]" />
+      <div className="space-y-6 max-w-7xl mx-auto">
+        {/* Two Column Layout: Booking Details and Services Booked */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Booking Details Section - Left Column */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Booking Details</h3>
+            
+            {/* Compact Header Row - Team Member, Date, Time, Total */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Team Member */}
+            {selectedTeamMemberData && (
+              <div className="p-4 rounded-xl border border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-all duration-200">
+                <div className="flex items-center gap-3">
+                  {selectedTeamMemberData.image_url ? (
+                    <img
+                      src={selectedTeamMemberData.image_url}
+                      alt={selectedTeamMemberData.name}
+                      className="w-14 h-14 rounded-full object-cover border-2 border-[#e4d9c8] dark:border-gray-700 flex-shrink-0 shadow-sm"
+                    />
+                  ) : (
+                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#f5f1e9] to-[#e4d9c8] dark:from-gray-800 dark:to-gray-700 flex items-center justify-center border-2 border-[#e4d9c8] dark:border-gray-700 flex-shrink-0 shadow-sm">
+                      <Shield className="w-7 h-7 text-[#9d9585] dark:text-[#c9c1b0]" />
                     </div>
-                )}
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Practitioner</p>
-                  <p className="text-base font-bold text-gray-900 dark:text-white truncate leading-tight">{selectedTeamMemberData.name}</p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 truncate mt-0.5">{selectedTeamMemberData.role}</p>
-                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Practitioner</p>
+                    <p className="text-base font-bold text-gray-900 dark:text-white truncate leading-tight">{selectedTeamMemberData.name}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate mt-0.5">{selectedTeamMemberData.role}</p>
                   </div>
-            </div>
-          )}
-          
-          {/* Date */}
-          <div className="p-4 rounded-xl border border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-all duration-200">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="p-1.5 rounded-lg bg-[#f5f1e9] dark:bg-gray-700">
-                <Calendar className="w-4 h-4 text-[#9d9585] dark:text-[#c9c1b0]" />
-              </div>
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Date</p>
-            </div>
-            <p className="text-sm font-bold text-gray-900 dark:text-white leading-tight">{formattedAppointmentDate}</p>
-                    </div>
-
-          {/* Time */}
-          <div className="p-4 rounded-xl border border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-all duration-200">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="p-1.5 rounded-lg bg-[#f5f1e9] dark:bg-gray-700">
-                <Clock className="w-4 h-4 text-[#9d9585] dark:text-[#c9c1b0]" />
-                      </div>
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Time</p>
-                    </div>
-            <p className="text-sm font-bold text-gray-900 dark:text-white leading-tight mb-2">{timeRange}</p>
-            {selectedTimeSlots.length > 0 && (
-              <p className="text-xs text-gray-600 dark:text-gray-400 font-mono bg-gray-50 dark:bg-gray-900/50 px-2 py-1 rounded inline-block">{selectedTimeSlots.join(' → ')}</p>
-            )}
-            {selectedDateSlots?.workingHours && (
-              <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 space-y-1.5">
-                {selectedDateSlots.workingHours.buffer_minutes !== undefined && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">Buffer</span>
-                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{selectedDateSlots.workingHours.buffer_minutes} min</span>
-                  </div>
-                )}
-                {selectedDateSlots.workingHours.max_appointments !== undefined && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">Max Appointments</span>
-                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{selectedDateSlots.workingHours.max_appointments}</span>
                 </div>
-                )}
               </div>
             )}
-        </div>
-        
-          {/* Total */}
-          <div className="p-4 rounded-xl border-2 border-egp-green dark:border-egp-green-light bg-gradient-to-br from-[#f5f1e9] via-white to-[#faf7f1] dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 shadow-md hover:shadow-lg transition-all duration-200">
-          <div className="flex items-center gap-2 mb-2">
-              <div className="p-1.5 rounded-lg bg-egp-green/20 dark:bg-egp-green-light/20">
-                <CreditCard className="w-4 h-4 text-egp-green dark:text-white" />
-          </div>
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total</p>
+            
+            {/* Date */}
+            <div className="p-4 rounded-xl border border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-all duration-200">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-1.5 rounded-lg bg-[#f5f1e9] dark:bg-gray-700">
+                  <Calendar className="w-4 h-4 text-[#9d9585] dark:text-[#c9c1b0]" />
+                </div>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Date</p>
+              </div>
+              <p className="text-sm font-bold text-gray-900 dark:text-white leading-tight">{formattedAppointmentDate}</p>
             </div>
-            <p className="text-3xl font-bold text-egp-green dark:text-white mb-1">£{totalAmount.toFixed(0)}</p>
-            <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">{totalDuration} min total</p>
+
+            {/* Time */}
+            <div className="p-4 rounded-xl border border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-all duration-200">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-1.5 rounded-lg bg-[#f5f1e9] dark:bg-gray-700">
+                  <Clock className="w-4 h-4 text-[#9d9585] dark:text-[#c9c1b0]" />
+                </div>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Time</p>
+              </div>
+              <p className="text-sm font-bold text-gray-900 dark:text-white leading-tight mb-2">{timeRange}</p>
+              {selectedTimeSlots.length > 0 && (
+                <p className="text-xs text-gray-600 dark:text-gray-400 font-mono bg-gray-50 dark:bg-gray-900/50 px-2 py-1 rounded inline-block">{selectedTimeSlots.join(' → ')}</p>
+              )}
+              {selectedDateSlots?.workingHours && (
+                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 space-y-1.5">
+                  {selectedDateSlots.workingHours.buffer_minutes !== undefined && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Buffer</span>
+                      <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{selectedDateSlots.workingHours.buffer_minutes} min</span>
+                    </div>
+                  )}
+                  {selectedDateSlots.workingHours.max_appointments !== undefined && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Max Appointments</span>
+                      <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{selectedDateSlots.workingHours.max_appointments}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+            
+            {/* Total */}
+            <div className="p-4 rounded-xl border-2 border-egp-green dark:border-egp-green-light bg-gradient-to-br from-[#f5f1e9] via-white to-[#faf7f1] dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 shadow-md hover:shadow-lg transition-all duration-200">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-1.5 rounded-lg bg-egp-green/20 dark:bg-egp-green-light/20">
+                  <CreditCard className="w-4 h-4 text-egp-green dark:text-white" />
+                </div>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total</p>
+              </div>
+              <p className="text-3xl font-bold text-egp-green dark:text-white mb-1">£{totalAmount.toFixed(0)}</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">{totalDuration} min total</p>
+            </div>
           </div>
-        </div>
-        
-        {/* Services - Compact Cards */}
-        <div>
-          <h4 className="text-base font-bold text-gray-900 dark:text-white mb-4">Selected Services</h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          
+          {/* Customer Details */}
+          <div className="mt-4">
+            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Your Contact Information</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 rounded-xl border border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Name</p>
+                <p className="text-base font-semibold text-gray-900 dark:text-white">
+                  {customerData.firstName} {customerData.lastName}
+                </p>
+              </div>
+              <div className="p-4 rounded-xl border border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Email</p>
+                <p className="text-base font-semibold text-gray-900 dark:text-white">
+                  {customerData.email}
+                </p>
+              </div>
+              <div className="p-4 rounded-xl border border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Phone</p>
+                <p className="text-base font-semibold text-gray-900 dark:text-white">
+                  {customerData.phone}
+                </p>
+              </div>
+            </div>
+          </div>
+          </div>
+
+          {/* Service Booked Section - Right Column */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Service Booked</h3>
+            <div className="grid grid-cols-1 gap-4">
             {selectedServices.map(item => {
               const serviceData = servicesDataMap[item.serviceId];
               return (
@@ -1821,61 +1947,20 @@ function BookingPageContent() {
               </Card>
             );
           })}
+            </div>
           </div>
         </div>
         
         {!showPaymentForm ? (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4">
-            <Button
-              onPress={async () => {
-                try {
-                  const response = await fetch('/api/bookings/test', {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                      services: selectedServices.map(item => ({
-                        name: item.name,
-                        price: item.price,
-                        quantity: item.quantity,
-                        duration: item.duration,
-                      })),
-                      selectedDate: selectedDate,
-                      selectedTime: selectedTime,
-                      teamMemberId: selectedTeamMember || null,
-                      serviceDurationMinutes: totalServiceDuration || null,
-                      amount: totalAmount,
-                      notes: 'Test booking - No payment required',
-                    }),
-                  });
-
-                  const data = await response.json();
-
-                  if (response.ok && data.bookingId) {
-                    handlePaymentSuccess(data.bookingId);
-                  } else {
-                    showError('Test Booking Failed', data.error || 'Failed to create test booking');
-                  }
-                } catch (error) {
-                  console.error('Test booking error:', error);
-                  showError('Test Booking Failed', error instanceof Error ? error.message : 'Failed to create test booking');
-                }
-              }}
-              variant="bordered"
-              className="w-full sm:w-auto border-egp-green text-egp-green dark:text-white dark:border-egp-green"
-              startContent={<CheckCircle className="w-4 h-4" />}
+          <div className="flex justify-center mt-6">
+            <ButtonPrimary
+              onPress={proceedToPayment}
+              variant="primary"
+              className="w-full sm:w-auto min-w-[200px]"
+              startContent={<CreditCard className="w-4 h-4" />}
             >
-              Test Booking
-            </Button>
-        <ButtonPrimary
-          onPress={proceedToPayment}
-          variant="primary"
-          className="w-full sm:w-auto"
-          startContent={<CreditCard className="w-4 h-4" />}
-        >
-          Proceed to Payment
-        </ButtonPrimary>
+              Proceed to Payment
+            </ButtonPrimary>
           </div>
         ) : (
           <div className="mt-4 space-y-4">
@@ -1890,26 +1975,49 @@ function BookingPageContent() {
             </div>
             
             {/* Stripe Payment Form */}
-            <StripePaymentForm
-              amount={totalAmount}
-              services={selectedServices.map(item => ({
-                name: item.name,
-                price: item.price,
-                quantity: item.quantity,
-                duration: item.duration,
-              }))}
-              selectedDate={selectedDate}
-              selectedTime={selectedTime}
-              teamMemberId={selectedTeamMember || undefined}
-              teamMemberName={selectedTeamMember ? teamMembers.find(m => m.id === selectedTeamMember)?.name : undefined}
-              teamMemberRole={selectedTeamMember ? teamMembers.find(m => m.id === selectedTeamMember)?.role : undefined}
-              teamMemberPhone={selectedTeamMember ? teamMembers.find(m => m.id === selectedTeamMember)?.phone : undefined}
-              teamMemberEmail={selectedTeamMember ? teamMembers.find(m => m.id === selectedTeamMember)?.email : undefined}
-              serviceDurationMinutes={totalServiceDuration || undefined}
-              onPaymentSuccess={handlePaymentSuccess}
-              onPaymentError={handlePaymentError}
-              onTestBooking={handlePaymentSuccess}
-            />
+            {(() => {
+              // Validate customer data before rendering payment form
+              const hasValidCustomerData = customerData.firstName?.trim() && customerData.email?.trim();
+              
+              if (!hasValidCustomerData) {
+                return (
+                  <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                    <p className="text-yellow-800 dark:text-yellow-200 text-sm">
+                      Please complete the "Your Details" step before proceeding to payment.
+                    </p>
+                  </div>
+                );
+              }
+
+              return (
+                <StripePaymentForm
+                  amount={totalAmount}
+                  services={selectedServices.map(item => ({
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity,
+                    duration: item.duration,
+                  }))}
+                  selectedDate={selectedDate}
+                  selectedTime={selectedTime}
+                  teamMemberId={selectedTeamMember || undefined}
+                  teamMemberName={selectedTeamMember ? teamMembers.find(m => m.id === selectedTeamMember)?.name : undefined}
+                  teamMemberRole={selectedTeamMember ? teamMembers.find(m => m.id === selectedTeamMember)?.role : undefined}
+                  teamMemberPhone={selectedTeamMember ? teamMembers.find(m => m.id === selectedTeamMember)?.phone : undefined}
+                  teamMemberEmail={selectedTeamMember ? teamMembers.find(m => m.id === selectedTeamMember)?.email : undefined}
+                  serviceDurationMinutes={totalServiceDuration || undefined}
+                  customerData={{
+                    firstName: customerData.firstName.trim(),
+                    lastName: customerData.lastName?.trim() || '',
+                    email: customerData.email.trim(),
+                    phone: customerData.phone.trim(),
+                  }}
+                  onPaymentSuccess={handlePaymentSuccess}
+                  onPaymentError={handlePaymentError}
+                  onTestBooking={handlePaymentSuccess}
+                />
+              );
+            })()}
           </div>
         )}
       </div>
@@ -1940,26 +2048,55 @@ function BookingPageContent() {
         </div>
         
         {/* Real Stripe Payment Form */}
-        <StripePaymentForm
-          amount={totalAmount}
-          services={selectedServices.map(item => ({
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-            duration: item.duration,
-          }))}
-          selectedDate={selectedDate}
-          selectedTime={selectedTime}
-          teamMemberId={selectedTeamMember || undefined}
-          teamMemberName={selectedTeamMember ? teamMembers.find(m => m.id === selectedTeamMember)?.name : undefined}
-          teamMemberRole={selectedTeamMember ? teamMembers.find(m => m.id === selectedTeamMember)?.role : undefined}
-          teamMemberPhone={selectedTeamMember ? teamMembers.find(m => m.id === selectedTeamMember)?.phone : undefined}
-          teamMemberEmail={selectedTeamMember ? teamMembers.find(m => m.id === selectedTeamMember)?.email : undefined}
-          serviceDurationMinutes={totalServiceDuration || undefined}
-          onPaymentSuccess={handlePaymentSuccess}
-          onPaymentError={handlePaymentError}
-          onTestBooking={handlePaymentSuccess} // Use same success handler for test bookings
-        />
+        {(() => {
+          // Validate customer data before rendering payment form
+          const hasValidCustomerData = customerData.firstName?.trim() && customerData.email?.trim();
+          
+          if (!hasValidCustomerData) {
+            console.warn('Cannot render payment form - invalid customer data:', {
+              firstName: customerData.firstName,
+              lastName: customerData.lastName,
+              email: customerData.email,
+              phone: customerData.phone,
+            });
+            return (
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                <p className="text-yellow-800 dark:text-yellow-200 text-sm">
+                  Please complete the "Your Details" step before proceeding to payment.
+                </p>
+              </div>
+            );
+          }
+
+          return (
+            <StripePaymentForm
+              amount={totalAmount}
+              services={selectedServices.map(item => ({
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                duration: item.duration,
+              }))}
+              selectedDate={selectedDate}
+              selectedTime={selectedTime}
+              teamMemberId={selectedTeamMember || undefined}
+              teamMemberName={selectedTeamMember ? teamMembers.find(m => m.id === selectedTeamMember)?.name : undefined}
+              teamMemberRole={selectedTeamMember ? teamMembers.find(m => m.id === selectedTeamMember)?.role : undefined}
+              teamMemberPhone={selectedTeamMember ? teamMembers.find(m => m.id === selectedTeamMember)?.phone : undefined}
+              teamMemberEmail={selectedTeamMember ? teamMembers.find(m => m.id === selectedTeamMember)?.email : undefined}
+              serviceDurationMinutes={totalServiceDuration || undefined}
+              customerData={{
+                firstName: customerData.firstName.trim(),
+                lastName: customerData.lastName?.trim() || '',
+                email: customerData.email.trim(),
+                phone: customerData.phone?.trim() || undefined,
+              }}
+              onPaymentSuccess={handlePaymentSuccess}
+              onPaymentError={handlePaymentError}
+              onTestBooking={handlePaymentSuccess} // Use same success handler for test bookings
+            />
+          );
+        })()}
       </div>
     );
   };
@@ -1967,10 +2104,10 @@ function BookingPageContent() {
   // Show loading state while services are being fetched
   if (servicesLoading) {
     return (
-      <div className="min-h-screen bg-default-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <Spinner size="lg" color="primary" className="mb-4" />
-          <p className="text-default-600">Loading services...</p>
+          <p className="text-gray-600 dark:text-gray-300">Loading services...</p>
         </div>
       </div>
     );

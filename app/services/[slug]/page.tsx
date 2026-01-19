@@ -480,7 +480,13 @@ export default async function ServicePage({ params }: PageProps) {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button
                 as={Link}
-                href={`/book?service=${slug}`}
+                href="/book/new"
+                onClick={() => {
+                  // Store service ID in sessionStorage for booking page
+                  if (typeof window !== 'undefined' && normalizedService?.id) {
+                    sessionStorage.setItem('pendingServiceId', normalizedService.id);
+                  }
+                }}
                 size="lg"
                 className="bg-egp-green hover:bg-egp-green-dark text-white"
                 startContent={<Calendar className="w-5 h-5" />}
@@ -593,7 +599,13 @@ export default async function ServicePage({ params }: PageProps) {
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button
                   as={Link}
-                  href={`/book?service=${slug}`}
+                  href="/book/new"
+                  onClick={() => {
+                    // Store service ID in sessionStorage for booking page
+                    if (typeof window !== 'undefined' && normalizedService?.id) {
+                      sessionStorage.setItem('pendingServiceId', normalizedService.id);
+                    }
+                  }}
                   size="lg"
                   className="bg-egp-green hover:bg-egp-green-dark text-white"
                   startContent={<Calendar className="w-5 h-5" />}

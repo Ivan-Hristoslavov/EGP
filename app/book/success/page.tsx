@@ -55,6 +55,7 @@ function BookingSuccessContent() {
             selectedTime: booking.time,
             customerName: booking.customer_name,
             customerEmail: booking.customer_email,
+            customerPhone: booking.customer_phone,
             status: booking.status || 'confirmed',
             teamMember: booking.team ? {
               name: booking.team.name,
@@ -428,21 +429,21 @@ function BookingSuccessContent() {
 
         {/* Booking Details Card */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 mb-8">
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Left Column - Booking Info */}
-            <div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left Column - Booking Details */}
+            <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                 Booking Details
               </h2>
               
               <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[#f5f1e9] dark:bg-[#9d9585]/30 rounded-full flex items-center justify-center">
-                    <Calendar className="w-5 h-5 text-[#9d9585] dark:text-[#b5ad9d]" />
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-[#f5f1e9] dark:bg-[#9d9585]/30 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Calendar className="w-6 h-6 text-[#9d9585] dark:text-[#b5ad9d]" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Date</p>
-                    <p className="font-semibold text-gray-900 dark:text-white">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Date</p>
+                    <p className="font-semibold text-base text-gray-900 dark:text-white">
                       {new Date(bookingDetails.selectedDate).toLocaleDateString('en-GB', {
                         weekday: 'long',
                         year: 'numeric',
@@ -453,42 +454,42 @@ function BookingSuccessContent() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[#f5f1e9] dark:bg-[#9d9585]/30 rounded-full flex items-center justify-center">
-                    <Clock className="w-5 h-5 text-[#9d9585] dark:text-[#b5ad9d]" />
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-[#f5f1e9] dark:bg-[#9d9585]/30 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Clock className="w-6 h-6 text-[#9d9585] dark:text-[#b5ad9d]" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Time</p>
-                    <p className="font-semibold text-gray-900 dark:text-white">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Time</p>
+                    <p className="font-semibold text-base text-gray-900 dark:text-white">
                       {bookingDetails.selectedTime}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[#f5f1e9] dark:bg-[#9d9585]/30 rounded-full flex items-center justify-center">
-                    <Mail className="w-5 h-5 text-[#9d9585] dark:text-[#b5ad9d]" />
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-[#f5f1e9] dark:bg-[#9d9585]/30 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Mail className="w-6 h-6 text-[#9d9585] dark:text-[#b5ad9d]" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Booking Number</p>
-                    <p className="font-semibold text-gray-900 dark:text-white">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Booking Number</p>
+                    <p className="font-semibold text-base text-gray-900 dark:text-white">
                       {bookingDetails.bookingNumber || bookingDetails.id}
                     </p>
                   </div>
                 </div>
 
                 {bookingDetails.teamMember && (
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-[#f5f1e9] dark:bg-[#9d9585]/30 rounded-full flex items-center justify-center">
-                      <User className="w-5 h-5 text-[#9d9585] dark:text-[#b5ad9d]" />
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-[#f5f1e9] dark:bg-[#9d9585]/30 rounded-full flex items-center justify-center flex-shrink-0">
+                      <User className="w-6 h-6 text-[#9d9585] dark:text-[#b5ad9d]" />
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Practitioner</p>
-                      <p className="font-semibold text-gray-900 dark:text-white">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Practitioner</p>
+                      <p className="font-semibold text-base text-gray-900 dark:text-white">
                         {bookingDetails.teamMember.name}
                       </p>
                       {bookingDetails.teamMember.role && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                           {bookingDetails.teamMember.role}
                         </p>
                       )}
@@ -498,37 +499,92 @@ function BookingSuccessContent() {
               </div>
             </div>
 
-            {/* Right Column - Services & Total */}
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                Services Booked
-              </h3>
+            {/* Right Column - Customer Information */}
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                Customer Information
+              </h2>
               
-              <div className="space-y-3 mb-6">
-                {bookingDetails.services.map((service: any, index: number) => (
-                  <div key={index} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div>
-                      <p className="font-semibold text-gray-900 dark:text-white">
+              <div className="space-y-4">
+                {bookingDetails.customerName && (
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-[#f5f1e9] dark:bg-[#9d9585]/30 rounded-full flex items-center justify-center flex-shrink-0">
+                      <User className="w-6 h-6 text-[#9d9585] dark:text-[#b5ad9d]" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Customer Name</p>
+                      <p className="font-semibold text-base text-gray-900 dark:text-white">
+                        {bookingDetails.customerName}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {bookingDetails.customerEmail && (
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-[#f5f1e9] dark:bg-[#9d9585]/30 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Mail className="w-6 h-6 text-[#9d9585] dark:text-[#b5ad9d]" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Email</p>
+                      <p className="font-semibold text-base text-gray-900 dark:text-white">
+                        {bookingDetails.customerEmail}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {bookingDetails.customerPhone && (
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-[#f5f1e9] dark:bg-[#9d9585]/30 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Phone className="w-6 h-6 text-[#9d9585] dark:text-[#b5ad9d]" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Phone</p>
+                      <p className="font-semibold text-base text-gray-900 dark:text-white">
+                        {bookingDetails.customerPhone}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Services Booked Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 mb-8">
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+              Services Booked
+            </h2>
+            
+            <div className="space-y-4 mb-6">
+              {bookingDetails.services.map((service: any, index: number) => (
+                <div key={index} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex-1">
+                      <p className="font-semibold text-lg text-gray-900 dark:text-white mb-1">
                         {service.name}
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         Quantity: {service.quantity}
                       </p>
                     </div>
-                    <p className="font-bold text-[#9d9585] dark:text-[#b5ad9d]">
+                    <p className="font-bold text-xl text-[#9d9585] dark:text-[#b5ad9d] whitespace-nowrap">
                       £{service.price * service.quantity}
                     </p>
                   </div>
-                ))}
-              </div>
-
-              <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-lg font-semibold text-gray-900 dark:text-white">Total Paid:</span>
-                  <span className="text-2xl font-bold text-green-600 dark:text-green-400">
-                    £{bookingDetails.totalAmount}
-                  </span>
                 </div>
+              ))}
+            </div>
+
+            <div className="border-t-2 border-gray-300 dark:border-gray-600 pt-6">
+              <div className="flex justify-between items-center">
+                <span className="text-lg font-semibold text-gray-900 dark:text-white">Total Paid:</span>
+                <span className="text-3xl font-bold text-green-600 dark:text-green-400">
+                  £{bookingDetails.totalAmount}
+                </span>
               </div>
             </div>
           </div>
@@ -580,12 +636,12 @@ function BookingSuccessContent() {
         </div>
 
         {/* Action Buttons */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 no-print">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 no-print">
           <ButtonPrimary
             as={Link}
             href="/book"
             variant="primary"
-            className="w-full"
+            className="w-full min-h-[44px]"
             startContent={<ArrowRight className="w-4 h-4 rotate-180" />}
           >
             Back to Booking
@@ -593,39 +649,32 @@ function BookingSuccessContent() {
 
           <ButtonPrimary
             as={Link}
-            href="/"
-            variant="secondary"
-            className="w-full"
-            startContent={<ArrowRight className="w-4 h-4" />}
-          >
-            Back to Home
-          </ButtonPrimary>
-
-          <ButtonPrimary
-            as={Link}
             href="/book"
             variant="primary"
-            className="w-full"
+            className="w-full min-h-[44px]"
             startContent={<Calendar className="w-4 h-4" />}
           >
             Book Another
           </ButtonPrimary>
 
-          <Link
+          <ButtonPrimary
+            as="a"
             href={`tel:${contactPhone}`}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+            variant="secondary"
+            className="w-full min-h-[44px]"
+            startContent={<Phone className="w-4 h-4" />}
           >
-            <Phone className="w-4 h-4" />
             Call Us
-          </Link>
+          </ButtonPrimary>
 
-          <button
-            onClick={() => window.print()}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+          <ButtonPrimary
+            onPress={() => window.print()}
+            variant="secondary"
+            className="w-full min-h-[44px]"
+            startContent={<Download className="w-4 h-4" />}
           >
-            <Download className="w-4 h-4" />
             Print Receipt
-          </button>
+          </ButtonPrimary>
         </div>
 
         {/* Contact Info */}

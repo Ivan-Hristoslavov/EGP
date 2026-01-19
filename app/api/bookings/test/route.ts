@@ -12,6 +12,10 @@ export async function POST(request: NextRequest) {
       teamMemberId,
       serviceDurationMinutes,
       amount,
+      customerData,
+      customerName: directCustomerName,
+      customerEmail: directCustomerEmail,
+      customerPhone: directCustomerPhone,
       notes
     } = body;
 
@@ -24,60 +28,71 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Date and time are required" }, { status: 400 });
     }
 
-    // Test customer email - reuse existing or create new
-    const testEmail = "test@example.com";
+    // Use customer data from request (either direct fields or customerData object)
+    let customerName = directCustomerName || "Test Customer";
+    let customerEmail = directCustomerEmail || "test@example.com";
+    let customerPhone = directCustomerPhone || "+44 7700 900123";
     
-    // First, try to find existing test customer
-    let customer;
-    const { data: existingCustomer, error: findError } = await supabaseAdmin
-      .from("customers")
-      .select("*")
-      .eq("email", testEmail)
-      .single();
+    // Handle legacy customerData object format
+    if (customerData && !directCustomerName) {
+      customerName = `${customerData.firstName} ${customerData.lastName}`.trim();
+      customerEmail = customerData.email || customerEmail;
+      customerPhone = customerData.phone || customerPhone;
+    }
 
-    if (existingCustomer) {
-      // Use existing test customer
-      customer = existingCustomer;
-    } else {
-      // Create new test customer if doesn't exist
-      const testCustomer = {
-        first_name: "Test",
-        last_name: "Customer", 
-        email: testEmail,
-        phone: "+44 7700 900123",
-        address: "Test Address, London, UK",
-        password_hash: "test_hash", // Required field
-        notes: "Test booking customer"
-      };
+    console.log("Test booking with customer data:", { customerName, customerEmail, customerPhone });
 
-      const { data: newCustomer, error: customerError } = await supabaseAdmin
+    // Create or find customer record
+    let customerId: string | null = null;
+    
+    if (customerEmail && customerEmail !== "test@example.com") {
+      // Try to find existing customer by email
+      const { data: existingCustomer } = await supabaseAdmin
         .from("customers")
-        .insert(testCustomer)
-        .select()
+        .select("id")
+        .eq("email", customerEmail.toLowerCase())
         .single();
 
-      if (customerError) {
-        console.error("Error creating test customer:", customerError);
-        return NextResponse.json({ 
-          error: "Failed to create test customer",
-          details: customerError.message 
-        }, { status: 500 });
+      if (existingCustomer) {
+        customerId = existingCustomer.id;
+      } else {
+        // Parse name into first_name and last_name
+        const nameParts = customerName.trim().split(' ');
+        const firstName = nameParts[0] || 'Test';
+        const lastName = nameParts.slice(1).join(' ') || 'Customer';
+
+        // Create new customer
+        const { data: newCustomer, error: customerError } = await supabaseAdmin
+          .from("customers")
+          .insert({
+            first_name: firstName,
+            last_name: lastName,
+            email: customerEmail.toLowerCase(),
+            phone: customerPhone,
+            password_hash: `test_booking_${Date.now()}`,
+          })
+          .select("id")
+          .single();
+
+        if (!customerError && newCustomer) {
+          customerId = newCustomer.id;
+          console.log("Created customer for test booking:", customerId);
+        } else {
+          console.warn("Could not create customer:", customerError);
+        }
       }
-      
-      customer = newCustomer;
     }
 
     // Create booking data
     const bookingData = {
-      customer_id: customer.id,
-      customer_name: `${customer.first_name} ${customer.last_name}`, // Required field
-      customer_email: customer.email,
-      customer_phone: customer.phone,
-      service: services.map((s: any) => `${s.name} (${s.quantity}x)`).join(", "),
+      customer_id: customerId, // Link to customer if created
+      customer_name: customerName, // Required field
+      customer_email: customerEmail,
+      customer_phone: customerPhone,
+      service: services.map((s: any) => `${s.name}${s.quantity > 1 ? ` (x${s.quantity})` : ''}`).join(", "),
       date: selectedDate,
       time: selectedTime,
       amount: amount,
-      address: customer.address || "Test Address, London, UK",
       notes: notes || "Test booking - No payment required",
       team_member_id: teamMemberId || null,
       service_duration_minutes: serviceDurationMinutes || null,
@@ -97,9 +112,37 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to create test booking" }, { status: 500 });
     }
 
+    console.log("Test booking created:", booking.id, "Booking Number:", booking.booking_number);
+
+    // Create payment record for test booking (optional - for visibility in admin panel)
+    if (customerId && booking.id && amount > 0) {
+      const { data: payment, error: paymentError } = await supabaseAdmin
+        .from("payments")
+        .insert({
+          booking_id: booking.id,
+          customer_id: customerId,
+          amount: amount,
+          payment_method: "card",
+          payment_status: "test",
+          payment_date: new Date().toISOString().split("T")[0],
+          reference: `test_${booking.id.slice(-10)}`,
+          notes: "Test booking - No actual payment",
+        })
+        .select()
+        .single();
+
+      if (paymentError) {
+        console.warn("Could not create payment record for test booking:", paymentError);
+      } else {
+        console.log("Test payment record created:", payment.id);
+      }
+    }
+
     return NextResponse.json({ 
       success: true, 
       bookingId: booking.id,
+      bookingNumber: booking.booking_number,
+      customerId: customerId,
       message: "Test booking created successfully"
     });
 

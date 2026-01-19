@@ -30,6 +30,12 @@ interface StripePaymentFormProps {
   teamMemberPhone?: string;
   teamMemberEmail?: string;
   serviceDurationMinutes?: number;
+  customerData?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+  };
   onPaymentSuccess: (bookingId: string) => void;
   onPaymentError: (error: string) => void;
   onTestBooking?: (bookingId: string) => void;
@@ -46,6 +52,12 @@ interface PaymentFormProps {
   teamMemberPhone?: string;
   teamMemberEmail?: string;
   serviceDurationMinutes?: number;
+  customerData?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+  };
   onPaymentSuccess: (bookingId: string) => void;
   onPaymentError: (error: string) => void;
   onTestBooking?: (bookingId: string) => void;
@@ -62,6 +74,7 @@ function PaymentForm({
   teamMemberPhone,
   teamMemberEmail,
   serviceDurationMinutes,
+  customerData,
   onPaymentSuccess,
   onPaymentError,
   onTestBooking,
@@ -98,6 +111,12 @@ function PaymentForm({
           teamMemberId: teamMemberId || null,
           serviceDurationMinutes: serviceDurationMinutes || null,
           amount,
+          customerData: customerData ? {
+            firstName: customerData.firstName,
+            lastName: customerData.lastName,
+            email: customerData.email,
+            phone: customerData.phone || null,
+          } : null,
           notes: 'Test booking - No payment required',
         }),
       });
@@ -257,37 +276,6 @@ function PaymentForm({
           </ButtonPrimary>
         </div>
       </form>
-
-      {/* Test Booking Button (for development/testing) */}
-      {onTestBooking && (
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
-          <div className="text-center mb-3">
-            <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-              🧪 Development Testing Only
-            </p>
-          </div>
-          <button
-            onClick={handleTestBooking}
-            disabled={isLoading || isTestBooking}
-            className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px] touch-manipulation active:scale-95"
-          >
-            {isTestBooking ? (
-              <>
-                <Loader className="w-5 h-5 animate-spin" />
-                <span>Creating Test Booking...</span>
-              </>
-            ) : (
-              <>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>Book Without Payment (Test)</span>
-              </>
-            )}
-          </button>
-        </div>
-      )}
-
       {/* Security Notice */}
       <div className="text-center px-4">
         <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
@@ -304,8 +292,35 @@ export default function StripePaymentForm(props: StripePaymentFormProps) {
   const [isTestBooking, setIsTestBooking] = useState(false);
   const [initError, setInitError] = useState<string>('');
 
+  // Debug: Log customer data when it changes
+  useEffect(() => {
+    console.log('StripePaymentForm - Customer data received:', {
+      hasCustomerData: !!props.customerData,
+      firstName: props.customerData?.firstName,
+      lastName: props.customerData?.lastName,
+      email: props.customerData?.email,
+      phone: props.customerData?.phone,
+      fullData: props.customerData
+    });
+  }, [props.customerData]);
+
   const handleTestBookingMain = async () => {
     if (!props.onTestBooking) return;
+
+    // Validate customer data - must have at least first name and email
+    if (!props.customerData?.firstName?.trim() || !props.customerData?.email?.trim()) {
+      setInitError('Please fill in your details (at least first name and email) before creating a test booking.');
+      return;
+    }
+
+    // Build customer data properly
+    const customerFirstName = props.customerData.firstName.trim();
+    const customerLastName = props.customerData.lastName?.trim() || '';
+    const customerName = customerLastName 
+      ? `${customerFirstName} ${customerLastName}` 
+      : customerFirstName;
+    const customerEmail = props.customerData.email.trim();
+    const customerPhone = props.customerData.phone?.trim() || '';
     
     setIsTestBooking(true);
     setInitError('');
@@ -329,6 +344,9 @@ export default function StripePaymentForm(props: StripePaymentFormProps) {
           teamMemberId: props.teamMemberId || null,
           serviceDurationMinutes: props.serviceDurationMinutes || null,
           amount: props.amount,
+          customerName: customerName,
+          customerEmail: customerEmail,
+          customerPhone: customerPhone,
           notes: 'Test booking - No payment required',
         }),
       });
@@ -357,6 +375,38 @@ export default function StripePaymentForm(props: StripePaymentFormProps) {
       return;
     }
 
+    // Validate customer data - must have at least first name and email
+    // Check if customerData exists and has required fields
+    if (!props.customerData) {
+      console.error('Customer data is missing:', props.customerData);
+      setInitError('Please fill in your details in the "Your Details" step before proceeding to payment.');
+      return;
+    }
+
+    const firstName = props.customerData.firstName?.trim() || '';
+    const email = props.customerData.email?.trim() || '';
+
+    if (!firstName || !email) {
+      console.error('Customer data validation failed:', {
+        firstName: firstName || 'MISSING',
+        email: email || 'MISSING',
+        fullCustomerData: props.customerData
+      });
+      setInitError('Please fill in your details (at least first name and email) in the "Your Details" step before proceeding to payment.');
+      return;
+    }
+
+    // Build customer name properly
+    const customerFirstName = firstName;
+    const customerLastName = props.customerData.lastName?.trim() || '';
+    const customerName = customerLastName 
+      ? `${customerFirstName} ${customerLastName}` 
+      : customerFirstName;
+    const customerEmail = email;
+    const customerPhone = props.customerData.phone?.trim() || '';
+
+    console.log('Initializing payment with customer data:', { customerName, customerEmail, customerPhone });
+
     setIsInitializing(true);
     setInitError('');
 
@@ -374,6 +424,9 @@ export default function StripePaymentForm(props: StripePaymentFormProps) {
               selectedTime: props.selectedTime,
               teamMemberId: props.teamMemberId || '',
               serviceDurationMinutes: props.serviceDurationMinutes?.toString() || '',
+              customerName: customerName,
+              customerEmail: customerEmail,
+              customerPhone: customerPhone,
               timestamp: new Date().toISOString(),
             },
           }),
@@ -460,37 +513,6 @@ export default function StripePaymentForm(props: StripePaymentFormProps) {
             {isInitializing ? "Initializing Payment..." : `Pay £${props.amount.toFixed(2)} Now`}
           </ButtonPrimary>
         </div>
-
-        {/* Test Booking Button (for development/testing) */}
-        {props.onTestBooking && (
-          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
-            <div className="text-center mb-3">
-              <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-                🧪 Development Testing Only
-              </p>
-            </div>
-            <button
-              onClick={handleTestBookingMain}
-              disabled={isInitializing || isTestBooking}
-              className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px] touch-manipulation active:scale-95"
-            >
-              {isTestBooking ? (
-                <>
-                  <Loader className="w-5 h-5 animate-spin" />
-                  <span>Creating Test Booking...</span>
-                </>
-              ) : (
-                <>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span>Book Without Payment (Test)</span>
-                </>
-              )}
-            </button>
-          </div>
-        )}
-
         {/* Security Notice */}
         <div className="text-center px-4">
           <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">

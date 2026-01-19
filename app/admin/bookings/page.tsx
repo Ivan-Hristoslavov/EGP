@@ -673,8 +673,13 @@ export default function BookingsPage() {
                           </div>
                           </div>
                         </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <div className="text-sm text-foreground">{booking.service}</div>
+                    <td className="px-6 py-4 text-center">
+                      <div 
+                        className="text-sm text-foreground max-w-xs mx-auto truncate cursor-help" 
+                        title={booking.service}
+                      >
+                        {booking.service}
+                      </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-center">
                       <div className="flex flex-col items-center">

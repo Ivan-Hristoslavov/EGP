@@ -250,7 +250,7 @@ export default function AntiWrinklePage() {
                     <div className="text-lg font-bold text-egp-green">£{service.price}</div>
                   </div>
                   <Link
-                    href={`/book?service=${service.slug}`}
+                    href="/book/new"
                     className="flex items-center gap-2 text-egp-green font-semibold hover:text-egp-green-dark hover:gap-3 transition-all"
                   >
                     <span>Book</span>
