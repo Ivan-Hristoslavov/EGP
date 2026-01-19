@@ -267,7 +267,7 @@ function ServicesPageContent() {
                 </Button>
                 <Button
                   as={Link}
-                href={`/book?service=${selectedService}`}
+                href="/book/new"
                   onPress={onClose}
                   className="bg-egp-green hover:bg-egp-green-dark text-white"
                   size="sm"
@@ -538,7 +538,7 @@ function ServicesPageContent() {
                       </Button>
                       <Button
                         as={Link}
-                        href={`/book?service=${serviceId}`}
+                        href="/book/new"
                         size="sm"
                         className="flex-1 bg-egp-green text-white"
                         startContent={<Plus className="w-3 h-3" />}

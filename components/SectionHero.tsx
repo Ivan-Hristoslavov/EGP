@@ -124,18 +124,18 @@ export function SectionHero() {
         <div className="flex flex-col items-center mb-6 w-full">
           {/* Availability Badge */}
           {heroSection?.badge_text && (
-            <div className="inline-flex items-center px-4 py-2 bg-black/40 backdrop-blur-md rounded-full text-white text-sm font-medium border border-white/20 mb-4">
+          <div className="inline-flex items-center px-4 py-2 bg-black/40 backdrop-blur-md rounded-full text-white text-sm font-medium border border-white/20 mb-4">
               {heroSection.badge_icon === "star" && (
-                <svg
+            <svg
                   className="w-4 h-4 mr-2 text-yellow-400"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
+            </svg>
               )}
               {heroSection.badge_text}
-            </div>
+          </div>
           )}
 
           {/* Trust Badges - Responsive, no text overflow */}
@@ -201,10 +201,10 @@ export function SectionHero() {
           </h1>
 
           {heroSection?.sub_headline && (
-            <p
-              className="text-lg md:text-xl text-white/90 font-medium mb-4 animate-fade-in-up"
-              style={{ animationDelay: "0.2s" }}
-            >
+          <p
+            className="text-lg md:text-xl text-white/90 font-medium mb-4 animate-fade-in-up"
+            style={{ animationDelay: "0.2s" }}
+          >
               <span className="text-blue-200">{heroSection.sub_headline}</span>
             </p>
           )}
@@ -317,32 +317,32 @@ export function SectionHero() {
           style={{ animationDelay: "0.6s" }}
         >
           {heroSection?.button_1_text && (
-            <a
+          <a
               className="group bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-lg text-base font-bold transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center justify-center w-full sm:w-auto"
               href={heroSection.button_1_link || "#contact"}
-              onClick={(e) => {
+            onClick={(e) => {
                 if (heroSection.button_1_type === "internal" && heroSection.button_1_link?.startsWith("#")) {
-                  e.preventDefault();
-                  document
+              e.preventDefault();
+              document
                     .getElementById(heroSection.button_1_link.substring(1))
-                    ?.scrollIntoView({ behavior: "smooth" });
+                ?.scrollIntoView({ behavior: "smooth" });
                 }
-              }}
-            >
+            }}
+          >
               {heroSection.button_1_icon === "calendar" && (
-                <svg
-                  className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
+            <svg
+              className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
                     d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
+              />
+            </svg>
               )}
               {heroSection.button_1_text}
             </a>
@@ -364,7 +364,7 @@ export function SectionHero() {
                 </svg>
               )}
               {heroSection.button_2_text}
-            </a>
+          </a>
           )}
         </div>
 

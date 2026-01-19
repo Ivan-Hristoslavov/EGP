@@ -43,6 +43,7 @@ export default function FormBooking() {
 
   // Get business phone from admin profile
   const businessPhone = adminProfile?.phone || "+44 7541777225";
+  const hasSelectedService = Boolean(selectedService);
 
   // Get today's date for the minimum date and default value
   const today = new Date();
@@ -380,164 +381,91 @@ export default function FormBooking() {
       
       {/* Grid Layout for Form Fields */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-        
-        {/* Left Column - Personal Details */}
+
+        {/* Left Column - Service & Schedule */}
         <div className="space-y-4 sm:space-y-6">
-          <div className="flex items-center space-x-3 sm:space-x-4 mb-4 sm:mb-6">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-blue-600 dark:text-blue-400 font-bold text-xs sm:text-sm">1</span>
+          <div className="flex items-center space-x-3 mb-3 sm:mb-4">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-green-600 dark:text-green-400 font-bold text-xs sm:text-sm">1</span>
             </div>
-            <h4 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Your Details</h4>
+            <h4 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Service & Schedule</h4>
           </div>
           
-          {/* Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="name">
-              Full Name *
-            </label>
-            <input
-              required
-              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm sm:text-base"
-              id="name"
-              name="name"
-              placeholder="Your full name"
-              type="text"
-            />
-          </div>
-
-          {/* Email and Phone */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="email">
-                Email *
-              </label>
-              <input
-                required
-                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm sm:text-base"
-                id="email"
-                name="email"
-                placeholder="your@email.com"
-                type="email"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="phone">
-                Phone *
-              </label>
-              <input
-                required
-                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm sm:text-base"
-                id="phone"
-                name="phone"
-                placeholder="+44 7XXX XXXXXX"
-                type="tel"
-              />
-            </div>
-          </div>
-
-          {/* Address */}
-          <div>
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="address">
-              Service Address *
-            </label>
-            <textarea
-              required
-              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none text-sm sm:text-base min-h-[80px]"
-              id="address"
-              name="address"
-              placeholder="Full address where service is needed"
-              rows={3}
-            />
-          </div>
-
-          {/* Description */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="description">
-              Additional Notes (Optional)
-            </label>
-            <textarea
-              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none text-sm sm:text-base min-h-[80px]"
-              id="description"
-              name="description"
-              placeholder="Any additional notes or questions..."
-              rows={3}
-            />
-          </div>
-        </div>
-
-        {/* Right Column - Service & Schedule */}
-        <div className="space-y-4 sm:space-y-6">
-          
-          {/* Service Selection */}
-          <div>
-            <div className="flex items-center space-x-3 mb-3 sm:mb-4">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-green-600 dark:text-green-400 font-bold text-xs sm:text-sm">2</span>
-              </div>
-              <h4 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Service & Schedule</h4>
-            </div>
-            
-            <div className="mb-4">
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <div className="mb-4">
+            <div className="flex items-center justify-between gap-3 mb-2">
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
                 Select Service *
               </label>
-              {isLoadingServices ? (
-                <div className="space-y-2">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg h-16"></div>
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-2 max-h-[300px] sm:max-h-48 overflow-y-auto menu-scroll pr-2">
-                  {services.map((service: BookingService) => (
-                    <div
-                      key={service.id}
-                      className={`p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-sm touch-manipulation min-h-[60px] sm:min-h-[70px] flex items-center ${
-                        selectedService === service.id
-                          ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-sm"
-                          : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
-                      }`}
-                      onClick={() => setSelectedService(service.id)}
-                    >
-                      <input
-                        checked={selectedService === service.id}
-                        className="sr-only"
-                        name="service"
-                        type="radio"
-                        value={service.id}
-                        onChange={(e) => setSelectedService(e.target.value)}
-                      />
-                      <div className="flex items-center justify-between gap-2 sm:gap-3 w-full">
-                        <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
-                          <span className="text-base sm:text-lg flex-shrink-0">{service.icon}</span>
-                          <div className="flex-1 min-w-0">
-                            <h5 className="font-medium text-gray-900 dark:text-white text-sm sm:text-base truncate">
-                              {service.name}
-                            </h5>
-                            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-0.5 line-clamp-1 sm:line-clamp-2">
-                              {service.description}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-1.5 sm:space-x-2 flex-shrink-0">
-                          <span className="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/50 px-2 sm:px-3 py-1 rounded-full whitespace-nowrap">
-                            {service.price}
-                          </span>
-                          {selectedService === service.id && (
-                            <div className="text-blue-500">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
-                              </svg>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              {hasSelectedService && (
+                <button
+                  className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 underline"
+                  type="button"
+                  onClick={() => setSelectedService("")}
+                >
+                  Clear selection
+                </button>
               )}
             </div>
+            {isLoadingServices ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg h-16"></div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-[300px] sm:max-h-48 overflow-y-auto menu-scroll pr-2">
+                {services.map((service: BookingService) => (
+                  <div
+                    key={service.id}
+                    className={`p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-sm touch-manipulation min-h-[60px] sm:min-h-[70px] flex items-center ${
+                      selectedService === service.id
+                        ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-sm"
+                        : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
+                    }`}
+                    onClick={() => setSelectedService(service.id)}
+                  >
+                    <input
+                      checked={selectedService === service.id}
+                      className="sr-only"
+                      name="service"
+                      type="radio"
+                      value={service.id}
+                      onChange={(e) => setSelectedService(e.target.value)}
+                    />
+                    <div className="flex items-center justify-between gap-2 sm:gap-3 w-full">
+                      <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
+                        <span className="text-base sm:text-lg flex-shrink-0">{service.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <h5 className="font-medium text-gray-900 dark:text-white text-sm sm:text-base truncate">
+                            {service.name}
+                          </h5>
+                          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-0.5 line-clamp-1 sm:line-clamp-2">
+                            {service.description}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-1.5 sm:space-x-2 flex-shrink-0">
+                        <span className="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/50 px-2 sm:px-3 py-1 rounded-full whitespace-nowrap">
+                          {service.price}
+                        </span>
+                        {selectedService === service.id && (
+                          <div className="text-blue-500">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {!hasSelectedService && (
+              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                Please select at least one service to continue.
+              </p>
+            )}
           </div>
 
           {/* Date and Time */}
@@ -690,17 +618,102 @@ export default function FormBooking() {
             </div>
           </div>
         </div>
+
+        {/* Right Column - Personal Details */}
+        <div className="space-y-4 sm:space-y-6">
+          <div className="flex items-center space-x-3 sm:space-x-4 mb-4 sm:mb-6">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-blue-600 dark:text-blue-400 font-bold text-xs sm:text-sm">2</span>
+            </div>
+            <h4 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Your Details</h4>
+          </div>
+
+          {/* Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="name">
+              Full Name *
+            </label>
+            <input
+              required
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm sm:text-base"
+              id="name"
+              name="name"
+              placeholder="Your full name"
+              type="text"
+            />
+          </div>
+
+          {/* Email and Phone */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="email">
+                Email *
+              </label>
+              <input
+                required
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm sm:text-base"
+                id="email"
+                name="email"
+                placeholder="your@email.com"
+                type="email"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="phone">
+                Phone *
+              </label>
+              <input
+                required
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm sm:text-base"
+                id="phone"
+                name="phone"
+                placeholder="+44 7XXX XXXXXX"
+                type="tel"
+              />
+            </div>
+          </div>
+
+          {/* Address */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="address">
+              Service Address *
+            </label>
+            <textarea
+              required
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none text-sm sm:text-base min-h-[80px]"
+              id="address"
+              name="address"
+              placeholder="Full address where service is needed"
+              rows={3}
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="description">
+              Additional Notes (Optional)
+            </label>
+            <textarea
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none text-sm sm:text-base min-h-[80px]"
+              id="description"
+              name="description"
+              placeholder="Any additional notes or questions..."
+              rows={3}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Submit Button */}
       <div className="pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-center">
         <button
           className={`w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-white text-base sm:text-lg transition-all min-h-[44px] touch-manipulation ${
-            isSubmitting
+            isSubmitting || !hasSelectedService
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transform hover:scale-[1.02] shadow-md hover:shadow-lg active:scale-95"
           }`}
-          disabled={isSubmitting}
+          disabled={isSubmitting || !hasSelectedService}
           type="submit"
         >
           {isSubmitting ? (

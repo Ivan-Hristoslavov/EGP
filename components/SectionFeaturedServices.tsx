@@ -517,8 +517,14 @@ export default function SectionFeaturedServices() {
               {/* CTA Buttons */}
               <div className="pt-4 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row gap-3">
                 <Link
-                  href={`/book?service=${selectedService.slug}`}
-                  onClick={() => setSelectedService(null)}
+                  href="/book/new"
+                  onClick={() => {
+                    // Store service ID in sessionStorage for booking page
+                    if (typeof window !== 'undefined' && selectedService) {
+                      sessionStorage.setItem('pendingServiceId', selectedService.id);
+                    }
+                    setSelectedService(null);
+                  }}
                   className="flex-1 flex items-center justify-center gap-2 text-white py-4 rounded-xl font-semibold text-base sm:text-lg transition-all duration-200 shadow-lg hover:shadow-xl text-center"
                   style={{ backgroundColor: aestheticsColors.green.DEFAULT }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = aestheticsColors.green.hover}

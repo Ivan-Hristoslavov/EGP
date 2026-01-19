@@ -127,11 +127,11 @@ function ConditionsPageContent() {
               <ModalBody className="space-y-6">
             {/* Description */}
             <div>
-                  <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-2">
-                <Info className="w-5 h-5 text-[#9d9585]" />
+                  <h3 className="text-base font-bold text-foreground mb-3 flex items-center gap-2">
+                <Info className="w-4 h-4 text-egp-beige-darkest" />
                 Overview
               </h3>
-                  <p className="text-lg text-default-600 leading-relaxed">
+                  <p className="text-sm text-default-600 leading-relaxed">
                 {condition.description}
               </p>
             </div>
@@ -139,17 +139,17 @@ function ConditionsPageContent() {
             {/* Treatments */}
             {condition.treatments && condition.treatments.length > 0 && (
               <div>
-                    <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                      <CheckCircle className="w-5 h-5 text-success" />
+                    <h3 className="text-base font-bold text-foreground mb-4 flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-egp-green" />
                   Available Treatments
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {condition.treatments.map((treatment, index) => (
-                        <Card key={index} className="bg-success-50 dark:bg-success-900/20">
+                        <Card key={index} className="bg-egp-green-bg-light dark:bg-egp-green-dark/20">
                           <CardBody className="p-3">
                             <div className="flex items-start gap-3">
-                              <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
-                              <span className="text-default-700">{treatment}</span>
+                              <CheckCircle className="w-4 h-4 text-egp-green flex-shrink-0 mt-0.5" />
+                              <span className="text-sm text-default-700">{treatment}</span>
                     </div>
                           </CardBody>
                         </Card>
@@ -164,7 +164,7 @@ function ConditionsPageContent() {
                 </Button>
                 <Button
                   as={Link}
-                href={`/book?condition=${selectedCondition}`}
+                href="/book/new"
                   onPress={onClose}
                   className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white"
                   size="lg"
@@ -201,16 +201,16 @@ function ConditionsPageContent() {
             href="/"
             className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#b5ad9d] transition-colors"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4" />
             Back to Home
           </Link>
         </div>
 
         <div className="text-center mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6 font-playfair">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6 font-playfair">
             Conditions We Treat
           </h1>
-          <p className="text-2xl text-gray-600 dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto">
+          <p className="text-base text-gray-600 dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto">
             Discover our comprehensive range of treatments for various aesthetic concerns and conditions
           </p>
         </div>
@@ -225,7 +225,7 @@ function ConditionsPageContent() {
                 placeholder="Search conditions..."
                 value={searchTerm}
                 onValueChange={handleSearch}
-                startContent={<Search className="w-5 h-5 text-default-400" />}
+                startContent={<Search className="w-4 h-4 text-default-400" />}
                 variant="bordered"
                 size="lg"
                 isClearable
@@ -237,7 +237,7 @@ function ConditionsPageContent() {
             <Button
               variant="bordered"
               onPress={() => setShowFilters(!showFilters)}
-              startContent={<Filter className="w-5 h-5" />}
+              startContent={<Filter className="w-4 h-4" />}
             >
               Filters
             </Button>
@@ -290,7 +290,7 @@ function ConditionsPageContent() {
         {paginatedConditions.length === 0 ? (
           <div className="text-center py-12">
             <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No conditions found</h3>
+            <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">No conditions found</h3>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
               Try adjusting your filters or search terms
             </p>
@@ -323,7 +323,7 @@ function ConditionsPageContent() {
                   
                   {/* Title - Centered */}
                   <div className="text-center pt-6 pb-2">
-                    <h3 className="text-lg font-bold text-[#464C45] dark:text-[#5a6259] leading-tight line-clamp-2">
+                    <h3 className="text-base font-bold text-egp-green dark:text-egp-green-light leading-tight line-clamp-2">
                       {condition.title}
                     </h3>
                       </div>
@@ -344,14 +344,14 @@ function ConditionsPageContent() {
                           onClick={() => setSelectedCondition(condition.slug)}
                       className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-[#464C45] text-[#464C45] dark:text-[#5a6259] dark:border-[#5a6259] rounded-lg hover:bg-[#464C45]/10 dark:hover:bg-[#5a6259]/10 transition-colors font-medium text-sm"
                         >
-                          <Info className="w-4 h-4" />
+                          <Info className="w-3.5 h-3.5" />
                           Details
                         </button>
                         <Link
-                          href={`/book?condition=${condition.slug}`}
+                          href="/book/new"
                       className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white rounded-lg hover:from-[#857d68] hover:via-[#aea693] hover:to-[#c9c1b0] transition-all font-medium text-sm shadow-md hover:shadow-lg"
                         >
-                          <Plus className="w-4 h-4" />
+                          <Plus className="w-3.5 h-3.5" />
                           Book
                         </Link>
                       </div>
@@ -390,7 +390,7 @@ export default function ConditionsPage() {
     <Suspense fallback={
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-egp-green mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Loading...</p>
         </div>
       </div>

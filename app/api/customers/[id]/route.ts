@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createClient();
     const { id: customerId } = await params;
 
     // Validate customer ID format
@@ -17,7 +16,7 @@ export async function GET(
     }
 
     // Get customer details
-    const { data: customer, error: customerError } = await supabase
+    const { data: customer, error: customerError } = await supabaseAdmin
       .from("customers")
       .select("*")
       .eq("id", customerId)
@@ -28,35 +27,35 @@ export async function GET(
     }
 
     // Get counts of related data
-    const { count: bookingsCount } = await supabase
+    const { count: bookingsCount } = await supabaseAdmin
       .from("bookings")
       .select("*", { count: "exact", head: true })
       .eq("customer_id", customerId);
 
-    const { count: paymentsCount } = await supabase
+    const { count: paymentsCount } = await supabaseAdmin
       .from("payments")
       .select("*", { count: "exact", head: true })
       .eq("customer_id", customerId);
 
-    const { count: invoicesCount } = await supabase
+    const { count: invoicesCount } = await supabaseAdmin
       .from("invoices")
       .select("*", { count: "exact", head: true })
       .eq("customer_id", customerId);
 
     // Get sample data for preview
-    const { data: sampleBookings } = await supabase
+    const { data: sampleBookings } = await supabaseAdmin
       .from("bookings")
       .select("id, date, service, amount, status")
       .eq("customer_id", customerId)
       .limit(5);
 
-    const { data: samplePayments } = await supabase
+    const { data: samplePayments } = await supabaseAdmin
       .from("payments")
       .select("id, date, amount, status")
       .eq("customer_id", customerId)
       .limit(5);
 
-    const { data: sampleInvoices } = await supabase
+    const { data: sampleInvoices } = await supabaseAdmin
       .from("invoices")
       .select("id, invoice_number, amount, status, created_at")
       .eq("customer_id", customerId)
@@ -90,11 +89,10 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createClient();
     const { id: customerId } = await params;
     const body = await request.json();
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from("customers")
       .update(body)
       .eq("id", customerId)
@@ -116,7 +114,6 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createClient();
     const { id: customerId } = await params;
 
     // Validate customer ID format
@@ -127,7 +124,7 @@ export async function DELETE(
     }
 
     // First check if customer exists and get full details
-    const { data: existingCustomer, error: fetchError } = await supabase
+    const { data: existingCustomer, error: fetchError } = await supabaseAdmin
       .from("customers")
       .select("*")
       .eq("id", customerId)
@@ -140,23 +137,23 @@ export async function DELETE(
     }
 
     // Get counts of related data for confirmation
-    const { count: bookingsCount } = await supabase
+    const { count: bookingsCount } = await supabaseAdmin
       .from("bookings")
       .select("*", { count: "exact", head: true })
       .eq("customer_id", customerId);
 
-    const { count: paymentsCount } = await supabase
+    const { count: paymentsCount } = await supabaseAdmin
       .from("payments")
       .select("*", { count: "exact", head: true })
       .eq("customer_id", customerId);
 
-    const { count: invoicesCount } = await supabase
+    const { count: invoicesCount } = await supabaseAdmin
       .from("invoices")
       .select("*", { count: "exact", head: true })
       .eq("customer_id", customerId);
 
     // Delete related data in order (foreign key constraints)
-    const { error: invoicesError } = await supabase
+    const { error: invoicesError } = await supabaseAdmin
       .from("invoices")
       .delete()
       .eq("customer_id", customerId);
@@ -168,7 +165,7 @@ export async function DELETE(
       }, { status: 500 });
     }
 
-    const { error: paymentsError } = await supabase
+    const { error: paymentsError } = await supabaseAdmin
       .from("payments")
       .delete()
       .eq("customer_id", customerId);
@@ -180,7 +177,7 @@ export async function DELETE(
       }, { status: 500 });
     }
 
-    const { error: bookingsError } = await supabase
+    const { error: bookingsError } = await supabaseAdmin
       .from("bookings")
       .delete()
       .eq("customer_id", customerId);
@@ -193,7 +190,7 @@ export async function DELETE(
     }
 
     // Finally delete the customer
-    const { error: customerError } = await supabase
+    const { error: customerError } = await supabaseAdmin
       .from("customers")
       .delete()
       .eq("id", customerId);
@@ -210,7 +207,9 @@ export async function DELETE(
       message: "Customer deleted successfully",
       customer: {
         id: customerId,
-        name: existingCustomer.name,
+        name: `${existingCustomer.first_name || ''} ${existingCustomer.last_name || ''}`.trim(),
+        first_name: existingCustomer.first_name,
+        last_name: existingCustomer.last_name,
         email: existingCustomer.email,
         phone: existingCustomer.phone,
         address: existingCustomer.address,

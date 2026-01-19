@@ -238,12 +238,12 @@ export function DeleteCustomerModal({
                     {dataSummary?.payments.count || 0} records
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
+                {/* <div className="flex items-center justify-between">
                   <span className="text-gray-700 dark:text-gray-300 transition-colors duration-300">Invoices</span>
                   <span className="text-red-600 dark:text-red-400 font-medium transition-colors duration-300">
                     {dataSummary?.invoices.count || 0} records
                   </span>
-                </div>
+                </div> */}
                 
                 {/* Sample data preview */}
                 {dataSummary && (dataSummary.bookings.count > 0 || dataSummary.payments.count > 0 || dataSummary.invoices.count > 0) && (
@@ -278,7 +278,7 @@ export function DeleteCustomerModal({
                 </svg>
                 <div className="text-sm text-red-800 dark:text-red-200">
                   <p className="font-medium">Warning:</p>
-                  <p>This will permanently delete all customer data including bookings, payments, invoices, and any uploaded files. This action cannot be undone.</p>
+                  <p>This will permanently delete all customer data including bookings, payments, and any uploaded files. This action cannot be undone.</p>
                 </div>
               </div>
             </div>
