@@ -91,7 +91,7 @@ export default function SectionFeaturedServices() {
 
   if (isLoading) {
     return (
-      <section className="py-12 sm:py-16 md:py-20 bg-[#f5f1e9] dark:bg-gray-900">
+      <section className="py-12 sm:py-16 md:py-20 bg-[#e4d9c8] dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12 md:mb-16">
             <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-sm sm:text-base font-semibold mb-3 sm:mb-4`}>
@@ -123,7 +123,7 @@ export default function SectionFeaturedServices() {
 
   if (!isLoading && filteredServices.length === 0) {
     return (
-      <section className="py-12 sm:py-16 md:py-20 bg-[#f5f1e9] dark:bg-gray-900">
+      <section className="py-12 sm:py-16 md:py-20 bg-[#e4d9c8] dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12 md:mb-16">
             <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-sm sm:text-base font-semibold mb-3 sm:mb-4`}>
@@ -149,7 +149,7 @@ export default function SectionFeaturedServices() {
   }
 
   return (
-    <section id="featured-services" className="py-12 sm:py-16 md:py-20 bg-[#f5f1e9] dark:bg-gradient-to-b dark:from-egp-green-darker dark:via-egp-green-dark dark:to-egp-green-darker">
+    <section id="featured-services" className="py-12 sm:py-16 md:py-20 bg-[#e4d9c8] dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-8 sm:mb-12 md:mb-16">
@@ -313,7 +313,7 @@ export default function SectionFeaturedServices() {
                         setSelectedService(service);
                       }}
                       variant="primary"
-                      className="w-full"
+                      className="w-full !bg-transparent border-2 border-egp-green dark:border-egp-beige !text-egp-green dark:!text-egp-beige hover:!bg-egp-green hover:!text-white dark:hover:!bg-egp-beige dark:hover:!text-gray-900 rounded-xl font-semibold transition-all duration-300 shadow-sm hover:shadow-md"
                       endContent={<ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
                     >
                       Learn More
