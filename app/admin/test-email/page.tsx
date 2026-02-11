@@ -27,24 +27,19 @@ export default function TestEmailPage() {
       }));
 
       if (result.success && result.configured) {
-        showSuccess("SendGrid Test", "SendGrid is properly configured!");
+        showSuccess("SMTP Test", "SMTP (Gmail) is properly configured!");
       } else {
-        showError("SendGrid Test", result.message || "SendGrid configuration failed");
+        showError("SMTP Test", result.message || "SMTP configuration failed");
       }
     } catch (error) {
-      console.error("Error testing SendGrid:", error);
-      showError("SendGrid Test", "Failed to test SendGrid configuration");
+      console.error("Error testing SMTP:", error);
+      showError("SMTP Test", "Failed to test SMTP configuration");
     } finally {
       setIsTesting(false);
     }
   };
 
   const sendTestEmail = async () => {
-    if (!testEmail) {
-      showError("Test Email", "Please enter an email address");
-      return;
-    }
-
     setIsTesting(true);
     try {
       const response = await fetch("/api/test-email", {
@@ -53,9 +48,9 @@ export default function TestEmailPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          to: testEmail,
+          ...(testEmail && { to: testEmail }),
           subject: "Test Email from Admin Panel",
-          message: "This is a test email to verify that SendGrid is working correctly with the admin panel."
+          message: "This is a test email to verify that SMTP (Gmail) is working correctly with the admin panel.",
         }),
       });
 
@@ -67,7 +62,7 @@ export default function TestEmailPage() {
       }));
 
       if (result.success) {
-        showSuccess("Test Email", `Test email sent successfully to ${testEmail}`);
+        showSuccess("Test Email", `Test email sent successfully to ${result.recipient || testEmail}`);
       } else {
         showError("Test Email", result.error || "Failed to send test email");
       }
@@ -112,18 +107,18 @@ export default function TestEmailPage() {
             Test Email & Payment Configuration
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1 transition-colors duration-300">
-            Test SendGrid email functionality and Stripe payment configuration.
+            Test SMTP (Gmail) email functionality and Stripe payment configuration.
           </p>
         </div>
       </div>
 
       {/* Configuration Status */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* SendGrid Status */}
+        {/* SMTP Email (Gmail) Status */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              SendGrid Configuration
+              SMTP Email (Gmail)
             </h3>
             <div className={`w-3 h-3 rounded-full ${
               testResults?.sendgrid?.configured 
@@ -137,26 +132,8 @@ export default function TestEmailPage() {
           <div className="space-y-4">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                Environment Variables:
+                SMTP configuration (SMTP_SERVER, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD) is verified when you run the test below. These are server-side environment variables.
               </p>
-              <div className="space-y-1">
-                <div className="flex items-center space-x-2">
-                  <span className={`w-2 h-2 rounded-full ${
-                    process.env.NEXT_PUBLIC_SENDGRID_API_KEY ? 'bg-green-500' : 'bg-red-500'
-                  }`} />
-                  <span className="text-sm font-mono text-gray-700 dark:text-gray-300">
-                    SENDGRID_API_KEY: {process.env.NEXT_PUBLIC_SENDGRID_API_KEY ? '✓ Set' : '✗ Missing'}
-                  </span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className={`w-2 h-2 rounded-full ${
-                    process.env.ADMIN_EMAIL ? 'bg-green-500' : 'bg-red-500'
-                  }`} />
-                  <span className="text-sm font-mono text-gray-700 dark:text-gray-300">
-                    ADMIN_EMAIL: {process.env.ADMIN_EMAIL ? '✓ Set' : '✗ Missing'}
-                  </span>
-                </div>
-              </div>
             </div>
 
             <button
@@ -164,7 +141,7 @@ export default function TestEmailPage() {
               disabled={isTesting}
               className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isTesting ? "Testing..." : "Test SendGrid Configuration"}
+              {isTesting ? "Testing..." : "Test SMTP Configuration"}
             </button>
 
             {testResults?.sendgrid && (
@@ -255,14 +232,14 @@ export default function TestEmailPage() {
               type="email"
               value={testEmail}
               onChange={(e) => setTestEmail(e.target.value)}
-              placeholder="Enter email address to send test email"
+              placeholder="Enter email or leave blank to use SMTP_TO_ADDRESS"
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           <button
             onClick={sendTestEmail}
-            disabled={isTesting || !testEmail}
+            disabled={isTesting}
             className="w-full px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isTesting ? "Sending..." : "Send Test Email"}
@@ -287,12 +264,12 @@ export default function TestEmailPage() {
         </h3>
         <div className="space-y-3 text-sm text-blue-800 dark:text-blue-200">
           <div>
-            <strong>SendGrid Setup:</strong>
+            <strong>Gmail SMTP Setup:</strong>
             <ol className="list-decimal list-inside mt-1 ml-4 space-y-1">
-              <li>Sign up for a SendGrid account at sendgrid.com</li>
-              <li>Create an API key in your SendGrid dashboard</li>
-              <li>Add SENDGRID_API_KEY to your environment variables</li>
-              <li>Verify your sender email address in SendGrid</li>
+              <li>Add SMTP_SERVER=smtp.gmail.com, SMTP_PORT=465, SMTP_SECURITY=SSL to .env</li>
+              <li>Set SMTP_USERNAME and SMTP_FROM_ADDRESS to your Gmail address</li>
+              <li>Use an App Password for SMTP_PASSWORD (Google Account → Security → 2-Step Verification → App passwords)</li>
+              <li>Optionally set SMTP_TO_ADDRESS for default test recipient</li>
             </ol>
           </div>
           <div>
@@ -305,10 +282,10 @@ export default function TestEmailPage() {
             </ol>
           </div>
           <div>
-            <strong>Admin Email Logic:</strong>
+            <strong>Sender Email Logic:</strong>
             <p className="mt-1 ml-4">
-              The system will use the email from your admin profile in the database if available, 
-              otherwise it will fall back to the ADMIN_EMAIL environment variable.
+              The system uses SMTP_FROM_ADDRESS from environment, or falls back to business_email from admin profile, 
+              then ADMIN_EMAIL.
             </p>
           </div>
         </div>
