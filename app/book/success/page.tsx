@@ -46,11 +46,18 @@ function BookingSuccessContent() {
             services = [{ name: booking.service || 'Service', price: booking.amount, quantity: 1 }];
           }
           
+          const totalAmount = booking.total_amount ?? booking.amount;
+          const amountPaid = booking.amount_paid ?? booking.amount;
+          const paymentType = booking.payment_type || 'full';
+          const remainingAmount = booking.remaining_amount ?? 0;
           setBookingDetails({
             id: booking.booking_number || booking.id,
             bookingNumber: booking.booking_number,
             services: services,
-            totalAmount: booking.amount,
+            totalAmount: totalAmount,
+            amountPaid: amountPaid,
+            paymentType: paymentType,
+            remainingAmount: remainingAmount,
             selectedDate: booking.date,
             selectedTime: booking.time,
             customerName: booking.customer_name,
@@ -579,13 +586,33 @@ function BookingSuccessContent() {
               ))}
             </div>
 
-            <div className="border-t-2 border-gray-300 dark:border-gray-600 pt-6">
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold text-gray-900 dark:text-white">Total Paid:</span>
-                <span className="text-3xl font-bold text-green-600 dark:text-green-400">
-                  £{bookingDetails.totalAmount}
-                </span>
-              </div>
+            <div className="border-t-2 border-gray-300 dark:border-gray-600 pt-6 space-y-2">
+              {bookingDetails.paymentType === 'deposit' && bookingDetails.remainingAmount != null && bookingDetails.remainingAmount > 0 ? (
+                <>
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-semibold text-gray-900 dark:text-white">Paid now (deposit):</span>
+                    <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      £{Number(bookingDetails.amountPaid ?? bookingDetails.totalAmount).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-base text-gray-600 dark:text-gray-400">Due on arrival:</span>
+                    <span className="text-xl font-bold text-gray-900 dark:text-white">
+                      £{Number(bookingDetails.remainingAmount).toFixed(2)}
+                    </span>
+                  </div>
+                  <p className="text-sm text-amber-700 dark:text-amber-300 mt-2">
+                    You can cancel or request a refund up to 24 hours before your appointment.
+                  </p>
+                </>
+              ) : (
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-semibold text-gray-900 dark:text-white">Total Paid:</span>
+                  <span className="text-3xl font-bold text-green-600 dark:text-green-400">
+                    £{Number(bookingDetails.totalAmount).toFixed(2)}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -8,6 +8,7 @@ import ThemeToggleButton from "./ThemeToggleButton";
 import { Phone, Mail, MapPin, X, ChevronDown } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import { useConditions } from "@/hooks/useConditions";
+import { PriceWithDiscount } from "@/components/PriceWithDiscount";
 import type { Condition } from "@/hooks/useConditions";
 import { useAdminProfile, useAdminProfileContext } from "@/components/AdminProfileContext";
 
@@ -66,7 +67,7 @@ export default function HeaderAesthetics() {
             slug: string;
             display_order?: number;
           };
-          services: Array<{ id: string; name: string; price: number; slug: string }>;
+          services: Array<{ id: string; name: string; price: number; originalPrice?: number; discountPercentage?: number; slug: string }>;
         }
       >
     > = {};
@@ -92,7 +93,9 @@ export default function HeaderAesthetics() {
       grouped[mainTabSlug][categoryId].services.push({
         id: service.id,
         name: service.name,
-        price: service.price,
+        price: service.discounted_price ?? service.price,
+        originalPrice: service.discount_percentage ? service.price : undefined,
+        discountPercentage: service.discount_percentage ?? undefined,
         slug: service.slug,
       });
     });
@@ -839,29 +842,44 @@ export default function HeaderAesthetics() {
                               </Link>
                             </div>
                             <ul className="space-y-1 max-h-[min(78vh,680px)] overflow-y-auto menu-scroll pl-2 pr-2">
-                              {categoryServices.map((item) => (
+                              {categoryServices.map((item) => {
+                                const hasDiscount = (item.originalPrice != null && item.originalPrice > item.price) || (item.discountPercentage != null && item.discountPercentage > 0);
+                                return (
                                 <li key={item.name}>
                                   <Link
                                     href="/book/new"
                                     onClick={() => {
-                                      // Store service ID in sessionStorage for booking page
                                       if (typeof window !== 'undefined') {
                                         sessionStorage.setItem('pendingServiceId', item.id);
                                       }
                                       setActiveMenu(null);
                                     }}
-                                    className="group relative flex items-start justify-between gap-4 px-2 py-1.5 -mx-2 rounded-md text-sm text-gray-800 dark:text-gray-200 font-montserrat transition-all duration-300 hover:bg-white/30 dark:hover:bg-white/10"
+                                    className={`group relative flex px-2 py-1.5 -mx-2 rounded-md text-sm text-gray-800 dark:text-gray-200 font-montserrat transition-all duration-300 hover:bg-white/30 dark:hover:bg-white/10 ${hasDiscount ? 'flex-col gap-1 py-2' : 'items-center justify-between gap-4'}`}
                                   >
-                                    <span className="relative z-10 group-hover:translate-x-1 text-gray-800 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-all duration-300">
+                                    <span className="relative z-10 flex-1 min-w-0 group-hover:translate-x-1 text-gray-800 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-all duration-300 inline-flex items-center gap-2 flex-wrap">
                                       {item.name}
+                                      {hasDiscount && item.discountPercentage != null && item.discountPercentage > 0 && (
+                                        <span className="inline-flex flex-shrink-0 text-[10px] font-semibold bg-egp-green text-white dark:bg-egp-beige dark:text-egp-green px-1.5 py-0.5 rounded">
+                                          {item.discountPercentage}% off
+                                        </span>
+                                      )}
                                       <span className="absolute left-0 -bottom-0.5 w-0 h-px bg-egp-green dark:bg-egp-beige group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
                                     </span>
-                                    <span className="relative z-10 font-semibold text-egp-green dark:text-egp-beige whitespace-nowrap">
-                                      £{item.price}
+                                    <span className={`relative z-10 flex-shrink-0 text-right ${hasDiscount ? 'w-full' : ''}`}>
+                                      <PriceWithDiscount
+                                        price={item.price}
+                                        originalPrice={item.originalPrice}
+                                        discountPercentage={item.discountPercentage}
+                                        size="sm"
+                                        showBadge={false}
+                                        layout={hasDiscount ? 'inline' : 'inline'}
+                                        align={hasDiscount ? 'end' : 'start'}
+                                      />
                                     </span>
                                   </Link>
                                 </li>
-                              ))}
+                                );
+                              })}
                             </ul>
                           </div>
                         );
@@ -1035,32 +1053,47 @@ export default function HeaderAesthetics() {
                                 </Link>
                               </div>
                               <ul className="space-y-1 max-h-[300px] overflow-y-auto menu-scroll pr-2">
-                                {categoryServices.map((item) => (
+                                {categoryServices.map((item) => {
+                                  const hasDiscount = (item.originalPrice != null && item.originalPrice > item.price) || (item.discountPercentage != null && item.discountPercentage > 0);
+                                  return (
                                   <li key={item.name}>
                                     <Link
                                       href="/book/new"
                                       onClick={() => {
-                                        // Store service ID in sessionStorage for booking page
                                         if (typeof window !== 'undefined') {
                                           sessionStorage.setItem('pendingServiceId', item.id);
                                         }
                                         setMobileMenuOpen(false);
                                         setActiveMenu(null);
                                       }}
-                                      className="group relative flex items-center justify-between gap-3 px-3 py-2.5 min-h-[44px] text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md transition-all duration-200 active:scale-95 touch-manipulation font-montserrat pb-1"
+                                      className={`group relative flex px-3 py-2.5 min-h-[44px] text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md transition-all duration-200 active:scale-95 touch-manipulation font-montserrat pb-1 ${hasDiscount ? 'flex-col gap-1 items-stretch' : 'items-center justify-between gap-3'}`}
                                     >
-                                      <span className="relative flex-1 text-left leading-tight">
+                                      <span className="relative flex-1 min-w-0 text-left leading-tight inline-flex items-center gap-2 flex-wrap">
                                         <span className="relative z-10">
                                           {item.name}
                                         </span>
+                                        {hasDiscount && item.discountPercentage != null && item.discountPercentage > 0 && (
+                                          <span className="inline-flex flex-shrink-0 text-[10px] font-semibold bg-egp-green text-white dark:bg-egp-beige dark:text-egp-green px-1.5 py-0.5 rounded">
+                                            {item.discountPercentage}% off
+                                          </span>
+                                        )}
                                         <span className="absolute left-0 right-0 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
                                       </span>
-                                      <span className="font-semibold text-[#9d9585] dark:text-[#c9c1b0] whitespace-nowrap text-sm flex-shrink-0">
-                                        £{item.price}
+                                      <span className={`flex-shrink-0 text-right ${hasDiscount ? 'w-full' : ''}`}>
+                                        <PriceWithDiscount
+                                          price={item.price}
+                                          originalPrice={item.originalPrice}
+                                          discountPercentage={item.discountPercentage}
+                                          size="sm"
+                                          showBadge={false}
+                                          layout="inline"
+                                          align={hasDiscount ? 'end' : 'start'}
+                                        />
                                       </span>
                                     </Link>
                                   </li>
-                                ))}
+                                  );
+                                })}
                               </ul>
                             </div>
                           );

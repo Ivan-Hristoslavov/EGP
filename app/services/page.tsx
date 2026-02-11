@@ -7,6 +7,7 @@ import { Search, Filter, ArrowLeft, Info, Plus, Clock, CheckCircle, X } from "lu
 import Link from 'next/link';
 import { useServices } from '@/hooks/useServices';
 import { aestheticsColors } from "@/config/colors";
+import { PriceWithDiscount } from "@/components/PriceWithDiscount";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Card, CardBody, CardHeader, Chip, Spinner, Select, SelectItem } from "@heroui/react";
 
 const categories = [
@@ -39,6 +40,7 @@ function ServicesPageContent() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedPriceRange, setSelectedPriceRange] = useState('All Prices');
   const [selectedDurationRange, setSelectedDurationRange] = useState('All Durations');
+  const [showDiscountedOnly, setShowDiscountedOnly] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
@@ -50,10 +52,13 @@ function ServicesPageContent() {
   const servicesDataMap = useMemo(() => {
     const map: Record<string, any> = {};
     services.forEach(service => {
+      const effectivePrice = service.discounted_price ?? service.price;
       map[service.slug] = {
         id: service.id,
         name: service.name,
-        price: service.price,
+        price: effectivePrice,
+        originalPrice: service.discount_percentage ? service.price : null,
+        discountPercentage: service.discount_percentage ?? null,
         category: service.category.name,
         duration: service.duration,
         description: service.description,
@@ -97,14 +102,17 @@ function ServicesPageContent() {
           selectedDurationRangeObj.min <= serviceData.duration && 
           selectedDurationRangeObj.max >= serviceData.duration
         ) : true;
+        const hasDiscount = (service.discounted_price != null && service.discounted_price < service.price) ||
+          (service.discount_percentage != null && service.discount_percentage > 0);
+        const matchesDiscount = !showDiscountedOnly || hasDiscount;
         const matchesSearch = serviceData.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                              (serviceData.description && serviceData.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
                              serviceData.category.toLowerCase().includes(searchTerm.toLowerCase());
         
-        return matchesCategory && matchesPrice && matchesDuration && matchesSearch;
+        return matchesCategory && matchesPrice && matchesDuration && matchesDiscount && matchesSearch;
       })
       .map(service => [service.slug, servicesDataMap[service.slug]] as [string, any]);
-  }, [services, servicesDataMap, selectedCategory, selectedPriceRange, selectedDurationRange, searchTerm]);
+  }, [services, servicesDataMap, selectedCategory, selectedPriceRange, selectedDurationRange, showDiscountedOnly, searchTerm]);
 
   // Pagination
   const totalPages = Math.ceil(filteredServices.length / itemsPerPage);
@@ -123,6 +131,9 @@ function ServicesPageContent() {
         break;
       case 'duration':
         setSelectedDurationRange(value);
+        break;
+      case 'discount':
+        setShowDiscountedOnly(value === 'Discounted only');
         break;
     }
   };
@@ -160,7 +171,16 @@ function ServicesPageContent() {
                   >
                   {service.duration} min
                   </Chip>
-                <span className="text-lg font-bold">£{service.price}</span>
+                <span className="text-lg font-bold flex justify-center [&_.line-through]:text-white/70 [&_.font-bold]:text-white">
+                    <PriceWithDiscount
+                      price={service.price}
+                      originalPrice={service.originalPrice}
+                      discountPercentage={service.discountPercentage}
+                      size="md"
+                      layout="stack"
+                      align="center"
+                    />
+                  </span>
                   <Chip 
                     variant="flat"
                     className="bg-white/20 text-white text-xs"
@@ -271,7 +291,7 @@ function ServicesPageContent() {
                     className="w-full bg-egp-green hover:bg-egp-green-dark text-white"
                     size="sm"
                   >
-                    Book This Treatment - £{service.price}
+                    Book This Treatment - £{service.price.toFixed(0)}
                   </Button>
                 </Link>
               </ModalFooter>
@@ -349,7 +369,7 @@ function ServicesPageContent() {
           {/* Filter Options */}
           {showFilters && (
             <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Category Filter */}
                 <Select
                   label="Category"
@@ -394,6 +414,20 @@ function ServicesPageContent() {
                     <SelectItem key={range.label}>{range.label}</SelectItem>
                     ))}
                 </Select>
+
+                {/* Discount Filter */}
+                <Select
+                  label="Discount"
+                  selectedKeys={[showDiscountedOnly ? 'Discounted only' : 'All']}
+                  onSelectionChange={(keys) => {
+                    const selected = Array.from(keys)[0] as string;
+                    handleFilterChange('discount', selected || 'All');
+                  }}
+                  variant="bordered"
+                  >
+                    <SelectItem key="All">All</SelectItem>
+                    <SelectItem key="Discounted only">On offer</SelectItem>
+                  </Select>
               </div>
             </div>
           )}
@@ -404,12 +438,13 @@ function ServicesPageContent() {
           <p className="text-gray-600 dark:text-gray-400">
             Showing {filteredServices.length} of {services.length} services
           </p>
-          {selectedCategory !== 'All' && (
+          {(selectedCategory !== 'All' || selectedPriceRange !== 'All Prices' || selectedDurationRange !== 'All Durations' || showDiscountedOnly || searchTerm) && (
             <Button
               onPress={() => {
                 setSelectedCategory('All');
                 setSelectedPriceRange('All Prices');
                 setSelectedDurationRange('All Durations');
+                setShowDiscountedOnly(false);
                 setSearchTerm('');
                 setCurrentPage(1);
               }}
@@ -482,8 +517,15 @@ function ServicesPageContent() {
                       {service.name}
                     </h3>
                     {/* Price */}
-                    <div className="text-xl font-bold text-egp-green dark:text-white">
-                      £{service.price}
+                    <div className="text-center w-full">
+                      <PriceWithDiscount
+                        price={service.price}
+                        originalPrice={service.originalPrice}
+                        discountPercentage={service.discountPercentage}
+                        size="md"
+                        layout="stack"
+                        align="center"
+                      />
                     </div>
                       </div>
                 </CardHeader>

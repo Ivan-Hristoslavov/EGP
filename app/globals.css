@@ -281,6 +281,11 @@ html {
   box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.3);
 }
 
+/* HeroUI: remove the inner "white box" on inputs/selects (ring-offset) so only a single focus ring shows */
+.group[data-focus-visible="true"] {
+  --tw-ring-offset-width: 0px;
+}
+
 /* Backdrop blur fallback */
 @supports not (backdrop-filter: blur(10px)) {
   .backdrop-blur-fallback {

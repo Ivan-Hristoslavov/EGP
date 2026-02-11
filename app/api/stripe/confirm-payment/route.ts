@@ -43,8 +43,14 @@ export async function POST(request: NextRequest) {
         }, { status: 400 });
       }
 
-      // Calculate total amount and service names
-      const totalAmount = services.reduce((sum: number, s: any) => sum + (s.price * s.quantity), 0);
+      // Total amount: from metadata when deposit (full booking total), else from services
+      const isDeposit = metadata.isDeposit === 'true';
+      const totalAmountFromMeta = metadata.totalAmount != null ? parseFloat(String(metadata.totalAmount)) : NaN;
+      const totalAmount = (isDeposit && !Number.isNaN(totalAmountFromMeta)) ? totalAmountFromMeta : services.reduce((sum: number, s: any) => sum + (s.price * s.quantity), 0);
+      const amountPaidPence = paymentIntent.amount;
+      const amountPaid = amountPaidPence / 100;
+      const remainingAmount = isDeposit && metadata.remainingAmount != null ? parseFloat(String(metadata.remainingAmount)) : 0;
+      const paymentType = isDeposit && amountPaid < totalAmount ? 'deposit' : 'full';
       const serviceNames = services.map((s: any) => `${s.name}${s.quantity > 1 ? ` (x${s.quantity})` : ''}`).join(', ');
 
       // Get customer data from metadata - use defaults if not provided
@@ -190,23 +196,28 @@ export async function POST(request: NextRequest) {
       console.log('Final customer ID:', customerId);
 
       // === STEP 2: Create Booking ===
+      const bookingInsert: Record<string, unknown> = {
+        customer_id: customerId, // May be null if customer creation failed
+        customer_name: customerName,
+        customer_email: finalCustomerEmail,
+        customer_phone: customerPhone,
+        service: serviceNames,
+        date: selectedDate,
+        time: selectedTime,
+        amount: totalAmount,
+        total_amount: totalAmount,
+        amount_paid: amountPaid,
+        payment_type: paymentType,
+        remaining_amount: paymentType === 'deposit' ? remainingAmount : 0,
+        team_member_id: teamMemberId || null,
+        service_duration_minutes: serviceDurationMinutes || null,
+        status: 'confirmed',
+        payment_status: 'paid',
+        notes: `Payment via Stripe - Payment Intent: ${paymentIntentId}`,
+      };
       const { data: booking, error: bookingError } = await supabaseAdmin
         .from('bookings')
-        .insert({
-          customer_id: customerId, // May be null if customer creation failed
-          customer_name: customerName,
-          customer_email: finalCustomerEmail,
-          customer_phone: customerPhone,
-          service: serviceNames,
-          date: selectedDate,
-          time: selectedTime,
-          amount: totalAmount,
-          team_member_id: teamMemberId || null,
-          service_duration_minutes: serviceDurationMinutes || null,
-          status: 'confirmed',
-          payment_status: 'paid',
-          notes: `Payment via Stripe - Payment Intent: ${paymentIntentId}`,
-        })
+        .insert(bookingInsert)
         .select()
         .single();
       
@@ -239,12 +250,13 @@ export async function POST(request: NextRequest) {
         .insert({
           booking_id: booking.id,
           customer_id: customerId, // May be null
-          amount: totalAmount,
+          amount: amountPaid,
+          payment_type: paymentType,
           payment_method: 'card',
           payment_status: 'paid',
           payment_date: new Date().toISOString().split('T')[0],
           reference: paymentIntentId,
-          notes: `Stripe Payment for ${serviceNames}`,
+          notes: paymentType === 'deposit' ? `Deposit (Stripe) for ${serviceNames} - £${remainingAmount.toFixed(2)} due on arrival` : `Stripe Payment for ${serviceNames}`,
         })
         .select()
         .single();

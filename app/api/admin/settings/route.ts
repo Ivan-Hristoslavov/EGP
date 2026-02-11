@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase";
 
-// GET - Fetch admin settings
+// GET - Fetch admin settings (service role bypasses RLS)
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = supabaseAdmin;
     const { searchParams } = new URL(request.url);
     const key = searchParams.get("key");
 
@@ -63,17 +63,17 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// PUT - Update admin settings
+// PUT - Update admin settings (service role bypasses RLS)
 export async function PUT(request: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = supabaseAdmin;
     const body = await request.json();
 
     // Update multiple settings
     const updatePromises = Object.entries(body).map(([key, value]) => {
       return supabase
         .from("admin_settings")
-        .upsert({ key, value })
+        .upsert({ key, value }, { onConflict: "key" })
         .select();
     });
 
@@ -99,15 +99,15 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// POST - Create or update admin setting
+// POST - Create or update admin setting (service role bypasses RLS)
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = supabaseAdmin;
     const { key, value } = await request.json();
 
     const { data: setting, error } = await supabase
       .from("admin_settings")
-      .upsert({ key, value })
+      .upsert({ key, value }, { onConflict: "key" })
       .select()
       .single();
 

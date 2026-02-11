@@ -14,11 +14,14 @@ import { Spinner } from "@heroui/react";
 import { Input } from "@heroui/react";
 import { useToast } from '@/components/Toast';
 import ButtonPrimary from '@/components/ButtonPrimary';
+import { PriceWithDiscount } from '@/components/PriceWithDiscount';
 
 type OrderItem = {
   serviceId: string; // This will now be the service ID (UUID), not slug
   name: string;
   price: number;
+  originalPrice?: number;
+  discountPercentage?: number;
   duration: number;
   category: string;
   quantity: number;
@@ -75,7 +78,13 @@ function BookingPageContent() {
   const [currentStep, setCurrentStep] = useState<BookingStepKey>('services');
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [showServiceSelector, setShowServiceSelector] = useState(false);
+  const [serviceSelectorDiscountedOnly, setServiceSelectorDiscountedOnly] = useState(false);
   const [serviceInfoModal, setServiceInfoModal] = useState<string | null>(null);
+
+  // Deposit settings (from admin); used when deposit is enabled
+  type DepositConfig = { enabled: boolean; type: "percentage" | "fixed"; percentage?: number; fixedAmount?: number | null };
+  const [depositConfig, setDepositConfig] = useState<DepositConfig>({ enabled: false, type: "percentage", percentage: 50, fixedAmount: null });
+  const [payDepositOnly, setPayDepositOnly] = useState(false);
   
   // Customer data state
   const [customerData, setCustomerData] = useState({
@@ -141,13 +150,16 @@ function BookingPageContent() {
     }
   };
 
-  // Create a lookup map from services for easy access (using ID as key)
+  // Create a lookup map from services for easy access (using ID as key). Use discounted price when available.
   const servicesDataMap = useMemo(() => {
     const map: Record<string, any> = {};
     services.forEach(service => {
+      const effectivePrice = service.discounted_price ?? service.price;
       map[service.id] = {
         name: service.name,
-        price: service.price,
+        price: effectivePrice,
+        originalPrice: service.price,
+        discount_percentage: service.discount_percentage ?? null,
         category: service.category.name,
         duration: service.duration,
         description: service.description,
@@ -177,6 +189,29 @@ function BookingPageContent() {
     });
     return grouped;
   }, [services, servicesDataMap]);
+
+  const hasDiscount = useCallback((service: { discounted_price?: number | null; price: number; discount_percentage?: number | null }) => {
+    return (
+      (service.discounted_price != null && service.discounted_price < service.price) ||
+      (service.discount_percentage != null && service.discount_percentage > 0)
+    );
+  }, []);
+
+  // Service selector: optionally filter to discounted only
+  const servicesByCategoryForSelector = useMemo(() => {
+    const list = serviceSelectorDiscountedOnly
+      ? services.filter(hasDiscount)
+      : services;
+    const grouped: Record<string, Array<[string, any]>> = {};
+    list.forEach(service => {
+      const categoryName = service.category.name;
+      if (!grouped[categoryName]) {
+        grouped[categoryName] = [];
+      }
+      grouped[categoryName].push([service.id, servicesDataMap[service.id]]);
+    });
+    return grouped;
+  }, [services, servicesDataMap, serviceSelectorDiscountedOnly, hasDiscount]);
 
   // Load team members and filter by selected services
   useEffect(() => {
@@ -267,6 +302,24 @@ function BookingPageContent() {
     };
     loadTeamMembers();
   }, [selectedServices, services]); // Removed selectedTeamMember from dependencies
+
+  // Fetch deposit settings for booking (public config)
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/admin/settings?key=deposit_settings")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((value) => {
+        if (cancelled || !value || typeof value !== "object") return;
+        setDepositConfig({
+          enabled: !!value.enabled,
+          type: value.type === "fixed" ? "fixed" : "percentage",
+          percentage: value.percentage != null ? Number(value.percentage) : 50,
+          fixedAmount: value.fixedAmount != null ? Number(value.fixedAmount) : null,
+        });
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   // Calculate total service duration in minutes
   const totalServiceDuration = useMemo(() => {
@@ -409,6 +462,8 @@ function BookingPageContent() {
           serviceId: pendingServiceId,
           name: service.name,
           price: service.price,
+          originalPrice: service.originalPrice ?? undefined,
+          discountPercentage: service.discount_percentage ?? undefined,
           duration: service.duration,
           category: service.category,
           quantity: 1
@@ -435,6 +490,19 @@ function BookingPageContent() {
 
   const totalAmount = selectedServices.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const totalDuration = selectedServices.reduce((sum, item) => sum + (item.duration * item.quantity), 0);
+
+  // Deposit: amount to charge now and remaining due on arrival
+  const depositAmount = useMemo(() => {
+    if (!depositConfig.enabled || totalAmount <= 0) return 0;
+    if (depositConfig.type === "fixed" && depositConfig.fixedAmount != null) {
+      return Math.min(Number(depositConfig.fixedAmount), totalAmount);
+    }
+    const pct = depositConfig.percentage ?? 50;
+    return Math.round((totalAmount * pct) / 100 * 100) / 100;
+  }, [depositConfig.enabled, depositConfig.type, depositConfig.percentage, depositConfig.fixedAmount, totalAmount]);
+  const remainingAmount = Math.max(0, Math.round((totalAmount - depositAmount) * 100) / 100);
+  const amountToCharge = depositConfig.enabled && payDepositOnly ? depositAmount : totalAmount;
+  const isDepositPayment = depositConfig.enabled && payDepositOnly && depositAmount > 0 && depositAmount < totalAmount;
 
   // Helper function to check if adding a service would exceed working hours
   const wouldExceedWorkingHours = useCallback((additionalDuration: number): boolean => {
@@ -497,6 +565,8 @@ function BookingPageContent() {
         serviceId,
         name: service.name,
         price: service.price,
+        originalPrice: service.originalPrice ?? undefined,
+        discountPercentage: service.discount_percentage ?? undefined,
         duration: service.duration,
         category: service.category,
         quantity: 1
@@ -667,7 +737,13 @@ function BookingPageContent() {
                       
                       <div className="mb-4 pb-4 border-b border-divider">
                         <p className="text-xs uppercase tracking-wide text-default-500 mb-1">Subtotal</p>
-                        <p className="text-2xl font-bold text-egp-green dark:text-white">£{item.price * item.quantity}</p>
+                        <PriceWithDiscount
+                          price={item.price}
+                          originalPrice={item.originalPrice}
+                          discountPercentage={item.discountPercentage}
+                          quantity={item.quantity}
+                          size="md"
+                        />
                       </div>
                     </div>
 
@@ -1062,9 +1138,38 @@ function BookingPageContent() {
             </button>
           </div>
           
+          {/* Discount filter - only show if any service has discount */}
+          {services.some(hasDiscount) && (
+            <div className="px-6 py-3 border-b border-gray-700 bg-gray-800/50 dark:bg-gray-900/50 flex flex-wrap items-center gap-2">
+              <span className="text-sm text-gray-400">Filter:</span>
+              <button
+                type="button"
+                onClick={() => setServiceSelectorDiscountedOnly(false)}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  !serviceSelectorDiscountedOnly
+                    ? "bg-egp-green text-white"
+                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                }`}
+              >
+                All
+              </button>
+              <button
+                type="button"
+                onClick={() => setServiceSelectorDiscountedOnly(true)}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  serviceSelectorDiscountedOnly
+                    ? "bg-egp-green text-white"
+                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                }`}
+              >
+                On offer
+              </button>
+            </div>
+          )}
+          
           {/* Content */}
           <div className="p-6 overflow-y-auto flex-1 bg-gray-800 dark:bg-gray-900">
-            {Object.entries(servicesByCategory).map(([category, servicesList]) => {
+            {Object.entries(servicesByCategoryForSelector).map(([category, servicesList]) => {
               // Filter out services that are already selected
               const availableServices = servicesList.filter(([serviceId, service]) => 
                 service && !selectedServices.some(item => item.serviceId === serviceId)
@@ -1113,8 +1218,15 @@ function BookingPageContent() {
                               <h4 className="text-lg font-bold text-white leading-tight line-clamp-2 mb-3">
                                 {service.name}
                               </h4>
-                              <div className="text-3xl font-bold text-white">
-                                £{service.price}
+                              <div className="flex flex-col items-center gap-1 w-full [&_.line-through]:text-gray-400 [&_.font-bold]:text-white">
+                                <PriceWithDiscount
+                                  price={service.price}
+                                  originalPrice={service.originalPrice}
+                                  discountPercentage={service.discount_percentage}
+                                  size="lg"
+                                  layout="stack"
+                                  align="center"
+                                />
                               </div>
                             </div>
                           </CardHeader>
@@ -1805,191 +1917,176 @@ function BookingPageContent() {
       ? teamMembers.find(m => m.id === selectedTeamMember)
       : null;
 
-            return (
-      <div className="space-y-6 max-w-7xl mx-auto">
-        {/* Two Column Layout: Booking Details and Services Booked */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Booking Details Section - Left Column */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Booking Details</h3>
-            
-            {/* Compact Header Row - Team Member, Date, Time, Total */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Team Member */}
-            {selectedTeamMemberData && (
-              <div className="p-4 rounded-xl border border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-all duration-200">
-                <div className="flex items-center gap-3">
-                  {selectedTeamMemberData.image_url ? (
-                    <img
-                      src={selectedTeamMemberData.image_url}
-                      alt={selectedTeamMemberData.name}
-                      className="w-14 h-14 rounded-full object-cover border-2 border-[#e4d9c8] dark:border-gray-700 flex-shrink-0 shadow-sm"
-                    />
-                  ) : (
-                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#f5f1e9] to-[#e4d9c8] dark:from-gray-800 dark:to-gray-700 flex items-center justify-center border-2 border-[#e4d9c8] dark:border-gray-700 flex-shrink-0 shadow-sm">
-                      <Shield className="w-7 h-7 text-[#9d9585] dark:text-[#c9c1b0]" />
+    return (
+      <div className="space-y-8 max-w-5xl mx-auto">
+        {/* Header */}
+        <div className="text-center sm:text-left">
+          <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Review &amp; Payment</h3>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Confirm your appointment and complete payment securely.</p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+          {/* Left: Booking summary + Your details */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* Appointment card */}
+            <Card className="border border-[#e4d9c8] dark:border-gray-700 shadow-sm overflow-hidden">
+              <CardHeader className="pb-3 border-b border-[#e4d9c8] dark:border-gray-700 bg-[#faf7f1] dark:bg-gray-800/50">
+                <h4 className="text-base font-semibold text-gray-900 dark:text-white">Appointment</h4>
+              </CardHeader>
+              <CardBody className="p-5 space-y-5">
+                {selectedTeamMemberData && (
+                  <div className="flex items-center gap-4">
+                    {selectedTeamMemberData.image_url ? (
+                      <img src={selectedTeamMemberData.image_url} alt="" className="w-14 h-14 rounded-full object-cover border-2 border-[#e4d9c8] dark:border-gray-600 flex-shrink-0" />
+                    ) : (
+                      <div className="w-14 h-14 rounded-full bg-egp-green/10 dark:bg-egp-green/20 flex items-center justify-center flex-shrink-0">
+                        <Shield className="w-7 h-7 text-egp-green dark:text-egp-beige" />
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Practitioner</p>
+                      <p className="text-base font-semibold text-gray-900 dark:text-white truncate">{selectedTeamMemberData.name}</p>
+                      {selectedTeamMemberData.role && <p className="text-sm text-gray-600 dark:text-gray-400">{selectedTeamMemberData.role}</p>}
                     </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Practitioner</p>
-                    <p className="text-base font-bold text-gray-900 dark:text-white truncate leading-tight">{selectedTeamMemberData.name}</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate mt-0.5">{selectedTeamMemberData.role}</p>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-egp-green/10 dark:bg-egp-green/20 flex-shrink-0">
+                      <Calendar className="w-4 h-4 text-egp-green dark:text-egp-beige" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white leading-snug">{formattedAppointmentDate}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-egp-green/10 dark:bg-egp-green/20 flex-shrink-0">
+                      <Clock className="w-4 h-4 text-egp-green dark:text-egp-beige" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Time</p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white leading-snug">{timeRange}</p>
+                      {selectedTimeSlots.length > 0 && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400 font-mono mt-0.5">{selectedTimeSlots.join(" → ")}</p>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-            
-            {/* Date */}
-            <div className="p-4 rounded-xl border border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-all duration-200">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="p-1.5 rounded-lg bg-[#f5f1e9] dark:bg-gray-700">
-                  <Calendar className="w-4 h-4 text-[#9d9585] dark:text-[#c9c1b0]" />
-                </div>
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Date</p>
-              </div>
-              <p className="text-sm font-bold text-gray-900 dark:text-white leading-tight">{formattedAppointmentDate}</p>
-            </div>
+              </CardBody>
+            </Card>
 
-            {/* Time */}
-            <div className="p-4 rounded-xl border border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-all duration-200">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="p-1.5 rounded-lg bg-[#f5f1e9] dark:bg-gray-700">
-                  <Clock className="w-4 h-4 text-[#9d9585] dark:text-[#c9c1b0]" />
-                </div>
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Time</p>
-              </div>
-              <p className="text-sm font-bold text-gray-900 dark:text-white leading-tight mb-2">{timeRange}</p>
-              {selectedTimeSlots.length > 0 && (
-                <p className="text-xs text-gray-600 dark:text-gray-400 font-mono bg-gray-50 dark:bg-gray-900/50 px-2 py-1 rounded inline-block">{selectedTimeSlots.join(' → ')}</p>
-              )}
-              {selectedDateSlots?.workingHours && (
-                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 space-y-1.5">
-                  {selectedDateSlots.workingHours.buffer_minutes !== undefined && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500 dark:text-gray-400">Buffer</span>
-                      <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{selectedDateSlots.workingHours.buffer_minutes} min</span>
-                    </div>
-                  )}
-                  {selectedDateSlots.workingHours.max_appointments !== undefined && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500 dark:text-gray-400">Max Appointments</span>
-                      <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{selectedDateSlots.workingHours.max_appointments}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-            
-            {/* Total */}
-            <div className="p-4 rounded-xl border-2 border-egp-green dark:border-egp-green-light bg-gradient-to-br from-[#f5f1e9] via-white to-[#faf7f1] dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 shadow-md hover:shadow-lg transition-all duration-200">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="p-1.5 rounded-lg bg-egp-green/20 dark:bg-egp-green-light/20">
-                  <CreditCard className="w-4 h-4 text-egp-green dark:text-white" />
-                </div>
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total</p>
-              </div>
-              <p className="text-3xl font-bold text-egp-green dark:text-white mb-1">£{totalAmount.toFixed(0)}</p>
-              <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">{totalDuration} min total</p>
-            </div>
-          </div>
-          
-          {/* Customer Details */}
-          <div className="mt-4">
-            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Your Contact Information</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-4 rounded-xl border border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Name</p>
-                <p className="text-base font-semibold text-gray-900 dark:text-white">
-                  {customerData.firstName} {customerData.lastName}
-                </p>
-              </div>
-              <div className="p-4 rounded-xl border border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Email</p>
-                <p className="text-base font-semibold text-gray-900 dark:text-white">
-                  {customerData.email}
-                </p>
-              </div>
-              <div className="p-4 rounded-xl border border-[#e4d9c8] dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Phone</p>
-                <p className="text-base font-semibold text-gray-900 dark:text-white">
-                  {customerData.phone}
-                </p>
-              </div>
-            </div>
-          </div>
-          </div>
-
-          {/* Service Booked Section - Right Column */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Service Booked</h3>
-            <div className="grid grid-cols-1 gap-4">
-            {selectedServices.map(item => {
-              const serviceData = servicesDataMap[item.serviceId];
-              return (
-                <Card
-                  key={item.serviceId}
-                  className="group"
-                  shadow="sm"
-                >
-                  <CardBody className="p-4 flex flex-col">
-                  <div className="flex items-start justify-between gap-2 mb-3">
-                    <h4 className="text-sm font-bold text-foreground leading-tight flex-1 line-clamp-2">{item.name}</h4>
-                    <Chip
-                      size="sm"
-                      variant="flat"
-                      startContent={<Clock className="w-3 h-3" />}
-                      className="flex-shrink-0"
-                    >
-                      {item.duration}
-                    </Chip>
-          </div>
-
-                  <div className="flex items-center justify-between mb-3 pb-3 border-b border-divider">
-                    <span className="text-xs font-medium text-default-500 uppercase tracking-wide">Subtotal</span>
-                    <span className="text-xl font-bold text-egp-green dark:text-white">£{item.price * item.quantity}</span>
+            {/* Your details */}
+            <Card className="border border-[#e4d9c8] dark:border-gray-700 shadow-sm overflow-hidden">
+              <CardHeader className="pb-3 border-b border-[#e4d9c8] dark:border-gray-700 bg-[#faf7f1] dark:bg-gray-800/50">
+                <h4 className="text-base font-semibold text-gray-900 dark:text-white">Your details</h4>
+              </CardHeader>
+              <CardBody className="p-5">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Name</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{customerData.firstName} {customerData.lastName}</p>
                   </div>
-
-                  <div className="flex items-center justify-end mt-auto">
-                    <Button
-                      onPress={() => setServiceInfoModal(item.serviceId)}
-                      variant="bordered"
-                      size="sm"
-                      startContent={<Info className="w-3.5 h-3.5" />}
-                    >
-                      Details
-                    </Button>
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Email</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white break-all">{customerData.email}</p>
                   </div>
-                </CardBody>
-              </Card>
-            );
-          })}
-            </div>
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Phone</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{customerData.phone}</p>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+          </div>
+
+          {/* Right: Treatments + Payment summary */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Treatments list */}
+            <Card className="border border-[#e4d9c8] dark:border-gray-700 shadow-sm overflow-hidden">
+              <CardHeader className="pb-3 border-b border-[#e4d9c8] dark:border-gray-700 bg-[#faf7f1] dark:bg-gray-800/50">
+                <h4 className="text-base font-semibold text-gray-900 dark:text-white">Treatments</h4>
+              </CardHeader>
+              <CardBody className="p-0">
+                <ul className="divide-y divide-[#e4d9c8] dark:divide-gray-700">
+                  {selectedServices.map((item, i) => (
+                    <li key={item.serviceId} className="px-5 py-4 flex items-center justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2">{item.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{item.duration} min{item.quantity > 1 ? ` × ${item.quantity}` : ""}</p>
+                      </div>
+                      <div className="flex-shrink-0 text-right">
+                        <PriceWithDiscount
+                          price={item.price}
+                          originalPrice={item.originalPrice}
+                          discountPercentage={item.discountPercentage}
+                          quantity={item.quantity}
+                          size="sm"
+                        />
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </CardBody>
+            </Card>
+
+            {/* Payment summary + CTA */}
+            <Card className="border-2 border-egp-green dark:border-egp-beige bg-gradient-to-b from-[#f5f1e9] to-white dark:from-gray-800 dark:to-gray-900 shadow-lg overflow-hidden">
+              <CardBody className="p-6 space-y-4">
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Total</span>
+                  <span className="text-2xl font-bold text-egp-green dark:text-white">£{totalAmount.toFixed(2)}</span>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{totalDuration} min total</p>
+                {depositConfig.enabled && (
+                  <div className="pt-3 border-t border-egp-green/20 dark:border-egp-beige/20 space-y-3">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={payDepositOnly}
+                        onChange={(e) => setPayDepositOnly(e.target.checked)}
+                        className="mt-1 rounded border-gray-300 text-egp-green focus:ring-egp-green"
+                      />
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Pay deposit only (rest on arrival)</span>
+                    </label>
+                    {payDepositOnly && (
+                      <div className="pl-6 space-y-1">
+                        <p className="text-sm font-semibold text-egp-green dark:text-white">Pay now: £{depositAmount.toFixed(2)}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">£{remainingAmount.toFixed(2)} due on arrival</p>
+                      </div>
+                    )}
+                    <p className="text-xs text-amber-700 dark:text-amber-300/90">Cancel or request a refund up to 24 hours before your appointment.</p>
+                  </div>
+                )}
+                {!showPaymentForm ? (
+                  <ButtonPrimary
+                    onPress={proceedToPayment}
+                    variant="primary"
+                    className="w-full mt-2"
+                    size="lg"
+                    startContent={<CreditCard className="w-5 h-5" />}
+                  >
+                    Proceed to Payment
+                  </ButtonPrimary>
+                ) : null}
+              </CardBody>
+            </Card>
           </div>
         </div>
-        
-        {!showPaymentForm ? (
-          <div className="flex justify-center mt-6">
-            <ButtonPrimary
-              onPress={proceedToPayment}
-              variant="primary"
-              className="w-full sm:w-auto min-w-[200px]"
-              startContent={<CreditCard className="w-4 h-4" />}
-            >
-              Proceed to Payment
-            </ButtonPrimary>
-          </div>
-        ) : (
-          <div className="mt-4 space-y-4">
-            <div className="p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg">
-              <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
-                <CheckCircle className="w-4 h-4" />
-                <span className="text-sm font-semibold">Secure Payment by Stripe</span>
+
+        {showPaymentForm && (
+          <Card className="border border-[#e4d9c8] dark:border-gray-700 shadow-sm overflow-hidden">
+            <CardBody className="p-6 space-y-5">
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/40">
+                  <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-green-800 dark:text-green-200">Secure payment by Stripe</p>
+                  <p className="text-sm text-green-700 dark:text-green-300/80">Your payment information is encrypted and secure.</p>
+                </div>
               </div>
-              <p className="text-xs text-green-600 dark:text-green-500 mt-1">
-                Your payment information is encrypted and secure
-              </p>
-            </div>
-            
+              
             {/* Stripe Payment Form */}
             {(() => {
               // Validate customer data before rendering payment form
@@ -2008,6 +2105,8 @@ function BookingPageContent() {
               return (
                 <StripePaymentForm
                   amount={totalAmount}
+                  amountToCharge={amountToCharge}
+                  depositMetadata={isDepositPayment ? { isDeposit: true, totalAmount, depositAmount, remainingAmount } : undefined}
                   services={selectedServices.map(item => ({
                     name: item.name,
                     price: item.price,
@@ -2034,7 +2133,8 @@ function BookingPageContent() {
                 />
               );
             })()}
-          </div>
+            </CardBody>
+          </Card>
         )}
       </div>
     );
@@ -2087,6 +2187,8 @@ function BookingPageContent() {
           return (
             <StripePaymentForm
               amount={totalAmount}
+              amountToCharge={amountToCharge}
+              depositMetadata={isDepositPayment ? { isDeposit: true, totalAmount, depositAmount, remainingAmount } : undefined}
               services={selectedServices.map(item => ({
                 name: item.name,
                 price: item.price,

@@ -8,7 +8,7 @@ export async function GET() {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 
-    // Fetch ALL services (including inactive) for admin
+    // Fetch ALL services (including inactive) for admin, with optional discount group
     const { data: services, error } = await supabase
       .from('services')
       .select(`
@@ -16,7 +16,8 @@ export async function GET() {
         category:service_categories!inner(
           *,
           main_tab:main_tabs!inner(*)
-        )
+        ),
+        discount_group:discount_groups(id, name, discount_percentage, is_active)
       `)
       .order('display_order', { ascending: true })
       .order('created_at', { ascending: false });
@@ -45,6 +46,13 @@ export async function GET() {
       downtime_days: service.downtime_days,
       results_duration_weeks: service.results_duration_weeks,
       display_order: service.display_order,
+      discount_group_id: service.discount_group_id ?? null,
+      discount_group: service.discount_group ? {
+        id: service.discount_group.id,
+        name: service.discount_group.name,
+        discount_percentage: parseFloat(service.discount_group.discount_percentage?.toString() ?? '0'),
+        is_active: service.discount_group.is_active,
+      } : null,
       created_at: service.created_at,
       updated_at: service.updated_at,
       // Flatten nested data

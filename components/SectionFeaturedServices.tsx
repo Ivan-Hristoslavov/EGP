@@ -7,6 +7,7 @@ import { useServices } from "@/hooks/useServices";
 import Pagination from "@/components/Pagination";
 import type { Service } from "@/hooks/useServices";
 import { aestheticsColors } from "@/config/colors";
+import { PriceWithDiscount } from "@/components/PriceWithDiscount";
 import { badgeBackgroundClass } from "@/config/badge-styles";
 import ButtonPrimary from "@/components/ButtonPrimary";
 
@@ -26,12 +27,28 @@ function getCategoryGradient(categoryName: string): string {
   return categoryGradients[categoryName.toUpperCase()] || categoryGradients['default'];
 }
 
+function hasDiscount(s: Service): boolean {
+  return (
+    (s.discounted_price != null && s.discounted_price < s.price) ||
+    (s.discount_percentage != null && s.discount_percentage > 0)
+  );
+}
+
 export default function SectionFeaturedServices() {
   const { services, isLoading } = useServices();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [showDiscountedOnly, setShowDiscountedOnly] = useState(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const itemsPerPage = 8;
+
+  // Whether any featured service has a discount (for showing "On offer" filter)
+  const hasDiscountedFeatured = useMemo(() => {
+    const featured = services.filter(s =>
+      s.is_featured && (s.main_tab?.slug === 'book-now' || s.main_tab?.slug === 'by-condition')
+    );
+    return featured.some(hasDiscount);
+  }, [services]);
 
   // Get unique categories from featured services only (for filters)
   const availableCategories = useMemo(() => {
@@ -56,7 +73,7 @@ export default function SectionFeaturedServices() {
     return Array.from(categoriesMap.values()).sort((a, b) => a.name.localeCompare(b.name));
   }, [services]);
 
-  // Filter services based on selected category - only show featured services
+  // Filter services based on selected category and discount - only show featured services
   const filteredServices = useMemo(() => {
     // Only include featured services from both 'book-now' and 'by-condition' main tabs
     let featured = services.filter(s => 
@@ -69,6 +86,11 @@ export default function SectionFeaturedServices() {
       featured = featured.filter(s => s.category.id === selectedCategory);
     }
     
+    // Apply discount filter
+    if (showDiscountedOnly) {
+      featured = featured.filter(hasDiscount);
+    }
+    
     // Sort by display_order, then by name
     return featured.sort((a, b) => {
       if (a.display_order !== b.display_order) {
@@ -76,7 +98,7 @@ export default function SectionFeaturedServices() {
       }
       return a.name.localeCompare(b.name);
     });
-  }, [services, selectedCategory]);
+  }, [services, selectedCategory, showDiscountedOnly]);
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredServices.length / itemsPerPage);
@@ -84,10 +106,10 @@ export default function SectionFeaturedServices() {
   const endIndex = startIndex + itemsPerPage;
   const paginatedServices = filteredServices.slice(startIndex, endIndex);
 
-  // Reset to page 1 when category changes
+  // Reset to page 1 when category or discount filter changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedCategory]);
+  }, [selectedCategory, showDiscountedOnly]);
 
   if (isLoading) {
     return (
@@ -165,8 +187,8 @@ export default function SectionFeaturedServices() {
           </p>
         </div>
 
-        {/* Category Filters */}
-        {availableCategories.length > 0 && (
+        {/* Category and Discount Filters */}
+        {(availableCategories.length > 0 || hasDiscountedFeatured) && (
           <div className="mb-8 sm:mb-12">
             <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-4">
               <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -184,6 +206,19 @@ export default function SectionFeaturedServices() {
               >
                 All Services
               </button>
+              
+              {hasDiscountedFeatured && (
+                <button
+                  onClick={() => setShowDiscountedOnly(!showDiscountedOnly)}
+                  className={`px-4 sm:px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                    showDiscountedOnly
+                      ? "bg-egp-green dark:bg-egp-green-dark text-white shadow-lg scale-105"
+                      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-[#ddd5c3] dark:hover:bg-gray-700 border border-[#c9c1b0] dark:border-gray-700"
+                  }`}
+                >
+                  On offer
+                </button>
+              )}
               
               {availableCategories.map((category) => (
                 <button
@@ -304,8 +339,15 @@ export default function SectionFeaturedServices() {
                   {/* Price & CTA - Fixed at bottom */}
                   <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
                     {/* Price */}
-                    <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white text-center">
-                      £{service.price.toFixed(0)}
+                    <div className="text-center flex flex-col items-center gap-1 w-full">
+                      <PriceWithDiscount
+                        price={service.discounted_price ?? service.price}
+                        originalPrice={service.discount_percentage ? service.price : null}
+                        discountPercentage={service.discount_percentage}
+                        size="lg"
+                        layout="stack"
+                        align="center"
+                      />
                     </div>
                     {/* Button */}
                     <ButtonPrimary
@@ -382,7 +424,15 @@ export default function SectionFeaturedServices() {
                     <Clock className="w-5 h-5" />
                     <span className="text-base sm:text-lg">{selectedService.duration} minutes</span>
                   </span>
-                  <span className="text-2xl sm:text-3xl font-bold">£{selectedService.price.toFixed(0)}</span>
+                  <PriceWithDiscount
+                    price={selectedService.discounted_price ?? selectedService.price}
+                    originalPrice={selectedService.discount_percentage ? selectedService.price : null}
+                    discountPercentage={selectedService.discount_percentage}
+                    size="lg"
+                    layout="stack"
+                    align="center"
+                    className="text-white [&_.line-through]:text-white/70 [&_.font-bold]:text-white"
+                  />
                   <span className="bg-white/20 px-3 py-1 rounded-full text-sm font-semibold">
                     {selectedService.category.name}
                   </span>
@@ -525,7 +575,7 @@ export default function SectionFeaturedServices() {
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = aestheticsColors.green.DEFAULT}
                 >
                   <Calendar className="w-5 h-5" />
-                  Book This Treatment - £{selectedService.price.toFixed(0)}
+                  Book This Treatment - £{(selectedService.discounted_price ?? selectedService.price).toFixed(0)}
                 </Link>
                 <Link
                   href={`/services/${selectedService.slug}`}

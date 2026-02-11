@@ -27,6 +27,10 @@ export interface Service {
   aftercare: string | null;
   duration: number;
   price: number;
+  /** When service is in a discount group, discounted price (after discount) */
+  discounted_price?: number | null;
+  /** Discount percentage from discount group (e.g. 20 for 20% off) */
+  discount_percentage?: number | null;
   is_featured: boolean;
   image_url: string | null;
   requires_consultation: boolean;

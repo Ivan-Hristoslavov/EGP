@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { Calendar, Clock, ArrowRight } from "lucide-react";
 import ButtonBookNow from "@/components/ButtonBookNow";
+import { PriceWithDiscount } from "@/components/PriceWithDiscount";
 import { useServices } from "@/hooks/useServices";
 
 export default function FaceTreatmentsPage() {
@@ -80,7 +81,16 @@ export default function FaceTreatmentsPage() {
                 <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-egp-green-dark mt-auto">
                   <div>
                     <span className="text-xs text-gray-600 dark:text-gray-400">From</span>
-                    <div className="text-lg font-bold text-egp-green dark:text-white">£{service.price}</div>
+                    <div className="text-lg w-full flex justify-center">
+                      <PriceWithDiscount
+                        price={service.discounted_price ?? service.price}
+                        originalPrice={service.discount_percentage ? service.price : null}
+                        discountPercentage={service.discount_percentage}
+                        size="md"
+                        layout="stack"
+                        align="center"
+                      />
+                    </div>
                   </div>
                   <Link
                     href={`/book?serviceId=${service.id}`}
