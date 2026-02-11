@@ -63,7 +63,7 @@ async function initializeAdmin() {
           name: adminName,
           email: adminEmail,
           password: hashedPassword,
-          phone: '+44 7700 900123',
+          phone: process.env.NEXT_PUBLIC_PHONE_NUMBER || '07944 24 20 79',
           company_address: 'London, UK'
         }]);
 

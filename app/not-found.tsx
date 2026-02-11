@@ -51,11 +51,11 @@ export default function NotFound() {
             <div className="text-sm text-gray-500 dark:text-gray-400">
               <p>Need help? Contact us at{" "}
                 <a
-                  href={`mailto:${process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "info@egp.com"}`}
+                  href={`mailto:${process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "info@egpaesthetics.co.uk"}`}
                   className="text-egp-green dark:text-white hover:underline inline-flex items-center gap-1"
                 >
                   <Mail className="w-4 h-4" />
-                  {process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "info@egp.com"}
+                  {process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "info@egpaesthetics.co.uk"}
                 </a>
               </p>
             </div>

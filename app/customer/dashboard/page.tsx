@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { siteConfig } from "@/config/site";
 import { 
   Calendar, 
   Clock, 
@@ -321,17 +322,17 @@ export default function CustomerDashboardPage() {
               <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Need Help?</h3>
                 <div className="space-y-3">
-                  <div className="flex items-center space-x-3">
+                  <a href={`tel:${siteConfig.contact.phone}`} className="flex items-center space-x-3">
                     <Phone className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">+44 20 1234 5678</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">{siteConfig.contact.phone}</span>
+                  </a>
+                  <a href={`mailto:${siteConfig.contact.email}`} className="flex items-center space-x-3">
                     <Mail className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">info@egpaesthetics.co.uk</span>
-                  </div>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">{siteConfig.contact.email}</span>
+                  </a>
                   <div className="flex items-center space-x-3">
                     <MapPin className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">London, UK</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">{siteConfig.contact.address.full}</span>
                   </div>
                 </div>
               </div>

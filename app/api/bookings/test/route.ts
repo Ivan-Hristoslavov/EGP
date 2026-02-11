@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     // Use customer data from request (either direct fields or customerData object)
     let customerName = directCustomerName || "Test Customer";
     let customerEmail = directCustomerEmail || "test@example.com";
-    let customerPhone = directCustomerPhone || "+44 7700 900123";
+    let customerPhone = directCustomerPhone || process.env.NEXT_PUBLIC_PHONE_NUMBER || "07944 24 20 79";
     
     // Handle legacy customerData object format
     if (customerData && !directCustomerName) {

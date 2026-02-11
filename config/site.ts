@@ -9,9 +9,9 @@ export const siteConfig = {
   // URLs
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://egpaesthetics.co.uk",
   
-  // Contact Information
+  // Contact Information (from env - override in Admin Profile)
   contact: {
-    phone: process.env.NEXT_PUBLIC_PHONE_NUMBER || "+44 XXXX XXXXXX",
+    phone: process.env.NEXT_PUBLIC_PHONE_NUMBER || "07944 24 20 79",
     email: process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "info@egpaesthetics.co.uk",
     whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "+44 XXXX XXXXXX",
     address: {
@@ -168,7 +168,7 @@ export const siteConfig = {
   urgentContact: {
     enabled: true,
     message: "For urgent bookings, please call us directly",
-    phone: process.env.NEXT_PUBLIC_PHONE_NUMBER || "+44 XXXX XXXXXX",
+    phone: process.env.NEXT_PUBLIC_PHONE_NUMBER || "07944 24 20 79",
   },
   
   // Analytics
@@ -180,7 +180,7 @@ export const siteConfig = {
   
   // Legacy (keep for backward compatibility)
   links: {
-    phone: process.env.NEXT_PUBLIC_PHONE_NUMBER || "+44 XXXX XXXXXX",
+    phone: process.env.NEXT_PUBLIC_PHONE_NUMBER || "07944 24 20 79",
     email: process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "info@egpaesthetics.co.uk",
   },
   areas: [], // Will be populated from database

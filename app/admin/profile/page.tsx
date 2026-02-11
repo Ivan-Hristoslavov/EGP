@@ -49,8 +49,8 @@ const defaultSettings: SettingsState = {
   businessCity: "London",
   businessPostcode: "SW1A 1AA",
   businessAddress: "",
-  businessPhone: "+44 7700 900123",
-  businessEmail: "info@egp.com",
+  businessPhone: process.env.NEXT_PUBLIC_PHONE_NUMBER || "07944 24 20 79",
+  businessEmail: process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "info@egpaesthetics.co.uk",
 };
 
 export default function ProfilePage() {
@@ -124,8 +124,8 @@ export default function ProfilePage() {
           lastName: lastName || "",
           email: dbProfile.email || "",
           businessEmail: dbProfile.business_email || process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "",
-          phone: dbProfile.phone || "+44 7700 900123",
-          whatsapp: (dbProfile as any).whatsapp || dbProfile.phone || "+44 7700 900123",
+          phone: dbProfile.phone || process.env.NEXT_PUBLIC_PHONE_NUMBER || "07944 24 20 79",
+          whatsapp: (dbProfile as any).whatsapp || dbProfile.phone || process.env.NEXT_PUBLIC_PHONE_NUMBER || "07944 24 20 79",
           companyName: dbProfile.company_name || "EGP Aesthetics",
           companyAddress: dbProfile.company_address || "809 Wandsworth Road, SW8 3JH, London, UK",
           // Preserve existing avatar value from previous state (avatar is not stored in database)
@@ -142,7 +142,7 @@ export default function ProfilePage() {
           businessCity: (dbProfile.company_address || "").split(",").pop()?.trim() || "London",
           businessPostcode: (dbProfile.company_address || "").match(/[A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2}/i)?.[0] || "SW1A 1AA",
           businessAddress: dbProfile.company_address || "",
-          businessPhone: dbProfile.phone || "+44 7700 900123",
+          businessPhone: dbProfile.phone || process.env.NEXT_PUBLIC_PHONE_NUMBER || "07944 24 20 79",
           businessEmail: dbProfile.business_email || process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "",
         });
       } else {
@@ -153,7 +153,7 @@ export default function ProfilePage() {
           lastName: prev.lastName || "User",
           email: prev.email || process.env.NEXT_PUBLIC_ADMIN_EMAIL || "",
           businessEmail: prev.businessEmail || process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "",
-          phone: prev.phone || "+44 7700 900123",
+          phone: prev.phone || process.env.NEXT_PUBLIC_PHONE_NUMBER || "07944 24 20 79",
           companyName: prev.companyName || "EGP Aesthetics",
           companyAddress: prev.companyAddress || "809 Wandsworth Road, SW8 3JH, London, UK",
         }));
@@ -419,7 +419,7 @@ export default function ProfilePage() {
                       value={profileData.whatsapp}
                       onChange={(e) => setProfileData(prev => ({ ...prev, whatsapp: e.target.value }))}
                       className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                      placeholder="+44 7700 900123"
+                      placeholder="07944 24 20 79"
                     />
                   </div>
                 </div>

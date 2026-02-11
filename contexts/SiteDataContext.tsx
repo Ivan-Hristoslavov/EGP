@@ -50,11 +50,11 @@ interface SiteDataContextType {
 const SiteDataContext = createContext<SiteDataContextType | undefined>(undefined);
 
 const defaultContactInfo: ContactInfo = {
-  address: "809 Wandsworth Road, SW8 3JH, London, UK",
-  phone: "+44 20 7123 4567",
-  email: "info@egpaesthetics.com",
-  whatsapp: "+44 20 7123 4567",
-  googleMapsAddress: "809 Wandsworth Road, SW8 3JH, London, UK"
+  address: process.env.NEXT_PUBLIC_ADDRESS_FULL || "London, UK",
+  phone: process.env.NEXT_PUBLIC_PHONE_NUMBER || "07944 24 20 79",
+  email: process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "info@egpaesthetics.co.uk",
+  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || process.env.NEXT_PUBLIC_PHONE_NUMBER || "07944 24 20 79",
+  googleMapsAddress: process.env.NEXT_PUBLIC_GOOGLE_MAPS_ADDRESS || process.env.NEXT_PUBLIC_ADDRESS_FULL || "London, UK"
 };
 
 const defaultOpeningHours: OpeningHours = {

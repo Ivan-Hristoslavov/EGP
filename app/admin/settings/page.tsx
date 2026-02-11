@@ -37,8 +37,8 @@ const defaultSettings: SettingsState = {
   businessCity: "London",
   businessPostcode: "SW1A 1AA",
   businessAddress: "",
-  businessPhone: "+44 7700 900123",
-  businessEmail: "info@egp.com",
+  businessPhone: process.env.NEXT_PUBLIC_PHONE_NUMBER || "07944 24 20 79",
+  businessEmail: process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "info@egpaesthetics.co.uk",
   
   consultationRate: "150",
   standardRate: "75",
@@ -78,7 +78,7 @@ export default function AdminSettingsPage() {
         businessCity: (profile.company_address || "").split(",").pop()?.trim() || "London",
         businessPostcode: (profile.company_address || "").match(/[A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2}/i)?.[0] || "SW1A 1AA",
         businessAddress: profile.company_address || "",
-        businessPhone: profile.phone || "+44 7700 900123",
+        businessPhone: profile.phone || process.env.NEXT_PUBLIC_PHONE_NUMBER || "07944 24 20 79",
         businessEmail: profile.business_email || "",
         consultationRate: "150", // These should come from admin_settings if needed
         standardRate: "75",

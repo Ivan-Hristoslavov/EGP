@@ -11,12 +11,21 @@ STRIPE_SECRET_KEY=sk_test_placeholder_key
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_placeholder_key
 STRIPE_WEBHOOK_SECRET=whsec_placeholder
 
-# SendGrid Email Configuration
+# SendGrid Email Configuration (optional - for API-based sending)
 SENDGRID_API_KEY=SG.placeholder_key
 SENDGRID_FROM_EMAIL=noreply@egpaesthetics.co.uk
 
+# Gmail SMTP Configuration (newsletter, invoices, test emails)
+SMTP_SERVER=smtp.gmail.com
+SMTP_PORT=465
+SMTP_SECURITY=SSL
+SMTP_USERNAME=your-email@gmail.com
+SMTP_PASSWORD=your_app_specific_password
+SMTP_FROM_ADDRESS=your-email@gmail.com
+SMTP_TO_ADDRESS=test-recipient@example.com
+
 # Admin Configuration
-ADMIN_EMAIL=admin@egpaesthetics.co.uk
+ADMIN_EMAIL=hristoslavov.ivanov@gmail.com
 ADMIN_PASSWORD=admin123
 ADMIN_NAME=Admin User
 
@@ -40,8 +49,8 @@ NEXT_PUBLIC_WHATSAPP_NUMBER=+447700000000
 # Site Configuration
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
-# Contact Information
-NEXT_PUBLIC_PHONE_NUMBER=+447XXXXXXXXX
+# Contact Information (also stored in admin_profile - DB takes precedence in emails)
+NEXT_PUBLIC_PHONE_NUMBER=07944 24 20 79
 NEXT_PUBLIC_BUSINESS_EMAIL=info@egpaesthetics.co.uk
 
 # Address
