@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense, useMemo, useCallback, useRef } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { siteConfig } from "@/config/site";
 import { Calendar, Clock, CreditCard, CheckCircle, Plus, Minus, X, ArrowLeft, Info, Shield, ChevronDown, Lock, Trash2 } from "lucide-react";
 import StripePaymentForm from '@/components/StripePaymentForm';
@@ -55,6 +56,8 @@ type TeamMember = {
 };
 
 function BookingPageContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const { services, isLoading: servicesLoading } = useServices();
   const { showError } = useToast();
   const [selectedServices, setSelectedServices] = useState<OrderItem[]>([]);
@@ -386,36 +389,49 @@ function BookingPageContent() {
     }
   }, [availableDates, selectedDate]);
 
-  // Check for pending service from sessionStorage (from Book Now menu)
+  // Check for pending service from URL or sessionStorage (from + Book on services page, featured services, etc.)
+  const pendingProcessedRef = useRef(false);
   useEffect(() => {
     if (servicesLoading || services.length === 0 || Object.keys(servicesDataMap).length === 0) return;
     if (selectedServices.length > 0) return; // Don't add if services already selected
-    
-    // Check sessionStorage for pending service
-    if (typeof window !== 'undefined') {
-      const pendingServiceId = sessionStorage.getItem('pendingServiceId');
-      if (pendingServiceId) {
-        // Check if service exists and is not already added
-        const service = servicesDataMap[pendingServiceId];
-        if (service && !selectedServices.some(s => s.serviceId === pendingServiceId)) {
-          // Add service automatically
-          setSelectedServices([{
-            serviceId: pendingServiceId,
-            name: service.name,
-            price: service.price,
-            duration: service.duration,
-            category: service.category,
-            quantity: 1
-          }]);
-          // Clear sessionStorage
-          sessionStorage.removeItem('pendingServiceId');
-        } else {
-          // Clear invalid service ID
+    if (pendingProcessedRef.current) return; // Already processed this session (avoids Strict Mode double-add)
+
+    // Prefer URL param (reliable across navigations), then sessionStorage (legacy)
+    const pendingServiceId =
+      searchParams.get('pendingServiceId') ||
+      (typeof window !== 'undefined' ? sessionStorage.getItem('pendingServiceId') : null);
+
+    if (pendingServiceId) {
+      const service = servicesDataMap[pendingServiceId];
+      if (service && !selectedServices.some(s => s.serviceId === pendingServiceId)) {
+        pendingProcessedRef.current = true;
+        setSelectedServices([{
+          serviceId: pendingServiceId,
+          name: service.name,
+          price: service.price,
+          duration: service.duration,
+          category: service.category,
+          quantity: 1
+        }]);
+        // Clear URL param without full reload
+        if (searchParams.get('pendingServiceId')) {
+          const params = new URLSearchParams(searchParams.toString());
+          params.delete('pendingServiceId');
+          router.replace(params.toString() ? `/book?${params.toString()}` : '/book', { scroll: false });
+        }
+        if (typeof window !== 'undefined') {
           sessionStorage.removeItem('pendingServiceId');
         }
+      } else {
+        if (searchParams.get('pendingServiceId')) {
+          const params = new URLSearchParams(searchParams.toString());
+          params.delete('pendingServiceId');
+          router.replace(params.toString() ? `/book?${params.toString()}` : '/book', { scroll: false });
+        }
+        if (typeof window !== 'undefined') sessionStorage.removeItem('pendingServiceId');
       }
     }
-  }, [servicesLoading, services, servicesDataMap, selectedServices]);
+  }, [servicesLoading, services, servicesDataMap, selectedServices, searchParams, router]);
 
   const totalAmount = selectedServices.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const totalDuration = selectedServices.reduce((sum, item) => sum + (item.duration * item.quantity), 0);

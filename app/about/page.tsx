@@ -172,7 +172,7 @@ export default async function AboutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#e4d9c8] dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="container mx-auto px-4 pt-24 pb-16">
         <div className="max-w-4xl mx-auto">
           {/* Back to Home Button */}

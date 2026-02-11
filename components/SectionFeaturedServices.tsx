@@ -91,7 +91,7 @@ export default function SectionFeaturedServices() {
 
   if (isLoading) {
     return (
-      <section className="py-12 sm:py-16 md:py-20 bg-[#e4d9c8] dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <section className="py-12 sm:py-16 md:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12 md:mb-16">
             <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-sm sm:text-base font-semibold mb-3 sm:mb-4`}>
@@ -123,7 +123,7 @@ export default function SectionFeaturedServices() {
 
   if (!isLoading && filteredServices.length === 0) {
     return (
-      <section className="py-12 sm:py-16 md:py-20 bg-[#e4d9c8] dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <section className="py-12 sm:py-16 md:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12 md:mb-16">
             <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-sm sm:text-base font-semibold mb-3 sm:mb-4`}>
@@ -149,7 +149,7 @@ export default function SectionFeaturedServices() {
   }
 
   return (
-    <section id="featured-services" className="py-12 sm:py-16 md:py-20 bg-[#e4d9c8] dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <section id="featured-services" className="py-12 sm:py-16 md:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-8 sm:mb-12 md:mb-16">
@@ -419,7 +419,7 @@ export default function SectionFeaturedServices() {
 
               {/* Details */}
               {selectedService.details && (
-                <div className="bg-[#f5f1e9] dark:bg-gray-800 rounded-xl p-6">
+                <div className="bg-egp-beige-lighter dark:bg-gray-800 rounded-xl p-6">
                   <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3">
                     Treatment Details
                   </h3>
@@ -517,14 +517,8 @@ export default function SectionFeaturedServices() {
               {/* CTA Buttons */}
               <div className="pt-4 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row gap-3">
                 <Link
-                  href="/book/new"
-                  onClick={() => {
-                    // Store service ID in sessionStorage for booking page
-                    if (typeof window !== 'undefined' && selectedService) {
-                      sessionStorage.setItem('pendingServiceId', selectedService.id);
-                    }
-                    setSelectedService(null);
-                  }}
+                  href={`/book?pendingServiceId=${selectedService.id}`}
+                  onClick={() => setSelectedService(null)}
                   className="flex-1 flex items-center justify-center gap-2 text-white py-4 rounded-xl font-semibold text-base sm:text-lg transition-all duration-200 shadow-lg hover:shadow-xl text-center"
                   style={{ backgroundColor: aestheticsColors.green.DEFAULT }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = aestheticsColors.green.hover}

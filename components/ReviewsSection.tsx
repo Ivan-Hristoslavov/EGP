@@ -13,7 +13,7 @@ export function ReviewsSection() {
 
   if (isLoading) {
     return (
-      <section className="py-16 bg-[#f5f1e9] dark:bg-gray-900">
+      <section className="py-16 bg-egp-beige-lighter dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-6 sm:px-8">
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#b5ad9d]"></div>
@@ -26,7 +26,7 @@ export function ReviewsSection() {
 
   if (error) {
     return (
-      <section className="py-16 bg-[#f5f1e9] dark:bg-gray-900">
+      <section className="py-16 bg-egp-beige-lighter dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-6 sm:px-8">
           <div className="text-center py-12 text-red-600">{error}</div>
         </div>
@@ -41,7 +41,7 @@ export function ReviewsSection() {
   const currentReviews = reviews.slice(startIndex, endIndex);
 
   return (
-    <section className="py-16 bg-[#f5f1e9] dark:bg-gray-900" id="reviews">
+    <section className="py-16 bg-egp-beige-lighter dark:bg-gray-900" id="reviews">
       <div className="max-w-7xl mx-auto px-6 sm:px-8">
         {/* Header */}
         <div className="text-center mb-12">
