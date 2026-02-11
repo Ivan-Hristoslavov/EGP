@@ -51,6 +51,7 @@ function ServicesPageContent() {
     const map: Record<string, any> = {};
     services.forEach(service => {
       map[service.slug] = {
+        id: service.id,
         name: service.name,
         price: service.price,
         category: service.category.name,
@@ -265,15 +266,14 @@ function ServicesPageContent() {
                 <Button variant="light" onPress={onClose} size="sm">
                   Close
                 </Button>
-                <Button
-                  as={Link}
-                href="/book/new"
-                  onPress={onClose}
-                  className="bg-egp-green hover:bg-egp-green-dark text-white"
-                  size="sm"
-              >
-                Book This Treatment - £{service.price}
-                </Button>
+                <Link href={service?.id ? `/book?pendingServiceId=${service.id}` : "/book"} onClick={() => onClose()}>
+                  <Button
+                    className="w-full bg-egp-green hover:bg-egp-green-dark text-white"
+                    size="sm"
+                  >
+                    Book This Treatment - £{service.price}
+                  </Button>
+                </Link>
               </ModalFooter>
             </>
           )}
@@ -536,15 +536,15 @@ function ServicesPageContent() {
                       >
                         Details
                       </Button>
-                      <Button
-                        as={Link}
-                        href="/book/new"
-                        size="sm"
-                        className="flex-1 bg-egp-green text-white"
-                        startContent={<Plus className="w-3 h-3" />}
-                      >
-                        Book
-                      </Button>
+                      <Link href={service?.id ? `/book?pendingServiceId=${service.id}` : "/book"}>
+                        <Button
+                          size="sm"
+                          className="flex-1 w-full bg-egp-green text-white"
+                          startContent={<Plus className="w-3 h-3" />}
+                        >
+                          Book
+                        </Button>
+                      </Link>
                   </div>
                 </CardBody>
               </Card>

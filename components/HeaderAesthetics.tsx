@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
@@ -26,6 +26,8 @@ export default function HeaderAesthetics() {
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [isPressPageEnabled, setIsPressPageEnabled] = useState(true); // Default to true
+  const headerRef = useRef<HTMLElement>(null);
+  const [megaMenuTop, setMegaMenuTop] = useState(0);
 
   // Ensure component is mounted before rendering portal
   useEffect(() => {
@@ -195,6 +197,32 @@ export default function HeaderAesthetics() {
     };
   }, [mobileMenuOpen]);
 
+  // Measure header bottom for portal dropdown (so it sits flush under header, no gap on scroll)
+  function updateMegaMenuTop() {
+    requestAnimationFrame(() => {
+      const header = headerRef.current;
+      if (header) setMegaMenuTop(header.getBoundingClientRect().bottom);
+    });
+  }
+
+  useLayoutEffect(() => {
+    if (activeMenu === "treatments" || activeMenu === "conditions") {
+      updateMegaMenuTop();
+    }
+  }, [activeMenu]);
+
+  // Keep dropdown flush under header when user scrolls or resizes (header height can change)
+  useEffect(() => {
+    if (activeMenu !== "treatments" && activeMenu !== "conditions") return;
+    updateMegaMenuTop();
+    window.addEventListener("scroll", updateMegaMenuTop, true);
+    window.addEventListener("resize", updateMegaMenuTop);
+    return () => {
+      window.removeEventListener("scroll", updateMegaMenuTop, true);
+      window.removeEventListener("resize", updateMegaMenuTop);
+    };
+  }, [activeMenu]);
+
   // Handle menu hover with delay
   const handleMenuEnter = (menuType: string) => {
     if (hoverTimeout) {
@@ -214,6 +242,7 @@ export default function HeaderAesthetics() {
   return (
     <>
       <header
+        ref={headerRef}
         className={`fixed top-0 left-0 right-0 transition-all duration-300 ${
           scrolled
             ? "bg-[#ddd5c3] dark:bg-gray-900 shadow-lg"
@@ -633,7 +662,7 @@ export default function HeaderAesthetics() {
                   EGP AESTHETICS
                 </h1>
                 <p
-                  className={`font-montserrat text-gray-500 dark:text-gray-400 font-light tracking-[0.25em] sm:tracking-[0.3em] uppercase transition-all duration-300 group-hover:text-[#9d9585] dark:group-hover:text-[#c9c1b0] group-hover:tracking-[0.35em] sm:group-hover:tracking-[0.4em] ${
+                  className={`font-montserrat text-gray-700 dark:text-gray-400 font-light tracking-[0.25em] sm:tracking-[0.3em] uppercase transition-all duration-300 group-hover:text-gray-900 dark:group-hover:text-white group-hover:tracking-[0.35em] sm:group-hover:tracking-[0.4em] ${
                     scrolled
                       ? "text-[7px] sm:text-[8px] md:text-[9px] mt-0.5"
                       : "text-[8px] sm:text-[9px] md:text-[10px] lg:text-xs mt-0.5 sm:mt-1"
@@ -745,37 +774,48 @@ export default function HeaderAesthetics() {
           </div>
         </div>
 
-        {/* Mega Menu Dropdowns - Desktop Only */}
-        {(activeMenu === "treatments" || activeMenu === "conditions") && (
+        {/* Desktop mega menu is rendered via portal below so backdrop-filter blurs page content */}
+      </header>
+      {/* Portal: desktop mega menu (outside header so backdrop-filter blurs page) */}
+      {isMounted && (activeMenu === "treatments" || activeMenu === "conditions") && typeof document !== "undefined" && createPortal(
+        <div
+          className="hidden lg:block fixed left-0 right-0 shadow-2xl overflow-hidden"
+          style={{
+            zIndex: 9999,
+            top: megaMenuTop,
+            bottom: 0,
+            animation: "slideDown 0.3s ease-out",
+          }}
+          onMouseEnter={() => activeMenu && handleMenuEnter(activeMenu)}
+          onMouseLeave={handleMenuLeave}
+        >
           <div
-            className="hidden lg:block absolute left-0 right-0 top-full shadow-2xl overflow-hidden backdrop-blur-xl"
+            className="absolute inset-0 bg-white/40 dark:bg-black/35 border-b border-white/10 dark:border-white/5"
             style={{
-              zIndex: 9999,
-              animation: "slideDown 0.3s ease-out",
+              backdropFilter: "blur(24px) saturate(180%)",
+              WebkitBackdropFilter: "blur(24px) saturate(180%)",
+              transform: "translateZ(0)",
             }}
-            onMouseEnter={() => handleMenuEnter(activeMenu)}
-            onMouseLeave={handleMenuLeave}
-          >
-            {/* Transparent blurred background - Glassmorphism effect */}
-            <div className="absolute inset-0 min-h-full bg-white/70 dark:bg-black/70 backdrop-blur-xl backdrop-saturate-150"></div>
-            {/* Additional transparent blur layer for depth */}
-            <div className="absolute inset-0 min-h-full bg-white/50 dark:bg-black/50 backdrop-blur-lg"></div>
-            {/* Subtle border for definition */}
-            <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-gray-200/50 dark:via-gray-700/50 to-transparent z-20"></div>
-            {/* Content wrapper */}
-            <div className="relative z-10">
-              <div className="container mx-auto px-4 py-8">
+          />
+          <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-gray-200/50 dark:via-gray-700/50 to-transparent z-20" />
+          <div className="relative z-10 flex h-full flex-col min-h-0">
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              <div className="w-full max-w-[96vw] 2xl:max-w-[1600px] mx-auto px-5 sm:px-6 lg:px-8 py-6">
                 <div
-                  className={`grid gap-8 ${
+                className={`grid gap-4 sm:gap-5 lg:gap-6 ${
                     bookNowCategories.length === 1
                       ? "grid-cols-1"
                       : bookNowCategories.length === 2
                         ? "grid-cols-2"
                         : bookNowCategories.length === 3
                           ? "grid-cols-3"
-                          : bookNowCategories.length >= 4
+                          : bookNowCategories.length === 4
                             ? "grid-cols-4"
-                            : "grid-cols-4"
+                            : bookNowCategories.length === 5
+                              ? "grid-cols-5"
+                              : bookNowCategories.length === 6
+                                ? "grid-cols-6"
+                                : "grid-cols-7"
                   }`}
                 >
                   {activeMenu === "treatments" && (
@@ -784,25 +824,21 @@ export default function HeaderAesthetics() {
                         const categoryServices =
                           bookNowServices[category.id]?.services || [];
                         return (
-                          <div key={category.id}>
-                            <div className="flex items-center justify-between mb-4">
-                              <h3 className="text-xs font-light text-gray-700 dark:text-gray-300 uppercase tracking-widest font-montserrat">
+                          <div key={category.id} className="min-w-0">
+                            <div className="flex items-center justify-between gap-6 mb-5">
+                              <h3 className="text-xs font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-widest font-montserrat">
                                 {category.name}
                               </h3>
                               <Link
                                 href={`/services?category=${encodeURIComponent(category.name)}`}
                                 onClick={() => setActiveMenu(null)}
-                                className="group relative text-xs font-medium transition-all duration-300"
+                                className="group relative text-xs font-medium text-gray-800 dark:text-gray-200 hover:text-egp-green dark:hover:text-egp-beige transition-all duration-300 whitespace-nowrap"
                               >
-                                <span className="relative z-10 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] bg-clip-text text-transparent group-hover:from-[#857d68] group-hover:via-[#aea693] group-hover:to-[#c9c1b0] transition-all duration-300">
-                                  View All
-                                </span>
-                                <span className="relative z-10 ml-1 inline-block group-hover:translate-x-1 transition-transform duration-300">
-                                  →
-                                </span>
+                                <span className="relative z-10">View All</span>
+                                <span className="relative z-10 ml-1 inline-block group-hover:translate-x-1 transition-transform duration-300">→</span>
                               </Link>
                             </div>
-                            <ul className="space-y-2 max-h-[600px] overflow-y-auto menu-scroll pr-2">
+                            <ul className="space-y-1 max-h-[min(78vh,680px)] overflow-y-auto menu-scroll pl-2 pr-2">
                               {categoryServices.map((item) => (
                                 <li key={item.name}>
                                   <Link
@@ -814,14 +850,13 @@ export default function HeaderAesthetics() {
                                       }
                                       setActiveMenu(null);
                                     }}
-                                    className="group relative flex items-start justify-between gap-2 px-2 py-2 -mx-2 rounded-md text-sm text-gray-700 dark:text-gray-300 font-montserrat transition-all duration-300 hover:bg-gradient-to-r hover:from-[#f5f1e9]/80 hover:via-[#eee6d9]/80 hover:to-[#e8decd]/80 dark:hover:from-[#1f1a14]/40 dark:hover:via-[#252018]/40 dark:hover:to-[#2b251c]/40"
+                                    className="group relative flex items-start justify-between gap-4 px-2 py-1.5 -mx-2 rounded-md text-sm text-gray-800 dark:text-gray-200 font-montserrat transition-all duration-300 hover:bg-white/30 dark:hover:bg-white/10"
                                   >
-                                    <span className="relative z-10 group-hover:translate-x-1 group-hover:text-[#8c846f] dark:group-hover:text-[#b5ad9d] transition-all duration-300">
+                                    <span className="relative z-10 group-hover:translate-x-1 text-gray-800 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-all duration-300">
                                       {item.name}
-                                      {/* Animated underline */}
-                                      <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
+                                      <span className="absolute left-0 -bottom-0.5 w-0 h-px bg-egp-green dark:bg-egp-beige group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
                                     </span>
-                                    <span className="relative z-10 font-semibold text-egp-green dark:text-white whitespace-nowrap group-hover:scale-110 transition-transform duration-300">
+                                    <span className="relative z-10 font-semibold text-egp-green dark:text-egp-beige whitespace-nowrap">
                                       £{item.price}
                                     </span>
                                   </Link>
@@ -836,72 +871,62 @@ export default function HeaderAesthetics() {
 
                   {activeMenu === "conditions" && (
                     <>
-                      <div>
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-xs font-light text-gray-700 dark:text-gray-300 uppercase tracking-widest font-montserrat">
+                      <div className="min-w-0">
+                        <div className="flex items-center justify-between gap-6 mb-5">
+                          <h3 className="text-xs font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-widest font-montserrat">
                             Face Conditions
                           </h3>
                           <Link
                             href="/conditions"
                             onClick={() => setActiveMenu(null)}
-                            className="group relative text-xs font-medium text-[#9d9585] dark:text-[#b5ad9d] hover:text-[#857d68] dark:hover:text-[#c9c1b0] transition-all duration-300"
+                            className="group relative text-xs font-medium text-gray-800 dark:text-gray-200 hover:text-egp-green dark:hover:text-egp-beige transition-all duration-300 whitespace-nowrap"
                           >
-                            <span className="relative z-10">
-                              View All
-                            </span>
-                            <span className="relative z-10 ml-1 inline-block group-hover:translate-x-1 transition-transform duration-300">
-                              →
-                            </span>
+                            <span className="relative z-10">View All</span>
+                            <span className="relative z-10 ml-1 inline-block group-hover:translate-x-1 transition-transform duration-300">→</span>
                           </Link>
                         </div>
-                        <ul className="space-y-2 max-h-[600px] overflow-y-auto menu-scroll pr-2">
+                        <ul className="space-y-1 max-h-[min(78vh,680px)] overflow-y-auto menu-scroll pl-2 pr-2">
                           {conditionsByCategory.face.map((condition) => (
                             <li key={condition.id}>
                               <Link
                                 href={`/conditions/${condition.slug}`}
-                                className="group relative block px-2 py-2 -mx-2 rounded-md text-sm text-gray-700 dark:text-gray-300 font-montserrat transition-all duration-300 hover:bg-gradient-to-r hover:from-[#f5f1e9]/80 hover:via-[#eee6d9]/80 hover:to-[#e8decd]/80 dark:hover:from-[#1f1a14]/40 dark:hover:via-[#252018]/40 dark:hover:to-[#2b251c]/40"
+                                className="group relative block px-2 py-1.5 -mx-2 rounded-md text-sm text-gray-800 dark:text-gray-200 font-montserrat transition-all duration-300 hover:bg-white/30 dark:hover:bg-white/10"
                                 onClick={() => setActiveMenu(null)}
                               >
-                                <span className="relative z-10 group-hover:translate-x-1 group-hover:text-[#8c846f] dark:group-hover:text-[#b5ad9d] transition-all duration-300 inline-block">
+                                <span className="relative z-10 group-hover:translate-x-1 text-gray-800 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-all duration-300 inline-block">
                                   {condition.title}
-                                  {/* Animated underline */}
-                                  <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
+                                  <span className="absolute left-0 -bottom-0.5 w-0 h-px bg-egp-green dark:bg-egp-beige group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
                                 </span>
                               </Link>
                             </li>
                           ))}
                         </ul>
                       </div>
-                      <div>
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-xs font-light text-gray-700 dark:text-gray-300 uppercase tracking-widest font-montserrat">
+                      <div className="min-w-0">
+                        <div className="flex items-center justify-between gap-6 mb-5">
+                          <h3 className="text-xs font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-widest font-montserrat">
                             Body Conditions
                           </h3>
                           <Link
                             href="/conditions?category=Body"
                             onClick={() => setActiveMenu(null)}
-                            className="group relative text-xs font-medium transition-all duration-300"
+                            className="group relative text-xs font-medium text-gray-800 dark:text-gray-200 hover:text-egp-green dark:hover:text-egp-beige transition-all duration-300 whitespace-nowrap"
                           >
-                            <span className="relative z-10 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] bg-clip-text text-transparent group-hover:from-[#857d68] group-hover:via-[#aea693] group-hover:to-[#c9c1b0] transition-all duration-300">
-                              View All
-                            </span>
-                            <span className="relative z-10 ml-1 inline-block group-hover:translate-x-1 transition-transform duration-300">
-                              →
-                            </span>
+                            <span className="relative z-10">View All</span>
+                            <span className="relative z-10 ml-1 inline-block group-hover:translate-x-1 transition-transform duration-300">→</span>
                           </Link>
                         </div>
-                        <ul className="space-y-2 max-h-[600px] overflow-y-auto menu-scroll pr-2">
+                        <ul className="space-y-1 max-h-[min(78vh,680px)] overflow-y-auto menu-scroll pl-2 pr-2">
                           {conditionsByCategory.body.map((condition) => (
                             <li key={condition.id}>
                               <Link
                                 href={`/conditions/${condition.slug}`}
-                                className="group relative block px-2 py-2 -mx-2 rounded-md text-sm text-gray-700 dark:text-gray-300 font-montserrat transition-all duration-300 hover:bg-gradient-to-r hover:from-[#f5f1e9]/80 hover:via-[#eee6d9]/80 hover:to-[#e8decd]/80 dark:hover:from-[#1f1a14]/40 dark:hover:via-[#252018]/40 dark:hover:to-[#2b251c]/40"
+                                className="group relative block px-2 py-1.5 -mx-2 rounded-md text-sm text-gray-800 dark:text-gray-200 font-montserrat transition-all duration-300 hover:bg-white/30 dark:hover:bg-white/10"
                                 onClick={() => setActiveMenu(null)}
                               >
-                                <span className="relative z-10 group-hover:translate-x-1 group-hover:text-[#8c846f] dark:group-hover:text-[#b5ad9d] transition-all duration-300 inline-block">
+                                <span className="relative z-10 group-hover:translate-x-1 text-gray-800 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-all duration-300 inline-block">
                                   {condition.title}
-                                  {/* Animated underline */}
-                                  <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
+                                  <span className="absolute left-0 -bottom-0.5 w-0 h-px bg-egp-green dark:bg-egp-beige group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
                                 </span>
                               </Link>
                             </li>
@@ -915,9 +940,15 @@ export default function HeaderAesthetics() {
                 </div>
               </div>
             </div>
+            {/* Scroll hint - always visible at bottom, outside scroll area */}
+            <div className="flex-shrink-0 border-t-2 border-white/50 dark:border-gray-500/50 bg-white/20 dark:bg-black/20 px-4 py-3 flex items-center justify-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200">
+              <ChevronDown className="w-4 h-4 flex-shrink-0 opacity-80" />
+              <span>Scroll within each column to see all services</span>
+            </div>
           </div>
-        )}
-      </header>
+        </div>,
+        document.body
+      )}
       {isMounted &&
         mobileMenuOpen &&
         createPortal(

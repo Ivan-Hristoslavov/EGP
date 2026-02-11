@@ -887,6 +887,7 @@ export default function BookingsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2 relative customer-search-container">
                     <Input
+                      name="customer_name"
                       label="Customer Name"
                       placeholder="Enter customer name or search..."
                         value={formData.customer_name}
@@ -945,6 +946,7 @@ export default function BookingsPage() {
                     </div>
 
                   <Input
+                      name="customer_email"
                           type="email"
                     label="Email"
                     placeholder="customer@email.com"
@@ -956,6 +958,7 @@ export default function BookingsPage() {
                   />
 
                   <Input
+                      name="customer_phone"
                           type="tel"
                     label="Phone"
                     placeholder="07944 24 20 79"
@@ -965,6 +968,7 @@ export default function BookingsPage() {
                   />
 
                   <Input
+                    name="service"
                     label="Service"
                     placeholder="Enter service name"
                       value={formData.service}
@@ -979,6 +983,7 @@ export default function BookingsPage() {
                 {/* Date and Time */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
+                      name="date"
                           type="date"
                     label="Date"
                       value={formData.date}
@@ -989,6 +994,7 @@ export default function BookingsPage() {
                   />
 
                   <Input
+                      name="time"
                           type="time"
                     label="Time"
                       value={formData.time}
@@ -1002,6 +1008,7 @@ export default function BookingsPage() {
                 {/* Amount and Status */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Input
+                      name="amount"
                         type="number"
                     label="Amount (£)"
                     placeholder="0.00"
@@ -1044,6 +1051,7 @@ export default function BookingsPage() {
 
                 {/* Address */}
                 <Textarea
+                  name="address"
                   label="Address"
                   placeholder="Enter service address"
                     value={formData.address}
@@ -1053,6 +1061,7 @@ export default function BookingsPage() {
 
                 {/* Notes */}
                 <Textarea
+                  name="notes"
                   label="Notes"
                   placeholder="Enter any additional notes"
                     value={formData.notes}

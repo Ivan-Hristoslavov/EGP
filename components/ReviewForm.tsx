@@ -101,7 +101,7 @@ export function ReviewForm() {
 
   if (submitResult) {
     return (
-      <section className="py-16 bg-[#f5f1e9] dark:bg-gray-900" id="leave-review">
+      <section className="py-16 bg-egp-beige-lighter dark:bg-gray-900" id="leave-review">
         <div className="max-w-xl mx-auto px-6 sm:px-8">
           <div className={`relative overflow-hidden rounded-2xl p-8 text-center ${
             submitResult.success 
@@ -135,7 +135,7 @@ export function ReviewForm() {
   }
 
   return (
-    <section className="py-12 sm:py-16 bg-[#f5f1e9] dark:bg-gray-900" id="leave-review">
+    <section className="py-12 sm:py-16 bg-egp-beige-lighter dark:bg-gray-900" id="leave-review">
       <div className="max-w-2xl mx-auto px-6 sm:px-8">
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
