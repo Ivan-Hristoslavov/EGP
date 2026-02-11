@@ -587,7 +587,7 @@ export default function CustomersPage() {
                   <Input
                     type="tel"
                     label="Phone"
-                    placeholder="+44 7700 900123"
+                    placeholder="07944 24 20 79"
                     value={newCustomer.phone}
                     onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
                     isRequired

@@ -958,7 +958,7 @@ export default function BookingsPage() {
                   <Input
                           type="tel"
                     label="Phone"
-                    placeholder="+44 7700 900123"
+                    placeholder="07944 24 20 79"
                       value={formData.customer_phone}
                       onChange={handleInputChange}
                     isClearable

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export interface AdminProfile {
   id: string;
@@ -39,5 +40,44 @@ export async function getAdminProfile(): Promise<AdminProfile | null> {
   } catch (error) {
     console.error('Error in getAdminProfile:', error);
     return null;
+  }
+}
+
+export interface AdminContactInfo {
+  phone: string;
+  email: string;
+}
+
+/**
+ * Get contact info from admin_profile for use in emails and API routes.
+ * Falls back to env vars when DB values are missing.
+ */
+export async function getAdminContactInfo(): Promise<AdminContactInfo> {
+  try {
+    const { data: profile } = await supabaseAdmin
+      .from('admin_profile')
+      .select('phone, business_email')
+      .single();
+
+    return {
+      phone:
+        profile?.phone ||
+        process.env.NEXT_PUBLIC_PHONE_NUMBER ||
+        '07944 24 20 79',
+      email:
+        profile?.business_email ||
+        process.env.ADMIN_EMAIL ||
+        process.env.NEXT_PUBLIC_BUSINESS_EMAIL ||
+        'info@egpaesthetics.co.uk',
+    };
+  } catch (error) {
+    console.warn('Error fetching admin contact info:', error);
+    return {
+      phone: process.env.NEXT_PUBLIC_PHONE_NUMBER || '07944 24 20 79',
+      email:
+        process.env.ADMIN_EMAIL ||
+        process.env.NEXT_PUBLIC_BUSINESS_EMAIL ||
+        'info@egpaesthetics.co.uk',
+    };
   }
 } 

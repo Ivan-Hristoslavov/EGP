@@ -47,16 +47,36 @@ export async function POST(request: NextRequest) {
       subject: subject,
       text: message,
       html: `
-        <html>
-          <body>
-            <h2>Test Email</h2>
-            <p>${message}</p>
-            <p>This email was sent to verify that SMTP (Gmail) is working correctly.</p>
-            <p>If you received this email, the email configuration is working properly!</p>
-            <hr>
-            <p><small>Sent at: ${new Date().toLocaleString()}</small></p>
-          </body>
-        </html>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{margin:0;padding:0;font-family:Georgia,serif;background:#f5f3ef;color:#1c1917}
+.wrap{max-width:560px;margin:0 auto;background:#fff}
+.head{background:#1c1917;color:#faf8f5;padding:36px 28px;text-align:center}
+.head h1{margin:0;font-size:22px;font-weight:400;letter-spacing:.1em}
+.line{width:40px;height:2px;background:#b76e79;margin:14px auto 0}
+.main{padding:40px 32px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.7}
+.ft{padding:24px;text-align:center;font-size:12px;color:#a8a29e;border-top:1px solid #e7e4df}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="head">
+<h1>SMTP Test</h1>
+<p style="margin:8px 0 0;font-size:14px;opacity:.9">EGP Aesthetics</p>
+<div class="line"></div>
+</div>
+<div class="main">
+<p>${message}</p>
+<p>This email confirms that SMTP (Gmail) is configured correctly. If you received this, the setup is working.</p>
+</div>
+<div class="ft">${new Date().toLocaleString()}</div>
+</div>
+</body>
+</html>
       `,
     });
 

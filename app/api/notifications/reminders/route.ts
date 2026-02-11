@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { sendEmail } from "@/lib/sendgrid";
+import { sendEmail } from "@/lib/sendgrid-smtp";
+import { getAdminContactInfo } from "@/lib/admin-profile";
 
 export async function POST(request: NextRequest) {
   try {
@@ -97,6 +98,7 @@ export async function POST(request: NextRequest) {
     }
 
     const results = [];
+    const contactInfo = await getAdminContactInfo();
 
     for (const booking of bookings) {
       try {
@@ -105,10 +107,10 @@ export async function POST(request: NextRequest) {
 
         if (type === "24h" || type === "1h") {
           subject = `Reminder: Your ${booking.service} appointment ${reminderTime} from now`;
-          emailContent = generateReminderEmail(booking, reminderTime);
+          emailContent = generateReminderEmail(booking, reminderTime, contactInfo);
         } else if (type === "followup") {
           subject = `How was your ${booking.service} treatment?`;
-          emailContent = generateFollowupEmail(booking);
+          emailContent = generateFollowupEmail(booking, contactInfo);
         }
 
         // Send email
@@ -160,110 +162,118 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function generateReminderEmail(booking: any, reminderTime: string): string {
+function generateReminderEmail(booking: any, reminderTime: string, contactInfo: { phone: string; email: string }): string {
   const appointmentDate = new Date(booking.date).toLocaleDateString('en-GB', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   });
+  const firstName = booking.customers?.first_name || 'there';
 
   return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <title>Appointment Reminder</title>
-      <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: linear-gradient(135deg, #ec4899, #8b5cf6); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-        .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
-        .appointment-details { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ec4899; }
-        .button { display: inline-block; background: #ec4899; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 10px 0; }
-        .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1>Appointment Reminder</h1>
-          <p>EGP Aesthetics London</p>
-        </div>
-        <div class="content">
-          <h2>Hello ${booking.customers.first_name}!</h2>
-          <p>This is a friendly reminder that you have an appointment coming up in ${reminderTime}.</p>
-          
-          <div class="appointment-details">
-            <h3>Appointment Details</h3>
-            <p><strong>Service:</strong> ${booking.service}</p>
-            <p><strong>Date:</strong> ${appointmentDate}</p>
-            <p><strong>Time:</strong> ${booking.time}</p>
-            <p><strong>Amount:</strong> £${booking.amount}</p>
-            ${booking.address ? `<p><strong>Address:</strong> ${booking.address}</p>` : ''}
-          </div>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Appointment Reminder</title>
+<style>
+body{margin:0;padding:0;font-family:Georgia,serif;background:#f5f3ef;color:#1c1917}
+.wrap{max-width:560px;margin:0 auto;background:#fff}
+.head{background:linear-gradient(165deg,#1c1917 0%,#292524 100%);color:#faf8f5;padding:44px 32px;text-align:center}
+.head h1{margin:0;font-size:24px;font-weight:400;letter-spacing:.08em}
+.head p{margin:8px 0 0;font-size:14px;opacity:.9}
+.accent{width:48px;height:3px;background:#b76e79;margin:20px auto 0}
+.badge{display:inline-block;background:#b76e79;color:#fff;padding:10px 24px;font-size:11px;letter-spacing:.2em;margin-top:16px}
+.main{padding:40px 32px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.7}
+.card{background:#faf8f5;border:1px solid #e7e4df;margin:24px 0;padding:24px}
+.card-title{font-size:11px;letter-spacing:.15em;color:#78716c;margin-bottom:16px}
+.row{padding:12px 0;border-bottom:1px solid #e7e4df}
+.row:last-child{border-bottom:none}
+.ft{padding:28px 32px;text-align:center;font-size:12px;color:#a8a29e;border-top:1px solid #e7e4df}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="head">
+<h1>Appointment Reminder</h1>
+<p>${reminderTime} from now</p>
+<div class="accent"></div>
+<span class="badge">EGP Aesthetics</span>
+</div>
+<div class="main">
+<p>Hello ${firstName},</p>
+<p>This is a friendly reminder that your appointment is coming up in ${reminderTime}.</p>
 
-          <p>If you need to reschedule or cancel your appointment, please contact us as soon as possible.</p>
-          
-          <p>We look forward to seeing you!</p>
-          
-          <div class="footer">
-            <p><strong>EGP Aesthetics London</strong></p>
-            <p>Phone: +44 20 1234 5678</p>
-            <p>Email: info@egpaesthetics.co.uk</p>
-            <p>Website: www.egpaesthetics.co.uk</p>
-          </div>
-        </div>
-      </div>
-    </body>
-    </html>
+<div class="card">
+<div class="card-title">Your appointment</div>
+<div class="row">${booking.service}</div>
+<div class="row">${appointmentDate}</div>
+<div class="row">${booking.time} · £${booking.amount}</div>
+${booking.address ? `<div class="row">${booking.address}</div>` : ''}
+</div>
+
+<p>Need to reschedule? Contact us as soon as possible. We look forward to seeing you.</p>
+
+<div class="ft">
+<p style="margin:0 0 4px"><strong>EGP Aesthetics London</strong></p>
+<p style="margin:0">${contactInfo.phone} · ${contactInfo.email}</p>
+</div>
+</div>
+</div>
+</body>
+</html>
   `;
 }
 
-function generateFollowupEmail(booking: any): string {
+function generateFollowupEmail(booking: any, contactInfo: { phone: string; email: string }): string {
+  const firstName = booking.customers?.first_name || 'there';
+
   return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <title>Treatment Follow-up</title>
-      <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: linear-gradient(135deg, #ec4899, #8b5cf6); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-        .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
-        .button { display: inline-block; background: #ec4899; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 10px 0; }
-        .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1>How was your treatment?</h1>
-          <p>EGP Aesthetics London</p>
-        </div>
-        <div class="content">
-          <h2>Hello ${booking.customers.first_name}!</h2>
-          <p>We hope you're enjoying the results of your ${booking.service} treatment from 3 days ago.</p>
-          
-          <p>We'd love to hear about your experience and see how you're doing. Your feedback helps us improve our services and helps other clients make informed decisions.</p>
-          
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="https://www.egpaesthetics.co.uk/reviews" class="button">Leave a Review</a>
-          </div>
-          
-          <p>If you have any questions or concerns about your treatment, please don't hesitate to contact us.</p>
-          
-          <p>We look forward to seeing you again soon!</p>
-          
-          <div class="footer">
-            <p><strong>EGP Aesthetics London</strong></p>
-            <p>Phone: +44 20 1234 5678</p>
-            <p>Email: info@egpaesthetics.co.uk</p>
-          </div>
-        </div>
-      </div>
-    </body>
-    </html>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Treatment Follow-up</title>
+<style>
+body{margin:0;padding:0;font-family:Georgia,serif;background:#f5f3ef;color:#1c1917}
+.wrap{max-width:560px;margin:0 auto;background:#fff}
+.head{background:linear-gradient(165deg,#1c1917 0%,#292524 100%);color:#faf8f5;padding:44px 32px;text-align:center}
+.head h1{margin:0;font-size:24px;font-weight:400;letter-spacing:.08em}
+.accent{width:48px;height:3px;background:#b76e79;margin:20px auto 0}
+.badge{display:inline-block;background:#b76e79;color:#fff;padding:10px 24px;font-size:11px;letter-spacing:.2em;margin-top:16px}
+.main{padding:40px 32px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.7}
+.btn{display:inline-block;background:#1c1917;color:#faf8f5!important;padding:16px 36px;text-decoration:none;font-size:13px;letter-spacing:.1em}
+.ft{padding:28px 32px;text-align:center;font-size:12px;color:#a8a29e;border-top:1px solid #e7e4df}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="head">
+<h1>How was your treatment?</h1>
+<div class="accent"></div>
+<span class="badge">We'd love your feedback</span>
+</div>
+<div class="main">
+<p>Hello ${firstName},</p>
+<p>We hope you're enjoying the results of your ${booking.service} treatment from a few days ago.</p>
+<p>Your feedback helps us improve and helps others make informed decisions. We'd love to hear about your experience.</p>
+
+<div style="text-align:center;margin:28px 0">
+<a href="https://www.egpaesthetics.co.uk/reviews" class="btn">Leave a Review</a>
+</div>
+
+<p>Any questions about your treatment? We're here for you.</p>
+
+<div class="ft">
+<p style="margin:0 0 4px"><strong>EGP Aesthetics London</strong></p>
+<p style="margin:0">${contactInfo.phone} · ${contactInfo.email}</p>
+</div>
+</div>
+</div>
+</body>
+</html>
   `;
 }

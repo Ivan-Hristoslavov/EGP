@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle, Calendar, Gift, Star, ArrowRight } from "lucide-react";
+import { siteConfig } from "@/config/site";
 
 function MembershipSuccessContent() {
   const [membership, setMembership] = useState<any>(null);
@@ -222,16 +223,16 @@ function MembershipSuccessContent() {
           </p>
           <div className="flex justify-center space-x-6">
             <a
-              href="tel:+442012345678"
+              href={`tel:${siteConfig.contact.phone.replace(/\s/g, "")}`}
               className="text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 font-medium"
             >
-              +44 20 1234 5678
+              {siteConfig.contact.phone}
             </a>
             <a
-              href="mailto:info@egpaesthetics.co.uk"
+              href={`mailto:${siteConfig.contact.email}`}
               className="text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 font-medium"
             >
-              info@egpaesthetics.co.uk
+              {siteConfig.contact.email}
             </a>
           </div>
         </div>

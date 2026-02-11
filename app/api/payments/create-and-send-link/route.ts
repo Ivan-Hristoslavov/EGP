@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "../../../../lib/supabase";
 import { createPaymentLink, isStripeAvailable } from "../../../../lib/stripe";
+import { sendEmail } from "../../../../lib/sendgrid-smtp";
 
 export async function POST(request: NextRequest) {
   try {
@@ -122,69 +123,62 @@ export async function POST(request: NextRequest) {
     // Create email content
     const emailSubject = `Payment Request from ${adminProfile.company_name || adminProfile.name}`;
     const emailContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #333;">Payment Request</h2>
-        
-        <p>Dear ${customerName},</p>
-        
-        <p>We hope this email finds you well. We have prepared a secure payment link for your convenience.</p>
-        
-        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="color: #333; margin-top: 0;">Payment Details</h3>
-          <p><strong>Amount:</strong> £${amount.toFixed(2)}</p>
-          <p><strong>Description:</strong> ${productName}</p>
-          ${booking ? `<p><strong>Service:</strong> ${booking.service}</p>` : ''}
-          ${booking ? `<p><strong>Date:</strong> ${new Date(booking.date).toLocaleDateString()}</p>` : ''}
-          <p><strong>Payment Method:</strong> Secure online payment via Stripe</p>
-        </div>
-        
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${paymentLink.url}" 
-             style="background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
-            Pay Now - £${amount.toFixed(2)}
-          </a>
-        </div>
-        
-        <p style="color: #666; font-size: 14px;">
-          This payment link is secure and processed by Stripe. You can pay using your credit/debit card or other supported payment methods.
-        </p>
-        
-        <p style="color: #666; font-size: 14px;">
-          If you have any questions about this payment, please don't hesitate to contact us.
-        </p>
-        
-        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-        
-        <p style="color: #666; font-size: 12px;">
-          Best regards,<br>
-          ${adminProfile.name}<br>
-          ${adminProfile.company_name || ''}<br>
-          ${adminProfile.email}
-        </p>
-      </div>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{margin:0;padding:0;font-family:Georgia,serif;background:#f5f3ef;color:#1c1917}
+.wrap{max-width:560px;margin:0 auto;background:#fff}
+.head{background:#1c1917;color:#faf8f5;padding:36px 28px;text-align:center}
+.head h1{margin:0;font-size:22px;font-weight:400;letter-spacing:.1em}
+.line{width:40px;height:2px;background:#b76e79;margin:14px auto 0}
+.main{padding:40px 32px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.7}
+.card{background:#faf8f5;border:1px solid #e7e4df;margin:24px 0;padding:24px}
+.card-title{font-size:11px;letter-spacing:.12em;color:#78716c;margin-bottom:12px}
+.row{padding:10px 0;border-bottom:1px solid #e7e4df}
+.row:last-child{border-bottom:none}
+.btn{display:inline-block;background:#1c1917;color:#faf8f5!important;padding:16px 36px;text-decoration:none;font-size:13px;letter-spacing:.1em}
+.ft{padding:28px 32px;text-align:center;font-size:12px;color:#a8a29e;border-top:1px solid #e7e4df}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="head">
+<h1>Payment Request</h1>
+<p style="margin:8px 0 0;font-size:14px;opacity:.9">${adminProfile.company_name || adminProfile.name}</p>
+<div class="line"></div>
+</div>
+<div class="main">
+<p>Dear ${customerName},</p>
+<p>We've prepared a secure payment link for you.</p>
+<div class="card">
+<div class="card-title">Details</div>
+<div class="row">£${amount.toFixed(2)}</div>
+<div class="row">${productName}</div>
+${booking ? `<div class="row">${booking.service} · ${new Date(booking.date).toLocaleDateString()}</div>` : ''}
+</div>
+<div style="text-align:center;margin:28px 0">
+<a href="${paymentLink.url}" class="btn">Pay Now — £${amount.toFixed(2)}</a>
+</div>
+<p style="font-size:14px;color:#78716c">Secure payment via Stripe. Questions? Contact ${adminProfile.name}.</p>
+</div>
+<div class="ft">
+<p style="margin:0">${adminProfile.name} · ${adminProfile.company_name || ''}</p>
+</div>
+</div>
+</body>
+</html>
     `;
 
-    // Send email using your preferred email service
-    // For now, we'll just log the email content
-    console.log('Email would be sent to:', customer.email);
-    console.log('Email subject:', emailSubject);
-    console.log('Email content:', emailContent);
-
-    // TODO: Implement actual email sending using SendGrid or similar service
-    // Example with SendGrid:
-    /*
-    const sgMail = require('@sendgrid/mail');
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
-    const msg = {
+    // Send email via SMTP (Gmail)
+    await sendEmail({
       to: customer.email,
-      from: adminProfile.email,
       subject: emailSubject,
+      text: `Payment Request from ${adminProfile.company_name || adminProfile.name}\n\nDear ${customerName},\n\nPay Now: ${paymentLink.url}\n\nAmount: £${amount.toFixed(2)}\n${booking ? `Service: ${booking.service}\n` : ""}${booking ? `Date: ${new Date(booking.date).toLocaleDateString()}\n` : ""}`,
       html: emailContent,
-    };
-
-    await sgMail.send(msg);
-    */
+    });
 
     // Update payment record to track that email was sent
     await supabase

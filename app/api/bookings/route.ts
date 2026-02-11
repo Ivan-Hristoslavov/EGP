@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "../../../lib/supabase";
-import { sendEmail } from "@/lib/sendgrid";
+import { sendEmail } from "@/lib/sendgrid-smtp";
+import { getAdminContactInfo } from "@/lib/admin-profile";
 
 // GET - Fetch bookings with pagination and filtering
 export async function GET(request: NextRequest) {
@@ -284,16 +285,18 @@ export async function POST(request: NextRequest) {
 // Function to send booking notification email to admin
 async function sendBookingNotificationEmail(booking: any) {
   try {
-    // Get admin email from database or environment
-    const { data: adminProfile } = await supabaseAdmin
-      .from('admin_profile')
-      .select('email, name')
-      .single();
-
-    const adminEmail = adminProfile?.email || process.env.ADMIN_EMAIL;
-    
+    // Prefer ADMIN_EMAIL from env (e.g. info@egpaesthetics.co.uk), fallback to admin_profile
+    let adminEmail = process.env.ADMIN_EMAIL;
     if (!adminEmail) {
-      console.warn("No admin email found for booking notification");
+      const { data: adminProfile } = await supabaseAdmin
+        .from("admin_profile")
+        .select("email")
+        .single();
+      adminEmail = adminProfile?.email;
+    }
+
+    if (!adminEmail) {
+      console.warn("No admin email found for booking notification. Set ADMIN_EMAIL in .env");
       return;
     }
 
@@ -347,64 +350,51 @@ function generateBookingNotificationEmailHtml(booking: any): string {
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Booking Request</title>
-    <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #3b82f6; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
-        .content { background-color: #f9fafb; padding: 20px; border-radius: 0 0 8px 8px; }
-        .booking-details { background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #3b82f6; }
-        .amount { font-size: 24px; font-weight: bold; color: #3b82f6; }
-        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 14px; color: #6b7280; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Booking Request</title>
+<style>
+body{margin:0;padding:0;font-family:Georgia,serif;background:#f5f3ef;color:#1c1917}
+.wrap{max-width:560px;margin:0 auto;background:#fff}
+.head{background:#1c1917;color:#faf8f5;padding:36px 28px;text-align:center}
+.head h1{margin:0;font-size:22px;font-weight:400;letter-spacing:.1em}
+.line{width:40px;height:2px;background:#b76e79;margin:14px auto 0}
+.badge{display:inline-block;background:#78716c;color:#fff;padding:6px 16px;font-size:10px;letter-spacing:.15em;margin-top:12px}
+.main{padding:32px 28px;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:1.65}
+.sect{background:#faf8f5;border:1px solid #e7e4df;margin:20px 0;padding:20px}
+.sect-title{font-size:11px;letter-spacing:.12em;color:#78716c;margin-bottom:12px}
+.row{padding:10px 0;border-bottom:1px solid #e7e4df}
+.row:last-child{border-bottom:none}
+.amt{font-size:22px;font-weight:400;color:#1c1917}
+.ft{padding:24px;text-align:center;font-size:12px;color:#a8a29e;border-top:1px solid #e7e4df}
+</style>
 </head>
 <body>
-    <div class="header">
-        <h1>New Booking Request</h1>
-    </div>
-    
-    <div class="content">
-        <h2>Customer Details</h2>
-        <div class="booking-details">
-            <p><strong>Name:</strong> ${booking.customer_name}</p>
-            <p><strong>Email:</strong> ${booking.customer_email || 'Not provided'}</p>
-            <p><strong>Phone:</strong> ${booking.customer_phone || 'Not provided'}</p>
-        </div>
-        
-        <h2>Service Details</h2>
-        <div class="booking-details">
-            <p><strong>Service:</strong> ${booking.service}</p>
-            <p><strong>Date:</strong> ${bookingDate}</p>
-            <p><strong>Time:</strong> ${booking.time}</p>
-            <p><strong>Amount:</strong> <span class="amount">£${booking.amount.toFixed(2)}</span></p>
-        </div>
-        
-        ${booking.address ? `
-        <h2>Address</h2>
-        <div class="booking-details">
-            <p>${booking.address}</p>
-        </div>
-        ` : ''}
-        
-        ${booking.notes ? `
-        <h2>Notes</h2>
-        <div class="booking-details">
-            <p>${booking.notes}</p>
-        </div>
-        ` : ''}
-        
-        <div class="booking-details">
-            <p><strong>Booking ID:</strong> ${booking.id}</p>
-            <p><strong>Created:</strong> ${new Date(booking.created_at).toLocaleString("en-GB")}</p>
-        </div>
-        
-        <p>Please review and update the booking status in your admin panel.</p>
-    </div>
-    
-    <div class="footer">
-        <p>This is an automated notification from the booking system.</p>
-    </div>
+<div class="wrap">
+<div class="head">
+<h1>New Booking Request</h1>
+<div class="line"></div>
+<span class="badge">PENDING</span>
+</div>
+<div class="main">
+<div class="sect">
+<div class="sect-title">CUSTOMER</div>
+<div class="row">${booking.customer_name}</div>
+<div class="row">${booking.customer_email || '—'}</div>
+<div class="row">${booking.customer_phone || '—'}</div>
+</div>
+<div class="sect">
+<div class="sect-title">APPOINTMENT</div>
+<div class="row">${booking.service}</div>
+<div class="row">${bookingDate} · ${booking.time}</div>
+<div class="row"><span class="amt">£${booking.amount.toFixed(2)}</span></div>
+</div>
+${booking.address ? `<div class="sect"><div class="sect-title">ADDRESS</div><div class="row">${booking.address}</div></div>` : ''}
+${booking.notes ? `<div class="sect"><div class="sect-title">NOTES</div><div class="row">${booking.notes}</div></div>` : ''}
+<p style="color:#78716c;font-size:13px;">Ref: ${booking.id} · ${new Date(booking.created_at).toLocaleString("en-GB")}</p>
+</div>
+<div class="ft">Booking system · EGP Aesthetics</div>
+</div>
 </body>
 </html>
   `.trim();
@@ -418,17 +408,16 @@ async function sendCustomerBookingConfirmationEmail(booking: any) {
       return;
     }
 
-    // Generate Stripe payment link
+    const contactInfo = await getAdminContactInfo();
     const paymentLink = await generateStripePaymentLink(booking);
-    
     const emailSubject = `Booking Confirmation - ${booking.service} on ${new Date(booking.date).toLocaleDateString("en-GB")}`;
-    const emailBody = generateCustomerBookingConfirmationEmail(booking, paymentLink);
+    const emailBody = generateCustomerBookingConfirmationEmail(booking, paymentLink, contactInfo);
 
     await sendEmail({
       to: booking.customer_email,
       subject: emailSubject,
       text: emailBody,
-      html: generateCustomerBookingConfirmationEmailHtml(booking, paymentLink)
+      html: generateCustomerBookingConfirmationEmailHtml(booking, paymentLink, contactInfo),
     });
 
   } catch (error) {
@@ -454,7 +443,7 @@ async function generateStripePaymentLink(booking: any) {
   }
 }
 
-function generateCustomerBookingConfirmationEmail(booking: any, paymentLink: string): string {
+function generateCustomerBookingConfirmationEmail(booking: any, paymentLink: string, contactInfo: { phone: string; email: string }): string {
   const bookingDate = new Date(booking.date).toLocaleDateString("en-GB");
   
   return `
@@ -484,8 +473,8 @@ Important Information:
 - Late cancellations may incur a fee
 
 Contact Information:
-Phone: +44 7700 900123
-Email: info@egp.com
+Phone: ${contactInfo.phone}
+Email: ${contactInfo.email}
 
 We look forward to seeing you!
 
@@ -496,94 +485,83 @@ Booking ID: ${booking.id}
   `.trim();
 }
 
-function generateCustomerBookingConfirmationEmailHtml(booking: any, paymentLink: string): string {
+function generateCustomerBookingConfirmationEmailHtml(booking: any, paymentLink: string, contactInfo: { phone: string; email: string }): string {
   const bookingDate = new Date(booking.date).toLocaleDateString("en-GB");
   
   return `
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking Confirmation</title>
-    <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
-        .content { background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
-        .booking-details { background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea; }
-        .amount { font-size: 28px; font-weight: bold; color: #667eea; }
-        .payment-button { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
-        .payment-button:hover { opacity: 0.9; }
-        .info-box { background-color: #e0f2fe; border: 1px solid #81d4fa; padding: 15px; border-radius: 8px; margin: 20px 0; }
-        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 14px; color: #6b7280; text-align: center; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Booking Confirmation</title>
+<style>
+body{margin:0;padding:0;font-family:Georgia,serif;background:#f5f3ef;color:#1c1917}
+.wrap{max-width:560px;margin:0 auto;background:#fff}
+.head{background:linear-gradient(165deg,#1c1917 0%,#292524 100%);color:#faf8f5;padding:44px 32px;text-align:center}
+.head h1{margin:0;font-size:24px;font-weight:400;letter-spacing:.08em}
+.head p{margin:8px 0 0;font-size:14px;opacity:.9;font-family:Helvetica,Arial,sans-serif}
+.accent{width:48px;height:3px;background:#b76e79;margin:20px auto 0}
+.badge{display:inline-block;background:#78716c;color:#fff;padding:10px 24px;font-size:11px;letter-spacing:.2em;margin-top:16px}
+.main{padding:40px 32px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.7;color:#2d2a26}
+.card{background:#faf8f5;border:1px solid #e7e4df;margin:24px 0;padding:24px}
+.card-title{font-family:Georgia,serif;font-size:11px;letter-spacing:.15em;color:#78716c;margin-bottom:16px}
+.row{padding:12px 0;border-bottom:1px solid #e7e4df}
+.row:last-child{border-bottom:none}
+.btn{display:inline-block;background:#1c1917;color:#faf8f5!important;padding:16px 36px;text-decoration:none;font-size:13px;letter-spacing:.1em}
+.notice{background:#fef7ed;border-left:4px solid #b76e79;padding:20px;margin:24px 0}
+.notice ul{margin:8px 0 0;padding-left:20px}
+.amt{font-size:28px;font-weight:400;color:#1c1917;font-family:Georgia,serif}
+.ft{padding:28px 32px;text-align:center;font-size:12px;color:#a8a29e;border-top:1px solid #e7e4df}
+</style>
 </head>
 <body>
-    <div class="header">
-        <h1>Booking Confirmed!</h1>
-        <p>Thank you for choosing EGP Aesthetics</p>
-    </div>
-    
-    <div class="content">
-        <h2>Dear ${booking.customer_name},</h2>
-        <p>We're excited to provide you with our premium aesthetic treatments. Your booking has been confirmed!</p>
-        
-        <h2>Booking Details</h2>
-        <div class="booking-details">
-            <p><strong>Service:</strong> ${booking.service}</p>
-            <p><strong>Date:</strong> ${bookingDate}</p>
-            <p><strong>Time:</strong> ${booking.time}</p>
-            <p><strong>Amount:</strong> <span class="amount">£${booking.amount.toFixed(2)}</span></p>
-        </div>
-        
-        ${booking.address ? `
-        <h2>Address</h2>
-        <div class="booking-details">
-            <p>${booking.address}</p>
-        </div>
-        ` : ''}
-        
-        ${booking.notes ? `
-        <h2>Notes</h2>
-        <div class="booking-details">
-            <p>${booking.notes}</p>
-        </div>
-        ` : ''}
-        
-        <h2>Complete Your Payment</h2>
-        <p>To secure your booking, please complete your payment using the button below:</p>
-        <div style="text-align: center;">
-            <a href="${paymentLink}" class="payment-button">Pay Now - £${booking.amount.toFixed(2)}</a>
-        </div>
-        
-        <div class="info-box">
-            <h3>Important Information:</h3>
-            <ul>
-                <li>Please arrive 10 minutes before your appointment</li>
-                <li>Bring a valid ID</li>
-                <li>If you need to reschedule, please contact us at least 24 hours in advance</li>
-                <li>Late cancellations may incur a fee</li>
-            </ul>
-        </div>
-        
-        <h2>Contact Information</h2>
-        <div class="booking-details">
-            <p><strong>Phone:</strong> +44 7700 900123</p>
-            <p><strong>Email:</strong> info@egp.com</p>
-        </div>
-        
-        <p>We look forward to seeing you!</p>
-        <p><strong>Best regards,<br>EGP Aesthetics Team</strong></p>
-        
-        <div class="booking-details">
-            <p><strong>Booking ID:</strong> ${booking.id}</p>
-        </div>
-    </div>
-    
-    <div class="footer">
-        <p>This is an automated confirmation from EGP Aesthetics booking system.</p>
-        <p>If you have any questions, please don't hesitate to contact us.</p>
-    </div>
+<div class="wrap">
+<div class="head">
+<h1>Booking Request Received</h1>
+<p>Secure your appointment</p>
+<div class="accent"></div>
+<span class="badge">Payment pending</span>
+</div>
+<div class="main">
+<p>Dear ${booking.customer_name},</p>
+<p>Thank you for choosing EGP Aesthetics. Your booking has been received. To confirm your appointment, please complete payment below.</p>
+
+<div class="card">
+<div class="card-title">Appointment</div>
+<div class="row">${booking.service}</div>
+<div class="row">${bookingDate} · ${booking.time}</div>
+<div class="row"><span class="amt">£${booking.amount.toFixed(2)}</span></div>
+${booking.address ? `<div class="row">${booking.address}</div>` : ''}
+${booking.notes ? `<div class="row">${booking.notes}</div>` : ''}
+</div>
+
+<div style="text-align:center;margin:28px 0">
+<a href="${paymentLink}" class="btn">Pay Now — £${booking.amount.toFixed(2)}</a>
+</div>
+
+<div class="notice">
+<div style="font-weight:600;color:#1c1917">Before your visit</div>
+<ul>
+<li>Arrive 10 minutes early</li>
+<li>Bring a valid ID</li>
+<li>Reschedule at least 24 hours in advance if needed</li>
+</ul>
+</div>
+
+<div class="card">
+<div class="card-title">Questions?</div>
+<div class="row"><a href="tel:${contactInfo.phone.replace(/\s/g,'')}" style="color:#1c1917;text-decoration:none">${contactInfo.phone}</a></div>
+<div class="row"><a href="mailto:${contactInfo.email}" style="color:#1c1917;text-decoration:none">${contactInfo.email}</a></div>
+</div>
+
+<p style="margin-top:32px">We look forward to welcoming you.</p>
+<p style="font-family:Georgia,serif;color:#1c1917"><strong>EGP Aesthetics</strong></p>
+</div>
+<div class="ft">
+<p style="margin:0">Ref: ${booking.id} · EGP Aesthetics London</p>
+</div>
+</div>
 </body>
 </html>
   `.trim();

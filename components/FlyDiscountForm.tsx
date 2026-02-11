@@ -183,7 +183,7 @@ export function FlyDiscountForm({ onClose, isVisible }: FlyDiscountFormProps) {
                     value={formData.phone}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-transparent"
-                    placeholder="+44 7700 900123"
+                    placeholder="07944 24 20 79"
                   />
                 </div>
 
