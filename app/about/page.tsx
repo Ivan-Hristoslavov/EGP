@@ -15,51 +15,13 @@ type AboutContentSection = {
   bullet_points?: string[];
 };
 
-type ImageTextLayoutOptions = {
-  index: number;
-  content: ReactNode;
-  priority?: boolean;
-  imageSizes?: string;
-  heading?: ReactNode | null;
-};
-
-function renderImageTextLayout(
-  section: AboutContentSection,
-  { index, content, priority = false, imageSizes = "(max-width: 768px) 100vw, 50vw", heading }: ImageTextLayoutOptions
-) {
-  const showImage = Boolean(section.image_url);
-  const swapOnDesktop = showImage && index % 2 === 1;
-  const headingContent = heading ?? section.heading;
-
-  return (
-    <section key={section.id} className="mb-16 last:mb-0">
-      <div className={showImage ? "flex flex-col gap-8 md:grid md:grid-cols-2 md:gap-12" : "flex flex-col gap-6"}>
-        <div className={`flex flex-col gap-6 ${showImage ? (swapOnDesktop ? "md:order-2" : "md:order-1") : ""}`}>
-          {headingContent ? (
-            typeof headingContent === "string" ? (
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-              {headingContent}
-            </h2>
-            ) : (
-              headingContent
-            )
-          ) : null}
-          {content}
-        </div>
-        {showImage && (
-          <ImageWithSkeleton
-            src={section.image_url as string}
-            alt={section.heading || "About EGP Aesthetics"}
-            fill
-            className="object-cover"
-            priority={priority}
-            sizes={imageSizes}
-            containerClassName={`relative w-full overflow-hidden rounded-2xl shadow-xl h-[260px] sm:h-[340px] md:h-[440px] ${swapOnDesktop ? "md:order-1" : "md:order-2"}`}
-          />
-        )}
-      </div>
-    </section>
-  );
+// Split long content into paragraphs
+function contentToParagraphs(content: string | undefined): string[] {
+  if (!content?.trim()) return [];
+  return content
+    .split(/\n\n+/)
+    .map((p) => p.trim())
+    .filter(Boolean);
 }
 
 async function getAboutContent(): Promise<AboutContentSection[]> {
@@ -84,9 +46,14 @@ async function getAboutContent(): Promise<AboutContentSection[]> {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
+  const sections = await getAboutContent();
+  const firstContent = sections[0]?.content;
+  const description = firstContent
+    ? (firstContent.slice(0, 160).trim() + (firstContent.length > 160 ? "…" : ""))
+    : "Learn about EGP Aesthetics London - our story, values, and commitment to exceptional aesthetic treatments.";
   return {
     title: `About Us | ${siteConfig.name}`,
-    description: "Learn about EGP Aesthetics London - our story, values, and commitment to providing exceptional aesthetic treatments.",
+    description,
     alternates: {
       canonical: `${siteConfig.url}/about`,
     },
@@ -96,143 +63,143 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function AboutPage() {
   const sections = await getAboutContent();
 
-  const renderSection = (section: AboutContentSection, index: number) => {
-    switch (section.section_type) {
-      case 'hero':
-        return renderImageTextLayout(section, {
-          index,
-          heading: section.heading
-            ? (
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white font-playfair">
-                {section.heading}
-              </h1>
-            )
-            : null,
-          content: (
-            <div className="prose prose-lg dark:prose-invert max-w-none">
-              <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
-                {section.content}
-              </p>
-            </div>
-          ),
-          priority: index === 0,
-          imageSizes: "(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw",
-        });
+  // First section with image = full-viewport hero. Rest = stacked below.
+  const heroSection = sections.find((s) => s.image_url && (s.section_type === 'hero' || s.section_type === 'story'));
+  const otherSections = sections.filter((s) => s.id !== heroSection?.id);
 
-      case 'story':
-      case 'why_choose_us':
-        return renderImageTextLayout(section, {
-          index,
-          content: (
-            <div className="prose prose-lg dark:prose-invert max-w-none">
-              <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                {section.content}
-              </p>
-            </div>
-          ),
-        });
-
-      case 'values':
-        return renderImageTextLayout(section, {
-          index,
-          content: (
-            <div className="space-y-6">
-              {section.content && (
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                  {section.content}
-                </p>
-              )}
-              {section.bullet_points && section.bullet_points.length > 0 && (
-                <ul className="space-y-3">
-                  {section.bullet_points.map((bullet: string, idx: number) => (
-                    <li key={idx} className="flex items-start gap-3 text-gray-600 dark:text-gray-300">
-                      <span className="text-[#9d9585] dark:text-[#b5ad9d] mt-1 font-bold">✓</span>
-                      <span>{bullet}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          ),
-        });
-
-      default:
-        return renderImageTextLayout(section, {
-          index,
-          content: (
-            <div className="prose prose-lg dark:prose-invert max-w-none">
-              <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                {section.content}
-              </p>
-            </div>
-          ),
-          imageSizes: "(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw",
-        });
-    }
+  const sectionLabel: Record<string, string> = {
+    hero: 'About Us',
+    story: 'Our Story',
+    why_choose_us: 'Why Choose Us',
+    values: 'Our Values',
   };
 
   return (
-    <div className="min-h-screen bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="container mx-auto px-4 pt-24 pb-16">
-        <div className="max-w-4xl mx-auto">
-          {/* Back to Home Button */}
-          <div className="flex items-center gap-4 mb-8">
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-egp-green dark:hover:text-egp-beige transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              Back to Home
-            </Link>
-          </div>
-          
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 font-playfair">
-              About EGP Aesthetics London
-            </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto">
-              Learn about our story, values, and commitment to providing exceptional aesthetic treatments.
-            </p>
-          </div>
-          
-          {sections.length > 0 ? (
-            <div>
-              {sections.map((section, index) => renderSection(section, index))}
+    <div className="min-h-screen bg-white dark:bg-gray-950">
+      {/* Full-viewport hero: text left, large image right */}
+      {heroSection && heroSection.image_url ? (
+        <section className="min-h-0 flex flex-col lg:flex-row lg:min-h-[85vh]">
+          {/* Left: text — content centered or scrollable */}
+          <div className="flex-1 flex flex-col min-h-0 lg:max-w-[50%]">
+            <div className="flex flex-col justify-center flex-1 px-6 py-12 sm:px-10 sm:py-16 lg:px-16 lg:py-20 xl:px-24 overflow-y-auto">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-8 lg:mb-10"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Home
+              </Link>
+
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 mb-3">
+                {sectionLabel[heroSection.section_type] || 'About'}
+              </p>
+              {heroSection.heading && (
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white tracking-tight mb-6 md:mb-8 max-w-xl">
+                  {heroSection.heading}
+                </h1>
+              )}
+              <div className="text-gray-600 dark:text-gray-300 text-base sm:text-lg leading-relaxed max-w-xl space-y-4">
+                {contentToParagraphs(heroSection.content).length > 0 ? (
+                  contentToParagraphs(heroSection.content).map((para, i) => (
+                    <p key={i}>{para}</p>
+                  ))
+                ) : (
+                  <p>{heroSection.content}</p>
+                )}
+              </div>
+              <Link
+                href="/#services"
+                className="inline-block mt-8 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 bg-egp-green dark:bg-egp-green-dark text-white hover:opacity-90 shadow-md hover:shadow-lg w-auto min-w-0"
+                style={{ width: "fit-content" }}
+              >
+                Our Services
+              </Link>
             </div>
-          ) : (
-            <div className="prose prose-lg dark:prose-invert max-w-none">
-              <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
-                Welcome to EGP Aesthetics London, where we combine medical expertise with artistic vision to help you achieve your aesthetic goals.
-              </p>
-              
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-6">
-                Our Story
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                Founded with a passion for natural beauty enhancement, EGP Aesthetics has been serving clients in London with exceptional aesthetic treatments. Our clinic is built on the foundation of trust, expertise, and personalised care.
-              </p>
-              
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-6">
-                Our Values
-              </h2>
-              <ul className="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-2">
-                <li>Safety and excellence in every treatment</li>
-                <li>Natural-looking results that enhance your beauty</li>
-                <li>Personalised care tailored to your unique needs</li>
-                <li>Continuous education and training in latest techniques</li>
-                <li>Transparent pricing and honest consultations</li>
-              </ul>
-              
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-6">
-                Why Choose Us
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                Our team of qualified practitioners is dedicated to providing safe, effective, and beautiful results. We stay at the forefront of aesthetic medicine, using only the latest techniques and highest quality products.
-              </p>
+          </div>
+
+          {/* Right: image fits on screen with rounding */}
+          <div className="relative w-full lg:w-[50%] flex-shrink-0 flex items-center justify-center lg:min-h-[85vh] p-4 lg:p-6">
+            <div className="relative w-full max-h-[70vh] lg:max-h-[80vh] aspect-[3/4] lg:aspect-[4/5] rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-900 shadow-lg">
+              <ImageWithSkeleton
+                src={heroSection.image_url}
+                alt={heroSection.heading || 'About EGP Aesthetics'}
+                fill
+                className="object-cover"
+                priority
+                sizes="(max-width: 1023px) 100vw, 50vw"
+                containerClassName="absolute inset-0 w-full h-full"
+                unoptimized
+              />
             </div>
-          )}
+          </div>
+        </section>
+      ) : sections.length > 0 ? (
+        /* No hero image: back link only; sections render below */
+        <div className="pt-8 px-6 sm:px-10 lg:px-16">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Home
+          </Link>
         </div>
-      </div>
+      ) : null}
+
+      {/* Other sections: full width, stacked, minimal layout */}
+      {otherSections.length > 0 && (
+        <div className="w-full max-w-4xl mx-auto px-6 sm:px-10 lg:px-16 py-16 lg:py-24 space-y-20">
+          {otherSections.map((section) => {
+            const paras = contentToParagraphs(section.content);
+            const label = sectionLabel[section.section_type] || section.section_type;
+
+            return (
+              <article key={section.id} className="scroll-mt-24">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 mb-2">
+                  {label}
+                </p>
+                {section.heading && (
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight mb-6">
+                    {section.heading}
+                  </h2>
+                )}
+                <div className="text-gray-600 dark:text-gray-300 leading-relaxed space-y-4">
+                  {paras.length > 0 ? (
+                    paras.map((para, i) => <p key={i}>{para}</p>)
+                  ) : (
+                    <p>{section.content}</p>
+                  )}
+                </div>
+                {section.bullet_points && section.bullet_points.length > 0 && (
+                  <ul className="mt-6 space-y-3">
+                    {section.bullet_points.map((bullet, idx) => (
+                      <li key={idx} className="flex items-start gap-3 text-gray-600 dark:text-gray-300">
+                        <span className="text-[#9d9585] dark:text-[#b5ad9d] mt-0.5 font-bold">✓</span>
+                        <span>{bullet}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </article>
+            );
+          })}
+        </div>
+      )}
+
+      {sections.length === 0 && (
+        <div className="max-w-xl mx-auto px-6 py-24 text-center">
+          <p className="text-lg text-gray-600 dark:text-gray-400">
+            About page content is being updated. Please check back soon.
+          </p>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 mt-6 text-gray-900 dark:text-white font-medium"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Home
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

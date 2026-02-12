@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Upload, AlertCircle, Image as ImageIcon, Save, X, ChevronDown, ChevronUp } from "lucide-react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Switch, Chip, Card, CardBody, Spinner } from "@heroui/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Switch, Chip, Card, CardBody, Spinner, Select, SelectItem } from "@heroui/react";
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { ConfirmationModal } from "@/components/ConfirmationModal";
 
@@ -49,7 +49,7 @@ export default function AdminAboutPage() {
   const loadSections = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/about-content');
+      const response = await fetch('/api/about-content?all=true');
       if (response.ok) {
         const data = await response.json();
         setSections(data.sections || []);
@@ -464,15 +464,22 @@ export default function AdminAboutPage() {
                 <ModalBody className="py-6">
                   <div className="space-y-6">
                     {/* Section Type */}
-                    <Input
+                    <Select
                       label="Section Type"
-                      placeholder="hero, story, values, etc."
-                      value={formData.section_type}
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, section_type: value }))}
+                      selectedKeys={[formData.section_type]}
+                      onSelectionChange={(keys) => {
+                        const v = Array.from(keys)[0] as string;
+                        if (v) setFormData(prev => ({ ...prev, section_type: v }));
+                      }}
                       variant="bordered"
                       size="lg"
                       isRequired
-                    />
+                    >
+                      <SelectItem key="hero">Hero (main intro + image)</SelectItem>
+                      <SelectItem key="story">Story</SelectItem>
+                      <SelectItem key="values">Values (with bullet points)</SelectItem>
+                      <SelectItem key="why_choose_us">Why Choose Us</SelectItem>
+                    </Select>
 
                     {/* Heading */}
                     <Input
@@ -487,12 +494,14 @@ export default function AdminAboutPage() {
                     {/* Content */}
                     <Textarea
                       label="Content"
-                      placeholder="Section content"
+                      placeholder="Section content. Use blank lines to create separate paragraphs on the about page."
                       value={formData.content}
                       onValueChange={(value) => setFormData(prev => ({ ...prev, content: value }))}
                       variant="bordered"
-                      minRows={5}
+                      minRows={8}
+                      classNames={{ input: "min-h-[180px]" }}
                       isRequired
+                      description="Long text is shown in readable paragraphs. Add empty lines between paragraphs for better layout."
                     />
 
                     {/* Bullet Points */}

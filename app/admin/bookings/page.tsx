@@ -90,6 +90,9 @@ export default function BookingsPage() {
     date: '',
     time: '',
     amount: '',
+    payment_method: 'card' as 'cash' | 'card' | 'cash_and_card',
+    cash_amount: '',
+    card_amount: '',
     address: '',
     notes: '',
     status: 'pending',
@@ -103,6 +106,12 @@ export default function BookingsPage() {
   const [customerSearchResults, setCustomerSearchResults] = useState<any[]>([]);
   const [showCustomerSearch, setShowCustomerSearch] = useState(false);
   const [isSearchingCustomers, setIsSearchingCustomers] = useState(false);
+
+  // Services for dropdown (with price for amount prefill)
+  const [services, setServices] = useState<{ id: string; name: string; price: number; discounted_price?: number | null }[]>([]);
+
+  // Payments for selected booking (view modal breakdown: cash vs card)
+  const [bookingPayments, setBookingPayments] = useState<{ payment_method: string; amount: number }[]>([]);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -170,6 +179,24 @@ export default function BookingsPage() {
   useEffect(() => {
     loadBookings();
   }, [loadBookings]);
+
+  // Load services when add/edit modal is open (for dropdown and price)
+  useEffect(() => {
+    if (showAddModal || showEditModal) {
+      fetch('/api/services')
+        .then((res) => res.ok ? res.json() : { services: [] })
+        .then((data) => {
+          const list = (data.services || []).map((s: { id: string; name: string; price: number; discounted_price?: number | null }) => ({
+            id: s.id,
+            name: s.name,
+            price: typeof s.price === 'number' ? s.price : parseFloat(String(s.price)) || 0,
+            discounted_price: s.discounted_price != null ? (typeof s.discounted_price === 'number' ? s.discounted_price : parseFloat(String(s.discounted_price))) : null,
+          }));
+          setServices(list);
+        })
+        .catch(() => setServices([]));
+    }
+  }, [showAddModal, showEditModal]);
 
   const getStatusColor = (status: string): "success" | "warning" | "danger" | "default" | "primary" => {
     switch (status) {
@@ -401,6 +428,9 @@ export default function BookingsPage() {
       date: '',
       time: '',
       amount: '',
+      payment_method: 'card',
+      cash_amount: '',
+      card_amount: '',
       address: '',
       notes: '',
       status: 'pending',
@@ -447,6 +477,22 @@ export default function BookingsPage() {
       errors.amount = 'Valid amount is required';
     }
 
+    // Validate split amounts for cash+card
+    if (formData.payment_method === 'cash_and_card') {
+      const total = parseFloat(formData.amount) || 0;
+      const cashAmt = parseFloat(formData.cash_amount) || 0;
+      const cardAmt = parseFloat(formData.card_amount) || 0;
+      if (cashAmt <= 0) {
+        errors.cash_amount = 'Cash amount is required';
+      }
+      if (cardAmt <= 0) {
+        errors.card_amount = 'Card amount is required';
+      }
+      if (cashAmt > 0 && cardAmt > 0 && Math.abs(cashAmt + cardAmt - total) > 0.01) {
+        errors.cash_amount = `Cash + Card must equal £${total.toFixed(2)}`;
+      }
+    }
+
     if (formData.customer_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.customer_email)) {
       errors.customer_email = 'Please enter a valid email address';
     }
@@ -477,6 +523,70 @@ export default function BookingsPage() {
       });
 
       if (response.ok) {
+        const bookingResult = await response.json();
+        const createdBooking = bookingResult.booking;
+
+        // Create payment record(s) only for new bookings (not edits)
+        if (!editingBooking && createdBooking) {
+          const paymentDate = new Date().toISOString().split('T')[0];
+          const paymentStatus = formData.payment_status === 'paid' ? 'paid' : 'pending';
+
+          try {
+            if (formData.payment_method === 'cash_and_card') {
+              // Create two payment records: one for cash, one for card
+              const cashAmt = parseFloat(formData.cash_amount) || 0;
+              const cardAmt = parseFloat(formData.card_amount) || 0;
+
+              await Promise.all([
+                fetch('/api/payments', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    booking_id: createdBooking.id,
+                    customer_id: createdBooking.customer_id || null,
+                    amount: cashAmt,
+                    payment_method: 'cash',
+                    payment_status: paymentStatus,
+                    payment_date: paymentDate,
+                    notes: `Cash portion of split payment for ${formData.service}`,
+                  }),
+                }),
+                fetch('/api/payments', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    booking_id: createdBooking.id,
+                    customer_id: createdBooking.customer_id || null,
+                    amount: cardAmt,
+                    payment_method: 'card',
+                    payment_status: paymentStatus,
+                    payment_date: paymentDate,
+                    notes: `Card portion of split payment for ${formData.service}`,
+                  }),
+                }),
+              ]);
+            } else {
+              // Single payment record (cash or card)
+              await fetch('/api/payments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  booking_id: createdBooking.id,
+                  customer_id: createdBooking.customer_id || null,
+                  amount: parseFloat(formData.amount),
+                  payment_method: formData.payment_method,
+                  payment_status: paymentStatus,
+                  payment_date: paymentDate,
+                  notes: `Payment for ${formData.service}`,
+                }),
+              });
+            }
+          } catch (paymentError) {
+            console.error('Error creating payment record:', paymentError);
+            // Don't fail booking creation if payment record fails
+          }
+        }
+
         // Refresh bookings list
         await loadBookings();
         
@@ -508,6 +618,9 @@ export default function BookingsPage() {
         date: editingBooking.date || '',
         time: editingBooking.time || '',
         amount: editingBooking.amount?.toString() || '',
+        payment_method: 'card',
+        cash_amount: '',
+        card_amount: '',
         address: editingBooking.address || '',
         notes: editingBooking.notes || '',
         status: editingBooking.status || 'pending',
@@ -517,6 +630,24 @@ export default function BookingsPage() {
       resetForm();
     }
   }, [editingBooking]);
+
+  // Load payment breakdown (cash / card) when viewing a booking
+  useEffect(() => {
+    if (!showViewModal || !selectedBooking?.id) {
+      setBookingPayments([]);
+      return;
+    }
+    fetch(`/api/payments?booking_id=${selectedBooking.id}`)
+      .then((res) => (res.ok ? res.json() : { payments: [] }))
+      .then((data) => {
+        const list = (data.payments || []).map((p: { payment_method: string; amount: number }) => ({
+          payment_method: p.payment_method,
+          amount: typeof p.amount === "number" ? p.amount : parseFloat(String(p.amount)) || 0,
+        }));
+        setBookingPayments(list);
+      })
+      .catch(() => setBookingPayments([]));
+  }, [showViewModal, selectedBooking?.id]);
 
   if (loading) {
         return (
@@ -608,179 +739,156 @@ export default function BookingsPage() {
               </Button>
         </div>
       ) : (
-              <div className="overflow-x-auto">
-            <table className="w-full">
+              <div className="w-full">
+            <table className="w-full table-fixed">
               <thead className="bg-default-100 border-b border-divider">
-                    <tr>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-default-600 uppercase tracking-wider">
-                        Customer
-                      </th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-default-600 uppercase tracking-wider">
-                        Service
-                      </th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-default-600 uppercase tracking-wider">
-                        Date & Time
-                      </th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-default-600 uppercase tracking-wider">
-                        Status
-                      </th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-default-600 uppercase tracking-wider">
-                        Payment
-                      </th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-default-600 uppercase tracking-wider">
-                        Amount
-                      </th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-default-600 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
+                <tr>
+                  <th className="w-[22%] px-2 py-3 text-center text-xs font-semibold text-default-600 uppercase tracking-wider">Customer</th>
+                  <th className="w-[18%] px-2 py-3 text-center text-xs font-semibold text-default-600 uppercase tracking-wider">Service</th>
+                  <th className="w-[14%] px-2 py-3 text-center text-xs font-semibold text-default-600 uppercase tracking-wider">Date & Time</th>
+                  <th className="w-[12%] px-2 py-3 text-center text-xs font-semibold text-default-600 uppercase tracking-wider">Status</th>
+                  <th className="w-[12%] px-2 py-3 text-center text-xs font-semibold text-default-600 uppercase tracking-wider">Payment</th>
+                  <th className="w-[12%] px-2 py-3 text-center text-xs font-semibold text-default-600 uppercase tracking-wider">Amount</th>
+                  <th className="w-[10%] px-2 py-3 text-center text-xs font-semibold text-default-600 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
               <tbody className="divide-y divide-divider">
-                    {filteredBookings.map((booking) => (
+                {filteredBookings.map((booking) => (
                   <tr key={booking.id} className="hover:bg-default-50 transition-colors">
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <div className="flex flex-col items-center">
-                        <div className="text-sm font-medium text-foreground">{booking.customer_name}</div>
-                        <div className="text-sm text-default-500 flex items-center gap-1">
+                    <td className="px-2 py-3 text-center">
+                      <div className="flex flex-col items-center min-w-0">
+                        <div className="text-sm font-medium text-foreground truncate w-full">{booking.customer_name}</div>
+                        <div className="text-xs text-default-500 truncate w-full text-center">
                           {booking.customer_email ? (
                             <button
                               onClick={() => handleEmailCustomer(booking.customer_email)}
-                              className="flex items-center gap-1 hover:text-primary transition-colors"
-                              title="Send email"
+                              className="inline-flex items-center gap-1 hover:text-primary transition-colors max-w-full"
+                              title={booking.customer_email}
                             >
-                              <Mail className="w-3 h-3 text-primary" />
-                                {booking.customer_email}
+                              <Mail className="w-3 h-3 flex-shrink-0 text-primary" />
+                              <span className="truncate">{booking.customer_email}</span>
                             </button>
                           ) : (
-                            <span className="flex items-center gap-1">
-                              <Mail className="w-3 h-3 text-default-400" />
-                              No email
+                            <span className="inline-flex items-center gap-1 text-default-400">
+                              <Mail className="w-3 h-3 flex-shrink-0" /> N/A
                             </span>
                           )}
                         </div>
-                        <div className="text-sm text-default-500 flex items-center gap-1">
+                        <div className="text-xs text-default-500 truncate w-full text-center">
                           {booking.customer_phone ? (
                             <button
                               onClick={() => handleCallCustomer(booking.customer_phone)}
-                              className="flex items-center gap-1 hover:text-success transition-colors"
-                                  title="Call customer"
-                                >
-                              <Phone className="w-3 h-3 text-success" />
-                                  {booking.customer_phone}
+                              className="inline-flex items-center gap-1 hover:text-success transition-colors max-w-full"
+                              title={booking.customer_phone}
+                            >
+                              <Phone className="w-3 h-3 flex-shrink-0 text-success" />
+                              <span className="truncate">{booking.customer_phone}</span>
                             </button>
                           ) : (
-                            <span className="flex items-center gap-1">
-                              <Phone className="w-3 h-3 text-default-400" />
-                              No phone
+                            <span className="inline-flex items-center gap-1 text-default-400">
+                              <Phone className="w-3 h-3 flex-shrink-0" /> N/A
                             </span>
-                            )}
-                          </div>
-                          </div>
-                        </td>
-                    <td className="px-6 py-4 text-center">
-                      <div 
-                        className="text-sm text-foreground max-w-xs mx-auto truncate cursor-help" 
-                        title={booking.service}
-                      >
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-2 py-3 text-center">
+                      <div className="text-sm text-foreground truncate cursor-help" title={booking.service}>
                         {booking.service}
                       </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                    </td>
+                    <td className="px-2 py-3 text-center">
                       <div className="flex flex-col items-center">
-                      <div className="text-sm text-foreground flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {new Date(booking.date).toLocaleDateString()}
-                          </div>
-                      <div className="text-sm text-default-500 flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                            {formatTime(booking.time)}
-                          </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <Chip
-                            color={getStatusColor(booking.status)}
-                            variant="flat"
-                            startContent={getStatusIcon(booking.status)}
-                            size="sm"
-                          >
+                        <div className="text-sm text-foreground flex items-center gap-1">
+                          <Calendar className="w-3 h-3 flex-shrink-0" />
+                          <span className="whitespace-nowrap">{new Date(booking.date).toLocaleDateString()}</span>
+                        </div>
+                        <div className="text-xs text-default-500 flex items-center gap-1">
+                          <Clock className="w-3 h-3 flex-shrink-0" />
+                          {formatTime(booking.time)}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-2 py-3 text-center">
+                      <Chip
+                        color={getStatusColor(booking.status)}
+                        variant="flat"
+                        startContent={getStatusIcon(booking.status)}
+                        size="sm"
+                      >
                         {booking.status}
-                          </Chip>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <Chip
-                            color={getPaymentStatusColor(booking.payment_status)}
-                            variant="flat"
-                            size="sm"
-                          >
-                            {booking.payment_status}
-                          </Chip>
-                        </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm">
-                          <span className={`font-semibold ${
-                            booking.payment_status === 'paid' ? 'text-success' :
-                            booking.payment_status === 'pending' ? 'text-warning' :
-                            'text-danger'
-                          }`}>
-                            {booking.payment_type === 'deposit' && (booking.amount_paid != null || booking.remaining_amount != null) ? (
-                              <>£{(booking.amount_paid ?? booking.amount).toFixed(2)} deposit, £{(booking.remaining_amount ?? 0).toFixed(2)} due</>
-                            ) : (
-                              <>£{booking.amount}</>
-                            )}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                          <Dropdown>
-                            <DropdownTrigger>
-                              <Button
-                                isIconOnly
-                                variant="light"
-                                size="sm"
-                              >
+                      </Chip>
+                    </td>
+                    <td className="px-2 py-3 text-center">
+                      <Chip
+                        color={getPaymentStatusColor(booking.payment_status)}
+                        variant="flat"
+                        size="sm"
+                      >
+                        {booking.payment_status}
+                      </Chip>
+                    </td>
+                    <td className="px-2 py-3 text-center text-sm">
+                      <span className={`font-semibold ${
+                        booking.payment_status === 'paid' ? 'text-success' :
+                        booking.payment_status === 'pending' ? 'text-warning' :
+                        'text-danger'
+                      }`}>
+                        {booking.payment_type === 'deposit' && (booking.amount_paid != null || booking.remaining_amount != null) ? (
+                          <>£{(booking.amount_paid ?? booking.amount).toFixed(2)}<br/><span className="text-xs font-normal">£{(booking.remaining_amount ?? 0).toFixed(2)} due</span></>
+                        ) : (
+                          <>£{booking.amount}</>
+                        )}
+                      </span>
+                    </td>
+                    <td className="px-2 py-3 text-center">
+                      <Dropdown>
+                        <DropdownTrigger>
+                          <Button isIconOnly variant="light" size="sm">
                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                               <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                                  </svg>
-                              </Button>
-                            </DropdownTrigger>
-                            <DropdownMenu aria-label="Booking actions">
-                              <DropdownItem
-                                key="view"
-                                startContent={<Eye className="w-4 h-4" />}
-                                onPress={() => {
-                                  setSelectedBooking(booking);
-                                  setShowViewModal(true);
-                                }}
-                              >
-                                View Details
-                              </DropdownItem>
-                              <DropdownItem
-                                key="edit"
-                                startContent={<Edit className="w-4 h-4" />}
-                                onPress={() => {
-                                  setEditingBooking(booking);
-                                  setShowEditModal(true);
-                                }}
-                              >
-                                Edit Booking
-                              </DropdownItem>
-                              <DropdownItem
-                                key="delete"
-                                color="danger"
-                                startContent={<Trash2 className="w-4 h-4" />}
-                                onPress={() => {
-                                  setBookingToDelete(booking);
-                                  setShowDeleteModal(true);
-                                }}
-                              >
-                                Delete Booking
-                              </DropdownItem>
-                            </DropdownMenu>
-                          </Dropdown>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                            </svg>
+                          </Button>
+                        </DropdownTrigger>
+                        <DropdownMenu aria-label="Booking actions">
+                          <DropdownItem
+                            key="view"
+                            startContent={<Eye className="w-4 h-4" />}
+                            onPress={() => {
+                              setSelectedBooking(booking);
+                              setShowViewModal(true);
+                            }}
+                          >
+                            View Details
+                          </DropdownItem>
+                          <DropdownItem
+                            key="edit"
+                            startContent={<Edit className="w-4 h-4" />}
+                            onPress={() => {
+                              setEditingBooking(booking);
+                              setShowEditModal(true);
+                            }}
+                          >
+                            Edit Booking
+                          </DropdownItem>
+                          <DropdownItem
+                            key="delete"
+                            color="danger"
+                            startContent={<Trash2 className="w-4 h-4" />}
+                            onPress={() => {
+                              setBookingToDelete(booking);
+                              setShowDeleteModal(true);
+                            }}
+                          >
+                            Delete Booking
+                          </DropdownItem>
+                        </DropdownMenu>
+                      </Dropdown>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
             </div>
           )}
         </CardBody>
@@ -918,8 +1026,8 @@ export default function BookingsPage() {
                     />
                       {/* Customer Search Results */}
                       {showCustomerSearch && (customerSearchResults.length > 0 || isSearchingCustomers) && (
-                      <Card className="absolute z-10 w-full mt-1 max-h-60 overflow-y-auto">
-                        <CardBody className="p-0">
+                      <Card className="absolute z-[9999] w-full mt-1 max-h-60 overflow-y-auto shadow-lg border border-default-200 bg-content1">
+                        <CardBody className="p-0 bg-content1">
                           {isSearchingCustomers ? (
                             <div className="p-3 text-center">
                               <Spinner size="sm" />
@@ -975,17 +1083,39 @@ export default function BookingsPage() {
                     isClearable
                   />
 
-                  <Input
+                  <Select
                     name="service"
                     label="Service"
-                    placeholder="Enter service name"
-                      value={formData.service}
-                      onChange={handleInputChange}
+                    placeholder="Select a service"
+                    selectedKeys={formData.service ? [formData.service] : []}
+                    onSelectionChange={(keys) => {
+                      const selected = Array.from(keys)[0] as string;
+                      if (!selected) {
+                        setFormData((prev) => ({ ...prev, service: '', amount: '' }));
+                        return;
+                      }
+                      const svc = services.find((s) => s.name === selected);
+                      const displayAmount = svc
+                        ? (svc.discounted_price != null && svc.discounted_price > 0 ? svc.discounted_price : svc.price).toFixed(2)
+                        : '';
+                      setFormData((prev) => ({
+                        ...prev,
+                        service: selected,
+                        amount: displayAmount,
+                      }));
+                    }}
                     isRequired
-                    isClearable
                     errorMessage={formErrors.service}
                     isInvalid={!!formErrors.service}
-                  />
+                  >
+                    <>
+                      {services.map((svc) => (
+                        <SelectItem key={svc.name} textValue={svc.name}>
+                          {svc.name} — £{(svc.discounted_price != null && svc.discounted_price > 0 ? svc.discounted_price : svc.price).toFixed(2)}
+                        </SelectItem>
+                      ))}
+                    </>
+                  </Select>
                     </div>
 
                 {/* Date and Time */}
@@ -1013,15 +1143,21 @@ export default function BookingsPage() {
                   />
                     </div>
 
-                {/* Amount and Status */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Amount, Payment Method and Status */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
                       name="amount"
                         type="number"
                     label="Amount (£)"
                     placeholder="0.00"
                       value={formData.amount}
-                      onChange={handleInputChange}
+                      onChange={(e) => {
+                        handleInputChange(e);
+                        // If cash+card, reset split when total changes
+                        if (formData.payment_method === 'cash_and_card') {
+                          setFormData((prev) => ({ ...prev, amount: e.target.value, cash_amount: '', card_amount: '' }));
+                        }
+                      }}
                         step="0.01"
                         min="0"
                     isRequired
@@ -1030,6 +1166,83 @@ export default function BookingsPage() {
                   />
 
                   <Select
+                    label="Payment Method"
+                    selectedKeys={[formData.payment_method]}
+                    onSelectionChange={(keys) => {
+                      const selected = Array.from(keys)[0] as string;
+                      setFormData((prev) => ({
+                        ...prev,
+                        payment_method: selected as 'cash' | 'card' | 'cash_and_card',
+                        cash_amount: '',
+                        card_amount: '',
+                      }));
+                    }}
+                  >
+                    <>
+                      <SelectItem key="card">Card</SelectItem>
+                      <SelectItem key="cash">Cash</SelectItem>
+                      <SelectItem key="cash_and_card">Cash + Card</SelectItem>
+                    </>
+                  </Select>
+                </div>
+
+                {/* Split amounts for Cash + Card */}
+                {formData.payment_method === 'cash_and_card' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Input
+                      name="cash_amount"
+                      type="number"
+                      label="Cash Amount (£)"
+                      placeholder="0.00"
+                      value={formData.cash_amount}
+                      onChange={(e) => {
+                        const cashVal = e.target.value;
+                        const total = parseFloat(formData.amount) || 0;
+                        const cashNum = parseFloat(cashVal) || 0;
+                        const cardNum = Math.max(0, Math.round((total - cashNum) * 100) / 100);
+                        setFormData((prev) => ({
+                          ...prev,
+                          cash_amount: cashVal,
+                          card_amount: cashNum > 0 && total > 0 ? cardNum.toFixed(2) : '',
+                        }));
+                      }}
+                      step="0.01"
+                      min="0"
+                      max={formData.amount || undefined}
+                      isRequired
+                      errorMessage={formErrors.cash_amount}
+                      isInvalid={!!formErrors.cash_amount}
+                    />
+                    <Input
+                      name="card_amount"
+                      type="number"
+                      label="Card Amount (£)"
+                      placeholder="0.00"
+                      value={formData.card_amount}
+                      onChange={(e) => {
+                        const cardVal = e.target.value;
+                        const total = parseFloat(formData.amount) || 0;
+                        const cardNum = parseFloat(cardVal) || 0;
+                        const cashNum = Math.max(0, Math.round((total - cardNum) * 100) / 100);
+                        setFormData((prev) => ({
+                          ...prev,
+                          card_amount: cardVal,
+                          cash_amount: cardNum > 0 && total > 0 ? cashNum.toFixed(2) : '',
+                        }));
+                      }}
+                      step="0.01"
+                      min="0"
+                      max={formData.amount || undefined}
+                      isRequired
+                      errorMessage={formErrors.card_amount}
+                      isInvalid={!!formErrors.card_amount}
+                    />
+                  </div>
+                )}
+
+                {/* Status */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Select
                     label="Status"
                     selectedKeys={[formData.status]}
                     onSelectionChange={(keys) => {
@@ -1037,10 +1250,12 @@ export default function BookingsPage() {
                       handleInputChange({ target: { name: 'status', value: selected } } as any);
                     }}
                     >
-                    <SelectItem key="pending">Pending</SelectItem>
-                    <SelectItem key="scheduled">Scheduled</SelectItem>
-                    <SelectItem key="completed">Completed</SelectItem>
-                    <SelectItem key="cancelled">Cancelled</SelectItem>
+                    <>
+                      <SelectItem key="pending">Pending</SelectItem>
+                      <SelectItem key="scheduled">Scheduled</SelectItem>
+                      <SelectItem key="completed">Completed</SelectItem>
+                      <SelectItem key="cancelled">Cancelled</SelectItem>
+                    </>
                   </Select>
 
                   <Select
@@ -1051,9 +1266,11 @@ export default function BookingsPage() {
                       handleInputChange({ target: { name: 'payment_status', value: selected } } as any);
                     }}
                     >
-                    <SelectItem key="pending">Pending</SelectItem>
-                    <SelectItem key="paid">Paid</SelectItem>
-                    <SelectItem key="refunded">Refunded</SelectItem>
+                    <>
+                      <SelectItem key="pending">Pending</SelectItem>
+                      <SelectItem key="paid">Paid</SelectItem>
+                      <SelectItem key="refunded">Refunded</SelectItem>
+                    </>
                   </Select>
                 </div>
 
@@ -1164,7 +1381,7 @@ export default function BookingsPage() {
                       </Chip>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-default-500">Amount</label>
+                      <label className="text-sm font-medium text-default-500 mb-2 block">Amount</label>
                       {selectedBooking.payment_type === 'deposit' && (selectedBooking.amount_paid != null || selectedBooking.remaining_amount != null) ? (
                         <div className="space-y-1">
                           <p className={`text-xl font-bold ${
@@ -1177,13 +1394,32 @@ export default function BookingsPage() {
                           <p className="text-base text-default-600">£{(selectedBooking.remaining_amount ?? 0).toFixed(2)} due on arrival</p>
                         </div>
                       ) : (
-                        <p className={`text-2xl font-bold ${
-                          selectedBooking.payment_status === 'paid' ? 'text-success' :
-                          selectedBooking.payment_status === 'pending' ? 'text-warning' :
-                          'text-danger'
-                        }`}>
-                          £{selectedBooking.amount}
-                        </p>
+                        <>
+                          <p className={`text-2xl font-bold ${
+                            selectedBooking.payment_status === 'paid' ? 'text-success' :
+                            selectedBooking.payment_status === 'pending' ? 'text-warning' :
+                            'text-danger'
+                          }`}>
+                            £{typeof selectedBooking.amount === 'number' ? selectedBooking.amount.toFixed(2) : selectedBooking.amount}
+                          </p>
+                          {bookingPayments.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-3 text-sm text-default-600">
+                              {bookingPayments.some((p) => p.payment_method === 'cash') && (
+                                <span>Cash: £{bookingPayments.filter((p) => p.payment_method === 'cash').reduce((s, p) => s + p.amount, 0).toFixed(2)}</span>
+                              )}
+                              {bookingPayments.some((p) => p.payment_method === 'card') && (
+                                <span>Card: £{bookingPayments.filter((p) => p.payment_method === 'card').reduce((s, p) => s + p.amount, 0).toFixed(2)}</span>
+                              )}
+                              {bookingPayments.filter((p) => p.payment_method !== 'cash' && p.payment_method !== 'card').length > 0 &&
+                                bookingPayments
+                                  .filter((p) => p.payment_method !== 'cash' && p.payment_method !== 'card')
+                                  .map((p) => (
+                                    <span key={p.payment_method}>{p.payment_method.replace('_', ' ')}: £{p.amount.toFixed(2)}</span>
+                                  ))
+                              }
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                 {selectedBooking.address && (

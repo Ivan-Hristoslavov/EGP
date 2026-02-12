@@ -910,7 +910,28 @@ export default function PaymentsPage() {
                 {selectedPayment.reference && selectedPayment.reference.startsWith('pi_') && (
                       <div>
                         <label className="text-sm font-medium text-default-500">Payment Reference</label>
-                        <p className="text-base text-xs text-default-400">{selectedPayment.reference}</p>
+                        <p className="text-sm text-default-400">{selectedPayment.reference}</p>
+                      </div>
+                    )}
+                {(selectedPayment.reference?.startsWith('plink_') || (selectedPayment.notes && /https?:\/\//.test(selectedPayment.notes))) && (
+                      <div>
+                        <label className="text-sm font-medium text-default-500 mb-2 block">Payment Link</label>
+                        {(() => {
+                          const urlMatch = selectedPayment.notes?.match(/URL:\s*(https?:\/\/[^\s|]+)/);
+                          const paymentUrl = urlMatch ? urlMatch[1].trim() : null;
+                          return paymentUrl ? (
+                            <a
+                              href={paymentUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline break-all text-sm"
+                            >
+                              {paymentUrl}
+                            </a>
+                          ) : (
+                            <p className="text-sm text-default-400">Stripe payment link (ID: {selectedPayment.reference})</p>
+                          );
+                        })()}
                       </div>
                     )}
                 {selectedPayment.notes && (

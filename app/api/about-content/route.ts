@@ -1,15 +1,22 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const supabase = createClient();
-    
-    const { data, error } = await supabase
+    const { searchParams } = new URL(request.url);
+    const all = searchParams.get('all') === 'true';
+
+    let query = supabase
       .from('about_content')
       .select('*')
-      .eq('is_active', true)
       .order('order', { ascending: true });
+
+    if (!all) {
+      query = query.eq('is_active', true);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('Error fetching about content:', error);

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { supabase, supabaseAdmin } from "../../../lib/supabase";
+import { supabaseAdmin } from "../../../lib/supabase";
 import { createCheckoutSession, createPaymentLink, STRIPE_TO_DB_STATUS, isStripeAvailable } from "../../../lib/stripe";
 
 // GET - Fetch payments with pagination
@@ -10,12 +10,28 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
     const offset = (page - 1) * limit;
+    const bookingId = searchParams.get("booking_id") || undefined;
 
     // Use admin client to bypass RLS
-    // Get total count for pagination
-    const { count: totalCount, error: countError } = await supabaseAdmin
+    let countQuery = supabaseAdmin.from("payments").select("*", { count: "exact", head: true });
+    let paymentsQuery = supabaseAdmin
       .from("payments")
-      .select("*", { count: "exact", head: true });
+      .select(
+        `
+        *,
+        customers(first_name, last_name, email),
+        bookings(service, date, customer_name, customer_email, booking_number, payment_type, remaining_amount, total_amount)
+      `,
+      )
+      .order("created_at", { ascending: false });
+
+    if (bookingId) {
+      countQuery = countQuery.eq("booking_id", bookingId);
+      paymentsQuery = paymentsQuery.eq("booking_id", bookingId);
+    }
+
+    // Get total count for pagination
+    const { count: totalCount, error: countError } = await countQuery;
 
     if (countError) {
       console.error("Error fetching payment count:", countError);
@@ -25,18 +41,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get paginated payments with joins
-    const { data: payments, error } = await supabaseAdmin
-      .from("payments")
-      .select(
-        `
-        *,
-        customers(first_name, last_name, email),
-        bookings(service, date, customer_name, customer_email, booking_number, payment_type, remaining_amount, total_amount)
-      `,
-      )
-      .order("created_at", { ascending: false })
-      .range(offset, offset + limit - 1);
+    // Get payments (all when filtering by booking_id, otherwise paginated)
+    const { data: payments, error } = bookingId
+      ? await paymentsQuery
+      : await paymentsQuery.range(offset, offset + limit - 1);
 
     if (error) {
       console.error("Error fetching payments:", error);
@@ -91,7 +99,7 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    const totalPages = Math.ceil((totalCount || 0) / limit);
+    const totalPages = bookingId ? 1 : Math.ceil((totalCount || 0) / limit);
 
     return NextResponse.json({
       payments: transformedPayments || [],
@@ -133,7 +141,7 @@ export async function POST(request: NextRequest) {
       const { customer_id, booking_id, amount, description, currency = "gbp" } = paymentData;
 
       // Get customer and booking details
-      const { data: customer } = await supabase
+      const { data: customer } = await supabaseAdmin
         .from("customers")
         .select("first_name, last_name, email")
         .eq("id", customer_id)
@@ -142,7 +150,7 @@ export async function POST(request: NextRequest) {
       let booking = null;
 
       if (booking_id) {
-        const { data: bookingData } = await supabase
+        const { data: bookingData } = await supabaseAdmin
           .from("bookings")
           .select("service, date")
           .eq("id", booking_id)
@@ -165,7 +173,7 @@ export async function POST(request: NextRequest) {
           : customer.first_name || customer.last_name || "Customer";
 
       // Create payment record in database first
-      const { data: payment, error: paymentError } = await supabase
+      const { data: payment, error: paymentError } = await supabaseAdmin
         .from("payments")
         .insert([
           {
@@ -209,7 +217,7 @@ export async function POST(request: NextRequest) {
       });
 
       // Update payment record with payment link ID for reference
-      await supabase
+      await supabaseAdmin
         .from("payments")
         .update({
           reference: paymentLink.id,
@@ -235,7 +243,7 @@ export async function POST(request: NextRequest) {
         payment_status: paymentData.payment_status || "paid", // Default to paid for manual payments
       };
 
-      const { data: payment, error } = await supabase
+      const { data: payment, error } = await supabaseAdmin
         .from("payments")
         .insert([paymentRecord])
         .select()
@@ -272,7 +280,7 @@ export async function PUT(request: NextRequest) {
 
     // Find payment by session ID or payment intent ID
     if (session_id) {
-      const { data: paymentData, error: findError } = await supabase
+      const { data: paymentData, error: findError } = await supabaseAdmin
         .from("payments")
         .select("*")
         .eq("reference", session_id)
@@ -282,7 +290,7 @@ export async function PUT(request: NextRequest) {
         payment = paymentData;
       }
     } else if (payment_intent_id) {
-      const { data: paymentData, error: findError } = await supabase
+      const { data: paymentData, error: findError } = await supabaseAdmin
         .from("payments")
         .select("*")
         .eq("reference", payment_intent_id)
@@ -302,7 +310,7 @@ export async function PUT(request: NextRequest) {
       STRIPE_TO_DB_STATUS[status as keyof typeof STRIPE_TO_DB_STATUS] ||
       "pending";
 
-    const { data: updatedPayment, error: updateError } = await supabase
+    const { data: updatedPayment, error: updateError } = await supabaseAdmin
       .from("payments")
       .update({
         payment_status: dbStatus,
