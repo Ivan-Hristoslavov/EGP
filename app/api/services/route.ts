@@ -8,7 +8,7 @@ export async function GET() {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 
-    // Fetch services with joins to get category and main_tab info
+    // Fetch services with joins to get category, main_tab, and optional discount group
     const { data: services, error } = await supabase
       .from('services')
       .select(`
@@ -16,7 +16,8 @@ export async function GET() {
         category:service_categories!inner(
           *,
           main_tab:main_tabs!inner(*)
-        )
+        ),
+        discount_group:discount_groups(id, name, discount_percentage, is_active)
       `)
       .eq('is_active', true)
       .order('display_order', { ascending: true })
@@ -28,7 +29,16 @@ export async function GET() {
     }
 
     // Transform the data to flatten the structure
-    const transformedServices = services?.map(service => ({
+    const transformedServices = services?.map(service => {
+      const discountGroup = service.discount_group;
+      const discountPercentage = discountGroup?.is_active && discountGroup?.discount_percentage != null
+        ? parseFloat(discountGroup.discount_percentage.toString())
+        : null;
+      const price = parseFloat(service.price.toString());
+      const discountedPrice = discountPercentage != null && discountPercentage > 0
+        ? Math.round(price * (1 - discountPercentage / 100) * 100) / 100
+        : null;
+      return {
       id: service.id,
       name: service.name,
       slug: service.slug,
@@ -38,7 +48,10 @@ export async function GET() {
       preparation: service.preparation,
       aftercare: service.aftercare,
       duration: service.duration,
-      price: parseFloat(service.price.toString()),
+      price,
+      discounted_price: discountedPrice,
+      discount_percentage: discountPercentage,
+      discount_group_id: service.discount_group_id ?? null,
       is_featured: service.is_featured,
       image_url: service.image_url,
       requires_consultation: service.requires_consultation,
@@ -60,7 +73,8 @@ export async function GET() {
         name: service.category.main_tab.name,
         slug: service.category.main_tab.slug
       }
-    })) || [];
+    };
+    }) || [];
 
     return NextResponse.json({ services: transformedServices });
   } catch (error) {
@@ -94,7 +108,8 @@ export async function POST(request: Request) {
       requires_consultation,
       downtime_days,
       results_duration_weeks,
-      image_url
+      image_url,
+      discount_group_id
     } = body;
 
     const { data: service, error } = await supabase
@@ -116,7 +131,8 @@ export async function POST(request: Request) {
         requires_consultation: requires_consultation || false,
         downtime_days: downtime_days || 0,
         results_duration_weeks,
-        image_url
+        image_url,
+        ...(discount_group_id !== undefined && discount_group_id !== null && { discount_group_id })
       }])
       .select()
       .single();

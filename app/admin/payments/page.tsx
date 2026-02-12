@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Filter, Search, Edit, Trash2, Eye, CheckCircle, XCircle, AlertCircle, Calendar, User, CreditCard, Banknote, Building2 } from "lucide-react";
+import { Plus, Filter, Search, Edit, Trash2, Eye, CheckCircle, XCircle, AlertCircle, Calendar, User, CreditCard, Banknote, Building2, Save } from "lucide-react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
@@ -10,12 +10,15 @@ import { Select, SelectItem } from "@heroui/select";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 import { Spinner } from "@heroui/spinner";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/dropdown";
+import { Checkbox } from "@heroui/checkbox";
+import { useToast } from "@/components/Toast";
 
 interface Payment {
   id: string;
   booking_id: string | null;
   customer_id: string | null;
   amount: number;
+  payment_type?: "full" | "deposit";
   payment_method: "cash" | "card" | "bank_transfer" | "cheque";
   payment_status: "pending" | "paid" | "refunded" | "failed";
   payment_date: string;
@@ -32,6 +35,9 @@ interface Payment {
     date: string;
     customer_name: string;
     booking_number: string | null;
+    payment_type?: "full" | "deposit";
+    remaining_amount?: number;
+    total_amount?: number;
   };
 }
 
@@ -63,7 +69,22 @@ const DUMMY_SERVICES = [
 // Empty payments array - will be populated from database
 const DUMMY_PAYMENTS: Payment[] = [];
 
+type DepositSettings = {
+  enabled: boolean;
+  type: "percentage" | "fixed";
+  percentage: number | null;
+  fixedAmount: number | null;
+};
+
+const defaultDepositSettings: DepositSettings = {
+  enabled: false,
+  type: "percentage",
+  percentage: 50,
+  fixedAmount: null,
+};
+
 export default function PaymentsPage() {
+  const { showSuccess, showError } = useToast();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -77,6 +98,10 @@ export default function PaymentsPage() {
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
   const [paymentToDelete, setPaymentToDelete] = useState<Payment | null>(null);
+  
+  // Deposit options (for booking flow)
+  const [depositSettings, setDepositSettings] = useState<DepositSettings>(defaultDepositSettings);
+  const [isSavingDeposit, setIsSavingDeposit] = useState(false);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -92,6 +117,30 @@ export default function PaymentsPage() {
 
     return () => clearTimeout(timer);
   }, [searchTerm]);
+
+  // Load deposit settings
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await fetch("/api/admin/settings?key=deposit_settings");
+        if (!res.ok || cancelled) return;
+        const value = await res.json();
+        if (value && typeof value === "object" && !cancelled) {
+          setDepositSettings({
+            enabled: !!value.enabled,
+            type: value.type === "fixed" ? "fixed" : "percentage",
+            percentage: value.percentage != null ? Number(value.percentage) : 50,
+            fixedAmount: value.fixedAmount != null ? Number(value.fixedAmount) : null,
+          });
+        }
+      } catch {
+        // keep defaults
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
 
   // Load payments on component mount or when filters change (but NOT on search - that's client-side only)
   useEffect(() => {
@@ -183,6 +232,37 @@ export default function PaymentsPage() {
         return <CreditCard className="w-4 h-4" />;
       default:
         return <CreditCard className="w-4 h-4" />;
+    }
+  };
+
+  const handleDepositSettingsChange = (updates: Partial<DepositSettings>) => {
+    setDepositSettings(prev => ({ ...prev, ...updates }));
+  };
+
+  const handleSaveDepositSettings = async () => {
+    setIsSavingDeposit(true);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          deposit_settings: {
+            enabled: depositSettings.enabled,
+            type: depositSettings.type,
+            percentage: depositSettings.percentage,
+            fixedAmount: depositSettings.fixedAmount,
+          },
+        }),
+      });
+      if (res.ok) {
+        showSuccess("Success", "Deposit settings saved.");
+      } else {
+        showError("Error", "Failed to save deposit settings.");
+      }
+    } catch {
+      showError("Error", "Failed to save deposit settings.");
+    } finally {
+      setIsSavingDeposit(false);
     }
   };
 
@@ -293,7 +373,84 @@ export default function PaymentsPage() {
   }
 
   return (
-    <div className="w-full space-y-6">
+    <div className="w-full max-w-full min-w-0 overflow-hidden space-y-6">
+      {/* Deposit options (booking flow: pay now vs pay on arrival) */}
+      <Card className="border border-divider">
+        <CardHeader className="pb-2">
+          <h3 className="text-lg font-semibold">Deposit options</h3>
+          <p className="text-sm text-default-500">Allow customers to pay a deposit only (rest on arrival) when booking.</p>
+        </CardHeader>
+        <CardBody className="pt-0 space-y-4">
+          <Checkbox
+            isSelected={depositSettings.enabled}
+            onValueChange={(v) => handleDepositSettingsChange({ enabled: v })}
+          >
+            Allow customers to pay deposit only (rest on arrival)
+          </Checkbox>
+          {depositSettings.enabled && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6">
+              <div className="flex flex-col gap-2">
+                <span className="text-sm text-default-600">Deposit type</span>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="depositType"
+                      checked={depositSettings.type === "percentage"}
+                      onChange={() => handleDepositSettingsChange({ type: "percentage" })}
+                      className="rounded-full"
+                    />
+                    <span>Percentage</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="depositType"
+                      checked={depositSettings.type === "fixed"}
+                      onChange={() => handleDepositSettingsChange({ type: "fixed" })}
+                      className="rounded-full"
+                    />
+                    <span>Fixed amount</span>
+                  </label>
+                </div>
+              </div>
+              {depositSettings.type === "percentage" ? (
+                <Input
+                  label="Deposit percentage"
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={String(depositSettings.percentage ?? "")}
+                  onChange={(e) => handleDepositSettingsChange({ percentage: e.target.value ? Number(e.target.value) : null })}
+                  placeholder="50"
+                  endContent="%"
+                />
+              ) : (
+                <Input
+                  label="Deposit fixed amount"
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={String(depositSettings.fixedAmount ?? "")}
+                  onChange={(e) => handleDepositSettingsChange({ fixedAmount: e.target.value ? Number(e.target.value) : null })}
+                  placeholder="100"
+                  startContent={<span className="text-default-500">£</span>}
+                />
+              )}
+            </div>
+          )}
+          <Button
+            color="primary"
+            variant="flat"
+            onPress={handleSaveDepositSettings}
+            isLoading={isSavingDeposit}
+            startContent={<Save className="w-4 h-4" />}
+          >
+            {isSavingDeposit ? "Saving..." : "Save deposit settings"}
+          </Button>
+        </CardBody>
+      </Card>
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="border border-divider">
@@ -406,8 +563,8 @@ export default function PaymentsPage() {
       </Card>
 
       {/* Payments Table */}
-      <Card className="border border-divider">
-        <CardBody className="p-0">
+      <Card className="border border-divider min-w-0 overflow-hidden">
+        <CardBody className="p-0 min-w-0">
         {filteredPayments.length === 0 ? (
           <div className="text-center py-12">
               <CreditCard className="w-12 h-12 text-default-300 mx-auto mb-4" />
@@ -422,32 +579,32 @@ export default function PaymentsPage() {
               </Button>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div className="min-w-0 overflow-x-auto">
+            <table className="w-full table-fixed min-w-0" style={{ tableLayout: 'fixed' }}>
               <thead className="bg-default-100 border-b border-divider">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
+                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-default-600 uppercase tracking-wider w-[14%] min-w-0">
                     Customer
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
+                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-default-600 uppercase tracking-wider w-[14%] min-w-0">
                     Service
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
+                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-default-600 uppercase tracking-wider w-[8%] min-w-0">
                     Amount
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
+                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-default-600 uppercase tracking-wider w-[11%] min-w-0">
                     Method
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
+                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-default-600 uppercase tracking-wider w-[9%] min-w-0">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
+                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-default-600 uppercase tracking-wider w-[9%] min-w-0">
                     Date
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
-                    Booking Number
+                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-default-600 uppercase tracking-wider w-[10%] min-w-0">
+                    Booking #
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-semibold text-default-600 uppercase tracking-wider">
+                  <th className="px-3 py-2.5 text-right text-xs font-semibold text-default-600 uppercase tracking-wider w-[12%] min-w-0">
                     Actions
                   </th>
                 </tr>
@@ -455,60 +612,71 @@ export default function PaymentsPage() {
               <tbody className="divide-y divide-divider">
                 {filteredPayments.map((payment) => (
                   <tr key={payment.id} className="hover:bg-default-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div>
-                        <div className="text-sm font-medium text-foreground">
+                    <td className="px-3 py-2.5 min-w-0">
+                      <div className="min-w-0 overflow-hidden">
+                        <div className="text-sm font-medium text-foreground truncate" title={payment.customers?.name || payment.bookings?.customer_name || 'Unknown Customer'}>
                           {payment.customers?.name || payment.bookings?.customer_name || 'Unknown Customer'}
                         </div>
-                        <div className="text-sm text-default-500">
+                        <div className="text-xs text-default-500 truncate" title={payment.customers?.email || 'No email'}>
                           {payment.customers?.email || 'No email'}
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-foreground">
-                        {payment.bookings?.service || 'Manual Payment'}
-                      </div>
-                      {payment.bookings?.date && (
-                        <div className="text-sm text-default-500 flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {new Date(payment.bookings.date).toLocaleDateString()}
+                    <td className="px-3 py-2.5 min-w-0">
+                      <div className="min-w-0 overflow-hidden">
+                        <div className="text-sm text-foreground truncate" title={payment.bookings?.service || 'Manual Payment'}>
+                          {payment.bookings?.service || 'Manual Payment'}
                         </div>
-                      )}
+                        {payment.bookings?.date && (
+                          <div className="text-xs text-default-500 flex items-center gap-1 truncate">
+                            <Calendar className="w-3 h-3 shrink-0" />
+                            {new Date(payment.bookings.date).toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">
-                      £{payment.amount.toFixed(2)}
+                    <td className="px-3 py-2.5 min-w-0">
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <span className="text-sm font-medium text-foreground">£{payment.amount.toFixed(2)}</span>
+                        {payment.payment_type === 'deposit' && (
+                          <Chip size="sm" variant="flat" color="secondary" className="w-fit">Deposit</Chip>
+                        )}
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
+                    <td className="px-3 py-2.5 min-w-0">
+                      <div className="flex items-center gap-1.5 min-w-0">
                         {getMethodIcon(payment.payment_method)}
-                        <span className="text-sm text-foreground capitalize">
+                        <span className="text-sm text-foreground capitalize truncate">
                           {payment.payment_method.replace('_', ' ')}
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 py-2.5 min-w-0">
                       <Chip
                         color={getStatusColor(payment.payment_status)}
                         variant="flat"
                         startContent={getStatusIcon(payment.payment_status)}
                         size="sm"
+                        className="max-w-full"
                       >
-                        {payment.payment_status}
+                        <span className="truncate">{payment.payment_status}</span>
                       </Chip>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
+                    <td className="px-3 py-2.5 min-w-0 text-sm text-foreground">
                       {new Date(payment.payment_date).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-default-500">
-                      {payment.bookings?.booking_number || payment.reference || '-'}
+                    <td className="px-3 py-2.5 min-w-0">
+                      <div className="text-sm text-default-500 truncate" title={payment.bookings?.booking_number || payment.reference || '-'}>
+                        {payment.bookings?.booking_number || payment.reference || '-'}
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end gap-2">
+                    <td className="px-3 py-2.5 min-w-0 text-right text-sm font-medium">
+                      <div className="flex items-center justify-end gap-1">
                         <Button
                           isIconOnly
                           variant="light"
                           size="sm"
+                          className="min-w-8 w-8"
                           onPress={() => setSelectedPayment(payment)}
                         >
                           <Eye className="w-4 h-4" />
@@ -518,6 +686,7 @@ export default function PaymentsPage() {
                           color="primary"
                           variant="light"
                           size="sm"
+                          className="min-w-8 w-8"
                           onPress={() => {
                             setEditingPayment(payment);
                             setShowEditModal(true);
@@ -530,6 +699,7 @@ export default function PaymentsPage() {
                           color="danger"
                           variant="light"
                           size="sm"
+                          className="min-w-8 w-8"
                           onPress={() => {
                             setPaymentToDelete(payment);
                             setShowDeleteModal(true);
@@ -701,6 +871,12 @@ export default function PaymentsPage() {
                 <div>
                       <label className="text-sm font-medium text-default-500">Amount</label>
                       <p className="text-2xl font-bold text-success">£{selectedPayment.amount.toFixed(2)}</p>
+                      {selectedPayment.payment_type === 'deposit' && (
+                        <p className="text-sm text-default-500 mt-1">Deposit payment</p>
+                      )}
+                      {selectedPayment.payment_type === 'deposit' && selectedPayment.bookings?.remaining_amount != null && selectedPayment.bookings.remaining_amount > 0 && (
+                        <p className="text-sm text-warning mt-1">£{Number(selectedPayment.bookings.remaining_amount).toFixed(2)} due on arrival</p>
+                      )}
                 </div>
                 <div>
                       <label className="text-sm font-medium text-default-500 mb-2 block">Payment Method</label>

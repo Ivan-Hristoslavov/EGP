@@ -330,7 +330,7 @@ export default function AdminLayout({
       </div>
 
       {/* Main content area with margin for fixed sidebar */}
-      <div className="lg:ml-64" suppressHydrationWarning>
+      <div className="lg:ml-64 min-w-0" suppressHydrationWarning>
         {/* Top bar */}
         <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm border-b border-rose-200/50 dark:border-gray-700 sticky top-0 z-30 transition-colors duration-300">
           <div className="flex items-center justify-between h-16 px-4 sm:px-6">
@@ -370,7 +370,7 @@ export default function AdminLayout({
           className="min-h-screen bg-gradient-to-br from-rose-50/30 via-pink-50/30 to-purple-50/30 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800 transition-colors duration-300"
           suppressHydrationWarning
         >
-          <div className="p-3 sm:p-4 lg:p-6 xl:p-8">{children}</div>
+          <div className="p-3 sm:p-4 lg:p-6 xl:p-8 min-w-0 max-w-full overflow-x-hidden">{children}</div>
         </main>
         <FirstVisitDiscountFormWrapper />
       </div>

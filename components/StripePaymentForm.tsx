@@ -14,8 +14,19 @@ import ButtonPrimary from './ButtonPrimary';
 // Initialize Stripe
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
+export type DepositMetadata = {
+  isDeposit: true;
+  totalAmount: number;
+  depositAmount: number;
+  remainingAmount: number;
+};
+
 interface StripePaymentFormProps {
   amount: number;
+  /** Amount to charge now (deposit or full). Defaults to amount. */
+  amountToCharge?: number;
+  /** When paying deposit only, pass so backend can persist booking totals. */
+  depositMetadata?: DepositMetadata;
   services: Array<{
     name: string;
     price: number;
@@ -43,6 +54,9 @@ interface StripePaymentFormProps {
 
 interface PaymentFormProps {
   amount: number;
+  /** Amount actually charged (for button label and validation). */
+  amountToCharge?: number;
+  depositMetadata?: DepositMetadata;
   services: StripePaymentFormProps['services'];
   selectedDate: string;
   selectedTime: string;
@@ -65,6 +79,8 @@ interface PaymentFormProps {
 
 function PaymentForm({
   amount,
+  amountToCharge,
+  depositMetadata,
   services,
   selectedDate,
   selectedTime,
@@ -79,6 +95,7 @@ function PaymentForm({
   onPaymentError,
   onTestBooking,
 }: PaymentFormProps) {
+  const chargeAmount = amountToCharge ?? amount;
   const stripe = useStripe();
   const elements = useElements();
   const [isLoading, setIsLoading] = useState(false);
@@ -272,7 +289,7 @@ function PaymentForm({
             isLoading={isLoading}
             startContent={!isLoading ? <CreditCard className="w-5 h-5" /> : undefined}
           >
-            {isLoading ? "Processing Payment..." : `Pay £${amount.toFixed(2)} Now`}
+            {isLoading ? "Processing Payment..." : `Pay £${chargeAmount.toFixed(2)} Now`}
           </ButtonPrimary>
         </div>
       </form>
@@ -411,24 +428,32 @@ export default function StripePaymentForm(props: StripePaymentFormProps) {
     setInitError('');
 
       try {
+        const chargeAmount = props.amountToCharge ?? props.amount;
+        const metadata: Record<string, string> = {
+          services: JSON.stringify(props.services),
+          selectedDate: props.selectedDate,
+          selectedTime: props.selectedTime,
+          teamMemberId: props.teamMemberId || '',
+          serviceDurationMinutes: props.serviceDurationMinutes?.toString() || '',
+          customerName: customerName,
+          customerEmail: customerEmail,
+          customerPhone: customerPhone,
+          timestamp: new Date().toISOString(),
+        };
+        if (props.depositMetadata?.isDeposit) {
+          metadata.isDeposit = 'true';
+          metadata.totalAmount = String(props.depositMetadata.totalAmount);
+          metadata.depositAmount = String(props.depositMetadata.depositAmount);
+          metadata.remainingAmount = String(props.depositMetadata.remainingAmount);
+        }
         const response = await fetch('/api/stripe/create-payment-intent', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            amount: props.amount,
-            metadata: {
-              services: JSON.stringify(props.services),
-              selectedDate: props.selectedDate,
-              selectedTime: props.selectedTime,
-              teamMemberId: props.teamMemberId || '',
-              serviceDurationMinutes: props.serviceDurationMinutes?.toString() || '',
-              customerName: customerName,
-              customerEmail: customerEmail,
-              customerPhone: customerPhone,
-              timestamp: new Date().toISOString(),
-            },
+            amount: chargeAmount,
+            metadata,
           }),
         });
 
@@ -510,7 +535,7 @@ export default function StripePaymentForm(props: StripePaymentFormProps) {
             isLoading={isInitializing}
             startContent={!isInitializing ? <CreditCard className="w-5 h-5" /> : undefined}
           >
-            {isInitializing ? "Initializing Payment..." : `Pay £${props.amount.toFixed(2)} Now`}
+            {isInitializing ? "Initializing Payment..." : `Pay £${(props.amountToCharge ?? props.amount).toFixed(2)} Now`}
           </ButtonPrimary>
         </div>
         {/* Security Notice */}

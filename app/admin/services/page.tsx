@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Plus,
   Edit,
@@ -41,36 +41,44 @@ interface ExtendedServiceCategory extends ServiceCategory {
   description?: string;
 }
 
+type DiscountGroup = { id: string; name: string; discount_percentage: number; is_active: boolean };
+
 export default function AdminServicesPage() {
   const { confirm, modalProps } = useConfirmation();
-  
+
   // Main state
-  const [activeView, setActiveView] = useState<"services" | "categories">(
-    "services"
-  );
-  const [mainTab, setMainTab] = useState<"book-now" | "by-condition">(
-    "book-now"
-  );
+  const [activeView, setActiveView] = useState<"services" | "categories" | "discounts">("services");
+  const [mainTab, setMainTab] = useState<"book-now" | "by-condition">("book-now");
 
   // Data state
   const [services, setServices] = useState<Service[]>([]);
   const [categories, setCategories] = useState<ExtendedServiceCategory[]>([]);
   const [mainTabs, setMainTabs] = useState<MainTab[]>([]);
+  const [discountGroups, setDiscountGroups] = useState<DiscountGroup[]>([]);
 
   // UI state
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
-  const [editingCategory, setEditingCategory] =
-    useState<ExtendedServiceCategory | null>(null);
+  const [editingCategory, setEditingCategory] = useState<ExtendedServiceCategory | null>(null);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isDiscountGroupModalOpen, setIsDiscountGroupModalOpen] = useState(false);
+  const [editingDiscountGroup, setEditingDiscountGroup] = useState<DiscountGroup | null>(null);
+  const [discountGroupForm, setDiscountGroupForm] = useState({
+    name: "",
+    discount_percentage: 50,
+    is_active: true,
+    selectedServiceIds: [] as string[],
+  });
+  const [discountGroupServiceSearch, setDiscountGroupServiceSearch] = useState("");
+  const [discountGroupCategoryFilter, setDiscountGroupCategoryFilter] = useState("all");
 
   // Form state
-  const [formData, setFormData] = useState({
+  const defaultFormData = {
     name: "",
     slug: "",
     description: "",
@@ -81,12 +89,14 @@ export default function AdminServicesPage() {
     price: 0,
     duration: 30,
     category_id: "",
+    discount_group_id: "" as string | null,
     requires_consultation: false,
     downtime_days: 0,
     results_duration_weeks: null as number | null,
     is_featured: false,
     image_url: null as string | null,
-  });
+  };
+  const [formData, setFormData] = useState({ ...defaultFormData });
 
   const [categoryFormData, setCategoryFormData] = useState({
     name: "",
@@ -94,79 +104,40 @@ export default function AdminServicesPage() {
     slug: "",
   });
 
-  // Image upload state
+  // Image/Benefit state
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [newBenefit, setNewBenefit] = useState("");
 
-  // Load all data on mount
-  useEffect(() => {
-    loadAllData();
-  }, []);
-
-  // Reset category filter when mainTab changes
-  useEffect(() => {
-    setCategoryFilter("all");
-  }, [mainTab]);
-
-  const loadAllData = async () => {
-    setIsLoading(true);
-    await Promise.all([loadServices(), loadCategories(), loadMainTabs()]);
-    setIsLoading(false);
-  };
-
-  const loadServices = async () => {
+  // Data loading
+  const loadServices = useCallback(async () => {
     try {
-      // Use admin endpoint to get all services (including inactive)
       const response = await fetch("/api/admin/services");
       if (response.ok) {
         const data = await response.json();
-        const servicesData = data.services || [];
-        console.log(
-          "Loaded services (admin):",
-          servicesData.length,
-          servicesData
-        );
-        setServices(servicesData);
+        setServices(data.services || []);
       } else {
-        console.error(
-          "Error loading services: Response not ok",
-          response.status
-        );
-        const errorText = await response.text();
-        console.error("Error response:", errorText);
+        console.error("Error loading services: Response not ok", response.status);
       }
     } catch (error) {
       console.error("Error loading services:", error);
     }
-  };
+  }, []);
 
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async () => {
     try {
-      // Use admin endpoint to get all categories (including inactive)
       const response = await fetch("/api/admin/service-categories");
       if (response.ok) {
         const data = await response.json();
-        const categoriesData = data.categories || [];
-        console.log(
-          "Loaded categories (admin):",
-          categoriesData.length,
-          categoriesData
-        );
-        setCategories(categoriesData);
+        setCategories(data.categories || []);
       } else {
-        console.error(
-          "Error loading categories: Response not ok",
-          response.status
-        );
-        const errorText = await response.text();
-        console.error("Error response:", errorText);
+        console.error("Error loading categories: Response not ok", response.status);
       }
     } catch (error) {
       console.error("Error loading categories:", error);
     }
-  };
+  }, []);
 
-  const loadMainTabs = async () => {
+  const loadMainTabs = useCallback(async () => {
     try {
       const response = await fetch("/api/main-tabs");
       if (response.ok) {
@@ -176,24 +147,56 @@ export default function AdminServicesPage() {
     } catch (error) {
       console.error("Error loading main tabs:", error);
     }
-  };
+  }, []);
+
+  const loadDiscountGroups = useCallback(async () => {
+    try {
+      const response = await fetch("/api/admin/discount-groups");
+      if (response.ok) {
+        const data = await response.json();
+        setDiscountGroups(data.discountGroups ?? []);
+      }
+    } catch (error) {
+      console.error("Error loading discount groups:", error);
+    }
+  }, []);
+
+  const loadAllData = useCallback(async () => {
+    setIsLoading(true);
+    await Promise.all([
+      loadServices(),
+      loadCategories(),
+      loadMainTabs(),
+      loadDiscountGroups()
+    ]);
+    setIsLoading(false);
+  }, [loadServices, loadCategories, loadMainTabs, loadDiscountGroups]);
+
+  useEffect(() => {
+    loadAllData();
+  }, [loadAllData]);
+
+  // Reset category filter when mainTab changes
+  useEffect(() => {
+    setCategoryFilter("all");
+  }, [mainTab]);
 
   // Service CRUD operations
   const handleAddService = async () => {
-    if (!formData.name || !formData.price || !formData.category_id) return;
-
+    if (!formData.name || !formData.category_id) return;
     try {
       const serviceData = {
         ...formData,
+        price: parseFloat(`${formData.price}`) || 0,
+        duration: parseInt(`${formData.duration}`) || 30,
         slug: formData.slug || formData.name.toLowerCase().replace(/\s+/g, "-"),
+        discount_group_id: formData.discount_group_id || null,
       };
-
       const response = await fetch("/api/services", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(serviceData),
+        body: JSON.stringify(serviceData)
       });
-
       if (response.ok) {
         await loadServices();
         resetServiceForm();
@@ -206,6 +209,7 @@ export default function AdminServicesPage() {
 
   const handleEditService = (service: Service) => {
     setEditingService(service);
+    const svc = service as Service & { discount_group_id?: string | null };
     setFormData({
       name: service.name,
       slug: service.slug,
@@ -217,6 +221,7 @@ export default function AdminServicesPage() {
       price: service.price,
       duration: service.duration,
       category_id: service.category.id,
+      discount_group_id: svc.discount_group_id ?? "",
       requires_consultation: service.requires_consultation,
       downtime_days: service.downtime_days,
       results_duration_weeks: service.results_duration_weeks,
@@ -229,14 +234,18 @@ export default function AdminServicesPage() {
 
   const handleUpdateService = async () => {
     if (!editingService) return;
-
     try {
+      const payload = {
+        ...formData,
+        price: parseFloat(`${formData.price}`) || 0,
+        duration: parseInt(`${formData.duration}`) || 30,
+        discount_group_id: formData.discount_group_id || null,
+      };
       const response = await fetch(`/api/services/${editingService.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
-
       if (response.ok) {
         await loadServices();
         resetServiceForm();
@@ -256,68 +265,47 @@ export default function AdminServicesPage() {
         confirmText: "Delete",
       },
       async () => {
-    try {
-      const response = await fetch(`/api/services/${id}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        await loadServices();
-      }
-    } catch (error) {
-      console.error("Error deleting service:", error);
-    }
+        try {
+          const response = await fetch(`/api/services/${id}`, {
+            method: "DELETE",
+          });
+          if (response.ok) {
+            await loadServices();
+          }
+        } catch (error) {
+          console.error("Error deleting service:", error);
+        }
       }
     );
   };
 
   const handleToggleFeatured = async (service: Service) => {
-    // Optimistically update local state first to prevent reordering
+    // Optimistically update local state
     const newFeaturedStatus = !service.is_featured;
-    setServices((prevServices) =>
-      prevServices.map((s) =>
+    setServices((prev) =>
+      prev.map((s) =>
         s.id === service.id ? { ...s, is_featured: newFeaturedStatus } : s
       )
     );
-
     try {
       const response = await fetch(`/api/services/${service.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: service.name,
-          slug: service.slug,
-          description: service.description || "",
-          details: service.details || "",
-          benefits: Array.isArray(service.benefits) ? service.benefits : [],
-          preparation: service.preparation || "",
-          aftercare: service.aftercare || "",
-          price: service.price,
-          duration: service.duration,
-          category_id: service.category.id,
-          requires_consultation: service.requires_consultation,
-          downtime_days: service.downtime_days,
-          results_duration_weeks: service.results_duration_weeks,
+          ...service,
           is_featured: newFeaturedStatus,
-          image_url: service.image_url,
+          category_id: service.category.id,
+          benefits: Array.isArray(service.benefits) ? service.benefits : [],
         }),
       });
-
       if (!response.ok) {
-        // Revert on error
-        setServices((prevServices) =>
-          prevServices.map((s) =>
-            s.id === service.id ? { ...s, is_featured: service.is_featured } : s
-          )
+        setServices((prev) =>
+          prev.map((s) => (s.id === service.id ? { ...s, is_featured: service.is_featured } : s))
         );
-        console.error("Error toggling featured status:", response.statusText);
       }
     } catch (error) {
-      // Revert on error
-      setServices((prevServices) =>
-        prevServices.map((s) =>
-          s.id === service.id ? { ...s, is_featured: service.is_featured } : s
-        )
+      setServices((prev) =>
+        prev.map((s) => (s.id === service.id ? { ...s, is_featured: service.is_featured } : s))
       );
       console.error("Error toggling featured status:", error);
     }
@@ -326,11 +314,9 @@ export default function AdminServicesPage() {
   // Category CRUD operations
   const handleAddCategory = async () => {
     if (!categoryFormData.name) return;
-
     try {
       const selectedMainTab = mainTabs.find((tab) => tab.slug === mainTab);
       if (!selectedMainTab) return;
-
       const categoryData = {
         main_tab_id: selectedMainTab.id,
         name: categoryFormData.name,
@@ -340,13 +326,11 @@ export default function AdminServicesPage() {
         description: categoryFormData.description || "",
         display_order: 0,
       };
-
       const response = await fetch("/api/service-categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(categoryData),
       });
-
       if (response.ok) {
         await loadCategories();
         resetCategoryForm();
@@ -369,7 +353,6 @@ export default function AdminServicesPage() {
 
   const handleUpdateCategory = async () => {
     if (!editingCategory) return;
-
     try {
       const response = await fetch(
         `/api/service-categories/${editingCategory.id}`,
@@ -379,7 +362,6 @@ export default function AdminServicesPage() {
           body: JSON.stringify(categoryFormData),
         }
       );
-
       if (response.ok) {
         await loadCategories();
         resetCategoryForm();
@@ -399,40 +381,23 @@ export default function AdminServicesPage() {
         confirmText: "Delete",
       },
       async () => {
-    try {
-      const response = await fetch(`/api/service-categories/${id}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        await loadCategories();
-      }
-    } catch (error) {
-      console.error("Error deleting category:", error);
-    }
+        try {
+          const response = await fetch(`/api/service-categories/${id}`, {
+            method: "DELETE",
+          });
+          if (response.ok) {
+            await loadCategories();
+          }
+        } catch (error) {
+          console.error("Error deleting category:", error);
+        }
       }
     );
   };
 
   // Form utilities
   const resetServiceForm = () => {
-    setFormData({
-      name: "",
-      slug: "",
-      description: "",
-      details: "",
-      benefits: [],
-      preparation: "",
-      aftercare: "",
-      price: 0,
-      duration: 30,
-      category_id: "",
-      requires_consultation: false,
-      downtime_days: 0,
-      results_duration_weeks: null,
-      is_featured: false,
-      image_url: null,
-    });
+    setFormData({ ...defaultFormData });
     setEditingService(null);
     setImagePreview(null);
     setNewBenefit("");
@@ -457,6 +422,102 @@ export default function AdminServicesPage() {
     setIsCategoryModalOpen(true);
   };
 
+  const openAddDiscountGroupModal = () => {
+    setEditingDiscountGroup(null);
+    setDiscountGroupForm({
+      name: "",
+      discount_percentage: 50,
+      is_active: true,
+      selectedServiceIds: [],
+    });
+    setDiscountGroupServiceSearch("");
+    setDiscountGroupCategoryFilter("all");
+    setIsDiscountGroupModalOpen(true);
+  };
+
+  const handleEditDiscountGroup = async (dg: DiscountGroup) => {
+    setEditingDiscountGroup(dg);
+    setDiscountGroupForm({
+      name: dg.name,
+      discount_percentage: dg.discount_percentage,
+      is_active: dg.is_active,
+      selectedServiceIds: [],
+    });
+    setDiscountGroupServiceSearch("");
+    setDiscountGroupCategoryFilter("all");
+    setIsDiscountGroupModalOpen(true);
+    try {
+      const res = await fetch(`/api/admin/discount-groups/${dg.id}/services`);
+      if (res.ok) {
+        const data = await res.json();
+        setDiscountGroupForm((prev) => ({
+          ...prev,
+          selectedServiceIds: Array.isArray(data.serviceIds) ? data.serviceIds : [],
+        }));
+      }
+    } catch (e) {
+      console.error("Error loading offer services:", e);
+    }
+  };
+
+  const handleSaveDiscountGroup = async () => {
+    if (!discountGroupForm.name.trim()) return;
+    const { selectedServiceIds, ...groupPayload } = discountGroupForm;
+    try {
+      let groupId: string | null = null;
+      if (editingDiscountGroup) {
+        const res = await fetch(`/api/admin/discount-groups/${editingDiscountGroup.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(groupPayload),
+        });
+        const data = res.ok ? await res.json() : null;
+        groupId = data?.discountGroup?.id ?? editingDiscountGroup.id;
+        if (!res.ok) return;
+      } else {
+        const res = await fetch("/api/admin/discount-groups", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(groupPayload),
+        });
+        const data = res.ok ? await res.json() : null;
+        groupId = data?.discountGroup?.id ?? null;
+        if (!res.ok || !groupId) return;
+      }
+      const servicesRes = await fetch(`/api/admin/discount-groups/${groupId}/services`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ serviceIds: selectedServiceIds }),
+      });
+      if (servicesRes.ok) {
+        await loadDiscountGroups();
+        await loadServices();
+        setIsDiscountGroupModalOpen(false);
+      }
+    } catch (error) {
+      console.error("Error saving discount group:", error);
+    }
+  };
+
+  const handleDeleteDiscountGroup = async (id: string) => {
+    await confirm(
+      {
+        title: "Delete discount group",
+        message: "Are you sure? Services in this group will keep the group link until you change them.",
+        isDestructive: true,
+        confirmText: "Delete",
+      },
+      async () => {
+        try {
+          const res = await fetch(`/api/admin/discount-groups/${id}`, { method: "DELETE" });
+          if (res.ok) await loadDiscountGroups();
+        } catch (error) {
+          console.error("Error deleting discount group:", error);
+        }
+      }
+    );
+  };
+
   // Benefits management
   const addBenefit = () => {
     if (newBenefit.trim()) {
@@ -477,7 +538,6 @@ export default function AdminServicesPage() {
 
   // Filter logic
   const filteredServices = services.filter((service) => {
-    // Safely check main_tab
     const serviceMainTabSlug = service.main_tab?.slug;
     const matchesMainTab = serviceMainTabSlug === mainTab;
     const matchesSearch =
@@ -487,35 +547,19 @@ export default function AdminServicesPage() {
         .includes(searchQuery.toLowerCase());
     const matchesCategory =
       categoryFilter === "all" || service.category.id === categoryFilter;
-
     return matchesMainTab && matchesSearch && matchesCategory;
   });
 
   const currentCategories = categories.filter((cat) => {
     const catMainTabSlug = cat.main_tab?.slug;
-    const matches = catMainTabSlug === mainTab;
-    if (!matches && mainTab === "by-condition") {
-      console.log(
-        "Category filtered out:",
-        cat.name,
-        "main_tab:",
-        cat.main_tab
-      );
-    }
-    return matches;
+    return catMainTabSlug === mainTab;
   });
 
   // Debug logging
   useEffect(() => {
     if (mainTab === "by-condition") {
-      console.log("BY-CONDITION Debug:", {
-        totalCategories: categories.length,
-        currentCategories: currentCategories.length,
-        currentCategoriesData: currentCategories,
-        totalServices: services.length,
-        filteredServices: filteredServices.length,
-        mainTab,
-      });
+      // Disabled excessive logging unless needed
+      // console.log("Debug:", {totalCategories: categories.length, currentCategories: currentCategories.length});
     }
   }, [mainTab, categories, services, currentCategories, filteredServices]);
 
@@ -535,7 +579,7 @@ export default function AdminServicesPage() {
   return (
     <div className="w-full">
       <div className="space-y-6">
-        {/* Mobile-Optimized Main Tabs */}
+        {/* Main Tabs */}
         <div className="flex gap-2 sm:gap-3 mb-4 sm:mb-6">
           <button
             onClick={() => setMainTab("book-now")}
@@ -559,7 +603,7 @@ export default function AdminServicesPage() {
           </button>
         </div>
 
-        {/* Mobile-Optimized View Tabs */}
+        {/* View Tabs */}
         <div className="flex gap-2 sm:gap-3 mb-4 sm:mb-6">
           <button
             onClick={() => setActiveView("services")}
@@ -589,14 +633,27 @@ export default function AdminServicesPage() {
               <span className="xs:hidden">Category</span>
             </div>
           </button>
+          <button
+            onClick={() => setActiveView("discounts")}
+            className={`flex-1 px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all ${
+              activeView === "discounts"
+                ? "bg-white dark:bg-gray-800 text-[#464C45] dark:text-[#464C45] border-2 border-[#464C45] shadow-lg"
+                : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-2 border-gray-200 dark:border-gray-700"
+            }`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden xs:inline">Discounts</span>
+              <span className="xs:hidden">Offers</span>
+            </div>
+          </button>
         </div>
 
         {/* Services View */}
         {activeView === "services" && (
           <div className="space-y-6">
-            {/* Mobile-Optimized Actions Bar */}
+            {/* Actions Bar */}
             <div className="mb-6">
-              {/* Search, Filter and Add Button - All in one line */}
               <div className="flex gap-2 items-center">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
@@ -611,9 +668,7 @@ export default function AdminServicesPage() {
                 </div>
                 <Select
                   placeholder="All Categories"
-                  selectedKeys={
-                    categoryFilter === "all" ? [] : [categoryFilter]
-                  }
+                  selectedKeys={categoryFilter === "all" ? [] : [categoryFilter]}
                   onSelectionChange={(keys) => {
                     const key = Array.from(keys)[0] as string;
                     setCategoryFilter(key || "all");
@@ -639,14 +694,11 @@ export default function AdminServicesPage() {
                 </Button>
               </div>
             </div>
-
-            {/* Mobile-Optimized Stats */}
+            {/* Stats */}
             <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
               <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 <CardBody className="p-3 sm:p-4">
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
-                    Total
-                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Total</p>
                   <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                     {filteredServices.length}
                   </p>
@@ -654,9 +706,7 @@ export default function AdminServicesPage() {
               </Card>
               <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 <CardBody className="p-3 sm:p-4">
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
-                    Categories
-                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Categories</p>
                   <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                     {currentCategories.length}
                   </p>
@@ -664,17 +714,14 @@ export default function AdminServicesPage() {
               </Card>
               <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 <CardBody className="p-3 sm:p-4">
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
-                    Featured
-                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Featured</p>
                   <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                     {filteredServices.filter((s) => s.is_featured).length}
                   </p>
                 </CardBody>
               </Card>
             </div>
-
-            {/* Mobile-Optimized Services Grid */}
+            {/* Services Grid or Info */}
             {currentCategories.length === 0 ? (
               <div className="text-center py-12">
                 <AlertCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -709,9 +756,8 @@ export default function AdminServicesPage() {
                     className="hover:shadow-xl transition-all group border border-gray-200 dark:border-gray-700 flex flex-col"
                   >
                     <CardBody className="p-4 sm:p-6 flex flex-col flex-1">
-                      {/* Content Section - Top */}
+                      {/* Top Section */}
                       <div className="flex-1">
-                        {/* Header */}
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1 min-w-0">
                             <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2 truncate">
@@ -732,8 +778,6 @@ export default function AdminServicesPage() {
                             </Chip>
                           )}
                         </div>
-
-                        {/* Description */}
                         <div className="mb-3">
                           {service.description ? (
                             <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">
@@ -745,24 +789,20 @@ export default function AdminServicesPage() {
                             </p>
                           )}
                         </div>
-
-                        {/* Benefits Preview */}
                         {service.benefits && service.benefits.length > 0 ? (
                           <div className="mb-3">
                             <div className="flex flex-wrap gap-1">
-                              {service.benefits
-                                .slice(0, 3)
-                                .map((benefit, idx) => (
-                                  <Chip
-                                    key={idx}
-                                    size="sm"
-                                    variant="flat"
-                                    color="danger"
-                                    className="text-xs"
-                                  >
-                                    {benefit}
-                                  </Chip>
-                                ))}
+                              {service.benefits.slice(0, 3).map((benefit, idx) => (
+                                <Chip
+                                  key={idx}
+                                  size="sm"
+                                  variant="flat"
+                                  color="danger"
+                                  className="text-xs"
+                                >
+                                  {benefit}
+                                </Chip>
+                              ))}
                               {service.benefits.length > 3 && (
                                 <Chip
                                   size="sm"
@@ -781,8 +821,6 @@ export default function AdminServicesPage() {
                             </p>
                           </div>
                         )}
-
-                        {/* Details Preview */}
                         {service.details ? (
                           <div className="mb-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                             <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1">
@@ -800,8 +838,6 @@ export default function AdminServicesPage() {
                           </div>
                         )}
                       </div>
-
-                      {/* Price and Additional Information - Below buttons */}
                       <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <div className="flex items-center justify-between mb-3">
                           <div>
@@ -822,8 +858,6 @@ export default function AdminServicesPage() {
                             </div>
                           </div>
                         </div>
-
-                        {/* Additional Information */}
                         <div className="space-y-2">
                           <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold mb-2">
                             Additional Information:
@@ -900,7 +934,7 @@ export default function AdminServicesPage() {
                               )}
                           </div>
                         </div>
-                        {/* Action Buttons - At bottom */}
+                        {/* Action Buttons */}
                         <div className="flex gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                           <Button
                             size="sm"
@@ -908,15 +942,9 @@ export default function AdminServicesPage() {
                             color={service.is_featured ? "warning" : "default"}
                             onPress={() => handleToggleFeatured(service)}
                             className="flex-1 flex items-center justify-center"
-                            title={
-                              service.is_featured
-                                ? "Remove from featured"
-                                : "Make featured"
-                            }
+                            title={service.is_featured ? "Remove from featured" : "Make featured"}
                           >
-                            <Star
-                              className={`w-4 h-4 ${service.is_featured ? "fill-current" : ""}`}
-                            />
+                            <Star className={`w-4 h-4 ${service.is_featured ? "fill-current" : ""}`} />
                           </Button>
                           <Button
                             size="sm"
@@ -963,7 +991,6 @@ export default function AdminServicesPage() {
                 <Plus className="w-5 h-5" />
               </Button>
             </div>
-
             {currentCategories.length === 0 ? (
               <div className="text-center py-12">
                 <AlertCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -984,11 +1011,9 @@ export default function AdminServicesPage() {
                           {category.name}
                         </h3>
                       </div>
-
                       <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3 min-h-[60px]">
                         {category.description || "No description"}
                       </p>
-
                       <div className="flex gap-2">
                         <Button
                           size="sm"
@@ -1017,7 +1042,62 @@ export default function AdminServicesPage() {
           </div>
         )}
 
-        {/* Service Modal - Mobile Optimized */}
+        {/* Discounts View */}
+        {activeView === "discounts" && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                Discount groups
+              </h2>
+              <Button
+                onPress={openAddDiscountGroupModal}
+                className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white"
+                size="sm"
+                startContent={<Plus className="w-4 h-4" />}
+              >
+                Add group
+              </Button>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Assign a discount group to a service when editing it. Customers will see the discounted price and a badge.
+            </p>
+            {discountGroups.length === 0 ? (
+              <div className="text-center py-12">
+                <TrendingUp className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 dark:text-gray-400">No discount groups yet</p>
+                <Button className="mt-4" onPress={openAddDiscountGroupModal} color="primary">
+                  Create discount group
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {discountGroups.map((dg) => (
+                  <Card key={dg.id} className="border border-gray-200 dark:border-gray-700">
+                    <CardBody className="p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-bold text-gray-900 dark:text-white">{dg.name}</h3>
+                        <Chip size="sm" color="secondary">{dg.discount_percentage}% off</Chip>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                        {dg.is_active ? "Active" : "Inactive"}
+                      </p>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="flat" onPress={() => handleEditDiscountGroup(dg)}>
+                          <Edit className="w-4 h-4 mr-1" /> Edit
+                        </Button>
+                        <Button size="sm" variant="flat" color="danger" onPress={() => handleDeleteDiscountGroup(dg.id)}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </CardBody>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Service Modal */}
         <Modal
           isOpen={isModalOpen}
           onClose={() => {
@@ -1051,9 +1131,7 @@ export default function AdminServicesPage() {
                     <Select
                       label="Category"
                       placeholder="Select category"
-                      selectedKeys={
-                        formData.category_id ? [formData.category_id] : []
-                      }
+                      selectedKeys={formData.category_id ? [formData.category_id] : []}
                       onSelectionChange={(keys) => {
                         const key = Array.from(keys)[0] as string;
                         setFormData((prev) => ({ ...prev, category_id: key }));
@@ -1062,11 +1140,12 @@ export default function AdminServicesPage() {
                       size="lg"
                       isRequired
                     >
-                      {currentCategories.map((cat) => (
-                        <SelectItem key={cat.id}>{cat.name}</SelectItem>
-                      ))}
+                      <>
+                        {currentCategories.map((cat) => (
+                          <SelectItem key={cat.id}>{cat.name}</SelectItem>
+                        ))}
+                      </>
                     </Select>
-
                     <Input
                       label="Service Name"
                       placeholder="Enter service name"
@@ -1078,14 +1157,32 @@ export default function AdminServicesPage() {
                       size="lg"
                       isRequired
                     />
-
-                    {/* Price & Duration - Grid on mobile */}
+                    <Select
+                      label="Discount group (optional)"
+                      placeholder="None"
+                      selectedKeys={formData.discount_group_id ? [formData.discount_group_id] : []}
+                      onSelectionChange={(keys) => {
+                        const key = Array.from(keys)[0] as string;
+                        setFormData((prev) => ({ ...prev, discount_group_id: key || "" }));
+                      }}
+                      variant="bordered"
+                      size="lg"
+                    >
+                      <>
+                        <SelectItem key="">None</SelectItem>
+                        {discountGroups.filter((g) => g.is_active).map((g) => (
+                          <SelectItem key={g.id}>
+                            {g.name} ({g.discount_percentage}% off)
+                          </SelectItem>
+                        ))}
+                      </>
+                    </Select>
                     <div className="grid grid-cols-2 gap-3 sm:gap-4">
                       <Input
                         label="Price (£)"
                         placeholder="0.00"
                         type="number"
-                        value={formData.price.toString()}
+                        value={formData.price?.toString() ?? ""}
                         onValueChange={(value) =>
                           setFormData((prev) => ({
                             ...prev,
@@ -1100,7 +1197,7 @@ export default function AdminServicesPage() {
                         label="Duration (min)"
                         placeholder="30"
                         type="number"
-                        value={formData.duration.toString()}
+                        value={formData.duration?.toString() ?? ""}
                         onValueChange={(value) =>
                           setFormData((prev) => ({
                             ...prev,
@@ -1112,7 +1209,6 @@ export default function AdminServicesPage() {
                         isRequired
                       />
                     </div>
-
                     {/* Description & Details */}
                     <Textarea
                       label="Description"
@@ -1124,7 +1220,6 @@ export default function AdminServicesPage() {
                       variant="bordered"
                       minRows={3}
                     />
-
                     <Textarea
                       label="Details"
                       placeholder="Detailed information"
@@ -1135,7 +1230,6 @@ export default function AdminServicesPage() {
                       variant="bordered"
                       minRows={4}
                     />
-
                     {/* Benefits */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -1179,7 +1273,6 @@ export default function AdminServicesPage() {
                         </div>
                       )}
                     </div>
-
                     {/* Preparation & Aftercare */}
                     <Textarea
                       label="Preparation"
@@ -1191,7 +1284,6 @@ export default function AdminServicesPage() {
                       variant="bordered"
                       minRows={3}
                     />
-
                     <Textarea
                       label="Aftercare"
                       placeholder="Post-treatment instructions"
@@ -1202,14 +1294,12 @@ export default function AdminServicesPage() {
                       variant="bordered"
                       minRows={3}
                     />
-
-                    {/* Additional Options - Grid */}
                     <div className="grid grid-cols-2 gap-3 sm:gap-4">
                       <Input
                         label="Downtime (days)"
                         placeholder="0"
                         type="number"
-                        value={formData.downtime_days.toString()}
+                        value={formData.downtime_days?.toString() ?? ""}
                         onValueChange={(value) =>
                           setFormData((prev) => ({
                             ...prev,
@@ -1223,9 +1313,7 @@ export default function AdminServicesPage() {
                         label="Results (weeks)"
                         placeholder="12"
                         type="number"
-                        value={
-                          formData.results_duration_weeks?.toString() || ""
-                        }
+                        value={formData.results_duration_weeks?.toString() || ""}
                         onValueChange={(value) =>
                           setFormData((prev) => ({
                             ...prev,
@@ -1238,8 +1326,6 @@ export default function AdminServicesPage() {
                         size="lg"
                       />
                     </div>
-
-                    {/* Switches - Stack on mobile */}
                     <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                       <Switch
                         isSelected={formData.requires_consultation}
@@ -1285,7 +1371,7 @@ export default function AdminServicesPage() {
           </ModalContent>
         </Modal>
 
-        {/* Category Modal - Mobile Optimized */}
+        {/* Category Modal */}
         <Modal
           isOpen={isCategoryModalOpen}
           onClose={() => {
@@ -1355,6 +1441,168 @@ export default function AdminServicesPage() {
                     className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500"
                   >
                     {editingCategory ? "Update" : "Create"}
+                  </Button>
+                </ModalFooter>
+              </>
+            )}
+          </ModalContent>
+        </Modal>
+
+        {/* Discount group modal */}
+        <Modal
+          isOpen={isDiscountGroupModalOpen}
+          onClose={() => setIsDiscountGroupModalOpen(false)}
+          size="lg"
+          classNames={{
+            backdrop: "bg-black/50 backdrop-blur-sm",
+            base: "bg-white dark:bg-gray-800",
+            wrapper: "items-center",
+          }}
+        >
+          <ModalContent>
+            {(onClose) => (
+              <>
+                <ModalHeader className="border-b border-gray-200 dark:border-gray-700 pb-4">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                    {editingDiscountGroup ? "Edit discount group" : "Add discount group"}
+                  </h2>
+                </ModalHeader>
+                <ModalBody className="py-6 space-y-4">
+                  <Input
+                    label="Group name"
+                    placeholder="e.g. Winter promo"
+                    value={discountGroupForm.name}
+                    onValueChange={(v) => setDiscountGroupForm((prev) => ({ ...prev, name: v }))}
+                    variant="bordered"
+                    size="lg"
+                  />
+                  <Input
+                    label="Discount (%)"
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={discountGroupForm.discount_percentage.toString()}
+                    onValueChange={(v) => setDiscountGroupForm((prev) => ({ ...prev, discount_percentage: parseInt(v) || 0 }))}
+                    variant="bordered"
+                    size="lg"
+                  />
+                  <Switch
+                    isSelected={discountGroupForm.is_active}
+                    onValueChange={(v) => setDiscountGroupForm((prev) => ({ ...prev, is_active: v }))}
+                  >
+                    Active (shown to customers)
+                  </Switch>
+                  <div>
+                    <label className="block text-sm font-medium text-default-600 dark:text-default-400 mb-2">
+                      Services that use this offer
+                    </label>
+                    <p className="text-xs text-default-500 mb-2">
+                      Select which services get this discount. Customers will see the reduced price and a badge.
+                    </p>
+                    {discountGroupForm.selectedServiceIds.length > 0 && (
+                      <div className="mb-3 p-3 rounded-lg bg-default-100 dark:bg-default-50 border border-default-200 dark:border-default-100">
+                        <p className="text-xs font-medium text-default-600 dark:text-default-400 mb-2">
+                          Selected for this offer ({discountGroupForm.selectedServiceIds.length})
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {discountGroupForm.selectedServiceIds.map((id) => {
+                            const svc = services.find((s) => s.id === id);
+                            return (
+                              <Chip
+                                key={id}
+                                size="sm"
+                                variant="flat"
+                                color="primary"
+                                onClose={() =>
+                                  setDiscountGroupForm((prev) => ({
+                                    ...prev,
+                                    selectedServiceIds: prev.selectedServiceIds.filter((sid) => sid !== id),
+                                  }))
+                                }
+                              >
+                                {svc?.name ?? id}
+                              </Chip>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex flex-col sm:flex-row gap-2 mb-3">
+                      <Input
+                        placeholder="Search services..."
+                        value={discountGroupServiceSearch}
+                        onValueChange={setDiscountGroupServiceSearch}
+                        variant="bordered"
+                        size="sm"
+                        className="flex-1"
+                        startContent={<Search className="w-4 h-4 text-default-400" />}
+                      />
+                      <Select
+                        placeholder="Category"
+                        selectedKeys={[discountGroupCategoryFilter]}
+                        onSelectionChange={(keys) => {
+                          const key = Array.from(keys)[0] as string;
+                          setDiscountGroupCategoryFilter(key ?? "all");
+                        }}
+                        variant="bordered"
+                        size="sm"
+                        className="w-full sm:w-40"
+                        aria-label="Filter by category"
+                      >
+                        <>
+                          <SelectItem key="all">All categories</SelectItem>
+                          {categories.map((cat) => (
+                            <SelectItem key={cat.id}>{cat.name}</SelectItem>
+                          ))}
+                        </>
+                      </Select>
+                    </div>
+                    <div className="max-h-48 overflow-y-auto rounded-lg border border-default-200 dark:border-default-100 p-3 space-y-2">
+                      {services.length === 0 ? (
+                        <p className="text-sm text-default-500">No services yet. Add services in the Services tab first.</p>
+                      ) : (() => {
+                          const q = discountGroupServiceSearch.trim().toLowerCase();
+                          const catId = discountGroupCategoryFilter === "all" ? null : discountGroupCategoryFilter;
+                          const filtered = services.filter((svc) => {
+                            const matchSearch = !q || svc.name.toLowerCase().includes(q);
+                            const matchCategory = !catId || svc.category?.id === catId;
+                            return matchSearch && matchCategory;
+                          });
+                          return filtered.length === 0 ? (
+                            <p className="text-sm text-default-500">No services match your search or filter.</p>
+                          ) : (
+                            filtered.map((svc) => (
+                              <label
+                                key={svc.id}
+                                className="flex items-center gap-2 cursor-pointer hover:bg-default-100 dark:hover:bg-default-50 rounded px-2 py-1.5"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={discountGroupForm.selectedServiceIds.includes(svc.id)}
+                                  onChange={(e) => {
+                                    const checked = e.target.checked;
+                                    setDiscountGroupForm((prev) => ({
+                                      ...prev,
+                                      selectedServiceIds: checked
+                                        ? [...prev.selectedServiceIds, svc.id]
+                                        : prev.selectedServiceIds.filter((id) => id !== svc.id),
+                                    }));
+                                  }}
+                                  className="rounded border-default-300 text-primary"
+                                />
+                                <span className="text-sm text-foreground truncate">{svc.name}</span>
+                                <span className="text-xs text-default-400 shrink-0">£{svc.price}</span>
+                              </label>
+                            ))
+                          );
+                        })()}
+                    </div>
+                  </div>
+                </ModalBody>
+                <ModalFooter className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <Button variant="light" onPress={onClose}>Cancel</Button>
+                  <Button color="primary" onPress={handleSaveDiscountGroup}>
+                    {editingDiscountGroup ? "Update" : "Create"}
                   </Button>
                 </ModalFooter>
               </>

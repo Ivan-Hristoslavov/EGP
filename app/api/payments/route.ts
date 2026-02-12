@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
         `
         *,
         customers(first_name, last_name, email),
-        bookings(service, date, customer_name, customer_email, booking_number)
+        bookings(service, date, customer_name, customer_email, booking_number, payment_type, remaining_amount, total_amount)
       `,
       )
       .order("created_at", { ascending: false })

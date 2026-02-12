@@ -43,6 +43,10 @@ interface Booking {
   status: "pending" | "confirmed" | "completed" | "cancelled";
   payment_status: "pending" | "paid" | "refunded";
   amount: number;
+  payment_type?: "full" | "deposit";
+  total_amount?: number;
+  amount_paid?: number;
+  remaining_amount?: number;
   address?: string;
   notes?: string;
   created_at?: string;
@@ -718,7 +722,11 @@ export default function BookingsPage() {
                             booking.payment_status === 'pending' ? 'text-warning' :
                             'text-danger'
                           }`}>
-                          £{booking.amount}
+                            {booking.payment_type === 'deposit' && (booking.amount_paid != null || booking.remaining_amount != null) ? (
+                              <>£{(booking.amount_paid ?? booking.amount).toFixed(2)} deposit, £{(booking.remaining_amount ?? 0).toFixed(2)} due</>
+                            ) : (
+                              <>£{booking.amount}</>
+                            )}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
@@ -1157,13 +1165,26 @@ export default function BookingsPage() {
                     </div>
                     <div>
                       <label className="text-sm font-medium text-default-500">Amount</label>
-                      <p className={`text-2xl font-bold ${
-                        selectedBooking.payment_status === 'paid' ? 'text-success' :
-                        selectedBooking.payment_status === 'pending' ? 'text-warning' :
-                        'text-danger'
-                      }`}>
-                        £{selectedBooking.amount}
-                      </p>
+                      {selectedBooking.payment_type === 'deposit' && (selectedBooking.amount_paid != null || selectedBooking.remaining_amount != null) ? (
+                        <div className="space-y-1">
+                          <p className={`text-xl font-bold ${
+                            selectedBooking.payment_status === 'paid' ? 'text-success' :
+                            selectedBooking.payment_status === 'pending' ? 'text-warning' :
+                            'text-danger'
+                          }`}>
+                            £{(selectedBooking.amount_paid ?? selectedBooking.amount).toFixed(2)} deposit paid
+                          </p>
+                          <p className="text-base text-default-600">£{(selectedBooking.remaining_amount ?? 0).toFixed(2)} due on arrival</p>
+                        </div>
+                      ) : (
+                        <p className={`text-2xl font-bold ${
+                          selectedBooking.payment_status === 'paid' ? 'text-success' :
+                          selectedBooking.payment_status === 'pending' ? 'text-warning' :
+                          'text-danger'
+                        }`}>
+                          £{selectedBooking.amount}
+                        </p>
+                      )}
                     </div>
                 {selectedBooking.address && (
                     <div>

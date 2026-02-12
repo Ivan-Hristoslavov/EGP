@@ -30,7 +30,8 @@ export async function PUT(
       requires_consultation,
       downtime_days,
       results_duration_weeks,
-      image_url
+      image_url,
+      discount_group_id
     } = body;
 
     const { data: service, error } = await supabase
@@ -52,7 +53,8 @@ export async function PUT(
         ...(requires_consultation !== undefined && { requires_consultation }),
         ...(downtime_days !== undefined && { downtime_days }),
         ...(results_duration_weeks !== undefined && { results_duration_weeks }),
-        ...(image_url !== undefined && { image_url })
+        ...(image_url !== undefined && { image_url }),
+        ...(discount_group_id !== undefined && { discount_group_id: discount_group_id || null })
       })
       .eq('id', id)
       .select()
