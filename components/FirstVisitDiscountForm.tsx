@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, Gift, Mail, CheckCircle, Percent } from "lucide-react";
+import { X, Gift, Mail, Percent, Copy, Check } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { setCookie, getCookie, COOKIE_NAMES } from "@/lib/cookies";
 import { usePathname } from "next/navigation";
@@ -15,6 +15,26 @@ export function FirstVisitDiscountForm() {
   const [mobile, setMobile] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [discountCode, setDiscountCode] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyCode = async () => {
+    if (!discountCode) return;
+    try {
+      await navigator.clipboard.writeText(discountCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback for older browsers
+      const input = document.createElement("input");
+      input.value = discountCode;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("copy");
+      document.body.removeChild(input);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   useEffect(() => {
     // Check if user has already seen the discount popup
@@ -101,26 +121,67 @@ export function FirstVisitDiscountForm() {
             <X className="w-5 h-5 text-white" />
           </button>
           {discountCode ? (
-            <div className="py-10 sm:py-12 md:py-14 px-6 sm:px-8 md:px-12 text-center">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-[#9d9585]/20 to-[#c9c1b0]/20 dark:from-[#9d9585]/30 dark:to-[#b5ad9d]/30 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-5 border-2 border-[#b5ad9d]/30 dark:border-[#c9c1b0]/40">
+            <div className="py-10 sm:py-12 md:py-14 px-6 sm:px-8 md:px-12 text-center text-white">
+              <div
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-5 border-2 border-white/30 shadow-lg"
+                style={{
+                  background: `linear-gradient(to bottom right, ${aestheticsColors.green.DEFAULT}, ${aestheticsColors.green.dark})`,
+                }}
+              >
                 <Percent className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
               </div>
-              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">Congratulations!</h3>
-              <p className="text-gray-700 dark:text-gray-300 text-base sm:text-lg mb-5">Here's your exclusive discount code:</p>
-              <div className="inline-block bg-gradient-to-br from-[#9d9585]/15 to-[#c9c1b0]/15 dark:from-[#9d9585]/20 dark:to-[#b5ad9d]/20 backdrop-blur-sm border-2 border-[#b5ad9d]/30 dark:border-[#c9c1b0]/40 rounded-xl px-6 sm:px-8 py-3 sm:py-4 mb-5">
-                <div className="text-xs sm:text-sm text-[#464C45] dark:text-[#5a6259] mb-1 font-medium">Your Discount Code</div>
-                <div className="text-2xl sm:text-3xl font-bold text-[#464C45] dark:text-[#5a6259] tracking-wider">{discountCode}</div>
-              </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">Check your email for details. Valid for 30 days!</p>
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  setCookie(COOKIE_NAMES.DISCOUNT_SHOWN, 'true', 365);
+              <h3 className="text-2xl sm:text-3xl font-bold text-white mb-2">Congratulations!</h3>
+              <p className="text-white/90 text-base sm:text-lg mb-5">Here&apos;s your exclusive discount code:</p>
+              <div
+                className="inline-flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 rounded-xl px-6 sm:px-8 py-4 sm:py-5 mb-5 border-2 backdrop-blur-sm"
+                style={{
+                  backgroundColor: "rgba(255,255,255,0.15)",
+                  borderColor: "rgba(255,255,255,0.35)",
                 }}
-                className="px-6 py-3 bg-[#464C45] hover:bg-[#3a4039] text-white font-semibold rounded-full transition-all shadow-lg hover:shadow-xl"
               >
-                Close
-              </button>
+                <div className="min-w-0">
+                  <div className="text-xs sm:text-sm text-white/80 mb-1 font-semibold uppercase tracking-wide">Your Discount Code</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-white tracking-wider select-all">{discountCode}</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCopyCode}
+                  className="flex-shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-white transition-all shadow-lg hover:shadow-xl active:scale-95"
+                  style={{
+                    background: copied
+                      ? "linear-gradient(to right, #2d322c, #3a4039)"
+                      : "linear-gradient(to right, #9d9585, #b5ad9d, #ddd5c3)",
+                  }}
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      Copy Code
+                    </>
+                  )}
+                </button>
+              </div>
+              <p className="text-sm text-white/80 mb-6">Check your email for details. Valid for 30 days!</p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOpen(false);
+                    setCookie(COOKIE_NAMES.DISCOUNT_SHOWN, "true", 365);
+                  }}
+                  className="px-6 py-3 text-white font-semibold rounded-full transition-all shadow-lg hover:shadow-xl"
+                  style={{
+                    background: "linear-gradient(to right, #9d9585, #b5ad9d, #ddd5c3)",
+                  }}
+                >
+                  Close
+                </button>
+              </div>
             </div>
           ) : (
             <div className="p-5 sm:p-6 md:p-8">

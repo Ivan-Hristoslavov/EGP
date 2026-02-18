@@ -128,14 +128,8 @@ export default async function RootLayout({
   // Fetch admin profile data once at the layout level
   const adminProfile = await getAdminProfile();
   
-  // Fetch areas, pricing cards, and admin settings data for structured data
+  // Fetch pricing cards and admin settings data for structured data (areas table not used)
   const supabase = createClient();
-  const { data: areas } = await supabase
-    .from('admin_areas_cover')
-    .select('*')
-    .eq('is_active', true)
-    .order('order', { ascending: true });
-    
   const { data: pricingCards } = await supabase
     .from('pricing_cards')
     .select('*')
@@ -183,11 +177,7 @@ export default async function RootLayout({
       "latitude": 51.4708,
       "longitude": -0.1389
     },
-    "areaServed": areas?.map(area => ({
-      "@type": "City",
-      "name": area.name,
-      "postalCode": area.postcode
-    })) || [],
+    "areaServed": [],
     "serviceType": pricingCards?.map(card => card.title) || [],
     "openingHoursSpecification": settingsMap.workingDays?.map((day: string) => ({
       "@type": "OpeningHoursSpecification",

@@ -1,5 +1,28 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase';
+
+function extractFilePathFromUrl(url: string): string | null {
+  if (!url) return null;
+  try {
+    const match = url.match(/\/storage\/v1\/object\/public\/egp\/(.+)/);
+    return match ? match[1] : null;
+  } catch {
+    return null;
+  }
+}
+
+async function deleteImageFromStorage(imageUrl: string | null): Promise<void> {
+  if (!imageUrl || !supabaseAdmin) return;
+  const filePath = extractFilePathFromUrl(imageUrl);
+  if (!filePath) return;
+  try {
+    const { error } = await supabaseAdmin.storage.from('egp').remove([filePath]);
+    if (error) console.error('Error deleting about image from storage:', error);
+  } catch (e) {
+    console.error('Error in deleteImageFromStorage:', e);
+  }
+}
 
 export async function GET(
   request: Request,
@@ -36,6 +59,20 @@ export async function PUT(
     const supabase = createClient();
     const body = await request.json();
 
+    if (body.image_url !== undefined) {
+      const { data: existing } = await supabase
+        .from('about_content')
+        .select('image_url')
+        .eq('id', id)
+        .single();
+
+      const newUrl = body.image_url == null || body.image_url === '' ? null : body.image_url;
+      const oldUrl = existing?.image_url ?? null;
+      if (oldUrl && (newUrl !== oldUrl || !newUrl)) {
+        await deleteImageFromStorage(oldUrl);
+      }
+    }
+
     const { data, error } = await supabase
       .from('about_content')
       .update(body)
@@ -62,6 +99,16 @@ export async function DELETE(
   try {
     const { id } = await params;
     const supabase = createClient();
+
+    const { data: section } = await supabase
+      .from('about_content')
+      .select('image_url')
+      .eq('id', id)
+      .single();
+
+    if (section?.image_url) {
+      await deleteImageFromStorage(section.image_url);
+    }
 
     const { error } = await supabase
       .from('about_content')

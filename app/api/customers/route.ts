@@ -61,20 +61,48 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
     const offset = (page - 1) * limit;
+    const sort = searchParams.get("sort") || "newest";
+    const hasDiscountCode = searchParams.get("has_discount_code") || "all";
 
     let query = supabaseAdmin
       .from("customers")
-      .select("id, first_name, last_name, email, phone, address, postcode, city, created_at, updated_at", { count: "exact" });
+      .select("id, first_name, last_name, email, phone, address, postcode, city, notes, marketing_emails, created_at, updated_at, discount_codes(id, code, discount_percentage, valid_from, valid_until, used_at, is_active, created_at)", { count: "exact" });
 
-    // If search term provided, filter by it
-    if (searchTerm) {
-      query = query.or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%`);
+    // Search: name, email, phone
+    if (searchTerm && searchTerm.trim()) {
+      const term = searchTerm.trim();
+      query = query.or(`first_name.ilike.%${term}%,last_name.ilike.%${term}%,email.ilike.%${term}%,phone.ilike.%${term}%`);
     }
 
-    // Apply pagination
-    query = query
-      .order("created_at", { ascending: false })
-      .range(offset, offset + limit - 1);
+    // Filter: only customers with at least one discount code
+    if (hasDiscountCode === "yes") {
+      const { data: idsWithCode } = await supabaseAdmin
+        .from("discount_codes")
+        .select("customer_id")
+        .not("customer_id", "is", null);
+      const customerIds = [...new Set((idsWithCode || []).map((r: { customer_id: string }) => r.customer_id))];
+      if (customerIds.length === 0) {
+        return NextResponse.json({
+          customers: [],
+          pagination: { page: 1, limit, totalCount: 0, totalPages: 0, hasNextPage: false, hasPrevPage: false },
+        });
+      }
+      query = query.in("id", customerIds);
+    }
+
+    // Sort
+    if (sort === "oldest") {
+      query = query.order("created_at", { ascending: true });
+    } else if (sort === "name_asc") {
+      query = query.order("first_name", { ascending: true }).order("last_name", { ascending: true });
+    } else if (sort === "name_desc") {
+      query = query.order("first_name", { ascending: false }).order("last_name", { ascending: false });
+    } else {
+      query = query.order("created_at", { ascending: false });
+    }
+
+    // Pagination
+    query = query.range(offset, offset + limit - 1);
 
     const { data: customers, error, count } = await query;
 

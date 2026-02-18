@@ -58,22 +58,9 @@ export default function FooterMain() {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch service areas
-        const areasResponse = await fetch('/api/areas');
-        if (areasResponse.ok) {
-          const areas = await areasResponse.json();
-          setServiceAreas(areas.filter((area: ServiceArea) => area.is_active));
-        }
-      } catch (error) {
-        console.error('Error fetching footer data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
+    // Areas (admin_areas_cover) are not used; keep service areas empty
+    setServiceAreas([]);
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {

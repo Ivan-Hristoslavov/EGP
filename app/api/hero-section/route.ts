@@ -1,5 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase";
+
+function extractFilePathFromUrl(url: string): string | null {
+  if (!url) return null;
+  try {
+    const match = url.match(/\/storage\/v1\/object\/public\/egp\/(.+)/);
+    return match ? match[1] : null;
+  } catch {
+    return null;
+  }
+}
+
+async function deleteImageFromStorage(imageUrl: string | null): Promise<void> {
+  if (!imageUrl || !supabaseAdmin) return;
+  const filePath = extractFilePathFromUrl(imageUrl);
+  if (!filePath) return;
+  try {
+    const { error } = await supabaseAdmin.storage.from("egp").remove([filePath]);
+    if (error) console.error("Error deleting hero image from storage:", error);
+  } catch (e) {
+    console.error("Error in deleteImageFromStorage:", e);
+  }
+}
 
 export async function GET() {
   try {
@@ -79,13 +102,22 @@ export async function PUT(request: NextRequest) {
     const existingId = existingRecords && existingRecords.length > 0 ? existingRecords[0].id : null;
     const recordId = id || existingId;
 
-    // If there are multiple records, delete all except the first one
+    // If there are multiple records, delete all except the first one (and their images from bucket)
     if (existingRecords && existingRecords.length > 0) {
       const idsToDelete = existingRecords
         .filter((r: { id: string }) => r.id !== recordId)
         .map((r: { id: string }) => r.id);
       
       if (idsToDelete.length > 0) {
+        const { data: toDelete } = await supabase
+          .from("hero_section")
+          .select("image_1_url, image_2_url, image_3_url")
+          .in("id", idsToDelete);
+        for (const row of toDelete || []) {
+          await deleteImageFromStorage(row.image_1_url);
+          await deleteImageFromStorage(row.image_2_url);
+          await deleteImageFromStorage(row.image_3_url);
+        }
         await supabase
           .from("hero_section")
           .delete()
@@ -95,6 +127,20 @@ export async function PUT(request: NextRequest) {
 
     // Upsert: update if exists, create if not
     if (recordId) {
+      // Delete old images from bucket when replacing or removing
+      const { data: existingHero } = await supabase
+        .from("hero_section")
+        .select("image_1_url, image_2_url, image_3_url")
+        .eq("id", recordId)
+        .single();
+      const oldUrls = [existingHero?.image_1_url, existingHero?.image_2_url, existingHero?.image_3_url];
+      const newUrls = [image_1_url, image_2_url, image_3_url];
+      for (let i = 0; i < 3; i++) {
+        const oldU = oldUrls[i] ?? null;
+        const newU = newUrls[i] == null || newUrls[i] === "" ? null : newUrls[i];
+        if (oldU && (newU !== oldU || !newU)) await deleteImageFromStorage(oldU);
+      }
+
       // Update existing record
       const { data: heroSection, error } = await supabase
         .from("hero_section")
@@ -199,6 +245,18 @@ export async function DELETE(request: NextRequest) {
 
     if (!id) {
       return NextResponse.json({ error: "Hero section ID is required" }, { status: 400 });
+    }
+
+    const { data: existing } = await supabase
+      .from("hero_section")
+      .select("image_1_url, image_2_url, image_3_url")
+      .eq("id", id)
+      .single();
+
+    if (existing) {
+      await deleteImageFromStorage(existing.image_1_url);
+      await deleteImageFromStorage(existing.image_2_url);
+      await deleteImageFromStorage(existing.image_3_url);
     }
 
     const { error } = await supabase

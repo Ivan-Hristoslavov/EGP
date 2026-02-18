@@ -56,21 +56,9 @@ export default function SectionContact() {
 
 
   useEffect(() => {
-    const fetchServiceAreas = async () => {
-      try {
-        const areasResponse = await fetch("/api/areas");
-        if (areasResponse.ok) {
-          const areas = await areasResponse.json();
-          setServiceAreas(areas.filter((area: ServiceArea) => area.is_active));
-        }
-      } catch (error) {
-        console.error("Error fetching service areas:", error);
-      } finally {
-        setIsLoadingAreas(false);
-      }
-    };
-
-    fetchServiceAreas();
+    // Areas (admin_areas_cover) are not used; keep service areas empty
+    setServiceAreas([]);
+    setIsLoadingAreas(false);
   }, []);
 
   const formatWorkingHours = () => {

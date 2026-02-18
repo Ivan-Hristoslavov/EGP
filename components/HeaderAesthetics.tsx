@@ -854,26 +854,27 @@ export default function HeaderAesthetics() {
                                       }
                                       setActiveMenu(null);
                                     }}
-                                    className={`group relative flex px-2 py-1.5 -mx-2 rounded-md text-sm text-gray-800 dark:text-gray-200 font-montserrat transition-all duration-300 hover:bg-white/30 dark:hover:bg-white/10 ${hasDiscount ? 'flex-col gap-1 py-2' : 'items-center justify-between gap-4'}`}
+                                    className={`group relative flex px-2 py-1.5 -mx-2 rounded-md text-sm text-gray-800 dark:text-gray-200 font-montserrat transition-all duration-300 hover:bg-white/30 dark:hover:bg-white/10 ${hasDiscount ? 'flex-col gap-1.5 py-2 pr-12' : 'items-center justify-between gap-4'}`}
                                   >
-                                    <span className="relative z-10 flex-1 min-w-0 group-hover:translate-x-1 text-gray-800 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-all duration-300 inline-flex items-center gap-2 flex-wrap">
+                                    {hasDiscount && item.discountPercentage != null && item.discountPercentage > 0 && (
+                                      <span className="absolute top-1.5 right-2 z-10 inline-flex flex-shrink-0 text-[10px] font-semibold bg-egp-green text-white dark:bg-egp-beige dark:text-egp-green px-1.5 py-0.5 rounded">
+                                        {item.discountPercentage}% off
+                                      </span>
+                                    )}
+                                    <span className="relative z-0 flex-1 min-w-0 group-hover:translate-x-1 text-gray-800 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-all duration-300 inline-flex items-center gap-2 flex-wrap">
                                       {item.name}
-                                      {hasDiscount && item.discountPercentage != null && item.discountPercentage > 0 && (
-                                        <span className="inline-flex flex-shrink-0 text-[10px] font-semibold bg-egp-green text-white dark:bg-egp-beige dark:text-egp-green px-1.5 py-0.5 rounded">
-                                          {item.discountPercentage}% off
-                                        </span>
-                                      )}
                                       <span className="absolute left-0 -bottom-0.5 w-0 h-px bg-egp-green dark:bg-egp-beige group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
                                     </span>
-                                    <span className={`relative z-10 flex-shrink-0 text-right ${hasDiscount ? 'w-full' : ''}`}>
+                                    <span className={`relative z-0 flex-shrink-0 text-right min-w-0 ${hasDiscount ? 'w-full flex justify-end' : ''}`}>
                                       <PriceWithDiscount
                                         price={item.price}
                                         originalPrice={item.originalPrice}
                                         discountPercentage={item.discountPercentage}
                                         size="sm"
                                         showBadge={false}
-                                        layout={hasDiscount ? 'inline' : 'inline'}
-                                        align={hasDiscount ? 'end' : 'start'}
+                                        layout="inline"
+                                        align={hasDiscount ? "end" : "start"}
+                                        compact={true}
                                       />
                                     </span>
                                   </Link>
@@ -1066,20 +1067,20 @@ export default function HeaderAesthetics() {
                                         setMobileMenuOpen(false);
                                         setActiveMenu(null);
                                       }}
-                                      className={`group relative flex px-3 py-2.5 min-h-[44px] text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md transition-all duration-200 active:scale-95 touch-manipulation font-montserrat pb-1 ${hasDiscount ? 'flex-col gap-1 items-stretch' : 'items-center justify-between gap-3'}`}
+                                      className={`group relative flex px-3 py-2.5 min-h-[44px] text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md transition-all duration-200 active:scale-95 touch-manipulation font-montserrat pb-1 ${hasDiscount ? 'flex-col gap-1.5 items-stretch pr-12' : 'items-center justify-between gap-3'}`}
                                     >
-                                      <span className="relative flex-1 min-w-0 text-left leading-tight inline-flex items-center gap-2 flex-wrap">
-                                        <span className="relative z-10">
+                                      {hasDiscount && item.discountPercentage != null && item.discountPercentage > 0 && (
+                                        <span className="absolute top-2 right-2 z-10 inline-flex flex-shrink-0 text-[10px] font-semibold bg-egp-green text-white dark:bg-egp-beige dark:text-egp-green px-1.5 py-0.5 rounded">
+                                          {item.discountPercentage}% off
+                                        </span>
+                                      )}
+                                      <span className="relative flex-1 min-w-0 text-left leading-tight inline-flex items-center gap-2 flex-wrap pr-0">
+                                        <span className="relative z-0">
                                           {item.name}
                                         </span>
-                                        {hasDiscount && item.discountPercentage != null && item.discountPercentage > 0 && (
-                                          <span className="inline-flex flex-shrink-0 text-[10px] font-semibold bg-egp-green text-white dark:bg-egp-beige dark:text-egp-green px-1.5 py-0.5 rounded">
-                                            {item.discountPercentage}% off
-                                          </span>
-                                        )}
                                         <span className="absolute left-0 right-0 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
                                       </span>
-                                      <span className={`flex-shrink-0 text-right ${hasDiscount ? 'w-full' : ''}`}>
+                                      <span className={`flex-shrink-0 text-right min-w-0 z-0 ${hasDiscount ? 'w-full flex justify-end' : ''}`}>
                                         <PriceWithDiscount
                                           price={item.price}
                                           originalPrice={item.originalPrice}
@@ -1087,7 +1088,8 @@ export default function HeaderAesthetics() {
                                           size="sm"
                                           showBadge={false}
                                           layout="inline"
-                                          align={hasDiscount ? 'end' : 'start'}
+                                          align={hasDiscount ? "end" : "start"}
+                                          compact={true}
                                         />
                                       </span>
                                     </Link>

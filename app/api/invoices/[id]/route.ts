@@ -9,6 +9,27 @@ const supabaseStorage = createStorageClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+function extractInvoiceStoragePath(url: string): string | null {
+  if (!url) return null;
+  try {
+    const match = url.match(/\/storage\/v1\/object\/public\/invoices\/(.+)/);
+    return match ? match[1] : null;
+  } catch {
+    return null;
+  }
+}
+
+async function deleteInvoiceImageFromStorage(imageUrl: string): Promise<void> {
+  const path = extractInvoiceStoragePath(imageUrl);
+  if (!path) return;
+  try {
+    const { error } = await supabaseStorage.storage.from("invoices").remove([path]);
+    if (error) console.error("Error deleting invoice image from storage:", error);
+  } catch (e) {
+    console.error("Error in deleteInvoiceImageFromStorage:", e);
+  }
+}
+
 // Helper function to compress images
 async function compressImage(buffer: Buffer, originalSize: number): Promise<{ compressedBuffer: Buffer; compressedSize: number; compressionRatio: number }> {
   try {
@@ -125,6 +146,26 @@ export async function PUT(
         imageAttachments = [...existingImages];
       } catch (error) {
         console.error("Error parsing existing images:", error);
+      }
+    }
+
+    // Delete from bucket any previous images that are no longer in the list
+    const { data: currentInvoice } = await supabase
+      .from("invoices")
+      .select("image_attachments")
+      .eq("id", id)
+      .single();
+    if (currentInvoice?.image_attachments) {
+      try {
+        const previous = JSON.parse(currentInvoice.image_attachments) as { path: string }[];
+        const newPaths = new Set(imageAttachments.map((a) => a.path));
+        for (const att of previous) {
+          if (att.path && !newPaths.has(att.path)) {
+            await deleteInvoiceImageFromStorage(att.path);
+          }
+        }
+      } catch (e) {
+        console.error("Error deleting removed invoice images:", e);
       }
     }
 
@@ -249,21 +290,13 @@ export async function DELETE(
       return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
     }
 
-    // Delete associated image files if any
+    // Delete associated images from storage bucket
     if (existingInvoice.image_attachments) {
       try {
-        const attachments = JSON.parse(existingInvoice.image_attachments);
-        const fs = require('fs');
-        
-        attachments.forEach((attachment: { path: string }) => {
-          try {
-            if (fs.existsSync(attachment.path)) {
-              fs.unlinkSync(attachment.path);
-            }
-          } catch (error) {
-            console.error(`Error deleting file ${attachment.path}:`, error);
-          }
-        });
+        const attachments = JSON.parse(existingInvoice.image_attachments) as { path: string }[];
+        for (const att of attachments) {
+          if (att.path) await deleteInvoiceImageFromStorage(att.path);
+        }
       } catch (error) {
         console.error("Error parsing/deleting image attachments:", error);
       }
