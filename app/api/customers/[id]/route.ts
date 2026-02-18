@@ -15,10 +15,10 @@ export async function GET(
       }, { status: 400 });
     }
 
-    // Get customer details
+    // Get customer details with discount codes
     const { data: customer, error: customerError } = await supabaseAdmin
       .from("customers")
-      .select("*")
+      .select("*, discount_codes(id, code, discount_percentage, valid_from, valid_until, used_at, is_active, created_at)")
       .eq("id", customerId)
       .single();
 
@@ -153,6 +153,15 @@ export async function DELETE(
       .eq("customer_id", customerId);
 
     // Delete related data in order (foreign key constraints)
+    const { error: discountCodesError } = await supabaseAdmin
+      .from("discount_codes")
+      .delete()
+      .eq("customer_id", customerId);
+
+    if (discountCodesError) {
+      console.error("Error deleting discount codes:", discountCodesError);
+    }
+
     const { error: invoicesError } = await supabaseAdmin
       .from("invoices")
       .delete()

@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { useGallery } from "@/hooks/useGallery";
-import { useAreas } from "@/hooks/useAreas";
 import { useServices } from "@/hooks/useServices";
 import { GalleryItem } from "@/types";
 import { useToast, ToastMessages } from "@/components/Toast";
@@ -24,7 +23,6 @@ export function AdminGalleryManager({
     updateGalleryItem,
     deleteGalleryItem,
   } = useGallery();
-  const { areas, loading: areasLoading } = useAreas();
   const { services, isLoading: servicesLoading } = useServices();
   const { showSuccess, showError } = useToast();
   const { confirm, modalProps } = useConfirmation();
@@ -43,6 +41,7 @@ export function AdminGalleryManager({
       setBeforeImagePreview("");
       setAfterImagePreview("");
       setImageErrors({});
+      setFieldErrors({});
       setUseCustomLocation(false);
       setShowAddForm(true);
     }
@@ -60,6 +59,14 @@ export function AdminGalleryManager({
     before?: string;
     after?: string;
   }>({});
+  const [fieldErrors, setFieldErrors] = useState<{
+    title?: boolean;
+    category_id?: boolean;
+    service_id?: boolean;
+    before?: boolean;
+    after?: boolean;
+  }>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Individual image compression settings
   const [beforeImageSettings, setBeforeImageSettings] = useState({
@@ -147,6 +154,7 @@ export function AdminGalleryManager({
       
       // Clear error and set file
       setImageErrors((prev) => ({ ...prev, [type]: undefined }));
+      setFieldErrors((prev) => ({ ...prev, [type]: false }));
 
       // Get original dimensions
       const dimensions = await getImageDimensions(file);
@@ -330,16 +338,29 @@ export function AdminGalleryManager({
   };
 
   const handleSave = async () => {
-    try {
-      // Validate required images for new items
-      if (!editingItem && (!beforeImage || !afterImage)) {
-        showError(
-          "Validation Error",
-          "Both before and after images are required"
-        );
-        return;
-      }
+    // Validate required fields and set red borders
+    const errors: typeof fieldErrors = {};
+    if (!formData.title?.trim()) errors.title = true;
+    if (!formData.category_id) errors.category_id = true;
+    if (!formData.service_id) errors.service_id = true;
+    if (!editingItem) {
+      if (!beforeImage && !formData.before_image_url) errors.before = true;
+      if (!afterImage && !formData.after_image_url) errors.after = true;
+    }
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      showError(
+        "Validation Error",
+        "Please fill in all required fields (marked in red) and upload both before and after images for new items."
+      );
+      return;
+    }
 
+    // Prevent double submit
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    try {
       // Upload images first (only if new images are provided)
       let beforeUrl = formData.before_image_url;
       let afterUrl = formData.after_image_url;
@@ -354,6 +375,7 @@ export function AdminGalleryManager({
             "Upload Error",
             uploadError instanceof Error ? uploadError.message : "Failed to upload images. Please try again."
           );
+          setIsSubmitting(false);
           return;
         }
       }
@@ -402,6 +424,7 @@ export function AdminGalleryManager({
       setBeforeImagePreview("");
       setAfterImagePreview("");
       setImageErrors({});
+      setFieldErrors({});
       
       // Reset image settings
       setBeforeImageSettings({
@@ -428,6 +451,8 @@ export function AdminGalleryManager({
         ToastMessages.gallery.error.title,
         err instanceof Error ? err.message : ToastMessages.gallery.error.message
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -438,12 +463,13 @@ export function AdminGalleryManager({
     // Reset form data to defaults
     setFormData({ ...defaultItem });
     
-    // Clear all image states
+    // Clear all image states and validation errors
     setBeforeImage(null);
     setAfterImage(null);
     setBeforeImagePreview("");
     setAfterImagePreview("");
     setImageErrors({});
+    setFieldErrors({});
     setUseCustomLocation(false);
     
     // Reset image settings
@@ -472,9 +498,9 @@ export function AdminGalleryManager({
 
   const handleEdit = (item: GalleryItem) => {
     setEditingItem(item);
-    // Check if location is in areas list or custom
-    const isCustomLocation = !areas.some(area => area.name === item.location);
-    setUseCustomLocation(isCustomLocation);
+    setFieldErrors({});
+    // Location is free text (areas feature not used)
+    setUseCustomLocation(!!item.location);
     
     setFormData({
       title: item.title,
@@ -718,6 +744,7 @@ export function AdminGalleryManager({
                       setFormData({ ...defaultItem });
                       setBeforeImage(null);
                       setAfterImage(null);
+                      setFieldErrors({});
                       
                       // Revoke object URLs before clearing
                       if (beforeImagePreview && beforeImagePreview.startsWith('blob:')) {
@@ -782,14 +809,15 @@ export function AdminGalleryManager({
                     <select
                       value={formData.category_id || ""}
                       onChange={(e) => {
+                        setFieldErrors((prev) => ({ ...prev, category_id: false }));
                         setFormData((prev) => ({
                           ...prev,
                           category_id: e.target.value || undefined,
                           service_id: undefined, // Reset service when category changes
                         }));
                       }}
-                      className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all"
-                      disabled={servicesLoading}
+                      className={`w-full px-4 py-2.5 border-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 transition-all ${fieldErrors.category_id ? "border-red-500 focus:border-red-500" : "border-gray-300 dark:border-gray-600 focus:border-rose-500"}`}
+                      disabled={servicesLoading || isSubmitting}
                       required
                     >
                       <option value="">Select treatment area...</option>
@@ -816,14 +844,15 @@ export function AdminGalleryManager({
                     </label>
                     <select
                       value={formData.service_id || ""}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        setFieldErrors((prev) => ({ ...prev, service_id: false }));
                         setFormData((prev) => ({
                           ...prev,
                           service_id: e.target.value || undefined,
-                        }))
-                      }
-                      className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all"
-                      disabled={servicesLoading || !formData.category_id}
+                        }));
+                      }}
+                      className={`w-full px-4 py-2.5 border-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 transition-all ${fieldErrors.service_id ? "border-red-500 focus:border-red-500" : "border-gray-300 dark:border-gray-600 focus:border-rose-500"}`}
+                      disabled={servicesLoading || !formData.category_id || isSubmitting}
                       required
                     >
                       <option value="">Select specific treatment...</option>
@@ -884,14 +913,16 @@ export function AdminGalleryManager({
                     <input
                       type="text"
                       value={formData.title}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        setFieldErrors((prev) => ({ ...prev, title: false }));
                         setFormData((prev) => ({
                           ...prev,
                           title: e.target.value,
-                        }))
-                      }
-                      className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all"
+                        }));
+                      }}
+                      className={`w-full px-4 py-2.5 border-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 transition-all ${fieldErrors.title ? "border-red-500 focus:border-red-500" : "border-gray-300 dark:border-gray-600 focus:border-rose-500"}`}
                       placeholder="e.g., Natural Lip Enhancement Results"
+                      disabled={isSubmitting}
                       required
                     />
                     <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
@@ -970,7 +1001,7 @@ export function AdminGalleryManager({
                 {/* Right Column - Image Uploads */}
                 <div className="space-y-4">
                   {/* Before Image Upload */}
-                  <div>
+                  <div className={fieldErrors.before ? "rounded-lg ring-2 ring-red-500 p-1" : ""}>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Before Image *{" "}
                       {editingItem && "(leave empty to keep current)"}
@@ -979,7 +1010,7 @@ export function AdminGalleryManager({
                     <div className="space-y-3">
                       {/* File Input */}
                       <div className="flex items-center justify-center w-full">
-                        <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500">
+                        <label className={`flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 ${fieldErrors.before ? "border-red-500 dark:border-red-500" : "border-gray-300"}`}>
                           <div className="flex flex-col items-center justify-center pt-2 pb-2">
                             <svg
                               className="w-6 h-6 mb-2 text-gray-500 dark:text-gray-400"
@@ -1010,10 +1041,10 @@ export function AdminGalleryManager({
                             onChange={(e) => {
                               if (e.target.files?.[0]) {
                                 handleImageUpload(e.target.files[0], "before");
-                                // Clear the input value to allow selecting the same file again
                                 e.target.value = '';
                               }
                             }}
+                            disabled={isSubmitting}
                             className="hidden"
                           />
                         </label>
@@ -1125,7 +1156,7 @@ export function AdminGalleryManager({
                   </div>
 
                   {/* After Image Upload */}
-                  <div>
+                  <div className={fieldErrors.after ? "rounded-lg ring-2 ring-red-500 p-1" : ""}>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       After Image *{" "}
                       {editingItem && "(leave empty to keep current)"}
@@ -1134,7 +1165,7 @@ export function AdminGalleryManager({
                     <div className="space-y-3">
                       {/* File Input */}
                       <div className="flex items-center justify-center w-full">
-                        <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500">
+                        <label className={`flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 ${fieldErrors.after ? "border-red-500 dark:border-red-500" : "border-gray-300"}`}>
                           <div className="flex flex-col items-center justify-center pt-2 pb-2">
                             <svg
                               className="w-6 h-6 mb-2 text-gray-500 dark:text-gray-400"
@@ -1165,10 +1196,10 @@ export function AdminGalleryManager({
                             onChange={(e) => {
                               if (e.target.files?.[0]) {
                                 handleImageUpload(e.target.files[0], "after");
-                                // Clear the input value to allow selecting the same file again
                                 e.target.value = '';
                               }
                             }}
+                            disabled={isSubmitting}
                             className="hidden"
                           />
                         </label>
@@ -1309,6 +1340,7 @@ export function AdminGalleryManager({
                     setFormData({ ...defaultItem });
                     setBeforeImage(null);
                     setAfterImage(null);
+                    setFieldErrors({});
                     
                     // Revoke object URLs before clearing
                     if (beforeImagePreview && beforeImagePreview.startsWith('blob:')) {
@@ -1348,10 +1380,22 @@ export function AdminGalleryManager({
                   Cancel
                 </button>
                     <button
+                      type="button"
                       onClick={handleSave}
-                      className="px-6 py-3 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 text-white rounded-lg hover:from-rose-600 hover:via-pink-600 hover:to-purple-700 transition-colors font-medium"
+                      disabled={isSubmitting}
+                      className="px-6 py-3 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 text-white rounded-lg hover:from-rose-600 hover:via-pink-600 hover:to-purple-700 transition-colors font-medium disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2 min-w-[120px] justify-center"
                     >
-                      {editingItem ? "Update Item" : "Add Item"}
+                      {isSubmitting ? (
+                        <>
+                          <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                          </svg>
+                          Saving...
+                        </>
+                      ) : (
+                        editingItem ? "Update Item" : "Add Item"
+                      )}
                     </button>
                   </div>
                 </div>

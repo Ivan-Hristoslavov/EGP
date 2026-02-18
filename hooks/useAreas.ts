@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 
-interface Area {
+export interface Area {
   id: string;
   name: string;
   slug: string;
@@ -13,60 +13,13 @@ interface Area {
   updated_at: string;
 }
 
-// Global cache to prevent multiple API calls
-let areasCache: Area[] | null = null;
-let cachePromise: Promise<Area[]> | null = null;
-
+/**
+ * Areas (admin_areas_cover) are not used in this project.
+ * Returns empty list without calling the API.
+ */
 export function useAreas() {
-  const [areas, setAreas] = useState<Area[]>(areasCache || []);
-  const [loading, setLoading] = useState(!areasCache);
-  const [error, setError] = useState<string | null>(null);
-  const hasInitialized = useRef(false);
-
-  useEffect(() => {
-    if (hasInitialized.current) return;
-    hasInitialized.current = true;
-
-    // If we have cached data, use it
-    if (areasCache) {
-      setAreas(areasCache);
-      setLoading(false);
-      return;
-    }
-
-    // If there's already a request in progress, wait for it
-    if (cachePromise) {
-      cachePromise.then(data => {
-        setAreas(data);
-        setLoading(false);
-      }).catch(err => {
-        setError(err instanceof Error ? err.message : 'Unknown error');
-        setLoading(false);
-      });
-      return;
-    }
-
-    // Make the API call
-    cachePromise = fetch('/api/areas')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to fetch areas');
-        }
-        return response.json();
-      })
-      .then(data => {
-        areasCache = data;
-        setAreas(data);
-        setLoading(false);
-        return data;
-      })
-      .catch(err => {
-        setError(err instanceof Error ? err.message : 'Unknown error');
-        setLoading(false);
-        cachePromise = null; // Reset promise on error
-        throw err;
-      });
-  }, []);
-
+  const [areas] = useState<Area[]>([]);
+  const loading = false;
+  const error: string | null = null;
   return { areas, loading, error };
 } 

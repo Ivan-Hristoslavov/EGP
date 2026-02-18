@@ -23,6 +23,8 @@ type PriceWithDiscountProps = {
   layout?: "inline" | "stack";
   /** Alignment: start (default), center (e.g. in cards), or end (e.g. header nav right-aligned) */
   align?: "start" | "center" | "end";
+  /** Tighter spacing for nav/header so old and new price fit on one line */
+  compact?: boolean;
 };
 
 const sizeClasses = {
@@ -41,6 +43,7 @@ export function PriceWithDiscount({
   showBadge = true,
   layout = "inline",
   align = "start",
+  compact = false,
 }: PriceWithDiscountProps) {
   const total = price * quantity;
   const originalTotal = originalPrice != null && originalPrice > price ? originalPrice * quantity : null;
@@ -73,11 +76,14 @@ export function PriceWithDiscount({
   const rowClass =
     align === "center" ? "justify-center" : align === "end" ? "justify-end" : "";
 
+  const originalPriceClass = `${sizes.original} font-medium line-through decoration-2 text-gray-600 dark:text-gray-300 decoration-gray-500 dark:decoration-gray-400`;
+  const gapClass = compact ? "gap-1" : "gap-2";
+
   if (layout === "stack") {
     return (
       <div className={`flex flex-col gap-1.5 ${alignClass} ${className}`} role="group" aria-label={`Price: was £${originalTotal?.toFixed(2)}, now £${total.toFixed(2)}`}>
         <div className={`flex items-center gap-1.5 flex-nowrap ${rowClass}`}>
-          <span className={`${sizes.original} font-medium text-gray-500 dark:text-gray-400 line-through decoration-2 decoration-gray-400 dark:decoration-gray-500`}>
+          <span className={originalPriceClass}>
             £{originalTotal.toFixed(2)}
           </span>
           {badgeEl}
@@ -92,12 +98,12 @@ export function PriceWithDiscount({
   const inlineAlignClass =
     align === "center" ? "justify-center" : align === "end" ? "justify-end" : "";
   return (
-    <span className={`inline-flex items-center gap-2 flex-wrap ${inlineAlignClass} ${className}`} role="group" aria-label={`Price: was £${originalTotal?.toFixed(2)}, now £${total.toFixed(2)}`}>
-      <span className={`${sizes.original} font-medium text-gray-500 dark:text-gray-400 line-through decoration-2 decoration-gray-400 dark:decoration-gray-500`}>
+    <span className={`inline-flex items-center ${gapClass} flex-nowrap ${inlineAlignClass} ${className}`} role="group" aria-label={`Price: was £${originalTotal?.toFixed(2)}, now £${total.toFixed(2)}`}>
+      <span className={originalPriceClass}>
         £{originalTotal.toFixed(2)}
       </span>
-      <span className="opacity-70 font-normal text-inherit" aria-hidden="true">→</span>
-      <span className={`font-bold tracking-tight text-egp-green dark:text-egp-beige ${sizes.main}`}>
+      <span className="flex-shrink-0 text-gray-600 dark:text-gray-400 font-normal" aria-hidden="true">→</span>
+      <span className={`font-bold tracking-tight text-egp-green dark:text-egp-beige ${sizes.main} flex-shrink-0`}>
         £{total.toFixed(2)}
       </span>
       {badgeEl}

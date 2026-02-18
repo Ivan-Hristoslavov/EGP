@@ -281,9 +281,34 @@ html {
   box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.3);
 }
 
-/* HeroUI: remove the inner "white box" on inputs/selects (ring-offset) so only a single focus ring shows */
-.group[data-focus-visible="true"] {
+/* Remove inner white border (ring-offset) from all form fields app-wide */
+input,
+textarea,
+select,
+[data-slot="input"],
+[data-slot="textarea"],
+[role="combobox"],
+.group[data-focus-visible="true"],
+[data-focus-visible="true"] {
+  --tw-ring-offset-width: 0px !important;
+  --tw-ring-offset-color: transparent !important;
+}
+
+/* HeroUI / Tailwind: remove ring-offset from any focusable form control wrapper */
+[class*="input-wrapper"],
+[class*="Input"],
+[class*="input"],
+.ring-offset-0,
+.ring-offset-2,
+.ring-offset-background {
+  --tw-ring-offset-width: 0px !important;
+  --tw-ring-offset-color: transparent !important;
+}
+
+/* Default ring-offset for the app: none (removes inner white border on all form fields) */
+:root {
   --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: transparent;
 }
 
 /* Backdrop blur fallback */
