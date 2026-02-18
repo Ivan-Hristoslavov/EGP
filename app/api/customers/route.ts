@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
         .from("discount_codes")
         .select("customer_id")
         .not("customer_id", "is", null);
-      const customerIds = [...new Set((idsWithCode || []).map((r: { customer_id: string }) => r.customer_id))];
+      const customerIds = Array.from(new Set((idsWithCode || []).map((r: { customer_id: string }) => r.customer_id)));
       if (customerIds.length === 0) {
         return NextResponse.json({
           customers: [],
