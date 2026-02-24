@@ -38,39 +38,34 @@ export default function LayoutMain({
     }
   }, [isAdminPanel, activePeriods, isMounted]);
 
-  // Always use default padding class to match server render
-  // Only apply dynamic padding class after mount to avoid hydration mismatch
-  const paddingClass = (isMounted && hasDayOffBanner)
-    ? 'pt-[100px] sm:pt-[120px]'
-    : 'pt-[90px] sm:pt-[100px]';
+  // No top padding on admin (they have their own layout); on public site, padding clears the fixed header
+  const paddingClass = isAdminPanel
+    ? ''
+    : (isMounted && hasDayOffBanner)
+      ? 'pt-[100px] sm:pt-[120px]'
+      : 'pt-[90px] sm:pt-[100px]';
 
-  // If we're in admin panel, render only the children without main layout elements
-  if (isAdminPanel) {
-    return <>{children}</>;
-  }
-
+  // Always render the same DOM structure so server and client trees match (avoids hydration error).
+  // When isAdminPanel, header and footer are hidden via CSS so pathname cannot change the tree shape.
   return (
     <div className="min-h-screen flex flex-col">
-      
-      
-      {/* New Aesthetics Header - Fixed position */}
-      <HeaderAesthetics />
-      
-      {/* Floating Contact Buttons */}
-      <FloatingContactButtons />
-      
-      {/* Main content with padding for fixed header */}
-      <main 
+      <div className={isAdminPanel ? 'hidden' : undefined}>
+        <HeaderAesthetics />
+        <FloatingContactButtons />
+      </div>
+      <main
         className={`flex-grow transition-all duration-300 ${paddingClass}`}
-        style={{ 
-          position: 'relative', 
+        style={{
+          position: 'relative',
           zIndex: 1,
         }}
         suppressHydrationWarning
       >
         {children}
       </main>
-      <FooterAesthetics />
+      <div className={isAdminPanel ? 'hidden' : undefined}>
+        <FooterAesthetics />
+      </div>
     </div>
   );
 }
