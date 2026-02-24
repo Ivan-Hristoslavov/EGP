@@ -93,9 +93,33 @@ Apply the corresponding rule file when editing or creating files in these areas:
 2. Edit `config/colors.ts`, `config/typography.ts`, or `config/site.ts` as needed.
 3. After changing typography/layout tokens, consider a pass over key pages/sections to use the new tokens.
 
+### Responsive design audit (for any public page)
+
+1. Apply **typography-responsive.mdc** and **public-pages.mdc**.
+2. Ensure the page imports `typography`, `layout`, `textColors` from `@/config/typography`.
+3. Check every heading: h1 uses `typography.headingPage`, h2 uses `typography.headingSection`, h3 uses `typography.headingCard`, h4 uses `typography.headingSmall`.
+4. Check subtitle/lead paragraph uses `typography.lead`.
+5. Check body text uses `typography.body`, captions use `typography.small`.
+6. Check container uses `layout.container` or `layout.containerWide`.
+7. No raw `text-4xl`/`text-5xl`/`text-6xl` without smaller mobile size.
+
+### Phone / contact data consistency
+
+- Phone resolution chain: **DB `admin_profile.phone`** -> env `NEXT_PUBLIC_PHONE_NUMBER` -> `siteConfig.contact.phone` (`config/site.ts`).
+- WhatsApp resolution: DB `admin_profile.whatsapp` -> `admin_profile.phone` -> `siteConfig.contact.whatsapp`.
+- Components use `useAdminProfile()` or `useSiteData()` (which fetch from `/api/admin/profile`), falling back to `siteConfig.contact.*`.
+- Never hardcode a specific phone number in a component.
+- `SiteDataContext` (`contexts/SiteDataContext.tsx`) centralises contact info for the public site; `useAdminProfile()` hook is for individual components.
+
+### Find Us page data sources
+
+- `/api/admin/profile` returns: `how_to_find_us`, `how_to_reach_us`, `transport_options` (JSONB), `nearby_landmarks` (JSONB), `google_maps_address`, `phone`, `whatsapp`, `business_email`, `company_address`.
+- `SiteDataContext` parses JSONB fields (handles double-encoded JSON strings).
+- Sections with only default/placeholder text or empty arrays are hidden on the public Find Us page.
+
 ---
 
-## Don’ts (quick reference)
+## Don'ts (quick reference)
 
 - Do NOT use NextUI — use HeroUI (`@heroui/*`).
 - Do NOT query `admin_areas_cover` — table does not exist.
@@ -103,10 +127,11 @@ Apply the corresponding rule file when editing or creating files in these areas:
 - Do NOT change DOM structure conditionally on client-only state — use `hidden` or same structure.
 - Do NOT call Supabase from client or hooks — use `/api/*` only.
 - Do NOT add raw large typography on mobile — use `typography.*` tokens with responsive scale.
+- Do NOT hardcode phone numbers — always use the resolution chain (DB -> env -> siteConfig).
 
 ---
 
-## Quick Reference: File Path → Rules
+## Quick Reference: File Path -> Rules
 
 | Path | Apply these rules |
 |------|-------------------|

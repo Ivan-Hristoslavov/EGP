@@ -7,6 +7,7 @@ import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/react";
 import { Chip } from "@heroui/react";
 import { Spinner } from "@heroui/react";
+import { typography, layout, textColors } from "@/config/typography";
 
 function truncateText(text: string, maxLength: number = 150): string {
   if (text.length <= maxLength) return text;
@@ -48,7 +49,7 @@ export default function BlogPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-10 pt-24 pb-16">
+      <div className={`${layout.container} pt-24 pb-16`}>
         {/* Back to Home Button */}
         <div className="flex items-center gap-4 mb-8">
           <Button
@@ -62,10 +63,10 @@ export default function BlogPage() {
         </div>
         
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 font-playfair">
+          <h1 className={`${typography.headingPage} ${textColors.heading} mb-6 font-playfair`}>
             Our Blog
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto">
+          <p className={`${typography.lead} font-montserrat font-light max-w-3xl mx-auto`}>
             Stay informed about the latest in aesthetic treatments, skincare tips, and beauty insights.
           </p>
         </div>

@@ -40,6 +40,17 @@ Most components use `"use client"` because they need interactivity. Mark at the 
 - Use `suppressHydrationWarning` on elements with dynamic content
 - Wrap client-only components in `<ClientOnly>` from `@/components/ClientOnly`
 
+## Phone / Contact Data in Components
+
+- Components that display or link to a phone number (e.g. `ButtonCallNow`, `ButtonWhatsApp`, `SectionContact`, `FooterMain`) must resolve phone via: `useAdminProfile().profile.phone` → `siteConfig.contact.phone`.
+- Never hardcode a specific phone number as a fallback (e.g. `"0800 123 4567"` or `"+44 7541777225"`). Always fall back to `siteConfig.contact.phone`.
+- For WhatsApp: use `adminProfile.whatsapp` → `adminProfile.phone` → `siteConfig.contact.whatsapp`.
+
+## Empty Data Sections
+
+- When a component section renders data from the DB (e.g. transport options, landmarks, service areas): **hide the section** when data is empty or only contains default placeholder text.
+- Do not show generic placeholder text like "We are conveniently located near major transport links" when no real data has been entered.
+
 ## Image Handling
 
 - Use `lib/image-utils.ts` for processing, compression, and format support

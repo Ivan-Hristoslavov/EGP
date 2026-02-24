@@ -9,6 +9,7 @@ import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/react";
 import { Chip } from "@heroui/react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
+import { typography, layout, textColors } from "@/config/typography";
 
 interface PressItem {
   id: string;
@@ -173,8 +174,7 @@ export function PressPageClient({ awards, pressFeatures }: PressPageClientProps)
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12">
-        <div className="max-w-7xl mx-auto">
+      <div className={`${layout.containerWide} pt-20 pb-12`}>
           {/* Back to Home Button */}
           <div className="flex items-center gap-4 mb-6">
             <Button
@@ -188,10 +188,10 @@ export function PressPageClient({ awards, pressFeatures }: PressPageClientProps)
           </div>
           
           <div className="text-center mb-6">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 font-playfair">
+            <h1 className={`${typography.headingPage} ${textColors.heading} mb-4 font-playfair`}>
               Awards & Press
             </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto mb-4">
+            <p className={`${typography.lead} font-montserrat font-light max-w-3xl mx-auto mb-4`}>
               Recognition for our commitment to excellence in aesthetic medicine.
             </p>
             
@@ -440,7 +440,6 @@ export function PressPageClient({ awards, pressFeatures }: PressPageClientProps)
               })()}
             </div>
           )}
-        </div>
       </div>
 
       {/* Modal */}

@@ -38,9 +38,25 @@ Applies to all routes under `app/` that are **not** under `app/admin/`. This inc
 
 ## Typography & Containers
 
-- Use `typography.headingPage` or `typography.headingSection` for page/section titles (from `@/config/typography`).
-- Use `layout.container` or `layout.containerNarrow` for content width and padding.
+- **MUST** import and use `typography`, `layout`, `textColors` from `@/config/typography` in every public page.
+- Use `typography.headingPage` for page h1, `typography.headingSection` for section h2, `typography.headingCard` for card/block h3.
+- Use `typography.lead` for the subtitle paragraph under a page heading.
+- Use `layout.container` (max-w-6xl) or `layout.containerWide` (max-w-7xl) for page wrappers; `layout.containerNarrow` for forms.
 - Use `layout.sectionPy` for section vertical spacing.
+- **NEVER** use raw `text-4xl`, `text-5xl`, or `text-6xl` without a smaller mobile size. Always use `typography.*` tokens or a mobile-first responsive scale (`text-2xl sm:text-3xl md:text-4xl`).
+
+## Phone / Contact Data
+
+- Phone numbers resolve in this order: **DB `admin_profile.phone`** → env `NEXT_PUBLIC_PHONE_NUMBER` → `siteConfig.contact.phone`.
+- Components that display phone must use `useAdminProfile()` or `useSiteData()` (which fetch from DB), falling back to `siteConfig.contact.phone`.
+- Never hardcode a phone number in a component — always use the resolution chain above.
+
+## Find Us Page Data
+
+- The Find Us page (`app/find-us/page.tsx`) uses `useSiteData()` which fetches from `/api/admin/profile`.
+- The API returns `how_to_find_us`, `how_to_reach_us`, `transport_options` (JSONB), `nearby_landmarks` (JSONB), `google_maps_address`.
+- `transport_options` and `nearby_landmarks` may arrive as objects or as JSON-encoded strings (including double-encoded). `SiteDataContext` handles unwrapping.
+- Empty/default sections ("How to Find Us", "How to Reach Us", "Nearby Landmarks") should be **hidden** when they only contain placeholder text or empty arrays — do not show generic default text.
 
 ## Data Fetching
 

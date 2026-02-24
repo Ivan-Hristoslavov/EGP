@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { siteConfig } from "@/config/site";
+import { typography, layout, textColors } from "@/config/typography";
 import {
   Calendar,
   Clock,
@@ -1186,7 +1187,7 @@ function BookingPageContent() {
                     <p className="text-sm uppercase tracking-[0.3em] font-semibold text-[#3f3a31]/70">
                       Treatment insight
                     </p>
-                    <h2 className="text-2xl sm:text-3xl font-bold mt-1">
+                    <h2 className={`${typography.headingCard} mt-1`}>
                       {service.name}
                     </h2>
                     <p className="text-sm text-[#3f3a31]/80 mt-1">
@@ -1239,7 +1240,7 @@ function BookingPageContent() {
 
                   {service.description && (
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                      <h3 className={`${typography.headingSmall} ${textColors.heading} mb-3 flex items-center gap-2`}>
                         <Info className="w-5 h-5 text-[#9d9585]" />
                         Overview
                       </h3>
@@ -1251,7 +1252,7 @@ function BookingPageContent() {
 
                   {service.details && (
                     <div className="bg-white/80 dark:bg-gray-900/50 rounded-xl border border-[#e4d9c8] dark:border-gray-700 p-6">
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3">
+                      <h3 className={`${typography.headingSmall} ${textColors.heading} mb-3`}>
                         Treatment experience
                       </h3>
                       <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -1262,7 +1263,7 @@ function BookingPageContent() {
 
                   {service.benefits && service.benefits.length > 0 && (
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                      <h3 className={`${typography.headingSmall} ${textColors.heading} mb-3 flex items-center gap-2`}>
                         <CheckCircle className="w-5 h-5 text-green-500" />
                         Key benefits
                       </h3>
@@ -1336,7 +1337,7 @@ function BookingPageContent() {
         >
           {/* Header */}
           <div className="bg-gray-900 dark:bg-gray-950 text-white px-6 py-4 flex items-center justify-between rounded-t-2xl flex-shrink-0 border-b border-gray-700 relative z-[10002]">
-            <h2 className="text-2xl font-bold">Select Services</h2>
+            <h2 className={`${typography.headingCard}`}>Select Services</h2>
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -1395,7 +1396,7 @@ function BookingPageContent() {
 
                 return (
                   <div key={category} className="mb-8">
-                    <h3 className="text-xl font-bold text-white mb-5">
+                    <h3 className={`${typography.headingSmall} text-white mb-5`}>
                       {category}
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -2704,13 +2705,13 @@ function BookingPageContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 pt-24 pb-16 max-w-7xl">
+      <div className={`${layout.containerWide} pt-24 pb-16`}>
         {/* Header */}
         <div className="text-center mb-8 sm:mb-12 px-4">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 md:mb-6 font-playfair">
+          <h1 className={`${typography.headingPage} ${textColors.heading} mb-3 sm:mb-4 md:mb-6 font-playfair`}>
             Book Your Treatment
           </h1>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto">
+          <p className={`${typography.lead} font-montserrat font-light max-w-3xl mx-auto`}>
             Select services, choose date & time, and pay securely
           </p>
         </div>

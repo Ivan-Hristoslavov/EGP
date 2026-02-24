@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { siteConfig } from "@/config/site";
+import { typography, layout, textColors } from "@/config/typography";
 import { Search, Filter, ArrowLeft, Info, Plus, CheckCircle, X } from "lucide-react";
 import Link from 'next/link';
 import { useConditions } from "@/hooks/useConditions";
@@ -182,7 +183,7 @@ function ConditionsPageContent() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-        <div className="container mx-auto px-4 max-w-7xl">
+        <div className={`${layout.containerWide}`}>
           <div className="text-center py-20">
             <Spinner size="lg" />
             <p className="mt-4 text-default-500">Loading conditions...</p>
@@ -194,7 +195,7 @@ function ConditionsPageContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 pt-24 pb-16 max-w-7xl">
+      <div className={`${layout.containerWide} pt-24 pb-16`}>
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <Link
@@ -207,10 +208,10 @@ function ConditionsPageContent() {
         </div>
 
         <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6 font-playfair">
+          <h1 className={`${typography.headingPage} ${textColors.heading} mb-6 font-playfair`}>
             Conditions We Treat
           </h1>
-          <p className="text-base text-gray-600 dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto">
+          <p className={`${typography.lead} font-montserrat font-light max-w-3xl mx-auto`}>
             Discover our comprehensive range of treatments for various aesthetic concerns and conditions
           </p>
         </div>

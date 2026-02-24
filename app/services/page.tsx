@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { siteConfig } from "@/config/site";
+import { typography, layout, textColors } from "@/config/typography";
 import { Search, Filter, ArrowLeft, Info, Plus, Clock, CheckCircle, X } from "lucide-react";
 import Link from 'next/link';
 import { useServices } from '@/hooks/useServices';
@@ -316,7 +317,7 @@ function ServicesPageContent() {
 
   return (
     <div className="min-h-screen bg-[#f5f1e9] dark:bg-gray-900">
-      <div className="container mx-auto px-4 pt-24 pb-16 max-w-7xl">
+      <div className={`${layout.containerWide} pt-24 pb-16`}>
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <Link
@@ -329,12 +330,12 @@ function ServicesPageContent() {
         </div>
 
         <div className="text-center mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6 font-playfair">
+          <h1 className={`${typography.headingPage} ${textColors.heading} mb-6 font-playfair`}>
             Our Services
           </h1>
-          <p className="text-2xl text-gray-600 dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto">
+          <p className={`${typography.lead} font-montserrat font-light max-w-3xl mx-auto`}>
             Discover our comprehensive range of aesthetic treatments designed to enhance your natural beauty
-                </p>
+          </p>
               </div>
 
         {/* Filters and Search */}
@@ -435,7 +436,7 @@ function ServicesPageContent() {
 
         {/* Results Count */}
         <div className="flex items-center justify-between mb-6">
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className={`${typography.small}`}>
             Showing {filteredServices.length} of {services.length} services
           </p>
           {(selectedCategory !== 'All' || selectedPriceRange !== 'All Prices' || selectedDurationRange !== 'All Durations' || showDiscountedOnly || searchTerm) && (
