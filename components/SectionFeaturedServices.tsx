@@ -34,13 +34,30 @@ function hasDiscount(s: Service): boolean {
   );
 }
 
+// Responsive items per page: 3 on mobile, 6 on md, 8 on lg (default 3 for mobile-first)
+function useItemsPerPage() {
+  const [perPage, setPerPage] = useState(3);
+  useEffect(() => {
+    const update = () => {
+      if (typeof window === "undefined") return;
+      if (window.matchMedia("(min-width: 1024px)").matches) setPerPage(8);
+      else if (window.matchMedia("(min-width: 768px)").matches) setPerPage(6);
+      else setPerPage(3);
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+  return perPage;
+}
+
 export default function SectionFeaturedServices() {
   const { services, isLoading } = useServices();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [showDiscountedOnly, setShowDiscountedOnly] = useState(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const itemsPerPage = 8;
+  const itemsPerPage = useItemsPerPage();
 
   // Whether any featured service has a discount (for showing "On offer" filter)
   const hasDiscountedFeatured = useMemo(() => {
@@ -116,14 +133,14 @@ export default function SectionFeaturedServices() {
       <section className="py-12 sm:py-16 md:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12 md:mb-16">
-            <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-sm sm:text-base font-semibold mb-3 sm:mb-4`}>
-              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-2 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-xs sm:text-base font-semibold mb-2 sm:mb-4`}>
+              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
               <span>Popular Treatments</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 px-4">
+            <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-4 px-4">
               Featured Services
             </h2>
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-4">
+            <p className="text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-4">
               Discover our most popular aesthetic treatments
             </p>
           </div>
@@ -148,14 +165,14 @@ export default function SectionFeaturedServices() {
       <section className="py-12 sm:py-16 md:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12 md:mb-16">
-            <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-sm sm:text-base font-semibold mb-3 sm:mb-4`}>
-              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-2 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-xs sm:text-base font-semibold mb-2 sm:mb-4`}>
+              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
               <span>Popular Treatments</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 px-4">
+            <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-4 px-4">
               Featured Services
             </h2>
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-4">
+            <p className="text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-4">
               Discover our most popular aesthetic treatments
             </p>
           </div>
@@ -173,32 +190,31 @@ export default function SectionFeaturedServices() {
   return (
     <section id="featured-services" className="py-12 sm:py-16 md:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
+        {/* Section Header - smaller titles */}
         <div className="text-center mb-8 sm:mb-12 md:mb-16">
-          <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-sm sm:text-base font-semibold mb-3 sm:mb-4`}>
-            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-2 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-xs sm:text-base font-semibold mb-2 sm:mb-4`}>
+            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
             <span>Popular Treatments</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 px-4">
+          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-4 px-4">
             Featured Services
           </h2>
-          <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-4">
+          <p className="text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-4">
             Discover our most popular aesthetic treatments
           </p>
         </div>
 
-        {/* Category and Discount Filters */}
+        {/* Category and Discount Filters - 4 per line */}
         {(availableCategories.length > 0 || hasDiscountedFeatured) && (
           <div className="mb-8 sm:mb-12">
-            <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-4">
-              <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                <Filter className="w-4 h-4" />
-                <span className="hidden sm:inline">Filter:</span>
-              </div>
-              
+            <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 sm:mb-3">
+              <Filter className="w-4 h-4 flex-shrink-0" />
+              <span>Filter:</span>
+            </div>
+            <div className="grid grid-cols-4 gap-2 sm:gap-3">
               <button
                 onClick={() => setSelectedCategory("all")}
-                className={`px-4 sm:px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                className={`px-3 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 ${
                   selectedCategory === "all"
                     ? "bg-egp-green dark:bg-egp-green-dark text-white shadow-lg scale-105"
                     : "bg-white dark:bg-egp-green text-gray-700 dark:text-white hover:bg-[#ddd5c3] dark:hover:bg-egp-green-light border border-[#c9c1b0] dark:border-egp-green-dark"
@@ -210,7 +226,7 @@ export default function SectionFeaturedServices() {
               {hasDiscountedFeatured && (
                 <button
                   onClick={() => setShowDiscountedOnly(!showDiscountedOnly)}
-                  className={`px-4 sm:px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                  className={`px-3 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 ${
                     showDiscountedOnly
                       ? "bg-egp-green dark:bg-egp-green-dark text-white shadow-lg scale-105"
                       : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-[#ddd5c3] dark:hover:bg-gray-700 border border-[#c9c1b0] dark:border-gray-700"
@@ -224,7 +240,7 @@ export default function SectionFeaturedServices() {
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
-                  className={`px-4 sm:px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 whitespace-nowrap ${
+                  className={`px-3 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 whitespace-nowrap ${
                     selectedCategory === category.id
                       ? "bg-[#b5ad9d] dark:bg-[#9d9585] text-white shadow-lg scale-105"
                       : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-[#ddd5c3] dark:hover:bg-gray-700 border border-[#c9c1b0] dark:border-gray-700"
@@ -237,19 +253,19 @@ export default function SectionFeaturedServices() {
           </div>
         )}
 
-        {/* Services Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
+        {/* Services Grid - smaller cards on mobile, max 3 per page on mobile */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-8 sm:mb-12">
           {paginatedServices.map((service) => {
             const gradient = getCategoryGradient(service.category.name);
             
             return (
               <div
                 key={service.id}
-                className="group relative bg-white dark:bg-egp-green rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-300 dark:border-egp-green-dark cursor-pointer flex flex-col"
+                className="group relative bg-white dark:bg-egp-green rounded-xl sm:rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-300 dark:border-egp-green-dark cursor-pointer flex flex-col"
                 onClick={() => setSelectedService(service)}
               >
-                {/* Image */}
-                <div className="h-32 sm:h-36 md:h-40 lg:h-44 relative overflow-hidden bg-gradient-to-br">
+                {/* Image - smaller on mobile */}
+                <div className="h-24 sm:h-32 md:h-36 lg:h-40 relative overflow-hidden bg-gradient-to-br">
                   {service.image_url ? (
                     <>
                       <img
@@ -263,9 +279,9 @@ export default function SectionFeaturedServices() {
                     <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-90`}></div>
                   )}
                   
-                  {/* Service Name Overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-5 md:p-6 z-10">
-                    <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white text-center drop-shadow-lg line-clamp-2 leading-tight">
+                  {/* Service Name Overlay - smaller on mobile */}
+                  <div className="absolute inset-0 flex items-center justify-center p-2 sm:p-4 md:p-5 z-10">
+                    <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-white text-center drop-shadow-lg line-clamp-2 leading-tight">
                       {service.name}
                     </h3>
                   </div>
@@ -286,8 +302,8 @@ export default function SectionFeaturedServices() {
                   </div>
                 </div>
 
-                {/* Content */}
-                <div className="p-5 sm:p-6 flex flex-col flex-1">
+                {/* Content - tighter padding on mobile */}
+                <div className="p-3 sm:p-4 md:p-5 lg:p-6 flex flex-col flex-1">
                   {/* Category */}
                   <div className="flex items-center gap-2 mb-2">
                     <span className="inline-flex items-center px-2.5 py-0.5 bg-[#ddd5c3]/50 dark:bg-[#c9c1b0]/30 text-gray-800 dark:text-gray-200 border border-[#c9c1b0]/50 dark:border-gray-600/50 rounded-full text-xs font-semibold">

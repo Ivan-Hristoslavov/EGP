@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { supabaseAdmin } from "../../../lib/supabase";
 import { createCheckoutSession, createPaymentLink, STRIPE_TO_DB_STATUS, isStripeAvailable } from "../../../lib/stripe";
+import { requireAdmin } from "@/lib/admin-auth";
 
-// GET - Fetch payments with pagination
+// GET - Fetch payments with pagination (admin only)
 export async function GET(request: NextRequest) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
@@ -122,8 +126,11 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - Create new payment or payment intent
+// POST - Create new payment or payment intent (admin only)
 export async function POST(request: NextRequest) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const body = await request.json();
     const { type, ...paymentData } = body;

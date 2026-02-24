@@ -1,9 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { testSendGridConnection, sendEmail } from "@/lib/sendgrid-smtp";
+import { getTemplate, type TemplateId } from "./templates";
 
-// GET - Test SMTP configuration
-export async function GET() {
+const TEMPLATE_IDS: TemplateId[] = [
+  "simple",
+  "booking_confirmation",
+  "payment_confirmed",
+  "admin_new_paid_booking",
+  "admin_booking_request",
+  "newsletter_welcome",
+];
+
+// GET - Test SMTP configuration, or return template preview (subject, html, text)
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const template = searchParams.get("template") as TemplateId | null;
+
+    if (template && TEMPLATE_IDS.includes(template)) {
+      const t = getTemplate(template);
+      return NextResponse.json({ subject: t.subject, html: t.html, text: t.text });
+    }
+
     const isConfigured = await testSendGridConnection();
 
     return NextResponse.json({
@@ -26,26 +44,52 @@ export async function GET() {
   }
 }
 
-// POST - Send test email
+// POST - Send test email (optionally for a specific template with autofilled data)
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}));
     const {
       to,
-      subject = "Test Email from EGP Aesthetics",
-      message = "This is a test email to verify SMTP configuration.",
-    } = body;
+      subject,
+      message,
+      template,
+    } = body as {
+      to?: string;
+      subject?: string;
+      message?: string;
+      template?: TemplateId;
+    };
 
     const toAddress =
       to ||
       process.env.SMTP_TO_ADDRESS ||
+      process.env.ADMIN_EMAIL ||
       "hristoslavov.ivanov@gmail.com";
 
-    // Send test email
+    if (template && TEMPLATE_IDS.includes(template)) {
+      const t = getTemplate(template);
+      await sendEmail({
+        to: toAddress,
+        subject: t.subject,
+        text: t.text,
+        html: t.html,
+      });
+      return NextResponse.json({
+        success: true,
+        message: `Test email sent (${template})`,
+        recipient: toAddress,
+        template,
+      });
+    }
+
+    const subjectFinal = subject ?? "Test Email from EGP Aesthetics";
+    const messageFinal =
+      message ?? "This is a test email to verify SMTP configuration.";
+
     await sendEmail({
       to: toAddress,
-      subject: subject,
-      text: message,
+      subject: subjectFinal,
+      text: messageFinal,
       html: `
 <!DOCTYPE html>
 <html>
@@ -70,7 +114,7 @@ body{margin:0;padding:0;font-family:Georgia,serif;background:#f5f3ef;color:#1c19
 <div class="line"></div>
 </div>
 <div class="main">
-<p>${message}</p>
+<p>${messageFinal}</p>
 <p>This email confirms that SMTP (Gmail) is configured correctly. If you received this, the setup is working.</p>
 </div>
 <div class="ft">${new Date().toLocaleString()}</div>
@@ -88,12 +132,12 @@ body{margin:0;padding:0;font-family:Georgia,serif;background:#f5f3ef;color:#1c19
   } catch (error) {
     console.error("Error sending test email:", error);
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: "Failed to send test email",
-        details: error instanceof Error ? error.message : "Unknown error"
+        details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );
   }
-} 
+}

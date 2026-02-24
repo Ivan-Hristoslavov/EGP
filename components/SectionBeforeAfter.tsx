@@ -51,7 +51,7 @@ export default function SectionBeforeAfter() {
             <div className={`inline-block px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-sm sm:text-base font-semibold mb-3 sm:mb-4 text-[#6b5f4b] dark:text-gray-200`}>
               Real Results
             </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 px-4">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 px-4">
               Before & After Gallery
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-4 mb-8">
@@ -60,7 +60,7 @@ export default function SectionBeforeAfter() {
             <Card className="max-w-2xl mx-auto" shadow="lg">
               <CardBody className="p-12 text-center">
               <div className="text-6xl mb-4">✨</div>
-                <h3 className="text-2xl font-bold text-foreground mb-4">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-4">
                 Gallery Coming Soon
               </h3>
                 <p className="text-default-600">

@@ -93,6 +93,8 @@ export default function BookingsPage() {
     payment_method: 'card' as 'cash' | 'card' | 'cash_and_card',
     cash_amount: '',
     card_amount: '',
+    payment_type: 'full' as 'full' | 'deposit',
+    deposit_amount: '',
     address: '',
     notes: '',
     status: 'pending',
@@ -431,6 +433,8 @@ export default function BookingsPage() {
       payment_method: 'card',
       cash_amount: '',
       card_amount: '',
+      payment_type: 'full',
+      deposit_amount: '',
       address: '',
       notes: '',
       status: 'pending',
@@ -514,12 +518,24 @@ export default function BookingsPage() {
       const url = editingBooking ? `/api/bookings?id=${editingBooking.id}` : '/api/bookings';
       const method = editingBooking ? 'PUT' : 'POST';
 
+      const totalAmount = parseFloat(formData.amount) || 0;
+      const isDeposit = formData.payment_type === 'deposit';
+      const depositAmount = isDeposit ? (parseFloat(formData.deposit_amount) || 0) : totalAmount;
+
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          amount: isDeposit ? depositAmount : totalAmount,
+          total_amount: totalAmount,
+          amount_paid: depositAmount,
+          remaining_amount: isDeposit ? Math.max(0, totalAmount - depositAmount) : 0,
+          payment_type: formData.payment_type,
+          payment_method: formData.payment_method,
+        }),
       });
 
       if (response.ok) {
@@ -610,6 +626,7 @@ export default function BookingsPage() {
   // Load form data when editing
   useEffect(() => {
     if (editingBooking) {
+      const eb = editingBooking as any;
       setFormData({
         customer_name: editingBooking.customer_name || '',
         customer_email: editingBooking.customer_email || '',
@@ -617,10 +634,12 @@ export default function BookingsPage() {
         service: editingBooking.service || '',
         date: editingBooking.date || '',
         time: editingBooking.time || '',
-        amount: editingBooking.amount?.toString() || '',
-        payment_method: 'card',
+        amount: (eb.total_amount ?? editingBooking.amount)?.toString() || '',
+        payment_method: eb.payment_method || 'card',
         cash_amount: '',
         card_amount: '',
+        payment_type: eb.payment_type || 'full',
+        deposit_amount: eb.amount_paid?.toString() || '',
         address: editingBooking.address || '',
         notes: editingBooking.notes || '',
         status: editingBooking.status || 'pending',
@@ -1237,6 +1256,43 @@ export default function BookingsPage() {
                       errorMessage={formErrors.card_amount}
                       isInvalid={!!formErrors.card_amount}
                     />
+                  </div>
+                )}
+
+                {/* Deposit toggle */}
+                <div className="flex items-center gap-3 p-3 bg-default-50 rounded-lg border border-divider">
+                  <input
+                    type="checkbox"
+                    id="booking-deposit-toggle"
+                    checked={formData.payment_type === 'deposit'}
+                    onChange={(e) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        payment_type: e.target.checked ? 'deposit' : 'full',
+                        deposit_amount: '',
+                      }));
+                    }}
+                    className="w-4 h-4 text-primary rounded border-default-300 focus:ring-primary"
+                  />
+                  <label htmlFor="booking-deposit-toggle" className="text-sm font-medium text-foreground cursor-pointer">
+                    Deposit payment (partial payment now, rest later)
+                  </label>
+                </div>
+
+                {formData.payment_type === 'deposit' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Input
+                      label="Deposit Amount (£)"
+                      type="number"
+                      value={formData.deposit_amount}
+                      onChange={(e) => setFormData(prev => ({ ...prev, deposit_amount: e.target.value }))}
+                      step="0.01" min="0" max={formData.amount || undefined}
+                      placeholder="0.00"
+                      isRequired
+                    />
+                    <div className="flex items-center px-3 text-sm text-default-500">
+                      Remaining: £{(Math.max(0, (parseFloat(formData.amount) || 0) - (parseFloat(formData.deposit_amount) || 0))).toFixed(2)}
+                    </div>
                   </div>
                 )}
 

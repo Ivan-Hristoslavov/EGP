@@ -184,10 +184,10 @@ export default function SectionContact() {
             Get in touch for immediate assistance or book your service online.
             Professional aesthetic treatments with instant confirmation.
           </p> */}
-          <h2 className="text-5xl font-bold text-gray-900 dark:text-white mb-6 transition-colors duration-300">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6 transition-colors duration-300">
             Book & Pay Immediately
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed transition-colors duration-300 max-w-4xl mx-auto">
+          <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 leading-relaxed transition-colors duration-300 max-w-4xl mx-auto">
             Book your aesthetic treatment and pay securely online. 
             Professional aesthetic treatments with instant confirmation.
           </p>
@@ -350,7 +350,7 @@ export default function SectionContact() {
             <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-8 py-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-2xl font-bold text-white mb-2">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2">
                     Book Your Service Online
                   </h3>
                   <p className="text-blue-100">
@@ -400,7 +400,7 @@ export default function SectionContact() {
               <FormBooking />
             </div> */}
             <div className="p-8 text-center">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-4">
                 Direct Booking with Payment
               </h3>
               <p className="text-gray-600 dark:text-gray-300 mb-6">

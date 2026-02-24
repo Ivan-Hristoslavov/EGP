@@ -1,0 +1,47 @@
+---
+description: Form patterns — validation, loading state, error display, double-submit prevention
+globs:
+  - components/**/*.tsx
+  - app/**/*.tsx
+alwaysApply: false
+---
+
+# Forms & Validation Rules
+
+## Controlled Inputs
+
+- All form fields must be controlled: `value={state}` and `onChange`/`onValueChange` that updates state.
+- Use a single state object for the form or separate `useState` per field; keep validation state (e.g. `fieldErrors`) separate.
+
+## Validation
+
+- Validate required fields before submit (and optionally on blur).
+- Store validation errors in state, e.g. `fieldErrors: Record<string, string>`.
+- Show red border on invalid fields: e.g. `isInvalid={!!fieldErrors.email}` and `errorMessage={fieldErrors.email}` for HeroUI Input/Select.
+- Clear the error for a field when the user edits that field (onChange sets `fieldErrors.fieldName` to empty or delete key).
+
+## Submit Flow
+
+1. **Prevent double submit:** `isSubmitting` state. Set `true` at start of submit, `false` at end (in finally).
+2. **Disable submit button** while `isSubmitting`: `disabled={isSubmitting}`.
+3. **Show loading indicator** on the button (e.g. Spinner as `startContent` or replace label with "Sending...").
+4. **On validation failure:** Set `fieldErrors`, do not set `isSubmitting` (or set it false). Do not call API.
+5. **On API error:** Show toast (e.g. `showError("Message")`), set `isSubmitting = false`.
+6. **On success:** Show toast, reset form or close modal, set `isSubmitting = false`.
+
+## Admin Forms (modals)
+
+- When opening add/edit modal: reset form state and `fieldErrors`.
+- When closing modal: clear form and errors.
+- Use HeroUI `Modal`, `ModalContent`, `ModalHeader`, `ModalBody`, `ModalFooter`; primary button in footer for submit.
+
+## Toast Feedback
+
+- Success: `showSuccess("Saved successfully")` (or from `useToast()`).
+- Error: `showError("Something went wrong")`.
+- Use from `@/components/Toast`: `const { showSuccess, showError } = useToast();`
+
+## HeroUI Form Components
+
+- `Input`, `Textarea`, `Select`, `SelectItem` from `@heroui/react` or specific packages.
+- Use `isRequired`, `isInvalid`, `errorMessage`, `onValueChange`, `value` (or `selectedKeys` for Select) for consistency with validation state.

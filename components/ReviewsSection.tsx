@@ -1,7 +1,7 @@
 "use client";
 
 import { useReviews } from '@/hooks/useReviews';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Review } from '@/types';
 import { badgeBackgroundClass } from '@/config/badge-styles';
 
@@ -9,7 +9,16 @@ export function ReviewsSection() {
   const { reviews, isLoading, error } = useReviews();
   const [currentPage, setCurrentPage] = useState(1);
   const [expandedReview, setExpandedReview] = useState<Review | null>(null);
-  const reviewsPerPage = 6;
+  const [reviewsPerPage, setReviewsPerPage] = useState(3); // default 3 for mobile; desktop set in useEffect
+  useEffect(() => {
+    const update = () => {
+      if (typeof window === "undefined") return;
+      setReviewsPerPage(window.matchMedia("(min-width: 768px)").matches ? 6 : 3);
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
 
   if (isLoading) {
     return (
@@ -41,18 +50,18 @@ export function ReviewsSection() {
   const currentReviews = reviews.slice(startIndex, endIndex);
 
   return (
-    <section className="py-16 bg-egp-beige-lighter dark:bg-gray-900" id="reviews">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className={`inline-flex items-center gap-2 px-4 py-2 ${badgeBackgroundClass} mb-5`}>
-            <svg className="w-5 h-5 text-[#9d9585]" fill="currentColor" viewBox="0 0 20 20">
+    <section className="py-10 sm:py-12 md:py-16 bg-egp-beige-lighter dark:bg-gray-900" id="reviews">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header - same title scale as other sections */}
+        <div className="text-center mb-8 sm:mb-12">
+          <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} mb-3 sm:mb-4`}>
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-[#9d9585]" fill="currentColor" viewBox="0 0 20 20">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
-            <span className="text-sm font-semibold text-[#6b5f4b]">Client Impressions</span>
+            <span className="text-xs sm:text-sm font-semibold text-[#6b5f4b]">Client Impressions</span>
           </div>
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">What Our Clients Say</h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">What Our Clients Say</h2>
+          <p className="text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Real experiences from valued customers who trust our services
           </p>
         </div>
@@ -65,7 +74,7 @@ export function ReviewsSection() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-3">
                 No Reviews Yet
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-8">
@@ -88,24 +97,24 @@ export function ReviewsSection() {
           </div>
         ) : (
           <div>
-            {/* Reviews Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {/* Reviews Grid - smaller cards on mobile */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
               {currentReviews.map((review, index) => {
                 const isLongComment = review.comment.length > 260;
                 return (
                 <div 
                   key={review.id} 
-                  className="group relative bg-white/90 dark:bg-gray-900/70 rounded-3xl p-6 sm:p-7 shadow-lg backdrop-blur border border-[#e4d9c8]/80 dark:border-gray-700 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  className="group relative bg-white/90 dark:bg-gray-900/70 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-7 shadow-lg backdrop-blur border border-[#e4d9c8]/80 dark:border-gray-700 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="absolute inset-x-6 -top-6 h-16 bg-gradient-to-br from-[#9d9585]/20 via-[#b5ad9d]/20 to-[#ddd5c3]/10 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
                   {/* Header */}
-                  <div className="flex items-start gap-4 mb-4">
+                  <div className="flex items-start gap-3 sm:gap-4 mb-3 sm:mb-4">
                     {/* Avatar */}
                     <div className="flex-shrink-0 relative">
-                      <div className="w-12 h-12 bg-[#9d9585] rounded-full flex items-center justify-center shadow-lg">
-                        <span className="text-white font-bold text-lg">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#9d9585] rounded-full flex items-center justify-center shadow-lg">
+                        <span className="text-white font-bold text-base sm:text-lg">
                           {review.customer_name.charAt(0).toUpperCase()}
                         </span>
                       </div>
@@ -148,7 +157,7 @@ export function ReviewsSection() {
                   </div>
 
                   {/* Review Text */}
-                  <div className={`text-gray-700 dark:text-gray-300 text-sm leading-relaxed ${isLongComment ? 'line-clamp-5' : ''}`}>
+                  <div className={`text-gray-700 dark:text-gray-300 text-xs sm:text-sm leading-relaxed ${isLongComment ? 'line-clamp-4 sm:line-clamp-5' : ''}`}>
                     {review.comment}
                   </div>
                   
@@ -167,9 +176,9 @@ export function ReviewsSection() {
               );})}
             </div>
 
-            {/* Pagination */}
+            {/* Pagination - Previous, up to 3 page numbers, Next (left to right) */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-2">
+              <div className="flex justify-center items-center gap-2 flex-wrap">
                 <button
                   onClick={() => setCurrentPage(currentPage - 1)}
                   disabled={currentPage === 1}
@@ -177,21 +186,25 @@ export function ReviewsSection() {
                 >
                   Previous
                 </button>
-                
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
+                {(() => {
+                  const pagesToShow: number[] = [];
+                  for (let p = currentPage - 1; p <= currentPage + 1; p++) {
+                    if (p >= 1 && p <= totalPages) pagesToShow.push(p);
+                  }
+                  return pagesToShow.map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
                       className={`px-4 py-2 rounded-xl transition-all text-sm font-medium shadow-sm ${
-                      page === currentPage
-                        ? 'bg-gray-700 dark:bg-gray-600 text-white shadow-md scale-105'
-                        : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-700 hover:shadow'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-                
+                        page === currentPage
+                          ? 'bg-gray-700 dark:bg-gray-600 text-white shadow-md scale-105'
+                          : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-700 hover:shadow'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ));
+                })()}
                 <button
                   onClick={() => setCurrentPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
@@ -211,11 +224,11 @@ export function ReviewsSection() {
             <div className="flex items-start justify-between gap-6 px-6 sm:px-8 pt-8">
               <div>
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 bg-[#9d9585] rounded-full flex items-center justify-center text-white text-xl font-semibold shadow">
+                  <div className="w-12 h-12 bg-[#9d9585] rounded-full flex items-center justify-center text-white text-base sm:text-xl font-semibold shadow">
                     {expandedReview.customer_name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">{expandedReview.customer_name}</h3>
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">{expandedReview.customer_name}</h3>
                     <div className="flex items-center gap-1 mt-1">
                       {Array.from({ length: 5 }).map((_, i) => (
                         <svg

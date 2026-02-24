@@ -2,11 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Mail, CheckCircle, Gift } from "lucide-react";
+import { Mail, Gift, Copy, Check } from "lucide-react";
 import { siteConfig } from "@/config/site";
-import { badgeBackgroundClass } from "@/config/badge-styles";
 import { aestheticsColors } from "@/config/colors";
-import { Input, Button, Card, CardBody, Chip, Spinner } from "@heroui/react";
+import { Input, Button, Card, CardBody, Chip } from "@heroui/react";
 
 export default function SectionNewsletter() {
   const [email, setEmail] = useState("");
@@ -15,27 +14,43 @@ export default function SectionNewsletter() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [discountCode, setDiscountCode] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyCode = async () => {
+    if (!discountCode) return;
+    try {
+      await navigator.clipboard.writeText(discountCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Copy failed:", err);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate required fields
     if (!firstName.trim() || !email.trim() || !mobile.trim()) {
       setStatus("error");
       return;
     }
-    
     setIsSubmitting(true);
     setStatus("idle");
-
     try {
-      // TODO: Implement newsletter API
-      // For now, just simulate success
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Generate discount code
-      const code = `${siteConfig.newsletter.discountCodePrefix}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
-      setDiscountCode(code);
+      const res = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: firstName.trim(),
+          email: email.trim().toLowerCase(),
+          mobile: mobile.trim(),
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setStatus("error");
+        return;
+      }
+      setDiscountCode(data.discountCode ?? "");
       setStatus("success");
       setEmail("");
       setFirstName("");
@@ -51,7 +66,7 @@ export default function SectionNewsletter() {
   if (status === "success") {
     return (
       <section className="py-12 sm:py-16 md:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center">
             <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#464C45] dark:bg-[#464C45] rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 border-2 border-[#c9c1b0] dark:border-gray-700 shadow-lg">
               <svg
@@ -64,7 +79,7 @@ export default function SectionNewsletter() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7V3z" />
               </svg>
             </div>
-            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 px-4">
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 px-4">
               Welcome to EGP Aesthetics!
             </h3>
             <p className="text-lg sm:text-xl text-gray-700 dark:text-gray-300 mb-4 sm:mb-6 px-4">
@@ -73,13 +88,24 @@ export default function SectionNewsletter() {
             <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-2 border-[#c9c1b0] dark:border-gray-700 shadow-lg">
               <CardBody className="px-6 sm:px-8 py-3 sm:py-4">
                 <div className="text-xs sm:text-sm text-default-500 mb-1 font-medium">Your Discount Code</div>
-                <Chip 
-                  size="lg"
-                  variant="flat"
-                  className="text-2xl sm:text-3xl font-bold text-[#464C45] dark:text-[#464C45] tracking-wider bg-transparent"
-                >
-                {discountCode}
-                </Chip>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Chip
+                    size="lg"
+                    variant="flat"
+                    className="text-2xl sm:text-3xl font-bold text-[#464C45] dark:text-[#464C45] tracking-wider bg-transparent"
+                  >
+                    {discountCode}
+                  </Chip>
+                  <Button
+                    size="sm"
+                    variant="flat"
+                    onPress={handleCopyCode}
+                    className="bg-[#464C45] dark:bg-[#464C45] text-white min-w-0"
+                    startContent={copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  >
+                    {copied ? "Copied!" : "Copy"}
+                  </Button>
+                </div>
               </CardBody>
             </Card>
             <p className="text-base sm:text-lg text-gray-700 dark:text-gray-300 mb-6 sm:mb-8 px-4">
@@ -101,7 +127,7 @@ export default function SectionNewsletter() {
 
   return (
       <section className="py-12 sm:py-16 md:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto">
             <div 
               className="rounded-xl sm:rounded-2xl p-6 sm:p-8 shadow-lg"
@@ -217,7 +243,7 @@ export default function SectionNewsletter() {
                   }}
                 >
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-white mb-1">
+                    <div className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1">
                       {siteConfig.newsletter.welcomeDiscountPercent}%
                     </div>
                     <div className="text-white font-bold text-sm">OFF</div>

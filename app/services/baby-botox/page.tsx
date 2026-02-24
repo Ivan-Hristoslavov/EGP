@@ -56,10 +56,10 @@ export default function BabyBotoxPage() {
               <Star className="w-4 h-4" />
               <span>Anti-Wrinkle Injections</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
               Baby Botox Treatment
             </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8">
               Subtle, natural-looking anti-wrinkle injections for a refreshed appearance
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -89,7 +89,7 @@ export default function BabyBotoxPage() {
             <div className="grid lg:grid-cols-2 gap-12">
               {/* Service Info */}
               <div>
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6">
                   About Baby Botox
                 </h2>
                 <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
@@ -115,7 +115,7 @@ export default function BabyBotoxPage() {
 
               {/* Benefits */}
               <div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-6">
                   Treatment Benefits
                 </h3>
                 <ul className="space-y-4">
@@ -136,7 +136,7 @@ export default function BabyBotoxPage() {
       <section className="py-16 md:py-24 bg-egp-beige-lighter dark:bg-egp-green-dark">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white text-center mb-12">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white text-center mb-12">
               Treatment Process
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -148,7 +148,7 @@ export default function BabyBotoxPage() {
                   <div className="w-12 h-12 bg-gradient-to-br from-egp-green to-egp-green-dark rounded-full flex items-center justify-center mb-4">
                     <span className="text-white font-bold text-lg">{step.step}</span>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3">
                     {step.title}
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300">
@@ -166,10 +166,10 @@ export default function BabyBotoxPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <div className="bg-gradient-to-br from-egp-beige-lighter to-egp-beige-light dark:from-egp-green-dark dark:to-egp-green rounded-2xl p-8 mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
                 Baby Botox Treatment
               </h2>
-              <div className="text-4xl font-bold text-egp-green dark:text-white mb-4">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-egp-green dark:text-white mb-4">
                 £199
               </div>
               <p className="text-gray-600 dark:text-gray-300 mb-6">

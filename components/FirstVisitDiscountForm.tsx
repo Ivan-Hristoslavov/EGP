@@ -130,7 +130,7 @@ export function FirstVisitDiscountForm() {
               >
                 <Percent className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
               </div>
-              <h3 className="text-2xl sm:text-3xl font-bold text-white mb-2">Congratulations!</h3>
+              <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2">Congratulations!</h3>
               <p className="text-white/90 text-base sm:text-lg mb-5">Here&apos;s your exclusive discount code:</p>
               <div
                 className="inline-flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 rounded-xl px-6 sm:px-8 py-4 sm:py-5 mb-5 border-2 backdrop-blur-sm"
@@ -141,7 +141,7 @@ export function FirstVisitDiscountForm() {
               >
                 <div className="min-w-0">
                   <div className="text-xs sm:text-sm text-white/80 mb-1 font-semibold uppercase tracking-wide">Your Discount Code</div>
-                  <div className="text-2xl sm:text-3xl font-bold text-white tracking-wider select-all">{discountCode}</div>
+                  <div className="text-xl sm:text-2xl md:text-3xl font-bold text-white tracking-wider select-all">{discountCode}</div>
                 </div>
                 <button
                   type="button"
@@ -192,7 +192,7 @@ export function FirstVisitDiscountForm() {
                     <Gift className="w-7 h-7 text-white" />
                     <span className="px-3 py-1.5 sm:py-2 bg-white/20 backdrop-blur-sm text-white text-xs sm:text-sm font-semibold rounded-full border border-white/30">EXCLUSIVE OFFER</span>
                   </div>
-                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-2 text-white">
+                  <h3 className="text-base sm:text-lg md:text-xl font-bold mb-2 text-white">
                     Get {siteConfig.newsletter.welcomeDiscountPercent}% Off Your First Visit
                   </h3>
                   <p className="text-white/90 text-sm sm:text-base mb-4">
@@ -270,7 +270,7 @@ export function FirstVisitDiscountForm() {
                     }}
                   >
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-white mb-1">
+                      <div className="text-xl sm:text-2xl font-bold text-white mb-1">
                         {siteConfig.newsletter.welcomeDiscountPercent}%
                       </div>
                       <div className="text-white font-bold text-xs">OFF</div>

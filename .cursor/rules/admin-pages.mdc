@@ -1,0 +1,71 @@
+---
+description: Rules for creating and modifying admin panel pages
+globs:
+  - app/admin/**/*.tsx
+---
+
+# Admin Page Rules
+
+## Page Structure
+
+Every admin page starts with `"use client"` and follows this pattern:
+
+```typescript
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Card, CardBody, CardHeader, Input, Select, SelectItem, Spinner } from "@heroui/react";
+import { Chip } from "@heroui/chip";
+import { useToast } from "@/components/Toast";
+
+export default function AdminPage() {
+  const { showSuccess, showError } = useToast();
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  // ... state management
+}
+```
+
+## UI Components
+
+- Use HeroUI components from `@heroui/react` and individual packages
+- Icons from `lucide-react`
+- Cards with `border border-divider` for sections
+- Modals for add/edit forms
+- Chips for status badges
+- Toast notifications for success/error feedback
+
+## Form Patterns
+
+- Controlled inputs with `useState`
+- Validation before submit — show red borders on invalid fields using `fieldErrors` state
+- Prevent double submit with `isSubmitting` state
+- Disable button + show spinner during submit
+- Clear validation errors when user edits the field
+- Reset form state when opening/closing modals
+
+## Booking Forms — Payment Fields
+
+Both new and edit booking forms must include:
+1. **Total Amount** (£) — required
+2. **Payment Method** — Select: Card, Cash, Cash + Card
+3. **Cash + Card split** — Two auto-calculating fields (shown when Cash + Card selected)
+4. **Deposit toggle** — Checkbox: "Deposit payment (partial payment now, rest later)"
+5. **Deposit amount + remaining** — Shown when deposit is checked
+6. **Status** — Select: Pending, Scheduled, Confirmed, Completed, Cancelled
+7. **Payment Status** — Select: Pending, Paid, Refunded
+
+## Data Fetching
+
+- Fetch from internal API routes (`/api/...`) using `fetch()`
+- Show loading states while fetching
+- Handle errors with try/catch and toast notifications
+- Refresh data after mutations
+
+## Layout
+
+Admin pages render inside the admin layout (`app/admin/layout.tsx`) which provides:
+- Fixed sidebar navigation
+- Sticky top header with page title
+- Authentication guard (redirects to login if not authenticated)
+- The main `LayoutMain` component wraps everything but hides the public header/footer on admin routes

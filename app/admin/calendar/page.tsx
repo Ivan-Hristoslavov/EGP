@@ -158,6 +158,11 @@ export default function CalendarPage() {
     date: '',
     time: '',
     amount: '',
+    payment_method: 'card' as 'cash' | 'card' | 'cash_and_card',
+    cash_amount: '',
+    card_amount: '',
+    payment_type: 'full' as 'full' | 'deposit',
+    deposit_amount: '',
     status: 'pending',
     payment_status: 'pending',
     address: '',
@@ -176,6 +181,11 @@ export default function CalendarPage() {
     date: getCurrentToday(),
     time: '',
     amount: '',
+    payment_method: 'card' as 'cash' | 'card' | 'cash_and_card',
+    cash_amount: '',
+    card_amount: '',
+    payment_type: 'full' as 'full' | 'deposit',
+    deposit_amount: '',
     status: 'pending',
     payment_status: 'pending',
     address: '',
@@ -207,6 +217,7 @@ export default function CalendarPage() {
   // Populate edit form when editing booking
   useEffect(() => {
     if (editingBooking) {
+      const eb = editingBooking as any;
       setEditFormData({
         customer_name: editingBooking.customer_name || '',
         customer_email: editingBooking.customer_email || '',
@@ -214,7 +225,12 @@ export default function CalendarPage() {
         service: editingBooking.service || '',
         date: editingBooking.date || '',
         time: editingBooking.time || '',
-        amount: editingBooking.amount?.toString() || '',
+        amount: (eb.total_amount ?? editingBooking.amount)?.toString() || '',
+        payment_method: eb.payment_method || 'card',
+        cash_amount: eb.cash_amount?.toString() || '',
+        card_amount: eb.card_amount?.toString() || '',
+        payment_type: eb.payment_type || 'full',
+        deposit_amount: eb.amount_paid?.toString() || '',
         status: editingBooking.status || 'pending',
         payment_status: editingBooking.payment_status || 'pending',
         address: editingBooking.address || '',
@@ -699,12 +715,23 @@ export default function CalendarPage() {
     setIsSubmittingEdit(true);
 
     try {
+      const totalAmount = parseFloat(editFormData.amount) || 0;
+      const isDeposit = editFormData.payment_type === 'deposit';
+      const depositAmount = isDeposit ? (parseFloat(editFormData.deposit_amount) || 0) : totalAmount;
+
       const response = await fetch(`/api/bookings?id=${editingBooking.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...editFormData,
-          amount: parseFloat(editFormData.amount)
+          amount: isDeposit ? depositAmount : totalAmount,
+          total_amount: totalAmount,
+          amount_paid: depositAmount,
+          remaining_amount: isDeposit ? Math.max(0, totalAmount - depositAmount) : 0,
+          payment_type: editFormData.payment_type,
+          payment_method: editFormData.payment_method,
+          cash_amount: editFormData.payment_method === 'cash_and_card' ? (parseFloat(editFormData.cash_amount) || 0) : undefined,
+          card_amount: editFormData.payment_method === 'cash_and_card' ? (parseFloat(editFormData.card_amount) || 0) : undefined,
         }),
       });
 
@@ -830,6 +857,10 @@ export default function CalendarPage() {
     setIsSubmittingNew(true);
 
     try {
+      const totalAmount = parseFloat(newBookingForm.amount) || 0;
+      const isDeposit = newBookingForm.payment_type === 'deposit';
+      const depositAmount = isDeposit ? (parseFloat(newBookingForm.deposit_amount) || 0) : totalAmount;
+
       const response = await fetch('/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -840,7 +871,14 @@ export default function CalendarPage() {
           service: newBookingForm.service,
           date: newBookingForm.date,
           time: newBookingForm.time,
-          amount: parseFloat(newBookingForm.amount),
+          amount: isDeposit ? depositAmount : totalAmount,
+          total_amount: totalAmount,
+          amount_paid: depositAmount,
+          remaining_amount: isDeposit ? Math.max(0, totalAmount - depositAmount) : 0,
+          payment_type: newBookingForm.payment_type,
+          payment_method: newBookingForm.payment_method,
+          cash_amount: newBookingForm.payment_method === 'cash_and_card' ? (parseFloat(newBookingForm.cash_amount) || 0) : undefined,
+          card_amount: newBookingForm.payment_method === 'cash_and_card' ? (parseFloat(newBookingForm.card_amount) || 0) : undefined,
           status: newBookingForm.status,
           payment_status: newBookingForm.payment_status,
           address: newBookingForm.address || null,
@@ -853,7 +891,6 @@ export default function CalendarPage() {
         setBookings([...bookings, newBooking]);
         showSuccess('Booking Created', 'New booking has been successfully created');
         
-        // Reset form and close modal
         setNewBookingForm({
           customer_name: '',
           customer_email: '',
@@ -862,6 +899,11 @@ export default function CalendarPage() {
           date: getCurrentToday(),
           time: '',
           amount: '',
+          payment_method: 'card',
+          cash_amount: '',
+          card_amount: '',
+          payment_type: 'full',
+          deposit_amount: '',
           status: 'pending',
           payment_status: 'pending',
           address: '',
@@ -1686,7 +1728,7 @@ export default function CalendarPage() {
                     <Plus className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold">New Booking</h2>
+                    <h2 className="text-xl sm:text-2xl font-bold">New Booking</h2>
                     <p className="text-sm font-normal text-default-500">
                       Create a new appointment booking
                     </p>
@@ -1818,22 +1860,123 @@ export default function CalendarPage() {
                         <h3 className="text-lg font-semibold">Payment & Status</h3>
                       </div>
                     </CardHeader>
-                    <CardBody className="pt-0">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <CardBody className="pt-0 space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
                         <Input
-                          label="Amount (£)"
+                          label="Total Amount (£)"
                           name="amount"
                           type="number"
                           value={newBookingForm.amount}
-                          onChange={handleNewBookingInputChange}
+                          onChange={(e) => {
+                            handleNewBookingInputChange(e);
+                            if (newBookingForm.payment_method === 'cash_and_card') {
+                              setNewBookingForm(prev => ({ ...prev, amount: e.target.value, cash_amount: '', card_amount: '' }));
+                            }
+                          }}
                           isRequired
                           step="0.01"
                           min="0"
                           placeholder="0.00"
                         />
                         <Select
+                          label="Payment Method"
+                          selectedKeys={[newBookingForm.payment_method]}
+                          onSelectionChange={(keys) => {
+                            const selected = Array.from(keys)[0] as string;
+                            setNewBookingForm(prev => ({
+                              ...prev,
+                              payment_method: selected as 'cash' | 'card' | 'cash_and_card',
+                              cash_amount: '', card_amount: '',
+                            }));
+                          }}
+                        >
+                          <SelectItem key="card">Card</SelectItem>
+                          <SelectItem key="cash">Cash</SelectItem>
+                          <SelectItem key="cash_and_card">Cash + Card</SelectItem>
+                        </Select>
+                      </div>
+
+                      {newBookingForm.payment_method === 'cash_and_card' && (
+                        <div className="grid grid-cols-2 gap-4">
+                          <Input
+                            label="Cash Amount (£)"
+                            type="number"
+                            value={newBookingForm.cash_amount}
+                            onChange={(e) => {
+                              const cashVal = e.target.value;
+                              const total = parseFloat(newBookingForm.amount) || 0;
+                              const cashNum = parseFloat(cashVal) || 0;
+                              const cardNum = Math.max(0, Math.round((total - cashNum) * 100) / 100);
+                              setNewBookingForm(prev => ({
+                                ...prev,
+                                cash_amount: cashVal,
+                                card_amount: cashNum > 0 && total > 0 ? cardNum.toFixed(2) : '',
+                              }));
+                            }}
+                            step="0.01" min="0" max={newBookingForm.amount || undefined}
+                            placeholder="0.00"
+                          />
+                          <Input
+                            label="Card Amount (£)"
+                            type="number"
+                            value={newBookingForm.card_amount}
+                            onChange={(e) => {
+                              const cardVal = e.target.value;
+                              const total = parseFloat(newBookingForm.amount) || 0;
+                              const cardNum = parseFloat(cardVal) || 0;
+                              const cashNum = Math.max(0, Math.round((total - cardNum) * 100) / 100);
+                              setNewBookingForm(prev => ({
+                                ...prev,
+                                card_amount: cardVal,
+                                cash_amount: cardNum > 0 && total > 0 ? cashNum.toFixed(2) : '',
+                              }));
+                            }}
+                            step="0.01" min="0" max={newBookingForm.amount || undefined}
+                            placeholder="0.00"
+                          />
+                        </div>
+                      )}
+
+                      {/* Deposit toggle */}
+                      <div className="flex items-center gap-3 p-3 bg-default-50 rounded-lg border border-divider">
+                        <input
+                          type="checkbox"
+                          id="new-deposit-toggle"
+                          checked={newBookingForm.payment_type === 'deposit'}
+                          onChange={(e) => {
+                            setNewBookingForm(prev => ({
+                              ...prev,
+                              payment_type: e.target.checked ? 'deposit' : 'full',
+                              deposit_amount: '',
+                            }));
+                          }}
+                          className="w-4 h-4 text-primary rounded border-default-300 focus:ring-primary"
+                        />
+                        <label htmlFor="new-deposit-toggle" className="text-sm font-medium text-foreground cursor-pointer">
+                          Deposit payment (partial payment now, rest later)
+                        </label>
+                      </div>
+
+                      {newBookingForm.payment_type === 'deposit' && (
+                        <div className="grid grid-cols-2 gap-4">
+                          <Input
+                            label="Deposit Amount (£)"
+                            type="number"
+                            value={newBookingForm.deposit_amount}
+                            onChange={(e) => setNewBookingForm(prev => ({ ...prev, deposit_amount: e.target.value }))}
+                            step="0.01" min="0" max={newBookingForm.amount || undefined}
+                            placeholder="0.00"
+                            isRequired
+                          />
+                          <div className="flex items-center px-3 text-sm text-default-500">
+                            Remaining: £{(Math.max(0, (parseFloat(newBookingForm.amount) || 0) - (parseFloat(newBookingForm.deposit_amount) || 0))).toFixed(2)}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <Select
                           label="Status"
-                          name="status"
                           selectedKeys={[newBookingForm.status]}
                           onSelectionChange={(keys) => {
                             const selectedStatus = Array.from(keys)[0] as string;
@@ -1847,7 +1990,6 @@ export default function CalendarPage() {
                         </Select>
                         <Select
                           label="Payment Status"
-                          name="payment_status"
                           selectedKeys={[newBookingForm.payment_status]}
                           onSelectionChange={(keys) => {
                             const selectedPaymentStatus = Array.from(keys)[0] as string;
@@ -1929,7 +2071,7 @@ export default function CalendarPage() {
                       <CalendarIcon className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold">Booking Details</h2>
+                      <h2 className="text-xl sm:text-2xl font-bold">Booking Details</h2>
                       <p className="text-sm text-default-500">
                         {selectedBookingDetails && new Date(selectedBookingDetails.date).toLocaleDateString('en-US', { 
                           weekday: 'long', 
@@ -2039,7 +2181,7 @@ export default function CalendarPage() {
                       <CardBody className="pt-0">
                         <div>
                           <label className="block text-sm font-medium text-default-500 mb-1">Amount</label>
-                          <p className="text-3xl font-bold text-warning-600 dark:text-warning-400">£{selectedBookingDetails.amount.toFixed(2)}</p>
+                          <p className="text-xl sm:text-2xl md:text-3xl font-bold text-warning-600 dark:text-warning-400">£{selectedBookingDetails.amount.toFixed(2)}</p>
                         </div>
                       </CardBody>
                     </Card>
@@ -2211,7 +2353,7 @@ export default function CalendarPage() {
                     <CalendarIcon className="w-8 h-8" />
                   </div>
                   <div>
-                    <h2 className="text-3xl font-bold">
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold">
                       {new Date(expandedDay).toLocaleDateString('en-US', { 
                         weekday: 'long', 
                         year: 'numeric', 
@@ -2625,7 +2767,7 @@ export default function CalendarPage() {
                 <CalendarIcon className="w-5 h-5 text-primary-600 dark:text-primary-400" />
             </div>
               <div>
-                <h2 className="text-2xl font-bold">Edit Booking</h2>
+                <h2 className="text-xl sm:text-2xl font-bold">Edit Booking</h2>
             {editingBooking && (
                   <p className="text-sm font-normal text-default-500">
                 Editing: {editingBooking.customer_name} - {editingBooking.service}
@@ -2788,22 +2930,121 @@ export default function CalendarPage() {
                     <h3 className="text-lg font-semibold">Payment & Status</h3>
                   </div>
                 </CardHeader>
-                <CardBody className="pt-0">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <CardBody className="pt-0 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <Input
-                      label="Amount (£)"
-                        name="amount"
+                      label="Total Amount (£)"
+                      name="amount"
                       type="number"
-                        value={editFormData.amount}
-                        onChange={handleEditInputChange}
+                      value={editFormData.amount}
+                      onChange={(e) => {
+                        handleEditInputChange(e);
+                        if (editFormData.payment_method === 'cash_and_card') {
+                          setEditFormData(prev => ({ ...prev, amount: e.target.value, cash_amount: '', card_amount: '' }));
+                        }
+                      }}
                       isRequired
-                        step="0.01"
-                        min="0"
+                      step="0.01" min="0"
                       placeholder="0.00"
                     />
                     <Select
+                      label="Payment Method"
+                      selectedKeys={[editFormData.payment_method]}
+                      onSelectionChange={(keys) => {
+                        const selected = Array.from(keys)[0] as string;
+                        setEditFormData(prev => ({
+                          ...prev,
+                          payment_method: selected as 'cash' | 'card' | 'cash_and_card',
+                          cash_amount: '', card_amount: '',
+                        }));
+                      }}
+                    >
+                      <SelectItem key="card">Card</SelectItem>
+                      <SelectItem key="cash">Cash</SelectItem>
+                      <SelectItem key="cash_and_card">Cash + Card</SelectItem>
+                    </Select>
+                  </div>
+
+                  {editFormData.payment_method === 'cash_and_card' && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <Input
+                        label="Cash Amount (£)"
+                        type="number"
+                        value={editFormData.cash_amount}
+                        onChange={(e) => {
+                          const cashVal = e.target.value;
+                          const total = parseFloat(editFormData.amount) || 0;
+                          const cashNum = parseFloat(cashVal) || 0;
+                          const cardNum = Math.max(0, Math.round((total - cashNum) * 100) / 100);
+                          setEditFormData(prev => ({
+                            ...prev,
+                            cash_amount: cashVal,
+                            card_amount: cashNum > 0 && total > 0 ? cardNum.toFixed(2) : '',
+                          }));
+                        }}
+                        step="0.01" min="0" max={editFormData.amount || undefined}
+                        placeholder="0.00"
+                      />
+                      <Input
+                        label="Card Amount (£)"
+                        type="number"
+                        value={editFormData.card_amount}
+                        onChange={(e) => {
+                          const cardVal = e.target.value;
+                          const total = parseFloat(editFormData.amount) || 0;
+                          const cardNum = parseFloat(cardVal) || 0;
+                          const cashNum = Math.max(0, Math.round((total - cardNum) * 100) / 100);
+                          setEditFormData(prev => ({
+                            ...prev,
+                            card_amount: cardVal,
+                            cash_amount: cardNum > 0 && total > 0 ? cashNum.toFixed(2) : '',
+                          }));
+                        }}
+                        step="0.01" min="0" max={editFormData.amount || undefined}
+                        placeholder="0.00"
+                      />
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-3 p-3 bg-default-50 rounded-lg border border-divider">
+                    <input
+                      type="checkbox"
+                      id="edit-deposit-toggle"
+                      checked={editFormData.payment_type === 'deposit'}
+                      onChange={(e) => {
+                        setEditFormData(prev => ({
+                          ...prev,
+                          payment_type: e.target.checked ? 'deposit' : 'full',
+                          deposit_amount: '',
+                        }));
+                      }}
+                      className="w-4 h-4 text-primary rounded border-default-300 focus:ring-primary"
+                    />
+                    <label htmlFor="edit-deposit-toggle" className="text-sm font-medium text-foreground cursor-pointer">
+                      Deposit payment (partial payment now, rest later)
+                    </label>
+                  </div>
+
+                  {editFormData.payment_type === 'deposit' && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <Input
+                        label="Deposit Amount (£)"
+                        type="number"
+                        value={editFormData.deposit_amount}
+                        onChange={(e) => setEditFormData(prev => ({ ...prev, deposit_amount: e.target.value }))}
+                        step="0.01" min="0" max={editFormData.amount || undefined}
+                        placeholder="0.00"
+                        isRequired
+                      />
+                      <div className="flex items-center px-3 text-sm text-default-500">
+                        Remaining: £{(Math.max(0, (parseFloat(editFormData.amount) || 0) - (parseFloat(editFormData.deposit_amount) || 0))).toFixed(2)}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <Select
                       label="Status"
-                        name="status"
                       selectedKeys={[editFormData.status]}
                       onSelectionChange={(keys) => {
                         const selectedStatus = Array.from(keys)[0] as string;
@@ -2818,7 +3059,6 @@ export default function CalendarPage() {
                     </Select>
                     <Select
                       label="Payment Status"
-                        name="payment_status"
                       selectedKeys={[editFormData.payment_status]}
                       onSelectionChange={(keys) => {
                         const selectedPaymentStatus = Array.from(keys)[0] as string;
@@ -2829,7 +3069,7 @@ export default function CalendarPage() {
                       <SelectItem key="paid">Paid</SelectItem>
                       <SelectItem key="refunded">Refunded</SelectItem>
                     </Select>
-                    </div>
+                  </div>
                 </CardBody>
               </Card>
 

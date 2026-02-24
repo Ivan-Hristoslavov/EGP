@@ -215,7 +215,7 @@ function PaymentForm({
     return (
       <div className="text-center py-6 sm:py-8 px-4">
         <CheckCircle className="w-12 h-12 sm:w-16 sm:h-16 text-green-500 mx-auto mb-3 sm:mb-4" />
-        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">
+        <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2">
           Payment Successful!
         </h3>
         <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
