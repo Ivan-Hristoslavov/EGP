@@ -2,27 +2,57 @@
 
 import { useState } from "react";
 import { useFAQ } from "@/hooks/useFAQ";
-import { aestheticsColors } from "@/config/colors";
 import { badgeBackgroundClass } from "@/config/badge-styles";
+import { typography, textColors } from "@/config/typography";
 import { HelpCircle } from "lucide-react";
-import { Accordion, AccordionItem, Card, CardBody, Spinner, Chip } from "@heroui/react";
+import { Accordion, AccordionItem, Spinner } from "@heroui/react";
 
 const FAQ_INITIAL_COUNT = 3;
 
+/** Renders FAQ answer with proper paragraphs and bullet lists */
+function FAQAnswer({ text }: { text: string }) {
+  const parts = text.split(/\n\n+/);
+  return (
+    <div className={`${typography.body} ${textColors.body} space-y-3`}>
+      {parts.map((block, i) => {
+        const trimmed = block.trim();
+        if (!trimmed) return null;
+        const lines = trimmed.split(/\n/).map((l) => l.trim()).filter(Boolean);
+        const bulletIdx = lines.findIndex((l) => l.startsWith("•"));
+        const hasBullets = bulletIdx >= 0;
+        if (hasBullets) {
+          const beforeBullets = lines.slice(0, bulletIdx);
+          const bulletItems = lines.slice(bulletIdx);
+          return (
+            <div key={i} className="space-y-2">
+              {beforeBullets.length > 0 && (
+                <p className="leading-relaxed">{beforeBullets.join(" ")}</p>
+              )}
+              <ul className="list-disc list-inside space-y-1.5 pl-1 marker:text-egp-green dark:marker:text-egp-green-light">
+                {bulletItems.map((b, j) => (
+                  <li key={j} className="leading-relaxed">{b.replace(/^•\s*/, "").trim()}</li>
+                ))}
+              </ul>
+            </div>
+          );
+        }
+        return (
+          <p key={i} className="leading-relaxed">
+            {trimmed.replace(/\n/g, " ")}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 export function FAQSection() {
   const { faqItems, isLoading, error } = useFAQ();
-  const [openItems, setOpenItems] = useState<number[]>([]);
   const [showAllFaq, setShowAllFaq] = useState(false);
 
   const visibleFaqItems = showAllFaq ? faqItems : faqItems.slice(0, FAQ_INITIAL_COUNT);
   const remainingCount = faqItems.length - FAQ_INITIAL_COUNT;
   const hasMore = !showAllFaq && remainingCount > 0;
-
-  const toggleItem = (index: number) => {
-    setOpenItems((prev) =>
-      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index],
-    );
-  };
 
   if (isLoading) {
     return (
@@ -66,24 +96,26 @@ export function FAQSection() {
             <HelpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>Questions & Answers</span>
           </div>
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className={`${typography.headingSection} ${textColors.heading} mb-4`}>
             Frequently Asked Questions
           </h2>
-          <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+          <p className={`${typography.lead} max-w-3xl mx-auto`}>
             Find answers to common questions about our aesthetic treatments
           </p>
         </div>
 
-        <Accordion 
-          variant="light" 
+        <Accordion
+          variant="light"
           selectionMode="multiple"
           defaultExpandedKeys={[]}
-          className="gap-3 sm:gap-4"
+          disableIndicatorAnimation={false}
+          className="gap-0 px-0 divide-y divide-gray-200 dark:divide-gray-700"
           itemClasses={{
-            base: "bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 border-0",
-            title: "text-base sm:text-lg font-semibold",
-            content: "text-default-600 dark:text-default-400 leading-relaxed px-4 sm:px-8 pb-4 sm:pb-6 text-sm sm:text-base",
-            trigger: "px-4 sm:px-8 py-4 sm:py-6 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl sm:rounded-2xl",
+            base: "bg-transparent border-0 shadow-none rounded-none",
+            title: `${typography.headingSmall} ${textColors.heading}`,
+            content: "px-0 pb-4 sm:pb-5 pt-1",
+            trigger: "px-0 py-4 sm:py-5 hover:bg-transparent rounded-none",
+            indicator: "text-egp-green dark:text-egp-green-light transition-transform duration-300",
           }}
         >
           {visibleFaqItems.map((item) => (
@@ -91,38 +123,38 @@ export function FAQSection() {
               key={item.id}
               aria-label={item.question}
               title={
-                <h3 className="text-base sm:text-lg font-semibold text-foreground pr-4">
+                <span className={`${typography.headingSmall} ${textColors.heading} pr-2`}>
                   {item.question}
-                </h3>
+                </span>
               }
             >
-              <p className="text-default-600 dark:text-default-400 leading-relaxed">
-                {item.answer}
-              </p>
+              <div className="pt-1">
+                <FAQAnswer text={item.answer} />
+              </div>
             </AccordionItem>
           ))}
         </Accordion>
 
-        {hasMore && (
-          <div className="mt-6 text-center">
-            <button
-              type="button"
-              onClick={() => setShowAllFaq(true)}
-              className="px-5 py-2.5 rounded-xl bg-egp-green dark:bg-egp-green-dark text-white text-sm font-semibold hover:opacity-90 transition-opacity"
-            >
-              Show more {remainingCount} question{remainingCount !== 1 ? "s" : ""}
-            </button>
-          </div>
-        )}
-        {showAllFaq && faqItems.length > FAQ_INITIAL_COUNT && (
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={() => setShowAllFaq(false)}
-              className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-            >
-              Show less
-            </button>
+        {(hasMore || showAllFaq) && (
+          <div className="mt-6 sm:mt-8 flex justify-center gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            {hasMore && (
+              <button
+                type="button"
+                onClick={() => setShowAllFaq(true)}
+                className="px-5 py-2.5 rounded-xl bg-egp-green dark:bg-egp-green-dark text-white text-sm font-semibold hover:opacity-90 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                Show more {remainingCount} question{remainingCount !== 1 ? "s" : ""}
+              </button>
+            )}
+            {showAllFaq && faqItems.length > FAQ_INITIAL_COUNT && (
+              <button
+                type="button"
+                onClick={() => setShowAllFaq(false)}
+                className="px-5 py-2.5 rounded-xl border-2 border-egp-green dark:border-egp-green-light text-egp-green dark:text-egp-green-light text-sm font-semibold hover:bg-egp-green/10 dark:hover:bg-egp-green-light/10 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                Show less
+              </button>
+            )}
           </div>
         )}
       </div>

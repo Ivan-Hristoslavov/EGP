@@ -9,7 +9,7 @@ import { Search, Filter, ArrowLeft, Info, Plus, CheckCircle, X } from "lucide-re
 import Link from 'next/link';
 import { useConditions } from "@/hooks/useConditions";
 import type { Condition } from "@/hooks/useConditions";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Card, CardBody, Chip, Spinner, Select, SelectItem, Pagination } from "@heroui/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Card, CardBody, CardHeader, Chip, Spinner, Select, SelectItem } from "@heroui/react";
 
 // Category mapping: display name -> filter value
 const categoryMapping: Record<string, string> = {
@@ -114,7 +114,7 @@ function ConditionsPageContent() {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white flex flex-col gap-2">
+              <ModalHeader className="bg-egp-green dark:bg-egp-green-dark text-white flex flex-col gap-2">
                 <h2 className="text-3xl font-bold">{condition.title}</h2>
               <div className="flex items-center gap-4 text-white/90">
                   <Chip 
@@ -165,11 +165,11 @@ function ConditionsPageContent() {
                 </Button>
                 <Button
                   as={Link}
-                href="/book/new"
+                  href={condition?.id ? `/book?pendingConditionId=${condition.id}` : "/book"}
                   onPress={onClose}
-                  className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white"
+                  className="bg-egp-green dark:bg-egp-green-dark text-white hover:opacity-90"
                   size="lg"
-              >
+                >
                 Book Treatment for This Condition
                 </Button>
               </ModalFooter>
@@ -194,8 +194,8 @@ function ConditionsPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className={`${layout.containerWide} pt-24 pb-16`}>
+    <div className="min-h-screen bg-[#f5f1e9] dark:bg-gray-900">
+      <div className={`${layout.containerWide} pt-20 sm:pt-24 pb-10 sm:pb-16`}>
         {/* Header - Back on left, Conditions We Treat centered */}
         <div className="relative flex items-center justify-between mb-4 sm:mb-6">
           <Link
@@ -271,20 +271,22 @@ function ConditionsPageContent() {
 
         {/* Results Count */}
         <div className="flex items-center justify-between mb-6">
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className={`${typography.small}`}>
             Showing {filteredConditions.length} of {Array.isArray(conditions) ? conditions.length : 0} conditions
           </p>
           {(selectedCategory !== 'All' || searchTerm) && (
-            <button
-              onClick={() => {
+            <Button
+              onPress={() => {
                 setSelectedCategory('All');
                 setSearchTerm('');
                 setCurrentPage(1);
               }}
-              className="text-[#9d9585] dark:text-[#b5ad9d] hover:text-[#857d68] dark:hover:text-[#c9c1b0] transition-colors"
+              variant="light"
+              size="sm"
+              className="text-egp-green dark:text-egp-green-light hover:text-egp-green-dark"
             >
               Clear all filters
-            </button>
+            </Button>
           )}
         </div>
 
@@ -292,91 +294,124 @@ function ConditionsPageContent() {
         {paginatedConditions.length === 0 ? (
           <div className="text-center py-12">
             <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">No conditions found</h3>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No conditions found</h3>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
               Try adjusting your filters or search terms
             </p>
-            <button
-              onClick={() => {
+            <Button
+              onPress={() => {
                 setSelectedCategory('All');
                 setSearchTerm('');
                 setCurrentPage(1);
               }}
-              className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white px-6 py-3 rounded-lg hover:from-[#857d68] hover:via-[#aea693] hover:to-[#c9c1b0] transition-all"
+              className="bg-egp-green hover:bg-egp-green-dark text-white"
+              size="md"
             >
               Show All Conditions
-            </button>
+            </Button>
           </div>
         ) : (
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
             {paginatedConditions.map((condition) => (
-              <div
+              <Card
                 key={condition.id}
-                className="bg-white dark:bg-gray-800 rounded-xl border border-gray-300 dark:border-gray-600 shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-col h-full"
+                className="h-full"
+                shadow="md"
               >
-                {/* Header (similar to services but without price) */}
-                <div className="bg-[#f5f1e9] dark:bg-gray-800 px-4 py-3 border-b border-[#ddd5c3]/60 dark:border-gray-700 relative rounded-t-xl">
-                  {/* Category Badge - Top Left */}
-                  <div className="absolute top-2 left-2">
-                    <span className="inline-flex items-center px-2 py-0.5 bg-[#464C45] text-white text-[10px] font-semibold rounded-full">
+                <CardHeader className="bg-egp-beige-lighter dark:bg-egp-green-dark px-2.5 sm:px-3 py-2 sm:py-2.5 border-b border-egp-beige-dark/60 dark:border-egp-green relative">
+                  {/* Category Badge - Top Left (matches services) */}
+                  <div className="absolute top-1 left-1">
+                    <Chip
+                      size="sm"
+                      className="bg-egp-green text-white text-[9px]"
+                      variant="flat"
+                    >
                       {getCategoryDisplayName(condition.category)}
-                    </span>
-                        </div>
-                  
-                  {/* Title - Centered */}
-                  <div className="text-center pt-6 pb-2">
-                    <h3 className="text-base font-bold text-egp-green dark:text-egp-green-light leading-tight line-clamp-2">
+                    </Chip>
+                  </div>
+
+                  {/* Title - Centered (no duration/price for conditions) */}
+                  <div className="text-center pt-4 pb-1.5 w-full">
+                    <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-tight line-clamp-2">
                       {condition.title}
                     </h3>
-                      </div>
-                    </div>
-                    
-                    {/* Content */}
-                <div className="p-4 flex flex-col flex-1">
+                  </div>
+                </CardHeader>
+
+                <CardBody
+                  className="p-3 flex flex-col flex-1 cursor-pointer"
+                  onClick={() => setSelectedCondition(condition.slug)}
+                >
                   {/* Description */}
                   {condition.description && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed line-clamp-3 flex-1">
-                        {condition.description}
-                      </p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-2.5 leading-relaxed line-clamp-2">
+                      {condition.description}
+                    </p>
                   )}
-                      
-                      {/* Buttons */}
-                  <div className="flex gap-2 mt-auto">
-                        <button
-                          onClick={() => setSelectedCondition(condition.slug)}
-                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-[#464C45] text-[#464C45] dark:text-[#5a6259] dark:border-[#5a6259] rounded-lg hover:bg-[#464C45]/10 dark:hover:bg-[#5a6259]/10 transition-colors font-medium text-sm"
-                        >
-                          <Info className="w-3.5 h-3.5" />
-                          Details
-                        </button>
-                        <Link
-                          href="/book/new"
-                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white rounded-lg hover:from-[#857d68] hover:via-[#aea693] hover:to-[#c9c1b0] transition-all font-medium text-sm shadow-md hover:shadow-lg"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                          Book
-                        </Link>
-                      </div>
-                    </div>
-              </div>
+
+                  {/* Buttons - same as services */}
+                  <div className="flex gap-1.5 mt-auto" onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      onPress={() => setSelectedCondition(condition.slug)}
+                      variant="bordered"
+                      size="sm"
+                      className="flex-1 border-egp-green text-egp-green dark:text-white dark:border-egp-green"
+                      startContent={<Info className="w-3 h-3" />}
+                    >
+                      Details
+                    </Button>
+                    <Link href={condition.id ? `/book?pendingConditionId=${condition.id}` : "/book"}>
+                      <Button
+                        size="sm"
+                        className="flex-1 w-full bg-egp-green text-white"
+                        startContent={<Plus className="w-3 h-3" />}
+                      >
+                        Book
+                      </Button>
+                    </Link>
+                  </div>
+                </CardBody>
+              </Card>
             ))}
           </div>
         )}
 
-        {/* Pagination */}
+        {/* Pagination - matches services */}
         {totalPages > 1 && (
-          <div className="flex justify-center items-center mt-8">
-            <Pagination
-              total={totalPages}
-              page={currentPage}
-              onChange={setCurrentPage}
-              color="primary"
-              classNames={{
-                wrapper: "gap-0",
-                item: "w-8 h-8 text-small rounded-lg",
-                cursor: "bg-gradient-to-br from-egp-beige-darkest to-egp-beige-dark text-white font-bold",
-              }}
-            />
+          <div className="flex justify-center items-center gap-2 mt-8">
+            <Button
+              onPress={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              isDisabled={currentPage === 1}
+              variant="bordered"
+              size="sm"
+              className="border-gray-300 dark:border-gray-600 hover:border-egp-green hover:text-egp-green"
+            >
+              Previous
+            </Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                onPress={() => setCurrentPage(page)}
+                size="sm"
+                variant={currentPage === page ? "solid" : "bordered"}
+                className={
+                  currentPage === page
+                    ? "bg-egp-green text-white"
+                    : "border-gray-300 dark:border-gray-600 hover:border-egp-green hover:text-egp-green"
+                }
+              >
+                {page}
+              </Button>
+            ))}
+            <Button
+              onPress={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              isDisabled={currentPage === totalPages}
+              variant="bordered"
+              size="sm"
+              className="border-gray-300 dark:border-gray-600 hover:border-egp-green hover:text-egp-green"
+            >
+              Next
+            </Button>
           </div>
         )}
 

@@ -77,6 +77,7 @@ export async function PUT(
       customer_id,
       booking_id,
       amount,
+      payment_type,
       payment_method,
       payment_date,
       reference,
@@ -108,19 +109,23 @@ export async function PUT(
     }
 
     // Update the payment
+    const updateData: Record<string, unknown> = {
+      customer_id: customer_id || null,
+      booking_id: booking_id || null,
+      amount: parseFloat(amount),
+      payment_method,
+      payment_date,
+      reference,
+      notes,
+      payment_status,
+      updated_at: new Date().toISOString(),
+    };
+    if (payment_type !== undefined) {
+      updateData.payment_type = payment_type;
+    }
     const { data: payment, error } = await supabase
       .from("payments")
-      .update({
-        customer_id: customer_id || null,
-        booking_id: booking_id || null,
-        amount: parseFloat(amount),
-        payment_method,
-        payment_date,
-        reference,
-        notes,
-        payment_status,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq("id", id)
       .select()
       .single();

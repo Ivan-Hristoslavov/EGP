@@ -16,6 +16,7 @@ import {
   AlertCircle, Loader2, CheckCircle2
 } from "lucide-react";
 import { IconPicker } from "./IconPicker";
+import { siteConfig } from "@/config/site";
 
 type HeroSection = {
   id?: string;
@@ -449,66 +450,58 @@ export function AdminHeroManager() {
     .filter(url => url !== null).length;
 
   return (
-    <div className="w-full space-y-6">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border border-divider hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
-          <CardBody className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-3xl font-bold mb-1 bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">
-                  {imagesCount}/3
-                </p>
-                <p className="text-sm font-medium text-default-600 dark:text-default-400">Images Uploaded</p>
+    <div className="w-full space-y-4 sm:space-y-6 p-3 sm:p-0">
+      {/* Stats Cards - compact for mobile */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
+        <Card className="border border-divider bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+          <CardBody className="p-3 sm:p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-lg sm:text-2xl font-bold text-primary truncate">{imagesCount}/3</p>
+                <p className="text-[10px] sm:text-xs font-medium text-default-500 truncate">Images</p>
               </div>
-              <div className="p-4 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30 rounded-2xl shadow-lg">
-                <ImageIcon className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+              <div className="p-2 sm:p-2.5 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex-shrink-0 self-start">
+                <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600 dark:text-primary-400" />
               </div>
             </div>
             {imagesCount < 3 && (
-              <div className="mt-4 pt-4 border-t border-divider">
-                <p className="text-xs text-warning-600 dark:text-warning-400">
-                  {3 - imagesCount} more image{3 - imagesCount > 1 ? 's' : ''} needed for full rotation
-                </p>
-              </div>
+              <p className="text-[10px] text-warning-600 dark:text-warning-400 mt-2 pt-2 border-t border-divider truncate">
+                +{3 - imagesCount} needed
+              </p>
             )}
           </CardBody>
         </Card>
 
-        <Card className="border border-divider hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
-          <CardBody className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-3xl font-bold mb-1 bg-gradient-to-r from-secondary-600 to-purple-600 bg-clip-text text-transparent">
-                  {formData.animation_duration_ms / 1000}s
-                </p>
-                <p className="text-sm font-medium text-default-600 dark:text-default-400">Animation Speed</p>
+        <Card className="border border-divider bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+          <CardBody className="p-3 sm:p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-lg sm:text-2xl font-bold text-secondary truncate">{formData.animation_duration_ms / 1000}s</p>
+                <p className="text-[10px] sm:text-xs font-medium text-default-500 truncate">Speed</p>
               </div>
-              <div className="p-4 bg-gradient-to-br from-secondary-100 to-purple-100 dark:from-secondary-900/30 dark:to-purple-900/30 rounded-2xl shadow-lg">
-                <Zap className="w-6 h-6 text-secondary-600 dark:text-secondary-400" />
+              <div className="p-2 sm:p-2.5 bg-secondary-100 dark:bg-secondary-900/30 rounded-lg flex-shrink-0 self-start">
+                <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-secondary-600 dark:text-secondary-400" />
               </div>
             </div>
           </CardBody>
         </Card>
 
-        <Card className="border border-divider hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
-          <CardBody className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-3xl font-bold mb-1 bg-gradient-to-r from-success-600 to-success-500 bg-clip-text text-transparent">
+        <Card className="border border-divider bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+          <CardBody className="p-3 sm:p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className={`text-lg sm:text-2xl font-bold truncate ${formData.image_resize_enabled ? "text-success" : "text-warning"}`}>
                   {formData.image_resize_enabled ? "On" : "Off"}
                 </p>
-                <p className="text-sm font-medium text-default-600 dark:text-default-400">Image Compression</p>
+                <p className="text-[10px] sm:text-xs font-medium text-default-500 truncate">Compress</p>
               </div>
-              <div className={`p-4 rounded-2xl shadow-lg ${
+              <div className={`p-2 sm:p-2.5 rounded-lg flex-shrink-0 self-start ${
                 formData.image_resize_enabled 
-                  ? "bg-gradient-to-br from-success-100 to-success-200 dark:from-success-900/30 dark:to-success-800/30" 
-                  : "bg-gradient-to-br from-warning-100 to-warning-200 dark:from-warning-900/30 dark:to-warning-800/30"
+                  ? "bg-success-100 dark:bg-success-900/30" 
+                  : "bg-warning-100 dark:bg-warning-900/30"
               }`}>
-                <Settings className={`w-6 h-6 ${
-                  formData.image_resize_enabled
-                    ? "text-success-600 dark:text-success-400"
-                    : "text-warning-600 dark:text-warning-400"
+                <Settings className={`w-4 h-4 sm:w-5 sm:h-5 ${
+                  formData.image_resize_enabled ? "text-success-600 dark:text-success-400" : "text-warning-600 dark:text-warning-400"
                 }`} />
               </div>
             </div>
@@ -516,24 +509,24 @@ export function AdminHeroManager() {
         </Card>
       </div>
 
-      {/* Images Section */}
-      <Card className="border border-divider shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
-        <CardHeader className="bg-gradient-to-r from-primary-500/10 via-secondary-500/10 to-purple-500/10 border-b border-divider pb-4">
-          <div className="flex items-center gap-3 w-full">
-            <div className="p-3 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30 rounded-xl shadow-md">
-              <ImageIcon className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+      {/* Images Section - compact header */}
+      <Card className="border border-divider bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+        <CardHeader className="py-3 sm:py-4 px-4 sm:px-6 bg-gradient-to-r from-primary-500/5 via-secondary-500/5 to-purple-500/5 border-b border-divider">
+          <div className="flex items-center gap-2 sm:gap-3 w-full min-w-0">
+            <div className="p-2 sm:p-2.5 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex-shrink-0">
+              <ImageIcon className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600 dark:text-primary-400" />
             </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-bold text-foreground">Hero Images</h2>
-              <p className="text-sm text-default-500 mt-1">{getSupportedFormatsText()}</p>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base sm:text-lg font-bold text-foreground">Hero Images</h2>
+              <p className="text-[10px] sm:text-xs text-default-500 mt-0.5 truncate">{getSupportedFormatsText()}</p>
             </div>
-            <Chip size="sm" variant="flat" color="primary">
-              {imagesCount} of 3
+            <Chip size="sm" variant="flat" color="primary" className="flex-shrink-0">
+              {imagesCount}/3
             </Chip>
           </div>
         </CardHeader>
-        <CardBody className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <CardBody className="p-4 sm:p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             {[0, 1, 2].map((index) => (
               <div key={index} className="space-y-4">
                 <div className="flex flex-col gap-1 mb-3 items-end">
@@ -936,7 +929,7 @@ export function AdminHeroManager() {
             />
             <Input
               label="Phone Number"
-              placeholder="+44 7944 24 24 79"
+              placeholder={siteConfig.contact.phone}
               value={formData.phone_number || ""}
               onChange={(e) => setFormData((prev) => ({ ...prev, phone_number: e.target.value || null }))}
               variant="bordered"

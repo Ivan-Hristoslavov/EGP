@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Customer } from "@/types";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 import { Input, Textarea } from "@heroui/react";
-import { inputClassNames } from "@/config/design-system";
+import { inputClassNames, formLayout } from "@/config/design-system";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 
@@ -113,21 +113,22 @@ export function EditCustomerModal({
       scrollBehavior="inside"
       isDismissable={!isLoading}
       isKeyboardDismissDisabled={isLoading}
+      classNames={{ base: "max-w-[95vw] sm:max-w-2xl mx-2" }}
     >
       <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader>
-              <h3 className="text-xl font-bold">Edit Customer</h3>
+            <ModalHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-0">
+              <h3 className="text-lg sm:text-xl font-bold">Edit Customer</h3>
             </ModalHeader>
-            <ModalBody>
-              <div className="space-y-4">
+            <ModalBody className={formLayout.modalBody}>
+              <div className={formLayout.sectionGap}>
                 {Object.keys(errors).length > 0 && (
                   <Chip color="danger" variant="flat" className="w-full">
                     Please fix the errors below
                   </Chip>
                 )}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className={formLayout.gridFields}>
                   <Input
                     label="Full Name"
                     placeholder="e.g., John Smith"
@@ -166,7 +167,7 @@ export function EditCustomerModal({
                   <Input
                     type="tel"
                     label="Phone Number"
-                    placeholder="e.g., +44 7700 123456"
+                    placeholder="e.g. +44 7XXX XXXXXX"
                     value={formData.phone}
                     onChange={(e) => {
                       setFormData({ ...formData, phone: e.target.value });
@@ -181,7 +182,7 @@ export function EditCustomerModal({
                     labelPlacement="outside"
                     classNames={inputClassNames}
                   />
-              <div className="md:col-span-2">
+              <div className={formLayout.fullWidth}>
                     <Textarea
                       label="Address"
                       placeholder="Full address including postcode"
@@ -197,7 +198,7 @@ export function EditCustomerModal({
                       isDisabled={isLoading}
                     />
               </div>
-                  <div className="md:col-span-2">
+                  <div className={formLayout.fullWidth}>
                     <Textarea
                       label="Notes"
                       placeholder="Any additional notes about this customer..."
@@ -210,20 +211,20 @@ export function EditCustomerModal({
                 </div>
               </div>
             </ModalBody>
-            <ModalFooter>
+            <ModalFooter className="px-4 sm:px-6 pb-4 sm:pb-6 pt-4 gap-2 flex-col-reverse sm:flex-row">
               <Button variant="light" onPress={onClose} isDisabled={isLoading}>
-              Cancel
+                Cancel
               </Button>
               <Button
                 color="primary"
                 onPress={handleSubmit}
                 isLoading={isLoading}
               >
-                  Update Customer
+                Update Customer
               </Button>
             </ModalFooter>
-                </>
-              )}
+          </>
+        )}
       </ModalContent>
     </Modal>
   );

@@ -35,7 +35,7 @@ export default function AntiWrinklePage() {
       <section className="relative bg-gradient-to-br from-egp-green-dark via-egp-green to-egp-green-light text-white py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-6">
               Anti-wrinkle Injections
             </h1>
             <p className="text-xl md:text-2xl text-white/90 mb-8">

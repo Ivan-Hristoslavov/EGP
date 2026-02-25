@@ -40,6 +40,20 @@ export const getTextClasses = (onDark: boolean = false, onGreen: boolean = false
   return typography.body;
 };
 
+// Form layout - consistent spacing for admin forms
+export const formLayout = {
+  /** Modal body padding - mobile first */
+  modalBody: "p-4 sm:p-6",
+  /** Form section spacing */
+  sectionGap: "space-y-4 sm:space-y-6",
+  /** Grid for 2-column layout on desktop */
+  gridFields: "grid grid-cols-1 md:grid-cols-2 gap-4",
+  /** Full-width field (spans both columns) */
+  fullWidth: "md:col-span-2",
+  /** Form field gap within a row */
+  fieldGap: "gap-4",
+};
+
 // Input component - label outside, no blue ring, single green border on focus
 export const inputClassNames = {
   base: "input-egp",

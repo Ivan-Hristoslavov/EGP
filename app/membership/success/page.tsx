@@ -84,7 +84,7 @@ function MembershipSuccessContent() {
           <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full mb-6">
             <CheckCircle className="w-10 h-10 text-green-600 dark:text-green-400" />
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent font-playfair mb-4">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent font-playfair mb-4">
             Welcome to {membership?.plan_name}!
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-400">

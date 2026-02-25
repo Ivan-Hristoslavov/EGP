@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Plus, Calendar, Clock, User, Phone, Mail, MapPin, Filter, Search, Edit, Trash2, Eye, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { Plus, Calendar, Clock, User, Phone, Mail, MapPin, Filter, Search, Edit, Trash2, Eye, CheckCircle, XCircle, AlertCircle, Table2, Grid3x3 } from "lucide-react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
@@ -11,6 +11,8 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@herou
 import { Textarea } from "@heroui/input";
 import { Spinner } from "@heroui/spinner";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/dropdown";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { formLayout } from "@/config/design-system";
 
 // Helper function to format time to HH:MM
 const formatTime = (timeString: string) => {
@@ -114,6 +116,10 @@ export default function BookingsPage() {
 
   // Payments for selected booking (view modal breakdown: cash vs card)
   const [bookingPayments, setBookingPayments] = useState<{ payment_method: string; amount: number }[]>([]);
+  
+  // View mode: cards (default on mobile) or table
+  const [viewMode, setViewMode] = useState<"table" | "cards">("cards");
+  const isMdOrLarger = useMediaQuery();
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -679,15 +685,38 @@ export default function BookingsPage() {
   return (
     <div className="w-full space-y-6">
       {/* Header */}
-      <div className="flex justify-end items-center">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="hidden md:flex bg-default-100 rounded-lg p-1">
+          <Button
+            size="sm"
+            variant={viewMode === "table" ? "solid" : "light"}
+            color={viewMode === "table" ? "primary" : "default"}
+            startContent={<Table2 className="w-4 h-4" />}
+            onPress={() => setViewMode("table")}
+            className="min-w-0 min-h-[44px]"
+          >
+            Table
+          </Button>
+          <Button
+            size="sm"
+            variant={viewMode === "cards" ? "solid" : "light"}
+            color={viewMode === "cards" ? "primary" : "default"}
+            startContent={<Grid3x3 className="w-4 h-4" />}
+            onPress={() => setViewMode("cards")}
+            className="min-w-0 min-h-[44px]"
+          >
+            Cards
+          </Button>
+        </div>
         <Button
           color="primary"
           startContent={<Plus className="w-4 h-4" />}
           onPress={() => setShowAddModal(true)}
+          className="min-h-[44px]"
         >
-                  New Booking
+          New Booking
         </Button>
-        </div>
+      </div>
 
       {/* Filters */}
       <Card className="border border-divider">
@@ -741,7 +770,7 @@ export default function BookingsPage() {
         </CardBody>
       </Card>
 
-      {/* Bookings Table */}
+      {/* Bookings */}
       <Card className="border border-divider">
         <CardBody className="p-0">
         {filteredBookings.length === 0 ? (
@@ -758,8 +787,74 @@ export default function BookingsPage() {
               </Button>
         </div>
       ) : (
-              <div className="w-full">
-            <table className="w-full table-fixed">
+          <>
+            {/* Card view - always on mobile, or when cards selected on desktop */}
+            <div className={(isMdOrLarger ? viewMode === "cards" : true) ? "p-4 space-y-4" : "hidden"}>
+              {filteredBookings.map((booking) => (
+                <Card key={booking.id} className="border border-divider shadow-sm overflow-visible">
+                  <CardBody className="p-4 sm:p-5 space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-semibold text-foreground truncate">{booking.customer_name}</h4>
+                      {booking.customer_email && (
+                        <a href={`mailto:${booking.customer_email}`} className="text-sm text-primary flex items-center gap-1 mt-0.5 truncate">
+                          <Mail className="w-3.5 h-3.5 flex-shrink-0" />
+                          <span className="truncate">{booking.customer_email}</span>
+                        </a>
+                      )}
+                      {booking.customer_phone && (
+                        <a href={`tel:${booking.customer_phone}`} className="text-sm text-success flex items-center gap-1 mt-0.5 truncate">
+                          <Phone className="w-3.5 h-3.5 flex-shrink-0" />
+                          <span className="truncate">{booking.customer_phone}</span>
+                        </a>
+                      )}
+                    </div>
+                    <Dropdown>
+                      <DropdownTrigger>
+                        <Button isIconOnly variant="light" size="md" className="min-h-[44px] min-w-[44px] flex-shrink-0">
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                          </svg>
+                        </Button>
+                      </DropdownTrigger>
+                      <DropdownMenu aria-label="Booking actions">
+                        <DropdownItem key="view" startContent={<Eye className="w-4 h-4" />} onPress={() => { setSelectedBooking(booking); setShowViewModal(true); }}>View Details</DropdownItem>
+                        <DropdownItem key="edit" startContent={<Edit className="w-4 h-4" />} onPress={() => { setEditingBooking(booking); setShowEditModal(true); }}>Edit Booking</DropdownItem>
+                        <DropdownItem key="delete" color="danger" startContent={<Trash2 className="w-4 h-4" />} onPress={() => { setBookingToDelete(booking); setShowDeleteModal(true); }}>Delete</DropdownItem>
+                      </DropdownMenu>
+                    </Dropdown>
+                  </div>
+                  <div className="text-sm text-foreground font-medium">{booking.service}</div>
+                  <div className="flex items-center gap-3 text-sm text-default-600">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5" />
+                      {new Date(booking.date).toLocaleDateString()}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5" />
+                      {formatTime(booking.time)}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Chip color={getStatusColor(booking.status)} variant="flat" size="sm" startContent={getStatusIcon(booking.status)}>{booking.status}</Chip>
+                    <Chip color={getPaymentStatusColor(booking.payment_status)} variant="flat" size="sm">{booking.payment_status}</Chip>
+                    <span className={`font-semibold ml-auto ${
+                      booking.payment_status === "paid" ? "text-success" :
+                      booking.payment_status === "pending" ? "text-warning" : "text-danger"
+                    }`}>
+                      {booking.payment_type === "deposit" && (booking.amount_paid != null || booking.remaining_amount != null)
+                        ? `£${(booking.amount_paid ?? booking.amount).toFixed(2)} / £${(booking.remaining_amount ?? 0).toFixed(2)} due`
+                        : `£${booking.amount}`}
+                    </span>
+                  </div>
+                  </CardBody>
+                </Card>
+              ))}
+            </div>
+
+            {/* Table view - desktop only when table selected */}
+            <div className={isMdOrLarger && viewMode === "table" ? "w-full overflow-x-auto -mx-px" : "hidden"}>
+            <table className="w-full min-w-[640px] table-fixed">
               <thead className="bg-default-100 border-b border-divider">
                 <tr>
                   <th className="w-[22%] px-2 py-3 text-center text-xs font-semibold text-default-600 uppercase tracking-wider">Customer</th>
@@ -863,7 +958,7 @@ export default function BookingsPage() {
                     <td className="px-2 py-3 text-center">
                       <Dropdown>
                         <DropdownTrigger>
-                          <Button isIconOnly variant="light" size="sm">
+                          <Button isIconOnly variant="light" size="md" className="min-h-[44px] min-w-[44px]">
                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                               <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                             </svg>
@@ -909,6 +1004,7 @@ export default function BookingsPage() {
               </tbody>
             </table>
             </div>
+          </>
           )}
         </CardBody>
       </Card>
@@ -923,7 +1019,7 @@ export default function BookingsPage() {
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+              className="min-h-[44px] min-w-[44px] px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
             >
               Previous
             </button>
@@ -931,7 +1027,7 @@ export default function BookingsPage() {
                 <button
                 key={page}
                 onClick={() => setCurrentPage(page)}
-                className={`px-3 py-1 border rounded-md text-sm ${
+                className={`min-h-[44px] min-w-[44px] px-3 py-2 border rounded-md text-sm ${
                   currentPage === page
                     ? 'bg-blue-600 text-white border-blue-600'
                     : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'
@@ -943,7 +1039,7 @@ export default function BookingsPage() {
                   <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+              className="min-h-[44px] min-w-[44px] px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
             >
               Next
                   </button>
@@ -1007,17 +1103,18 @@ export default function BookingsPage() {
         }}
         size="2xl"
         scrollBehavior="inside"
+        classNames={{ base: "max-w-[95vw] sm:max-w-2xl mx-2" }}
       >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader>
-                <h3 className="text-xl font-bold">
+              <ModalHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-0">
+                <h3 className="text-lg sm:text-xl font-bold">
                   {editingBooking ? 'Edit Booking' : 'Add New Booking'}
                 </h3>
               </ModalHeader>
-              <ModalBody>
-                <form onSubmit={handleSubmit} className="space-y-4">
+              <ModalBody className={formLayout.modalBody}>
+                <form onSubmit={handleSubmit} className={formLayout.sectionGap}>
                 {/* Customer Information */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2 relative customer-search-container">
@@ -1351,7 +1448,7 @@ export default function BookingsPage() {
                 />
               </form>
               </ModalBody>
-              <ModalFooter>
+              <ModalFooter className="px-4 sm:px-6 pb-4 sm:pb-6 pt-4 gap-2 flex-col-reverse sm:flex-row">
                 <Button
                   variant="light"
                   onPress={() => {
@@ -1382,9 +1479,10 @@ export default function BookingsPage() {
         onClose={() => {
                     setShowViewModal(false);
                     setSelectedBooking(null);
-                  }}
+        }}
         size="2xl"
         scrollBehavior="inside"
+        classNames={{ base: "max-w-[95vw] sm:max-w-2xl mx-2" }}
       >
         <ModalContent>
           {(onClose) => (

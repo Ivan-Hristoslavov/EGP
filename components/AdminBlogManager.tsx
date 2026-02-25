@@ -332,11 +332,11 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-3 sm:p-4 md:p-6">
       <div className="flex items-center justify-end mb-6">
         <button
           onClick={handleAddNew}
-          className="px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg hover:from-rose-600 hover:to-pink-600 transition-colors font-medium flex items-center gap-2"
+          className="min-h-[44px] px-4 sm:px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg hover:from-rose-600 hover:to-pink-600 transition-colors font-medium flex items-center gap-2"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -357,7 +357,56 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
         </div>
       ) : (
         <>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+          {/* Mobile: Card view */}
+          <div className="md:hidden divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+            {paginatedPosts.map((post) => (
+              <div key={post.id} className="p-4 space-y-3">
+                <h4 className="font-semibold text-gray-900 dark:text-white">{post.title}</h4>
+                {post.excerpt && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{post.excerpt}</p>
+                )}
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="px-2 py-1 text-xs font-medium bg-rose-100 dark:bg-rose-900/30 text-rose-800 dark:text-rose-400 rounded-full">
+                    {post.category}
+                  </span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                    post.is_published
+                      ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400"
+                      : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-400"
+                  }`}>
+                    {post.is_published ? "Published" : "Draft"}
+                  </span>
+                  {post.featured && (
+                    <span className="px-2 py-1 text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 rounded-full">
+                      Featured
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {post.published_at
+                    ? new Date(post.published_at).toLocaleDateString()
+                    : new Date(post.created_at).toLocaleDateString()}
+                </p>
+                <div className="flex gap-2 pt-2">
+                  <button
+                    onClick={() => handleEdit(post)}
+                    className="min-h-[44px] flex-1 px-4 py-2 text-sm font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-900/30"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(post)}
+                    className="min-h-[44px] flex-1 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop: Table view */}
+          <div className="hidden md:block bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>

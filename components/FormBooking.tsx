@@ -6,6 +6,7 @@ import { usePricingCardsForBooking, type BookingService } from "@/hooks/usePrici
 import { useWorkingHours } from "@/hooks/useWorkingHours";
 import { useAdminSettings } from "@/hooks/useAdminSettings";
 import { useAdminProfile } from "@/components/AdminProfileContext";
+import { siteConfig } from "@/config/site";
 import CustomDatePicker from "./CustomDatePicker";
 
 type DayOffSettings = {
@@ -42,7 +43,7 @@ export default function FormBooking() {
   }>>([]);
 
   // Get business phone from admin profile
-  const businessPhone = adminProfile?.phone || "+44 7541777225";
+  const businessPhone = adminProfile?.phone || siteConfig.contact.phone;
   const hasSelectedService = Boolean(selectedService);
 
   // Get today's date for the minimum date and default value

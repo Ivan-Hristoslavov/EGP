@@ -19,6 +19,7 @@ import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Spinner } from "@heroui/spinner";
 import { Table2, Grid3x3, Plus, Download, Mail, Eye, Edit, Trash2 } from "lucide-react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 import Tooltip from "../../../components/Tooltip";
 import { Invoice as BaseInvoice, Customer, Booking } from "@/types";
@@ -44,7 +45,7 @@ export default function InvoicesPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<"table" | "cards">("table");
+  const [viewMode, setViewMode] = useState<"table" | "cards">("cards");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showSendModal, setShowSendModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -65,6 +66,7 @@ export default function InvoicesPage() {
   
   const { profile: dbProfile } = useAdminProfile();
   const { showSuccess, showError } = useToast();
+  const isMdOrLarger = useMediaQuery();
   const { confirm, modalProps } = useConfirmation();
   const { settings: vatSettings } = useVATSettings();
 
@@ -329,15 +331,15 @@ export default function InvoicesPage() {
     <div className="w-full space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          {/* View Toggle */}
-          <div className="flex bg-default-100 rounded-lg p-1">
+          {/* View Toggle - desktop only */}
+          <div className="hidden md:flex bg-default-100 rounded-lg p-1">
             <Button
               size="sm"
               variant={viewMode === "table" ? "solid" : "light"}
               color={viewMode === "table" ? "primary" : "default"}
               startContent={<Table2 className="w-4 h-4" />}
               onPress={() => handleViewModeChange("table")}
-              className="min-w-0"
+              className="min-w-0 min-h-[44px]"
             >
               Table
             </Button>
@@ -347,7 +349,7 @@ export default function InvoicesPage() {
               color={viewMode === "cards" ? "primary" : "default"}
               startContent={<Grid3x3 className="w-4 h-4" />}
               onPress={() => handleViewModeChange("cards")}
-              className="min-w-0"
+              className="min-w-0 min-h-[44px]"
             >
               Cards
             </Button>
@@ -363,8 +365,8 @@ export default function InvoicesPage() {
         </div>
       </div>
 
-      {/* Invoices Table */}
-      {viewMode === "table" && (
+      {/* Invoices Table - desktop only when table selected */}
+      {isMdOrLarger && viewMode === "table" && (
         <Card className="border border-divider">
           <CardBody className="p-0">
           <div className="overflow-x-auto">
@@ -548,8 +550,8 @@ export default function InvoicesPage() {
       </Card>
       )}
 
-      {/* Cards View */}
-      {viewMode === "cards" && (
+      {/* Cards View - always on mobile, or when cards selected on desktop */}
+      {(!isMdOrLarger || viewMode === "cards") && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {invoices.length === 0 ? (
             <Card className="col-span-full border border-divider">
@@ -619,12 +621,13 @@ export default function InvoicesPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-4 border-t border-divider">
+                <div className="flex flex-wrap justify-end gap-2 pt-4 border-t border-divider">
                   <Tooltip content="Download PDF">
                     <Button
                       isIconOnly
                       variant="bordered"
-                      size="sm"
+                      size="md"
+                      className="min-h-[44px] min-w-[44px]"
                       onPress={() => handleDownloadInvoice(invoice)}
                       isLoading={downloadingId === invoice.id}
                     >
@@ -635,7 +638,8 @@ export default function InvoicesPage() {
                     <Button
                       isIconOnly
                       color="success"
-                      size="sm"
+                      size="md"
+                      className="min-h-[44px] min-w-[44px]"
                       onPress={() => {
                         setSelectedInvoice(invoice);
                         setShowSendModal(true);
@@ -649,7 +653,8 @@ export default function InvoicesPage() {
                     <Button
                       isIconOnly
                       color="primary"
-                      size="sm"
+                      size="md"
+                      className="min-h-[44px] min-w-[44px]"
                       onPress={() => handleViewDetails(invoice)}
                     >
                       <Eye className="w-4 h-4" />
@@ -659,7 +664,8 @@ export default function InvoicesPage() {
                     <Button
                       isIconOnly
                       color="warning"
-                      size="sm"
+                      size="md"
+                      className="min-h-[44px] min-w-[44px]"
                       onPress={() => {
                       setSelectedInvoice(invoice);
                       setShowEditModal(true);
@@ -673,7 +679,8 @@ export default function InvoicesPage() {
                     <Button
                       isIconOnly
                       color="danger"
-                      size="sm"
+                      size="md"
+                      className="min-h-[44px] min-w-[44px]"
                       onPress={() => handleDeleteInvoice(invoice.id)}
                       isLoading={deletingId === invoice.id}
                     >

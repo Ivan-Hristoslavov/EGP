@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Move } from "lucide-react";
 import { badgeBackgroundClass } from "@/config/badge-styles";
+import { typography, textColors, layout } from "@/config/typography";
 
 interface BeforeAfterItem {
   id: string;
@@ -178,16 +179,16 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
 
   return (
     <section className={`py-12 sm:py-16 md:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 ${className}`}>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className={layout.container}>
         {/* Section Header */}
         <div className="text-center mb-6 sm:mb-8 md:mb-10">
-          <div className={`inline-block px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-sm sm:text-base font-semibold mb-3 sm:mb-4 text-[#6b5f4b] dark:text-gray-200`}>
+          <div className={`inline-block px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-xs sm:text-sm font-semibold mb-3 sm:mb-4 text-[#6b5f4b] dark:text-gray-200`}>
             Real Results
           </div>
-          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 px-4">
+          <h2 className={`${typography.headingSection} ${textColors.heading} mb-3 sm:mb-4 px-4`}>
             Before & After Gallery
           </h2>
-          <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-4">
+          <p className={`${typography.lead} max-w-2xl mx-auto px-4`}>
             See the natural, beautiful transformations we've achieved for our clients
           </p>
         </div>
@@ -345,7 +346,7 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
             </div>
 
             {/* Title */}
-            <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-1">
+            <h3 className={`${typography.headingCard} ${textColors.heading} mb-1`}>
               {current.title}
             </h3>
             
@@ -427,7 +428,7 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
         </div>
 
         {/* Disclaimer */}
-        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center mt-6 px-4">
+        <p className={`${typography.small} text-center mt-6 px-4`}>
           Results may vary. All photos published with patient consent. Individual results depend on various factors.
         </p>
       </div>

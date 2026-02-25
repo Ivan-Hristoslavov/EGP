@@ -3,6 +3,7 @@
 import { useGallery } from "@/hooks/useGallery";
 import BeforeAfterSlideLine from "./BeforeAfterSlideLine";
 import { badgeBackgroundClass } from "@/config/badge-styles";
+import { typography, textColors, layout } from "@/config/typography";
 import { Spinner } from "@heroui/react";
 import { Card, CardBody } from "@heroui/react";
 
@@ -34,7 +35,7 @@ export default function SectionBeforeAfter() {
   if (loading) {
     return (
       <section className="py-12 sm:py-16 md:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className={layout.container}>
           <div className="text-center">
             <Spinner size="lg" color="primary" />
           </div>
@@ -46,24 +47,24 @@ export default function SectionBeforeAfter() {
   if (error || beforeAfterItems.length === 0) {
     return (
       <section className="py-12 sm:py-16 md:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className={layout.container}>
           <div className="text-center">
-            <div className={`inline-block px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-sm sm:text-base font-semibold mb-3 sm:mb-4 text-[#6b5f4b] dark:text-gray-200`}>
+            <div className={`inline-block px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-xs sm:text-sm font-semibold mb-3 sm:mb-4 text-[#6b5f4b] dark:text-gray-200`}>
               Real Results
             </div>
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 px-4">
+            <h2 className={`${typography.headingSection} ${textColors.heading} mb-3 sm:mb-4 px-4`}>
               Before & After Gallery
             </h2>
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-4 mb-8">
+            <p className={`${typography.lead} max-w-2xl mx-auto px-4 mb-8`}>
               See the natural, beautiful transformations we've achieved for our clients
             </p>
             <Card className="max-w-2xl mx-auto" shadow="lg">
               <CardBody className="p-12 text-center">
               <div className="text-6xl mb-4">✨</div>
-                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-4">
+                <h3 className={`${typography.headingCard} ${textColors.heading} mb-4`}>
                 Gallery Coming Soon
               </h3>
-                <p className="text-default-600">
+                <p className={`${typography.body} ${textColors.body}`}>
                 We're currently updating our before and after gallery. Check back soon to see our amazing results!
               </p>
               </CardBody>
