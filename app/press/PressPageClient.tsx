@@ -9,6 +9,7 @@ import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/react";
 import { Chip } from "@heroui/react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
+import { typography, layout, textColors } from "@/config/typography";
 
 interface PressItem {
   id: string;
@@ -142,61 +143,63 @@ export function PressPageClient({ awards, pressFeatures }: PressPageClientProps)
   // Function to get card size based on row type and position
   const getCardSizeFromRow = (rowType: string, positionInRow: number, isFeatured: boolean, isFirstFeatured: boolean, totalItemsInRow?: number) => {
     if (isFirstFeatured) {
-      return { colSpan: 'col-span-12 lg:col-span-8', height: 'h-[280px] sm:h-[320px] md:h-[360px] lg:h-[400px]', isLarge: true };
+      return { colSpan: 'col-span-12 lg:col-span-8', height: 'h-[200px] sm:h-[280px] md:h-[360px] lg:h-[400px]', isLarge: true };
     }
     
     if (isFeatured) {
-      return { colSpan: 'col-span-12 sm:col-span-6 lg:col-span-4', height: 'h-[240px] sm:h-[280px] md:h-[320px]', isLarge: false };
+      return { colSpan: 'col-span-12 sm:col-span-6 lg:col-span-4', height: 'h-[180px] sm:h-[240px] md:h-[320px]', isLarge: false };
     }
     
     // If only one item in row, make it full width to avoid empty space
     if (totalItemsInRow === 1) {
-      return { colSpan: 'col-span-12', height: 'h-[280px] sm:h-[320px] md:h-[360px]', isLarge: true };
+      return { colSpan: 'col-span-12', height: 'h-[200px] sm:h-[280px] md:h-[360px]', isLarge: true };
     }
     
     if (rowType === 'large-small') {
       if (positionInRow === 0) {
-        return { colSpan: 'col-span-12 lg:col-span-8', height: 'h-[280px] sm:h-[320px] md:h-[360px]', isLarge: true };
+        return { colSpan: 'col-span-12 lg:col-span-8', height: 'h-[200px] sm:h-[280px] md:h-[360px]', isLarge: true };
       } else {
-        return { colSpan: 'col-span-12 sm:col-span-6 lg:col-span-4', height: 'h-[240px] sm:h-[280px] md:h-[320px]', isLarge: false };
+        return { colSpan: 'col-span-12 sm:col-span-6 lg:col-span-4', height: 'h-[180px] sm:h-[240px] md:h-[320px]', isLarge: false };
       }
     } else if (rowType === 'three-small') {
-      return { colSpan: 'col-span-12 sm:col-span-6 lg:col-span-4', height: 'h-[240px] sm:h-[280px] md:h-[320px]', isLarge: false };
+      return { colSpan: 'col-span-12 sm:col-span-6 lg:col-span-4', height: 'h-[180px] sm:h-[240px] md:h-[320px]', isLarge: false };
     } else { // small-large
       if (positionInRow === 0) {
-        return { colSpan: 'col-span-12 sm:col-span-6 lg:col-span-4', height: 'h-[240px] sm:h-[280px] md:h-[320px]', isLarge: false };
+        return { colSpan: 'col-span-12 sm:col-span-6 lg:col-span-4', height: 'h-[180px] sm:h-[240px] md:h-[320px]', isLarge: false };
       } else {
-        return { colSpan: 'col-span-12 lg:col-span-8', height: 'h-[280px] sm:h-[320px] md:h-[360px]', isLarge: true };
+        return { colSpan: 'col-span-12 lg:col-span-8', height: 'h-[200px] sm:h-[280px] md:h-[360px]', isLarge: true };
       }
     }
   };
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12">
-        <div className="max-w-7xl mx-auto">
-          {/* Back to Home Button */}
-          <div className="flex items-center gap-4 mb-6">
+      <div className={`${layout.containerWide} pt-16 sm:pt-20 pb-8 sm:pb-12`}>
+          {/* Header - Back on left, Awards & Press centered */}
+          <div className="relative flex items-center justify-between mb-4 sm:mb-6">
             <Button
               as={Link}
               href="/"
               variant="light"
-              startContent={<ArrowLeft className="w-5 h-5" />}
+              size="sm"
+              startContent={<ArrowLeft className="w-4 h-4" />}
+              className="text-sm font-medium flex-shrink-0 z-10"
             >
-              Back to Home
+              Back
             </Button>
+            <h1 className={`absolute left-1/2 -translate-x-1/2 text-lg sm:text-2xl md:text-3xl font-bold ${textColors.heading} font-playfair`}>
+              Awards & Press
+            </h1>
+            <div className="w-14 sm:w-16" aria-hidden />
           </div>
           
           <div className="text-center mb-6">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 font-playfair">
-              Awards & Press
-            </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto mb-4">
+            <p className={`${typography.lead} font-montserrat font-light max-w-3xl mx-auto mb-4`}>
               Recognition for our commitment to excellence in aesthetic medicine.
             </p>
             
-            {/* Filter Buttons */}
-            <div className="flex items-center justify-center gap-2 mb-6 flex-wrap">
+            {/* Filter Buttons - compact on mobile */}
+            <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-4 sm:mb-6 flex-wrap">
               <Filter className="w-5 h-5 text-default-500" />
               <Button
                 onPress={() => setActiveFilter('all')}
@@ -240,7 +243,7 @@ export function PressPageClient({ awards, pressFeatures }: PressPageClientProps)
               </CardBody>
             </Card>
           ) : (
-            <div className="grid grid-cols-12 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
+            <div className="grid grid-cols-12 gap-2 sm:gap-4 md:gap-5 lg:gap-6">
               {/* Featured Items */}
               {featuredItems.map((item, index) => {
                 const isFirstFeatured = index === 0;
@@ -440,7 +443,6 @@ export function PressPageClient({ awards, pressFeatures }: PressPageClientProps)
               })()}
             </div>
           )}
-        </div>
       </div>
 
       {/* Modal */}

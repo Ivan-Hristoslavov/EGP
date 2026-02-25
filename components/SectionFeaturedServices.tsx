@@ -2,12 +2,13 @@
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { ArrowRight, Sparkles, Filter, X, Clock, CheckCircle, Info, Calendar } from "lucide-react";
+import { ArrowRight, Sparkles, Filter } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import Pagination from "@/components/Pagination";
 import type { Service } from "@/hooks/useServices";
 import { aestheticsColors } from "@/config/colors";
 import { PriceWithDiscount } from "@/components/PriceWithDiscount";
+import { ServiceDetailsModal } from "@/components/ServiceDetailsModal";
 import { badgeBackgroundClass } from "@/config/badge-styles";
 import ButtonPrimary from "@/components/ButtonPrimary";
 
@@ -253,19 +254,19 @@ export default function SectionFeaturedServices() {
           </div>
         )}
 
-        {/* Services Grid - smaller cards on mobile, max 3 per page on mobile */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-8 sm:mb-12">
+        {/* Services Grid - compact cards on mobile */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 md:gap-6 mb-6 sm:mb-12">
           {paginatedServices.map((service) => {
             const gradient = getCategoryGradient(service.category.name);
             
             return (
               <div
                 key={service.id}
-                className="group relative bg-white dark:bg-egp-green rounded-xl sm:rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-300 dark:border-egp-green-dark cursor-pointer flex flex-col"
+                className="group relative bg-white dark:bg-egp-green rounded-lg sm:rounded-2xl overflow-hidden shadow-md sm:shadow-lg hover:shadow-xl sm:hover:shadow-2xl transition-all duration-300 hover:scale-[1.01] sm:hover:scale-[1.02] border border-gray-300 dark:border-egp-green-dark cursor-pointer flex flex-col"
                 onClick={() => setSelectedService(service)}
               >
-                {/* Image - smaller on mobile */}
-                <div className="h-24 sm:h-32 md:h-36 lg:h-40 relative overflow-hidden bg-gradient-to-br">
+                {/* Image - compact on mobile */}
+                <div className="h-20 sm:h-32 md:h-36 lg:h-40 relative overflow-hidden bg-gradient-to-br">
                   {service.image_url ? (
                     <>
                       <img
@@ -279,31 +280,31 @@ export default function SectionFeaturedServices() {
                     <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-90`}></div>
                   )}
                   
-                  {/* Service Name Overlay - smaller on mobile */}
-                  <div className="absolute inset-0 flex items-center justify-center p-2 sm:p-4 md:p-5 z-10">
-                    <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-white text-center drop-shadow-lg line-clamp-2 leading-tight">
+                  {/* Service Name Overlay - compact on mobile */}
+                  <div className="absolute inset-0 flex items-center justify-center p-1.5 sm:p-4 md:p-5 z-10">
+                    <h3 className="text-xs sm:text-base md:text-lg lg:text-xl font-bold text-white text-center drop-shadow-lg line-clamp-2 leading-tight">
                       {service.name}
                     </h3>
                   </div>
                   
                   {/* Featured Badge */}
-                  <div className="absolute top-3 left-3 z-10">
-                    <span className="inline-flex items-center px-2.5 py-1 text-white text-[10px] font-bold rounded-full shadow-lg backdrop-blur-sm" style={{ backgroundColor: aestheticsColors.green.DEFAULT }}>
-                      <Sparkles className="w-3 h-3 mr-1" />
+                  <div className="absolute top-1.5 left-1.5 sm:top-3 sm:left-3 z-10">
+                    <span className="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 text-white text-[9px] sm:text-[10px] font-bold rounded-full shadow-lg backdrop-blur-sm" style={{ backgroundColor: aestheticsColors.green.DEFAULT }}>
+                      <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" />
                       FEATURED
                     </span>
                   </div>
 
                   {/* Category Badge */}
-                  <div className="absolute top-3 right-3 z-10">
-                    <span className="inline-flex items-center px-2.5 py-1 bg-white/90 dark:bg-gray-800/90 text-gray-800 dark:text-white text-[10px] font-semibold rounded-full shadow-lg backdrop-blur-sm">
+                  <div className="absolute top-1.5 right-1.5 sm:top-3 sm:right-3 z-10">
+                    <span className="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 bg-white/90 dark:bg-gray-800/90 text-gray-800 dark:text-white text-[9px] sm:text-[10px] font-semibold rounded-full shadow-lg backdrop-blur-sm">
                       {service.category.name}
                     </span>
                   </div>
                 </div>
 
-                {/* Content - tighter padding on mobile */}
-                <div className="p-3 sm:p-4 md:p-5 lg:p-6 flex flex-col flex-1">
+                {/* Content - compact on mobile */}
+                <div className="p-2 sm:p-4 md:p-5 lg:p-6 flex flex-col flex-1">
                   {/* Category */}
                   <div className="flex items-center gap-2 mb-2">
                     <span className="inline-flex items-center px-2.5 py-0.5 bg-[#ddd5c3]/50 dark:bg-[#c9c1b0]/30 text-gray-800 dark:text-gray-200 border border-[#c9c1b0]/50 dark:border-gray-600/50 rounded-full text-xs font-semibold">
@@ -318,13 +319,13 @@ export default function SectionFeaturedServices() {
 
                   {/* Description */}
                   {service.description && (
-                    <p className="text-sm text-gray-700 dark:text-gray-300 mb-4 line-clamp-2">
+                    <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 mb-2 sm:mb-4 line-clamp-2">
                       {service.description}
                     </p>
                   )}
 
                   {/* Service Details */}
-                  <div className="flex flex-wrap gap-3 mb-4 text-xs text-gray-600 dark:text-gray-400">
+                  <div className="flex flex-wrap gap-2 sm:gap-3 mb-2 sm:mb-4 text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">
                     <div className="flex items-center gap-1">
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -353,7 +354,7 @@ export default function SectionFeaturedServices() {
                   <div className="flex-1"></div>
 
                   {/* Price & CTA - Fixed at bottom */}
-                  <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
+                  <div className="pt-2 sm:pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2 sm:space-y-3">
                     {/* Price */}
                     <div className="text-center flex flex-col items-center gap-1 w-full">
                       <PriceWithDiscount
@@ -422,190 +423,30 @@ export default function SectionFeaturedServices() {
       </div>
 
       {/* Service Details Modal */}
-      {selectedService && (
-        <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={() => setSelectedService(null)}
-        >
-          <div 
-            className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="bg-[#464C45] text-white px-6 sm:px-8 py-6 flex items-start justify-between rounded-t-2xl flex-shrink-0">
-              <div className="flex-1">
-                <h2 className="text-2xl sm:text-3xl font-bold mb-3">{selectedService.name}</h2>
-                <div className="flex flex-wrap items-center gap-4 text-white/90">
-                  <span className="flex items-center gap-2">
-                    <Clock className="w-5 h-5" />
-                    <span className="text-base sm:text-lg">{selectedService.duration} minutes</span>
-                  </span>
-                  <PriceWithDiscount
-                    price={selectedService.discounted_price ?? selectedService.price}
-                    originalPrice={selectedService.discount_percentage ? selectedService.price : null}
-                    discountPercentage={selectedService.discount_percentage}
-                    size="lg"
-                    layout="stack"
-                    align="center"
-                    className="text-white [&_.line-through]:text-white/70 [&_.font-bold]:text-white"
-                  />
-                  <span className="bg-white/20 px-3 py-1 rounded-full text-sm font-semibold">
-                    {selectedService.category.name}
-                  </span>
-                  {selectedService.main_tab && (
-                    <span className="bg-white/20 px-3 py-1 rounded-full text-sm">
-                      {selectedService.main_tab.name}
-                    </span>
-                  )}
-                </div>
-              </div>
-              <button
-                onClick={() => setSelectedService(null)}
-                className="p-2 hover:bg-white/20 rounded-full transition-colors ml-4 flex-shrink-0"
-                aria-label="Close modal"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            {/* Content */}
-            <div className="p-6 sm:p-8 space-y-6 overflow-y-auto flex-1">
-              {/* Description */}
-              {selectedService.description && (
-                <div>
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                    <Info className="w-5 h-5" style={{ color: aestheticsColors.green.DEFAULT }} />
-                    Overview
-                  </h3>
-                  <p className="text-base sm:text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-                    {selectedService.description}
-                  </p>
-                </div>
-              )}
-
-              {/* Details */}
-              {selectedService.details && (
-                <div className="bg-egp-beige-lighter dark:bg-gray-800 rounded-xl p-6">
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3">
-                    Treatment Details
-                  </h3>
-                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
-                    {selectedService.details}
-                  </p>
-                </div>
-              )}
-
-              {/* Benefits */}
-              {selectedService.benefits && selectedService.benefits.length > 0 && (
-                <div>
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5" style={{ color: aestheticsColors.green.DEFAULT }} />
-                    Key Benefits
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {selectedService.benefits.map((benefit: string, index: number) => (
-                      <div key={index} className="flex items-start gap-3 rounded-lg p-4 border" style={{ backgroundColor: '#e8f5e9', borderColor: '#c8e6c9' }}>
-                        <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: aestheticsColors.green.DEFAULT }} />
-                        <span className="text-gray-700 dark:text-gray-300">{benefit}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Service Information Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {selectedService.downtime_days > 0 && (
-                  <div className="rounded-lg p-4 border" style={{ backgroundColor: '#f5f1e9', borderColor: '#ddd5c3' }}>
-                    <div className="flex items-center gap-2 mb-2">
-                      <svg className="w-5 h-5" style={{ color: aestheticsColors.green.DEFAULT }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                      </svg>
-                      <span className="font-semibold text-gray-900 dark:text-white">Downtime</span>
-                    </div>
-                    <p className="text-gray-700 dark:text-gray-300">{selectedService.downtime_days} day{selectedService.downtime_days !== 1 ? 's' : ''}</p>
-                  </div>
-                )}
-                
-                {selectedService.results_duration_weeks && (
-                  <div className="rounded-lg p-4 border" style={{ backgroundColor: '#f5f1e9', borderColor: '#ddd5c3' }}>
-                    <div className="flex items-center gap-2 mb-2">
-                      <svg className="w-5 h-5" style={{ color: aestheticsColors.green.DEFAULT }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                      </svg>
-                      <span className="font-semibold text-gray-900 dark:text-white">Results Duration</span>
-                    </div>
-                    <p className="text-gray-700 dark:text-gray-300">{selectedService.results_duration_weeks} week{selectedService.results_duration_weeks !== 1 ? 's' : ''}</p>
-                  </div>
-                )}
-
-                {selectedService.requires_consultation && (
-                  <div className="rounded-lg p-4 border" style={{ backgroundColor: '#e8f5e9', borderColor: '#c8e6c9' }}>
-                    <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle className="w-5 h-5" style={{ color: aestheticsColors.green.DEFAULT }} />
-                      <span className="font-semibold text-gray-900 dark:text-white">Consultation Required</span>
-                    </div>
-                    <p className="text-gray-700 dark:text-gray-300">Initial consultation needed before treatment</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Preparation */}
-              {selectedService.preparation && (
-                <div className="rounded-xl p-6 border-l-4" style={{ backgroundColor: '#f5f1e9', borderLeftColor: aestheticsColors.green.DEFAULT }}>
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                    <svg className="w-5 h-5" style={{ color: aestheticsColors.green.DEFAULT }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                    Preparation
-                  </h3>
-                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
-                    {selectedService.preparation}
-                  </p>
-                </div>
-              )}
-
-              {/* Aftercare */}
-              {selectedService.aftercare && (
-                <div className="rounded-xl p-6 border-l-4" style={{ backgroundColor: '#f5f1e9', borderLeftColor: aestheticsColors.green.DEFAULT }}>
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                    <svg className="w-5 h-5" style={{ color: aestheticsColors.green.DEFAULT }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    Aftercare Instructions
-                  </h3>
-                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
-                    {selectedService.aftercare}
-                  </p>
-                </div>
-              )}
-
-              {/* CTA Buttons */}
-              <div className="pt-4 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row gap-3">
-                <Link
-                  href={`/book?pendingServiceId=${selectedService.id}`}
-                  onClick={() => setSelectedService(null)}
-                  className="flex-1 flex items-center justify-center gap-2 text-white py-4 rounded-xl font-semibold text-base sm:text-lg transition-all duration-200 shadow-lg hover:shadow-xl text-center"
-                  style={{ backgroundColor: aestheticsColors.green.DEFAULT }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = aestheticsColors.green.hover}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = aestheticsColors.green.DEFAULT}
-                >
-                  <Calendar className="w-5 h-5" />
-                  Book This Treatment - £{(selectedService.discounted_price ?? selectedService.price).toFixed(0)}
-                </Link>
-                <Link
-                  href={`/services/${selectedService.slug}`}
-                  onClick={() => setSelectedService(null)}
-                  className="flex items-center justify-center gap-2 px-6 py-4 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl font-semibold transition-all duration-200"
-                >
-                  View Full Details
-                  <ArrowRight className="w-5 h-5" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <ServiceDetailsModal
+        isOpen={!!selectedService}
+        onClose={() => setSelectedService(null)}
+        service={selectedService ? {
+          id: selectedService.id,
+          name: selectedService.name,
+          price: selectedService.discounted_price ?? selectedService.price,
+          originalPrice: selectedService.discount_percentage ? selectedService.price : null,
+          discount_percentage: selectedService.discount_percentage,
+          category: selectedService.category.name,
+          duration: selectedService.duration,
+          description: selectedService.description,
+          details: selectedService.details,
+          benefits: selectedService.benefits,
+          preparation: selectedService.preparation,
+          aftercare: selectedService.aftercare,
+          requires_consultation: selectedService.requires_consultation,
+          downtime_days: selectedService.downtime_days,
+          results_duration_weeks: selectedService.results_duration_weeks,
+          image_url: selectedService.image_url,
+          slug: selectedService.slug,
+        } : null}
+        showBookButton
+      />
     </section>
   );
 }

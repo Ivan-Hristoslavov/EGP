@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Customer } from "@/types";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 import { Input, Textarea } from "@heroui/react";
+import { inputClassNames } from "@/config/design-system";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 
@@ -130,46 +131,55 @@ export function EditCustomerModal({
                   <Input
                     label="Full Name"
                     placeholder="e.g., John Smith"
-                  value={formData.name}
-                  onChange={(e) => {
-                    setFormData({ ...formData, name: e.target.value });
-                    setErrors(prev => ({ ...prev, name: '' }));
-                  }}
+                    value={formData.name}
+                    onChange={(e) => {
+                      setFormData({ ...formData, name: e.target.value });
+                      setErrors(prev => ({ ...prev, name: '' }));
+                    }}
                     isRequired
                     isClearable
                     isInvalid={!!errors.name}
                     errorMessage={errors.name}
                     isDisabled={isLoading}
+                    variant="bordered"
+                    labelPlacement="outside"
+                    classNames={inputClassNames}
                   />
                   <Input
-                  type="email"
+                    type="email"
                     label="Email Address"
                     placeholder="e.g., john@example.com"
-                  value={formData.email}
-                  onChange={(e) => {
-                    setFormData({ ...formData, email: e.target.value });
-                    setErrors(prev => ({ ...prev, email: '' }));
-                  }}
+                    value={formData.email}
+                    onChange={(e) => {
+                      setFormData({ ...formData, email: e.target.value });
+                      setErrors(prev => ({ ...prev, email: '' }));
+                    }}
                     isRequired
                     isClearable
                     isInvalid={!!errors.email}
                     errorMessage={errors.email}
                     isDisabled={isLoading}
+                    variant="bordered"
+                    labelPlacement="outside"
+                    classNames={inputClassNames}
                   />
                   <Input
-                  type="tel"
+                    type="tel"
                     label="Phone Number"
                     placeholder="e.g., +44 7700 123456"
-                  value={formData.phone}
-                  onChange={(e) => {
-                    setFormData({ ...formData, phone: e.target.value });
-                    setErrors(prev => ({ ...prev, phone: '' }));
-                  }}
+                    value={formData.phone}
+                    onChange={(e) => {
+                      setFormData({ ...formData, phone: e.target.value });
+                      setErrors(prev => ({ ...prev, phone: '' }));
+                    }}
                     isRequired
                     isClearable
                     isInvalid={!!errors.phone}
                     errorMessage={errors.phone}
                     isDisabled={isLoading}
+                    variant="bordered"
+                    labelPlacement="outside"
+                    classNames={inputClassNames}
                   />
               <div className="md:col-span-2">
                     <Textarea

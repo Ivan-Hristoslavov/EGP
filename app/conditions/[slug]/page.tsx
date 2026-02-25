@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { siteConfig } from "@/config/site";
+import { typography, textColors } from "@/config/typography";
 import Link from "next/link";
 import { Calendar, CheckCircle, Star, ArrowRight, Phone, Target } from "lucide-react";
 import { notFound } from 'next/navigation';
@@ -106,10 +107,10 @@ export default async function ConditionPage({ params }: PageProps) {
                 {condition.category}
               </div>
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6">
+            <h1 className={`${typography.headingPage} ${textColors.heading} mb-6`}>
               {condition.title}
             </h1>
-            <p className="text-base text-gray-600 dark:text-gray-300 mb-8">
+            <p className={`${typography.body} ${textColors.body} mb-8`}>
               {condition.description}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -139,7 +140,7 @@ export default async function ConditionPage({ params }: PageProps) {
             <div className="text-center space-y-8">
               {/* Condition Info */}
               <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+                <h2 className={`${typography.headingSection} ${textColors.heading} mb-6`}>
                   Understanding {condition.title}
                 </h2>
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-6 max-w-2xl mx-auto">
@@ -156,7 +157,7 @@ export default async function ConditionPage({ params }: PageProps) {
 
               {/* Recommended Treatments */}
               <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">
+                <h3 className={`${typography.headingCard} ${textColors.heading} mb-6`}>
                   Recommended Treatments
                 </h3>
                 <ul className="space-y-4 max-w-md mx-auto">
@@ -177,7 +178,7 @@ export default async function ConditionPage({ params }: PageProps) {
       <section className="py-16 md:py-24 bg-gray-50 dark:bg-gray-800">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white text-center mb-12">
+            <h2 className={`${typography.headingSection} ${textColors.heading} text-center mb-12`}>
               Treatment Process
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -189,7 +190,7 @@ export default async function ConditionPage({ params }: PageProps) {
                   <div className="w-10 h-10 bg-gradient-to-br from-egp-beige-darkest via-egp-beige-darker to-egp-beige-dark rounded-full flex items-center justify-center mb-4 mx-auto">
                     <span className="text-white font-bold text-base">{step.step}</span>
                   </div>
-                  <h3 className="text-base font-bold text-gray-900 dark:text-white mb-3">
+                  <h3 className={`${typography.headingCard} ${textColors.heading} mb-3`}>
                     {step.title}
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300">
@@ -206,10 +207,10 @@ export default async function ConditionPage({ params }: PageProps) {
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            <h2 className={`${typography.headingSection} ${textColors.heading} mb-6`}>
               Ready to Address Your Concerns?
             </h2>
-            <p className="text-base text-gray-600 dark:text-gray-300 mb-8">
+            <p className={`${typography.body} ${textColors.body} mb-8`}>
               Book your treatment now to discuss the best treatment options for {condition.title.toLowerCase()}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

@@ -13,7 +13,7 @@ export const siteConfig = {
   contact: {
     phone: process.env.NEXT_PUBLIC_PHONE_NUMBER || "07944 24 20 79",
     email: process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "info@egpaesthetics.co.uk",
-    whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "+44 XXXX XXXXXX",
+    whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || process.env.NEXT_PUBLIC_PHONE_NUMBER || "07944 24 20 79",
     address: {
       street: process.env.NEXT_PUBLIC_ADDRESS_STREET || "",
       city: process.env.NEXT_PUBLIC_ADDRESS_CITY || "London",

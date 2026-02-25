@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAdminProfile, useAdminProfileContext } from "@/components/AdminProfileContext";
+import { siteConfig } from "@/config/site";
 
 // Import navigation structure from NavigationNavbar
 const navigation = [
@@ -52,7 +53,7 @@ export default function FooterMain() {
   const businessData = {
     businessName: adminProfile?.company_name || "EGP",
     businessEmail: adminProfile?.business_email || adminProfile?.email || process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "",
-    businessPhone: adminProfile?.phone || process.env.NEXT_PUBLIC_PHONE_NUMBER || "+44 7541777225",
+    businessPhone: adminProfile?.phone || process.env.NEXT_PUBLIC_PHONE_NUMBER || siteConfig.contact.phone,
     businessAddress: adminProfile?.company_address || "London, UK",
     companyStatus: adminProfile?.company_status || ""
   };

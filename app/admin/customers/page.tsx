@@ -8,6 +8,7 @@ import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Input } from "@heroui/input";
+import { inputClassNames } from "@/config/design-system";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 import { Spinner } from "@heroui/spinner";
 import { Users, Plus, Eye, Edit, Trash2, Mail, Phone, MapPin, Table2, Grid3x3, Tag, Ticket, Send, CheckCircle, XCircle, Clock, Search } from "lucide-react";
@@ -817,6 +818,9 @@ export default function CustomersPage() {
                     onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
                     isRequired
                     isClearable
+                    variant="bordered"
+                    labelPlacement="outside"
+                    classNames={inputClassNames}
                   />
                   <Input
                     type="email"
@@ -826,6 +830,9 @@ export default function CustomersPage() {
                     onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
                     isRequired
                     isClearable
+                    variant="bordered"
+                    labelPlacement="outside"
+                    classNames={inputClassNames}
                   />
                   <Input
                     type="tel"
@@ -835,6 +842,9 @@ export default function CustomersPage() {
                     onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
                     isRequired
                     isClearable
+                    variant="bordered"
+                    labelPlacement="outside"
+                    classNames={inputClassNames}
                   />
                   <Input
                     label="Address"
@@ -843,6 +853,9 @@ export default function CustomersPage() {
                     onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
                     isRequired
                     isClearable
+                    variant="bordered"
+                    labelPlacement="outside"
+                    classNames={inputClassNames}
                   />
                 </div>
               </ModalBody>

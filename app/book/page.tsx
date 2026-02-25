@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { siteConfig } from "@/config/site";
+import { typography, layout, textColors } from "@/config/typography";
 import {
   Calendar,
   Clock,
@@ -24,8 +25,10 @@ import {
   ChevronDown,
   Lock,
   Trash2,
+  Loader2,
 } from "lucide-react";
 import StripePaymentForm from "@/components/StripePaymentForm";
+import { ServiceDetailsModal } from "@/components/ServiceDetailsModal";
 import { useServices } from "@/hooks/useServices";
 import {
   Modal,
@@ -39,6 +42,7 @@ import { Card, CardBody, CardHeader } from "@heroui/react";
 import { Chip } from "@heroui/react";
 import { Spinner } from "@heroui/react";
 import { Input } from "@heroui/react";
+import { inputClassNames } from "@/config/design-system";
 import { useToast } from "@/components/Toast";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import { PriceWithDiscount } from "@/components/PriceWithDiscount";
@@ -111,6 +115,7 @@ function BookingPageContent() {
   );
   const [currentStep, setCurrentStep] = useState<BookingStepKey>("services");
   const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   const [showServiceSelector, setShowServiceSelector] = useState(false);
   const [serviceSelectorDiscountedOnly, setServiceSelectorDiscountedOnly] =
     useState(false);
@@ -149,10 +154,10 @@ function BookingPageContent() {
     () =>
       [
         { key: "services", label: "Services", icon: CheckCircle },
-        { key: "team", label: "Select Practitioner", icon: Shield },
+        { key: "team", label: "Practitioner", icon: Shield },
         { key: "date", label: "Date & Time", icon: Calendar },
         { key: "customer", label: "Your Details", icon: Info },
-        { key: "preview", label: "Review & Payment", icon: CreditCard },
+        { key: "preview", label: "Review", icon: CreditCard },
       ] as const,
     [],
   );
@@ -292,34 +297,11 @@ function BookingPageContent() {
     const loadTeamMembers = async () => {
       setTeamMembersLoading(true);
       try {
-        const response = await fetch("/api/admin/team");
+        const response = await fetch("/api/team");
         const data = await response.json();
-        console.log("Team API response:", data);
         if (response.ok && data.team) {
-          let activeMembers = data.team.filter(
-            (member: TeamMember) => member.is_active === true,
-          );
-
-          // Load day off periods for each team member
-          const membersWithDayOff = await Promise.all(
-            activeMembers.map(async (member: TeamMember) => {
-              try {
-                const dayOffResponse = await fetch(
-                  `/api/admin/team/${member.id}/day-off`,
-                );
-                if (dayOffResponse.ok) {
-                  const dayOffData = await dayOffResponse.json();
-                  return {
-                    ...member,
-                    dayOffPeriods: dayOffData.dayOffPeriods || [],
-                  };
-                }
-              } catch (error) {
-                console.error(`Error loading day off for ${member.id}:`, error);
-              }
-              return { ...member, dayOffPeriods: [] };
-            }),
-          );
+          // /api/team returns active members with dayOffPeriods already included
+          let activeMembers = data.team;
 
           // Filter team members based on selected services
           // Only show team members who can perform ALL selected services
@@ -330,7 +312,7 @@ function BookingPageContent() {
               .filter(Boolean) as string[];
 
             if (selectedServiceIds.length > 0) {
-              activeMembers = membersWithDayOff.filter((member: TeamMember) => {
+              activeMembers = activeMembers.filter((member: TeamMember) => {
                 // If member has no service_ids, don't show them (they can't perform any services)
                 if (!member.service_ids || member.service_ids.length === 0) {
                   return false;
@@ -341,13 +323,12 @@ function BookingPageContent() {
                 );
               });
             } else {
-              activeMembers = membersWithDayOff;
+              activeMembers = activeMembers;
             }
           } else {
-            activeMembers = membersWithDayOff;
+            activeMembers = activeMembers;
           }
 
-          console.log("Filtered team members:", activeMembers);
           setTeamMembers(activeMembers);
 
           // Clear selected team member if they can't perform all selected services
@@ -393,26 +374,33 @@ function BookingPageContent() {
     loadTeamMembers();
   }, [selectedServices, services]); // Removed selectedTeamMember from dependencies
 
-  // Fetch deposit settings for booking (public config)
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/admin/settings?key=deposit_settings")
+  const fetchDepositConfig = useCallback(() => {
+    const url = `/api/deposit-settings?t=${Date.now()}`;
+    fetch(url, { cache: "no-store", headers: { Pragma: "no-cache" } })
       .then((res) => (res.ok ? res.json() : null))
-      .then((value) => {
-        if (cancelled || !value || typeof value !== "object") return;
+      .then((raw) => {
+        if (!raw || typeof raw !== "object") return;
         setDepositConfig({
-          enabled: !!value.enabled,
-          type: value.type === "fixed" ? "fixed" : "percentage",
-          percentage: value.percentage != null ? Number(value.percentage) : 50,
-          fixedAmount:
-            value.fixedAmount != null ? Number(value.fixedAmount) : null,
+          enabled: !!raw.enabled,
+          type: raw.type === "fixed" ? "fixed" : "percentage",
+          percentage: raw.percentage != null ? Number(raw.percentage) : 50,
+          fixedAmount: raw.fixedAmount != null ? Number(raw.fixedAmount) : null,
         });
       })
       .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
   }, []);
+
+  // Fetch deposit settings on mount and when entering Review step (fixes mobile)
+  useEffect(() => {
+    fetchDepositConfig();
+  }, [fetchDepositConfig]);
+
+  // Refetch deposit config when entering Review step (fixes mobile late/slow load)
+  useEffect(() => {
+    if (currentStep === "preview") {
+      fetchDepositConfig();
+    }
+  }, [currentStep, fetchDepositConfig]);
 
   // Calculate total service duration in minutes
   const totalServiceDuration = useMemo(() => {
@@ -874,9 +862,10 @@ function BookingPageContent() {
           <ButtonPrimary
             onPress={() => setShowServiceSelector(true)}
             variant="primary"
+            size="md"
             startContent={<Plus className="w-4 h-4" />}
           >
-            Browse Services
+            Browse
           </ButtonPrimary>
         </div>
       ) : (
@@ -948,31 +937,31 @@ function BookingPageContent() {
             })}
           </div>
 
-          <div className="border-t border-divider pt-5 mt-6 flex flex-row items-center justify-between gap-3">
+          <div className="border-t border-divider pt-4 mt-5 flex flex-row items-center justify-between gap-2 sm:gap-3">
             <ButtonPrimary
               onPress={() => setShowServiceSelector(true)}
               variant="secondary"
-              className="flex-1 border-2 border-egp-beige-dark bg-egp-beige hover:bg-egp-beige-dark text-gray-900 dark:bg-egp-beige-darkest dark:text-white dark:border-egp-beige-darker dark:hover:bg-egp-beige-darker"
-              startContent={<Plus className="w-4 h-4" />}
+              size="md"
+              className="flex-1 min-w-0 border-2 border-egp-beige-dark bg-egp-beige hover:bg-egp-beige-dark text-gray-900 dark:bg-egp-beige-darkest dark:text-white dark:border-egp-beige-darker dark:hover:bg-egp-beige-darker text-sm"
+              startContent={<Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
             >
-              Add Services
+              Add
             </ButtonPrimary>
             <ButtonPrimary
               onPress={() => setCurrentStep("team")}
               isDisabled={selectedServices.length === 0}
               variant="primary"
-              className={`flex-1 ${selectedServices.length === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
+              size="md"
+              className={`flex-1 min-w-0 text-sm ${selectedServices.length === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
               endContent={
                 selectedServices.length === 0 ? (
-                  <Lock className="w-4 h-4" />
+                  <Lock className="w-3.5 h-3.5" />
                 ) : (
-                  <ArrowLeft className="w-4 h-4 rotate-180" />
+                  <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
                 )
               }
             >
-              {selectedServices.length === 0
-                ? "Please add at least one service"
-                : "Continue to Select Practitioner"}
+              {selectedServices.length === 0 ? "Add service first" : "Practitioner"}
             </ButtonPrimary>
           </div>
         </>
@@ -1119,13 +1108,15 @@ function BookingPageContent() {
           </div>
 
           {selectedTeamMember && (
-            <div className="border-t border-divider pt-5 mt-6 flex justify-end">
+            <div className="border-t border-divider pt-4 mt-5 flex justify-center">
               <ButtonPrimary
                 onPress={() => setCurrentStep("date")}
                 variant="primary"
-                endContent={<ArrowLeft className="w-4 h-4 rotate-180" />}
+                size="md"
+                className="w-full sm:w-auto min-w-[140px]"
+                endContent={<ArrowLeft className="w-3.5 h-3.5 rotate-180" />}
               >
-                Continue to Date Selection
+                Date & Time
               </ButtonPrimary>
             </div>
           )}
@@ -1134,195 +1125,19 @@ function BookingPageContent() {
     </div>
   );
 
-  const renderServiceInfoModal = () => {
-    if (!serviceInfoModal) return null;
-
-    const service = servicesDataMap[serviceInfoModal];
-    if (!service) return null;
-
-    const metaItems = [
-      {
-        label: "Investment",
-        value: `£${service.price}`,
-      },
-      service.duration && {
-        label: "Duration",
-        value: `${service.duration} min`,
-      },
-      service.requiresConsultation !== undefined && {
-        label: "Consultation",
-        value: service.requiresConsultation ? "Required" : "Optional",
-      },
-      service.downtimeDays !== undefined && {
-        label: "Downtime",
-        value:
-          service.downtimeDays > 0
-            ? `${service.downtimeDays} day${service.downtimeDays > 1 ? "s" : ""}`
-            : "Minimal",
-      },
-      service.resultsDurationWeeks && {
-        label: "Results last",
-        value: `${service.resultsDurationWeeks} week${service.resultsDurationWeeks > 1 ? "s" : ""}`,
-      },
-    ].filter(Boolean) as Array<{ label: string; value: string }>;
-
-    return (
-      <Modal
-        isOpen={true}
-        onClose={() => setServiceInfoModal(null)}
-        size="3xl"
-        scrollBehavior="inside"
-        classNames={{
-          backdrop: "bg-black/60 backdrop-blur-sm",
-          base: "bg-white dark:bg-gray-900",
-        }}
-      >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-white rounded-t-2xl [&>button]:hidden">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 w-full">
-                  <div className="flex-1">
-                    <p className="text-sm uppercase tracking-[0.3em] font-semibold text-[#3f3a31]/70">
-                      Treatment insight
-                    </p>
-                    <h2 className="text-2xl sm:text-3xl font-bold mt-1">
-                      {service.name}
-                    </h2>
-                    <p className="text-sm text-[#3f3a31]/80 mt-1">
-                      {service.category}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {service.imageUrl && (
-                      <div className="hidden sm:block w-20 h-20 rounded-xl overflow-hidden border border-white/40 shadow-lg">
-                        <img
-                          src={service.imageUrl}
-                          alt={service.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    <ButtonPrimary
-                      variant="secondary"
-                      onPress={onClose}
-                      isIconOnly
-                      size="sm"
-                      className="bg-white/20 hover:bg-white/30 text-white border-white/30"
-                      aria-label="Close modal"
-                    >
-                      <X className="w-4 h-4" />
-                    </ButtonPrimary>
-                  </div>
-                </div>
-              </ModalHeader>
-
-              <ModalBody className="py-6">
-                <div className="space-y-6">
-                  {metaItems.length > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {metaItems.map(({ label, value }) => (
-                        <div
-                          key={label}
-                          className="bg-[#f5f1e9] dark:bg-gray-800/40 border border-[#e4d9c8] dark:border-gray-700 rounded-lg px-4 py-3"
-                        >
-                          <p className="text-xs uppercase tracking-wide text-[#6b5f4b] dark:text-[#c9c1b0] font-semibold">
-                            {label}
-                          </p>
-                          <p className="text-sm sm:text-base text-gray-800 dark:text-gray-200 font-medium mt-1">
-                            {value}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {service.description && (
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                        <Info className="w-5 h-5 text-[#9d9585]" />
-                        Overview
-                      </h3>
-                      <p className="text-base sm:text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-                        {service.description}
-                      </p>
-                    </div>
-                  )}
-
-                  {service.details && (
-                    <div className="bg-white/80 dark:bg-gray-900/50 rounded-xl border border-[#e4d9c8] dark:border-gray-700 p-6">
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3">
-                        Treatment experience
-                      </h3>
-                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                        {service.details}
-                      </p>
-                    </div>
-                  )}
-
-                  {service.benefits && service.benefits.length > 0 && (
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                        Key benefits
-                      </h3>
-                      <ul className="list-disc list-inside space-y-2 text-sm sm:text-base text-gray-700 dark:text-gray-300">
-                        {service.benefits.map(
-                          (benefit: string, index: number) => (
-                            <li key={index}>{benefit}</li>
-                          ),
-                        )}
-                      </ul>
-                    </div>
-                  )}
-
-                  {(service.preparation || service.aftercare) && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {service.preparation && (
-                        <div className="bg-[#f5f1e9] dark:bg-gray-800/40 border border-[#e4d9c8] dark:border-gray-700 rounded-lg p-4">
-                          <h4 className="text-sm font-semibold text-[#6b5f4b] dark:text-[#c9c1b0] mb-2 flex items-center gap-2">
-                            <Shield className="w-4 h-4 text-[#9d9585]" />
-                            Preparation tips
-                          </h4>
-                          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                            {service.preparation}
-                          </p>
-                        </div>
-                      )}
-                      {service.aftercare && (
-                        <div className="bg-[#f5f1e9] dark:bg-gray-800/40 border border-[#e4d9c8] dark:border-gray-700 rounded-lg p-4">
-                          <h4 className="text-sm font-semibold text-[#6b5f4b] dark:text-[#c9c1b0] mb-2 flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-[#9d9585]" />
-                            Aftercare guidance
-                          </h4>
-                          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                            {service.aftercare}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </ModalBody>
-
-              <ModalFooter className="border-t border-gray-200 dark:border-gray-700">
-                <div className="flex justify-center w-full">
-                  <ButtonPrimary variant="secondary" onPress={onClose}>
-                    Close
-                  </ButtonPrimary>
-                </div>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
-    );
-  };
+  const renderServiceInfoModal = () => (
+    <ServiceDetailsModal
+      isOpen={!!serviceInfoModal}
+      onClose={() => setServiceInfoModal(null)}
+      service={serviceInfoModal ? servicesDataMap[serviceInfoModal] ?? null : null}
+      showBookButton={false}
+    />
+  );
 
   const renderServiceSelector = () => {
     return (
       <div
-        className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-start justify-center p-3 sm:p-4 pt-24 sm:pt-28 z-[10000] overflow-y-auto"
+        className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-start justify-center p-2 sm:p-4 pt-20 sm:pt-28 z-[10000] overflow-y-auto"
         onClick={(e) => {
           // Close modal when clicking on backdrop
           if (e.target === e.currentTarget) {
@@ -1331,12 +1146,12 @@ function BookingPageContent() {
         }}
       >
         <div
-          className="bg-gray-800 dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-7xl max-h-[85vh] flex flex-col relative z-[10001]"
+          className="bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] sm:max-h-[85vh] flex flex-col relative z-[10001] mx-2 sm:mx-4"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header */}
-          <div className="bg-gray-900 dark:bg-gray-950 text-white px-6 py-4 flex items-center justify-between rounded-t-2xl flex-shrink-0 border-b border-gray-700 relative z-[10002]">
-            <h2 className="text-2xl font-bold">Select Services</h2>
+          {/* Header - visible on both light and dark */}
+          <div className="bg-[#3a3428] dark:bg-gray-950 text-white px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between rounded-t-xl sm:rounded-t-2xl flex-shrink-0 border-b border-[#4a4438] dark:border-gray-700 relative z-[10002]">
+            <h2 className={`${typography.headingCard} text-white`}>Select Services</h2>
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -1351,15 +1166,15 @@ function BookingPageContent() {
 
           {/* Discount filter - only show if any service has discount */}
           {services.some(hasDiscount) && (
-            <div className="px-6 py-3 border-b border-gray-700 bg-gray-800/50 dark:bg-gray-900/50 flex flex-wrap items-center gap-2">
-              <span className="text-sm text-gray-400">Filter:</span>
+            <div className="px-4 sm:px-6 py-2 sm:py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex flex-wrap items-center gap-2">
+              <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Filter:</span>
               <button
                 type="button"
                 onClick={() => setServiceSelectorDiscountedOnly(false)}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors ${
                   !serviceSelectorDiscountedOnly
                     ? "bg-egp-green text-white"
-                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                    : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
                 }`}
               >
                 All
@@ -1367,10 +1182,10 @@ function BookingPageContent() {
               <button
                 type="button"
                 onClick={() => setServiceSelectorDiscountedOnly(true)}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors ${
                   serviceSelectorDiscountedOnly
                     ? "bg-egp-green text-white"
-                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                    : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
                 }`}
               >
                 On offer
@@ -1378,8 +1193,8 @@ function BookingPageContent() {
             </div>
           )}
 
-          {/* Content */}
-          <div className="p-6 overflow-y-auto flex-1 bg-gray-800 dark:bg-gray-900">
+          {/* Content - light bg for white theme, dark for dark theme */}
+          <div className="p-4 sm:p-6 overflow-y-auto flex-1 bg-white dark:bg-gray-900">
             {Object.entries(servicesByCategoryForSelector).map(
               ([category, servicesList]) => {
                 // Filter out services that are already selected
@@ -1394,25 +1209,25 @@ function BookingPageContent() {
                 if (availableServices.length === 0) return null;
 
                 return (
-                  <div key={category} className="mb-8">
-                    <h3 className="text-xl font-bold text-white mb-5">
+                  <div key={category} className="mb-4 sm:mb-8">
+                    <h3 className={`${typography.headingSmall} text-gray-900 dark:text-white mb-3 sm:mb-5`}>
                       {category}
                     </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
                       {availableServices.map(([serviceId, service]) => {
                         if (!service) return null;
                         return (
                           <Card
                             key={serviceId}
-                            className="h-full flex flex-col bg-gray-700 dark:bg-gray-800 border border-gray-600 dark:border-gray-700 hover:border-egp-green transition-all"
+                            className="h-full flex flex-col bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-egp-green transition-all"
                             shadow="lg"
                           >
-                            <CardHeader className="bg-gray-700 dark:bg-gray-800 px-5 py-4 relative min-h-[140px]">
+                            <CardHeader className="bg-gray-50 dark:bg-gray-800 px-3 sm:px-5 py-3 sm:py-4 relative min-h-[120px] sm:min-h-[140px]">
                               {/* Category Badge - Top Left */}
-                              <div className="absolute top-3 left-3">
+                              <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
                                 <Chip
                                   size="sm"
-                                  className="bg-gray-600 dark:bg-gray-700 text-white text-xs font-semibold"
+                                  className="bg-gray-600 dark:bg-gray-700 text-white text-[10px] sm:text-xs font-semibold"
                                   variant="flat"
                                 >
                                   {service.category || category}
@@ -1420,23 +1235,23 @@ function BookingPageContent() {
                               </div>
 
                               {/* Duration Badge - Top Right */}
-                              <div className="absolute top-3 right-3">
+                              <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
                                 <Chip
                                   size="sm"
-                                  startContent={<Clock className="w-3 h-3" />}
+                                  startContent={<Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />}
                                   variant="flat"
-                                  className="bg-gray-600 dark:bg-gray-700 text-white text-xs"
+                                  className="bg-gray-600 dark:bg-gray-700 text-white text-[10px] sm:text-xs"
                                 >
                                   {service.duration} min
                                 </Chip>
                               </div>
 
                               {/* Service Name and Price - Centered */}
-                              <div className="text-center pt-8 pb-3 w-full">
-                                <h4 className="text-lg font-bold text-white leading-tight line-clamp-2 mb-3">
+                              <div className="text-center pt-6 sm:pt-8 pb-2 sm:pb-3 w-full">
+                                <h4 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-tight line-clamp-2 mb-2 sm:mb-3">
                                   {service.name}
                                 </h4>
-                                <div className="flex flex-col items-center gap-1 w-full [&_.line-through]:text-gray-400 [&_.font-bold]:text-white">
+                                <div className="flex flex-col items-center gap-1 w-full [&_.line-through]:text-gray-500 [&_.font-bold]:text-gray-900 dark:[&_.font-bold]:text-white">
                                   <PriceWithDiscount
                                     price={service.price}
                                     originalPrice={service.originalPrice}
@@ -1451,21 +1266,21 @@ function BookingPageContent() {
                               </div>
                             </CardHeader>
 
-                            <CardBody className="p-5 flex flex-col flex-1 bg-gray-700 dark:bg-gray-800">
+                            <CardBody className="p-3 sm:p-5 flex flex-col flex-1 bg-gray-50 dark:bg-gray-800">
                               {/* Description */}
                               {service.description && (
-                                <p className="text-sm text-gray-300 mb-4 leading-relaxed line-clamp-3">
+                                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-2 sm:mb-4 leading-relaxed line-clamp-3">
                                   {service.description}
                                 </p>
                               )}
 
                               {/* Action Buttons - Stacked */}
-                              <div className="flex flex-col gap-2 pt-4 mt-auto border-t border-gray-600 dark:border-gray-700">
+                              <div className="flex flex-col gap-1.5 sm:gap-2 pt-3 sm:pt-4 mt-auto border-t border-gray-200 dark:border-gray-700">
                                 <Button
                                   onPress={() => setServiceInfoModal(serviceId)}
                                   variant="bordered"
                                   size="sm"
-                                  className="w-full border-gray-500 text-gray-300 hover:bg-gray-600 dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
+                                  className="w-full border-gray-400 text-gray-700 dark:border-gray-600 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                                   startContent={<Info className="w-4 h-4" />}
                                 >
                                   Details
@@ -1478,7 +1293,7 @@ function BookingPageContent() {
                                     }
                                   }}
                                   variant="primary"
-                                  className="w-full bg-gray-600 hover:bg-gray-500 dark:bg-gray-700 dark:hover:bg-gray-600 text-white"
+                                  className="w-full bg-egp-green hover:bg-egp-green-dark dark:bg-gray-700 dark:hover:bg-gray-600 text-white"
                                   size="sm"
                                   startContent={<Plus className="w-4 h-4" />}
                                 >
@@ -2041,16 +1856,17 @@ function BookingPageContent() {
                                 </div>
                               )}
                               {selectedTime && (
-                                <div className="mt-4">
+                                <div className="mt-4 flex justify-center">
                                   <ButtonPrimary
                                     onPress={() => setCurrentStep("customer")}
                                     variant="primary"
-                                    className="w-full"
+                                    size="md"
+                                    className="w-full sm:w-auto min-w-[140px]"
                                     endContent={
-                                      <ArrowLeft className="w-4 h-4 rotate-180" />
+                                      <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
                                     }
                                   >
-                                    Continue to Your Details
+                                    Your Details
                                   </ButtonPrimary>
                                 </div>
                               )}
@@ -2131,10 +1947,8 @@ function BookingPageContent() {
             errorMessage={customerDataErrors.firstName}
             variant="bordered"
             size="lg"
-            classNames={{
-              input: "text-base",
-              label: "text-base",
-            }}
+            labelPlacement="outside"
+            classNames={inputClassNames}
           />
           <Input
             label="Last Name"
@@ -2148,10 +1962,8 @@ function BookingPageContent() {
             errorMessage={customerDataErrors.lastName}
             variant="bordered"
             size="lg"
-            classNames={{
-              input: "text-base",
-              label: "text-base",
-            }}
+            labelPlacement="outside"
+            classNames={inputClassNames}
           />
         </div>
 
@@ -2169,10 +1981,8 @@ function BookingPageContent() {
             errorMessage={customerDataErrors.email}
             variant="bordered"
             size="lg"
-            classNames={{
-              input: "text-base",
-              label: "text-base",
-            }}
+            labelPlacement="outside"
+            classNames={inputClassNames}
           />
           <Input
             label="Phone"
@@ -2187,20 +1997,18 @@ function BookingPageContent() {
             errorMessage={customerDataErrors.phone}
             variant="bordered"
             size="lg"
-            classNames={{
-              input: "text-base",
-              label: "text-base",
-            }}
+            labelPlacement="outside"
+            classNames={inputClassNames}
           />
         </div>
 
-        <div className="flex gap-4 pt-4">
+        <div className="flex gap-2 sm:gap-3 pt-4">
           <Button
             variant="bordered"
             onPress={() => setCurrentStep("date")}
-            startContent={<ArrowLeft className="w-4 h-4" />}
-            className="flex-1"
-            size="lg"
+            startContent={<ArrowLeft className="w-3.5 h-3.5" />}
+            className="flex-1 min-w-0 text-sm"
+            size="md"
           >
             Back
           </Button>
@@ -2211,11 +2019,11 @@ function BookingPageContent() {
               }
             }}
             variant="primary"
-            className="flex-1"
-            endContent={<ArrowLeft className="w-4 h-4 rotate-180" />}
-            size="lg"
+            size="md"
+            className="flex-1 min-w-0 text-sm"
+            endContent={<ArrowLeft className="w-3.5 h-3.5 rotate-180" />}
           >
-            Continue to Review
+            Review
           </ButtonPrimary>
         </div>
       </div>
@@ -2262,11 +2070,11 @@ function BookingPageContent() {
       : null;
 
     return (
-      <div className="space-y-8 max-w-5xl mx-auto">
-        {/* Header */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          {/* Left: Booking summary + Your details */}
-          <div className="lg:col-span-3 space-y-6">
+      <div className="space-y-6 sm:space-y-8 w-full max-w-6xl mx-auto">
+        {/* On mobile: Payment (with deposit) first for visibility; desktop: left column */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 sm:gap-8 lg:gap-10">
+          {/* Left: Appointment + Your details (on desktop); Payment first on mobile */}
+          <div className="lg:col-span-3 flex flex-col gap-6 sm:gap-8 order-2 lg:order-1">
             {/* Appointment card */}
             <Card className="border border-[#e4d9c8] dark:border-gray-700 shadow-sm overflow-hidden">
               <CardHeader className="pb-3 border-b border-[#e4d9c8] dark:border-gray-700 bg-[#faf7f1] dark:bg-gray-800/50">
@@ -2346,8 +2154,8 @@ function BookingPageContent() {
                   Your details
                 </h4>
               </CardHeader>
-              <CardBody className="p-5">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <CardBody className="p-5 pt-5 pb-6 sm:pb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6">
                   <div>
                     <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
                       Name
@@ -2377,10 +2185,10 @@ function BookingPageContent() {
             </Card>
           </div>
 
-          {/* Right: Treatments + Payment summary */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Treatments list */}
-            <Card className="border border-[#e4d9c8] dark:border-gray-700 shadow-sm overflow-hidden">
+          {/* Right: Payment first on mobile (deposit visible); Treatments first on desktop */}
+          <div className="lg:col-span-2 flex flex-col gap-6 sm:gap-8 lg:gap-10 order-1 lg:order-2">
+            {/* Treatments list - second on mobile */}
+            <Card className="border border-[#e4d9c8] dark:border-gray-700 shadow-sm overflow-hidden order-2 lg:order-1">
               <CardHeader className="pb-3 border-b border-[#e4d9c8] dark:border-gray-700 bg-[#faf7f1] dark:bg-gray-800/50">
                 <h4 className="text-base font-semibold text-gray-900 dark:text-white">
                   Treatments
@@ -2417,14 +2225,14 @@ function BookingPageContent() {
               </CardBody>
             </Card>
 
-            {/* Payment summary + CTA */}
-            <Card className="border-2 border-egp-green dark:border-egp-beige bg-gradient-to-b from-[#f5f1e9] to-white dark:from-gray-800 dark:to-gray-900 shadow-lg overflow-hidden">
-              <CardBody className="p-6 space-y-4">
+            {/* Payment summary + CTA - first on mobile for deposit visibility */}
+            <Card className="border-2 border-egp-green dark:border-egp-beige bg-gradient-to-b from-[#f5f1e9] to-white dark:from-gray-800 dark:to-gray-900 shadow-lg overflow-visible order-1 lg:order-2">
+              <CardBody className="p-4 sm:p-5 space-y-3 sm:space-y-4">
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
                     Total
                   </span>
-                  <span className="text-2xl font-bold text-egp-green dark:text-white">
+                  <span className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                     £{totalAmount.toFixed(2)}
                   </span>
                 </div>
@@ -2432,20 +2240,20 @@ function BookingPageContent() {
                   {totalDuration} min total
                 </p>
                 {depositConfig.enabled && (
-                  <div className="pt-3 border-t border-egp-green/20 dark:border-egp-beige/20 space-y-3">
-                    <label className="flex items-start gap-3 cursor-pointer">
+                  <div id="deposit-option" className="rounded-lg border-2 border-egp-green/30 dark:border-egp-beige/30 bg-white/60 dark:bg-gray-800/40 p-3 sm:p-4 space-y-2 sm:space-y-3 scroll-mt-24">
+                    <label className="flex items-start gap-3 cursor-pointer group">
                       <input
                         type="checkbox"
                         checked={payDepositOnly}
                         onChange={(e) => setPayDepositOnly(e.target.checked)}
-                        className="mt-1 rounded border-gray-300 text-egp-green focus:ring-egp-green"
+                        className="mt-0.5 rounded border-gray-300 text-egp-green focus:ring-egp-green shrink-0 w-4 h-4 min-w-[16px]"
                       />
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white">
                         Pay deposit only (rest on arrival)
                       </span>
                     </label>
                     {payDepositOnly && (
-                      <div className="pl-6 space-y-1">
+                      <div className="pl-6 space-y-0.5">
                         <p className="text-sm font-semibold text-egp-green dark:text-white">
                           Pay now: £{depositAmount.toFixed(2)}
                         </p>
@@ -2455,8 +2263,7 @@ function BookingPageContent() {
                       </div>
                     )}
                     <p className="text-xs text-amber-700 dark:text-amber-300/90">
-                      Cancel or request a refund up to 24 hours before your
-                      appointment.
+                      Cancel or request a refund up to 24 hours before your appointment.
                     </p>
                   </div>
                 )}
@@ -2465,10 +2272,10 @@ function BookingPageContent() {
                     onPress={proceedToPayment}
                     variant="primary"
                     className="w-full mt-2"
-                    size="lg"
-                    startContent={<CreditCard className="w-5 h-5" />}
+                    size="md"
+                    startContent={<CreditCard className="w-4 h-4" />}
                   >
-                    Proceed to Payment
+                    Pay
                   </ButtonPrimary>
                 ) : null}
               </CardBody>
@@ -2477,7 +2284,15 @@ function BookingPageContent() {
         </div>
 
         {showPaymentForm && (
-          <Card className="border border-[#e4d9c8] dark:border-gray-700 shadow-sm overflow-hidden">
+          <Card className="border border-[#e4d9c8] dark:border-gray-700 shadow-sm overflow-hidden relative">
+            {isPaymentProcessing && (
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg">
+                <Loader2 className="w-10 h-10 text-egp-green dark:text-egp-beige animate-spin" />
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Processing payment...
+                </p>
+              </div>
+            )}
             <CardBody className="p-6 space-y-5">
               <div className="flex items-center gap-3 p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
                 <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/40">
@@ -2567,6 +2382,7 @@ function BookingPageContent() {
                     onPaymentSuccess={handlePaymentSuccess}
                     onPaymentError={handlePaymentError}
                     onTestBooking={handlePaymentSuccess}
+                    onProcessingChange={setIsPaymentProcessing}
                   />
                 );
               })()}
@@ -2704,19 +2520,19 @@ function BookingPageContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 pt-24 pb-16 max-w-7xl">
+      <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-24 pb-16">
         {/* Header */}
-        <div className="text-center mb-8 sm:mb-12 px-4">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 md:mb-6 font-playfair">
+        <div className="text-center mb-8 sm:mb-12 px-1 sm:px-0">
+          <h1 className={`${typography.headingPage} ${textColors.heading} mb-3 sm:mb-4 md:mb-6 font-playfair`}>
             Book Your Treatment
           </h1>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto">
+          <p className={`${typography.lead} font-montserrat font-light max-w-3xl mx-auto`}>
             Select services, choose date & time, and pay securely
           </p>
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 gap-6 sm:gap-8 px-4 sm:px-0 items-start">
+        <div className="grid grid-cols-1 gap-6 sm:gap-8 px-0 items-start w-full max-w-7xl mx-auto">
           <div className="space-y-5">
             {bookingSteps.map((step, index) => {
               const Icon = step.icon;
@@ -2747,29 +2563,29 @@ function BookingPageContent() {
               return (
                 <section
                   key={step.key}
-                  className="rounded-3xl border border-[#e4d9c8] dark:border-gray-800 bg-white/60 dark:bg-gray-900/50 backdrop-blur-sm shadow-lg"
+                  className="rounded-2xl sm:rounded-3xl border border-[#e4d9c8] dark:border-gray-800 bg-white/60 dark:bg-gray-900/50 backdrop-blur-sm shadow-md"
                 >
                   <button
                     type="button"
                     onClick={() => handleStepToggle(step.key)}
                     disabled={!canInteract}
-                    className={`w-full flex items-center justify-between gap-4 px-4 sm:px-6 py-5 text-left rounded-3xl transition-colors ${
+                    className={`w-full flex items-center justify-between gap-3 px-4 sm:px-5 py-4 sm:py-5 text-left rounded-2xl sm:rounded-3xl transition-colors ${
                       canInteract
                         ? "hover:bg-white/80 dark:hover:bg-gray-900/70"
                         : "opacity-70 cursor-not-allowed"
                     }`}
                   >
-                    <div className="flex items-center gap-4 sm:gap-5">
+                    <div className="flex items-center gap-3 sm:gap-4">
                       <span
-                        className={`flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border border-[#e4d9c8]/70 dark:border-gray-700 transition-all ${iconWrapperClasses}`}
+                        className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl border border-[#e4d9c8]/70 dark:border-gray-700 transition-all flex-shrink-0 ${iconWrapperClasses}`}
                       >
                         <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
                       </span>
-                      <div className="flex flex-col gap-1">
-                        <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white whitespace-nowrap truncate">
                           {step.label}
                         </h3>
-                        <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
                           Step {index + 1} of {bookingSteps.length}
                         </p>
                         <p className="hidden sm:block text-sm text-gray-500 dark:text-gray-400">
@@ -2777,9 +2593,9 @@ function BookingPageContent() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 flex-shrink-0">
                       <span
-                        className={`text-xs sm:text-sm font-semibold ${statusClass}`}
+                        className={`text-xs font-semibold whitespace-nowrap ${statusClass}`}
                       >
                         {statusLabel}
                       </span>
@@ -2793,9 +2609,9 @@ function BookingPageContent() {
                     </div>
                   </button>
                   <div
-                    className={`${isOpen ? "block" : "hidden"} border-t border-[#e4d9c8] dark:border-gray-800 px-4 sm:px-6 pb-6`}
+                    className={`${isOpen ? "block" : "hidden"} border-t border-[#e4d9c8] dark:border-gray-800 px-4 sm:px-5 ${step.key === "preview" ? "pb-24 sm:pb-5 min-h-[75vh] sm:min-h-0" : "pb-5"}`}
                   >
-                    <div className="pt-6">{renderStepContent(step.key)}</div>
+                    <div className="pt-5">{renderStepContent(step.key)}</div>
                   </div>
                 </section>
               );

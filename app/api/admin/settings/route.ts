@@ -28,7 +28,17 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      return NextResponse.json(data.value);
+      let value = data?.value;
+      if (typeof value === "string") {
+        try {
+          value = JSON.parse(value);
+        } catch {
+          value = {};
+        }
+      }
+      return NextResponse.json(value ?? {}, {
+        headers: { "Cache-Control": "no-store, max-age=0" },
+      });
     } else {
       const result = await supabase.from("admin_settings").select("*");
 

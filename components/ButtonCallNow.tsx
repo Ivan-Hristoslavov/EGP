@@ -1,12 +1,12 @@
 "use client";
 
 import { useAdminProfile } from "@/hooks/useAdminProfile";
+import { siteConfig } from "@/config/site";
 
 export function ButtonCallNow() {
   const { profile, loading, error } = useAdminProfile();
 
-  // Use fallback phone number if profile is not available
-  const phone = profile?.phone || "0800 123 4567";
+  const phone = profile?.phone || siteConfig.contact.phone;
 
   return (
     <div className="fixed bottom-8 right-8 z-50 flex flex-col items-center">

@@ -3,12 +3,14 @@
 import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { siteConfig } from "@/config/site";
-import { Search, Filter, ArrowLeft, Info, Plus, Clock, CheckCircle, X } from "lucide-react";
+import { typography, layout, textColors } from "@/config/typography";
+import { Search, Filter, ArrowLeft, Info, Plus, Clock, CheckCircle } from "lucide-react";
 import Link from 'next/link';
 import { useServices } from '@/hooks/useServices';
 import { aestheticsColors } from "@/config/colors";
 import { PriceWithDiscount } from "@/components/PriceWithDiscount";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Card, CardBody, CardHeader, Chip, Spinner, Select, SelectItem } from "@heroui/react";
+import { Button, Input, Card, CardBody, CardHeader, Chip, Spinner, Select, SelectItem } from "@heroui/react";
+import { ServiceDetailsModal } from "@/components/ServiceDetailsModal";
 
 const categories = [
   'All',
@@ -143,164 +145,6 @@ function ServicesPageContent() {
     setCurrentPage(1);
   };
 
-  const renderServiceModal = () => {
-    if (!selectedService) return null;
-    
-    const service = servicesDataMap[selectedService];
-    if (!service) return null;
-
-  return (
-      <Modal 
-        isOpen={!!selectedService} 
-        onClose={() => setSelectedService(null)}
-        size="3xl"
-        scrollBehavior="inside"
-        backdrop="blur"
-      >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="bg-egp-green dark:bg-egp-green text-white flex flex-col gap-2 py-4">
-                <h2 className="text-xl font-bold">{service.name}</h2>
-                <div className="flex items-center gap-3 text-white/90 flex-wrap text-sm">
-                  <Chip 
-                    startContent={<Clock className="w-3 h-3" />}
-                    variant="flat"
-                    className="bg-white/20 text-white text-xs"
-                    size="sm"
-                  >
-                  {service.duration} min
-                  </Chip>
-                <span className="text-lg font-bold flex justify-center [&_.line-through]:text-white/70 [&_.font-bold]:text-white">
-                    <PriceWithDiscount
-                      price={service.price}
-                      originalPrice={service.originalPrice}
-                      discountPercentage={service.discountPercentage}
-                      size="md"
-                      layout="stack"
-                      align="center"
-                    />
-                  </span>
-                  <Chip 
-                    variant="flat"
-                    className="bg-white/20 text-white text-xs"
-                    size="sm"
-                  >
-                    {service.category}
-                  </Chip>
-          </div>
-              </ModalHeader>
-
-              <ModalBody className="space-y-4 py-4">
-            {/* Description */}
-            <div>
-                  <h3 className="text-base font-semibold text-foreground mb-2 flex items-center gap-2">
-                <Info className="w-4 h-4 text-egp-green" />
-                Overview
-              </h3>
-                  <p className="text-sm text-default-600 leading-relaxed">
-                {service.description}
-            </p>
-          </div>
-
-            {/* Details */}
-            {service.details && (
-                  <Card className="bg-egp-beige-lighter dark:bg-egp-green-dark/30">
-                    <CardBody className="p-3">
-                      <h3 className="text-base font-semibold text-foreground mb-2">
-                  Treatment Details
-                      </h3>
-                      <p className="text-sm text-default-600 leading-relaxed">
-                  {service.details}
-                </p>
-                    </CardBody>
-                  </Card>
-            )}
-
-            {/* Benefits */}
-            {service.benefits && service.benefits.length > 0 && (
-              <div>
-                    <h3 className="text-base font-semibold text-foreground mb-3 flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-egp-green" />
-                  Key Benefits
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {service.benefits.map((benefit: string, index: number) => (
-                        <Card key={index} className="bg-egp-beige-lighter dark:bg-egp-green-dark/30">
-                          <CardBody className="p-2.5">
-                            <div className="flex items-start gap-2">
-                              <CheckCircle className="w-4 h-4 text-egp-green flex-shrink-0 mt-0.5" />
-                              <span className="text-sm text-default-700">{benefit}</span>
-                    </div>
-                          </CardBody>
-                        </Card>
-                  ))}
-                </div>
-                    </div>
-            )}
-
-            {/* Preparation */}
-            {service.preparation && (
-                  <Card className="bg-egp-beige-lighter dark:bg-egp-green-dark/30 border-l-3 border-egp-green">
-                    <CardBody className="p-3">
-                      <h3 className="text-base font-semibold text-foreground mb-2 flex items-center gap-2">
-                        <Info className="w-4 h-4 text-egp-green" />
-                  Preparation
-                </h3>
-                      <p className="text-sm text-default-600 leading-relaxed">
-                  {service.preparation}
-                </p>
-                    </CardBody>
-                  </Card>
-            )}
-
-            {/* Aftercare */}
-            {service.aftercare && (
-                  <Card className="bg-egp-beige-lighter dark:bg-egp-green-dark/30 border-l-3 border-egp-green">
-                    <CardBody className="p-3">
-                      <h3 className="text-base font-semibold text-foreground mb-2 flex items-center gap-2">
-                        <Info className="w-4 h-4 text-egp-green" />
-                  Aftercare
-                </h3>
-                      <p className="text-sm text-default-600 leading-relaxed">
-                  {service.aftercare}
-                </p>
-                    </CardBody>
-                  </Card>
-            )}
-
-            {/* Results Duration */}
-            {service.results_duration_weeks && (
-              <div className="bg-egp-beige-lighter dark:bg-egp-green-dark/30 rounded-lg px-4 py-3 border border-egp-beige-dark/30 dark:border-egp-green/30">
-                <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-egp-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                  <span className="text-sm font-semibold text-foreground">Results Duration:</span>
-                  <span className="text-sm text-default-600">{service.results_duration_weeks} weeks</span>
-                </div>
-              </div>
-            )}
-              </ModalBody>
-              <ModalFooter className="gap-2">
-                <Button variant="light" onPress={onClose} size="sm">
-                  Close
-                </Button>
-                <Link href={service?.id ? `/book?pendingServiceId=${service.id}` : "/book"} onClick={() => onClose()}>
-                  <Button
-                    className="w-full bg-egp-green hover:bg-egp-green-dark text-white"
-                    size="sm"
-                  >
-                    Book This Treatment - £{service.price.toFixed(0)}
-                  </Button>
-                </Link>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
-    );
-  };
 
   // Show loading state while services are being fetched
   if (servicesLoading) {
@@ -316,32 +160,33 @@ function ServicesPageContent() {
 
   return (
     <div className="min-h-screen bg-[#f5f1e9] dark:bg-gray-900">
-      <div className="container mx-auto px-4 pt-24 pb-16 max-w-7xl">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+      <div className={`${layout.containerWide} pt-20 sm:pt-24 pb-10 sm:pb-16`}>
+        {/* Header - Back on left, Our Services centered */}
+        <div className="relative flex items-center justify-between mb-4 sm:mb-6">
           <Link
             href="/"
-            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-[#464C45] dark:hover:text-[#5a6259] transition-colors"
+            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-[#464C45] dark:hover:text-[#5a6259] transition-colors flex-shrink-0 z-10"
           >
-            <ArrowLeft className="w-5 h-5" />
-            Back to Home
+            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="text-sm font-medium">Back</span>
           </Link>
-        </div>
-
-        <div className="text-center mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6 font-playfair">
+          <h1 className={`absolute left-1/2 -translate-x-1/2 text-lg sm:text-2xl md:text-3xl font-bold ${textColors.heading} font-playfair`}>
             Our Services
           </h1>
-          <p className="text-2xl text-gray-600 dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto">
-            Discover our comprehensive range of aesthetic treatments designed to enhance your natural beauty
-                </p>
-              </div>
+          <div className="w-14 sm:w-20" aria-hidden />
+        </div>
 
-        {/* Filters and Search */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
-          <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+        <div className="text-center mb-6 sm:mb-12">
+          <p className={`${typography.lead} font-montserrat font-light max-w-3xl mx-auto`}>
+            Discover our comprehensive range of aesthetic treatments designed to enhance your natural beauty
+          </p>
+        </div>
+
+        {/* Filters and Search - compact on mobile */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-8">
+          <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 items-stretch lg:items-center justify-between">
             {/* Search */}
-            <div className="flex-1 max-w-md">
+            <div className="flex-1 w-full max-w-full lg:max-w-md">
               <Input
                 type="text"
                 placeholder="Search services..."
@@ -366,12 +211,13 @@ function ServicesPageContent() {
 
           </div>
 
-          {/* Filter Options */}
+          {/* Filter Options - responsive grid, ensure Select fits on mobile */}
           {showFilters && (
-            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-700">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                 {/* Category Filter */}
                 <Select
+                  classNames={{ trigger: "min-h-10", value: "text-foreground" }}
                   label="Category"
                   selectedKeys={[selectedCategory]}
                   onSelectionChange={(keys) => {
@@ -387,6 +233,7 @@ function ServicesPageContent() {
 
                 {/* Price Filter */}
                 <Select
+                  classNames={{ trigger: "min-h-10", value: "text-foreground" }}
                   label="Price Range"
                   selectedKeys={[selectedPriceRange]}
                   onSelectionChange={(keys) => {
@@ -402,6 +249,7 @@ function ServicesPageContent() {
 
                 {/* Duration Filter */}
                 <Select
+                  classNames={{ trigger: "min-h-10", value: "text-foreground" }}
                   label="Duration"
                   selectedKeys={[selectedDurationRange]}
                   onSelectionChange={(keys) => {
@@ -417,6 +265,7 @@ function ServicesPageContent() {
 
                 {/* Discount Filter */}
                 <Select
+                  classNames={{ trigger: "min-h-10", value: "text-foreground" }}
                   label="Discount"
                   selectedKeys={[showDiscountedOnly ? 'Discounted only' : 'All']}
                   onSelectionChange={(keys) => {
@@ -435,7 +284,7 @@ function ServicesPageContent() {
 
         {/* Results Count */}
         <div className="flex items-center justify-between mb-6">
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className={`${typography.small}`}>
             Showing {filteredServices.length} of {services.length} services
           </p>
           {(selectedCategory !== 'All' || selectedPriceRange !== 'All Prices' || selectedDurationRange !== 'All Durations' || showDiscountedOnly || searchTerm) && (
@@ -480,14 +329,14 @@ function ServicesPageContent() {
             </Button>
           </div>
         ) : (
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
             {paginatedServices.map(([serviceId, service]) => (
               <Card
                 key={serviceId}
                 className="h-full"
                 shadow="md"
               >
-                <CardHeader className="bg-egp-beige-lighter dark:bg-egp-green-dark px-3 py-2.5 border-b border-egp-beige-dark/60 dark:border-egp-green relative">
+                <CardHeader className="bg-egp-beige-lighter dark:bg-egp-green-dark px-2.5 sm:px-3 py-2 sm:py-2.5 border-b border-egp-beige-dark/60 dark:border-egp-green relative">
                   {/* Category Badge - Top Left */}
                     <div className="absolute top-1 left-1">
                     <Chip 
@@ -513,7 +362,7 @@ function ServicesPageContent() {
                       
                   {/* Service Name - Centered */}
                   <div className="text-center pt-4 pb-1.5 w-full">
-                    <h3 className="text-base font-bold text-egp-green dark:text-white leading-tight line-clamp-2 mb-1">
+                    <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-tight line-clamp-2 mb-1">
                       {service.name}
                     </h3>
                     {/* Price */}
@@ -635,7 +484,12 @@ function ServicesPageContent() {
         )}
 
         {/* Service Modal */}
-        {renderServiceModal()}
+        <ServiceDetailsModal
+          isOpen={!!selectedService}
+          onClose={() => setSelectedService(null)}
+          service={selectedService ? servicesDataMap[selectedService] ?? null : null}
+          showBookButton
+        />
       </div>
     </div>
   );

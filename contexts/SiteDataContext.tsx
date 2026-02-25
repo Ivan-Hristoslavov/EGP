@@ -117,18 +117,18 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
           googleMapsAddress: profile.google_maps_address || profile.company_address || defaultContactInfo.googleMapsAddress
         });
         
-        // Parse transport_options and nearby_landmarks (they might be JSON strings)
         let transportOptions = defaultFindUsData.transportOptions;
-        let nearbyLandmarks = defaultFindUsData.nearbyLandmarks;
+        let nearbyLandmarks: NearbyLandmark[] = defaultFindUsData.nearbyLandmarks;
         
         try {
           if (profile.transport_options) {
-            if (typeof profile.transport_options === 'string') {
-              // Handle double-encoded JSON strings
-              const parsed = JSON.parse(profile.transport_options);
-              transportOptions = typeof parsed === 'string' ? JSON.parse(parsed) : parsed;
-            } else {
-              transportOptions = profile.transport_options;
+            let parsed = profile.transport_options;
+            // Unwrap any number of JSON-string wrappings
+            while (typeof parsed === 'string') {
+              parsed = JSON.parse(parsed);
+            }
+            if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+              transportOptions = parsed;
             }
           }
         } catch (e) {
@@ -137,12 +137,12 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
         
         try {
           if (profile.nearby_landmarks) {
-            if (typeof profile.nearby_landmarks === 'string') {
-              // Handle double-encoded JSON strings
-              const parsed = JSON.parse(profile.nearby_landmarks);
-              nearbyLandmarks = Array.isArray(parsed) ? parsed : (typeof parsed === 'string' ? JSON.parse(parsed) : []);
-            } else if (Array.isArray(profile.nearby_landmarks)) {
-              nearbyLandmarks = profile.nearby_landmarks;
+            let parsed = profile.nearby_landmarks;
+            while (typeof parsed === 'string') {
+              parsed = JSON.parse(parsed);
+            }
+            if (Array.isArray(parsed)) {
+              nearbyLandmarks = parsed;
             }
           }
         } catch (e) {

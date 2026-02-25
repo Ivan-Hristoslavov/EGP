@@ -40,6 +40,19 @@ export const getTextClasses = (onDark: boolean = false, onGreen: boolean = false
   return typography.body;
 };
 
+// Input component - label outside, no blue ring, single green border on focus
+export const inputClassNames = {
+  base: "input-egp",
+  label: "text-base font-medium",
+  input: "text-base outline-none focus:outline-none focus-visible:outline-none",
+  inputWrapper: [
+    "shadow-none !shadow-[none]",
+    "!ring-0 !ring-transparent",
+    "data-[focus-within]:!shadow-none data-[focus-within]:!ring-0",
+    "data-[focus-within]:border-2 data-[focus-within]:border-[#464C45]",
+  ].join(" "),
+};
+
 // Export default
 export default designSystem;
 

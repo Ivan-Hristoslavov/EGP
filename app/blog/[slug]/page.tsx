@@ -91,40 +91,40 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-      {/* Hero Section */}
-      <section className="py-12 md:py-16 bg-gradient-to-br from-[#f5f1e9] via-[#eee6d9] to-[#e4d9c8] dark:from-gray-800 dark:via-gray-800 dark:to-gray-900">
+      {/* Hero Section - compact on mobile */}
+      <section className="py-8 sm:py-12 md:py-16 bg-gradient-to-br from-[#f5f1e9] via-[#eee6d9] to-[#e4d9c8] dark:from-gray-800 dark:via-gray-800 dark:to-gray-900">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <Link 
               href="/blog"
-              className="inline-flex items-center gap-2 text-[#9d9585] dark:text-[#c9c1b0] hover:text-[#6b5f4b] dark:hover:text-[#e0d8c8] transition-colors mb-6"
+              className="inline-flex items-center gap-2 text-sm text-[#9d9585] dark:text-[#c9c1b0] hover:text-[#6b5f4b] dark:hover:text-[#e0d8c8] transition-colors mb-4 sm:mb-6"
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Blog</span>
+              <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span>Back</span>
             </Link>
 
-            <div className="flex items-center gap-4 mb-6">
-              <span className="inline-block px-4 py-2 bg-[#f0ede7] dark:bg-gray-800/40 text-[#6b5f4b] dark:text-[#d9d1c1] rounded-full text-sm font-medium">
+            <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-6 flex-wrap">
+              <span className="inline-block px-2.5 py-1 sm:px-4 sm:py-2 bg-[#f0ede7] dark:bg-gray-800/40 text-[#6b5f4b] dark:text-[#d9d1c1] rounded-full text-xs sm:text-sm font-medium">
                 {post.category}
               </span>
               {post.featured && (
-                <span className="inline-block px-4 py-2 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 rounded-full text-sm font-medium">
+                <span className="inline-block px-2.5 py-1 sm:px-4 sm:py-2 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 rounded-full text-xs sm:text-sm font-medium">
                   Featured
                 </span>
               )}
             </div>
 
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 font-playfair">
+            <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 font-playfair leading-tight">
               {post.title}
             </h1>
 
-            <div className="flex flex-wrap items-center gap-6 text-gray-600 dark:text-gray-400 mb-8">
-              <div className="flex items-center gap-2">
-                <User className="w-5 h-5" />
+            <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-base text-gray-600 dark:text-gray-400 mb-6 sm:mb-8">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <User className="w-3.5 h-3.5 sm:w-5 sm:h-5 flex-shrink-0" />
                 <span>{post.author_name}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Calendar className="w-3.5 h-3.5 sm:w-5 sm:h-5 flex-shrink-0" />
                 <time dateTime={publishedDate.toISOString()}>
                   {publishedDate.toLocaleDateString('en-GB', {
                     year: 'numeric',
@@ -133,14 +133,14 @@ export default async function BlogPostPage({ params }: PageProps) {
                   })}
                 </time>
               </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-5 h-5" />
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Clock className="w-3.5 h-3.5 sm:w-5 sm:h-5 flex-shrink-0" />
                 <span>{post.read_time_minutes} min read</span>
               </div>
             </div>
 
             {post.excerpt && (
-              <p className="text-xl text-gray-700 dark:text-gray-300 mb-8 leading-relaxed">
+              <p className="text-sm sm:text-base md:text-xl text-gray-700 dark:text-gray-300 mb-6 sm:mb-8 leading-relaxed">
                 {post.excerpt}
               </p>
             )}
@@ -148,23 +148,23 @@ export default async function BlogPostPage({ params }: PageProps) {
         </div>
       </section>
 
-      {/* Content Section */}
-      <section className="py-12 md:py-16">
+      {/* Content Section - compact on mobile */}
+      <section className="py-8 sm:py-12 md:py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             {/* Featured Image */}
             {post.featured_image_url && (
-              <div className="mb-8 rounded-xl overflow-hidden">
+              <div className="mb-6 sm:mb-8 rounded-lg sm:rounded-xl overflow-hidden">
                 <img
                   src={post.featured_image_url}
                   alt={post.title}
-                  className="w-full h-auto object-cover"
+                  className="w-full h-auto object-cover max-h-[240px] sm:max-h-none object-top"
                 />
               </div>
             )}
 
-            {/* Blog Content */}
-            <article className="prose prose-lg dark:prose-invert max-w-none">
+            {/* Blog Content - smaller prose on mobile */}
+            <article className="prose prose-sm sm:prose-base md:prose-lg dark:prose-invert max-w-none prose-headings:text-lg sm:prose-headings:text-xl md:prose-headings:text-2xl prose-p:text-sm sm:prose-p:text-base prose-li:text-sm sm:prose-li:text-base">
               <div 
                 className="blog-content"
                 dangerouslySetInnerHTML={{ __html: post.content }}
@@ -172,7 +172,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             </article>
 
             {/* Navigation */}
-            <div className="mt-16 pt-8 border-t border-gray-200 dark:border-gray-700">
+            <div className="mt-10 sm:mt-16 pt-6 sm:pt-8 border-t border-gray-200 dark:border-gray-700">
               <div className="flex flex-col sm:flex-row justify-between gap-6">
                 {prevPost ? (
                   <Link
