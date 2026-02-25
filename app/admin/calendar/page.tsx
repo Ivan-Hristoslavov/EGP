@@ -1713,7 +1713,12 @@ export default function CalendarPage() {
             status: 'pending',
             payment_status: 'pending',
             address: '',
-            notes: ''
+            notes: '',
+            payment_method: 'card' as 'cash' | 'card' | 'cash_and_card',
+            cash_amount: '',
+            card_amount: '',
+            payment_type: 'full' as 'full' | 'deposit',
+            deposit_amount: '',
           });
         }}
         size="3xl"

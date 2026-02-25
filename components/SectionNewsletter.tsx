@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Mail, Gift, Copy, Check } from "lucide-react";
+import { Mail, Gift, Copy, Check, Sparkles } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { aestheticsColors } from "@/config/colors";
-import { Input, Button, Card, CardBody, Chip } from "@heroui/react";
+import { Input, Button } from "@heroui/react";
+import { typography, layout, textColors } from "@/config/typography";
 
 export default function SectionNewsletter() {
   const [email, setEmail] = useState("");
@@ -65,60 +66,99 @@ export default function SectionNewsletter() {
 
   if (status === "success") {
     return (
-      <section className="py-12 sm:py-16 md:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#464C45] dark:bg-[#464C45] rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 border-2 border-[#c9c1b0] dark:border-gray-700 shadow-lg">
-              <svg
-                className="w-8 h-8 sm:w-10 sm:h-10 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7V3z" />
-              </svg>
-            </div>
-            <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 px-4">
-              Welcome to EGP Aesthetics!
-            </h3>
-            <p className="text-lg sm:text-xl text-gray-700 dark:text-gray-300 mb-4 sm:mb-6 px-4">
-              Check your email for your exclusive discount code:
-            </p>
-            <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-2 border-[#c9c1b0] dark:border-gray-700 shadow-lg">
-              <CardBody className="px-6 sm:px-8 py-3 sm:py-4">
-                <div className="text-xs sm:text-sm text-default-500 mb-1 font-medium">Your Discount Code</div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Chip
-                    size="lg"
-                    variant="flat"
-                    className="text-2xl sm:text-3xl font-bold text-[#464C45] dark:text-[#464C45] tracking-wider bg-transparent"
-                  >
-                    {discountCode}
-                  </Chip>
-                  <Button
-                    size="sm"
-                    variant="flat"
-                    onPress={handleCopyCode}
-                    className="bg-[#464C45] dark:bg-[#464C45] text-white min-w-0"
-                    startContent={copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                  >
-                    {copied ? "Copied!" : "Copy"}
-                  </Button>
+      <section className="py-8 sm:py-10 md:py-12 bg-gradient-to-b from-egp-beige-lighter via-egp-beige-light/50 to-egp-beige-lighter dark:from-egp-green-darker dark:via-egp-green-dark dark:to-egp-green-darker">
+        <div className={layout.container}>
+          <div className="max-w-4xl mx-auto">
+            {/* Success card - compact, uses more width */}
+            <div className="relative overflow-hidden rounded-xl sm:rounded-2xl shadow-lg border border-egp-beige-dark/30 dark:border-egp-green/30 bg-white dark:bg-egp-green-dark/95 backdrop-blur-sm">
+              {/* Decorative top gradient strip */}
+              <div
+                className="h-1.5 w-full"
+                style={{
+                  background: `linear-gradient(90deg, ${aestheticsColors.green.dark}, ${aestheticsColors.green.DEFAULT}, ${aestheticsColors.primary.dark}, ${aestheticsColors.green.DEFAULT})`,
+                }}
+              />
+
+              <div className="px-5 sm:px-8 py-6 sm:py-8">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+                  {/* Icon + heading block */}
+                  <div className="flex items-center gap-4 sm:flex-shrink-0">
+                    <div
+                      className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                      style={{
+                        background: `linear-gradient(135deg, ${aestheticsColors.green.DEFAULT}, ${aestheticsColors.green.dark})`,
+                        boxShadow: `0 4px 12px -2px rgba(70, 76, 69, 0.3)`,
+                      }}
+                    >
+                      <Sparkles className="w-6 h-6 text-white" strokeWidth={2} />
+                    </div>
+                    <div>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold uppercase tracking-wider bg-egp-green/10 dark:bg-white/10 text-egp-green dark:text-white/90 border border-egp-green/20 dark:border-white/20 mb-1">
+                        <Gift className="w-3 h-3" />
+                        Exclusive Offer
+                      </span>
+                      <h3 className={`${typography.headingCard} ${textColors.heading}`}>
+                        Welcome to EGP Aesthetics!
+                      </h3>
+                      <p className={`${typography.small} ${textColors.muted} mt-0.5`}>
+                        Check your email for details.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Discount code + actions - takes remaining width */}
+                  <div className="flex-1 min-w-0 space-y-3">
+                    <div
+                      className="rounded-lg sm:rounded-xl p-4 sm:p-5 border-2"
+                      style={{
+                        background: `linear-gradient(135deg, ${aestheticsColors.primary.light} 0%, ${aestheticsColors.neutral.light} 100%)`,
+                        borderColor: aestheticsColors.green.border.light,
+                        boxShadow: `inset 0 1px 0 rgba(255,255,255,0.8), 0 2px 8px -2px rgba(70, 76, 69, 0.12)`,
+                      }}
+                    >
+                      <div className="flex flex-col gap-3">
+                        <div className="min-w-0">
+                          <p className={`${typography.small} ${textColors.muted} mb-0.5 font-semibold uppercase tracking-wider`}>
+                            Your Discount Code
+                          </p>
+                          <p className="text-lg sm:text-xl font-bold tracking-[0.15em] text-egp-green dark:text-white select-all font-mono">
+                            {discountCode}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={handleCopyCode}
+                            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 ${
+                              copied
+                                ? "bg-emerald-500/90 text-white shadow-md"
+                                : "bg-egp-green hover:bg-egp-green-dark text-white shadow-md hover:shadow-lg active:scale-[0.98]"
+                            }`}
+                          >
+                            {copied ? <Check className="w-3.5 h-3.5" strokeWidth={2.5} /> : <Copy className="w-3.5 h-3.5" />}
+                            {copied ? "Copied!" : "Copy"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setStatus("idle")}
+                            className="px-4 py-2 rounded-lg font-semibold text-sm bg-egp-beige-dark hover:bg-egp-beige-darker text-white dark:bg-egp-green dark:hover:bg-egp-green-dark transition-colors"
+                          >
+                            Close
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <p className={`${typography.small} ${textColors.muted}`}>
+                      Use this code for{" "}
+                      <span className="font-bold text-egp-green dark:text-white">
+                        {siteConfig.newsletter.welcomeDiscountPercent}% off
+                      </span>{" "}
+                      your first treatment. Valid 30 days.
+                    </p>
+                  </div>
                 </div>
-              </CardBody>
-            </Card>
-            <p className="text-base sm:text-lg text-gray-700 dark:text-gray-300 mb-6 sm:mb-8 px-4">
-              Use this code to get <strong className="text-gray-900 dark:text-white">{siteConfig.newsletter.welcomeDiscountPercent}% off</strong> your first treatment!
-            </p>
-            <Button
-              onPress={() => setStatus("idle")}
-              color="primary"
-              size="lg"
-              className="bg-[#464C45] dark:bg-[#464C45] text-white font-semibold"
-            >
-              Close
-            </Button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
