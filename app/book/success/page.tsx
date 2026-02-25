@@ -97,7 +97,7 @@ function BookingSuccessContent() {
 
   if (!bookingDetails) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center pt-32">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center pt-20 sm:pt-24">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#9d9585] mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Loading booking details...</p>
@@ -109,7 +109,7 @@ function BookingSuccessContent() {
   // Show error state if booking not found or error occurred
   if (bookingDetails.error) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-32 pb-8">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 sm:pt-24 pb-8">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 text-center">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full mb-6">
@@ -134,7 +134,7 @@ function BookingSuccessContent() {
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-[#9d9585] text-[#9d9585] dark:text-[#b5ad9d] rounded-lg hover:bg-[#9d9585] hover:text-white dark:hover:bg-[#b5ad9d] transition-all"
               >
                 <ArrowRight className="w-4 h-4" />
-                Back to Home
+                Back
               </Link>
             </div>
           </div>
@@ -407,7 +407,7 @@ function BookingSuccessContent() {
         }
       `}} />
       
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-32 pb-8 print-content">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 sm:pt-24 pb-8 print-content">
         <div className="container mx-auto px-4 max-w-4xl print-container">
           {/* Logo - Print Only */}
           <div className="hidden print-only print-logo">
@@ -421,194 +421,189 @@ function BookingSuccessContent() {
             />
           </div>
           
-          {/* Success Header */}
-          <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-[#f5f1e9] dark:bg-[#9d9585]/30 rounded-full mb-8">
-            <CheckCircle className="w-10 h-10 text-[#9d9585] dark:text-[#c9c1b0]" />
+          {/* Success Header - compact */}
+          <div className="text-center mb-5">
+            <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-[#f5f1e9] dark:bg-[#9d9585]/30 rounded-full mb-2">
+              <CheckCircle className="w-7 h-7 sm:w-8 sm:h-8 text-[#9d9585] dark:text-[#c9c1b0]" />
+            </div>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#464C45] dark:text-[#c9c1b0] mb-2 font-playfair">
+              Booking Confirmed!
+            </h1>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 font-montserrat font-light">
+              Thank you for choosing EGP Aesthetics London
+            </p>
           </div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#464C45] dark:text-[#c9c1b0] mb-4 font-playfair">
-            Booking Confirmed!
-          </h1>
-          <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto">
-            Thank you for choosing EGP Aesthetics London
-          </p>
+
+        {/* Booking Details Card - consistent with book page */}
+        <div className="border border-[#e4d9c8] dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden mb-5">
+          <div className="border-b border-[#e4d9c8] dark:border-gray-700 bg-[#faf7f1] dark:bg-gray-800/50 px-4 sm:px-5 py-3">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white">
+              Booking Details
+            </h2>
+          </div>
+          <div className="p-4 sm:p-5">
+            <div className="divide-y divide-[#e4d9c8] dark:divide-gray-700 [&>div:first-child]:pt-0">
+              <div className="flex items-center gap-3 py-3">
+                <div className="w-10 h-10 rounded-lg bg-egp-green/10 dark:bg-egp-green/20 flex items-center justify-center flex-shrink-0">
+                  <Calendar className="w-5 h-5 text-egp-green dark:text-egp-beige" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {new Date(bookingDetails.selectedDate).toLocaleDateString('en-GB', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 py-3">
+                <div className="w-10 h-10 rounded-lg bg-egp-green/10 dark:bg-egp-green/20 flex items-center justify-center flex-shrink-0">
+                  <Clock className="w-5 h-5 text-egp-green dark:text-egp-beige" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Time</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {bookingDetails.selectedTime}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 py-3">
+                <div className="w-10 h-10 rounded-lg bg-egp-green/10 dark:bg-egp-green/20 flex items-center justify-center flex-shrink-0">
+                  <Mail className="w-5 h-5 text-egp-green dark:text-egp-beige" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Booking Number</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white font-mono">
+                    {bookingDetails.bookingNumber || bookingDetails.id}
+                  </p>
+                </div>
+              </div>
+              {bookingDetails.teamMember && (
+                <div className="flex items-center gap-3 py-3">
+                  <div className="w-10 h-10 rounded-lg bg-egp-green/10 dark:bg-egp-green/20 flex items-center justify-center flex-shrink-0">
+                    <User className="w-5 h-5 text-egp-green dark:text-egp-beige" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Practitioner</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                      {bookingDetails.teamMember.name}
+                    </p>
+                    {bookingDetails.teamMember.role && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        {bookingDetails.teamMember.role}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* Booking Details Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 mb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column - Booking Details */}
-            <div className="space-y-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                Booking Details
-              </h2>
-              
-              <div className="space-y-4">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-[#f5f1e9] dark:bg-[#9d9585]/30 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Calendar className="w-6 h-6 text-[#9d9585] dark:text-[#b5ad9d]" />
+        {/* Customer Information - same card style */}
+        <div className="border border-[#e4d9c8] dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden mb-5">
+          <div className="border-b border-[#e4d9c8] dark:border-gray-700 bg-[#faf7f1] dark:bg-gray-800/50 px-4 sm:px-5 py-3">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white">
+              Customer Information
+            </h2>
+          </div>
+          <div className="p-4 sm:p-5">
+            <div className="divide-y divide-[#e4d9c8] dark:divide-gray-700 [&>div:first-child]:pt-0">
+              {bookingDetails.customerName && (
+                <div className="flex items-center gap-3 py-3">
+                  <div className="w-10 h-10 rounded-lg bg-egp-green/10 dark:bg-egp-green/20 flex items-center justify-center flex-shrink-0">
+                    <User className="w-5 h-5 text-egp-green dark:text-egp-beige" />
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Date</p>
-                    <p className="font-semibold text-base text-gray-900 dark:text-white">
-                      {new Date(bookingDetails.selectedDate).toLocaleDateString('en-GB', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white break-words">
+                      {bookingDetails.customerName}
                     </p>
                   </div>
                 </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-[#f5f1e9] dark:bg-[#9d9585]/30 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Clock className="w-6 h-6 text-[#9d9585] dark:text-[#b5ad9d]" />
+              )}
+              {bookingDetails.customerEmail && (
+                <div className="flex items-center gap-3 py-3">
+                  <div className="w-10 h-10 rounded-lg bg-egp-green/10 dark:bg-egp-green/20 flex items-center justify-center flex-shrink-0">
+                    <Mail className="w-5 h-5 text-egp-green dark:text-egp-beige" />
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Time</p>
-                    <p className="font-semibold text-base text-gray-900 dark:text-white">
-                      {bookingDetails.selectedTime}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white break-all">
+                      {bookingDetails.customerEmail}
                     </p>
                   </div>
                 </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-[#f5f1e9] dark:bg-[#9d9585]/30 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Mail className="w-6 h-6 text-[#9d9585] dark:text-[#b5ad9d]" />
+              )}
+              {bookingDetails.customerPhone && (
+                <div className="flex items-center gap-3 py-3">
+                  <div className="w-10 h-10 rounded-lg bg-egp-green/10 dark:bg-egp-green/20 flex items-center justify-center flex-shrink-0">
+                    <Phone className="w-5 h-5 text-egp-green dark:text-egp-beige" />
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Booking Number</p>
-                    <p className="font-semibold text-base text-gray-900 dark:text-white">
-                      {bookingDetails.bookingNumber || bookingDetails.id}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Phone</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                      {bookingDetails.customerPhone}
                     </p>
                   </div>
                 </div>
-
-                {bookingDetails.teamMember && (
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-[#f5f1e9] dark:bg-[#9d9585]/30 rounded-full flex items-center justify-center flex-shrink-0">
-                      <User className="w-6 h-6 text-[#9d9585] dark:text-[#b5ad9d]" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Practitioner</p>
-                      <p className="font-semibold text-base text-gray-900 dark:text-white">
-                        {bookingDetails.teamMember.name}
-                      </p>
-                      {bookingDetails.teamMember.role && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                          {bookingDetails.teamMember.role}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Right Column - Customer Information */}
-            <div className="space-y-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                Customer Information
-              </h2>
-              
-              <div className="space-y-4">
-                {bookingDetails.customerName && (
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-[#f5f1e9] dark:bg-[#9d9585]/30 rounded-full flex items-center justify-center flex-shrink-0">
-                      <User className="w-6 h-6 text-[#9d9585] dark:text-[#b5ad9d]" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Customer Name</p>
-                      <p className="font-semibold text-base text-gray-900 dark:text-white">
-                        {bookingDetails.customerName}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {bookingDetails.customerEmail && (
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-[#f5f1e9] dark:bg-[#9d9585]/30 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Mail className="w-6 h-6 text-[#9d9585] dark:text-[#b5ad9d]" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Email</p>
-                      <p className="font-semibold text-base text-gray-900 dark:text-white">
-                        {bookingDetails.customerEmail}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {bookingDetails.customerPhone && (
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-[#f5f1e9] dark:bg-[#9d9585]/30 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Phone className="w-6 h-6 text-[#9d9585] dark:text-[#b5ad9d]" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Phone</p>
-                      <p className="font-semibold text-base text-gray-900 dark:text-white">
-                        {bookingDetails.customerPhone}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* Services Booked Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 mb-8">
-          <div className="space-y-6">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-6">
+        <div className="border border-[#e4d9c8] dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden mb-5">
+          <div className="border-b border-[#e4d9c8] dark:border-gray-700 bg-[#faf7f1] dark:bg-gray-800/50 px-4 sm:px-5 py-3">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white">
               Services Booked
             </h2>
-            
-            <div className="space-y-4 mb-6">
+          </div>
+          <div className="p-4 sm:p-5">
+            <ul className="divide-y divide-[#e4d9c8] dark:divide-gray-700">
               {bookingDetails.services.map((service: any, index: number) => (
-                <div key={index} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="flex-1">
-                      <p className="font-semibold text-lg text-gray-900 dark:text-white mb-1">
-                        {service.name}
-                      </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Quantity: {service.quantity}
-                      </p>
-                    </div>
-                    <p className="font-bold text-xl text-[#9d9585] dark:text-[#b5ad9d] whitespace-nowrap">
-                      £{service.price * service.quantity}
+                <li key={index} className="py-3 flex justify-between items-start gap-4">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white">
+                      {service.name}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      Qty: {service.quantity}
                     </p>
                   </div>
-                </div>
+                  <p className="font-bold text-base text-egp-green dark:text-egp-beige whitespace-nowrap flex-shrink-0">
+                    £{service.price * service.quantity}
+                  </p>
+                </li>
               ))}
-            </div>
+            </ul>
 
-            <div className="border-t-2 border-gray-300 dark:border-gray-600 pt-6 space-y-2">
+            <div className="border-t border-[#e4d9c8] dark:border-gray-700 pt-4 mt-4 space-y-2">
               {bookingDetails.paymentType === 'deposit' && bookingDetails.remainingAmount != null && bookingDetails.remainingAmount > 0 ? (
                 <>
                   <div className="flex justify-between items-center">
-                    <span className="text-lg font-semibold text-gray-900 dark:text-white">Paid now (deposit):</span>
-                    <span className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400">
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">Paid now (deposit):</span>
+                    <span className="text-lg font-bold text-green-600 dark:text-green-400">
                       £{Number(bookingDetails.amountPaid ?? bookingDetails.totalAmount).toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-base text-gray-600 dark:text-gray-400">Due on arrival:</span>
-                    <span className="text-xl font-bold text-gray-900 dark:text-white">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Due on arrival:</span>
+                    <span className="text-base font-bold text-gray-900 dark:text-white">
                       £{Number(bookingDetails.remainingAmount).toFixed(2)}
                     </span>
                   </div>
-                  <p className="text-sm text-amber-700 dark:text-amber-300 mt-2">
-                    You can cancel or request a refund up to 24 hours before your appointment.
+                  <p className="text-xs text-amber-700 dark:text-amber-300 mt-2">
+                    Cancel or request a refund up to 24 hours before your appointment.
                   </p>
                 </>
               ) : (
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-semibold text-gray-900 dark:text-white">Total Paid:</span>
-                  <span className="text-3xl font-bold text-green-600 dark:text-green-400">
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">Total Paid:</span>
+                  <span className="text-xl font-bold text-green-600 dark:text-green-400">
                     £{Number(bookingDetails.totalAmount).toFixed(2)}
                   </span>
                 </div>
@@ -618,52 +613,54 @@ function BookingSuccessContent() {
         </div>
 
         {/* Next Steps */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 mb-8 no-print">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-            What Happens Next?
-          </h2>
+        <div className="border border-[#e4d9c8] dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden mb-5 no-print">
+          <div className="border-b border-[#e4d9c8] dark:border-gray-700 bg-[#faf7f1] dark:bg-gray-800/50 px-4 sm:px-5 py-3">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white">
+              What Happens Next?
+            </h2>
+          </div>
+          <div className="p-4 sm:p-5">
           
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Mail className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          <div className="grid sm:grid-cols-3 gap-4">
+            <div className="text-center p-3 rounded-lg border border-[#e4d9c8] dark:border-gray-700 bg-[#faf7f1]/50 dark:bg-gray-800/30">
+              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
+                <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+              <h3 className="font-semibold text-sm text-gray-900 dark:text-white mb-1">
                 Confirmation Email
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                You'll receive a detailed confirmation email within the next few minutes.
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                You'll receive a confirmation email shortly.
               </p>
             </div>
-
-            <div className="text-center">
-              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Phone className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            <div className="text-center p-3 rounded-lg border border-[#e4d9c8] dark:border-gray-700 bg-[#faf7f1]/50 dark:bg-gray-800/30">
+              <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
+                <Phone className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+              <h3 className="font-semibold text-sm text-gray-900 dark:text-white mb-1">
                 Pre-Treatment Call
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                We'll call you 24 hours before your appointment to confirm details.
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                We'll call 24 hours before to confirm.
               </p>
             </div>
-
-            <div className="text-center">
-              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
+            <div className="text-center p-3 rounded-lg border border-[#e4d9c8] dark:border-gray-700 bg-[#faf7f1]/50 dark:bg-gray-800/30">
+              <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
+                <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
               </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-                Arrival Instructions
+              <h3 className="font-semibold text-sm text-gray-900 dark:text-white mb-1">
+                Arrival
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Please arrive 10 minutes early and bring a form of ID.
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                Arrive 10 minutes early with ID.
               </p>
             </div>
+          </div>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 no-print">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 no-print">
           <ButtonPrimary
             as={Link}
             href="/book"
@@ -705,7 +702,7 @@ function BookingSuccessContent() {
         </div>
 
         {/* Contact Info */}
-        <div className="mt-8 text-center no-print">
+        <div className="mt-6 text-center no-print">
           <p className="text-gray-600 dark:text-gray-400 mb-2">
             Questions about your booking?
           </p>
@@ -728,7 +725,7 @@ function BookingSuccessContent() {
         </div>
         
         {/* Print-only footer with location and thank you message */}
-        <div className="mt-8 text-center print-only hidden border-t border-gray-300 pt-6">
+        <div className="mt-6 text-center print-only hidden border-t border-gray-300 pt-4">
           <div className="mb-4">
             <h3 className="text-lg font-bold mb-2">Our Location</h3>
             <p className="text-sm leading-relaxed">

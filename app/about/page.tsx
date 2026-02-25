@@ -87,7 +87,7 @@ export default async function AboutPage() {
                 className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-8 lg:mb-10"
               >
                 <ArrowLeft className="w-4 h-4" />
-                Back to Home
+                Back
               </Link>
 
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 mb-3">
@@ -141,7 +141,7 @@ export default async function AboutPage() {
             className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Home
+            Back
           </Link>
         </div>
       ) : null}
@@ -196,7 +196,7 @@ export default async function AboutPage() {
             className="inline-flex items-center gap-2 mt-6 text-gray-900 dark:text-white font-medium"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Home
+            Back
           </Link>
         </div>
       )}

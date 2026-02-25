@@ -49,27 +49,28 @@ export default function BlogPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-      <div className={`${layout.container} pt-24 pb-16`}>
-        {/* Back to Home Button */}
-        <div className="flex items-center gap-4 mb-8">
+      <div className={`${layout.container} pt-20 sm:pt-24 pb-10 sm:pb-16`}>
+        {/* Header - Back on left, Our Blog centered (like Find Us) */}
+        <div className="relative flex items-center justify-between mb-4 sm:mb-6">
           <Button
             as={Link}
             href="/"
             variant="light"
-            startContent={<ArrowLeft className="w-5 h-5" />}
+            size="sm"
+            startContent={<ArrowLeft className="w-4 h-4" />}
+            className="text-sm font-medium text-[#3a3428] dark:text-gray-200 flex-shrink-0 z-10"
           >
-            Back to Home
+            Back
           </Button>
-        </div>
-        
-        <div className="text-center mb-12">
-          <h1 className={`${typography.headingPage} ${textColors.heading} mb-6 font-playfair`}>
+          <h1 className={`absolute left-1/2 -translate-x-1/2 text-lg sm:text-2xl md:text-3xl font-bold ${textColors.heading} font-playfair`}>
             Our Blog
           </h1>
-          <p className={`${typography.lead} font-montserrat font-light max-w-3xl mx-auto`}>
-            Stay informed about the latest in aesthetic treatments, skincare tips, and beauty insights.
-          </p>
+          <div className="w-14 sm:w-16" aria-hidden />
         </div>
+
+        <p className={`${typography.lead} font-montserrat font-light max-w-3xl mx-auto text-center text-sm sm:text-base mb-6 sm:mb-12`}>
+          Stay informed about the latest in aesthetic treatments, skincare tips, and beauty insights.
+        </p>
 
         {posts.length === 0 ? (
           <Card className="py-12">
@@ -83,11 +84,11 @@ export default function BlogPage() {
             </CardBody>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-10">
             {featuredPosts.map((post) => (
               <Link key={post.id} href={`/blog/${post.slug}`}>
                 <Card className="group relative flex h-full flex-col md:col-span-2 xl:col-span-3" shadow="lg" isPressable>
-                  <CardBody className="relative z-10 flex flex-col gap-4 sm:gap-6 p-6 sm:p-9 md:p-12">
+                  <CardBody className="relative z-10 flex flex-col gap-2 sm:gap-6 p-4 sm:p-9 md:p-12">
                     <div className="absolute right-3 top-3 sm:right-6 sm:top-6 z-20">
                       <Chip
                         size="sm"
@@ -116,11 +117,11 @@ export default function BlogPage() {
                       </Chip>
                     </div>
                     <div>
-                      <h2 className="text-2xl md:text-3xl font-bold text-foreground transition-colors duration-300 group-hover:text-[#7b715f]">
+                      <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-foreground transition-colors duration-300 group-hover:text-[#7b715f]">
                         {post.title}
                       </h2>
                       {post.excerpt && (
-                        <p className="mt-4 text-lg leading-relaxed text-default-600">
+                        <p className="mt-2 sm:mt-4 text-sm sm:text-lg leading-relaxed text-default-600">
                           {truncateText(post.excerpt, 220)}
                         </p>
                       )}
@@ -149,7 +150,7 @@ export default function BlogPage() {
             {regularPosts.map((post) => (
               <Link key={post.id} href={`/blog/${post.slug}`}>
                 <Card className="group relative flex h-full flex-col" shadow="lg" isPressable>
-                  <CardBody className="relative z-10 flex flex-1 flex-col p-5 sm:p-8">
+                  <CardBody className="relative z-10 flex flex-1 flex-col p-4 sm:p-8">
                     <div className="absolute right-3 top-3 sm:right-6 sm:top-6 z-20">
                       <Chip
                         size="sm"
@@ -168,15 +169,15 @@ export default function BlogPage() {
                     >
                       {post.category}
                     </Chip>
-                    <h2 className="text-2xl font-semibold text-foreground transition-colors duration-300 group-hover:text-[#7b715f]">
+                    <h2 className="text-lg sm:text-2xl font-semibold text-foreground transition-colors duration-300 group-hover:text-[#7b715f]">
                       {post.title}
                     </h2>
                     {post.excerpt && (
-                      <p className="mt-4 flex-1 text-base leading-relaxed text-default-600">
+                      <p className="mt-2 sm:mt-4 flex-1 text-sm sm:text-base leading-relaxed text-default-600">
                         {truncateText(post.excerpt, 160)}
                       </p>
                     )}
-                    <div className="mt-6 flex items-center justify-between text-sm text-default-500">
+                    <div className="mt-4 sm:mt-6 flex items-center justify-between text-xs sm:text-sm text-default-500">
                       <time>
                         {post.published_at
                           ? new Date(post.published_at).toLocaleDateString('en-GB', {

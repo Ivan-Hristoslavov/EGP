@@ -62,7 +62,7 @@ export default function AdminLoginPage() {
           onClick={() => (window.location.href = "/")}
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Home
+          Back
         </button>
       </div>
 

@@ -53,7 +53,7 @@ export function PriceWithDiscount({
   if (!hasDiscount) {
     const displayTotal = Number.isInteger(total) ? total.toFixed(0) : total.toFixed(2);
     return (
-      <span className={`font-semibold text-egp-green dark:text-white ${sizes.main} ${className}`}>
+      <span className={`font-semibold text-gray-900 dark:text-white ${sizes.main} ${className}`}>
         £{displayTotal}
       </span>
     );
@@ -88,7 +88,7 @@ export function PriceWithDiscount({
           </span>
           {badgeEl}
         </div>
-        <span className={`font-bold tracking-tight text-egp-green dark:text-white ${sizes.main} leading-tight`}>
+        <span className={`font-bold tracking-tight text-gray-900 dark:text-white ${sizes.main} leading-tight`}>
            £{total.toFixed(2)}
         </span>
       </div>
@@ -103,7 +103,7 @@ export function PriceWithDiscount({
         £{originalTotal.toFixed(2)}
       </span>
       <span className="flex-shrink-0 text-gray-600 dark:text-gray-400 font-normal" aria-hidden="true">→</span>
-      <span className={`font-bold tracking-tight text-egp-green dark:text-white ${sizes.main} flex-shrink-0`}>
+      <span className={`font-bold tracking-tight text-gray-900 dark:text-white ${sizes.main} flex-shrink-0`}>
         £{total.toFixed(2)}
       </span>
       {badgeEl}

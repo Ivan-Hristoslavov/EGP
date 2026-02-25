@@ -50,6 +50,8 @@ interface StripePaymentFormProps {
   onPaymentSuccess: (bookingId: string) => void;
   onPaymentError: (error: string) => void;
   onTestBooking?: (bookingId: string) => void;
+  /** Called when payment is initializing or processing (for loading overlay) */
+  onProcessingChange?: (processing: boolean) => void;
 }
 
 interface PaymentFormProps {
@@ -75,6 +77,7 @@ interface PaymentFormProps {
   onPaymentSuccess: (bookingId: string) => void;
   onPaymentError: (error: string) => void;
   onTestBooking?: (bookingId: string) => void;
+  onProcessingChange?: (processing: boolean) => void;
 }
 
 function PaymentForm({
@@ -94,6 +97,7 @@ function PaymentForm({
   onPaymentSuccess,
   onPaymentError,
   onTestBooking,
+  onProcessingChange,
 }: PaymentFormProps) {
   const chargeAmount = amountToCharge ?? amount;
   const stripe = useStripe();
@@ -164,6 +168,7 @@ function PaymentForm({
     setIsLoading(true);
     setPaymentStatus('processing');
     setErrorMessage('');
+    onProcessingChange?.(true);
 
     try {
       // Payment intent is already created, just confirm the payment
@@ -208,6 +213,7 @@ function PaymentForm({
       onPaymentError(error instanceof Error ? error.message : 'Payment failed');
     } finally {
       setIsLoading(false);
+      onProcessingChange?.(false);
     }
   };
 
@@ -426,6 +432,7 @@ export default function StripePaymentForm(props: StripePaymentFormProps) {
 
     setIsInitializing(true);
     setInitError('');
+    props.onProcessingChange?.(true);
 
       try {
         const chargeAmount = props.amountToCharge ?? props.amount;
@@ -462,6 +469,7 @@ export default function StripePaymentForm(props: StripePaymentFormProps) {
         const errorMessage = errorData.error || 'Failed to initialize payment';
         setInitError(errorMessage);
         setIsInitializing(false);
+        props.onProcessingChange?.(false);
         return;
       }
 
@@ -476,6 +484,7 @@ export default function StripePaymentForm(props: StripePaymentFormProps) {
       setInitError(error instanceof Error ? error.message : 'Failed to initialize payment. Please try again.');
     } finally {
       setIsInitializing(false);
+      props.onProcessingChange?.(false);
     }
   };
 
@@ -567,7 +576,7 @@ export default function StripePaymentForm(props: StripePaymentFormProps) {
 
   return (
     <Elements options={options} stripe={stripePromise}>
-      <PaymentForm {...props} />
+      <PaymentForm {...props} onProcessingChange={props.onProcessingChange} />
     </Elements>
   );
 }

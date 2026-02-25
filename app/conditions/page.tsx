@@ -196,21 +196,22 @@ function ConditionsPageContent() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className={`${layout.containerWide} pt-24 pb-16`}>
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        {/* Header - Back on left, Conditions We Treat centered */}
+        <div className="relative flex items-center justify-between mb-4 sm:mb-6">
           <Link
             href="/"
-            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#b5ad9d] transition-colors"
+            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#b5ad9d] transition-colors flex-shrink-0 z-10"
           >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Home
+            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="text-sm font-medium">Back</span>
           </Link>
+          <h1 className={`absolute left-1/2 -translate-x-1/2 text-lg sm:text-2xl md:text-3xl font-bold ${textColors.heading} font-playfair`}>
+            Conditions We Treat
+          </h1>
+          <div className="w-14 sm:w-20" aria-hidden />
         </div>
 
         <div className="text-center mb-12">
-          <h1 className={`${typography.headingPage} ${textColors.heading} mb-6 font-playfair`}>
-            Conditions We Treat
-          </h1>
           <p className={`${typography.lead} font-montserrat font-light max-w-3xl mx-auto`}>
             Discover our comprehensive range of treatments for various aesthetic concerns and conditions
           </p>

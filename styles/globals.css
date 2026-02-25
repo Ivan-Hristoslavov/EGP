@@ -149,3 +149,19 @@ body {
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0);
 }
+
+/* Input (input-egp): remove blue focus ring, single green border on focus */
+.input-egp input:focus,
+.input-egp input:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.input-egp [data-slot="input-wrapper"] {
+  box-shadow: none !important;
+}
+.input-egp [data-slot="input-wrapper"]:focus-within,
+.input-egp [data-slot="input-wrapper"][data-focus-within] {
+  box-shadow: none !important;
+  border-color: #464C45 !important;
+  border-width: 2px !important;
+}
