@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { sendEmail } from "@/lib/sendgrid-smtp";
 import { siteConfig } from "@/config/site";
+import { getEmailHead, EMAIL } from "@/lib/email-theme";
 
 export async function POST(request: NextRequest) {
   try {
@@ -114,53 +115,42 @@ export async function POST(request: NextRequest) {
 
     // Send email with discount code
     try {
+      const L = EMAIL.light;
       const emailSubject = `Welcome! Your ${siteConfig.newsletter.welcomeDiscountPercent}% Discount Code`;
       const emailHtml = `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+${getEmailHead()}
 <title>Your Discount Code</title>
-<style>
-body{margin:0;padding:0;font-family:Georgia,serif;background:#f5f3ef;color:#1c1917}
-.wrap{max-width:560px;margin:0 auto;background:#fff}
-.head{background:linear-gradient(165deg,#1c1917 0%,#292524 100%);color:#faf8f5;padding:44px 32px;text-align:center}
-.head h1{margin:0;font-size:24px;font-weight:400;letter-spacing:.08em}
-.accent{width:48px;height:3px;background:#b76e79;margin:20px auto 0}
-.main{padding:40px 32px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.7}
-.code-box{background:#1c1917;color:#faf8f5;padding:28px;text-align:center;margin:28px 0;letter-spacing:4px;font-size:28px;font-family:Georgia,serif}
-.code-label{font-size:11px;letter-spacing:.2em;opacity:.8;margin-bottom:8px}
-.ft{padding:28px 32px;text-align:center;font-size:12px;color:#a8a29e;border-top:1px solid #e7e4df}
-</style>
 </head>
-<body>
-<div class="wrap">
-<div class="head">
-<h1>Welcome</h1>
-<p>Your exclusive offer</p>
-<div class="accent"></div>
+<body class="email-body" style="margin:0;padding:0;font-family:${EMAIL.font};background:${L.bg};color:${L.text}">
+<div class="email-wrap" style="max-width:560px;margin:0 auto;background:${L.wrap};color:${L.text};border:1px solid ${L.cardBorder}">
+<div class="email-header" style="background:${L.green};color:#fff;padding:44px 32px;text-align:center">
+<h1 style="margin:0;font-size:24px;font-weight:600;color:#fff">Welcome</h1>
+<p style="margin:8px 0 0;font-size:14px;color:#e7e4df">Your exclusive offer</p>
+<div class="email-accent-bar" style="width:48px;height:3px;background:${L.accent};margin:20px auto 0"></div>
 </div>
-<div class="main">
-<p>Thank you for subscribing, ${firstName || "Valued Customer"}.</p>
-<p>Enjoy <strong>${siteConfig.newsletter.welcomeDiscountPercent}% off</strong> your first visit.</p>
+<div style="padding:40px 32px;font-size:15px;line-height:1.7;color:${L.text}">
+<p style="margin:0 0 8px;color:${L.text}">Thank you for subscribing, ${firstName || "Valued Customer"}.</p>
+<p style="margin:0 0 24px;color:${L.textMuted}">Enjoy <strong>${siteConfig.newsletter.welcomeDiscountPercent}% off</strong> your first visit.</p>
 
-<div class="code-box">
-<div class="code-label">Your code</div>
+<div style="background:${L.green};color:#fff;padding:28px;text-align:center;margin:28px 0;letter-spacing:4px;font-size:28px;font-weight:600;border:1px solid ${L.accent}">
+<div style="font-size:11px;letter-spacing:.2em;opacity:.9;margin-bottom:8px">Your code</div>
 ${discountCode}
 </div>
 
-<p><strong>How to use:</strong></p>
-<ul style="padding-left:20px;margin:12px 0 24px">
+<p style="font-weight:600;color:${L.text};margin-bottom:8px">How to use:</p>
+<ul style="padding-left:20px;margin:12px 0 24px;color:${L.textMuted}">
 <li>Book online or call us</li>
 <li>Mention this code when booking</li>
 <li>Valid for ${siteConfig.newsletter.discountValidDays || 30} days</li>
 </ul>
 
-<p>We look forward to welcoming you.</p>
-<p style="font-family:Georgia,serif"><strong>EGP Aesthetics</strong></p>
+<p style="margin-top:24px;color:${L.text}">We look forward to welcoming you.</p>
+<p style="color:${L.green};font-weight:600">EGP Aesthetics</p>
 </div>
-<div class="ft">EGP Aesthetics London</div>
+<div class="email-footer" style="padding:28px 32px;text-align:center;font-size:12px;color:${L.muted};border-top:1px solid ${L.cardBorder};background:${L.wrap}">EGP Aesthetics London</div>
 </div>
 </body>
 </html>

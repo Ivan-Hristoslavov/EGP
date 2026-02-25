@@ -10,6 +10,7 @@ import ButtonBookNow from "./ButtonBookNow";
 import ButtonWhatsApp from "./ButtonWhatsApp";
 import ButtonPrimary from "./ButtonPrimary";
 import { siteConfig } from "@/config/site";
+import { typography } from "@/config/typography";
 import { useAdminProfile, useAdminProfileContext } from "@/components/AdminProfileContext";
 import { useHeroSection } from "@/hooks/useHeroSection";
 import Link from "next/link";
@@ -202,13 +203,13 @@ export default function SectionHeroAesthetics() {
             </div>
           )}
 
-          {/* Main Heading */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-4 sm:mb-6 leading-tight font-playfair">
+          {/* Main Heading - shared scale for mobile/desktop */}
+          <h1 className={`${typography.headingHero} text-white mb-4 sm:mb-6 font-playfair`}>
             {slides[displaySlide]?.title || ""}
           </h1>
 
           {/* Subtitle */}
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-200 mb-6 sm:mb-8 leading-relaxed font-montserrat font-light">
+          <p className="text-base sm:text-lg md:text-xl text-gray-200 mb-6 sm:mb-8 leading-relaxed font-montserrat font-light">
             {slides[displaySlide]?.subtitle || ""}
           </p>
 

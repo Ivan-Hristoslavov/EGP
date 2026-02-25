@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendEmail } from '@/lib/sendgrid-smtp';
 import { getAdminContactInfo } from '@/lib/admin-profile';
+import { getEmailHead, EMAIL } from '@/lib/email-theme';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -305,6 +306,9 @@ export async function POST(request: NextRequest) {
             bookingTime: selectedTime,
             duration: durationText,
             totalAmount: totalAmount,
+            amountPaid: amountPaid,
+            remainingAmount: paymentType === 'deposit' ? remainingAmount : 0,
+            paymentType: paymentType,
             paymentMethod: 'Card (Stripe)',
             paymentIntentId: paymentIntentId,
             bookingId: booking.id,
@@ -321,6 +325,9 @@ export async function POST(request: NextRequest) {
             bookingTime: selectedTime,
             duration: durationText,
             totalAmount: totalAmount,
+            amountPaid: amountPaid,
+            remainingAmount: paymentType === 'deposit' ? remainingAmount : 0,
+            paymentType: paymentType,
             paymentMethod: 'Card (Stripe)',
             paymentIntentId: paymentIntentId,
             bookingId: booking.id,
@@ -350,55 +357,49 @@ export async function POST(request: NextRequest) {
         try {
           const bookingDateFormatted = new Date(selectedDate).toLocaleDateString('en-GB');
           const adminSubject = `New Paid Booking - ${customerName}`;
+          const L = EMAIL.light;
+          const adminDepositRows = paymentType === 'deposit' && amountPaid > 0 && remainingAmount > 0
+            ? `<div style="padding:10px 0;border-bottom:1px solid #e7e4df"><span style="color:${L.muted};font-size:13px">Paid (deposit)</span> · <span style="color:${L.text};font-weight:600">£${amountPaid.toFixed(2)}</span></div>
+<div style="padding:10px 0"><span style="color:${L.muted};font-size:13px">Due on arrival</span> · <span style="color:${L.text};font-weight:500">£${remainingAmount.toFixed(2)}</span></div>`
+            : '';
           const adminHtml = `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-body{margin:0;padding:0;font-family:Georgia,serif;background:#f5f3ef;color:#1c1917}
-.wrap{max-width:560px;margin:0 auto}
-.head{background:#1c1917;color:#faf8f5;padding:36px 28px;text-align:center}
-.head h1{margin:0;font-size:22px;font-weight:400;letter-spacing:.1em}
-.line{width:40px;height:2px;background:#b76e79;margin:14px auto 0}
-.badge{display:inline-block;background:#b76e79;color:#fff;padding:6px 16px;font-size:10px;letter-spacing:.15em;margin-top:12px}
-.main{padding:32px 28px;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:1.65}
-.sect{background:#faf8f5;border:1px solid #e7e4df;margin:20px 0;padding:20px}
-.sect-title{font-size:11px;letter-spacing:.12em;color:#78716c;margin-bottom:12px}
-.row{padding:10px 0;border-bottom:1px solid #e7e4df}
-.row:last-child{border-bottom:none}
-.label{color:#78716c}
-.amt{font-size:22px;font-weight:400;color:#1c1917}
-</style>
+${getEmailHead()}
+<title>New Paid Booking</title>
 </head>
-<body>
-<div class="wrap">
-<div class="head">
-<h1>New Paid Booking</h1>
-<div class="line"></div>
-<span class="badge">PAID</span>
+<body class="email-body" style="margin:0;padding:0;font-family:${EMAIL.font};background:${L.bg};color:${L.text}">
+<div class="email-wrap" style="max-width:560px;margin:0 auto;background:${L.wrap};color:${L.text}">
+<div class="email-header" style="background:${L.green};color:#fff;padding:32px 28px;text-align:center">
+<h1 style="margin:0;font-size:22px;font-weight:600;color:#fff">New Paid Booking</h1>
+<div class="email-accent-bar" style="width:40px;height:2px;background:${L.accent};margin:12px auto 0"></div>
+<span class="email-badge" style="display:inline-block;background:${L.deposit};color:#fff;padding:6px 16px;font-size:10px;letter-spacing:.12em;margin-top:10px;border-radius:4px">PAID</span>
 </div>
-<div class="main">
-<div class="sect">
-<div class="sect-title">CUSTOMER</div>
-<div class="row"><span class="label">Name</span> · ${customerName}</div>
-<div class="row"><span class="label">Email</span> · ${finalCustomerEmail || '—'}</div>
-<div class="row"><span class="label">Phone</span> · ${customerPhone || '—'}</div>
+<div style="padding:28px;font-size:14px;line-height:1.65;color:${L.text}">
+<div class="email-card" style="background:${L.cardBg};border:1px solid ${L.cardBorder};margin:0 0 20px;padding:20px;border-radius:8px">
+<div class="email-card-title" style="font-size:11px;letter-spacing:.1em;color:${L.green};margin-bottom:12px;font-weight:600">CUSTOMER</div>
+<div style="padding:8px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted}">Name</span> · ${customerName}</div>
+<div style="padding:8px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted}">Email</span> · ${finalCustomerEmail || '—'}</div>
+<div style="padding:8px 0;color:${L.text}"><span style="color:${L.muted}">Phone</span> · ${customerPhone || '—'}</div>
 </div>
-<div class="sect">
-<div class="sect-title">BOOKING</div>
-<div class="row"><span class="label">Service</span> · ${serviceNames}</div>
-<div class="row"><span class="label">Date</span> · ${bookingDateFormatted}</div>
-<div class="row"><span class="label">Time</span> · ${selectedTime}</div>
-<div class="row"><span class="label">Amount</span> · <span class="amt">£${totalAmount.toFixed(2)}</span></div>
-<div class="row"><span class="label">Ref</span> · ${booking.booking_number || booking.id}</div>
+<div class="email-card" style="background:${L.cardBg};border:1px solid ${L.cardBorder};margin:0 0 20px;padding:20px;border-radius:8px">
+<div class="email-card-title" style="font-size:11px;letter-spacing:.1em;color:${L.green};margin-bottom:12px;font-weight:600">BOOKING</div>
+<div style="padding:8px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted}">Service</span> · ${serviceNames}</div>
+<div style="padding:8px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted}">Date</span> · ${bookingDateFormatted}</div>
+<div style="padding:8px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted}">Time</span> · ${selectedTime}</div>
+<div style="padding:8px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted}">Total</span> · <span style="font-weight:600;color:${L.text}">£${totalAmount.toFixed(2)}</span></div>
+${adminDepositRows}
+<div style="padding:8px 0;color:${L.text}"><span style="color:${L.muted}">Ref</span> · ${booking.booking_number || booking.id}</div>
 </div>
-<p style="color:#78716c;font-size:13px;">Payment completed via Stripe. Review in admin panel.</p>
+<p style="margin:0;color:${L.muted};font-size:13px">Payment via Stripe. Review in admin panel.</p>
 </div>
 </div>
 </body>
 </html>`.trim();
+          const adminDepositText = paymentType === 'deposit' && amountPaid > 0 && remainingAmount > 0
+            ? `Paid (deposit): £${amountPaid.toFixed(2)}\nDue on arrival: £${remainingAmount.toFixed(2)}\n\n`
+            : '';
           const adminText = `
 New Paid Booking - EGP Aesthetics
 
@@ -409,10 +410,10 @@ Phone: ${customerPhone || 'Not provided'}
 Service: ${serviceNames}
 Date: ${bookingDateFormatted}
 Time: ${selectedTime}
-Amount: £${totalAmount.toFixed(2)}
+Total: £${totalAmount.toFixed(2)}
+${adminDepositText}Ref: ${booking.booking_number || booking.id}
 
-Booking ID: ${booking.id}
-Payment via Stripe - Payment Intent: ${paymentIntentId}
+Payment via Stripe - ${paymentIntentId}
           `.trim();
 
           await sendEmail({
@@ -463,6 +464,9 @@ function generatePaymentConfirmationEmail(data: {
   bookingTime: string;
   duration: string;
   totalAmount: number;
+  amountPaid?: number;
+  remainingAmount?: number;
+  paymentType?: string;
   paymentMethod: string;
   paymentIntentId: string;
   bookingId: string;
@@ -471,84 +475,77 @@ function generatePaymentConfirmationEmail(data: {
   contactPhone: string;
   contactEmail: string;
 }): string {
-  const servicesList = data.services.map(s => 
-    `• ${s.name}${s.quantity > 1 ? ` (x${s.quantity})` : ''} - £${(s.price * s.quantity).toFixed(2)}`
-  ).join('<br>');
+  const L = EMAIL.light;
+  const servicesList = data.services.map(s =>
+    `<tr><td style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text};font-size:15px">${s.name}${s.quantity > 1 ? ` (x${s.quantity})` : ''}</td><td style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text};font-weight:500;text-align:right">£${(s.price * s.quantity).toFixed(2)}</td></tr>`
+  ).join('');
+  const isDeposit = data.paymentType === 'deposit' && (data.amountPaid ?? 0) > 0 && (data.remainingAmount ?? 0) > 0;
+  const paymentBreakdown = isDeposit
+    ? `
+<tr><td colspan="2" style="padding:12px 0;border-top:2px solid #e7e4df"></td></tr>
+<tr><td style="padding:8px 0;color:${L.green};font-size:13px">Paid now (deposit)</td><td style="padding:8px 0;color:${L.deposit};font-weight:600;text-align:right;font-size:15px">£${(data.amountPaid ?? 0).toFixed(2)}</td></tr>
+<tr><td style="padding:8px 0;color:${L.green};font-size:13px">Due on arrival</td><td style="padding:8px 0;color:${L.text};font-weight:500;text-align:right;font-size:15px">£${(data.remainingAmount ?? 0).toFixed(2)}</td></tr>
+`
+    : '';
 
   return `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+${getEmailHead()}
 <title>Payment Confirmed</title>
-<style>
-body{margin:0;padding:0;font-family:Georgia,serif;background:#f5f3ef;color:#1c1917}
-.wrap{max-width:560px;margin:0 auto;background:#fff}
-.head{background:linear-gradient(165deg,#1c1917 0%,#292524 100%);color:#faf8f5;padding:44px 32px;text-align:center}
-.head h1{margin:0;font-size:24px;font-weight:400;letter-spacing:.08em}
-.head p{margin:8px 0 0;font-size:14px;opacity:.9;font-family:Helvetica,Arial,sans-serif}
-.accent{width:48px;height:3px;background:#b76e79;margin:20px auto 0}
-.badge{display:inline-block;background:#b76e79;color:#fff;padding:10px 24px;font-size:11px;letter-spacing:.2em;margin-top:16px}
-.main{padding:40px 32px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.7;color:#2d2a26}
-.card{background:#faf8f5;border:1px solid #e7e4df;margin:24px 0;padding:24px}
-.card-title{font-family:Georgia,serif;font-size:11px;letter-spacing:.15em;color:#78716c;margin-bottom:16px}
-.row{padding:12px 0;border-bottom:1px solid #e7e4df}
-.row:last-child{border-bottom:none}
-.lbl{color:#78716c;font-size:13px}
-.val{color:#1c1917;font-weight:500}
-.amt{font-size:28px;font-weight:400;color:#1c1917;font-family:Georgia,serif}
-.notice{background:#fef7ed;border-left:4px solid #b76e79;padding:20px;margin:24px 0}
-.notice ul{margin:8px 0 0;padding-left:20px}
-.ft{padding:28px 32px;text-align:center;font-size:12px;color:#a8a29e;border-top:1px solid #e7e4df}
-</style>
 </head>
-<body>
-<div class="wrap">
-<div class="head">
-<h1>Payment Confirmed</h1>
-<p>Your booking is secured</p>
-<div class="accent"></div>
-<span class="badge">Confirmed</span>
+<body class="email-body" style="margin:0;padding:0;font-family:${EMAIL.font};background:${L.bg};color:${L.text}">
+<div class="email-wrap" style="max-width:560px;margin:0 auto;background:${L.wrap};color:${L.text}">
+<div class="email-header" style="background:${L.green};color:#fff;padding:36px 28px;text-align:center">
+<h1 style="margin:0;font-size:24px;font-weight:600;letter-spacing:.04em;color:#fff">Payment Confirmed</h1>
+<p style="margin:10px 0 0;font-size:14px;color:#e7e4df">Your booking is secured.</p>
+<div class="email-accent-bar" style="width:48px;height:3px;background:${L.accent};margin:16px auto 0"></div>
+<span class="email-badge" style="display:inline-block;background:${L.deposit};color:#fff;padding:8px 20px;font-size:11px;letter-spacing:.12em;margin-top:14px;border-radius:4px">Confirmed</span>
 </div>
-<div class="main">
-<p>Dear ${data.customerName},</p>
-<p>Thank you for your payment. Your appointment is now confirmed and we look forward to welcoming you.</p>
+<div style="padding:32px 28px;font-size:15px;line-height:1.65;color:${L.text}">
+<p style="margin:0 0 16px;color:${L.text}">Dear ${data.customerName},</p>
+<p style="margin:0 0 24px;color:${L.textMuted}">Thank you for your payment. Your appointment is now confirmed and we look forward to welcoming you.</p>
 
-<div class="card">
-<div class="card-title">Services</div>
+<div class="email-card" style="background:${L.cardBg};border:1px solid ${L.cardBorder};margin:24px 0;padding:20px;border-radius:8px">
+<div class="email-card-title" style="font-size:11px;letter-spacing:.12em;color:${L.green};margin-bottom:12px;font-weight:600">SERVICES BOOKED</div>
+<table style="width:100%;border-collapse:collapse">
 ${servicesList}
-<div style="margin-top:20px;padding-top:20px;border-top:2px solid #e7e4df"><span class="lbl">Total </span><span class="amt">£${data.totalAmount.toFixed(2)}</span></div>
+<tr><td style="padding:12px 0 4px;color:${L.green};font-size:14px">Total</td><td style="padding:12px 0 4px;text-align:right;font-size:20px;font-weight:600;color:${L.text}">£${data.totalAmount.toFixed(2)}</td></tr>
+${paymentBreakdown}
+</table>
+</div>
+${isDeposit ? `<p style="margin:0 0 24px;padding:14px;background:#e8f5e9;border:1px solid ${L.accent};border-radius:6px;font-size:14px;color:${L.text}">You have paid <strong>£${(data.amountPaid ?? 0).toFixed(2)}</strong> deposit. The remaining <strong>£${(data.remainingAmount ?? 0).toFixed(2)}</strong> is due when you attend.</p>` : ''}
+
+<div class="email-card" style="background:${L.cardBg};border:1px solid ${L.cardBorder};margin:24px 0;padding:20px;border-radius:8px">
+<div class="email-card-title" style="font-size:11px;letter-spacing:.12em;color:${L.green};margin-bottom:12px;font-weight:600">APPOINTMENT</div>
+<div style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted};font-size:13px">Ref</span> · ${data.bookingNumber}</div>
+<div style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted};font-size:13px">Date</span> · ${data.bookingDate}</div>
+<div style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted};font-size:13px">Time</span> · ${data.bookingTime}</div>
+<div style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted};font-size:13px">Duration</span> · ${data.duration}</div>
+${data.teamMember ? `<div style="padding:10px 0;color:${L.text}"><span style="color:${L.muted};font-size:13px">Practitioner</span> · ${data.teamMember}</div>` : ''}
 </div>
 
-<div class="card">
-<div class="card-title">Appointment</div>
-<div class="row"><span class="lbl">Ref</span> · <span class="val">${data.bookingNumber}</span></div>
-<div class="row"><span class="lbl">Date</span> · ${data.bookingDate}</div>
-<div class="row"><span class="lbl">Time</span> · ${data.bookingTime}</div>
-<div class="row"><span class="lbl">Duration</span> · ${data.duration}</div>
-${data.teamMember ? `<div class="row"><span class="lbl">Practitioner</span> · ${data.teamMember}</div>` : ''}
-</div>
-
-<div class="notice">
-<div style="font-weight:600;color:#1c1917">Before your visit</div>
-<ul>
+<div class="email-notice" style="background:#fef7ed;border-left:4px solid ${L.noticeBorder};padding:20px;margin:24px 0;border-radius:0 6px 6px 0">
+<div style="font-weight:600;color:${L.text};margin-bottom:8px">Before your visit</div>
+<ul style="margin:0;padding-left:20px;color:${L.textMuted}">
 <li>Arrive 10 minutes early</li>
 <li>Bring a valid ID</li>
 <li>Reschedule at least 24 hours in advance if needed</li>
 </ul>
+<p style="margin:12px 0 0;font-size:13px;color:${L.danger};font-weight:500">You can cancel or request a refund up to 24 hours before your appointment.</p>
 </div>
 
-<div class="card">
-<div class="card-title">Contact us</div>
-<div class="row"><span class="lbl">Phone</span> · <a href="tel:${data.contactPhone.replace(/\s/g,'')}" style="color:#1c1917;text-decoration:none">${data.contactPhone}</a></div>
-<div class="row"><span class="lbl">Email</span> · <a href="mailto:${data.contactEmail}" style="color:#1c1917;text-decoration:none">${data.contactEmail}</a></div>
+<div class="email-card" style="background:${L.cardBg};border:1px solid ${L.cardBorder};margin:24px 0;padding:20px;border-radius:8px">
+<div class="email-card-title" style="font-size:11px;letter-spacing:.12em;color:${L.green};margin-bottom:12px;font-weight:600">CONTACT US</div>
+<div style="padding:10px 0;color:${L.text}"><a href="tel:${data.contactPhone.replace(/\s/g,'')}" class="email-link" style="color:${L.link};text-decoration:none;font-weight:500">${data.contactPhone}</a></div>
+<div style="padding:10px 0;color:${L.text}"><a href="mailto:${data.contactEmail}" class="email-link" style="color:${L.link};text-decoration:none;font-weight:500">${data.contactEmail}</a></div>
 </div>
 
-<p style="margin-top:32px">We look forward to seeing you.</p>
-<p style="font-family:Georgia,serif;color:#1c1917"><strong>EGP Aesthetics</strong></p>
+<p style="margin-top:28px;color:${L.text}">We look forward to seeing you.</p>
+<p style="color:${L.green};font-weight:600">EGP Aesthetics</p>
 </div>
-<div class="ft">
+<div class="email-footer" style="padding:24px 28px;text-align:center;font-size:12px;color:${L.muted};border-top:1px solid #e7e4df;background:${L.wrap}">
 <p style="margin:0">Automated confirmation · EGP Aesthetics London</p>
 </div>
 </div>
@@ -564,6 +561,9 @@ function generatePaymentConfirmationEmailText(data: {
   bookingTime: string;
   duration: string;
   totalAmount: number;
+  amountPaid?: number;
+  remainingAmount?: number;
+  paymentType?: string;
   paymentMethod: string;
   paymentIntentId: string;
   bookingId: string;
@@ -572,9 +572,23 @@ function generatePaymentConfirmationEmailText(data: {
   contactPhone: string;
   contactEmail: string;
 }): string {
-  const servicesList = data.services.map(s => 
+  const servicesList = data.services.map(s =>
     `- ${s.name}${s.quantity > 1 ? ` (x${s.quantity})` : ''} - £${(s.price * s.quantity).toFixed(2)}`
   ).join('\n');
+  const isDeposit = data.paymentType === 'deposit' && (data.amountPaid ?? 0) > 0 && (data.remainingAmount ?? 0) > 0;
+  const paymentSection = isDeposit
+    ? `
+Payment breakdown:
+- Total: £${data.totalAmount.toFixed(2)}
+- Paid now (deposit): £${(data.amountPaid ?? 0).toFixed(2)}
+- Due on arrival: £${(data.remainingAmount ?? 0).toFixed(2)}
+
+You have paid £${(data.amountPaid ?? 0).toFixed(2)} deposit. The remaining £${(data.remainingAmount ?? 0).toFixed(2)} is due when you attend.
+`
+    : `
+Payment Information:
+- Amount Paid: £${data.totalAmount.toFixed(2)}
+`;
 
   return `
 Payment Confirmed - EGP Aesthetics
@@ -589,26 +603,23 @@ Services Paid For:
 ${servicesList}
 
 Total Amount: £${data.totalAmount.toFixed(2)}
+${paymentSection}
+- Payment Method: ${data.paymentMethod}
 
 Booking Details:
 - Booking Number: ${data.bookingNumber}
 - Booked Day: ${data.bookingDate}
 - Time: ${data.bookingTime}
 - Duration: ${data.duration}
-${data.teamMember ? `- Team Member: ${data.teamMember}` : ''}
-
-Payment Information:
-- Amount Paid: £${data.totalAmount.toFixed(2)}
-- Payment Method: ${data.paymentMethod}
-- Payment ID: ${data.paymentIntentId}
+${data.teamMember ? `- Practitioner: ${data.teamMember}` : ''}
 
 Important Information:
 - Please arrive 10 minutes before your appointment
 - Bring a valid ID
-- If you need to reschedule, please contact us at least 24 hours in advance
-- Late cancellations may incur a fee
+- Reschedule at least 24 hours in advance if needed
+- You can cancel or request a refund up to 24 hours before your appointment.
 
-Contact Information:
+Contact:
 Phone: ${data.contactPhone}
 Email: ${data.contactEmail}
 

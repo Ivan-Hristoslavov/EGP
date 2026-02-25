@@ -1,7 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { useToast, ToastMessages } from "@/components/Toast";
+import { useState, useEffect } from "react";
+import { useToast } from "@/components/Toast";
+
+type TemplateId =
+  | "simple"
+  | "booking_confirmation"
+  | "payment_confirmed"
+  | "admin_new_paid_booking"
+  | "admin_booking_request"
+  | "newsletter_welcome";
+
+const TEMPLATE_OPTIONS: { value: TemplateId; label: string }[] = [
+  { value: "simple", label: "Simple SMTP test" },
+  { value: "booking_confirmation", label: "Booking confirmation (customer, with deposit)" },
+  { value: "payment_confirmed", label: "Payment confirmed (customer, after Stripe)" },
+  { value: "admin_new_paid_booking", label: "New paid booking (admin)" },
+  { value: "admin_booking_request", label: "New booking request (admin, pending)" },
+  { value: "newsletter_welcome", label: "Newsletter welcome (discount code)" },
+];
 
 interface TestResults {
   sendgrid?: any;
@@ -11,9 +28,43 @@ interface TestResults {
 
 export default function TestEmailPage() {
   const [testEmail, setTestEmail] = useState("");
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>("simple");
   const [isTesting, setIsTesting] = useState(false);
   const [testResults, setTestResults] = useState<TestResults | null>(null);
+  const [previewSubject, setPreviewSubject] = useState<string>("");
+  const [previewHtml, setPreviewHtml] = useState<string>("");
+  const [previewLoading, setPreviewLoading] = useState(false);
   const { showSuccess, showError } = useToast();
+
+  // Load preview when template changes
+  useEffect(() => {
+    let cancelled = false;
+    setPreviewLoading(true);
+    fetch(`/api/test-email?template=${encodeURIComponent(selectedTemplate)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        if (data.html != null) {
+          setPreviewSubject(data.subject ?? "");
+          setPreviewHtml(data.html);
+        } else {
+          setPreviewSubject("");
+          setPreviewHtml("");
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setPreviewSubject("");
+          setPreviewHtml("");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setPreviewLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedTemplate]);
 
   const testSendGridConfig = async () => {
     setIsTesting(true);
@@ -42,27 +93,32 @@ export default function TestEmailPage() {
   const sendTestEmail = async () => {
     setIsTesting(true);
     try {
+      const payload: Record<string, unknown> = {
+        ...(testEmail && { to: testEmail }),
+      };
+      if (selectedTemplate !== "simple") {
+        payload.template = selectedTemplate;
+      } else {
+        payload.subject = "Test Email from Admin Panel";
+        payload.message = "This is a test email to verify that SMTP (Gmail) is working correctly with the admin panel.";
+      }
+
       const response = await fetch("/api/test-email", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...(testEmail && { to: testEmail }),
-          subject: "Test Email from Admin Panel",
-          message: "This is a test email to verify that SMTP (Gmail) is working correctly with the admin panel.",
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
       const result = await response.json();
-      
+
       setTestResults((prev: TestResults | null) => ({
         ...prev,
-        emailSent: result
+        emailSent: result,
       }));
 
       if (result.success) {
-        showSuccess("Test Email", `Test email sent successfully to ${result.recipient || testEmail}`);
+        const templateLabel = TEMPLATE_OPTIONS.find((o) => o.value === selectedTemplate)?.label ?? selectedTemplate;
+        showSuccess("Test Email", `"${templateLabel}" sent to ${result.recipient || testEmail}`);
       } else {
         showError("Test Email", result.error || "Failed to send test email");
       }
@@ -103,7 +159,7 @@ export default function TestEmailPage() {
       {/* Header */}
       <div className="mt-6 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
             Test Email & Payment Configuration
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1 transition-colors duration-300">
@@ -222,8 +278,28 @@ export default function TestEmailPage() {
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Send Test Email
         </h3>
+
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          Choose a template to send a test email with autofilled data (1:1 with real booking/newsletter emails).
+        </p>
         
         <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Template
+            </label>
+            <select
+              value={selectedTemplate}
+              onChange={(e) => setSelectedTemplate(e.target.value as TemplateId)}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              {TEMPLATE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Email Address
@@ -232,7 +308,7 @@ export default function TestEmailPage() {
               type="email"
               value={testEmail}
               onChange={(e) => setTestEmail(e.target.value)}
-              placeholder="Enter email or leave blank to use SMTP_TO_ADDRESS"
+              placeholder="Leave blank to use SMTP_TO_ADDRESS or ADMIN_EMAIL"
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
@@ -242,8 +318,32 @@ export default function TestEmailPage() {
             disabled={isTesting}
             className="w-full px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {isTesting ? "Sending..." : "Send Test Email"}
+            {isTesting ? "Sending..." : `Send "${TEMPLATE_OPTIONS.find((o) => o.value === selectedTemplate)?.label ?? selectedTemplate}" test email`}
           </button>
+
+          {/* Email preview */}
+          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Preview</h4>
+            {previewSubject && (
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                Subject: <span className="font-medium text-gray-700 dark:text-gray-300">{previewSubject}</span>
+              </p>
+            )}
+            <div className="rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-900 overflow-hidden">
+              {previewLoading ? (
+                <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">Loading preview…</div>
+              ) : previewHtml ? (
+                <iframe
+                  title="Email preview"
+                  srcDoc={previewHtml}
+                  className="w-full min-h-[420px] max-h-[70vh] border-0 bg-white dark:bg-white"
+                  sandbox="allow-same-origin"
+                />
+              ) : (
+                <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">Select a template to preview</div>
+              )}
+            </div>
+          </div>
 
           {testResults?.emailSent && (
             <div className={`p-3 rounded-md text-sm ${

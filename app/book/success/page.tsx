@@ -115,7 +115,7 @@ function BookingSuccessContent() {
             <div className="inline-flex items-center justify-center w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full mb-6">
               <X className="w-10 h-10 text-red-600 dark:text-red-400" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
               Booking Not Found
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
@@ -426,10 +426,10 @@ function BookingSuccessContent() {
           <div className="inline-flex items-center justify-center w-20 h-20 bg-[#f5f1e9] dark:bg-[#9d9585]/30 rounded-full mb-8">
             <CheckCircle className="w-10 h-10 text-[#9d9585] dark:text-[#c9c1b0]" />
           </div>
-          <h1 className="text-4xl font-bold text-[#464C45] dark:text-[#c9c1b0] mb-4 font-playfair">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#464C45] dark:text-[#c9c1b0] mb-4 font-playfair">
             Booking Confirmed!
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto">
             Thank you for choosing EGP Aesthetics London
           </p>
         </div>
@@ -439,7 +439,7 @@ function BookingSuccessContent() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left Column - Booking Details */}
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-6">
                 Booking Details
               </h2>
               
@@ -508,7 +508,7 @@ function BookingSuccessContent() {
 
             {/* Right Column - Customer Information */}
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-6">
                 Customer Information
               </h2>
               
@@ -562,7 +562,7 @@ function BookingSuccessContent() {
         {/* Services Booked Card */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 mb-8">
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-6">
               Services Booked
             </h2>
             
@@ -591,7 +591,7 @@ function BookingSuccessContent() {
                 <>
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-semibold text-gray-900 dark:text-white">Paid now (deposit):</span>
-                    <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                    <span className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400">
                       £{Number(bookingDetails.amountPaid ?? bookingDetails.totalAmount).toFixed(2)}
                     </span>
                   </div>

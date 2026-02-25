@@ -121,7 +121,7 @@ export default function FooterMain() {
           {/* Company Info */}
           <div className="col-span-1 md:col-span-2">
             <Link
-              className="text-2xl font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-300"
+              className="text-lg sm:text-xl md:text-2xl font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-300"
               href="/"
             >
               {businessData.businessName.toUpperCase()}

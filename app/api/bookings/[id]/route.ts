@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { supabase, supabaseAdmin } from "../../../../lib/supabase";
+import { requireAdmin } from "@/lib/admin-auth";
 
 // GET - Fetch single booking by ID (UUID) or booking_number
 export async function GET(
@@ -90,11 +91,14 @@ export async function GET(
   }
 }
 
-// PATCH - Update booking by ID
+// PATCH - Update booking by ID (admin only)
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const { id } = await params;
   try {
     const body = await request.json();
@@ -160,11 +164,14 @@ export async function PUT(
   return PATCH(request, { params });
 }
 
-// DELETE - Delete booking by ID
+// DELETE - Delete booking by ID (admin only)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const { id } = await params;
   try {
     const { error } = await supabase

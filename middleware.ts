@@ -3,29 +3,35 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
-  // Check if the request is for an admin route
-  if (request.nextUrl.pathname.startsWith("/admin")) {
-    // Allow access to login page
-    if (request.nextUrl.pathname === "/admin/login") {
+  const { pathname } = request.nextUrl;
+
+  // Protect admin pages (UI)
+  if (pathname.startsWith("/admin")) {
+    if (pathname === "/admin/login") {
       return NextResponse.next();
     }
 
-    // TEMPORARILY DISABLED: Allow access to admin panel without authentication
-    // TODO: Re-enable authentication when ready
-    return NextResponse.next();
+    const adminAuth = request.cookies.get("adminAuth");
+    if (!adminAuth || adminAuth.value !== "authenticated") {
+      return NextResponse.redirect(new URL("/admin/login", request.url));
+    }
+  }
 
-    // Check for admin authentication
-    // const adminAuth = request.cookies.get("adminAuth");
+  // Protect admin API routes
+  if (pathname.startsWith("/api/admin")) {
+    if (pathname === "/api/admin/auth") {
+      return NextResponse.next();
+    }
 
-    // if (!adminAuth || adminAuth.value !== "authenticated") {
-    //   // Redirect to login page
-    //   return NextResponse.redirect(new URL("/admin/login", request.url));
-    // }
+    const adminAuth = request.cookies.get("adminAuth");
+    if (!adminAuth || adminAuth.value !== "authenticated") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: "/admin/:path*",
+  matcher: ["/admin/:path*", "/api/admin/:path*"],
 };

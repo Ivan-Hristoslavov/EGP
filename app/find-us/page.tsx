@@ -110,10 +110,10 @@ export default function FindUsPage() {
         </div>
 
         <div className="text-center mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold text-[#3a3428] dark:text-white mb-6 font-playfair">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[#3a3428] dark:text-white mb-6 font-playfair">
             Find Us
           </h1>
-          <p className="text-2xl text-[#6f6652] dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-[#6f6652] dark:text-gray-300 font-montserrat font-light max-w-3xl mx-auto">
             Visit our clinic in Wandsworth, South West London
           </p>
         </div>
@@ -174,7 +174,7 @@ export default function FindUsPage() {
                   <MapPin className="w-8 h-8 text-[#6f6652] dark:text-[#d8c5a7]" />
                 </div>
                 <div className="flex-1">
-                    <h2 className="text-2xl font-bold text-foreground mb-4">
+                    <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-4">
                     Our Location
                   </h2>
                     <p className="text-lg text-default-600 mb-4 leading-relaxed">
@@ -197,7 +197,7 @@ export default function FindUsPage() {
             {/* Interactive Google Map */}
             <Card shadow="lg">
               <CardHeader className="pb-0">
-                <h3 className="text-2xl font-bold text-foreground">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
                 Interactive Map
               </h3>
               </CardHeader>
@@ -232,7 +232,7 @@ export default function FindUsPage() {
             {displayFindUsData.howToFindUs && (
               <Card shadow="lg">
                 <CardHeader>
-                  <h3 className="text-2xl font-bold text-foreground">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
                   How to Find Us
                 </h3>
                 </CardHeader>
@@ -247,7 +247,7 @@ export default function FindUsPage() {
             {/* Transport Options */}
             <Card shadow="lg">
               <CardHeader>
-                <h3 className="text-2xl font-bold text-foreground">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
                 How to Reach Us
               </h3>
               </CardHeader>
@@ -287,7 +287,7 @@ export default function FindUsPage() {
             {/* Nearby Landmarks */}
             <Card shadow="lg">
               <CardHeader>
-                <h3 className="text-2xl font-bold text-foreground">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
                 Nearby Landmarks
               </h3>
               </CardHeader>
@@ -422,7 +422,7 @@ export default function FindUsPage() {
             {/* Quick Contact */}
             <Card className="bg-[#3a3428] text-[#f5f1e9]">
               <CardBody className="text-center p-8">
-                <h3 className="text-2xl font-bold mb-4">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-4">
                   Need Immediate Assistance?
                 </h3>
                 <p className="text-[#d8c5a7] mb-6 text-lg">
@@ -459,7 +459,7 @@ export default function FindUsPage() {
                   <Clock className="w-8 h-8 text-[#6f6652] dark:text-[#d8c5a7]" />
                 </div>
                 <div>
-                    <h2 className="text-2xl font-bold text-foreground mb-2">
+                    <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
                     Opening Hours
                   </h2>
                     <p className="text-default-500">
@@ -514,7 +514,7 @@ export default function FindUsPage() {
             {/* Booking CTA */}
             <Card className="bg-[#3a3428] text-[#f5f1e9]">
               <CardBody className="text-center p-8">
-              <h3 className="text-2xl font-bold mb-4">
+              <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-4">
                 Ready to Book Your Appointment?
               </h3>
               <p className="text-[#d8c5a7] mb-6 text-lg">

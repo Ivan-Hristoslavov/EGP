@@ -1,0 +1,60 @@
+---
+description: Public-facing pages (non-admin) — metadata, server vs client, layout
+globs:
+  - app/**/page.tsx
+  - app/**/layout.tsx
+alwaysApply: false
+---
+
+# Public Pages Rules
+
+## Scope
+
+Applies to all routes under `app/` that are **not** under `app/admin/`. This includes home (`app/page.tsx`), services (`app/services/`), book (`app/book/`), find-us, blog, terms, privacy, gdpr, etc.
+
+## Server vs Client
+
+- **Server components (default):** No `"use client"`. Use for static content, fetching data in the component, and `generateMetadata`. Example: `app/page.tsx`, many layout files.
+- **Client components:** Add `"use client"` at the top when the page uses hooks, event handlers, or browser APIs. Example: booking flow pages, forms, pages that use `useState`/`useEffect`.
+
+## Metadata
+
+- Export `generateMetadata` for SEO when the page is server-rendered:
+  ```typescript
+  export async function generateMetadata(): Promise<Metadata> {
+    return {
+      title: "Page Title | EGP Aesthetics",
+      description: "...",
+    };
+  }
+  ```
+- Use `metadataBase` from root layout; relative paths in Open Graph images are resolved against it.
+
+## Layout
+
+- Public pages are wrapped by `LayoutMain` (from root layout), which includes `HeaderAesthetics`, `FloatingContactButtons`, `FooterAesthetics`, and optional `DayOffBanner`.
+- Main content has top padding to clear the fixed header (`pt-[90px]` or `pt-[100px]` when day-off banner is shown).
+- Do not add a second full-width header/footer; use the existing layout.
+
+## Typography & Containers
+
+- Use `typography.headingPage` or `typography.headingSection` for page/section titles (from `@/config/typography`).
+- Use `layout.container` or `layout.containerNarrow` for content width and padding.
+- Use `layout.sectionPy` for section vertical spacing.
+
+## Data Fetching
+
+- Server components: fetch directly or use async server functions; can use `createClient()` from `lib/supabase/server` for server-only data.
+- Client components: use hooks that call `/api/*` (e.g. `useServices`, `useReviews`). Do not call Supabase from the client.
+
+## Dynamic Routes
+
+- `app/services/[slug]/page.tsx` — service detail by slug
+- `app/blog/[slug]/page.tsx` — blog post by slug
+- `app/conditions/[slug]/page.tsx` — condition page by slug
+- Use `params` in the page (and in `generateMetadata` if needed); in Next.js 15+ params may be a Promise.
+
+## Don'ts
+
+- Do not add admin-only logic or `requireAdmin()` on public pages
+- Do not expose internal API keys or service role; only call public or admin-protected API routes from the client as intended

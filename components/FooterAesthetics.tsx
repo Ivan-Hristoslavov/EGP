@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { useAdminProfile, useAdminProfileContext } from "@/components/AdminProfileContext";
+import { useSocialLinks } from "@/hooks/useSocialLinks";
 
 type WorkingHoursData = {
   [key: string]: {
@@ -30,7 +31,8 @@ export default function FooterAesthetics() {
   const [isPressPageEnabled, setIsPressPageEnabled] = useState(true); // Default to true
   const adminProfile = useAdminProfile();
   const { loading: profileLoading } = useAdminProfileContext();
-  
+  const { socialLinks } = useSocialLinks();
+
   // Get contact info from admin profile, fallback to siteConfig
   const contactPhone = adminProfile?.phone || siteConfig.contact.phone;
   const contactEmail = adminProfile?.business_email || adminProfile?.email || siteConfig.contact.email;
@@ -211,7 +213,7 @@ export default function FooterAesthetics() {
             {/* Column 1: Brand & Description */}
             <div className="space-y-4 sm:space-y-6">
               <div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2">
                   {siteConfig.shortName}
                 </h2>
                 <p className="text-sm text-gray-700 dark:text-gray-400 font-semibold">
@@ -403,37 +405,43 @@ export default function FooterAesthetics() {
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
                   Follow Us
                 </h3>
-                <div className="flex gap-3">
-                  <a
-                    href={siteConfig.social.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm hover:shadow"
-                    aria-label="Instagram"
-                  >
-                    <Instagram className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-                  </a>
-                  <a
-                    href={siteConfig.social.facebook}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm hover:shadow"
-                    aria-label="Facebook"
-                  >
-                    <Facebook className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-                  </a>
-                  <a
-                    href={siteConfig.social.youtube}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm hover:shadow"
-                    aria-label="YouTube"
-                  >
-                    <Youtube className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-                  </a>
-                  {siteConfig.social.tiktok && (
+                <div className="flex gap-3 flex-wrap">
+                  {socialLinks.instagram && (
                     <a
-                      href={siteConfig.social.tiktok}
+                      href={socialLinks.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm hover:shadow"
+                      aria-label="Instagram"
+                    >
+                      <Instagram className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+                    </a>
+                  )}
+                  {socialLinks.facebook && (
+                    <a
+                      href={socialLinks.facebook}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm hover:shadow"
+                      aria-label="Facebook"
+                    >
+                      <Facebook className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+                    </a>
+                  )}
+                  {socialLinks.youtube && (
+                    <a
+                      href={socialLinks.youtube}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm hover:shadow"
+                      aria-label="YouTube"
+                    >
+                      <Youtube className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+                    </a>
+                  )}
+                  {socialLinks.tiktok && (
+                    <a
+                      href={socialLinks.tiktok}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm hover:shadow"
@@ -469,6 +477,14 @@ export default function FooterAesthetics() {
                       className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors"
                     >
                       Privacy Policy
+                    </Link>
+                  </li>
+                  <li>
+                    <Link 
+                      href="/gdpr" 
+                      className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors"
+                    >
+                      GDPR & Data Protection
                     </Link>
                   </li>
                 </ul>

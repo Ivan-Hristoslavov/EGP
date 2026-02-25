@@ -1,0 +1,47 @@
+---
+description: Rules for creating and modifying React components
+globs:
+  - components/**/*.tsx
+---
+
+# Component Rules
+
+## Naming
+
+- PascalCase filenames: `HeaderAesthetics.tsx`, `SectionBeforeAfter.tsx`
+- Admin components prefixed with `Admin`: `AdminGalleryManager.tsx`
+- Section components prefixed with `Section`: `SectionNewsletter.tsx`
+
+## Client Components
+
+Most components use `"use client"` because they need interactivity. Mark at the top of the file.
+
+## HeroUI Usage
+
+- Import from `@heroui/react` for common components (Modal, Button, Card, etc.)
+- Import from individual packages for specific ones: `@heroui/chip`, `@heroui/input`, `@heroui/select`, `@heroui/spinner`
+- Never import from `@nextui/*` — always use `@heroui/*`
+
+## Styling
+
+- Tailwind CSS classes
+- Custom colors from `config/colors.ts` (e.g., `aestheticsColors.green.DEFAULT`)
+- Dark mode support with `dark:` prefix
+- Design tokens from `config/design-system.ts` and **`config/typography.ts`** for headings and layout (see `.cursor/rules/typography-responsive.mdc`)
+- The main green color is `#464C45`
+- **Responsive typography:** Use `typography.headingPage`, `typography.headingSection`, `typography.headingCard` etc. so titles scale on mobile (no raw `text-4xl`/`text-5xl` without smaller mobile size)
+- **Containers:** Use `layout.container` (`max-w-6xl mx-auto px-4 sm:px-6 lg:px-8`) for section content; `layout.containerNarrow` for forms
+
+## Hydration Safety
+
+- Always render the same DOM structure on server and client
+- Do NOT conditionally render different root elements based on client-only state
+- Use `hidden` class to hide/show elements instead of conditional rendering that changes tree shape
+- Use `suppressHydrationWarning` on elements with dynamic content
+- Wrap client-only components in `<ClientOnly>` from `@/components/ClientOnly`
+
+## Image Handling
+
+- Use `lib/image-utils.ts` for processing, compression, and format support
+- Support HEIC conversion via `heic2any`
+- Provide quality sliders for image compression in upload forms

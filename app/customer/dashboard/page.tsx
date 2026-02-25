@@ -157,7 +157,7 @@ export default function CustomerDashboardPage() {
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 p-6 mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent font-playfair mb-2">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent font-playfair mb-2">
                 Welcome back, {customer.firstName}!
               </h1>
               <p className="text-gray-600 dark:text-gray-400">
@@ -218,7 +218,7 @@ export default function CustomerDashboardPage() {
                       <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{customer.totalBookings}</p>
+                      <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{customer.totalBookings}</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Total Bookings</p>
                     </div>
                   </div>
@@ -230,7 +230,7 @@ export default function CustomerDashboardPage() {
                       <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
                         {bookings.filter(b => b.status === "completed").length}
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Completed</p>
@@ -244,7 +244,7 @@ export default function CustomerDashboardPage() {
                       <Award className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
                         {customer.membershipTier || "Standard"}
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Membership</p>

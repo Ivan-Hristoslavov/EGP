@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "../../../lib/supabase";
 import { sendEmail } from "@/lib/sendgrid-smtp";
 import { getAdminContactInfo } from "@/lib/admin-profile";
+import { requireAdmin } from "@/lib/admin-auth";
+import { getEmailHead, EMAIL } from "@/lib/email-theme";
 
 // GET - Fetch bookings with pagination and filtering
 export async function GET(request: NextRequest) {
@@ -139,7 +141,14 @@ export async function POST(request: NextRequest) {
       address,
       notes,
       team_member_id,
-      service_duration_minutes
+      service_duration_minutes,
+      payment_method,
+      payment_type,
+      total_amount,
+      amount_paid,
+      remaining_amount,
+      status: bodyStatus,
+      payment_status: bodyPaymentStatus,
     } = body;
 
     // Validate required fields
@@ -216,7 +225,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create booking
+    const parsedAmount = parseFloat(amount);
+    const parsedTotalAmount = total_amount != null ? parseFloat(total_amount) : parsedAmount;
+
     const { data: booking, error: bookingError } = await supabaseAdmin
       .from("bookings")
       .insert([
@@ -228,13 +239,18 @@ export async function POST(request: NextRequest) {
           service,
           date,
           time,
-          amount: parseFloat(amount),
+          amount: parsedAmount,
+          total_amount: parsedTotalAmount,
+          amount_paid: amount_paid != null ? parseFloat(amount_paid) : parsedAmount,
+          remaining_amount: remaining_amount != null ? parseFloat(remaining_amount) : 0,
+          payment_type: payment_type || "full",
+          payment_method: payment_method || null,
           address: address || null,
           notes: notes || null,
           team_member_id: team_member_id || null,
           service_duration_minutes: service_duration_minutes || null,
-          status: "pending",
-          payment_status: "pending",
+          status: bodyStatus || "pending",
+          payment_status: bodyPaymentStatus || "pending",
         },
       ])
       .select()
@@ -445,7 +461,11 @@ async function generateStripePaymentLink(booking: any) {
 
 function generateCustomerBookingConfirmationEmail(booking: any, paymentLink: string, contactInfo: { phone: string; email: string }): string {
   const bookingDate = new Date(booking.date).toLocaleDateString("en-GB");
-  
+  const isDeposit = booking.payment_type === "deposit" && Number(booking.amount_paid) > 0 && Number(booking.remaining_amount) > 0;
+  const depositBlurb = isDeposit
+    ? `\nYou have paid £${Number(booking.amount_paid).toFixed(2)} deposit. The remaining £${Number(booking.remaining_amount).toFixed(2)} is due when you attend.\n`
+    : "";
+
   return `
 Booking Confirmation - EGP Aesthetics
 
@@ -457,10 +477,13 @@ Booking Details:
 - Service: ${booking.service}
 - Date: ${bookingDate}
 - Time: ${booking.time}
-- Amount: £${booking.amount.toFixed(2)}
+- Amount: £${(booking.total_amount != null ? parseFloat(booking.total_amount) : booking.amount).toFixed(2)}
+${isDeposit ? `- Paid now (deposit): £${Number(booking.amount_paid).toFixed(2)}` : ""}
+${isDeposit ? `- Due on arrival: £${Number(booking.remaining_amount).toFixed(2)}` : ""}
+${depositBlurb}
 
-${booking.address ? `Address: ${booking.address}` : ''}
-${booking.notes ? `Notes: ${booking.notes}` : ''}
+${booking.address ? `Address: ${booking.address}` : ""}
+${booking.notes ? `Notes: ${booking.notes}` : ""}
 
 Payment:
 To secure your booking, please complete your payment using the link below:
@@ -486,79 +509,67 @@ Booking ID: ${booking.id}
 }
 
 function generateCustomerBookingConfirmationEmailHtml(booking: any, paymentLink: string, contactInfo: { phone: string; email: string }): string {
+  const L = EMAIL.light;
   const bookingDate = new Date(booking.date).toLocaleDateString("en-GB");
-  
+  const totalAmount = booking.total_amount != null ? parseFloat(booking.total_amount) : booking.amount;
+  const amountPaid = Number(booking.amount_paid ?? 0);
+  const remainingAmount = Number(booking.remaining_amount ?? 0);
+  const isDeposit = booking.payment_type === "deposit" && amountPaid > 0 && remainingAmount > 0;
+
   return `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+${getEmailHead()}
 <title>Booking Confirmation</title>
-<style>
-body{margin:0;padding:0;font-family:Georgia,serif;background:#f5f3ef;color:#1c1917}
-.wrap{max-width:560px;margin:0 auto;background:#fff}
-.head{background:linear-gradient(165deg,#1c1917 0%,#292524 100%);color:#faf8f5;padding:44px 32px;text-align:center}
-.head h1{margin:0;font-size:24px;font-weight:400;letter-spacing:.08em}
-.head p{margin:8px 0 0;font-size:14px;opacity:.9;font-family:Helvetica,Arial,sans-serif}
-.accent{width:48px;height:3px;background:#b76e79;margin:20px auto 0}
-.badge{display:inline-block;background:#78716c;color:#fff;padding:10px 24px;font-size:11px;letter-spacing:.2em;margin-top:16px}
-.main{padding:40px 32px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.7;color:#2d2a26}
-.card{background:#faf8f5;border:1px solid #e7e4df;margin:24px 0;padding:24px}
-.card-title{font-family:Georgia,serif;font-size:11px;letter-spacing:.15em;color:#78716c;margin-bottom:16px}
-.row{padding:12px 0;border-bottom:1px solid #e7e4df}
-.row:last-child{border-bottom:none}
-.btn{display:inline-block;background:#1c1917;color:#faf8f5!important;padding:16px 36px;text-decoration:none;font-size:13px;letter-spacing:.1em}
-.notice{background:#fef7ed;border-left:4px solid #b76e79;padding:20px;margin:24px 0}
-.notice ul{margin:8px 0 0;padding-left:20px}
-.amt{font-size:28px;font-weight:400;color:#1c1917;font-family:Georgia,serif}
-.ft{padding:28px 32px;text-align:center;font-size:12px;color:#a8a29e;border-top:1px solid #e7e4df}
-</style>
 </head>
-<body>
-<div class="wrap">
-<div class="head">
-<h1>Booking Request Received</h1>
-<p>Secure your appointment</p>
-<div class="accent"></div>
-<span class="badge">Payment pending</span>
+<body class="email-body" style="margin:0;padding:0;font-family:${EMAIL.font};background:${L.bg};color:${L.text}">
+<div class="email-wrap" style="max-width:560px;margin:0 auto;background:${L.wrap};color:${L.text}">
+<div class="email-header" style="background:${L.green};color:#fff;padding:36px 28px;text-align:center">
+<h1 style="margin:0;font-size:24px;font-weight:600;color:#fff">Booking Request Received</h1>
+<p style="margin:8px 0 0;font-size:14px;color:#e7e4df">Secure your appointment</p>
+<div class="email-accent-bar" style="width:48px;height:3px;background:${L.accent};margin:16px auto 0"></div>
+<span class="email-badge" style="display:inline-block;background:${L.greenDark};color:#fff;padding:8px 20px;font-size:11px;letter-spacing:.12em;margin-top:12px;border-radius:4px">Payment pending</span>
 </div>
-<div class="main">
-<p>Dear ${booking.customer_name},</p>
-<p>Thank you for choosing EGP Aesthetics. Your booking has been received. To confirm your appointment, please complete payment below.</p>
+<div style="padding:32px 28px;font-size:15px;line-height:1.65;color:${L.text}">
+<p style="margin:0 0 16px;color:${L.text}">Dear ${booking.customer_name},</p>
+<p style="margin:0 0 24px;color:${L.textMuted}">Thank you for choosing EGP Aesthetics. Your booking has been received. To confirm your appointment, please complete payment below.</p>
 
-<div class="card">
-<div class="card-title">Appointment</div>
-<div class="row">${booking.service}</div>
-<div class="row">${bookingDate} · ${booking.time}</div>
-<div class="row"><span class="amt">£${booking.amount.toFixed(2)}</span></div>
-${booking.address ? `<div class="row">${booking.address}</div>` : ''}
-${booking.notes ? `<div class="row">${booking.notes}</div>` : ''}
+<div class="email-card" style="background:${L.cardBg};border:1px solid ${L.cardBorder};margin:24px 0;padding:20px;border-radius:8px">
+<div class="email-card-title" style="font-size:11px;letter-spacing:.12em;color:${L.green};margin-bottom:12px;font-weight:600">APPOINTMENT</div>
+<div style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text}">${booking.service}</div>
+<div style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text}">${bookingDate} · ${booking.time}</div>
+<div style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text}">Total · <span style="font-size:20px;font-weight:600;color:${L.green}">£${Number(totalAmount).toFixed(2)}</span></div>
+${isDeposit ? `<div style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text}">Paid now (deposit) · <span style="color:${L.deposit};font-weight:600">£${amountPaid.toFixed(2)}</span></div><div style="padding:10px 0;color:${L.text}">Due on arrival · <span style="font-weight:600">£${remainingAmount.toFixed(2)}</span></div>` : ""}
+${booking.address ? `<div style="padding:10px 0;color:${L.text}">${booking.address}</div>` : ""}
+${booking.notes ? `<div style="padding:10px 0;color:${L.text}">${booking.notes}</div>` : ""}
 </div>
+${isDeposit ? `<div style="background:#e8f5e9;border:1px solid ${L.accent};padding:14px;margin:16px 0;font-size:14px;color:${L.text};border-radius:6px">You have paid <strong>£${amountPaid.toFixed(2)}</strong> deposit. The remaining <strong>£${remainingAmount.toFixed(2)}</strong> is due when you attend.</div>` : ""}
 
 <div style="text-align:center;margin:28px 0">
-<a href="${paymentLink}" class="btn">Pay Now — £${booking.amount.toFixed(2)}</a>
+<a href="${paymentLink}" style="display:inline-block;background:${L.green};color:#fff;padding:16px 36px;text-decoration:none;font-size:14px;font-weight:600;border-radius:6px">Pay Now — £${(isDeposit ? remainingAmount : totalAmount).toFixed(2)}</a>
 </div>
 
-<div class="notice">
-<div style="font-weight:600;color:#1c1917">Before your visit</div>
-<ul>
+<div class="email-notice" style="background:#f0ede7;border-left:4px solid ${L.noticeBorder};padding:20px;margin:24px 0;border-radius:0 6px 6px 0">
+<div style="font-weight:600;color:${L.text};margin-bottom:8px">Before your visit</div>
+<ul style="margin:0;padding-left:20px;color:${L.textMuted}">
 <li>Arrive 10 minutes early</li>
 <li>Bring a valid ID</li>
 <li>Reschedule at least 24 hours in advance if needed</li>
 </ul>
+<p style="margin:12px 0 0;font-size:13px;color:${L.danger};font-weight:500">You can cancel or request a refund up to 24 hours before your appointment.</p>
 </div>
 
-<div class="card">
-<div class="card-title">Questions?</div>
-<div class="row"><a href="tel:${contactInfo.phone.replace(/\s/g,'')}" style="color:#1c1917;text-decoration:none">${contactInfo.phone}</a></div>
-<div class="row"><a href="mailto:${contactInfo.email}" style="color:#1c1917;text-decoration:none">${contactInfo.email}</a></div>
+<div class="email-card" style="background:${L.cardBg};border:1px solid ${L.cardBorder};margin:24px 0;padding:20px;border-radius:8px">
+<div class="email-card-title" style="font-size:11px;letter-spacing:.12em;color:${L.green};margin-bottom:12px;font-weight:600">QUESTIONS?</div>
+<div style="padding:8px 0;color:${L.text}"><a href="tel:${contactInfo.phone.replace(/\s/g,"")}" class="email-link" style="color:${L.link};text-decoration:none;font-weight:500">${contactInfo.phone}</a></div>
+<div style="padding:8px 0;color:${L.text}"><a href="mailto:${contactInfo.email}" class="email-link" style="color:${L.link};text-decoration:none;font-weight:500">${contactInfo.email}</a></div>
 </div>
 
-<p style="margin-top:32px">We look forward to welcoming you.</p>
-<p style="font-family:Georgia,serif;color:#1c1917"><strong>EGP Aesthetics</strong></p>
+<p style="margin-top:28px;color:${L.text}">We look forward to welcoming you.</p>
+<p style="color:${L.green};font-weight:600">EGP Aesthetics</p>
 </div>
-<div class="ft">
+<div class="email-footer" style="padding:24px 28px;text-align:center;font-size:12px;color:${L.muted};border-top:1px solid #e7e4df;background:${L.wrap}">
 <p style="margin:0">Ref: ${booking.id} · EGP Aesthetics London</p>
 </div>
 </div>
@@ -567,8 +578,11 @@ ${booking.notes ? `<div class="row">${booking.notes}</div>` : ''}
   `.trim();
 }
 
-// DELETE - Delete a booking
+// DELETE - Delete a booking (admin only)
 export async function DELETE(request: NextRequest) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const { searchParams } = new URL(request.url);
     const bookingId = searchParams.get("id");
@@ -607,8 +621,11 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-// PUT - Update a booking
+// PUT - Update a booking (admin only)
 export async function PUT(request: NextRequest) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const { searchParams } = new URL(request.url);
     const bookingId = searchParams.get("id");
@@ -632,10 +649,14 @@ export async function PUT(request: NextRequest) {
       address,
       notes,
       status,
-      payment_status
+      payment_status,
+      payment_method,
+      payment_type,
+      total_amount,
+      amount_paid,
+      remaining_amount,
     } = body;
 
-    // Validate required fields
     if (!customer_name || !service || !date || !time || !amount) {
       return NextResponse.json(
         { error: "Missing required fields: customer_name, service, date, time, amount" },
@@ -643,23 +664,31 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Update the booking
+    const parsedAmount = parseFloat(amount);
+    const updateData: Record<string, any> = {
+      customer_name,
+      customer_email: customer_email || null,
+      customer_phone: customer_phone || null,
+      service,
+      date,
+      time,
+      amount: parsedAmount,
+      address: address || null,
+      notes: notes || null,
+      status: status || 'pending',
+      payment_status: payment_status || 'pending',
+      updated_at: new Date().toISOString(),
+    };
+
+    if (total_amount != null) updateData.total_amount = parseFloat(total_amount);
+    if (amount_paid != null) updateData.amount_paid = parseFloat(amount_paid);
+    if (remaining_amount != null) updateData.remaining_amount = parseFloat(remaining_amount);
+    if (payment_type) updateData.payment_type = payment_type;
+    if (payment_method) updateData.payment_method = payment_method;
+
     const { data: booking, error } = await supabaseAdmin
       .from("bookings")
-      .update({
-        customer_name,
-        customer_email: customer_email || null,
-        customer_phone: customer_phone || null,
-        service,
-        date,
-        time,
-        amount: parseFloat(amount),
-        address: address || null,
-        notes: notes || null,
-        status: status || 'pending',
-        payment_status: payment_status || 'pending',
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq("id", bookingId)
       .select()
       .single();

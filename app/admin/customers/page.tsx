@@ -450,7 +450,7 @@ export default function CustomersPage() {
                       <Users className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                     </div>
                     <div>
-                      <p className="text-3xl font-bold">{totalCount}</p>
+                      <p className="text-2xl sm:text-3xl font-bold">{totalCount}</p>
                       <p className="text-sm text-default-500">Total Customers</p>
                     </div>
                   </div>
@@ -510,7 +510,7 @@ export default function CustomersPage() {
                 <div className="w-20 h-20 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Users className="w-10 h-10 text-primary-600 dark:text-primary-400" />
                 </div>
-                <h3 className="text-2xl font-bold mb-2">No Customers Yet</h3>
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-2">No Customers Yet</h3>
                 <p className="text-default-500 mb-6">
                   Add your first customer using the button above or try different filters.
                 </p>
@@ -895,14 +895,14 @@ export default function CustomersPage() {
                         <div className="flex items-center gap-4">
                 <div className="relative">
                             <div className="w-20 h-20 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-2xl flex items-center justify-center shadow-lg">
-                              <span className="text-white font-bold text-2xl">
+                              <span className="text-white font-bold text-lg sm:text-xl md:text-2xl">
                                 {selectedCustomer.name.charAt(0).toUpperCase()}
                     </span>
                   </div>
                             <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-success-500 rounded-full border-2 border-background"></div>
                 </div>
                           <div>
-                            <h3 className="text-2xl font-bold mb-1">{selectedCustomer.name}</h3>
+                            <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-1">{selectedCustomer.name}</h3>
                             <p className="text-sm text-default-500">
                               Customer since {new Date(selectedCustomer.created_at).toLocaleDateString('en-GB', {
                                 year: 'numeric',

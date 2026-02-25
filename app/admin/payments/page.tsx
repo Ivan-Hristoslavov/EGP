@@ -458,7 +458,7 @@ export default function PaymentsPage() {
           <div className="flex items-center justify-between">
             <div>
                 <p className="text-sm font-medium text-default-500">Total Received</p>
-                <p className="text-2xl font-bold text-success">£{getTotalAmount().toFixed(2)}</p>
+                <p className="text-xl sm:text-2xl font-bold text-success">£{getTotalAmount().toFixed(2)}</p>
               </div>
               <div className="p-3 bg-success-100 dark:bg-success-900/20 rounded-full">
                 <CheckCircle className="w-6 h-6 text-success-600 dark:text-success-400" />
@@ -472,7 +472,7 @@ export default function PaymentsPage() {
           <div className="flex items-center justify-between">
             <div>
                 <p className="text-sm font-medium text-default-500">Pending Payments</p>
-                <p className="text-2xl font-bold text-warning">£{getPendingAmount().toFixed(2)}</p>
+                <p className="text-xl sm:text-2xl font-bold text-warning">£{getPendingAmount().toFixed(2)}</p>
               </div>
               <div className="p-3 bg-warning-100 dark:bg-warning-900/20 rounded-full">
                 <AlertCircle className="w-6 h-6 text-warning-600 dark:text-warning-400" />
@@ -486,7 +486,7 @@ export default function PaymentsPage() {
           <div className="flex items-center justify-between">
             <div>
                 <p className="text-sm font-medium text-default-500">Total Transactions</p>
-                <p className="text-2xl font-bold text-primary">{filteredPayments.length}</p>
+                <p className="text-xl sm:text-2xl font-bold text-primary">{filteredPayments.length}</p>
               </div>
               <div className="p-3 bg-primary-100 dark:bg-primary-900/20 rounded-full">
                 <CreditCard className="w-6 h-6 text-primary-600 dark:text-primary-400" />
@@ -870,7 +870,7 @@ export default function PaymentsPage() {
                 </div>
                 <div>
                       <label className="text-sm font-medium text-default-500">Amount</label>
-                      <p className="text-2xl font-bold text-success">£{selectedPayment.amount.toFixed(2)}</p>
+                      <p className="text-xl sm:text-2xl font-bold text-success">£{selectedPayment.amount.toFixed(2)}</p>
                       {selectedPayment.payment_type === 'deposit' && (
                         <p className="text-sm text-default-500 mt-1">Deposit payment</p>
                       )}

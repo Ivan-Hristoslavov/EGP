@@ -56,10 +56,10 @@ export default function BookTreatmentNowPage() {
               <Star className="w-4 h-4" />
               <span>Most Popular</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
               Book Treatment Now
             </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8">
               Start your aesthetic journey with a personalised 30-minute consultation
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -89,7 +89,7 @@ export default function BookTreatmentNowPage() {
             <div className="grid md:grid-cols-2 gap-12">
               {/* Service Info */}
               <div>
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6">
                   About This Consultation
                 </h2>
                 <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
@@ -109,7 +109,7 @@ export default function BookTreatmentNowPage() {
 
               {/* Benefits */}
               <div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-6">
                   What You'll Get
                 </h3>
                 <ul className="space-y-4">
@@ -130,7 +130,7 @@ export default function BookTreatmentNowPage() {
       <section className="py-16 md:py-24 bg-gray-50 dark:bg-gray-800">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white text-center mb-12">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white text-center mb-12">
               What to Expect
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -142,7 +142,7 @@ export default function BookTreatmentNowPage() {
                   <div className="w-12 h-12 bg-gradient-to-br from-rose-500 to-pink-500 rounded-full flex items-center justify-center mb-4">
                     <span className="text-white font-bold text-lg">{step.step}</span>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3">
                     {step.title}
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300">
@@ -159,10 +159,10 @@ export default function BookTreatmentNowPage() {
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-6">
               Ready to Start Your Journey?
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8">
               Book your consultation today and discover how we can help you achieve your aesthetic goals
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
