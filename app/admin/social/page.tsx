@@ -64,9 +64,9 @@ export default function AdminSocialPage() {
         body: JSON.stringify({ social_links: links }),
       });
       if (!res.ok) throw new Error("Failed to save");
-      showSuccess("Social links saved. They will appear in the footer and floating buttons.");
+      showSuccess("Saved", "Social links saved. They will appear in the footer and floating buttons.");
     } catch (e) {
-      showError("Could not save social links. Try again.");
+      showError("Error", "Could not save social links. Try again.");
     } finally {
       setSaving(false);
     }
