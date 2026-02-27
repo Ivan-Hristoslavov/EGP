@@ -194,7 +194,7 @@ export function SectionHero() {
 
         {/* Main Content */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 animate-fade-in-up">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 animate-fade-in-up">
             <span className="text-white">
               {heroSection?.main_headline || "Professional Aesthetic Treatments"}
             </span>

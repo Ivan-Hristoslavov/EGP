@@ -167,7 +167,7 @@ export default function SectionNewsletter() {
 
   return (
       <section className="py-12 sm:py-16 md:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className={layout.container}>
           <div className="max-w-3xl mx-auto">
             <div 
               className="rounded-xl sm:rounded-2xl p-6 sm:p-8 shadow-lg"
@@ -181,14 +181,14 @@ export default function SectionNewsletter() {
             <div className="flex flex-col lg:flex-row lg:items-center gap-6 sm:gap-8">
               {/* Content */}
               <div className="flex-1">
-                <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/20 backdrop-blur-sm text-white text-sm sm:text-base font-semibold mb-3 sm:mb-4 rounded-full border border-white/30">
+                <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/20 backdrop-blur-sm text-white ${typography.body} font-semibold mb-3 sm:mb-4 rounded-full border border-white/30`}>
                   <Gift className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   <span>Exclusive Offer</span>
                 </div>
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3 sm:mb-4">
+                <h2 className={`${typography.headingSection} text-white mb-3 sm:mb-4`}>
                   Get {siteConfig.newsletter.welcomeDiscountPercent}% Off Your First Visit
                 </h2>
-                <p className="text-sm sm:text-base md:text-lg text-white/90 mb-4 sm:mb-6">
+                <p className={`${typography.body} text-white/90 mb-4 sm:mb-6`}>
                   Subscribe to our newsletter and receive exclusive beauty tips, treatment guides, and special offers
                 </p>
 
@@ -257,13 +257,13 @@ export default function SectionNewsletter() {
                 </form>
 
                 {status === "error" && (
-                  <p className="mt-4 text-red-200 dark:text-red-400 text-sm">
+                  <p className={`mt-4 ${typography.small} text-red-200 dark:text-red-400`}>
                     Sorry, there was an error. Please try again or contact us directly.
                   </p>
                 )}
 
                 {/* Privacy */}
-                <p className="mt-4 text-sm text-white/80">
+                <p className={`mt-4 ${typography.small} text-white/80`}>
                   By subscribing, you agree to receive marketing emails. Unsubscribe anytime. 
                   <Link href="/privacy" className="underline hover:text-white ml-1 font-semibold transition-colors">
                     Privacy Policy

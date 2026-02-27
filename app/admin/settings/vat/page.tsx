@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useToast, ToastMessages } from "@/components/Toast";
+import { useToast } from "@/components/Toast";
+import { Card, CardBody } from "@heroui/card";
+import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
+import { Switch } from "@heroui/switch";
+import { inputClassNames, formLayout } from "@/config/design-system";
 
 type VATSettings = {
   id: string;
@@ -95,115 +100,93 @@ export default function VATSettingsPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="mt-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
-            VAT Settings
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1 transition-colors duration-300">
-            Configure VAT settings for your invoices and payments
-          </p>
-        </div>
+      <div>
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground">
+          VAT Settings
+        </h1>
+        <p className="text-sm text-default-500 mt-1">
+          Configure VAT settings for your invoices and payments
+        </p>
       </div>
 
       {/* VAT Settings Form */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <div className="space-y-6">
-          {/* VAT Enable/Disable */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                Enable VAT
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Enable or disable VAT calculations on invoices
-              </p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.is_enabled}
-                onChange={(e) => updateSettings({ is_enabled: e.target.checked })}
-                className="sr-only peer"
+      <Card className="border border-divider">
+        <CardBody className="p-4 sm:p-6">
+          <div className={formLayout.sectionGap}>
+            {/* VAT Enable/Disable */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h3 className="text-base font-medium text-foreground">Enable VAT</h3>
+                <p className="text-sm text-default-500">Enable or disable VAT calculations on invoices</p>
+              </div>
+              <Switch
+                isSelected={settings.is_enabled}
+                onValueChange={(v) => updateSettings({ is_enabled: v })}
+                size="lg"
+                classNames={{ wrapper: "group-data-[selected=true]:bg-primary" }}
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
+            </div>
 
-          {/* VAT Rate */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              VAT Rate (%)
-            </label>
-            <input
-              type="number"
-              min="0"
-              max="100"
-              step="0.01"
-              value={settings.vat_rate}
-              onChange={(e) => updateSettings({ vat_rate: parseFloat(e.target.value) || 0 })}
-              disabled={!settings.is_enabled}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-              placeholder="20.00"
-            />
-          </div>
+            {/* VAT Rate & Number */}
+            <div className={formLayout.gridFields}>
+              <Input
+                label="VAT Rate (%)"
+                type="number"
+                min={0}
+                max={100}
+                step={0.01}
+                value={String(settings.vat_rate)}
+                onValueChange={(v) => updateSettings({ vat_rate: parseFloat(v) || 0 })}
+                isDisabled={!settings.is_enabled}
+                placeholder="20.00"
+                variant="bordered"
+                labelPlacement="outside"
+                classNames={inputClassNames}
+              />
+              <Input
+                label="VAT Number (Optional)"
+                value={settings.vat_number || ""}
+                onValueChange={(v) => updateSettings({ vat_number: v || null })}
+                isDisabled={!settings.is_enabled}
+                placeholder="GB123456789"
+                variant="bordered"
+                labelPlacement="outside"
+                classNames={inputClassNames}
+                description="Enter your VAT registration number if applicable"
+              />
+            </div>
 
-          {/* VAT Number */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              VAT Number (Optional)
-            </label>
-            <input
-              type="text"
-              value={settings.vat_number || ""}
-              onChange={(e) => updateSettings({ vat_number: e.target.value || null })}
-              disabled={!settings.is_enabled}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-              placeholder="GB123456789"
-            />
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Enter your VAT registration number if applicable
-            </p>
+            {/* Save Button */}
+            <div className="flex justify-end pt-2">
+              <Button
+                color="primary"
+                onPress={saveVATSettings}
+                isLoading={saving}
+                isDisabled={saving}
+                className="min-h-[44px] w-full sm:w-auto"
+              >
+                {saving ? "Saving..." : "Save Settings"}
+              </Button>
+            </div>
           </div>
-
-          {/* Save Button */}
-          <div className="flex justify-end pt-4">
-            <button
-              onClick={saveVATSettings}
-              disabled={saving}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {saving ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Saving...
-                </>
-              ) : (
-                "Save Settings"
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
+        </CardBody>
+      </Card>
 
       {/* Information Card */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+      <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-xl p-4 sm:p-6">
         <div className="flex">
           <div className="flex-shrink-0">
-            <svg className="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <svg className="h-5 w-5 text-primary-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
             </svg>
           </div>
           <div className="ml-3">
-            <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
+            <h3 className="text-sm font-medium text-primary-800 dark:text-primary-200">
               VAT Information
             </h3>
-            <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
+            <div className="mt-2 text-sm text-primary-700 dark:text-primary-300">
               <ul className="list-disc list-inside space-y-1">
                 <li>VAT will be automatically calculated on all invoices when enabled</li>
                 <li>Existing invoices will not be affected by changes to these settings</li>

@@ -4,6 +4,7 @@ import { Award, Shield, Heart, Sparkles, Clock, Star } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { aestheticsColors } from "@/config/colors";
 import { badgeBackgroundClass } from "@/config/badge-styles";
+import { typography, textColors, layout } from "@/config/typography";
 
 const reasons = [
   {
@@ -47,17 +48,17 @@ const reasons = [
 export default function SectionWhyChooseUs() {
   return (
     <section className="py-8 sm:py-16 md:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className={layout.container}>
         {/* Section Header - compact on mobile */}
         <div className="text-center mb-6 sm:mb-12 md:mb-16">
-          <div className={`inline-flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-2 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-xs sm:text-base font-semibold mb-2 sm:mb-4`}>
+          <div className={`inline-flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-2 ${badgeBackgroundClass} ${textColors.heading} text-xs sm:text-sm font-semibold mb-2 sm:mb-4`}>
             <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
             <span>Why Choose Us</span>
           </div>
-          <h2 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-4 px-2 sm:px-4">
+          <h2 className={`${typography.headingSection} ${textColors.heading} mb-2 sm:mb-4 px-2 sm:px-4`}>
             Why Choose EGP Aesthetics?
           </h2>
-          <p className="text-sm sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto px-2 sm:px-4">
+          <p className={`${typography.lead} max-w-3xl mx-auto px-2 sm:px-4`}>
             Combining medical expertise with artistic vision to deliver exceptional results
           </p>
         </div>
@@ -77,10 +78,10 @@ export default function SectionWhyChooseUs() {
                 >
                   <Icon className="w-5 h-5 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
                 </div>
-                <h3 className="text-base sm:text-xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-3">
+                <h3 className={`${typography.headingSmall} ${textColors.heading} mb-1 sm:mb-3`}>
                   {reason.title}
                 </h3>
-                <p className="text-xs sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed">
+                <p className={`${typography.body} ${textColors.body} leading-relaxed`}>
                   {reason.description}
                 </p>
               </div>

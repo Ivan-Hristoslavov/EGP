@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useAdminProfile } from "@/components/AdminProfileContext";
+import { siteConfig } from "@/config/site";
 
 export function FloatingCTA() {
   const [showText, setShowText] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const adminProfile = useAdminProfile();
 
-  const businessPhone = adminProfile?.phone || "+44 7541777225";
+  const businessPhone = adminProfile?.phone || siteConfig.contact.phone;
 
   // Hide text after 5 seconds, show again on hover
   useEffect(() => {

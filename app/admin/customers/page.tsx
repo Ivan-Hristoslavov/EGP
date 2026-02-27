@@ -8,11 +8,12 @@ import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Input } from "@heroui/input";
-import { inputClassNames } from "@/config/design-system";
+import { inputClassNames, formLayout } from "@/config/design-system";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 import { Spinner } from "@heroui/spinner";
 import { Users, Plus, Eye, Edit, Trash2, Mail, Phone, MapPin, Table2, Grid3x3, Tag, Ticket, Send, CheckCircle, XCircle, Clock, Search } from "lucide-react";
 import { Select, SelectItem } from "@heroui/select";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 type DiscountCode = {
   id: string;
@@ -65,7 +66,8 @@ export default function CustomersPage() {
   const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null);
   const [discountCodeToDelete, setDiscountCodeToDelete] = useState<DiscountCode | null>(null);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
-  const [viewMode, setViewMode] = useState<"table" | "cards">("table");
+  const [viewMode, setViewMode] = useState<"table" | "cards">("cards");
+  const isMdOrLarger = useMediaQuery();
   const [newCustomer, setNewCustomer] = useState({
     name: "",
     email: "",
@@ -397,8 +399,8 @@ export default function CustomersPage() {
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div className="flex items-center gap-3">
-                {/* View Toggle */}
-          <div className="flex bg-default-100 rounded-lg p-1">
+                {/* View Toggle - desktop only */}
+          <div className="hidden md:flex bg-default-100 rounded-lg p-1">
             <Button
               size="sm"
               variant={viewMode === "table" ? "solid" : "light"}
@@ -465,7 +467,7 @@ export default function CustomersPage() {
                       onClear={() => setSearch("")}
                       classNames={{ input: "text-sm" }}
                       size="sm"
-                      className="min-w-[180px] max-w-[280px]"
+                      className="w-full sm:min-w-[180px] sm:max-w-[280px]"
                     />
                     <Select
                       label="Sort"
@@ -532,8 +534,8 @@ export default function CustomersPage() {
             </Card>
             ) : (
           <>
-            {/* Table View */}
-            {viewMode === "table" && (
+            {/* Table View - desktop only when table selected */}
+            {isMdOrLarger && viewMode === "table" && (
             <Card className="border border-divider">
               <CardBody className="p-0">
                 <div className="overflow-x-auto">
@@ -678,8 +680,8 @@ export default function CustomersPage() {
             </Card>
             )}
 
-            {/* Cards View */}
-            {viewMode === "cards" && (
+            {/* Cards View - always on mobile, or when cards selected on desktop */}
+            {(!isMdOrLarger || viewMode === "cards") && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredCustomers.map((customer) => (
                 <Card key={customer.id} isPressable className="border border-divider hover:shadow-lg transition-shadow">
@@ -797,69 +799,74 @@ export default function CustomersPage() {
         }}
         size="2xl"
         scrollBehavior="inside"
+        classNames={{ base: "max-w-[95vw] sm:max-w-2xl mx-2" }}
       >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader>
-                <h3 className="text-xl font-bold">Add Customer</h3>
+              <ModalHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-0">
+                <h3 className="text-lg sm:text-xl font-bold">Add Customer</h3>
               </ModalHeader>
-              <ModalBody>
-                <div className="space-y-4">
+              <ModalBody className={formLayout.modalBody}>
+                <div className={formLayout.sectionGap}>
               {formError && (
-                    <Chip color="danger" variant="flat" className="w-full">
+                    <Chip color="danger" variant="flat" className="w-full justify-center">
                       {formError}
                     </Chip>
                   )}
-                  <Input
-                    label="Name"
-                    placeholder="Enter customer name"
-                    value={newCustomer.name}
-                    onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
-                    isRequired
-                    isClearable
-                    variant="bordered"
-                    labelPlacement="outside"
-                    classNames={inputClassNames}
-                  />
-                  <Input
-                    type="email"
-                    label="Email"
-                    placeholder="customer@email.com"
-                    value={newCustomer.email}
-                    onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
-                    isRequired
-                    isClearable
-                    variant="bordered"
-                    labelPlacement="outside"
-                    classNames={inputClassNames}
-                  />
-                  <Input
-                    type="tel"
-                    label="Phone"
-                    placeholder="07944 24 20 79"
-                    value={newCustomer.phone}
-                    onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
-                    isRequired
-                    isClearable
-                    variant="bordered"
-                    labelPlacement="outside"
-                    classNames={inputClassNames}
-                  />
-                  <Input
-                    label="Address"
-                    placeholder="Enter customer address"
-                    value={newCustomer.address}
-                    onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
-                    isRequired
-                    isClearable
-                    variant="bordered"
-                    labelPlacement="outside"
-                    classNames={inputClassNames}
-                  />
+                  <div className={formLayout.gridFields}>
+                    <Input
+                      label="Name"
+                      placeholder="Enter customer name"
+                      value={newCustomer.name}
+                      onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
+                      isRequired
+                      isClearable
+                      variant="bordered"
+                      labelPlacement="outside"
+                      classNames={inputClassNames}
+                    />
+                    <Input
+                      type="email"
+                      label="Email"
+                      placeholder="customer@email.com"
+                      value={newCustomer.email}
+                      onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
+                      isRequired
+                      isClearable
+                      variant="bordered"
+                      labelPlacement="outside"
+                      classNames={inputClassNames}
+                    />
+                    <Input
+                      type="tel"
+                      label="Phone"
+                      placeholder="07944 24 20 79"
+                      value={newCustomer.phone}
+                      onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
+                      isRequired
+                      isClearable
+                      variant="bordered"
+                      labelPlacement="outside"
+                      classNames={inputClassNames}
+                    />
+                    <div className={formLayout.fullWidth}>
+                      <Input
+                        label="Address"
+                        placeholder="Enter customer address"
+                        value={newCustomer.address}
+                        onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
+                        isRequired
+                        isClearable
+                        variant="bordered"
+                        labelPlacement="outside"
+                        classNames={inputClassNames}
+                      />
+                    </div>
+                  </div>
                 </div>
               </ModalBody>
-              <ModalFooter>
+              <ModalFooter className="px-4 sm:px-6 pb-4 sm:pb-6 pt-4 gap-2 flex-col-reverse sm:flex-row">
                 <Button variant="light" onPress={onClose}>
                   Cancel
                 </Button>

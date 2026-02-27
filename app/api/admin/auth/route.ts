@@ -2,18 +2,25 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import bcrypt from "bcrypt";
 
-import { supabase } from "../../../../lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
 
-    // Get admin profile by email
-    const { data: adminProfile, error } = await supabase
+    if (!email || !password) {
+      return NextResponse.json(
+        { error: "Email and password are required" },
+        { status: 400 }
+      );
+    }
+
+    // Get admin profile by email (use service role to bypass RLS)
+    const { data: adminProfile, error } = await supabaseAdmin
       .from("admin_profile")
       .select("email, password")
       .eq("email", email)
-      .single();
+      .maybeSingle();
 
     // Validate credentials with bcrypt
     if (

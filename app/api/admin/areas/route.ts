@@ -1,66 +1,25 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
-// GET: List all areas
+// admin_areas_cover table does not exist - return empty/safe responses
+// useAreas hook returns [] - this API is kept for compatibility
+
+// GET: List all areas (returns [] since table doesn't exist)
 export async function GET() {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from('admin_areas_cover')
-    .select('*')
-    .order('order', { ascending: true });
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-  return NextResponse.json(data);
+  return NextResponse.json([]);
 }
 
-// POST: Create new area
-export async function POST(req: NextRequest) {
-  const supabase = createClient();
-  const body = await req.json();
-  const { data, error } = await supabase
-    .from('admin_areas_cover')
-    .insert([body])
-    .select()
-    .single();
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-  return NextResponse.json(data);
+// POST: No-op (table doesn't exist)
+export async function POST() {
+  return NextResponse.json({ error: 'Areas feature not configured' }, { status: 503 });
 }
 
-// PUT: Update area (expects id in body)
-export async function PUT(req: NextRequest) {
-  const supabase = createClient();
-  const body = await req.json();
-  if (!body.id) {
-    return NextResponse.json({ error: 'Missing id' }, { status: 400 });
-  }
-  const { data, error } = await supabase
-    .from('admin_areas_cover')
-    .update(body)
-    .eq('id', body.id)
-    .select()
-    .single();
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-  return NextResponse.json(data);
+// PUT: No-op (table doesn't exist)
+export async function PUT() {
+  return NextResponse.json({ error: 'Areas feature not configured' }, { status: 503 });
 }
 
-// DELETE: Delete area (expects id in body)
-export async function DELETE(req: NextRequest) {
-  const supabase = createClient();
-  const body = await req.json();
-  if (!body.id) {
-    return NextResponse.json({ error: 'Missing id' }, { status: 400 });
-  }
-  const { error } = await supabase
-    .from('admin_areas_cover')
-    .delete()
-    .eq('id', body.id);
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-  return NextResponse.json({ success: true });
+// DELETE: No-op (table doesn't exist)
+export async function DELETE() {
+  return NextResponse.json({ error: 'Areas feature not configured' }, { status: 503 });
 } 

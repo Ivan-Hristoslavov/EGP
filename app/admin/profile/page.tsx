@@ -311,45 +311,43 @@ export default function ProfilePage() {
 
   return (
     <div className="w-full">
-          {/* Profile Header */}
-      <div className="mb-6 p-6 bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 rounded-lg">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div className="flex items-center gap-6">
-                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30 flex-shrink-0">
-                  <User className="w-8 h-8 text-white" />
+          {/* Profile Header - compact for mobile */}
+      <div className="mb-4 sm:mb-6 p-4 sm:p-6 bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 rounded-lg">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+              <div className="flex items-center gap-4 sm:gap-6">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30 flex-shrink-0">
+                  <User className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                 </div>
-                <div className="flex items-center gap-6 flex-wrap">
-                  <div>
-                    <h2 className="text-xl font-bold text-white font-playfair">
-                      {dbProfile?.name || profileData.companyName}
-                    </h2>
-                    <p className="text-white/90 text-sm">{profileData.companyName}</p>
-                  </div>
-                  <div className="flex items-center gap-4 text-white/80 text-sm">
-                    <div className="flex items-center gap-1.5">
-                      <Mail className="w-4 h-4" />
-                      <span>{dbProfile?.email || profileData.businessEmail}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Phone className="w-4 h-4" />
-                      <span>{profileData.phone}</span>
-                    </div>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-base sm:text-lg font-bold text-white font-playfair truncate">
+                    {dbProfile?.name || profileData.companyName}
+                  </h2>
+                  <p className="text-white/90 text-xs sm:text-sm truncate">{profileData.companyName}</p>
+                  <div className="flex flex-col sm:flex-row sm:gap-4 gap-1 mt-2 text-white/80 text-xs sm:text-sm">
+                    <span className="flex items-center gap-1.5 truncate">
+                      <Mail className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span className="truncate">{dbProfile?.email || profileData.businessEmail}</span>
+                    </span>
+                    <span className="flex items-center gap-1.5 truncate">
+                      <Phone className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span className="truncate">{profileData.phone}</span>
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-      {/* Tabs Navigation - Moved to Top */}
-      <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
-        <nav className="flex space-x-1 overflow-x-auto">
+      {/* Tabs Navigation - compact for mobile */}
+      <div className="mb-4 sm:mb-6 border-b border-gray-200 dark:border-gray-700 -mx-1">
+        <nav className="flex space-x-0 overflow-x-auto scrollbar-hide px-1">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center space-x-2 py-3 px-4 border-b-2 font-medium text-sm transition-all whitespace-nowrap ${
+                className={`flex items-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-3 sm:px-4 border-b-2 font-medium text-xs sm:text-sm transition-all whitespace-nowrap min-h-[44px] ${
                       activeTab === tab.id
                     ? "border-rose-500 text-rose-600 dark:text-rose-400 bg-gray-50 dark:bg-gray-800"
                     : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50"
@@ -364,13 +362,13 @@ export default function ProfilePage() {
           </div>
 
           {/* Tab Content */}
-      <div className="space-y-6">
+      <div className="p-4 sm:p-0 space-y-4 sm:space-y-6">
             {activeTab === "company" && (
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {/* Business Information Section */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Business Information</h3>
-                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">Business Information</h3>
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                         Business Email
@@ -379,7 +377,7 @@ export default function ProfilePage() {
                         type="email"
                         value={profileData.businessEmail}
                         onChange={(e) => setProfileData(prev => ({ ...prev, businessEmail: e.target.value }))}
-                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                        className="w-full min-h-[44px] px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
                         placeholder="Enter business email"
                       />
                     </div>
@@ -392,7 +390,7 @@ export default function ProfilePage() {
                         type="tel"
                         value={profileData.phone}
                         onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value }))}
-                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                        className="w-full min-h-[44px] px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
                         placeholder="Enter your phone number"
                       />
                     </div>
@@ -405,7 +403,7 @@ export default function ProfilePage() {
                         type="text"
                         value={profileData.companyName}
                         onChange={(e) => setProfileData(prev => ({ ...prev, companyName: e.target.value }))}
-                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                        className="w-full min-h-[44px] px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
                         placeholder="Enter company name"
                       />
                     </div>
@@ -418,7 +416,7 @@ export default function ProfilePage() {
                       type="text"
                       value={profileData.whatsapp}
                       onChange={(e) => setProfileData(prev => ({ ...prev, whatsapp: e.target.value }))}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                      className="w-full min-h-[44px] px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
                       placeholder="07944 24 20 79"
                     />
                   </div>
@@ -432,7 +430,7 @@ export default function ProfilePage() {
                     rows={3}
                     value={profileData.companyAddress}
                     onChange={(e) => setProfileData(prev => ({ ...prev, companyAddress: e.target.value }))}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all resize-none"
+                    className="w-full min-h-[88px] px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all resize-none"
                     placeholder="Enter full company address including city and postcode (e.g., 809 Wandsworth Road, SW8 3JH, London, UK)"
                   />
                 </div>
@@ -445,7 +443,7 @@ export default function ProfilePage() {
                     rows={4}
                     value={profileData.howToFindUs}
                     onChange={(e) => setProfileData(prev => ({ ...prev, howToFindUs: e.target.value }))}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all resize-none"
+                    className="w-full min-h-[88px] px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all resize-none"
                     placeholder="Describe how to find your clinic location (e.g., Our clinic is located in the heart of London's medical district, easily accessible by public transport and car.)"
                   />
                 </div>
@@ -458,7 +456,7 @@ export default function ProfilePage() {
                     rows={4}
                     value={profileData.howToReachUs}
                     onChange={(e) => setProfileData(prev => ({ ...prev, howToReachUs: e.target.value }))}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all resize-none"
+                    className="w-full min-h-[88px] px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all resize-none"
                     placeholder="Describe how to reach your clinic (e.g., We are conveniently located near major transport links and landmarks.)"
                   />
                 </div>
@@ -474,7 +472,7 @@ export default function ProfilePage() {
                     type="text"
                     value={profileData.googleMapsAddress}
                     onChange={(e) => setProfileData(prev => ({ ...prev, googleMapsAddress: e.target.value }))}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                    className="w-full min-h-[44px] px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
                     placeholder="809 Wandsworth Road, SW8 3JH, London, UK"
                   />
                 </div>
@@ -961,7 +959,7 @@ export default function ProfilePage() {
                         type="text"
                         value={settings.businessCity}
                         onChange={(e) => handleSettingsInputChange("businessCity", e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                        className="w-full min-h-[44px] px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
                         placeholder="Enter city"
                       />
                     </div>
@@ -974,7 +972,7 @@ export default function ProfilePage() {
                         type="text"
                         value={settings.businessPostcode}
                         onChange={(e) => handleSettingsInputChange("businessPostcode", e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                        className="w-full min-h-[44px] px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
                         placeholder="Enter postcode"
                       />
                     </div>
@@ -1043,7 +1041,7 @@ export default function ProfilePage() {
                           type={showPassword ? "text" : "password"}
                           value={passwordData.newPassword}
                           onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                          className="w-full min-h-[44px] px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
                           placeholder="Enter new password"
                         />
                       </div>
@@ -1056,7 +1054,7 @@ export default function ProfilePage() {
                           type={showPassword ? "text" : "password"}
                           value={passwordData.confirmPassword}
                           onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                          className="w-full min-h-[44px] px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
                           placeholder="Confirm new password"
                         />
                       </div>

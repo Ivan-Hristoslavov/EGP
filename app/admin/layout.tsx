@@ -240,8 +240,9 @@ export default function AdminLayout({
             </div>
           </Link>
           <button
-            className="lg:hidden text-white hover:text-gray-200 transition-colors"
+            className="lg:hidden min-h-[44px] min-w-[44px] flex items-center justify-center text-white hover:text-gray-200 transition-colors -mr-2"
             onClick={() => setSidebarOpen(false)}
+            aria-label="Close menu"
           >
             <svg
               className="w-6 h-6"
@@ -345,8 +346,9 @@ export default function AdminLayout({
           <div className="flex items-center justify-between h-16 px-4 sm:px-6">
             <div className="flex items-center">
               <button
-                className="lg:hidden p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className="lg:hidden min-h-[44px] min-w-[44px] p-2 flex items-center justify-center rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 onClick={() => setSidebarOpen(true)}
+                aria-label="Open menu"
               >
                 <svg
                   className="w-6 h-6"

@@ -5,6 +5,7 @@ import { Save, Instagram, Facebook, Youtube, Linkedin, Twitter } from "lucide-re
 import { Button, Input, Card, CardBody, Spinner } from "@heroui/react";
 import { useToast } from "@/components/Toast";
 import { siteConfig } from "@/config/site";
+import { inputClassNames, formLayout } from "@/config/design-system";
 
 type SocialLinks = {
   instagram: string;
@@ -91,31 +92,35 @@ export default function AdminSocialPage() {
 
   return (
     <div className="p-4 sm:p-6 max-w-2xl">
-      <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">Social Media</h1>
-      <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+      <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-2">Social Media</h1>
+      <p className="text-sm text-default-500 mb-6">
         These links appear in the footer, floating contact buttons, and anywhere social icons are shown.
       </p>
-      <Card className="border border-default-200">
-        <CardBody className="gap-4">
-          {fields.map(({ key, label, icon, placeholder }) => (
-            <Input
-              key={key}
-              label={label}
-              value={links[key]}
-              onValueChange={(v) => setLinks((prev) => ({ ...prev, [key]: v }))}
-              placeholder={placeholder}
-              type="url"
-              startContent={icon}
-              variant="bordered"
-            />
-          ))}
+      <Card className="border border-divider">
+        <CardBody className="p-4 sm:p-6">
+          <div className={formLayout.gridFields}>
+            {fields.map(({ key, label, icon, placeholder }) => (
+              <Input
+                key={key}
+                label={label}
+                value={links[key]}
+                onValueChange={(v) => setLinks((prev) => ({ ...prev, [key]: v }))}
+                placeholder={placeholder}
+                type="url"
+                startContent={icon}
+                variant="bordered"
+                labelPlacement="outside"
+                classNames={inputClassNames}
+              />
+            ))}
+          </div>
           <Button
             color="primary"
             onPress={handleSave}
             isLoading={saving}
             isDisabled={saving}
             startContent={!saving && <Save className="w-4 h-4" />}
-            className="mt-2"
+            className="mt-4 min-h-[44px] w-full sm:w-auto"
           >
             {saving ? "Saving..." : "Save social links"}
           </Button>

@@ -7,6 +7,7 @@ import { useServices } from "@/hooks/useServices";
 import Pagination from "@/components/Pagination";
 import type { Service } from "@/hooks/useServices";
 import { aestheticsColors } from "@/config/colors";
+import { typography, textColors, layout } from "@/config/typography";
 import { PriceWithDiscount } from "@/components/PriceWithDiscount";
 import { ServiceDetailsModal } from "@/components/ServiceDetailsModal";
 import { badgeBackgroundClass } from "@/config/badge-styles";
@@ -132,16 +133,16 @@ export default function SectionFeaturedServices() {
   if (isLoading) {
     return (
       <section className="py-12 sm:py-16 md:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className={layout.container}>
           <div className="text-center mb-8 sm:mb-12 md:mb-16">
-            <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-2 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-xs sm:text-base font-semibold mb-2 sm:mb-4`}>
+            <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-2 ${badgeBackgroundClass} text-xs sm:text-sm font-semibold mb-2 sm:mb-4 ${textColors.heading}`}>
               <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
               <span>Popular Treatments</span>
             </div>
-            <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-4 px-4">
+            <h2 className={`${typography.headingSection} ${textColors.heading} mb-2 sm:mb-4 px-4`}>
               Featured Services
             </h2>
-            <p className="text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-4">
+            <p className={`${typography.lead} max-w-2xl mx-auto px-4`}>
               Discover our most popular aesthetic treatments
             </p>
           </div>
@@ -164,22 +165,22 @@ export default function SectionFeaturedServices() {
   if (!isLoading && filteredServices.length === 0) {
     return (
       <section className="py-12 sm:py-16 md:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className={layout.container}>
           <div className="text-center mb-8 sm:mb-12 md:mb-16">
-            <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-2 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-xs sm:text-base font-semibold mb-2 sm:mb-4`}>
+            <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-2 ${badgeBackgroundClass} text-xs sm:text-sm font-semibold mb-2 sm:mb-4 ${textColors.heading}`}>
               <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
               <span>Popular Treatments</span>
             </div>
-            <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-4 px-4">
+            <h2 className={`${typography.headingSection} ${textColors.heading} mb-2 sm:mb-4 px-4`}>
               Featured Services
             </h2>
-            <p className="text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-4">
+            <p className={`${typography.lead} max-w-2xl mx-auto px-4`}>
               Discover our most popular aesthetic treatments
             </p>
           </div>
           
           <div className="text-center py-12">
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className={typography.lead}>
               No featured services available at the moment.
             </p>
           </div>
@@ -208,7 +209,7 @@ export default function SectionFeaturedServices() {
         {/* Category and Discount Filters - 4 per line */}
         {(availableCategories.length > 0 || hasDiscountedFeatured) && (
           <div className="mb-8 sm:mb-12">
-            <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 sm:mb-3">
+            <div className={`flex items-center gap-2 ${typography.body} font-medium ${textColors.body} mb-2 sm:mb-3`}>
               <Filter className="w-4 h-4 flex-shrink-0" />
               <span>Filter:</span>
             </div>
@@ -282,7 +283,7 @@ export default function SectionFeaturedServices() {
                   
                   {/* Service Name Overlay - compact on mobile */}
                   <div className="absolute inset-0 flex items-center justify-center p-1.5 sm:p-4 md:p-5 z-10">
-                    <h3 className="text-xs sm:text-base md:text-lg lg:text-xl font-bold text-white text-center drop-shadow-lg line-clamp-2 leading-tight">
+                    <h3 className={`${typography.headingCard} text-white text-center drop-shadow-lg line-clamp-2 leading-tight`}>
                       {service.name}
                     </h3>
                   </div>
@@ -307,11 +308,11 @@ export default function SectionFeaturedServices() {
                 <div className="p-2 sm:p-4 md:p-5 lg:p-6 flex flex-col flex-1">
                   {/* Category */}
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="inline-flex items-center px-2.5 py-0.5 bg-[#ddd5c3]/50 dark:bg-[#c9c1b0]/30 text-gray-800 dark:text-gray-200 border border-[#c9c1b0]/50 dark:border-gray-600/50 rounded-full text-xs font-semibold">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 bg-[#ddd5c3]/50 dark:bg-[#c9c1b0]/30 ${textColors.body} border border-[#c9c1b0]/50 dark:border-gray-600/50 rounded-full ${typography.small} font-semibold`}>
                       {service.category.name}
                     </span>
                     {service.main_tab && (
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                      <span className={typography.small}>
                         • {service.main_tab.name}
                       </span>
                     )}
@@ -319,13 +320,13 @@ export default function SectionFeaturedServices() {
 
                   {/* Description */}
                   {service.description && (
-                    <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 mb-2 sm:mb-4 line-clamp-2">
+                    <p className={`${typography.body} ${textColors.body} mb-2 sm:mb-4 line-clamp-2`}>
                       {service.description}
                     </p>
                   )}
 
                   {/* Service Details */}
-                  <div className="flex flex-wrap gap-2 sm:gap-3 mb-2 sm:mb-4 text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">
+                  <div className={`flex flex-wrap gap-2 sm:gap-3 mb-2 sm:mb-4 ${typography.small}`}>
                     <div className="flex items-center gap-1">
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />

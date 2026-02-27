@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAdminProfile } from "@/hooks/useAdminProfile";
+import { siteConfig } from "@/config/site";
 import { Customer, Booking, Invoice } from "@/types";
 import { useVATSettings } from "@/hooks/useVATSettings";
 import { getSupportedFormatsText, processImageFile } from "@/lib/image-utils";
@@ -246,7 +247,7 @@ export function EditInvoiceModal({
     formDataToSend.append('total_amount', totalAmount.toString());
             formDataToSend.append('company_name', dbProfile?.company_name || "EGP");
     formDataToSend.append('company_address', dbProfile?.company_address || "London, UK");
-    formDataToSend.append('company_phone', dbProfile?.phone || "+44 7700 123456");
+    formDataToSend.append('company_phone', dbProfile?.phone || siteConfig.contact.phone);
     formDataToSend.append('company_email', dbProfile?.business_email || dbProfile?.email || "");
     formDataToSend.append('company_vat_number', vatSettings?.is_enabled ? (vatSettings.vat_number || "") : "");
     formDataToSend.append('notes', formData.notes || '');
@@ -330,7 +331,7 @@ export function EditInvoiceModal({
                 <strong>Company:</strong> {dbProfile?.company_name || "EGP"}
               </div>
               <div>
-                <strong>Phone:</strong> {dbProfile?.phone || "+44 7700 123456"}
+                <strong>Phone:</strong> {dbProfile?.phone || siteConfig.contact.phone}
               </div>
               <div>
                 <strong>Email:</strong> {dbProfile?.business_email || ""}

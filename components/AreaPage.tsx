@@ -3,6 +3,7 @@
 import Image from "next/image";
 import FormBooking from "./FormBooking";
 import { ButtonCallNow } from "./ButtonCallNow";
+import { typography } from "@/config/typography";
 
 interface AreaPageProps {
   areaName: string;
@@ -39,7 +40,7 @@ export function AreaPage({ areaName, postcode, description, localKeywords, nearb
                 </span>
               </div>
 
-              <h1 className="text-5xl font-bold mb-6 leading-tight">
+              <h1 className={`${typography.headingHero} mb-6 text-white`}>
                 Premium Aesthetics in <span className="text-yellow-300">{areaName}</span>
               </h1>
 
@@ -110,7 +111,7 @@ export function AreaPage({ areaName, postcode, description, localKeywords, nearb
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className={`${typography.headingSection} text-gray-900 mb-4`}>
               Aesthetic Treatments in {areaName}
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -195,7 +196,7 @@ export function AreaPage({ areaName, postcode, description, localKeywords, nearb
       <section className="py-20 bg-blue-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className={`${typography.headingSection} text-gray-900 mb-4`}>
               Why Choose EGP in {areaName}?
             </h2>
             <p className="text-xl text-gray-600">
@@ -272,7 +273,7 @@ export function AreaPage({ areaName, postcode, description, localKeywords, nearb
       <section className="py-20" id="contact">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className={`${typography.headingSection} text-gray-900 mb-4`}>
               Book Treatment in {areaName}?
             </h2>
             <p className="text-xl text-gray-600">

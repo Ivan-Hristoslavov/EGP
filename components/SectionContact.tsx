@@ -7,6 +7,7 @@ import { useWorkingHours } from "@/hooks/useWorkingHours";
 import { useAdminSettings } from "@/hooks/useAdminSettings";
 import { useToast, ToastMessages } from "@/components/Toast";
 import { useAdminProfile } from "@/components/AdminProfileContext";
+import { siteConfig } from "@/config/site";
 
 type ServiceArea = {
   id: number;
@@ -43,7 +44,7 @@ export default function SectionContact() {
   const businessData = {
     businessName: adminProfile?.company_name || "EGP",
     businessEmail: adminProfile?.business_email || "",
-    businessPhone: adminProfile?.phone || "+44 7541777225",
+    businessPhone: adminProfile?.phone || siteConfig.contact.phone,
     businessAddress: adminProfile?.company_address || "London, UK",
     responseTime:
       adminSettings?.responseTime ||

@@ -1041,10 +1041,10 @@ export default function CalendarPage() {
             className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           />
           
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
                       <button
               onClick={() => setView('month')}
-              className={`px-4 py-2 rounded-lg ${
+              className={`min-h-[44px] flex-1 min-w-[70px] px-4 py-2 rounded-lg font-medium ${
                 view === 'month' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
@@ -1052,7 +1052,7 @@ export default function CalendarPage() {
                       </button>
                       <button
               onClick={() => setView('week')}
-              className={`px-4 py-2 rounded-lg ${
+              className={`min-h-[44px] flex-1 min-w-[70px] px-4 py-2 rounded-lg font-medium ${
                 view === 'week' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
@@ -1060,7 +1060,7 @@ export default function CalendarPage() {
                       </button>
                       <button
               onClick={() => setView('day')}
-              className={`px-4 py-2 rounded-lg ${
+              className={`min-h-[44px] flex-1 min-w-[70px] px-4 py-2 rounded-lg font-medium ${
                 view === 'day' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
@@ -1082,21 +1082,21 @@ export default function CalendarPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => navigateDate('prev')}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300"
+                className="min-h-[44px] min-w-[44px] p-2 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-5 h-5" />
               </button>
               <button
                 onClick={() => setCurrentDate(new Date())}
-                className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="min-h-[44px] px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
                 Today
               </button>
               <button
                 onClick={() => navigateDate('next')}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300"
+                className="min-h-[44px] min-w-[44px] p-2 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300"
               >
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-5 h-5" />
               </button>
                 </div>
             </div>
@@ -1160,8 +1160,9 @@ export default function CalendarPage() {
             )}
               </div>
 
-              {/* Calendar Grid */}
-          <div className="grid grid-cols-7">
+              {/* Calendar Grid - scroll horizontally on mobile */}
+          <div className="overflow-x-auto">
+          <div className="grid grid-cols-7 min-w-[320px]">
             {/* Day headers */}
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
               <div key={day} className="p-3 text-center text-sm font-medium text-gray-500 dark:text-gray-400 border-b dark:border-gray-700">
@@ -1239,6 +1240,7 @@ export default function CalendarPage() {
               );
             })}
           </div>
+          </div>
         </div>
       )}
 
@@ -1254,21 +1256,21 @@ export default function CalendarPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => navigateWeek('prev')}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300"
+                className="min-h-[44px] min-w-[44px] p-2 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-5 h-5" />
               </button>
               <button
                 onClick={() => setCurrentDate(new Date())}
-                className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="min-h-[44px] px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
                 This Week
               </button>
               <button
                 onClick={() => navigateWeek('next')}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300"
+                className="min-h-[44px] min-w-[44px] p-2 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300"
               >
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-5 h-5" />
               </button>
             </div>
             </div>
@@ -1332,8 +1334,9 @@ export default function CalendarPage() {
             )}
           </div>
 
-          {/* Week Grid */}
-          <div className="grid grid-cols-8">
+          {/* Week Grid - scroll horizontally on mobile */}
+          <div className="overflow-x-auto">
+          <div className="grid grid-cols-8 min-w-[560px]">
             {/* Time column header */}
             <div className="p-3 text-center text-sm font-medium text-gray-500 dark:text-gray-400 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
               Time
@@ -1487,6 +1490,7 @@ export default function CalendarPage() {
               );
             })}
           </div>
+          </div>
         </div>
       )}
 
@@ -1510,16 +1514,16 @@ export default function CalendarPage() {
                     current.setDate(current.getDate() - 1);
                     setSelectedDate(current.toISOString().split('T')[0]);
                   }}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300 transition-colors"
+                  className="min-h-[44px] min-w-[44px] p-2 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300 transition-colors"
                   title="Previous Day"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => {
                     setSelectedDate(getCurrentToday());
                   }}
-                  className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="min-h-[44px] px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   title="Today"
                 >
                   Today
@@ -1530,10 +1534,10 @@ export default function CalendarPage() {
                     current.setDate(current.getDate() + 1);
                     setSelectedDate(current.toISOString().split('T')[0]);
                   }}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300 transition-colors"
+                  className="min-h-[44px] min-w-[44px] p-2 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300 transition-colors"
                   title="Next Day"
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
             </div>
