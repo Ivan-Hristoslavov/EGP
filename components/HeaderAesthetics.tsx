@@ -10,6 +10,7 @@ import { useServices } from "@/hooks/useServices";
 import { useConditions } from "@/hooks/useConditions";
 import { PriceWithDiscount } from "@/components/PriceWithDiscount";
 import type { Condition } from "@/hooks/useConditions";
+import type { Service } from "@/hooks/useServices";
 import { useAdminProfile, useAdminProfileContext } from "@/components/AdminProfileContext";
 import { useSocialLinks } from "@/hooks/useSocialLinks";
 
@@ -164,6 +165,26 @@ export default function HeaderAesthetics() {
 
     return grouped;
   }, [conditions]);
+
+  /** Get price for condition by matching service slug or parsing treatments */
+  const getConditionPrice = (condition: Condition): { price: number; originalPrice?: number | null; discountPercentage?: number | null } | null => {
+    const match = services.find((s: Service) => s.slug === condition.slug);
+    if (match) {
+      const price = match.discounted_price ?? match.price;
+      return {
+        price: typeof price === "number" ? price : Number(price),
+        originalPrice: match.discount_percentage && match.discounted_price ? match.price : null,
+        discountPercentage: match.discount_percentage ?? null,
+      };
+    }
+    const treatments = Array.isArray(condition.treatments) ? condition.treatments : [];
+    const prices = treatments
+      .map((t: string | unknown) => (typeof t === "string" ? t.match(/£(\d+(?:\.\d+)?)/) : null))
+      .filter((m): m is RegExpMatchArray => !!m)
+      .map((m) => parseFloat(m[1]));
+    if (prices.length > 0) return { price: Math.min(...prices) };
+    return null;
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -787,29 +808,44 @@ export default function HeaderAesthetics() {
             <div className="flex-1 min-h-0 overflow-y-auto">
               <div className="w-full max-w-[96vw] 2xl:max-w-[1600px] mx-auto px-5 sm:px-6 lg:px-8 py-6">
                 <div
-                className={`grid gap-4 sm:gap-5 lg:gap-6 ${
-                    bookNowCategories.length === 1
-                      ? "grid-cols-1"
-                      : bookNowCategories.length === 2
-                        ? "grid-cols-2"
-                        : bookNowCategories.length === 3
-                          ? "grid-cols-3"
-                          : bookNowCategories.length === 4
-                            ? "grid-cols-4"
-                            : bookNowCategories.length === 5
-                              ? "grid-cols-5"
-                              : bookNowCategories.length === 6
-                                ? "grid-cols-6"
-                                : "grid-cols-7"
+                className={`grid ${
+                    activeMenu === "conditions"
+                      ? "grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6 lg:gap-8 lg:gap-x-10"
+                      : "gap-4 sm:gap-5 lg:gap-6"
+                  } ${
+                    activeMenu === "conditions"
+                      ? ""
+                      : bookNowCategories.length === 1
+                        ? "grid-cols-1"
+                        : bookNowCategories.length === 2
+                          ? "grid-cols-2"
+                          : bookNowCategories.length === 3
+                            ? "grid-cols-3"
+                            : bookNowCategories.length === 4
+                              ? "grid-cols-4"
+                              : bookNowCategories.length === 5
+                                ? "grid-cols-5"
+                                : bookNowCategories.length === 6
+                                  ? "grid-cols-6"
+                                  : "grid-cols-7"
                   }`}
                 >
                   {activeMenu === "treatments" && (
                     <>
-                      {bookNowCategories.map((category) => {
+                      {bookNowCategories.map((category, index) => {
                         const categoryServices =
                           bookNowServices[category.id]?.services || [];
                         return (
-                          <div key={category.id} className="min-w-0">
+                          <div
+                            key={category.id}
+                            className={`min-w-0 relative ${index > 0 ? "pl-4 lg:pl-6" : ""}`}
+                          >
+                            {index > 0 && (
+                              <span
+                                aria-hidden
+                                className="absolute left-0 top-[12%] bottom-[12%] w-px bg-gray-200/60 dark:bg-gray-600/60"
+                              />
+                            )}
                             <div className="flex items-center justify-between gap-6 mb-5">
                               <h3 className="text-xs font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-widest font-montserrat">
                                 {category.name}
@@ -872,70 +908,128 @@ export default function HeaderAesthetics() {
 
                   {activeMenu === "conditions" && (
                     <>
-                      <div className="min-w-0">
-                        <div className="flex items-center justify-between gap-6 mb-5">
-                          <h3 className="text-xs font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-widest font-montserrat">
+                      {/* Face Conditions - box with centered title */}
+                      <div className="min-w-0 lg:col-span-2 flex flex-col">
+                        <div className="flex flex-col items-center justify-center text-center mb-5">
+                          <h3 className="text-xs font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-widest font-montserrat mb-1">
                             Face Conditions
                           </h3>
                           <Link
                             href="/conditions"
                             onClick={() => setActiveMenu(null)}
-                            className="group relative text-xs font-medium text-gray-800 dark:text-gray-200 hover:text-egp-green dark:hover:text-egp-beige transition-all duration-300 whitespace-nowrap"
+                            className="group text-xs font-medium text-gray-800 dark:text-gray-200 hover:text-egp-green dark:hover:text-egp-beige transition-all duration-300"
                           >
                             <span className="relative z-10">View All</span>
                             <span className="relative z-10 ml-1 inline-block group-hover:translate-x-1 transition-transform duration-300">→</span>
                           </Link>
                         </div>
-                        <ul className="space-y-1 max-h-[min(78vh,680px)] overflow-y-auto menu-scroll pl-2 pr-2">
-                          {conditionsByCategory.face.map((condition) => (
-                            <li key={condition.id}>
-                              <Link
-                                href={`/conditions/${condition.slug}`}
-                                className="group relative block px-2 py-1.5 -mx-2 rounded-md text-sm text-gray-800 dark:text-gray-200 font-montserrat transition-all duration-300 hover:bg-white/30 dark:hover:bg-white/10"
-                                onClick={() => setActiveMenu(null)}
-                              >
-                                <span className="relative z-10 group-hover:translate-x-1 text-gray-800 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-all duration-300 inline-block">
-                                  {condition.title}
-                                  <span className="absolute left-0 -bottom-0.5 w-0 h-px bg-egp-green dark:bg-egp-beige group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
-                                </span>
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
+                        <div className="grid grid-cols-2 gap-x-4 lg:gap-x-6">
+                          {[0, 1].map((col) => {
+                            const faceItems = conditionsByCategory.face;
+                            const mid = Math.ceil(faceItems.length / 2);
+                            const slice = col === 0 ? faceItems.slice(0, mid) : faceItems.slice(mid);
+                            if (slice.length === 0) return null;
+                            return (
+                              <ul key={`face-${col}`} className="space-y-1 max-h-[min(78vh,680px)] overflow-y-auto menu-scroll pl-2 pr-2">
+                                {slice.map((condition) => {
+                                  const priceInfo = getConditionPrice(condition);
+                                  return (
+                                    <li key={condition.id}>
+                                      <Link
+                                        href={`/conditions/${condition.slug}`}
+                                        className="group relative flex items-center justify-between gap-2 px-2 py-1.5 -mx-2 rounded-md text-sm text-gray-800 dark:text-gray-200 font-montserrat transition-all duration-300 hover:bg-white/30 dark:hover:bg-white/10"
+                                        onClick={() => setActiveMenu(null)}
+                                      >
+                                        <span className="relative z-10 group-hover:translate-x-1 text-gray-800 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-all duration-300 inline-block min-w-0">
+                                          {condition.title}
+                                          <span className="absolute left-0 -bottom-0.5 w-0 h-px bg-egp-green dark:bg-egp-beige group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
+                                        </span>
+                                        {priceInfo && (
+                                          <span className="relative z-10 text-xs font-semibold text-egp-green dark:text-egp-beige flex-shrink-0">
+                                            £{Number.isInteger(priceInfo.price) ? priceInfo.price : priceInfo.price.toFixed(2)}
+                                          </span>
+                                        )}
+                                      </Link>
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                            );
+                          })}
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center justify-between gap-6 mb-5">
-                          <h3 className="text-xs font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-widest font-montserrat">
+                      {/* Body Conditions - box with centered title, extra gap from Face */}
+                      <div className="min-w-0 lg:col-span-2 flex flex-col pl-4 lg:pl-8 relative">
+                        <span
+                          aria-hidden
+                          className="absolute left-0 top-[12%] bottom-[12%] w-px bg-gray-200/60 dark:bg-gray-600/60"
+                        />
+                        <div className="flex flex-col items-center justify-center text-center mb-5">
+                          <h3 className="text-xs font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-widest font-montserrat mb-1">
                             Body Conditions
                           </h3>
                           <Link
                             href="/conditions?category=Body"
                             onClick={() => setActiveMenu(null)}
-                            className="group relative text-xs font-medium text-gray-800 dark:text-gray-200 hover:text-egp-green dark:hover:text-egp-beige transition-all duration-300 whitespace-nowrap"
+                            className="group text-xs font-medium text-gray-800 dark:text-gray-200 hover:text-egp-green dark:hover:text-egp-beige transition-all duration-300"
                           >
                             <span className="relative z-10">View All</span>
                             <span className="relative z-10 ml-1 inline-block group-hover:translate-x-1 transition-transform duration-300">→</span>
                           </Link>
                         </div>
-                        <ul className="space-y-1 max-h-[min(78vh,680px)] overflow-y-auto menu-scroll pl-2 pr-2">
-                          {conditionsByCategory.body.map((condition) => (
-                            <li key={condition.id}>
-                              <Link
-                                href={`/conditions/${condition.slug}`}
-                                className="group relative block px-2 py-1.5 -mx-2 rounded-md text-sm text-gray-800 dark:text-gray-200 font-montserrat transition-all duration-300 hover:bg-white/30 dark:hover:bg-white/10"
-                                onClick={() => setActiveMenu(null)}
-                              >
-                                <span className="relative z-10 group-hover:translate-x-1 text-gray-800 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-all duration-300 inline-block">
-                                  {condition.title}
-                                  <span className="absolute left-0 -bottom-0.5 w-0 h-px bg-egp-green dark:bg-egp-beige group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
-                                </span>
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
+                        <div className="grid grid-cols-2 gap-x-4 lg:gap-x-6">
+                          {[0, 1].map((col) => {
+                            const bodyItems = conditionsByCategory.body;
+                            const mid = Math.ceil(bodyItems.length / 2);
+                            const slice = col === 0 ? bodyItems.slice(0, mid) : bodyItems.slice(mid);
+                            if (slice.length === 0) return null;
+                            return (
+                              <ul key={`body-${col}`} className="space-y-1 max-h-[min(78vh,680px)] overflow-y-auto menu-scroll pl-2 pr-2">
+                                {slice.map((condition) => {
+                                  const priceInfo = getConditionPrice(condition);
+                                  return (
+                                    <li key={condition.id}>
+                                      <Link
+                                        href={`/conditions/${condition.slug}`}
+                                        className="group relative flex items-center justify-between gap-2 px-2 py-1.5 -mx-2 rounded-md text-sm text-gray-800 dark:text-gray-200 font-montserrat transition-all duration-300 hover:bg-white/30 dark:hover:bg-white/10"
+                                        onClick={() => setActiveMenu(null)}
+                                      >
+                                        <span className="relative z-10 group-hover:translate-x-1 text-gray-800 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-all duration-300 inline-block min-w-0">
+                                          {condition.title}
+                                          <span className="absolute left-0 -bottom-0.5 w-0 h-px bg-egp-green dark:bg-egp-beige group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
+                                        </span>
+                                        {priceInfo && (
+                                          <span className="relative z-10 text-xs font-semibold text-egp-green dark:text-egp-beige flex-shrink-0">
+                                            £{Number.isInteger(priceInfo.price) ? priceInfo.price : priceInfo.price.toFixed(2)}
+                                          </span>
+                                        )}
+                                      </Link>
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                            );
+                          })}
+                        </div>
                       </div>
-                      <div></div>
-                      <div></div>
+                      {/* CTA panel - uses remaining space, extra gap from Body */}
+                      <div className="min-w-0 lg:col-span-2 flex flex-col justify-center pl-4 lg:pl-8 relative">
+                        <span
+                          aria-hidden
+                          className="absolute left-0 top-[12%] bottom-[12%] w-px bg-gray-200/60 dark:bg-gray-600/60"
+                        />
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 max-w-xs">
+                          Find the right treatment for your concern. Book a consultation or browse our full conditions list.
+                        </p>
+                        <Link
+                          href="/conditions"
+                          onClick={() => setActiveMenu(null)}
+                          className="inline-flex items-center gap-2 text-sm font-semibold text-egp-green dark:text-egp-beige hover:underline"
+                        >
+                          View all conditions
+                          <span className="inline-block group-hover:translate-x-1">→</span>
+                        </Link>
+                      </div>
                     </>
                   )}
                 </div>
@@ -1120,23 +1214,29 @@ export default function HeaderAesthetics() {
                             </Link>
                           </div>
                           <ul className="space-y-1 max-h-[250px] overflow-y-auto menu-scroll pr-2">
-                            {conditionsByCategory.face.map((condition) => (
-                              <li key={condition.id}>
-                                <Link
-                                  href={`/conditions/${condition.slug}`}
-                                  className="group relative flex px-3 py-2.5 min-h-[44px] text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md transition-all duration-200 active:scale-95 touch-manipulation font-montserrat items-center pb-1"
-                                  onClick={() => {
-                                    setMobileMenuOpen(false);
-                                    setActiveMenu(null);
-                                  }}
-                                >
-                                  <span className="relative z-10">
-                                    {condition.title}
-                                  </span>
-                                  <span className="absolute left-3 right-3 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
-                                </Link>
-                              </li>
-                            ))}
+                            {conditionsByCategory.face.map((condition) => {
+                              const priceInfo = getConditionPrice(condition);
+                              return (
+                                <li key={condition.id}>
+                                  <Link
+                                    href={`/conditions/${condition.slug}`}
+                                    className="group relative flex items-center justify-between gap-2 px-3 py-2.5 min-h-[44px] text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md transition-all duration-200 active:scale-95 touch-manipulation font-montserrat pb-1"
+                                    onClick={() => {
+                                      setMobileMenuOpen(false);
+                                      setActiveMenu(null);
+                                    }}
+                                  >
+                                    <span className="relative z-10 min-w-0">{condition.title}</span>
+                                    {priceInfo && (
+                                      <span className="relative z-10 text-xs font-semibold text-egp-green dark:text-egp-beige flex-shrink-0">
+                                        £{Number.isInteger(priceInfo.price) ? priceInfo.price : priceInfo.price.toFixed(2)}
+                                      </span>
+                                    )}
+                                    <span className="absolute left-3 right-3 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
+                                  </Link>
+                                </li>
+                              );
+                            })}
                           </ul>
                         </div>
                         <div>
@@ -1156,23 +1256,29 @@ export default function HeaderAesthetics() {
                             </Link>
                           </div>
                           <ul className="space-y-1 max-h-[250px] overflow-y-auto menu-scroll pr-2">
-                            {conditionsByCategory.body.map((condition) => (
-                              <li key={condition.id}>
-                                <Link
-                                  href={`/conditions/${condition.slug}`}
-                                  className="group relative flex px-3 py-2.5 min-h-[44px] text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md transition-all duration-200 active:scale-95 touch-manipulation font-montserrat items-center pb-1"
-                                  onClick={() => {
-                                    setMobileMenuOpen(false);
-                                    setActiveMenu(null);
-                                  }}
-                                >
-                                  <span className="relative z-10">
-                                    {condition.title}
-                                  </span>
-                                  <span className="absolute left-3 right-3 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
-                                </Link>
-                              </li>
-                            ))}
+                            {conditionsByCategory.body.map((condition) => {
+                              const priceInfo = getConditionPrice(condition);
+                              return (
+                                <li key={condition.id}>
+                                  <Link
+                                    href={`/conditions/${condition.slug}`}
+                                    className="group relative flex items-center justify-between gap-2 px-3 py-2.5 min-h-[44px] text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md transition-all duration-200 active:scale-95 touch-manipulation font-montserrat pb-1"
+                                    onClick={() => {
+                                      setMobileMenuOpen(false);
+                                      setActiveMenu(null);
+                                    }}
+                                  >
+                                    <span className="relative z-10 min-w-0">{condition.title}</span>
+                                    {priceInfo && (
+                                      <span className="relative z-10 text-xs font-semibold text-egp-green dark:text-egp-beige flex-shrink-0">
+                                        £{Number.isInteger(priceInfo.price) ? priceInfo.price : priceInfo.price.toFixed(2)}
+                                      </span>
+                                    )}
+                                    <span className="absolute left-3 right-3 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
+                                  </Link>
+                                </li>
+                              );
+                            })}
                           </ul>
                         </div>
                       </div>

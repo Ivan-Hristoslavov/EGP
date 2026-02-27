@@ -3,13 +3,38 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
-import { siteConfig } from "@/config/site";
 import { typography, layout, textColors } from "@/config/typography";
-import { Search, Filter, ArrowLeft, Info, Plus, CheckCircle, X } from "lucide-react";
+import { Search, Filter, ArrowLeft, Info, Plus, CheckCircle } from "lucide-react";
 import Link from 'next/link';
 import { useConditions } from "@/hooks/useConditions";
+import { useServices } from "@/hooks/useServices";
 import type { Condition } from "@/hooks/useConditions";
+import type { Service } from "@/hooks/useServices";
+import { PriceWithDiscount } from "@/components/PriceWithDiscount";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Card, CardBody, CardHeader, Chip, Spinner, Select, SelectItem } from "@heroui/react";
+
+/** Get price for condition by matching service slug or parsing treatments */
+function getConditionPrice(condition: Condition, services: Service[]): { price: number; originalPrice?: number | null; discountPercentage?: number | null } | null {
+  const match = services.find(s => s.slug === condition.slug);
+  if (match) {
+    const price = match.discounted_price ?? match.price;
+    return {
+      price: typeof price === "number" ? price : Number(price),
+      originalPrice: match.discount_percentage && match.discounted_price ? match.price : null,
+      discountPercentage: match.discount_percentage ?? null,
+    };
+  }
+  const treatments = Array.isArray(condition.treatments) ? condition.treatments : [];
+  const prices = treatments
+    .map(t => typeof t === "string" ? t.match(/£(\d+(?:\.\d+)?)/) : null)
+    .filter((m): m is RegExpMatchArray => !!m)
+    .map(m => parseFloat(m[1]));
+  if (prices.length > 0) {
+    const min = Math.min(...prices);
+    return { price: min };
+  }
+  return null;
+}
 
 // Category mapping: display name -> filter value
 const categoryMapping: Record<string, string> = {
@@ -31,7 +56,8 @@ const getCategoryDisplayName = (categoryValue: string): string => {
 
 function ConditionsPageContent() {
   const searchParams = useSearchParams();
-  const { conditions, isLoading } = useConditions();
+  const { conditions, isLoading: conditionsLoading } = useConditions();
+  const { services } = useServices();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -165,7 +191,12 @@ function ConditionsPageContent() {
                 </Button>
                 <Button
                   as={Link}
-                  href={condition?.id ? `/book?pendingConditionId=${condition.id}` : "/book"}
+                  href={
+                    (() => {
+                      const match = services.find((s) => s.slug === condition.slug);
+                      return match?.id ? `/book?pendingServiceId=${match.id}` : "/book";
+                    })()
+                  }
                   onPress={onClose}
                   className="bg-egp-green dark:bg-egp-green-dark text-white hover:opacity-90"
                   size="lg"
@@ -180,7 +211,7 @@ function ConditionsPageContent() {
     );
   };
 
-  if (isLoading) {
+  if (conditionsLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
         <div className={`${layout.containerWide}`}>
@@ -330,11 +361,27 @@ function ConditionsPageContent() {
                     </Chip>
                   </div>
 
-                  {/* Title - Centered (no duration/price for conditions) */}
+                  {/* Title and Price - Centered (matches services layout) */}
                   <div className="text-center pt-4 pb-1.5 w-full">
-                    <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-tight line-clamp-2">
+                    <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-tight line-clamp-2 mb-1">
                       {condition.title}
                     </h3>
+                    {(() => {
+                      const priceInfo = getConditionPrice(condition, services);
+                      if (!priceInfo) return null;
+                      return (
+                        <div className="flex justify-center">
+                          <PriceWithDiscount
+                            price={priceInfo.price}
+                            originalPrice={priceInfo.originalPrice}
+                            discountPercentage={priceInfo.discountPercentage}
+                            size="md"
+                            layout="stack"
+                            align="center"
+                          />
+                        </div>
+                      );
+                    })()}
                   </div>
                 </CardHeader>
 
@@ -360,7 +407,14 @@ function ConditionsPageContent() {
                     >
                       Details
                     </Button>
-                    <Link href={condition.id ? `/book?pendingConditionId=${condition.id}` : "/book"}>
+                    <Link
+                      href={
+                        (() => {
+                          const match = services.find(s => s.slug === condition.slug);
+                          return match?.id ? `/book?pendingServiceId=${match.id}` : "/book";
+                        })()
+                      }
+                    >
                       <Button
                         size="sm"
                         className="flex-1 w-full bg-egp-green text-white"
