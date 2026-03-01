@@ -1103,17 +1103,20 @@ export default function BookingsPage() {
         }}
         size="2xl"
         scrollBehavior="inside"
-        classNames={{ base: "max-w-[95vw] sm:max-w-2xl mx-2" }}
+        classNames={{
+          base: "max-w-[95vw] sm:max-w-2xl max-h-[95vh] mx-2 sm:mx-4",
+          wrapper: "items-start sm:items-center pt-4 sm:pt-0",
+        }}
       >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-0">
+              <ModalHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-0 shrink-0">
                 <h3 className="text-lg sm:text-xl font-bold">
                   {editingBooking ? 'Edit Booking' : 'Add New Booking'}
                 </h3>
               </ModalHeader>
-              <ModalBody className={formLayout.modalBody}>
+              <ModalBody className={`${formLayout.modalBody} overflow-y-auto max-h-[min(70vh,500px)] sm:max-h-[min(75vh,600px)]`}>
                 <form onSubmit={handleSubmit} className={formLayout.sectionGap}>
                 {/* Customer Information */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1482,15 +1485,18 @@ export default function BookingsPage() {
         }}
         size="2xl"
         scrollBehavior="inside"
-        classNames={{ base: "max-w-[95vw] sm:max-w-2xl mx-2" }}
+        classNames={{
+          base: "max-w-[95vw] sm:max-w-2xl max-h-[95vh] mx-2 sm:mx-4",
+          wrapper: "items-start sm:items-center pt-4 sm:pt-0",
+        }}
       >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader>
+              <ModalHeader className="shrink-0">
                 <h3 className="text-xl font-bold">Booking Details</h3>
               </ModalHeader>
-              <ModalBody>
+              <ModalBody className="overflow-y-auto max-h-[min(70vh,500px)] sm:max-h-[min(75vh,600px)]">
                 {selectedBooking && (
                   <div className="space-y-4">
                     <div>

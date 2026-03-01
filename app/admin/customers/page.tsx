@@ -899,14 +899,18 @@ export default function CustomersPage() {
         onClose={() => setSelectedCustomer(null)}
         size="2xl"
         scrollBehavior="inside"
+        classNames={{
+          base: "max-h-[95vh] mx-2 sm:mx-4",
+          wrapper: "items-start sm:items-center pt-4 sm:pt-0",
+        }}
       >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader>
+              <ModalHeader className="shrink-0">
                 <h3 className="text-xl font-bold">Customer Details</h3>
               </ModalHeader>
-              <ModalBody>
+              <ModalBody className="overflow-y-auto max-h-[min(70vh,500px)] sm:max-h-[min(75vh,600px)]">
                 {selectedCustomer && (
                   <div className="space-y-6">
                     {/* Customer Header */}

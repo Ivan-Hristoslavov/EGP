@@ -26,10 +26,10 @@ export default function NotFound() {
                 />
               </svg>
             </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-4 transition-colors duration-300">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-4 transition-colors duration-300">
               404
             </h1>
-            <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-300 mb-4 transition-colors duration-300">
+            <h2 className="text-xl sm:text-2xl font-semibold text-gray-700 dark:text-gray-300 mb-4 transition-colors duration-300">
               Page Not Found
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-8 transition-colors duration-300">

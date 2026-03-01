@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { siteConfig } from "@/config/site";
+import { typography, layout, textColors } from "@/config/typography";
 import Link from "next/link";
 import { Calendar, Clock, User, ArrowLeft, ArrowRight } from "lucide-react";
 import { notFound } from 'next/navigation';
@@ -93,7 +94,7 @@ export default async function BlogPostPage({ params }: PageProps) {
     <div className="min-h-screen bg-white dark:bg-gray-900">
       {/* Hero Section - compact on mobile */}
       <section className="py-8 sm:py-12 md:py-16 bg-gradient-to-br from-[#f5f1e9] via-[#eee6d9] to-[#e4d9c8] dark:from-gray-800 dark:via-gray-800 dark:to-gray-900">
-        <div className="container mx-auto px-4">
+        <div className={layout.container}>
           <div className="max-w-4xl mx-auto">
             <Link 
               href="/blog"
@@ -114,7 +115,7 @@ export default async function BlogPostPage({ params }: PageProps) {
               )}
             </div>
 
-            <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 font-playfair leading-tight">
+            <h1 className={`${typography.headingPage} ${textColors.heading} mb-4 sm:mb-6 font-playfair leading-tight`}>
               {post.title}
             </h1>
 
@@ -150,7 +151,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
       {/* Content Section - compact on mobile */}
       <section className="py-8 sm:py-12 md:py-16">
-        <div className="container mx-auto px-4">
+        <div className={layout.container}>
           <div className="max-w-4xl mx-auto">
             {/* Featured Image */}
             {post.featured_image_url && (

@@ -171,7 +171,7 @@ export function AdminDayOffManager() {
       {/* Header Section */}
       <div className="mt-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-8 text-white shadow-xl">
         <div>
-          <h2 className="text-4xl font-extrabold tracking-tight mb-2">Day Off Periods</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight mb-2">Day Off Periods</h2>
           <p className="text-blue-100">Manage your business's non-working days and holiday periods</p>
         </div>
         <button 

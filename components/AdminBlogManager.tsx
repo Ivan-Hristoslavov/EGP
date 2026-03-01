@@ -9,6 +9,7 @@ import { MarkdownEditor } from "@/components/MarkdownEditor";
 import Pagination from "@/components/Pagination";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Select, SelectItem, Checkbox, Card, CardBody, Spinner } from "@heroui/react";
 import { X } from "lucide-react";
+import { typography } from "@/config/typography";
 
 // Modal Component
 function BlogModal({
@@ -42,19 +43,23 @@ function BlogModal({
       size="4xl"
       scrollBehavior="inside"
       backdrop="blur"
+      classNames={{
+        base: "max-h-[95vh] sm:max-h-[90vh] mx-2 sm:mx-4",
+        wrapper: "items-start sm:items-center pt-4 sm:pt-0",
+      }}
     >
       <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader className="flex flex-col gap-1">
-              <h2 className="text-2xl font-bold">
+            <ModalHeader className="flex flex-col gap-1 shrink-0">
+              <h2 className={typography.headingCard}>
             {editingPost ? "Edit Blog Post" : "Add New Blog Post"}
               </h2>
               <p className="text-sm text-default-500 font-normal">
                 {editingPost ? "Update your blog post details" : "Create a new blog post for your website"}
               </p>
             </ModalHeader>
-            <ModalBody>
+            <ModalBody className="overflow-y-auto max-h-[min(70vh,600px)] sm:max-h-[min(75vh,700px)]">
               <div className="space-y-6">
                 <Input
                   label="Title"
@@ -332,11 +337,12 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
   }
 
   return (
-    <div className="p-3 sm:p-4 md:p-6">
-      <div className="flex items-center justify-end mb-6">
+    <div className="p-4 sm:p-5 md:p-6 w-full max-w-full overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <h2 className={typography.headingSection}>Blog Posts</h2>
         <button
           onClick={handleAddNew}
-          className="min-h-[44px] px-4 sm:px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg hover:from-rose-600 hover:to-pink-600 transition-colors font-medium flex items-center gap-2"
+          className="min-h-[44px] w-full sm:w-auto px-4 sm:px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg hover:from-rose-600 hover:to-pink-600 transition-colors font-medium flex items-center justify-center gap-2"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -358,10 +364,10 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
       ) : (
         <>
           {/* Mobile: Card view */}
-          <div className="md:hidden divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+          <div className="md:hidden divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
             {paginatedPosts.map((post) => (
-              <div key={post.id} className="p-4 space-y-3">
-                <h4 className="font-semibold text-gray-900 dark:text-white">{post.title}</h4>
+              <div key={post.id} className="p-4 sm:p-5 space-y-3">
+                <h4 className={`font-semibold text-gray-900 dark:text-white ${typography.headingSmall}`}>{post.title}</h4>
                 {post.excerpt && (
                   <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{post.excerpt}</p>
                 )}
@@ -390,13 +396,13 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
                 <div className="flex gap-2 pt-2">
                   <button
                     onClick={() => handleEdit(post)}
-                    className="min-h-[44px] flex-1 px-4 py-2 text-sm font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-900/30"
+                    className="min-h-[44px] flex-1 px-4 py-2.5 text-sm font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-900/30 transition-colors"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDelete(post)}
-                    className="min-h-[44px] flex-1 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30"
+                    className="min-h-[44px] flex-1 px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
                   >
                     Delete
                   </button>
@@ -406,33 +412,33 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
           </div>
 
           {/* Desktop: Table view */}
-          <div className="hidden md:block bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+          <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl shadow overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Title</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Category</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Featured</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Title</th>
+                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Category</th>
+                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Featured</th>
+                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
+                  <th className="px-4 lg:px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {paginatedPosts.map((post) => (
                   <tr key={post.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 lg:px-6 py-4">
                       <div className="text-sm font-medium text-gray-900 dark:text-white">{post.title}</div>
                       {post.excerpt && (
                         <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate max-w-xs">{post.excerpt}</div>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
                       <span className="px-2 py-1 text-xs font-medium bg-rose-100 dark:bg-rose-900/30 text-rose-800 dark:text-rose-400 rounded-full">
                         {post.category}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                         post.is_published
                           ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400"
@@ -441,19 +447,19 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
                         {post.is_published ? "Published" : "Draft"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
                       {post.featured && (
                         <span className="px-2 py-1 text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 rounded-full">
                           Featured
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                    <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {post.published_at
                         ? new Date(post.published_at).toLocaleDateString()
                         : new Date(post.created_at).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => handleEdit(post)}

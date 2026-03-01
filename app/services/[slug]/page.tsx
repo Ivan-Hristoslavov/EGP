@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { siteConfig } from "@/config/site";
+import { typography, layout, textColors } from "@/config/typography";
 import Link from "next/link";
 import { Calendar, Clock, CheckCircle, Star, ArrowRight, Phone, Shield } from "lucide-react";
 import { notFound } from 'next/navigation';
@@ -460,7 +461,7 @@ export default async function ServicePage({ params }: PageProps) {
     <div className="min-h-screen bg-white dark:bg-egp-green-darker flex flex-col">
       {/* Hero Section */}
       <section className="py-12 md:py-16 bg-gradient-to-br from-egp-beige-lighter to-egp-beige-light dark:from-egp-green-dark dark:to-egp-green-darker">
-        <div className="container mx-auto px-4">
+        <div className={layout.container}>
           <div className="max-w-4xl mx-auto text-center">
             {isPopular && (
               <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-egp-green/20 dark:bg-egp-green-dark rounded-full text-egp-green dark:text-white text-xs font-semibold mb-4">
@@ -471,10 +472,10 @@ export default async function ServicePage({ params }: PageProps) {
             <div className="inline-block px-3 py-1.5 bg-white/80 dark:bg-egp-green-dark rounded-full text-egp-green dark:text-white text-xs font-medium mb-4">
               {serviceCategory}
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            <h1 className={`${typography.headingPage} ${textColors.heading} mb-4`}>
               {serviceTitle}
             </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
+            <p className={`${typography.lead} ${textColors.body} mb-6`}>
               {serviceDescription}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -510,12 +511,12 @@ export default async function ServicePage({ params }: PageProps) {
 
       {/* Service Details */}
       <section className="py-12 md:py-16 flex-1">
-        <div className="container mx-auto px-4">
+        <div className={layout.container}>
           <div className="max-w-6xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-8">
               {/* Service Info */}
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                <h2 className={`${typography.headingSection} ${textColors.heading} mb-4`}>
                   About This Treatment
                 </h2>
                 <p className="text-base text-gray-600 dark:text-gray-300 mb-4">
@@ -544,7 +545,7 @@ export default async function ServicePage({ params }: PageProps) {
               {/* Benefits */}
               {serviceBenefits && serviceBenefits.length > 0 && (
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                  <h3 className={`${typography.headingCard} ${textColors.heading} mb-4`}>
                     Treatment Benefits
                   </h3>
                   <ul className="space-y-3">

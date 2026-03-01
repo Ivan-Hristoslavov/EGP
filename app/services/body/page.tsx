@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Clock, ArrowRight } from "lucide-react";
 import ButtonBookNow from "@/components/ButtonBookNow";
+import { typography, layout } from "@/config/typography";
 
 export const metadata: Metadata = {
   title: "Body Contouring & Sculpting Treatments in London",
@@ -21,12 +22,12 @@ export default function BodyTreatmentsPage() {
     <div className="min-h-screen bg-white">
       {/* Hero */}
       <section className="relative bg-gradient-to-br from-emerald-500 via-teal-500 to-emerald-600 text-white py-16 md:py-24">
-        <div className="container mx-auto px-4">
+        <div className={layout.container}>
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-6">
+            <h1 className={`${typography.headingHero} mb-6`}>
               Body Treatments
             </h1>
-            <p className="text-xl md:text-2xl text-emerald-100 mb-8">
+            <p className={`${typography.lead} text-emerald-100 mb-8`}>
               Sculpt, tone, and transform your body with advanced treatments
             </p>
             <ButtonBookNow size="lg" variant="secondary" />
@@ -36,7 +37,7 @@ export default function BodyTreatmentsPage() {
 
       {/* Services Grid */}
       <section className="py-16">
-        <div className="container mx-auto px-4">
+        <div className={layout.container}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {bodyServices.map((service) => (
               <div
