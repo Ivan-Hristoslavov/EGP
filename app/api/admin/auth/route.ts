@@ -1,10 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 import { supabaseAdmin } from "@/lib/supabase";
 
+// Rate limiting: keyed by IP address
+const loginAttempts = new Map<string, { count: number; blockedUntil: number }>();
+
+const MAX_ATTEMPTS = 5;
+const BLOCK_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+
+function getClientIp(request: NextRequest): string {
+  return request.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+}
+
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request);
+  const now = Date.now();
+
+  // Check rate limit
+  const record = loginAttempts.get(ip);
+  if (record && record.blockedUntil > now) {
+    const retryAfter = Math.ceil((record.blockedUntil - now) / 1000);
+    return NextResponse.json(
+      { error: "Too many failed attempts. Please try again later." },
+      { status: 429, headers: { "Retry-After": retryAfter.toString() } }
+    );
+  }
+
   try {
     const { email, password } = await request.json();
 
@@ -22,16 +46,32 @@ export async function POST(request: NextRequest) {
       .eq("email", email)
       .maybeSingle();
 
-    // Validate credentials with bcrypt
-    if (
+    const valid =
       !error &&
       adminProfile &&
-      (await bcrypt.compare(password, adminProfile.password))
-    ) {
-      // Set authentication cookie
-      const cookieStore = await cookies();
+      (await bcrypt.compare(password, adminProfile.password));
 
-      cookieStore.set("adminAuth", "authenticated", {
+    if (valid) {
+      // Reset rate limit on success
+      loginAttempts.delete(ip);
+
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret) {
+        console.error("JWT_SECRET env var is not set");
+        return NextResponse.json(
+          { error: "Server configuration error" },
+          { status: 500 }
+        );
+      }
+
+      const token = jwt.sign(
+        { type: "admin", email: adminProfile.email },
+        jwtSecret,
+        { expiresIn: "7d" }
+      );
+
+      const cookieStore = await cookies();
+      cookieStore.set("adminAuth", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
@@ -40,17 +80,24 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({ success: true });
     } else {
+      // Increment failure counter
+      const current = loginAttempts.get(ip) ?? { count: 0, blockedUntil: 0 };
+      current.count += 1;
+      if (current.count >= MAX_ATTEMPTS) {
+        current.blockedUntil = now + BLOCK_DURATION_MS;
+      }
+      loginAttempts.set(ip, current);
+
       return NextResponse.json(
         { error: "Invalid credentials" },
-        { status: 401 },
+        { status: 401 }
       );
     }
   } catch (error) {
     console.error("Auth error:", error);
-
     return NextResponse.json(
       { error: "Authentication failed" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -59,13 +106,10 @@ export async function POST(request: NextRequest) {
 export async function DELETE() {
   try {
     const cookieStore = await cookies();
-
     cookieStore.delete("adminAuth");
-
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Logout error:", error);
-
     return NextResponse.json({ error: "Logout failed" }, { status: 500 });
   }
 }

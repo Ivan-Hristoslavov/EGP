@@ -15,12 +15,15 @@ import {
   CheckCircle,
   AlertCircle,
   XCircle,
+  X,
+  Trash2,
 } from "lucide-react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Input } from "@heroui/input";
 import { Spinner } from "@heroui/spinner";
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/dropdown";
 
 interface Booking {
   id: string;
@@ -60,6 +63,7 @@ export default function DashboardPage() {
   const [selectedDate, setSelectedDate] = useState(getTodayString());
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewingBooking, setViewingBooking] = useState<Booking | null>(null);
   const [stats, setStats] = useState({
     today_bookings: 0,
     monthly_revenue: 0,
@@ -121,6 +125,20 @@ export default function DashboardPage() {
       setBookings([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteBooking = async (booking: Booking) => {
+    if (!window.confirm(`Delete booking for ${booking.customer_name}? This cannot be undone.`)) return;
+    try {
+      const response = await fetch(`/api/bookings?id=${booking.id}`, { method: "DELETE" });
+      if (response.ok) {
+        setBookings((prev) => prev.filter((b) => b.id !== booking.id));
+      } else {
+        console.error("Failed to delete booking");
+      }
+    } catch (error) {
+      console.error("Error deleting booking:", error);
     }
   };
 
@@ -305,14 +323,43 @@ export default function DashboardPage() {
                               {booking.payment_status}
                             </Chip>
                           </div>
-                          <Button
-                            isIconOnly
-                            variant="light"
-                            size="md"
-                            className="min-h-[44px] min-w-[44px]"
-                          >
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
+                          <Dropdown>
+                            <DropdownTrigger>
+                              <Button
+                                isIconOnly
+                                variant="light"
+                                size="md"
+                                className="min-h-[44px] min-w-[44px]"
+                                aria-label="Booking actions"
+                              >
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </DropdownTrigger>
+                            <DropdownMenu aria-label="Booking actions">
+                              <DropdownItem
+                                key="view"
+                                startContent={<Eye className="w-4 h-4" />}
+                                onPress={() => setViewingBooking(booking)}
+                              >
+                                View Details
+                              </DropdownItem>
+                              <DropdownItem
+                                key="bookings"
+                                startContent={<Calendar className="w-4 h-4" />}
+                                onPress={() => router.push("/admin/bookings")}
+                              >
+                                Go to Bookings
+                              </DropdownItem>
+                              <DropdownItem
+                                key="delete"
+                                color="danger"
+                                startContent={<Trash2 className="w-4 h-4" />}
+                                onPress={() => deleteBooking(booking)}
+                              >
+                                Delete
+                              </DropdownItem>
+                            </DropdownMenu>
+                          </Dropdown>
                         </div>
                       </div>
                     </CardBody>
@@ -425,6 +472,102 @@ export default function DashboardPage() {
           </div>
         </CardBody>
       </Card>
+
+      {/* Booking Detail Modal */}
+      {viewingBooking && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          onClick={() => setViewingBooking(null)}
+        >
+          <div
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-divider w-full max-w-md p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-lg font-semibold">Booking Details</h3>
+              <Button
+                isIconOnly
+                variant="light"
+                size="sm"
+                onPress={() => setViewingBooking(null)}
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs font-medium text-default-500 uppercase tracking-wide mb-1">Customer</p>
+                <p className="font-medium">{viewingBooking.customer_name}</p>
+                {viewingBooking.customer_email && (
+                  <p className="text-sm text-default-500">{viewingBooking.customer_email}</p>
+                )}
+                {viewingBooking.customer_phone && (
+                  <p className="text-sm text-default-500">{viewingBooking.customer_phone}</p>
+                )}
+              </div>
+              <div>
+                <p className="text-xs font-medium text-default-500 uppercase tracking-wide mb-1">Service</p>
+                <p className="font-medium">{viewingBooking.service}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-medium text-default-500 uppercase tracking-wide mb-1">Date</p>
+                  <p>{new Date(viewingBooking.date).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-default-500 uppercase tracking-wide mb-1">Time</p>
+                  <p>{viewingBooking.time}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-medium text-default-500 uppercase tracking-wide mb-1">Status</p>
+                  <Chip color={getStatusColor(viewingBooking.status)} variant="flat" size="sm">
+                    {viewingBooking.status}
+                  </Chip>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-default-500 uppercase tracking-wide mb-1">Payment</p>
+                  <Chip
+                    color={viewingBooking.payment_status === "paid" ? "success" : "warning"}
+                    variant="flat"
+                    size="sm"
+                  >
+                    {viewingBooking.payment_status}
+                  </Chip>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-default-500 uppercase tracking-wide mb-1">Amount</p>
+                <p className="font-semibold">£{viewingBooking.amount}</p>
+              </div>
+              {viewingBooking.notes && (
+                <div>
+                  <p className="text-xs font-medium text-default-500 uppercase tracking-wide mb-1">Notes</p>
+                  <p className="text-sm">{viewingBooking.notes}</p>
+                </div>
+              )}
+            </div>
+            <div className="mt-6 flex gap-3">
+              <Button
+                variant="flat"
+                color="primary"
+                className="flex-1"
+                onPress={() => { setViewingBooking(null); router.push("/admin/bookings"); }}
+              >
+                Go to Bookings
+              </Button>
+              <Button
+                variant="light"
+                onPress={() => setViewingBooking(null)}
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

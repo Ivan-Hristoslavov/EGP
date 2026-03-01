@@ -26,7 +26,6 @@ import {
   Globe,
   User
 } from "lucide-react";
-import { FirstVisitDiscountFormWrapper } from "@/components/FirstVisitDiscountFormWrapper";
 
 // Navigation definition
 const navigation = [
@@ -383,7 +382,6 @@ export default function AdminLayout({
         >
           <div className="p-3 sm:p-4 lg:p-6 xl:p-8 min-w-0 max-w-full overflow-x-hidden">{children}</div>
         </main>
-        <FirstVisitDiscountFormWrapper />
       </div>
     </div>
   );

@@ -340,8 +340,14 @@ export default function NavigationNavbar() {
               ))}
             </div>
 
-            {/* Theme Toggle - Far Right */}
-            <div className="hidden lg:block">
+            {/* Book Now CTA + Theme Toggle */}
+            <div className="hidden lg:flex items-center gap-3">
+              <Link
+                href="/book"
+                className="px-5 py-2.5 text-sm font-semibold text-white bg-[#464C45] hover:bg-[#3a4039] rounded-full shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 transform"
+              >
+                Book Now
+              </Link>
               <ThemeToggle size="md" />
             </div>
 

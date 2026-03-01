@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc --noEmit 2>&1 | head -60)",
+      "Bash(npx tsc --noEmit 2>&1 | grep -E \"admin/auth/route\\\\.ts|admin-auth\\\\.ts|middleware\\\\.ts|customer/dashboard|admin/dashboard/page\" || echo \"No errors in changed files\")",
+      "Bash(ls /Users/ivanivanov/Documents/Projects/EGP/.env* 2>/dev/null)",
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(48\\).toString\\('hex'\\)\\)\")"
+    ]
+  }
+}

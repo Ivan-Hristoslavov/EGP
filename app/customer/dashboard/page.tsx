@@ -49,6 +49,7 @@ export default function CustomerDashboardPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview" | "bookings" | "profile">("overview");
+  const [viewingBooking, setViewingBooking] = useState<Booking | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -174,9 +175,10 @@ export default function CustomerDashboardPage() {
               </Link>
               <button
                 onClick={handleLogout}
-                className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                className="inline-flex items-center gap-2 min-h-[44px] px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 bg-white/60 dark:bg-gray-700/60 hover:bg-red-50 dark:hover:bg-red-900/20 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors"
               >
-                <LogOut className="w-5 h-5" />
+                <LogOut className="w-4 h-4" />
+                <span>Log out</span>
               </button>
             </div>
           </div>
@@ -276,7 +278,11 @@ export default function CustomerDashboardPage() {
                           </div>
                           <div className="flex items-center justify-between sm:justify-end gap-2 flex-shrink-0">
                             <span className="text-sm font-medium text-gray-900 dark:text-white">£{booking.amount}</span>
-                            <button className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                            <button
+                              onClick={() => setViewingBooking(booking)}
+                              className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                              aria-label="View booking details"
+                            >
                               <Eye className="w-4 h-4" />
                             </button>
                           </div>
@@ -367,11 +373,19 @@ export default function CustomerDashboardPage() {
                       <div className="flex items-center justify-between sm:justify-end gap-2 flex-shrink-0">
                         <span className="text-sm font-medium text-gray-900 dark:text-white">£{booking.amount}</span>
                         <div className="flex items-center gap-2">
-                          <button className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                          <button
+                            onClick={() => setViewingBooking(booking)}
+                            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                            aria-label="View booking details"
+                          >
                             <Eye className="w-4 h-4" />
                           </button>
                           {(booking.status === "confirmed" || booking.status === "pending") && (
-                            <button className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                            <button
+                              onClick={() => setViewingBooking(booking)}
+                              className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                              aria-label="View booking details"
+                            >
                               <Edit className="w-4 h-4" />
                             </button>
                           )}
@@ -464,6 +478,70 @@ export default function CustomerDashboardPage() {
           </div>
         )}
       </div>
+
+      {/* Booking Detail Modal */}
+      {viewingBooking && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          onClick={() => setViewingBooking(null)}
+        >
+          <div
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-rose-100/50 dark:border-gray-700/50 w-full max-w-md p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Booking Details</h3>
+              <button
+                onClick={() => setViewingBooking(null)}
+                className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Service</p>
+                <p className="text-gray-900 dark:text-white font-medium">{viewingBooking.service}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Date</p>
+                  <p className="text-gray-900 dark:text-white">{new Date(viewingBooking.date).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Time</p>
+                  <p className="text-gray-900 dark:text-white">{viewingBooking.time}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Status</p>
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(viewingBooking.status)}`}>
+                    {getStatusIcon(viewingBooking.status)}
+                    {viewingBooking.status.charAt(0).toUpperCase() + viewingBooking.status.slice(1)}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Amount</p>
+                  <p className="text-gray-900 dark:text-white font-medium">£{viewingBooking.amount}</p>
+                </div>
+              </div>
+              {viewingBooking.practitioner && (
+                <div>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Practitioner</p>
+                  <p className="text-gray-900 dark:text-white">{viewingBooking.practitioner}</p>
+                </div>
+              )}
+            </div>
+            <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+                To reschedule or cancel, please contact us.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -204,18 +204,12 @@ export default async function RootLayout({
     },
     "aggregateRating": {
       "@type": "AggregateRating",
-      "ratingValue": 4.8,
-      "reviewCount": 150,
-      "itemReviewed": {
-        "@id": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://egp.com'}#business`
-      }
+      "ratingValue": 5.0,
+      "bestRating": 5,
+      "worstRating": 1,
+      "reviewCount": 1
     },
-    "sameAs": [],
-    "bankDetails": {
-      "@type": "BankAccount",
-      "accountNumber": adminProfile?.account_number || "",
-      "sortCode": adminProfile?.sort_code || ""
-    }
+    "sameAs": []
   };
 
   return (
