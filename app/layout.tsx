@@ -14,36 +14,23 @@ import CookieConsentModal from "@/components/CookieConsentModal";
 import LayoutMain from "@/components/LayoutMain";
 import { getAdminProfile } from "@/lib/admin-profile";
 import { createClient } from "@/lib/supabase/server";
+import { siteConfig } from "@/config/site";
 
 // Using Montserrat font loaded via CSS @font-face
 
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getAdminProfile();
-  const companyName = profile?.company_name || "EGP";
+  const companyName = profile?.company_name || siteConfig.name;
+  const description = siteConfig.seo.defaultDescription;
   
   return {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://egp.com'),
+    metadataBase: new URL(siteConfig.url),
     title: {
-      default: `${companyName} - Premium Aesthetic Treatments London`,
-      template: `%s | ${companyName} - Aesthetic Clinic London`
+      default: siteConfig.seo.defaultTitle,
+      template: `%s | ${companyName}`
     },
-    description: `Premier aesthetic clinic in South West London. Expert treatments with professional care and attention to detail.`,
-    keywords: [
-      "aesthetic clinic London",
-      "botox London",
-      "dermal fillers London",
-      "anti-wrinkle injections London",
-      "skin treatments London",
-      "facial aesthetics London",
-      "cosmetic clinic London",
-      "beauty clinic London",
-      "aesthetic practitioner London",
-      "body contouring London",
-      "skin rejuvenation London",
-      "egp",
-      "egp aesthetics",
-      "professional aesthetic treatments London"
-    ],
+    description,
+    keywords: siteConfig.seo.keywords,
     authors: [{ name: companyName }],
     creator: companyName,
     publisher: companyName,
@@ -59,18 +46,17 @@ export async function generateMetadata(): Promise<Metadata> {
       shortcut: "/favicon.ico",
     },
     openGraph: {
-      title: `${companyName} - Premium Aesthetic Clinic London`,
-      description: `Premier aesthetic treatments in South West London. Expert practitioners, proven results.`,
-      type: "website",
-      locale: "en_GB",
+      ...siteConfig.seo.openGraph,
+      title: siteConfig.seo.defaultTitle,
+      description,
       siteName: companyName,
-      url: process.env.NEXT_PUBLIC_SITE_URL || 'https://egp.com',
+      url: siteConfig.url,
       images: [],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${companyName} - Premium Aesthetic Clinic London`,
-      description: `Premier aesthetic treatments in South West London. Expert practitioners, proven results.`,
+      title: siteConfig.seo.defaultTitle,
+      description,
       images: [],
       creator: "@egp",
       site: "@egp",
@@ -96,8 +82,8 @@ export async function generateMetadata(): Promise<Metadata> {
       "geo.placename": "London",
       "geo.position": "51.4708;-0.1389",
       "ICBM": "51.4708, -0.1389",
-      "DC.title": `${companyName} - Premium Aesthetic Clinic London`,
-      "DC.description": `Premier aesthetic treatments in South West London. Expert practitioners, proven results.`,
+      "DC.title": siteConfig.seo.defaultTitle,
+      "DC.description": description,
       "DC.subject": "Aesthetic Clinic London, Aesthetic Treatments, Facial Aesthetics",
       "DC.creator": companyName,
       "DC.publisher": companyName,
@@ -105,7 +91,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "DC.date": new Date().toISOString(),
       "DC.type": "Service",
       "DC.format": "text/html",
-      "DC.identifier": process.env.NEXT_PUBLIC_SITE_URL || 'https://egp.com',
+      "DC.identifier": siteConfig.url,
       "DC.language": "en",
       "DC.coverage": "South West London",
       "DC.rights": `Copyright © ${new Date().getFullYear()} EGP. All rights reserved.`,
@@ -154,10 +140,10 @@ export default async function RootLayout({
   const structuredData = {
     "@context": "https://schema.org",
     "@type": ["LocalBusiness", "MedicalBusiness", "HealthAndBeautyBusiness"],
-    "@id": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://egp.com'}#business`,
+    "@id": `${siteConfig.url}#business`,
     "name": adminProfile?.company_name || "EGP",
-    "description": `Professional services platform - A skeleton template for building modern web applications.`,
-    "url": process.env.NEXT_PUBLIC_SITE_URL || 'https://egp.com',
+    "description": siteConfig.description,
+    "url": siteConfig.url,
     "telephone": adminProfile?.phone || "123456789",
     "email": adminProfile?.business_email || "",
     "founder": {

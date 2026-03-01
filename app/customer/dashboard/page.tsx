@@ -152,10 +152,10 @@ export default function CustomerDashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-pink-50/50 to-purple-50/50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800">
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
         {/* Header */}
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 p-6 mb-8">
-          <div className="flex items-center justify-between">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 p-4 sm:p-6 mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent font-playfair mb-2">
                 Welcome back, {customer.firstName}!
@@ -164,10 +164,10 @@ export default function CustomerDashboardPage() {
                 Manage your bookings and treatments
               </p>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-3 sm:gap-4">
               <Link
                 href="/book"
-                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-semibold rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl"
+                className="inline-flex items-center justify-center min-h-[44px] px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-semibold rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Book Treatment
@@ -183,8 +183,8 @@ export default function CustomerDashboardPage() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 p-6 mb-8">
-          <div className="flex space-x-8">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 p-4 sm:p-6 mb-6 sm:mb-8">
+          <div className="flex flex-wrap gap-2 sm:gap-4">
             {[
               { id: "overview", label: "Overview", icon: TrendingUp },
               { id: "bookings", label: "My Bookings", icon: Calendar },
@@ -254,29 +254,29 @@ export default function CustomerDashboardPage() {
               </div>
 
               {/* Upcoming Bookings */}
-              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Upcoming Bookings</h3>
+              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-4">Upcoming Bookings</h3>
                 {bookings.filter(b => b.status === "confirmed" || b.status === "pending").length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {bookings
                       .filter(b => b.status === "confirmed" || b.status === "pending")
                       .slice(0, 3)
                       .map((booking) => (
-                        <div key={booking.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div className="flex items-center space-x-4">
-                            <div className={`p-2 rounded-lg ${getStatusColor(booking.status)}`}>
+                        <div key={booking.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
+                            <div className={`p-2 rounded-lg flex-shrink-0 ${getStatusColor(booking.status)}`}>
                               {getStatusIcon(booking.status)}
                             </div>
-                            <div>
-                              <p className="font-medium text-gray-900 dark:text-white">{booking.service}</p>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-medium text-gray-900 dark:text-white truncate">{booking.service}</p>
                               <p className="text-sm text-gray-600 dark:text-gray-400">
                                 {new Date(booking.date).toLocaleDateString()} at {booking.time}
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center justify-between sm:justify-end gap-2 flex-shrink-0">
                             <span className="text-sm font-medium text-gray-900 dark:text-white">£{booking.amount}</span>
-                            <button className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                            <button className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                               <Eye className="w-4 h-4" />
                             </button>
                           </div>
@@ -341,19 +341,19 @@ export default function CustomerDashboardPage() {
         )}
 
         {activeTab === "bookings" && (
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">All Bookings</h3>
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 p-4 sm:p-6 flex flex-col min-h-0">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-4 sm:mb-6 shrink-0">All Bookings</h3>
             {bookings.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4 overflow-y-auto min-h-0 flex-1 -mx-1 px-1">
                 {bookings.map((booking) => (
                   <div key={booking.id} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className={`p-2 rounded-lg ${getStatusColor(booking.status)}`}>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
+                        <div className={`p-2 rounded-lg flex-shrink-0 ${getStatusColor(booking.status)}`}>
                           {getStatusIcon(booking.status)}
                         </div>
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">{booking.service}</p>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-gray-900 dark:text-white truncate">{booking.service}</p>
                           <p className="text-sm text-gray-600 dark:text-gray-400">
                             {new Date(booking.date).toLocaleDateString()} at {booking.time}
                           </p>
@@ -364,9 +364,9 @@ export default function CustomerDashboardPage() {
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center space-x-4">
+                      <div className="flex items-center justify-between sm:justify-end gap-2 flex-shrink-0">
                         <span className="text-sm font-medium text-gray-900 dark:text-white">£{booking.amount}</span>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center gap-2">
                           <button className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                             <Eye className="w-4 h-4" />
                           </button>

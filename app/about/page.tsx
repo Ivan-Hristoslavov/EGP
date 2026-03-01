@@ -94,7 +94,7 @@ export default async function AboutPage() {
                 {sectionLabel[heroSection.section_type] || 'About'}
               </p>
               {heroSection.heading && (
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white tracking-tight mb-6 md:mb-8 max-w-xl">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white tracking-tight mb-6 md:mb-8 max-w-xl">
                   {heroSection.heading}
                 </h1>
               )}

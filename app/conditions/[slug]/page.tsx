@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { siteConfig } from "@/config/site";
-import { typography, textColors } from "@/config/typography";
+import { typography, layout, textColors } from "@/config/typography";
 import Link from "next/link";
 import { Calendar, CheckCircle, Star, ArrowRight, Phone, Target } from "lucide-react";
 import { notFound } from 'next/navigation';
@@ -44,8 +44,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   return {
-    title: `${condition.title} Treatment | ${siteConfig.name}`,
-    description: condition.description,
+    title: (condition.seo_title || `${condition.title} Treatment`) + ` | ${siteConfig.name}`,
+    description: condition.seo_description || condition.description,
     alternates: {
       canonical: `${siteConfig.url}/conditions/${slug}`,
     },
@@ -94,7 +94,7 @@ export default async function ConditionPage({ params }: PageProps) {
     <div className="min-h-screen bg-white dark:bg-gray-900">
       {/* Hero Section */}
       <section className="py-16 md:py-24 bg-gradient-to-br from-egp-beige-lighter to-egp-beige-light dark:from-gray-800 dark:to-gray-900">
-        <div className="container mx-auto px-4">
+        <div className={layout.container}>
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex items-center justify-center gap-3 mb-6">
               {condition.popular && (
