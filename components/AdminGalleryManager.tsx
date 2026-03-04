@@ -7,12 +7,12 @@ import { GalleryItem } from "@/types";
 import { useToast, ToastMessages } from "@/components/Toast";
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { ConfirmationModal } from "@/components/ConfirmationModal";
-import { getSupportedFormatsText, processImageFile, getImageDimensions, compressImage } from "@/lib/image-utils";
+import { getSupportedFormatsText, processImageFile } from "@/lib/image-utils";
 import Pagination from "@/components/Pagination";
 
-export function AdminGalleryManager({ 
-  triggerModal
-}: { 
+export function AdminGalleryManager({
+  triggerModal,
+}: {
   triggerModal?: boolean;
 }) {
   const {
@@ -63,31 +63,12 @@ export function AdminGalleryManager({
     title?: boolean;
     category_id?: boolean;
     service_id?: boolean;
+    completion_date?: boolean;
     before?: boolean;
     after?: boolean;
   }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Individual image compression settings
-  const [beforeImageSettings, setBeforeImageSettings] = useState({
-    quality: 0.85,
-    originalFile: null as File | null,
-    compressedFile: null as File | null,
-    originalSize: 0,
-    compressedSize: 0,
-    originalDimensions: { width: 0, height: 0 },
-    compressedDimensions: { width: 0, height: 0 }
-  });
-  
-  const [afterImageSettings, setAfterImageSettings] = useState({
-    quality: 0.85,
-    originalFile: null as File | null,
-    compressedFile: null as File | null,
-    originalSize: 0,
-    compressedSize: 0,
-    originalDimensions: { width: 0, height: 0 },
-    compressedDimensions: { width: 0, height: 0 }
-  });
+  const [previewSliderPosition, setPreviewSliderPosition] = useState(50);
 
   const defaultItem = {
     title: "",
@@ -156,21 +137,8 @@ export function AdminGalleryManager({
       setImageErrors((prev) => ({ ...prev, [type]: undefined }));
       setFieldErrors((prev) => ({ ...prev, [type]: false }));
 
-      // Get original dimensions
-      const dimensions = await getImageDimensions(file);
-      
-      // Set original file data
+      // Set original file as selected image (full quality, single file)
       if (type === "before") {
-        setBeforeImageSettings(prev => ({
-          ...prev,
-          originalFile: file,
-          originalSize: file.size,
-          originalDimensions: dimensions,
-          compressedFile: file, // Start with original
-          compressedSize: file.size,
-          compressedDimensions: dimensions
-        }));
-        
         // Revoke previous object URL if it exists
         if (beforeImagePreview && beforeImagePreview.startsWith('blob:')) {
           URL.revokeObjectURL(beforeImagePreview);
@@ -178,16 +146,6 @@ export function AdminGalleryManager({
         setBeforeImage(file);
         setBeforeImagePreview(URL.createObjectURL(file));
       } else {
-        setAfterImageSettings(prev => ({
-          ...prev,
-          originalFile: file,
-          originalSize: file.size,
-          originalDimensions: dimensions,
-          compressedFile: file, // Start with original
-          compressedSize: file.size,
-          compressedDimensions: dimensions
-        }));
-        
         // Revoke previous object URL if it exists
         if (afterImagePreview && afterImagePreview.startsWith('blob:')) {
           URL.revokeObjectURL(afterImagePreview);
@@ -210,51 +168,6 @@ export function AdminGalleryManager({
     }
   };
 
-  const handleQualityChange = async (quality: number, type: "before" | "after") => {
-    const settings = type === "before" ? beforeImageSettings : afterImageSettings;
-    if (!settings.originalFile) return;
-
-    try {
-      // Compress the original file with new quality
-      const compressedFile = await compressImage(settings.originalFile, 1920, 1080, quality);
-      const dimensions = await getImageDimensions(compressedFile);
-
-      if (type === "before") {
-        setBeforeImageSettings(prev => ({
-          ...prev,
-          quality,
-          compressedFile,
-          compressedSize: compressedFile.size,
-          compressedDimensions: dimensions
-        }));
-        
-        // Update preview
-        if (beforeImagePreview && beforeImagePreview.startsWith('blob:')) {
-          URL.revokeObjectURL(beforeImagePreview);
-        }
-        setBeforeImage(compressedFile);
-        setBeforeImagePreview(URL.createObjectURL(compressedFile));
-      } else {
-        setAfterImageSettings(prev => ({
-          ...prev,
-          quality,
-          compressedFile,
-          compressedSize: compressedFile.size,
-          compressedDimensions: dimensions
-        }));
-        
-        // Update preview
-        if (afterImagePreview && afterImagePreview.startsWith('blob:')) {
-          URL.revokeObjectURL(afterImagePreview);
-        }
-        setAfterImage(compressedFile);
-        setAfterImagePreview(URL.createObjectURL(compressedFile));
-      }
-    } catch (error) {
-      console.error('Error compressing image:', error);
-    }
-  };
-
 
   const clearImage = (type: "before" | "after") => {
     if (type === "before") {
@@ -264,15 +177,6 @@ export function AdminGalleryManager({
       }
       setBeforeImage(null);
       setBeforeImagePreview("");
-      setBeforeImageSettings({
-        quality: 0.85,
-        originalFile: null,
-        compressedFile: null,
-        originalSize: 0,
-        compressedSize: 0,
-        originalDimensions: { width: 0, height: 0 },
-        compressedDimensions: { width: 0, height: 0 }
-      });
       if (editingItem) {
         setFormData((prev) => ({ ...prev, before_image_url: "" }));
       }
@@ -283,15 +187,6 @@ export function AdminGalleryManager({
       }
       setAfterImage(null);
       setAfterImagePreview("");
-      setAfterImageSettings({
-        quality: 0.85,
-        originalFile: null,
-        compressedFile: null,
-        originalSize: 0,
-        compressedSize: 0,
-        originalDimensions: { width: 0, height: 0 },
-        compressedDimensions: { width: 0, height: 0 }
-      });
       if (editingItem) {
         setFormData((prev) => ({ ...prev, after_image_url: "" }));
       }
@@ -343,6 +238,7 @@ export function AdminGalleryManager({
     if (!formData.title?.trim()) errors.title = true;
     if (!formData.category_id) errors.category_id = true;
     if (!formData.service_id) errors.service_id = true;
+    if (!formData.completion_date) errors.completion_date = true;
     if (!editingItem) {
       if (!beforeImage && !formData.before_image_url) errors.before = true;
       if (!afterImage && !formData.after_image_url) errors.after = true;
@@ -425,26 +321,6 @@ export function AdminGalleryManager({
       setAfterImagePreview("");
       setImageErrors({});
       setFieldErrors({});
-      
-      // Reset image settings
-      setBeforeImageSettings({
-        quality: 0.85,
-        originalFile: null,
-        compressedFile: null,
-        originalSize: 0,
-        compressedSize: 0,
-        originalDimensions: { width: 0, height: 0 },
-        compressedDimensions: { width: 0, height: 0 }
-      });
-      setAfterImageSettings({
-        quality: 0.85,
-        originalFile: null,
-        compressedFile: null,
-        originalSize: 0,
-        compressedSize: 0,
-        originalDimensions: { width: 0, height: 0 },
-        compressedDimensions: { width: 0, height: 0 }
-      });
     } catch (err) {
       console.error('Save error:', err);
       showError(
@@ -471,26 +347,6 @@ export function AdminGalleryManager({
     setImageErrors({});
     setFieldErrors({});
     setUseCustomLocation(false);
-    
-    // Reset image settings
-    setBeforeImageSettings({
-      quality: 0.85,
-      originalFile: null,
-      compressedFile: null,
-      originalSize: 0,
-      compressedSize: 0,
-      originalDimensions: { width: 0, height: 0 },
-      compressedDimensions: { width: 0, height: 0 }
-    });
-    setAfterImageSettings({
-      quality: 0.85,
-      originalFile: null,
-      compressedFile: null,
-      originalSize: 0,
-      compressedSize: 0,
-      originalDimensions: { width: 0, height: 0 },
-      compressedDimensions: { width: 0, height: 0 }
-    });
     
     // Show the form
     setShowAddForm(true);
@@ -722,21 +578,27 @@ export function AdminGalleryManager({
 
           {/* Add/Edit Form Modal */}
           {showAddForm && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <div className="bg-gradient-to-br from-rose-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[92vh] overflow-y-auto border border-white/60 dark:border-white/10">
                 {/* Modal Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
-                  <div>
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <svg className="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  {editingItem ? "Edit Transformation" : "Add New Before & After"}
+                <div className="flex items-start justify-between p-6 border-b border-rose-100/60 dark:border-gray-800 sticky top-0 bg-gradient-to-r from-rose-50/90 via-white/90 to-purple-50/90 dark:from-gray-900/95 dark:via-gray-900/95 dark:to-gray-950/95 z-10">
+                  <div className="space-y-2">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200 text-xs font-semibold uppercase tracking-wide">
+                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-rose-500 animate-pulse" />
+                      Before & After creator
+                    </div>
+                    <h3 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <svg className="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      {editingItem ? "Edit transformation" : "Add new Before & After"}
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  {editingItem ? "Update transformation details and images" : "Create a new before & after transformation showcase"}
-                </p>
-              </div>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 max-w-xl">
+                      {editingItem
+                        ? "Refine the story, treatment details, and visuals for this transformation."
+                        : "Capture the treatment, date, and beautiful results with a clear before & after comparison."}
+                    </p>
+                  </div>
                   <button
                     onClick={() => {
                       setShowAddForm(false);
@@ -745,39 +607,16 @@ export function AdminGalleryManager({
                       setBeforeImage(null);
                       setAfterImage(null);
                       setFieldErrors({});
-                      
-                      // Revoke object URLs before clearing
-                      if (beforeImagePreview && beforeImagePreview.startsWith('blob:')) {
+                      if (beforeImagePreview && beforeImagePreview.startsWith("blob:")) {
                         URL.revokeObjectURL(beforeImagePreview);
                       }
-                      if (afterImagePreview && afterImagePreview.startsWith('blob:')) {
+                      if (afterImagePreview && afterImagePreview.startsWith("blob:")) {
                         URL.revokeObjectURL(afterImagePreview);
                       }
-                      
                       setBeforeImagePreview("");
                       setUseCustomLocation(false);
                       setAfterImagePreview("");
                       setImageErrors({});
-                      
-                      // Reset image settings
-                      setBeforeImageSettings({
-                        quality: 0.85,
-                        originalFile: null,
-                        compressedFile: null,
-                        originalSize: 0,
-                        compressedSize: 0,
-                        originalDimensions: { width: 0, height: 0 },
-                        compressedDimensions: { width: 0, height: 0 }
-                      });
-                      setAfterImageSettings({
-                        quality: 0.85,
-                        originalFile: null,
-                        compressedFile: null,
-                        originalSize: 0,
-                        compressedSize: 0,
-                        originalDimensions: { width: 0, height: 0 },
-                        compressedDimensions: { width: 0, height: 0 }
-                      });
                     }}
                     className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                   >
@@ -788,615 +627,427 @@ export function AdminGalleryManager({
                 </div>
 
                 {/* Modal Content */}
-                <div className="p-6">
+                <div className="p-6 md:p-7 space-y-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                    {/* Column 1 – Treatment details */}
+                    <div className="lg:col-span-1 space-y-4 rounded-2xl bg-white/80 dark:bg-gray-900/70 border border-gray-100 dark:border-gray-800 p-4 md:p-5 shadow-sm">
+                      <div className="pb-3 border-b border-gray-100 dark:border-gray-800">
+                        <h5 className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-rose-100 text-rose-600 dark:bg-rose-900/40 dark:text-rose-200 text-[11px]">
+                            1
+                          </span>
+                          Treatment details
+                        </h5>
+                      </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Left Column - Treatment Information */}
-                <div className="space-y-4">
-                  <div className="pb-4 border-b border-gray-200 dark:border-gray-700">
-                    <h5 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                      <svg className="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                      </svg>
-                      Treatment Details
-                    </h5>
-                  </div>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Treatment Category *
+                          </label>
+                          <select
+                            value={formData.category_id || ""}
+                            onChange={(e) => {
+                              setFieldErrors((prev) => ({ ...prev, category_id: false }));
+                              setFormData((prev) => ({
+                                ...prev,
+                                category_id: e.target.value || undefined,
+                                service_id: undefined,
+                              }));
+                            }}
+                            className={`w-full px-3 py-2.5 text-sm border-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-rose-500 transition-all ${
+                              fieldErrors.category_id
+                                ? "border-red-500 focus:border-red-500"
+                                : "border-gray-200 dark:border-gray-700 focus:border-rose-500"
+                            }`}
+                            disabled={servicesLoading || isSubmitting}
+                            required
+                          >
+                            <option value="">Select treatment area...</option>
+                            {mainTabs.map((mainTab) => (
+                              <optgroup key={mainTab.slug} label={mainTab.name}>
+                                {categoriesByMainTab[mainTab.slug]?.map((category) => (
+                                  <option key={category.id} value={category.id}>
+                                    {category.name}
+                                  </option>
+                                ))}
+                              </optgroup>
+                            ))}
+                          </select>
+                          <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                            Face, body, lips and more.
+                          </p>
+                        </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Treatment Category *
-                    </label>
-                    <select
-                      value={formData.category_id || ""}
-                      onChange={(e) => {
-                        setFieldErrors((prev) => ({ ...prev, category_id: false }));
-                        setFormData((prev) => ({
-                          ...prev,
-                          category_id: e.target.value || undefined,
-                          service_id: undefined, // Reset service when category changes
-                        }));
-                      }}
-                      className={`w-full px-4 py-2.5 border-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 transition-all ${fieldErrors.category_id ? "border-red-500 focus:border-red-500" : "border-gray-300 dark:border-gray-600 focus:border-rose-500"}`}
-                      disabled={servicesLoading || isSubmitting}
-                      required
-                    >
-                      <option value="">Select treatment area...</option>
-                      {mainTabs.map(mainTab => (
-                        categoriesByMainTab[mainTab.slug] && categoriesByMainTab[mainTab.slug].length > 0 && (
-                          <optgroup key={mainTab.slug} label={mainTab.name}>
-                            {categoriesByMainTab[mainTab.slug].map((category) => (
-                              <option key={category.id} value={category.id}>
-                                {category.name}
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Specific Treatment *
+                          </label>
+                          <select
+                            value={formData.service_id || ""}
+                            onChange={(e) => {
+                              setFieldErrors((prev) => ({ ...prev, service_id: false }));
+                              setFormData((prev) => ({
+                                ...prev,
+                                service_id: e.target.value || undefined,
+                              }));
+                            }}
+                            className={`w-full px-3 py-2.5 text-sm border-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-rose-500 transition-all ${
+                              fieldErrors.service_id
+                                ? "border-red-500 focus:border-red-500"
+                                : "border-gray-200 dark:border-gray-700 focus:border-rose-500"
+                            }`}
+                            disabled={servicesLoading || !formData.category_id || isSubmitting}
+                            required
+                          >
+                            <option value="">Select specific treatment...</option>
+                            {filteredServices.map((service) => (
+                              <option key={service.id} value={service.id}>
+                                {service.name}
                               </option>
                             ))}
-                          </optgroup>
-                        )
-                      ))}
-                    </select>
-                    <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                      Choose the treatment area (Face, Body, Lips, etc.)
-                    </p>
-                  </div>
+                          </select>
+                          <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                            Choose the exact procedure you performed.
+                          </p>
+                        </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Specific Treatment *
-                    </label>
-                    <select
-                      value={formData.service_id || ""}
-                      onChange={(e) => {
-                        setFieldErrors((prev) => ({ ...prev, service_id: false }));
-                        setFormData((prev) => ({
-                          ...prev,
-                          service_id: e.target.value || undefined,
-                        }));
-                      }}
-                      className={`w-full px-4 py-2.5 border-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 transition-all ${fieldErrors.service_id ? "border-red-500 focus:border-red-500" : "border-gray-300 dark:border-gray-600 focus:border-rose-500"}`}
-                      disabled={servicesLoading || !formData.category_id || isSubmitting}
-                      required
-                    >
-                      <option value="">Select specific treatment...</option>
-                      {filteredServices.map((service) => (
-                        <option key={service.id} value={service.id}>
-                          {service.name}
-                        </option>
-                      ))}
-                    </select>
-                    {!formData.category_id ? (
-                      <p className="mt-1.5 text-xs text-amber-600 dark:text-amber-400">
-                        Please select a treatment category first
-                      </p>
-                    ) : (
-                      <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                        Select the specific treatment performed
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Treatment Date
-                    </label>
-                    <input
-                      type="date"
-                      value={formData.completion_date}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          completion_date: e.target.value,
-                        }))
-                      }
-                      className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all"
-                    />
-                    <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                      Date when the treatment was performed
-                    </p>
-                  </div>
-
-                </div>
-
-                {/* Right Column - Description & Media */}
-                <div className="space-y-4">
-                  <div className="pb-4 border-b border-gray-200 dark:border-gray-700">
-                    <h5 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                      <svg className="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      Transformation Details
-                    </h5>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Transformation Title *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.title}
-                      onChange={(e) => {
-                        setFieldErrors((prev) => ({ ...prev, title: false }));
-                        setFormData((prev) => ({
-                          ...prev,
-                          title: e.target.value,
-                        }));
-                      }}
-                      className={`w-full px-4 py-2.5 border-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 transition-all ${fieldErrors.title ? "border-red-500 focus:border-red-500" : "border-gray-300 dark:border-gray-600 focus:border-rose-500"}`}
-                      placeholder="e.g., Natural Lip Enhancement Results"
-                      disabled={isSubmitting}
-                      required
-                    />
-                    <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                      A brief title describing the transformation
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Description
-                    </label>
-                    <textarea
-                      value={formData.description || ""}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          description: e.target.value,
-                        }))
-                      }
-                      rows={4}
-                      className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all resize-none"
-                      placeholder="Describe the treatment results, client experience, or any notable details about this transformation..."
-                    />
-                    <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                      Optional: Add details about the treatment and results
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Treatment Area / Notes
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.project_type}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          project_type: e.target.value,
-                        }))
-                      }
-                      className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all"
-                      placeholder="e.g., Upper Lip, Cheek Enhancement, Jawline Definition"
-                    />
-                    <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                      Optional: Specify the exact treatment area or add notes
-                    </p>
-                  </div>
-
-
-                  <div className="flex items-center p-3 bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 rounded-lg border border-rose-200 dark:border-rose-800">
-                    <input
-                      type="checkbox"
-                      id="is_featured"
-                      checked={formData.is_featured}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          is_featured: e.target.checked,
-                        }))
-                      }
-                      className="mr-3 w-4 h-4 text-rose-600 focus:ring-rose-500 border-gray-300 rounded"
-                    />
-                    <label
-                      htmlFor="is_featured"
-                      className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2"
-                    >
-                      <svg className="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                      </svg>
-                      Feature this transformation
-                    </label>
-                  </div>
-                </div>
-
-                {/* Right Column - Image Uploads */}
-                <div className="space-y-4">
-                  {/* Before Image Upload */}
-                  <div className={fieldErrors.before ? "rounded-lg ring-2 ring-red-500 p-1" : ""}>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Before Image *{" "}
-                      {editingItem && "(leave empty to keep current)"}
-                    </label>
-
-                    <div className="space-y-3">
-                      {/* File Input */}
-                      <div className="flex items-center justify-center w-full">
-                        <label className={`flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 ${fieldErrors.before ? "border-red-500 dark:border-red-500" : "border-gray-300"}`}>
-                          <div className="flex flex-col items-center justify-center pt-2 pb-2">
-                            <svg
-                              className="w-6 h-6 mb-2 text-gray-500 dark:text-gray-400"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                              />
-                            </svg>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              <span className="font-semibold">
-                                Click to upload
-                              </span>{" "}
-                              Before image
-                            </p>
-                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                              {getSupportedFormatsText()}
-                            </p>
-                          </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Treatment Date *
+                          </label>
                           <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => {
-                              if (e.target.files?.[0]) {
-                                handleImageUpload(e.target.files[0], "before");
-                                e.target.value = '';
-                              }
-                            }}
-                            disabled={isSubmitting}
-                            className="hidden"
+                            type="date"
+                            value={formData.completion_date}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                completion_date: e.target.value,
+                              }))
+                            }
+                            className={`w-full px-3 py-2.5 text-sm border-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-rose-500 transition-all ${
+                              fieldErrors.completion_date
+                                ? "border-red-500 focus:border-red-500"
+                                : "border-gray-200 dark:border-gray-700 focus:border-rose-500"
+                            }`}
+                            required
                           />
-                        </label>
+                          <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                            When this transformation was completed.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Column 2 – Story / Description */}
+                    <div className="lg:col-span-1 space-y-4 rounded-2xl bg-white/80 dark:bg-gray-900/70 border border-gray-100 dark:border-gray-800 p-4 md:p-5 shadow-sm">
+                      <div className="pb-3 border-b border-gray-100 dark:border-gray-800">
+                        <h5 className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-rose-100 text-rose-600 dark:bg-rose-900/40 dark:text-rose-200 text-[11px]">
+                            2
+                          </span>
+                          Transformation story
+                        </h5>
                       </div>
 
-                      {/* Error Message */}
-                      {imageErrors.before && (
-                        <p className="text-red-500 text-xs">
-                          {imageErrors.before}
-                        </p>
-                      )}
-
-                      {/* Preview */}
-                      {beforeImagePreview && (
-                        <div className="space-y-2">
-                          <div className="relative">
-                            <img
-                              src={beforeImagePreview}
-                              alt="Before preview"
-                              className="w-full h-32 object-cover rounded"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => clearImage("before")}
-                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
-                            >
-                              <svg
-                                className="w-3 h-3"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M6 18L18 6M6 6l12 12"
-                                />
-                              </svg>
-                            </button>
-                          </div>
-                          
-                          {/* Quality Slider */}
-                          {beforeImageSettings.originalFile && (
-                            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-                              <div className="flex items-center justify-between mb-3">
-                                <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                                  Image Quality
-                                </h4>
-                                <span className="text-sm font-bold text-blue-700 dark:text-blue-300">
-                                  {Math.round(beforeImageSettings.quality * 100)}%
-                                </span>
-                              </div>
-                              
-                              {/* Quality Slider */}
-                              <div className="mb-3">
-                                <input
-                                  type="range"
-                                  min="0.1"
-                                  max="1"
-                                  step="0.05"
-                                  value={beforeImageSettings.quality}
-                                  onChange={(e) => handleQualityChange(parseFloat(e.target.value), "before")}
-                                  className="w-full h-2 bg-gradient-to-r from-red-200 via-yellow-200 to-green-200 rounded-lg appearance-none cursor-pointer slider"
-                                  style={{
-                                    background: `linear-gradient(to right, #ef4444 0%, #f59e0b 50%, #10b981 100%)`
-                                  }}
-                                />
-                                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                  <span>Low Quality</span>
-                                  <span>High Quality</span>
-                                </div>
-                              </div>
-                              
-                              {/* Compression Stats */}
-                              <div className="grid grid-cols-2 gap-3 text-xs">
-                                <div className="bg-white/50 dark:bg-gray-800/50 p-2 rounded">
-                                  <div className="text-gray-600 dark:text-gray-400">Original</div>
-                                  <div className="font-medium text-gray-900 dark:text-white">
-                                    {beforeImageSettings.originalDimensions.width}×{beforeImageSettings.originalDimensions.height}
-                                  </div>
-                                  <div className="text-gray-500 dark:text-gray-400">
-                                    {(beforeImageSettings.originalSize / 1024 / 1024).toFixed(2)}MB
-                                  </div>
-                                </div>
-                                <div className="bg-white/50 dark:bg-gray-800/50 p-2 rounded">
-                                  <div className="text-gray-600 dark:text-gray-400">Compressed</div>
-                                  <div className="font-medium text-gray-900 dark:text-white">
-                                    {beforeImageSettings.compressedDimensions.width}×{beforeImageSettings.compressedDimensions.height}
-                                  </div>
-                                  <div className="text-gray-500 dark:text-gray-400">
-                                    {(beforeImageSettings.compressedSize / 1024 / 1024).toFixed(2)}MB
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              {/* Savings */}
-                              <div className="mt-2 text-center">
-                                <span className="text-xs text-gray-600 dark:text-gray-400">Space saved: </span>
-                                <span className="text-sm font-bold text-green-600 dark:text-green-400">
-                                  {((beforeImageSettings.originalSize - beforeImageSettings.compressedSize) / beforeImageSettings.originalSize * 100).toFixed(1)}%
-                                </span>
-                              </div>
-                            </div>
-                          )}
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Transformation Title *
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.title}
+                            onChange={(e) => {
+                              setFieldErrors((prev) => ({ ...prev, title: false }));
+                              setFormData((prev) => ({
+                                ...prev,
+                                title: e.target.value,
+                              }));
+                            }}
+                            className={`w-full px-3 py-2.5 text-sm border-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-rose-500 transition-all ${
+                              fieldErrors.title
+                                ? "border-red-500 focus:border-red-500"
+                                : "border-gray-200 dark:border-gray-700 focus:border-rose-500"
+                            }`}
+                            placeholder="Natural lip enhancement, subtle mid‑face lift..."
+                            disabled={isSubmitting}
+                            required
+                          />
+                          <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                            Short, clear headline for the gallery.
+                          </p>
                         </div>
-                      )}
+
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Description
+                          </label>
+                          <textarea
+                            value={formData.description || ""}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                description: e.target.value,
+                              }))
+                            }
+                            rows={4}
+                            className="w-full px-3 py-2.5 text-sm border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all resize-none"
+                            placeholder="Add context about concerns, approach and outcome. Avoid identifiable personal details."
+                          />
+                          <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                            Optional narrative for patients browsing results.
+                          </p>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Treatment area / notes
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.project_type}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                project_type: e.target.value,
+                              }))
+                            }
+                            className="w-full px-3 py-2.5 text-sm border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all"
+                            placeholder="Upper lip, cheeks, jawline..."
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Column 3 – Images & preview */}
+                    <div className="lg:col-span-1 space-y-4 rounded-2xl bg-white/90 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-4 md:p-5 shadow-sm">
+                      <div className="pb-3 border-b border-gray-100 dark:border-gray-800">
+                        <div className="flex items-center gap-2">
+                          <h5 className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-rose-100 text-rose-600 dark:bg-rose-900/40 dark:text-rose-200 text-[11px]">
+                              3
+                            </span>
+                            Before & After images
+                          </h5>
+                        </div>
+                        <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                          JPG / PNG / WEBP · up to 10MB
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Before Image */}
+                        <div className={fieldErrors.before ? "rounded-lg ring-2 ring-red-500 p-1" : ""}>
+                          <p className="text-[11px] font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Before image <span className="text-red-500">*</span>{" "}
+                            {editingItem && (
+                              <span className="text-[10px] text-gray-500">(leave empty to keep)</span>
+                            )}
+                          </p>
+                          <div className="space-y-2">
+                            {!(beforeImagePreview || formData.before_image_url) && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const input = document.createElement("input");
+                                  input.type = "file";
+                                  input.accept = "image/*";
+                                  input.onchange = (e: any) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) handleImageUpload(file, "before");
+                                  };
+                                  input.click();
+                                }}
+                                disabled={isSubmitting}
+                                className="w-full h-24 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/70 flex flex-col items-center justify-center text-[11px] text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                              >
+                                <span className="mb-1 text-lg">⬆️</span>
+                                <span className="font-semibold">Upload before</span>
+                                <span className="text-[10px] text-gray-400 dark:text-gray-500">
+                                  {getSupportedFormatsText()}
+                                </span>
+                              </button>
+                            )}
+                            {imageErrors.before && (
+                              <p className="text-[11px] text-red-500">{imageErrors.before}</p>
+                            )}
+                            {(beforeImagePreview || formData.before_image_url) && (
+                              <div className="relative rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+                                <img
+                                  src={beforeImagePreview || formData.before_image_url}
+                                  alt="Before preview"
+                                  className="w-full h-28 object-cover"
+                                />
+                                <span className="absolute top-2 left-2 px-2 py-0.5 text-[11px] font-semibold rounded-full bg-red-500 text-white">
+                                  Before
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => clearImage("before")}
+                                  className="absolute top-1.5 right-1.5 bg-black/70 text-white rounded-full p-1 hover:bg-black/90 transition-colors"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* After Image */}
+                        <div className={fieldErrors.after ? "rounded-lg ring-2 ring-red-500 p-1" : ""}>
+                          <p className="text-[11px] font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            After image <span className="text-red-500">*</span>{" "}
+                            {editingItem && (
+                              <span className="text-[10px] text-gray-500">(leave empty to keep)</span>
+                            )}
+                          </p>
+                          <div className="space-y-2">
+                            {!(afterImagePreview || formData.after_image_url) && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const input = document.createElement("input");
+                                  input.type = "file";
+                                  input.accept = "image/*";
+                                  input.onchange = (e: any) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) handleImageUpload(file, "after");
+                                  };
+                                  input.click();
+                                }}
+                                disabled={isSubmitting}
+                                className="w-full h-24 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/70 flex flex-col items-center justify-center text-[11px] text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                              >
+                                <span className="mb-1 text-lg">⬆️</span>
+                                <span className="font-semibold">Upload after</span>
+                                <span className="text-[10px] text-gray-400 dark:text-gray-500">
+                                  {getSupportedFormatsText()}
+                                </span>
+                              </button>
+                            )}
+                            {imageErrors.after && (
+                              <p className="text-[11px] text-red-500">{imageErrors.after}</p>
+                            )}
+                            {(afterImagePreview || formData.after_image_url) && (
+                              <div className="relative rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+                                <img
+                                  src={afterImagePreview || formData.after_image_url}
+                                  alt="After preview"
+                                  className="w-full h-28 object-cover"
+                                />
+                                <span className="absolute top-2 left-2 px-2 py-0.5 text-[11px] font-semibold rounded-full bg-green-500 text-white">
+                                  After
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => clearImage("after")}
+                                  className="absolute top-1.5 right-1.5 bg-black/70 text-white rounded-full p-1 hover:bg-black/90 transition-colors"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Side‑by‑side preview with slider */}
+                      {(beforeImagePreview || formData.before_image_url) &&
+                        (afterImagePreview || formData.after_image_url) && (
+                          <div className="mt-4 space-y-3">
+                            <div className="flex items-center justify-center text-[11px] text-gray-600 dark:text-gray-400">
+                              <span>Live comparison preview</span>
+                            </div>
+                            <div className="relative w-full h-40 rounded-2xl overflow-hidden bg-gray-900">
+                              <img
+                                src={afterImagePreview || formData.after_image_url}
+                                alt="After preview"
+                                className="absolute inset-0 w-full h-full object-cover"
+                              />
+                              <div
+                                className="absolute inset-0 overflow-hidden"
+                                style={{ clipPath: `inset(0 ${100 - previewSliderPosition}% 0 0)` }}
+                              >
+                                <img
+                                  src={beforeImagePreview || formData.before_image_url}
+                                  alt="Before preview"
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div
+                                className="absolute top-0 bottom-0 w-0.5 bg-white/80 shadow-lg"
+                                style={{ left: `${previewSliderPosition}%`, transform: "translateX(-50%)" }}
+                              />
+                              <span className="absolute top-2 left-2 px-2 py-0.5 text-[11px] font-semibold rounded-full bg-red-500 text-white">
+                                Before
+                              </span>
+                              <span className="absolute top-2 right-2 px-2 py-0.5 text-[11px] font-semibold rounded-full bg-green-500 text-white">
+                                After
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              min={0}
+                              max={100}
+                              value={previewSliderPosition}
+                              onChange={(e) => setPreviewSliderPosition(Number(e.target.value))}
+                              className="w-full h-1 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer"
+                            />
+                          </div>
+                        )}
                     </div>
                   </div>
 
-                  {/* After Image Upload */}
-                  <div className={fieldErrors.after ? "rounded-lg ring-2 ring-red-500 p-1" : ""}>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      After Image *{" "}
-                      {editingItem && "(leave empty to keep current)"}
+                  {/* Form Actions */}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-gray-200/70 dark:border-gray-800 sticky bottom-0 bg-gradient-to-r from-rose-50/95 via-white/95 to-purple-50/95 dark:from-gray-900/98 dark:via-gray-900/98 dark:to-gray-950/98 backdrop-blur-sm">
+                    <label className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200 cursor-pointer order-last sm:order-first">
+                      <input
+                        type="checkbox"
+                        checked={formData.is_featured}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            is_featured: e.target.checked,
+                          }))
+                        }
+                        className="w-4 h-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500 shrink-0"
+                      />
+                      <span>Feature this transformation</span>
                     </label>
-
-                    <div className="space-y-3">
-                      {/* File Input */}
-                      <div className="flex items-center justify-center w-full">
-                        <label className={`flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 ${fieldErrors.after ? "border-red-500 dark:border-red-500" : "border-gray-300"}`}>
-                          <div className="flex flex-col items-center justify-center pt-2 pb-2">
-                            <svg
-                              className="w-6 h-6 mb-2 text-gray-500 dark:text-gray-400"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                              />
-                            </svg>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              <span className="font-semibold">
-                                Click to upload
-                              </span>{" "}
-                              After image
-                            </p>
-                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                              {getSupportedFormatsText()}
-                            </p>
-                          </div>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => {
-                              if (e.target.files?.[0]) {
-                                handleImageUpload(e.target.files[0], "after");
-                                e.target.value = '';
-                              }
-                            }}
-                            disabled={isSubmitting}
-                            className="hidden"
-                          />
-                        </label>
-                      </div>
-
-                      {/* Error Message */}
-                      {imageErrors.after && (
-                        <p className="text-red-500 text-xs">
-                          {imageErrors.after}
-                        </p>
-                      )}
-
-                      {/* Preview */}
-                      {afterImagePreview && (
-                        <div className="space-y-2">
-                          <div className="relative">
-                            <img
-                              src={afterImagePreview}
-                              alt="After preview"
-                              className="w-full h-32 object-cover rounded"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => clearImage("after")}
-                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
-                            >
-                              <svg
-                                className="w-3 h-3"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M6 18L18 6M6 6l12 12"
-                                />
-                              </svg>
-                            </button>
-                          </div>
-                          
-                          {/* Quality Slider */}
-                          {afterImageSettings.originalFile && (
-                            <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
-                              <div className="flex items-center justify-between mb-3">
-                                <h4 className="text-sm font-medium text-green-900 dark:text-green-100">
-                                  Image Quality
-                                </h4>
-                                <span className="text-sm font-bold text-green-700 dark:text-green-300">
-                                  {Math.round(afterImageSettings.quality * 100)}%
-                                </span>
-                              </div>
-                              
-                              {/* Quality Slider */}
-                              <div className="mb-3">
-                                <input
-                                  type="range"
-                                  min="0.1"
-                                  max="1"
-                                  step="0.05"
-                                  value={afterImageSettings.quality}
-                                  onChange={(e) => handleQualityChange(parseFloat(e.target.value), "after")}
-                                  className="w-full h-2 bg-gradient-to-r from-red-200 via-yellow-200 to-green-200 rounded-lg appearance-none cursor-pointer slider"
-                                  style={{
-                                    background: `linear-gradient(to right, #ef4444 0%, #f59e0b 50%, #10b981 100%)`
-                                  }}
-                                />
-                                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                  <span>Low Quality</span>
-                                  <span>High Quality</span>
-                                </div>
-                              </div>
-                              
-                              {/* Compression Stats */}
-                              <div className="grid grid-cols-2 gap-3 text-xs">
-                                <div className="bg-white/50 dark:bg-gray-800/50 p-2 rounded">
-                                  <div className="text-gray-600 dark:text-gray-400">Original</div>
-                                  <div className="font-medium text-gray-900 dark:text-white">
-                                    {afterImageSettings.originalDimensions.width}×{afterImageSettings.originalDimensions.height}
-                                  </div>
-                                  <div className="text-gray-500 dark:text-gray-400">
-                                    {(afterImageSettings.originalSize / 1024 / 1024).toFixed(2)}MB
-                                  </div>
-                                </div>
-                                <div className="bg-white/50 dark:bg-gray-800/50 p-2 rounded">
-                                  <div className="text-gray-600 dark:text-gray-400">Compressed</div>
-                                  <div className="font-medium text-gray-900 dark:text-white">
-                                    {afterImageSettings.compressedDimensions.width}×{afterImageSettings.compressedDimensions.height}
-                                  </div>
-                                  <div className="text-gray-500 dark:text-gray-400">
-                                    {(afterImageSettings.compressedSize / 1024 / 1024).toFixed(2)}MB
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              {/* Savings */}
-                              <div className="mt-2 text-center">
-                                <span className="text-xs text-gray-600 dark:text-gray-400">Space saved: </span>
-                                <span className="text-sm font-bold text-green-600 dark:text-green-400">
-                                  {((afterImageSettings.originalSize - afterImageSettings.compressedSize) / afterImageSettings.originalSize * 100).toFixed(1)}%
-                                </span>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Description - Full Width */}
-              <div className="mt-6">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Description
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      description: e.target.value,
-                    }))
-                  }
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="Describe the project, challenges, and results..."
-                />
-              </div>
-
-              {/* Form Actions */}
-                  <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700 sticky bottom-0 bg-white dark:bg-gray-800">
-                <button
-                  onClick={() => {
-                    setShowAddForm(false);
-                    setEditingItem(null);
-                    setFormData({ ...defaultItem });
-                    setBeforeImage(null);
-                    setAfterImage(null);
-                    setFieldErrors({});
-                    
-                    // Revoke object URLs before clearing
-                    if (beforeImagePreview && beforeImagePreview.startsWith('blob:')) {
-                      URL.revokeObjectURL(beforeImagePreview);
-                    }
-                    if (afterImagePreview && afterImagePreview.startsWith('blob:')) {
-                      URL.revokeObjectURL(afterImagePreview);
-                    }
-                    
-                    setBeforeImagePreview("");
-                    setUseCustomLocation(false);
-                    setAfterImagePreview("");
-                    setImageErrors({});
-                    
-                    // Reset image settings
-                    setBeforeImageSettings({
-                      quality: 0.85,
-                      originalFile: null,
-                      compressedFile: null,
-                      originalSize: 0,
-                      compressedSize: 0,
-                      originalDimensions: { width: 0, height: 0 },
-                      compressedDimensions: { width: 0, height: 0 }
-                    });
-                    setAfterImageSettings({
-                      quality: 0.85,
-                      originalFile: null,
-                      compressedFile: null,
-                      originalSize: 0,
-                      compressedSize: 0,
-                      originalDimensions: { width: 0, height: 0 },
-                      compressedDimensions: { width: 0, height: 0 }
-                    });
-                  }}
-                      className="px-6 py-3 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors font-medium"
-                >
-                  Cancel
-                </button>
+                    <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+                    <button
+                      onClick={() => {
+                        setShowAddForm(false);
+                        setEditingItem(null);
+                        setFormData({ ...defaultItem });
+                        setBeforeImage(null);
+                        setAfterImage(null);
+                        setFieldErrors({});
+                        if (beforeImagePreview && beforeImagePreview.startsWith("blob:")) {
+                          URL.revokeObjectURL(beforeImagePreview);
+                        }
+                        if (afterImagePreview && afterImagePreview.startsWith("blob:")) {
+                          URL.revokeObjectURL(afterImagePreview);
+                        }
+                        setBeforeImagePreview("");
+                        setUseCustomLocation(false);
+                        setAfterImagePreview("");
+                        setImageErrors({});
+                      }}
+                      className="w-full sm:w-auto px-6 py-2.5 bg-gray-200/90 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-medium"
+                    >
+                      Cancel
+                    </button>
                     <button
                       type="button"
                       onClick={handleSave}
                       disabled={isSubmitting}
-                      className="px-6 py-3 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 text-white rounded-lg hover:from-rose-600 hover:via-pink-600 hover:to-purple-700 transition-colors font-medium disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2 min-w-[120px] justify-center"
+                      className="w-full sm:w-auto px-7 py-2.5 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 text-white rounded-full hover:from-rose-600 hover:via-pink-600 hover:to-purple-700 transition-colors text-sm font-medium disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2 justify-center shadow-md shadow-rose-500/30"
                     >
-                      {isSubmitting ? (
-                        <>
-                          <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                          </svg>
-                          Saving...
-                        </>
-                      ) : (
-                        editingItem ? "Update Item" : "Add Item"
-                      )}
+                      {isSubmitting ? "Saving…" : editingItem ? "Update item" : "Add item"}
                     </button>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -160,30 +160,30 @@ function ServicesPageContent() {
 
   return (
     <div className="min-h-screen bg-[#f5f1e9] dark:bg-gray-900">
-      <div className={`${layout.containerWide} pt-20 sm:pt-24 pb-10 sm:pb-16`}>
+      <div className={`${layout.containerWide} pt-20 sm:pt-24 pb-8 sm:pb-12`}>
         {/* Header - Back on left, Our Services centered */}
-        <div className="relative flex items-center justify-between mb-4 sm:mb-6">
+        <div className="relative flex items-center justify-between mb-3 sm:mb-4">
           <Link
             href="/"
             className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-[#464C45] dark:hover:text-[#5a6259] transition-colors flex-shrink-0 z-10"
           >
-            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+            <ArrowLeft className="w-4 h-4" />
             <span className="text-sm font-medium">Back</span>
           </Link>
-          <h1 className={`absolute left-1/2 -translate-x-1/2 text-lg sm:text-2xl md:text-3xl font-bold ${textColors.heading} font-playfair`}>
+          <h1 className={`absolute left-1/2 -translate-x-1/2 text-base sm:text-xl md:text-2xl font-bold ${textColors.heading} font-playfair`}>
             Our Services
           </h1>
           <div className="w-14 sm:w-20" aria-hidden />
         </div>
 
-        <div className="text-center mb-6 sm:mb-12">
-          <p className={`${typography.lead} font-montserrat font-light max-w-3xl mx-auto`}>
+        <div className="text-center mb-4 sm:mb-6">
+          <p className={`${typography.lead} font-montserrat font-light max-w-2xl mx-auto text-sm sm:text-base`}>
             Discover our comprehensive range of aesthetic treatments designed to enhance your natural beauty
           </p>
         </div>
 
-        {/* Filters and Search - compact on mobile */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-8">
+        {/* Filters and Search */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-5 mb-4 sm:mb-6">
           <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 items-stretch lg:items-center justify-between">
             {/* Search */}
             <div className="flex-1 w-full max-w-full lg:max-w-md">
@@ -213,8 +213,8 @@ function ServicesPageContent() {
 
           {/* Filter Options - responsive grid, ensure Select fits on mobile */}
           {showFilters && (
-            <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-700">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {/* Category Filter */}
                 <Select
                   classNames={{ trigger: "min-h-10", value: "text-foreground" }}
@@ -283,7 +283,7 @@ function ServicesPageContent() {
         </div>
 
         {/* Results Count */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4">
           <p className={`${typography.small}`}>
             Showing {filteredServices.length} of {services.length} services
           </p>
@@ -329,113 +329,108 @@ function ServicesPageContent() {
             </Button>
           </div>
         ) : (
-          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
+          <div className="grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
             {paginatedServices.map(([serviceId, service]) => (
               <Card
                 key={serviceId}
                 className="h-full"
-                shadow="md"
+                shadow="sm"
               >
-                <CardHeader className="bg-egp-beige-lighter dark:bg-egp-green-dark px-2.5 sm:px-3 py-2 sm:py-2.5 border-b border-egp-beige-dark/60 dark:border-egp-green relative">
-                  {/* Category Badge - Top Left */}
-                    <div className="absolute top-1 left-1">
-                    <Chip 
+                <CardHeader className="bg-egp-beige-lighter dark:bg-egp-green-dark px-2 sm:px-2.5 py-2 sm:py-2.5 border-b border-egp-beige-dark/60 dark:border-egp-green flex flex-col items-center text-center">
+                  {/* Badges - Centered row */}
+                  <div className="flex flex-wrap justify-center gap-1.5 mb-1.5">
+                    <Chip
                       size="sm"
-                      className="bg-egp-green text-white text-[9px]"
+                      className="bg-egp-green text-white text-[8px] h-5"
                       variant="flat"
                     >
                       {service.category}
                     </Chip>
-                    </div>
-                    
-                  {/* Duration Badge - Top Right */}
-                  <div className="absolute top-1 right-1">
                     <Chip
                       size="sm"
                       startContent={<Clock className="w-2.5 h-2.5" />}
                       variant="flat"
-                      className="bg-white/90 dark:bg-egp-green-dark/90 text-egp-green dark:text-white text-[9px]"
+                      className="bg-white/90 dark:bg-egp-green-dark/90 text-egp-green dark:text-white text-[8px] h-5"
                     >
                       {service.duration} min
                     </Chip>
-                      </div>
-                      
-                  {/* Service Name - Centered */}
-                  <div className="text-center pt-4 pb-1.5 w-full">
-                    <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-tight line-clamp-2 mb-1">
+                  </div>
+
+                  {/* Service Name and Price - Centered */}
+                  <div className="w-full">
+                    <h3 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white leading-tight line-clamp-2 mb-0.5">
                       {service.name}
                     </h3>
-                    {/* Price */}
-                    <div className="text-center w-full">
+                    <div className="flex justify-center w-full">
                       <PriceWithDiscount
                         price={service.price}
                         originalPrice={service.originalPrice}
                         discountPercentage={service.discountPercentage}
-                        size="md"
+                        size="sm"
                         layout="stack"
                         align="center"
                       />
                     </div>
-                      </div>
+                  </div>
                 </CardHeader>
-                    
-                <CardBody 
-                  className="p-3 flex flex-col flex-1 cursor-pointer" 
+
+                <CardBody
+                  className="p-2 sm:p-2.5 flex flex-col flex-1 cursor-pointer min-h-0 items-center text-center"
                   onClick={() => setSelectedService(serviceId)}
                 >
                   {/* Description */}
                   {service.description && (
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-2.5 leading-relaxed line-clamp-2">
-                        {service.description}
-                      </p>
+                    <p className="text-[11px] text-gray-600 dark:text-gray-400 mb-1.5 leading-snug line-clamp-2 w-full">
+                      {service.description}
+                    </p>
                   )}
-                  
-                  {/* Service Details */}
-                  <div className="space-y-1 mb-2.5 text-[10px] text-gray-500 dark:text-gray-400">
+
+                  {/* Service Details - Centered */}
+                  <div className="space-y-0.5 mb-1.5 text-[9px] text-gray-500 dark:text-gray-400 flex flex-col items-center">
                     {service.requires_consultation && (
                       <div className="flex items-center gap-1">
-                        <CheckCircle className="w-3 h-3 text-egp-green" />
-                        <span>Consultation Required</span>
+                        <CheckCircle className="w-2.5 h-2.5 text-egp-green flex-shrink-0" />
+                        <span>Consultation required</span>
                       </div>
                     )}
                     {service.downtime_days > 0 && (
                       <div className="flex items-center gap-1">
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-2.5 h-2.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                         </svg>
-                        <span>Downtime: {service.downtime_days} day{service.downtime_days !== 1 ? 's' : ''}</span>
+                        <span>Downtime: {service.downtime_days}d</span>
                       </div>
                     )}
                     {service.results_duration_weeks && (
                       <div className="flex items-center gap-1">
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-2.5 h-2.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
-                        <span>Results: {service.results_duration_weeks} week{service.results_duration_weeks !== 1 ? 's' : ''}</span>
+                        <span>Results: {service.results_duration_weeks}w</span>
                       </div>
                     )}
-                    </div>
-                  
+                  </div>
+
                   {/* Buttons */}
-                  <div className="flex gap-1.5 mt-auto" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex gap-1 mt-auto pt-1 justify-center w-full" onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      onPress={() => setSelectedService(serviceId)}
+                      variant="bordered"
+                      size="sm"
+                      className="flex-1 min-w-0 border-egp-green text-egp-green dark:text-white dark:border-egp-green text-xs h-8"
+                      startContent={<Info className="w-2.5 h-2.5" />}
+                    >
+                      Details
+                    </Button>
+                    <Link href={service?.id ? `/book?pendingServiceId=${service.id}` : "/book"}>
                       <Button
-                        onPress={() => setSelectedService(serviceId)}
-                        variant="bordered"
                         size="sm"
-                        className="flex-1 border-egp-green text-egp-green dark:text-white dark:border-egp-green"
-                        startContent={<Info className="w-3 h-3" />}
+                        className="flex-1 w-full min-w-0 bg-egp-green text-white text-xs h-8"
+                        startContent={<Plus className="w-2.5 h-2.5" />}
                       >
-                        Details
+                        Book
                       </Button>
-                      <Link href={service?.id ? `/book?pendingServiceId=${service.id}` : "/book"}>
-                        <Button
-                          size="sm"
-                          className="flex-1 w-full bg-egp-green text-white"
-                          startContent={<Plus className="w-3 h-3" />}
-                        >
-                          Book
-                        </Button>
-                      </Link>
+                    </Link>
                   </div>
                 </CardBody>
               </Card>
@@ -445,7 +440,7 @@ function ServicesPageContent() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex justify-center items-center gap-2 mt-8">
+          <div className="flex justify-center items-center gap-2 mt-6">
             <Button
               onPress={() => setCurrentPage(Math.max(1, currentPage - 1))}
               isDisabled={currentPage === 1}

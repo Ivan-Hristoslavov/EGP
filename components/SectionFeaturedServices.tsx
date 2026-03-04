@@ -132,9 +132,9 @@ export default function SectionFeaturedServices() {
 
   if (isLoading) {
     return (
-      <section className="py-12 sm:py-16 md:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <section className="py-6 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className={layout.container}>
-          <div className="text-center mb-8 sm:mb-12 md:mb-16">
+          <div className="text-center mb-4 sm:mb-6 md:mb-8">
             <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-2 ${badgeBackgroundClass} text-xs sm:text-sm font-semibold mb-2 sm:mb-4 ${textColors.heading}`}>
               <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
               <span>Popular Treatments</span>
@@ -164,9 +164,9 @@ export default function SectionFeaturedServices() {
 
   if (!isLoading && filteredServices.length === 0) {
     return (
-      <section className="py-12 sm:py-16 md:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <section className="py-6 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className={layout.container}>
-          <div className="text-center mb-8 sm:mb-12 md:mb-16">
+          <div className="text-center mb-4 sm:mb-6 md:mb-8">
             <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-2 ${badgeBackgroundClass} text-xs sm:text-sm font-semibold mb-2 sm:mb-4 ${textColors.heading}`}>
               <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
               <span>Popular Treatments</span>
@@ -190,84 +190,87 @@ export default function SectionFeaturedServices() {
   }
 
   return (
-    <section id="featured-services" className="py-12 sm:py-16 md:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <section id="featured-services" className="py-6 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header - smaller titles */}
-        <div className="text-center mb-8 sm:mb-12 md:mb-16">
-          <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-2 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-xs sm:text-base font-semibold mb-2 sm:mb-4`}>
-            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
+        {/* Section Header - compact */}
+        <div className="text-center mb-4 sm:mb-6 md:mb-8">
+          <div className={`inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-xs font-semibold mb-1.5 sm:mb-3`}>
+            <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             <span>Popular Treatments</span>
           </div>
-          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-4 px-4">
+          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-1.5 sm:mb-3 px-4">
             Featured Services
           </h2>
-          <p className="text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-4">
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-4">
             Discover our most popular aesthetic treatments
           </p>
         </div>
 
-        {/* Category and Discount Filters - 4 per line */}
+        {/* Category and Discount Filters - compact pill bar */}
         {(availableCategories.length > 0 || hasDiscountedFeatured) && (
-          <div className="mb-8 sm:mb-12">
-            <div className={`flex items-center gap-2 ${typography.body} font-medium ${textColors.body} mb-2 sm:mb-3`}>
-              <Filter className="w-4 h-4 flex-shrink-0" />
-              <span>Filter:</span>
-            </div>
-            <div className="grid grid-cols-4 gap-2 sm:gap-3">
-              <button
-                onClick={() => setSelectedCategory("all")}
-                className={`px-3 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 ${
-                  selectedCategory === "all"
-                    ? "bg-egp-green dark:bg-egp-green-dark text-white shadow-lg scale-105"
-                    : "bg-white dark:bg-egp-green text-gray-700 dark:text-white hover:bg-[#ddd5c3] dark:hover:bg-egp-green-light border border-[#c9c1b0] dark:border-egp-green-dark"
-                }`}
-              >
-                All Services
-              </button>
-              
-              {hasDiscountedFeatured && (
+          <div className="mb-5 sm:mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-white/70 dark:bg-gray-800/50 border border-[#e4d9c8] dark:border-gray-700/80 shadow-sm">
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-egp-green/10 dark:bg-egp-green/20">
+                  <Filter className="w-4 h-4 text-egp-green dark:text-egp-green-light" />
+                </div>
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Filter by</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
                 <button
-                  onClick={() => setShowDiscountedOnly(!showDiscountedOnly)}
-                  className={`px-3 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 ${
-                    showDiscountedOnly
-                      ? "bg-egp-green dark:bg-egp-green-dark text-white shadow-lg scale-105"
-                      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-[#ddd5c3] dark:hover:bg-gray-700 border border-[#c9c1b0] dark:border-gray-700"
+                  onClick={() => setSelectedCategory("all")}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                    selectedCategory === "all"
+                      ? "bg-egp-green dark:bg-egp-green-dark text-white shadow-md"
+                      : "bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-transparent hover:border-gray-300 dark:hover:border-gray-600"
                   }`}
                 >
-                  On offer
+                  All
                 </button>
-              )}
-              
-              {availableCategories.map((category) => (
-                <button
-                  key={category.id}
-                  onClick={() => setSelectedCategory(category.id)}
-                  className={`px-3 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 whitespace-nowrap ${
-                    selectedCategory === category.id
-                      ? "bg-[#b5ad9d] dark:bg-[#9d9585] text-white shadow-lg scale-105"
-                      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-[#ddd5c3] dark:hover:bg-gray-700 border border-[#c9c1b0] dark:border-gray-700"
-                  }`}
-                >
-                  {category.name}
-                </button>
-              ))}
+                {hasDiscountedFeatured && (
+                  <button
+                    onClick={() => setShowDiscountedOnly(!showDiscountedOnly)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-1.5 ${
+                      showDiscountedOnly
+                        ? "bg-amber-500 dark:bg-amber-600 text-white shadow-md"
+                        : "bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-transparent hover:border-gray-300 dark:hover:border-gray-600"
+                    }`}
+                  >
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-current opacity-90" />
+                    On offer
+                  </button>
+                )}
+                {availableCategories.map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() => setSelectedCategory(category.id)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                      selectedCategory === category.id
+                        ? "bg-egp-green dark:bg-egp-green-dark text-white shadow-md"
+                        : "bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-transparent hover:border-gray-300 dark:hover:border-gray-600"
+                    }`}
+                  >
+                    {category.name}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
 
-        {/* Services Grid - compact cards on mobile */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 md:gap-6 mb-6 sm:mb-12">
+        {/* Services Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 mb-6 sm:mb-10">
           {paginatedServices.map((service) => {
             const gradient = getCategoryGradient(service.category.name);
             
             return (
               <div
                 key={service.id}
-                className="group relative bg-white dark:bg-egp-green rounded-lg sm:rounded-2xl overflow-hidden shadow-md sm:shadow-lg hover:shadow-xl sm:hover:shadow-2xl transition-all duration-300 hover:scale-[1.01] sm:hover:scale-[1.02] border border-gray-300 dark:border-egp-green-dark cursor-pointer flex flex-col"
+                className="group relative bg-white dark:bg-egp-green rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 border border-gray-200/80 dark:border-egp-green-dark cursor-pointer flex flex-col"
                 onClick={() => setSelectedService(service)}
               >
-                {/* Image - compact on mobile */}
-                <div className="h-20 sm:h-32 md:h-36 lg:h-40 relative overflow-hidden bg-gradient-to-br">
+                {/* Image */}
+                <div className="h-24 sm:h-28 md:h-32 lg:h-36 relative overflow-hidden bg-gradient-to-br">
                   {service.image_url ? (
                     <>
                       <img
@@ -281,9 +284,9 @@ export default function SectionFeaturedServices() {
                     <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-90`}></div>
                   )}
                   
-                  {/* Service Name Overlay - compact on mobile */}
-                  <div className="absolute inset-0 flex items-center justify-center p-1.5 sm:p-4 md:p-5 z-10">
-                    <h3 className={`${typography.headingCard} text-white text-center drop-shadow-lg line-clamp-2 leading-tight`}>
+                  {/* Service Name Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center p-2 sm:p-3 md:p-4 z-10">
+                    <h3 className="text-base sm:text-lg font-bold text-white text-center drop-shadow-lg line-clamp-2 leading-tight">
                       {service.name}
                     </h3>
                   </div>
@@ -304,29 +307,29 @@ export default function SectionFeaturedServices() {
                   </div>
                 </div>
 
-                {/* Content - compact on mobile */}
-                <div className="p-2 sm:p-4 md:p-5 lg:p-6 flex flex-col flex-1">
+                {/* Content */}
+                <div className="p-3 sm:p-4 flex flex-col flex-1">
                   {/* Category */}
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 bg-[#ddd5c3]/50 dark:bg-[#c9c1b0]/30 ${textColors.body} border border-[#c9c1b0]/50 dark:border-gray-600/50 rounded-full ${typography.small} font-semibold`}>
+                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                    <span className="inline-flex items-center px-2 py-0.5 bg-[#e4d9c8]/60 dark:bg-gray-700/60 text-gray-700 dark:text-gray-200 border border-[#c9c1b0]/40 dark:border-gray-600/50 rounded-md text-xs font-semibold">
                       {service.category.name}
                     </span>
                     {service.main_tab && (
-                      <span className={typography.small}>
-                        • {service.main_tab.name}
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {service.main_tab.name}
                       </span>
                     )}
                   </div>
 
                   {/* Description */}
                   {service.description && (
-                    <p className={`${typography.body} ${textColors.body} mb-2 sm:mb-4 line-clamp-2`}>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-2 sm:mb-3 line-clamp-2 leading-snug">
                       {service.description}
                     </p>
                   )}
 
                   {/* Service Details */}
-                  <div className={`flex flex-wrap gap-2 sm:gap-3 mb-2 sm:mb-4 ${typography.small}`}>
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 mb-2 sm:mb-3 text-xs text-gray-500 dark:text-gray-400">
                     <div className="flex items-center gap-1">
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -354,8 +357,8 @@ export default function SectionFeaturedServices() {
                   {/* Spacer to push price and button to bottom */}
                   <div className="flex-1"></div>
 
-                  {/* Price & CTA - Fixed at bottom */}
-                  <div className="pt-2 sm:pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2 sm:space-y-3">
+                  {/* Price & CTA */}
+                  <div className="pt-3 border-t border-gray-200 dark:border-gray-700 space-y-2">
                     {/* Price */}
                     <div className="text-center flex flex-col items-center gap-1 w-full">
                       <PriceWithDiscount

@@ -7,6 +7,7 @@ import {
   Phone, 
   Mail, 
   Clock, 
+  MessageCircle,
   Instagram, 
   Facebook, 
   Youtube,
@@ -36,6 +37,7 @@ export default function FooterAesthetics() {
   // Get contact info from admin profile, fallback to siteConfig
   const contactPhone = adminProfile?.phone || siteConfig.contact.phone;
   const contactEmail = adminProfile?.business_email || adminProfile?.email || siteConfig.contact.email;
+  const contactWhatsapp = (adminProfile as { whatsapp?: string } | null)?.whatsapp || siteConfig.contact.whatsapp;
   const contactAddress = adminProfile?.company_address || siteConfig.contact.address.full || `${siteConfig.contact.address.city}, ${siteConfig.contact.address.country}`;
 
   useEffect(() => {
@@ -248,7 +250,7 @@ export default function FooterAesthetics() {
             </div>
 
             {/* Column 2: Quick Links */}
-            <div className="space-y-4">
+            <div className="space-y-4 text-center sm:text-left">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                 Quick Links
               </h3>
@@ -315,21 +317,21 @@ export default function FooterAesthetics() {
             </div>
 
             {/* Column 3: Contact Info */}
-            <div className="space-y-4">
+            <div className="space-y-4 text-center sm:text-left">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                 Contact Us
               </h3>
               <ul className="space-y-3">
                 <li>
                   {profileLoading ? (
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 justify-center sm:justify-start">
                       <Phone className="w-5 h-5 flex-shrink-0 text-gray-400 dark:text-gray-500" />
                       <div className="h-4 w-32 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
                     </div>
                   ) : (
                     <a 
                       href={`tel:${contactPhone}`}
-                      className="flex items-center gap-3 text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm group"
+                      className="flex items-center gap-3 justify-center sm:justify-start text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm group"
                     >
                       <Phone className="w-5 h-5 flex-shrink-0 text-gray-600 dark:text-gray-500" />
                       <span>{contactPhone}</span>
@@ -338,14 +340,14 @@ export default function FooterAesthetics() {
                 </li>
                 <li>
                   {profileLoading ? (
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 justify-center sm:justify-start">
                       <Mail className="w-5 h-5 flex-shrink-0 text-gray-400 dark:text-gray-500" />
                       <div className="h-4 w-40 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
                     </div>
                   ) : (
                     <a 
                       href={`mailto:${contactEmail}`}
-                      className="flex items-center gap-3 text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm group"
+                      className="flex items-center gap-3 justify-center sm:justify-start text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm group"
                     >
                       <Mail className="w-5 h-5 flex-shrink-0 text-gray-600 dark:text-gray-500" />
                       <span>{contactEmail}</span>
@@ -354,7 +356,26 @@ export default function FooterAesthetics() {
                 </li>
                 <li>
                   {profileLoading ? (
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-center gap-3 justify-center sm:justify-start">
+                      <MessageCircle className="w-5 h-5 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+                      <div className="h-4 w-32 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+                    </div>
+                  ) : (
+                    <a 
+                      href={`https://wa.me/${contactWhatsapp.replace(/\s/g, '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 justify-center sm:justify-start text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm group"
+                      aria-label="WhatsApp"
+                    >
+                      <MessageCircle className="w-5 h-5 flex-shrink-0 text-gray-600 dark:text-gray-500" />
+                      <span>WhatsApp</span>
+                    </a>
+                  )}
+                </li>
+                <li>
+                  {profileLoading ? (
+                    <div className="flex items-start gap-3 justify-center sm:justify-start">
                       <MapPin className="w-5 h-5 flex-shrink-0 text-gray-400 dark:text-gray-500 mt-0.5" />
                       <div className="space-y-1.5">
                         <div className="h-4 w-36 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
@@ -362,7 +383,7 @@ export default function FooterAesthetics() {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-start gap-3 text-gray-700 dark:text-gray-400 text-sm">
+                    <div className="flex items-start gap-3 justify-center sm:justify-start text-gray-700 dark:text-gray-400 text-sm">
                       <MapPin className="w-5 h-5 flex-shrink-0 text-gray-600 dark:text-gray-500 mt-0.5" />
                       <div>
                         {contactAddress.split(',').map((part: string, index: number) => (
@@ -376,7 +397,7 @@ export default function FooterAesthetics() {
 
               {/* Business Hours */}
               <div className="pt-4 border-t border-gray-400 dark:border-gray-700">
-                <div className="flex items-center gap-2 mb-3">
+                <div className="flex items-center gap-2 mb-3 justify-center sm:justify-start">
                   <Clock className="w-5 h-5 text-gray-700 dark:text-gray-400" />
                   <h4 className="font-semibold text-gray-900 dark:text-white text-sm">Opening Hours</h4>
                 </div>
@@ -387,9 +408,9 @@ export default function FooterAesthetics() {
                     <li className="text-gray-500 dark:text-gray-500">No hours available</li>
                   ) : (
                     groupedHours.map((group, index) => (
-                      <li key={index} className="flex justify-between">
+                      <li key={index} className="flex justify-between gap-4">
                         <span>{group.label}:</span>
-                        <span className={`font-medium ${group.isOpen ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-400'}`}>
+                        <span className={`font-medium flex-shrink-0 ${group.isOpen ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-400'}`}>
                           {group.hours}
                         </span>
                       </li>
@@ -400,12 +421,12 @@ export default function FooterAesthetics() {
             </div>
 
             {/* Column 4: Social & Newsletter */}
-            <div className="space-y-6">
+            <div className="space-y-6 text-center sm:text-left">
               <div>
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
                   Follow Us
                 </h3>
-                <div className="flex gap-3 flex-wrap">
+                <div className="flex gap-3 flex-wrap justify-center sm:justify-start">
                   {socialLinks.instagram && (
                     <a
                       href={socialLinks.instagram}

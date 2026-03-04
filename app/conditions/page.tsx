@@ -141,7 +141,7 @@ function ConditionsPageContent() {
           {(onClose) => (
             <>
               <ModalHeader className="bg-egp-green dark:bg-egp-green-dark text-white flex flex-col gap-2">
-                <h2 className="text-3xl font-bold">{condition.title}</h2>
+                <h2 className="text-xl sm:text-2xl font-bold">{condition.title}</h2>
               <div className="flex items-center gap-4 text-white/90">
                   <Chip 
                     variant="flat"
@@ -226,30 +226,30 @@ function ConditionsPageContent() {
 
   return (
     <div className="min-h-screen bg-[#f5f1e9] dark:bg-gray-900">
-      <div className={`${layout.containerWide} pt-20 sm:pt-24 pb-10 sm:pb-16`}>
+      <div className={`${layout.containerWide} pt-20 sm:pt-24 pb-8 sm:pb-12`}>
         {/* Header - Back on left, Conditions We Treat centered */}
-        <div className="relative flex items-center justify-between mb-4 sm:mb-6">
+        <div className="relative flex items-center justify-between mb-3 sm:mb-4">
           <Link
             href="/"
             className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#b5ad9d] transition-colors flex-shrink-0 z-10"
           >
-            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+            <ArrowLeft className="w-4 h-4" />
             <span className="text-sm font-medium">Back</span>
           </Link>
-          <h1 className={`absolute left-1/2 -translate-x-1/2 text-lg sm:text-2xl md:text-3xl font-bold ${textColors.heading} font-playfair`}>
+          <h1 className={`absolute left-1/2 -translate-x-1/2 text-base sm:text-xl md:text-2xl font-bold ${textColors.heading} font-playfair`}>
             Conditions We Treat
           </h1>
           <div className="w-14 sm:w-20" aria-hidden />
         </div>
 
-        <div className="text-center mb-12">
-          <p className={`${typography.lead} font-montserrat font-light max-w-3xl mx-auto`}>
+        <div className="text-center mb-6 sm:mb-8">
+          <p className={`${typography.lead} font-montserrat font-light max-w-2xl mx-auto text-sm sm:text-base`}>
             Discover our comprehensive range of treatments for various aesthetic concerns and conditions
           </p>
         </div>
 
         {/* Filters and Search */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-5 mb-4 sm:mb-6">
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
             {/* Search */}
             <div className="flex-1 max-w-md">
@@ -279,8 +279,8 @@ function ConditionsPageContent() {
 
           {/* Filter Options */}
           {showFilters && (
-            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {/* Category Filter */}
                 <Select
                   label="Category"
@@ -301,7 +301,7 @@ function ConditionsPageContent() {
         </div>
 
         {/* Results Count */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4">
           <p className={`${typography.small}`}>
             Showing {filteredConditions.length} of {Array.isArray(conditions) ? conditions.length : 0} conditions
           </p>
@@ -342,28 +342,28 @@ function ConditionsPageContent() {
             </Button>
           </div>
         ) : (
-          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
+          <div className="grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
             {paginatedConditions.map((condition) => (
               <Card
                 key={condition.id}
                 className="h-full"
-                shadow="md"
+                shadow="sm"
               >
-                <CardHeader className="bg-egp-beige-lighter dark:bg-egp-green-dark px-2.5 sm:px-3 py-2 sm:py-2.5 border-b border-egp-beige-dark/60 dark:border-egp-green relative">
-                  {/* Category Badge - Top Left (matches services) */}
-                  <div className="absolute top-1 left-1">
+                <CardHeader className="bg-egp-beige-lighter dark:bg-egp-green-dark px-2 sm:px-2.5 py-2 sm:py-2.5 border-b border-egp-beige-dark/60 dark:border-egp-green flex flex-col items-center text-center">
+                  {/* Category Badge - Centered */}
+                  <div className="flex justify-center mb-1.5">
                     <Chip
                       size="sm"
-                      className="bg-egp-green text-white text-[9px]"
+                      className="bg-egp-green text-white text-[8px] h-5"
                       variant="flat"
                     >
                       {getCategoryDisplayName(condition.category)}
                     </Chip>
                   </div>
 
-                  {/* Title and Price - Centered (matches services layout) */}
-                  <div className="text-center pt-4 pb-1.5 w-full">
-                    <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-tight line-clamp-2 mb-1">
+                  {/* Title and Price - Centered */}
+                  <div className="w-full">
+                    <h3 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white leading-tight line-clamp-2 mb-0.5">
                       {condition.title}
                     </h3>
                     {(() => {
@@ -375,7 +375,7 @@ function ConditionsPageContent() {
                             price={priceInfo.price}
                             originalPrice={priceInfo.originalPrice}
                             discountPercentage={priceInfo.discountPercentage}
-                            size="md"
+                            size="sm"
                             layout="stack"
                             align="center"
                           />
@@ -386,24 +386,24 @@ function ConditionsPageContent() {
                 </CardHeader>
 
                 <CardBody
-                  className="p-3 flex flex-col flex-1 cursor-pointer"
+                  className="p-2 sm:p-2.5 flex flex-col flex-1 cursor-pointer min-h-0 items-center text-center"
                   onClick={() => setSelectedCondition(condition.slug)}
                 >
                   {/* Description */}
                   {condition.description && (
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-2.5 leading-relaxed line-clamp-2">
+                    <p className="text-[11px] text-gray-600 dark:text-gray-400 mb-2 leading-snug line-clamp-2 w-full">
                       {condition.description}
                     </p>
                   )}
 
-                  {/* Buttons - same as services */}
-                  <div className="flex gap-1.5 mt-auto" onClick={(e) => e.stopPropagation()}>
+                  {/* Buttons */}
+                  <div className="flex gap-1 mt-auto pt-1 justify-center w-full" onClick={(e) => e.stopPropagation()}>
                     <Button
                       onPress={() => setSelectedCondition(condition.slug)}
                       variant="bordered"
                       size="sm"
-                      className="flex-1 border-egp-green text-egp-green dark:text-white dark:border-egp-green"
-                      startContent={<Info className="w-3 h-3" />}
+                      className="flex-1 min-w-0 border-egp-green text-egp-green dark:text-white dark:border-egp-green text-xs h-8"
+                      startContent={<Info className="w-2.5 h-2.5" />}
                     >
                       Details
                     </Button>
@@ -417,8 +417,8 @@ function ConditionsPageContent() {
                     >
                       <Button
                         size="sm"
-                        className="flex-1 w-full bg-egp-green text-white"
-                        startContent={<Plus className="w-3 h-3" />}
+                        className="flex-1 w-full min-w-0 bg-egp-green text-white text-xs h-8"
+                        startContent={<Plus className="w-2.5 h-2.5" />}
                       >
                         Book
                       </Button>
@@ -432,7 +432,7 @@ function ConditionsPageContent() {
 
         {/* Pagination - matches services */}
         {totalPages > 1 && (
-          <div className="flex justify-center items-center gap-2 mt-8">
+          <div className="flex justify-center items-center gap-2 mt-6">
             <Button
               onPress={() => setCurrentPage(Math.max(1, currentPage - 1))}
               isDisabled={currentPage === 1}

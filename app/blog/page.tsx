@@ -49,9 +49,9 @@ export default function BlogPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-      <div className={`${layout.container} pt-20 sm:pt-24 pb-10 sm:pb-16`}>
-        {/* Header - Back on left, Our Blog centered (like Find Us) */}
-        <div className="relative flex items-center justify-between mb-4 sm:mb-6">
+      <div className={`${layout.container} pt-20 sm:pt-24 pb-8 sm:pb-12`}>
+        {/* Header - Back on left, Our Blog centered */}
+        <div className="relative flex items-center justify-between mb-3 sm:mb-4">
           <Button
             as={Link}
             href="/"
@@ -62,13 +62,13 @@ export default function BlogPage() {
           >
             Back
           </Button>
-          <h1 className={`absolute left-1/2 -translate-x-1/2 text-lg sm:text-2xl md:text-3xl font-bold ${textColors.heading} font-playfair`}>
+          <h1 className={`absolute left-1/2 -translate-x-1/2 text-base sm:text-xl md:text-2xl font-bold ${textColors.heading} font-playfair`}>
             Our Blog
           </h1>
           <div className="w-14 sm:w-16" aria-hidden />
         </div>
 
-        <p className={`${typography.lead} font-montserrat font-light max-w-3xl mx-auto text-center text-sm sm:text-base mb-6 sm:mb-12`}>
+        <p className={`${typography.lead} font-montserrat font-light max-w-2xl mx-auto text-center text-xs sm:text-sm mb-4 sm:mb-8`}>
           Stay informed about the latest in aesthetic treatments, skincare tips, and beauty insights.
         </p>
 
@@ -84,49 +84,49 @@ export default function BlogPage() {
             </CardBody>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
             {featuredPosts.map((post) => (
               <Link key={post.id} href={`/blog/${post.slug}`}>
-                <Card className="group relative flex h-full flex-col md:col-span-2 xl:col-span-3" shadow="lg" isPressable>
-                  <CardBody className="relative z-10 flex flex-col gap-2 sm:gap-6 p-4 sm:p-9 md:p-12">
-                    <div className="absolute right-3 top-3 sm:right-6 sm:top-6 z-20">
+                <Card className="group relative flex h-full flex-col md:col-span-2" shadow="md" isPressable>
+                  <CardBody className="relative z-10 flex flex-col gap-2 sm:gap-4 p-4 sm:p-6 md:p-8">
+                    <div className="absolute right-3 top-3 sm:right-4 sm:top-4 z-20">
                       <Chip
                         size="sm"
                         variant="flat"
-                        className="border-2 border-divider bg-background shadow-md backdrop-blur transition-all duration-300 group-hover:bg-[#9d9585] group-hover:text-white group-hover:border-[#9d9585]"
+                        className="border border-divider bg-background shadow-sm backdrop-blur transition-all duration-300 group-hover:bg-[#9d9585] group-hover:text-white group-hover:border-[#9d9585]"
                         endContent={<ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />}
                       >
                         <span className="hidden sm:inline">Read article</span>
                         <span className="sm:hidden">Read</span>
                       </Chip>
-                  </div>
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
                       <Chip
                         size="sm"
                         variant="flat"
-                        className="bg-[#f5f1e9] dark:bg-gray-800/40 text-[#6b5f4b] dark:text-[#c9c1b0]"
+                        className="bg-[#f5f1e9] dark:bg-gray-800/40 text-[#6b5f4b] dark:text-[#c9c1b0] text-xs"
                       >
                         {post.category}
                       </Chip>
                       <Chip
                         size="sm"
                         color="primary"
-                        className="bg-[#9d9585] text-white"
+                        className="bg-[#9d9585] text-white text-xs"
                       >
                         Featured
                       </Chip>
                     </div>
                     <div>
-                      <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-foreground transition-colors duration-300 group-hover:text-[#7b715f]">
+                      <h2 className="text-base sm:text-xl md:text-2xl font-bold text-foreground transition-colors duration-300 group-hover:text-[#7b715f]">
                         {post.title}
                       </h2>
                       {post.excerpt && (
-                        <p className="mt-2 sm:mt-4 text-sm sm:text-lg leading-relaxed text-default-600">
-                          {truncateText(post.excerpt, 220)}
+                        <p className="mt-1.5 sm:mt-2 text-sm leading-relaxed text-default-600">
+                          {truncateText(post.excerpt, 200)}
                         </p>
                       )}
                     </div>
-                    <div className="flex flex-wrap items-center gap-6 text-sm text-default-500">
+                    <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-default-500">
                       <time>
                         {post.published_at
                           ? new Date(post.published_at).toLocaleDateString('en-GB', {
@@ -149,35 +149,35 @@ export default function BlogPage() {
 
             {regularPosts.map((post) => (
               <Link key={post.id} href={`/blog/${post.slug}`}>
-                <Card className="group relative flex h-full flex-col" shadow="lg" isPressable>
-                  <CardBody className="relative z-10 flex flex-1 flex-col p-4 sm:p-8">
-                    <div className="absolute right-3 top-3 sm:right-6 sm:top-6 z-20">
+                <Card className="group relative flex h-full flex-col" shadow="md" isPressable>
+                  <CardBody className="relative z-10 flex flex-1 flex-col p-4 sm:p-5">
+                    <div className="absolute right-3 top-3 sm:right-4 sm:top-4 z-20">
                       <Chip
                         size="sm"
                         variant="flat"
-                        className="border-2 border-divider bg-background shadow-md backdrop-blur transition-all duration-300 group-hover:bg-[#9d9585] group-hover:text-white group-hover:border-[#9d9585]"
+                        className="border border-divider bg-background shadow-sm backdrop-blur transition-all duration-300 group-hover:bg-[#9d9585] group-hover:text-white group-hover:border-[#9d9585]"
                         endContent={<ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />}
                       >
                         <span className="hidden sm:inline">Read article</span>
                         <span className="sm:hidden">Read</span>
                       </Chip>
-                  </div>
+                    </div>
                     <Chip
                       size="sm"
                       variant="flat"
-                      className="mb-3 sm:mb-4 w-fit bg-[#f5f1e9] dark:bg-gray-800/40 text-[#6b5f4b] dark:text-[#c9c1b0] uppercase tracking-wide"
+                      className="mb-2 sm:mb-3 w-fit bg-[#f5f1e9] dark:bg-gray-800/40 text-[#6b5f4b] dark:text-[#c9c1b0] uppercase tracking-wide text-xs"
                     >
                       {post.category}
                     </Chip>
-                    <h2 className="text-lg sm:text-2xl font-semibold text-foreground transition-colors duration-300 group-hover:text-[#7b715f]">
+                    <h2 className="text-base sm:text-lg font-semibold text-foreground transition-colors duration-300 group-hover:text-[#7b715f]">
                       {post.title}
                     </h2>
                     {post.excerpt && (
-                      <p className="mt-2 sm:mt-4 flex-1 text-sm sm:text-base leading-relaxed text-default-600">
-                        {truncateText(post.excerpt, 160)}
+                      <p className="mt-1.5 sm:mt-2 flex-1 text-sm leading-relaxed text-default-600 line-clamp-3">
+                        {truncateText(post.excerpt, 140)}
                       </p>
                     )}
-                    <div className="mt-4 sm:mt-6 flex items-center justify-between text-xs sm:text-sm text-default-500">
+                    <div className="mt-3 sm:mt-4 flex items-center justify-between text-xs text-default-500">
                       <time>
                         {post.published_at
                           ? new Date(post.published_at).toLocaleDateString('en-GB', {
@@ -201,8 +201,8 @@ export default function BlogPage() {
         )}
 
         {posts.length > 0 && (
-          <div className="mt-12 text-center">
-            <p className="text-gray-600 dark:text-gray-300">
+          <div className="mt-8 text-center">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               More articles coming soon! Subscribe to our newsletter for updates.
             </p>
           </div>

@@ -102,7 +102,13 @@ html {
   @apply from-rose-500 to-pink-600;
 }
 
-/* Elegant scrollbar for menu lists */
+/* Thin scrollbar for nav menu lists – minimal width so more text is visible */
+.menu-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(157, 149, 133, 0.4) transparent;
+  padding-right: 2px;
+}
+
 .menu-scroll::-webkit-scrollbar {
   width: 4px;
 }
@@ -112,18 +118,12 @@ html {
 }
 
 .menu-scroll::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, rgba(244, 63, 94, 0.3), rgba(236, 72, 153, 0.3));
-  border-radius: 2px;
+  background: rgba(157, 149, 133, 0.35);
+  border-radius: 3px;
 }
 
 .menu-scroll::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, rgba(244, 63, 94, 0.5), rgba(236, 72, 153, 0.5));
-}
-
-/* Firefox scrollbar for menu lists */
-.menu-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(244, 63, 94, 0.3) transparent;
+  background: rgba(157, 149, 133, 0.55);
 }
 
 /* Custom scrollbar for description areas */
