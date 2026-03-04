@@ -84,51 +84,43 @@ export function validateImageFile(file: File, maxSizeMB: number = 10): ImageVali
 }
 
 /**
- * Convert HEIC file to JPEG using heic2any library
+ * Convert HEIC file to JPEG in the browser.
+ * Uses heic-to first (lightweight, modern), then heic2any as fallback.
  */
 export async function convertHeicToJpeg(file: File): Promise<File | null> {
+  if (typeof window === 'undefined') {
+    console.warn('HEIC conversion requires browser environment');
+    return null;
+  }
+
+  const baseName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
+
   try {
-    // Check if we're in browser environment
-    if (typeof window === 'undefined') {
-      console.warn('heic2any requires browser environment');
+    const { heicTo } = await import('heic-to');
+    const convertedBlob = await heicTo({
+      blob: file,
+      type: 'image/jpeg',
+      quality: 0.8,
+    });
+    const convertedFile = new File([convertedBlob], baseName, { type: 'image/jpeg' });
+    console.log('HEIC conversion successful (heic-to):', file.name, '→', convertedFile.name);
+    return convertedFile;
+  } catch (e1) {
+    try {
+      const heic2any = (await import('heic2any')).default;
+      const convertedBlob = await heic2any({
+        blob: file,
+        toType: 'image/jpeg',
+        quality: 0.8,
+      }) as Blob;
+      const convertedFile = new File([convertedBlob], baseName, { type: 'image/jpeg' });
+      console.log('HEIC conversion successful (heic2any):', file.name, '→', convertedFile.name);
+      return convertedFile;
+    } catch (e2) {
+      const msg = e1 instanceof Error ? e1.message : String(e1);
+      console.warn('HEIC conversion failed (heic-to and heic2any):', msg);
       return null;
     }
-    
-    console.log('Converting HEIC file to JPEG:', file.name);
-    
-    // Dynamic import to avoid server-side issues
-    const heic2any = (await import('heic2any')).default;
-    
-    const convertedBlob = await heic2any({
-      blob: file,
-      toType: 'image/jpeg',
-      quality: 0.8
-    }) as Blob; // Explicitly type as Blob
-    
-    // Create new file with converted data
-    const convertedFile = new File([convertedBlob], 
-      file.name.replace(/\.(heic|heif)$/i, '.jpg'), 
-      { type: 'image/jpeg' }
-    );
-    
-    console.log('HEIC conversion successful:', {
-      original: file.name,
-      converted: convertedFile.name,
-      originalSize: file.size,
-      convertedSize: convertedFile.size
-    });
-    
-    return convertedFile;
-  } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : typeof error === "string"
-        ? error
-        : "Unknown HEIC conversion error";
-
-    console.warn("Error converting HEIC to JPEG:", message);
-    return null;
   }
 }
 
@@ -234,7 +226,9 @@ export async function processImageFile(
       processedFile = convertedFile;
       wasConverted = true;
     } else {
-      console.warn('HEIC conversion failed, using original file:', file.name);
+      throw new Error(
+        'HEIC conversion failed in this browser. Please use Chrome or Firefox, or convert the image to JPEG/PNG before uploading.'
+      );
     }
   }
   

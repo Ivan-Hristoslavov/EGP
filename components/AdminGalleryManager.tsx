@@ -137,21 +137,20 @@ export function AdminGalleryManager({
       setImageErrors((prev) => ({ ...prev, [type]: undefined }));
       setFieldErrors((prev) => ({ ...prev, [type]: false }));
 
-      // Set original file as selected image (full quality, single file)
+      // Use processed file (HEIC converted to JPEG in browser when possible)
+      const fileToUse = validation.file;
       if (type === "before") {
-        // Revoke previous object URL if it exists
         if (beforeImagePreview && beforeImagePreview.startsWith('blob:')) {
           URL.revokeObjectURL(beforeImagePreview);
         }
-        setBeforeImage(file);
-        setBeforeImagePreview(URL.createObjectURL(file));
+        setBeforeImage(fileToUse);
+        setBeforeImagePreview(URL.createObjectURL(fileToUse));
       } else {
-        // Revoke previous object URL if it exists
         if (afterImagePreview && afterImagePreview.startsWith('blob:')) {
           URL.revokeObjectURL(afterImagePreview);
         }
-        setAfterImage(file);
-        setAfterImagePreview(URL.createObjectURL(file));
+        setAfterImage(fileToUse);
+        setAfterImagePreview(URL.createObjectURL(fileToUse));
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to process image";

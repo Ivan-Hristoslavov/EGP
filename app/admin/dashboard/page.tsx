@@ -294,7 +294,7 @@ export default function DashboardPage() {
                 ) : (
               <div className="space-y-3">
                     {todayBookings.map((booking) => (
-                  <Card key={booking.id} isPressable className="border border-divider hover:shadow-md transition-shadow">
+                  <Card key={booking.id} className="border border-divider hover:shadow-md transition-shadow">
                     <CardBody className="p-3 sm:p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 flex-1">
