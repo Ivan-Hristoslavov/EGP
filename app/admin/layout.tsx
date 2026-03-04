@@ -169,31 +169,48 @@ export default function AdminLayout({
     );
   }
 
-  // Show loading state
+  // Show loading state: skeleton that mirrors admin layout for a smooth transition
   if (isLoading) {
     return (
       <div
-        className="min-h-screen flex items-center justify-center bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-800 transition-colors duration-500"
+        className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-800 transition-colors duration-500 flex"
         suppressHydrationWarning
       >
-        <div className="text-center">
-          <div className="relative mb-6">
-            <div className="w-20 h-20 mx-auto">
-              <div className="absolute inset-0 rounded-full border-4 border-rose-200 dark:border-rose-800"></div>
-              <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-rose-500 dark:border-t-rose-400 animate-spin"></div>
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-rose-500 dark:bg-rose-400 rounded-full animate-pulse"></div>
+        {/* Skeleton sidebar */}
+        <div className="hidden lg:flex w-64 flex-col flex-shrink-0 bg-white dark:bg-gray-800 shadow-xl animate-pulse">
+          <div className="h-16 px-6 bg-gradient-to-r from-rose-600/80 to-purple-600/80 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white/20" />
+            <div className="flex-1 space-y-1">
+              <div className="h-4 w-24 bg-white/30 rounded" />
+              <div className="h-3 w-16 bg-white/20 rounded" />
             </div>
           </div>
-          <div className="space-y-2">
-            <p className="text-gray-600 dark:text-gray-300 font-medium transition-colors duration-300">
-              Loading Admin Panel
-            </p>
-            <div className="flex justify-center space-x-1">
-              <div className="w-2 h-2 bg-rose-500 dark:bg-rose-400 rounded-full animate-bounce"></div>
-              <div className="w-2 h-2 bg-pink-500 dark:bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-              <div className="w-2 h-2 bg-purple-500 dark:bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+          <nav className="flex-1 px-4 py-6 space-y-2">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+              <div key={i} className="h-10 rounded-lg bg-gray-200 dark:bg-gray-700" />
+            ))}
+          </nav>
+        </div>
+        {/* Skeleton main */}
+        <div className="flex-1 flex flex-col min-w-0">
+          <header className="h-16 bg-white/80 dark:bg-gray-800/80 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 sm:px-6 animate-pulse">
+            <div className="lg:hidden w-10 h-10 rounded-md bg-gray-200 dark:bg-gray-700" />
+            <div className="ml-4 h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded" />
+          </header>
+          <main className="flex-1 p-4 lg:p-6">
+            <div className="flex flex-col items-center justify-center min-h-[360px] gap-6">
+              <div className="relative">
+                <div className="w-14 h-14 rounded-full border-4 border-rose-200 dark:border-rose-800" />
+                <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-rose-500 dark:border-t-rose-400 animate-spin" />
+              </div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Loading Admin Panel</p>
+              <div className="flex gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-rose-500 animate-bounce" style={{ animationDelay: "0ms" }} />
+                <span className="w-2 h-2 rounded-full bg-pink-500 animate-bounce" style={{ animationDelay: "120ms" }} />
+                <span className="w-2 h-2 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: "240ms" }} />
+              </div>
             </div>
-          </div>
+          </main>
         </div>
       </div>
     );
@@ -296,18 +313,6 @@ export default function AdminLayout({
 
         {/* User section */}
         <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="w-10 h-10 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-semibold text-sm">AU</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                {/* Safe for hydration: This should be handled by the <AdminProfileData> */}
-                <AdminProfileData type="name" fallback="Admin User" />
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Administrator</p>
-            </div>
-          </div>
           <button
             className="w-full flex items-center px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
             onClick={async () => {

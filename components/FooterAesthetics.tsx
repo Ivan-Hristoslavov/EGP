@@ -208,325 +208,204 @@ export default function FooterAesthetics() {
   return (
     <footer className="relative bg-[#ddd5c3] dark:bg-gray-900 text-gray-900 dark:text-gray-300 border-t border-gray-200 dark:border-gray-700">
       <div className="relative">
-        {/* Main Footer Content */}
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-            
-            {/* Column 1: Brand & Description */}
-            <div className="space-y-4 sm:space-y-6">
-              <div>
-                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  {siteConfig.shortName}
-                </h2>
-                <p className="text-sm text-gray-700 dark:text-gray-400 font-semibold">
-                  {siteConfig.tagline}
-                </p>
-              </div>
-              
-              <p className="text-gray-700 dark:text-gray-400 text-sm leading-relaxed">
-                Premier aesthetic clinic in London offering advanced facial treatments, 
-                anti-wrinkle injections, dermal fillers, and body contouring.
+        {/* Main Footer Content - 6 sections: EGP, Contact Us, Opening Hours, Quick Links, Follow Us, Legal */}
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-6">
+            {/* 1. EGP (site name, tagline, description from config) - first in order */}
+            <div className="space-y-3 order-1 pb-6 border-b border-gray-300 dark:border-gray-600 sm:border-b-0 sm:pb-0">
+              <h2 className="text-base font-bold text-gray-900 dark:text-white text-center">
+                {siteConfig.shortName}
+              </h2>
+              <p className="text-xs text-gray-700 dark:text-gray-400 font-semibold text-center">
+                {siteConfig.tagline}
               </p>
-
-              {/* Trust Badges */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-700">
-                  <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Certified</span>
+              <p className="text-xs text-gray-700 dark:text-gray-400 leading-relaxed text-left">
+                {siteConfig.description}
+              </p>
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <div className="flex items-center gap-1.5 px-2 py-1.5 bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-700">
+                  <div className="w-3 h-3 bg-green-500 rounded-full shrink-0" />
+                  <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Certified</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-700">
-                  <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
-                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Insured</span>
+                <div className="flex items-center gap-1.5 px-2 py-1.5 bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-700">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full shrink-0" />
+                  <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Insured</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-700">
-                  <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
-                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Expert</span>
+                <div className="flex items-center gap-1.5 px-2 py-1.5 bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-700">
+                  <div className="w-3 h-3 bg-purple-500 rounded-full shrink-0" />
+                  <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Expert</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-700">
-                  <div className="w-4 h-4 bg-amber-500 rounded-full"></div>
-                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">5★ Rated</span>
+                <div className="flex items-center gap-1.5 px-2 py-1.5 bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-700">
+                  <div className="w-3 h-3 bg-amber-500 rounded-full shrink-0" />
+                  <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">5★ Rated</span>
                 </div>
               </div>
             </div>
 
-            {/* Column 2: Quick Links */}
-            <div className="space-y-4 text-center sm:text-left">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                Quick Links
-              </h3>
-              <ul className="space-y-2.5">
-                <li>
-                  <Link 
-                    href="/book" 
-                    className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
-                  >
-                    Book Appointment
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    href="/services" 
-                    className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
-                  >
-                    Our Services
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    href="/conditions" 
-                    className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
-                  >
-                    Conditions We Treat
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    href="/about" 
-                    className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
-                  >
-                    About Us
-                  </Link>
-                </li>
-                {isPressPageEnabled && (
-                  <li>
-                    <Link 
-                      href="/press" 
-                      className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
-                    >
-                      Awards & Press
-                    </Link>
-                  </li>
-                )}
-                <li>
-                  <Link 
-                    href="/blog" 
-                    className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
-                  >
-                    Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    href="/find-us" 
-                    className="text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm"
-                  >
-                    Find Us
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Column 3: Contact Info */}
-            <div className="space-y-4 text-center sm:text-left">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+            {/* 2. Contact Us - second */}
+            <div className="space-y-3 order-2 pb-6 border-b border-gray-300 dark:border-gray-600 sm:border-b-0 sm:pb-0">
+              <h3 className="text-base font-bold text-gray-900 dark:text-white text-center">
                 Contact Us
               </h3>
-              <ul className="space-y-3">
+              <ul className="grid grid-cols-2 gap-x-3 gap-y-2.5 text-left">
                 <li>
                   {profileLoading ? (
-                    <div className="flex items-center gap-3 justify-center sm:justify-start">
-                      <Phone className="w-5 h-5 flex-shrink-0 text-gray-400 dark:text-gray-500" />
-                      <div className="h-4 w-32 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+                    <div className="flex items-center gap-2">
+                      <Phone className="w-3.5 h-3.5 flex-shrink-0 text-gray-400" />
+                      <div className="h-3 w-20 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
                     </div>
                   ) : (
-                    <a 
-                      href={`tel:${contactPhone}`}
-                      className="flex items-center gap-3 justify-center sm:justify-start text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm group"
-                    >
-                      <Phone className="w-5 h-5 flex-shrink-0 text-gray-600 dark:text-gray-500" />
-                      <span>{contactPhone}</span>
+                    <a href={`tel:${contactPhone}`} className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">
+                      <Phone className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span className="break-all">{contactPhone}</span>
                     </a>
                   )}
                 </li>
                 <li>
                   {profileLoading ? (
-                    <div className="flex items-center gap-3 justify-center sm:justify-start">
-                      <Mail className="w-5 h-5 flex-shrink-0 text-gray-400 dark:text-gray-500" />
-                      <div className="h-4 w-40 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+                    <div className="flex items-center gap-2">
+                      <Mail className="w-3.5 h-3.5 flex-shrink-0 text-gray-400" />
+                      <div className="h-3 w-24 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
                     </div>
                   ) : (
-                    <a 
-                      href={`mailto:${contactEmail}`}
-                      className="flex items-center gap-3 justify-center sm:justify-start text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm group"
-                    >
-                      <Mail className="w-5 h-5 flex-shrink-0 text-gray-600 dark:text-gray-500" />
-                      <span>{contactEmail}</span>
+                    <a href={`mailto:${contactEmail}`} className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">
+                      <Mail className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span className="break-all">{contactEmail}</span>
                     </a>
                   )}
                 </li>
                 <li>
                   {profileLoading ? (
-                    <div className="flex items-center gap-3 justify-center sm:justify-start">
-                      <MessageCircle className="w-5 h-5 flex-shrink-0 text-gray-400 dark:text-gray-500" />
-                      <div className="h-4 w-32 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+                    <div className="flex items-center gap-2">
+                      <MessageCircle className="w-3.5 h-3.5 flex-shrink-0 text-gray-400" />
+                      <div className="h-3 w-16 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
                     </div>
                   ) : (
-                    <a 
-                      href={`https://wa.me/${contactWhatsapp.replace(/\s/g, '')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 justify-center sm:justify-start text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors text-sm group"
-                      aria-label="WhatsApp"
-                    >
-                      <MessageCircle className="w-5 h-5 flex-shrink-0 text-gray-600 dark:text-gray-500" />
+                    <a href={`https://wa.me/${contactWhatsapp.replace(/\s/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]" aria-label="WhatsApp">
+                      <MessageCircle className="w-3.5 h-3.5 flex-shrink-0" />
                       <span>WhatsApp</span>
                     </a>
                   )}
                 </li>
-                <li>
+                <li className="col-span-2">
                   {profileLoading ? (
-                    <div className="flex items-start gap-3 justify-center sm:justify-start">
-                      <MapPin className="w-5 h-5 flex-shrink-0 text-gray-400 dark:text-gray-500 mt-0.5" />
-                      <div className="space-y-1.5">
-                        <div className="h-4 w-36 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
-                        <div className="h-4 w-28 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+                    <div className="flex items-start gap-2">
+                      <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-gray-400 mt-0.5" />
+                      <div className="space-y-1">
+                        <div className="h-3 w-28 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
+                        <div className="h-3 w-20 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-start gap-3 justify-center sm:justify-start text-gray-700 dark:text-gray-400 text-sm">
-                      <MapPin className="w-5 h-5 flex-shrink-0 text-gray-600 dark:text-gray-500 mt-0.5" />
-                      <div>
-                        {contactAddress.split(',').map((part: string, index: number) => (
-                          <div key={index}>{part.trim()}</div>
+                    <div className="flex items-start gap-2 text-left text-xs text-gray-700 dark:text-gray-400">
+                      <MapPin className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        {contactAddress.split(',').map((part: string, i: number) => (
+                          <div key={i}>{part.trim()}</div>
                         ))}
                       </div>
                     </div>
                   )}
                 </li>
               </ul>
+            </div>
 
-              {/* Business Hours */}
-              <div className="pt-4 border-t border-gray-400 dark:border-gray-700">
-                <div className="flex items-center gap-2 mb-3 justify-center sm:justify-start">
-                  <Clock className="w-5 h-5 text-gray-700 dark:text-gray-400" />
-                  <h4 className="font-semibold text-gray-900 dark:text-white text-sm">Opening Hours</h4>
-                </div>
-                <ul className="space-y-1.5 text-xs text-gray-700 dark:text-gray-400">
-                  {loadingHours ? (
-                    <li className="text-gray-500 dark:text-gray-500">Loading hours...</li>
-                  ) : groupedHours.length === 0 ? (
-                    <li className="text-gray-500 dark:text-gray-500">No hours available</li>
-                  ) : (
-                    groupedHours.map((group, index) => (
-                      <li key={index} className="flex justify-between gap-4">
-                        <span>{group.label}:</span>
-                        <span className={`font-medium flex-shrink-0 ${group.isOpen ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-400'}`}>
-                          {group.hours}
-                        </span>
-                      </li>
-                    ))
-                  )}
-                </ul>
+            {/* 3. Opening Hours */}
+            <div className="space-y-3 order-3 pb-6 border-b border-gray-300 dark:border-gray-600 sm:border-b-0 sm:pb-0">
+              <h3 className="text-base font-bold text-gray-900 dark:text-white text-center">
+                Opening Hours
+              </h3>
+              <ul className="space-y-1 text-left text-xs text-gray-700 dark:text-gray-400">
+                {loadingHours ? (
+                  <li>Loading hours...</li>
+                ) : groupedHours.length === 0 ? (
+                  <li>No hours available</li>
+                ) : (
+                  groupedHours.map((group, i) => (
+                    <li key={i} className="flex justify-between gap-3">
+                      <span>{group.label}:</span>
+                      <span className={`font-medium shrink-0 ${group.isOpen ? 'text-gray-900 dark:text-white' : ''}`}>{group.hours}</span>
+                    </li>
+                  ))
+                )}
+              </ul>
+            </div>
+
+            {/* 4. Quick Links - evenly distributed */}
+            <div className="space-y-3 order-4 pb-6 border-b border-gray-300 dark:border-gray-600 sm:border-b-0 sm:pb-0">
+              <h3 className="text-base font-bold text-gray-900 dark:text-white text-center">
+                Quick Links
+              </h3>
+              <ul className="flex flex-wrap justify-evenly gap-x-4 gap-y-2.5 text-center sm:justify-between sm:gap-x-6">
+                <li><Link href="/book" className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">Book Appointment</Link></li>
+                <li><Link href="/services" className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">Our Services</Link></li>
+                <li><Link href="/conditions" className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">Conditions We Treat</Link></li>
+                <li><Link href="/about" className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">About Us</Link></li>
+                <li><Link href="/blog" className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">Blog</Link></li>
+                <li><Link href="/find-us" className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">Find Us</Link></li>
+                {isPressPageEnabled && (
+                  <li><Link href="/press" className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">Awards & Press</Link></li>
+                )}
+              </ul>
+            </div>
+
+            {/* 5. Follow Us */}
+            <div className="space-y-3 order-5 pb-6 border-b border-gray-300 dark:border-gray-600 sm:border-b-0 sm:pb-0">
+              <h3 className="text-base font-bold text-gray-900 dark:text-white text-center">
+                Follow Us
+              </h3>
+              <div className="flex gap-2 flex-wrap justify-center">
+                {socialLinks.instagram && (
+                  <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700" aria-label="Instagram">
+                    <Instagram className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+                  </a>
+                )}
+                {socialLinks.facebook && (
+                  <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700" aria-label="Facebook">
+                    <Facebook className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+                  </a>
+                )}
+                {socialLinks.youtube && (
+                  <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700" aria-label="YouTube">
+                    <Youtube className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+                  </a>
+                )}
+                {socialLinks.tiktok && (
+                  <a href={socialLinks.tiktok} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700" aria-label="TikTok">
+                    <svg className="w-4 h-4 text-gray-700 dark:text-gray-300" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+                    </svg>
+                  </a>
+                )}
               </div>
             </div>
 
-            {/* Column 4: Social & Newsletter */}
-            <div className="space-y-6 text-center sm:text-left">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                  Follow Us
-                </h3>
-                <div className="flex gap-3 flex-wrap justify-center sm:justify-start">
-                  {socialLinks.instagram && (
-                    <a
-                      href={socialLinks.instagram}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm hover:shadow"
-                      aria-label="Instagram"
-                    >
-                      <Instagram className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-                    </a>
-                  )}
-                  {socialLinks.facebook && (
-                    <a
-                      href={socialLinks.facebook}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm hover:shadow"
-                      aria-label="Facebook"
-                    >
-                      <Facebook className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-                    </a>
-                  )}
-                  {socialLinks.youtube && (
-                    <a
-                      href={socialLinks.youtube}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm hover:shadow"
-                      aria-label="YouTube"
-                    >
-                      <Youtube className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-                    </a>
-                  )}
-                  {socialLinks.tiktok && (
-                    <a
-                      href={socialLinks.tiktok}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm hover:shadow"
-                      aria-label="TikTok"
-                    >
-                      <svg
-                        className="w-6 h-6 text-gray-700 dark:text-gray-300"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                      >
-                        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
-                      </svg>
-                    </a>
-                  )}
-                </div>
-              </div>
-
-              {/* Legal Links */}
-              <div className="pt-4 border-t border-gray-400 dark:border-gray-700">
-                <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Legal</h4>
-                <ul className="space-y-2">
-                  <li>
-                    <Link 
-                      href="/terms" 
-                      className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors"
-                    >
-                      Terms & Conditions
-                    </Link>
-                  </li>
-                  <li>
-                    <Link 
-                      href="/privacy" 
-                      className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors"
-                    >
-                      Privacy Policy
-                    </Link>
-                  </li>
-                  <li>
-                    <Link 
-                      href="/gdpr" 
-                      className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors"
-                    >
-                      GDPR & Data Protection
-                    </Link>
-                  </li>
-                </ul>
-              </div>
+            {/* 6. Legal - last section before copyright */}
+            <div className="space-y-3 order-6">
+              <h3 className="text-base font-bold text-gray-900 dark:text-white text-center">
+                Legal
+              </h3>
+              <p className="text-xs text-gray-700 dark:text-gray-400 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center">
+                <Link href="/terms" className="hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">Terms</Link>
+                <span className="text-gray-400 dark:text-gray-500">·</span>
+                <Link href="/privacy" className="hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">Privacy</Link>
+                <span className="text-gray-400 dark:text-gray-500">·</span>
+                <Link href="/gdpr" className="hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">GDPR</Link>
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Bottom Bar */}
+        {/* Bottom Bar - copyright last on mobile */}
         <div className="border-t border-gray-400 dark:border-gray-700">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <p className="text-sm text-gray-700 dark:text-gray-400 text-center sm:text-left">
-                © {currentYear} <span className="font-bold text-gray-900 dark:text-white">{siteConfig.name}</span>. All rights reserved.
-              </p>
-              <p className="text-xs text-gray-600 dark:text-gray-500 text-center sm:text-right">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+              <p className="text-xs text-gray-600 dark:text-gray-500 text-center sm:order-2 sm:text-left order-1">
                 Made with{" "}
                 <Heart className="w-3 h-3 inline text-red-500 dark:text-red-400 animate-pulse" fill="currentColor" />{" "}
                 for beautiful transformations
               </p>
-              <p className="text-xs text-gray-600 dark:text-gray-500 text-center sm:text-right mt-2">
+              <p className="text-xs text-gray-600 dark:text-gray-500 text-center sm:order-3 sm:text-right order-2">
                 Developed by{" "}
                 <a
                   href="https://serenity.rapid-frame.co.uk/"
@@ -536,6 +415,9 @@ export default function FooterAesthetics() {
                 >
                   Serenity Web Studio
                 </a>
+              </p>
+              <p className="text-sm text-gray-700 dark:text-gray-400 text-center sm:order-1 sm:text-left order-3">
+                © {currentYear} <span className="font-bold text-gray-900 dark:text-white">{siteConfig.name}</span>. All rights reserved.
               </p>
             </div>
           </div>
