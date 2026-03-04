@@ -187,13 +187,10 @@ export default function FormBooking() {
     }
   };
 
-  // Normalize time to HH:mm
+  // Normalize time to HH:mm (handles "HH:mm", "HH:mm:SS", "HH:mm - HH:mm" formats)
   function normalizeTime(str: string) {
-    // Взимаме само първите 5 символа, ако е във формат HH:mm или HH:mm:SS
-    // Ако е във формат '18:00 - 19:00', взимаме първата част
     const time = str.split(" - ")[0].trim();
-    // Ако е HH:mm:SS -> HH:mm
-    if (time.length >= 5) return time.slice(0,5);
+    if (time.length >= 5) return time.slice(0, 5);
     return time;
   }
 
@@ -257,48 +254,12 @@ export default function FormBooking() {
       const selectedServiceData = services.find((s: BookingService) => s.id === data.service);
       const serviceName = selectedServiceData?.name || data.service;
 
-      // First, create or find customer
-      let customerId: string;
+      // Parse service price (e.g. "£80" or "From £50" → number)
+      const rawPrice = selectedServiceData?.price || "80";
+      const parsedPrice = parseFloat(rawPrice.replace(/[^0-9.]/g, "")) || 80;
 
-      // Check if customer already exists by email
-      const existingCustomerResponse = await fetch("/api/customers");
-      const existingCustomers = await existingCustomerResponse.json();
-      const existingCustomer = existingCustomers.find(
-        (c: any) => c.email === data.email,
-      );
-
-      if (existingCustomer) {
-        customerId = existingCustomer.id;
-      } else {
-        // Create new customer
-        const customerData = {
-          name: data.name,
-          email: data.email,
-          phone: data.phone,
-          address: data.address,
-          customer_type: "individual",
-        };
-
-        const customerResponse = await fetch("/api/customers", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(customerData),
-        });
-
-        if (!customerResponse.ok) {
-          const errorData = await customerResponse.json();
-          throw new Error(errorData.error || "Failed to create customer");
-        }
-
-        const newCustomer = await customerResponse.json();
-        customerId = newCustomer.id;
-      }
-
-      // Create booking
+      // Create booking - customer lookup/upsert is handled server-side
       const bookingData = {
-        customer_id: customerId,
         customer_name: data.name,
         customer_email: data.email,
         customer_phone: data.phone,
@@ -307,7 +268,7 @@ export default function FormBooking() {
         time: data.timeSlot.split(" - ")[0],
         status: "scheduled",
         payment_status: "pending",
-        amount: 80.0,
+        amount: parsedPrice,
         address: data.address,
         notes: data.description || null,
       };

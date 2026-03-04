@@ -5,8 +5,11 @@ import { getAdminContactInfo } from "@/lib/admin-profile";
 import { requireAdmin } from "@/lib/admin-auth";
 import { getEmailHead, EMAIL } from "@/lib/email-theme";
 
-// GET - Fetch bookings with pagination and filtering
+// GET - Fetch bookings with pagination and filtering (admin only)
 export async function GET(request: NextRequest) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
@@ -225,6 +228,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Server-side customer upsert: look up by email or use provided customer_id
+    let resolvedCustomerId: string | null = customer_id || null;
+    if (!resolvedCustomerId && customer_email) {
+      const { data: existingCustomer } = await supabaseAdmin
+        .from("customers")
+        .select("id")
+        .eq("email", customer_email)
+        .maybeSingle();
+
+      if (existingCustomer) {
+        resolvedCustomerId = existingCustomer.id;
+      } else if (customer_name) {
+        const nameParts = customer_name.trim().split(" ");
+        const first_name = nameParts[0] || "";
+        const last_name = nameParts.slice(1).join(" ") || "";
+        const { data: newCustomer } = await supabaseAdmin
+          .from("customers")
+          .insert([{ first_name, last_name, email: customer_email, phone: customer_phone || null, address: address || null }])
+          .select("id")
+          .single();
+        if (newCustomer) resolvedCustomerId = newCustomer.id;
+      }
+    }
+
     const parsedAmount = parseFloat(amount);
     const parsedTotalAmount = total_amount != null ? parseFloat(total_amount) : parsedAmount;
 
@@ -232,7 +259,7 @@ export async function POST(request: NextRequest) {
       .from("bookings")
       .insert([
         {
-          customer_id: customer_id || null,
+          customer_id: resolvedCustomerId,
           customer_name,
           customer_email: customer_email || null,
           customer_phone: customer_phone || null,

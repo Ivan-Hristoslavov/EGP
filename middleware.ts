@@ -12,7 +12,7 @@ export function middleware(request: NextRequest) {
     }
 
     const adminAuth = request.cookies.get("adminAuth");
-    if (!adminAuth || adminAuth.value !== "authenticated") {
+    if (!adminAuth?.value) {
       return NextResponse.redirect(new URL("/admin/login", request.url));
     }
   }
@@ -24,7 +24,7 @@ export function middleware(request: NextRequest) {
     }
 
     const adminAuth = request.cookies.get("adminAuth");
-    if (!adminAuth || adminAuth.value !== "authenticated") {
+    if (!adminAuth?.value) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
   }
