@@ -10,6 +10,7 @@ import { Select, SelectItem } from "@heroui/select";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 import { Textarea } from "@heroui/input";
 import { Spinner } from "@heroui/spinner";
+import { AdminPageLoading } from "@/components/AdminPageLoading";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/dropdown";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { formLayout } from "@/config/design-system";
@@ -675,11 +676,7 @@ export default function BookingsPage() {
   }, [showViewModal, selectedBooking?.id]);
 
   if (loading) {
-        return (
-      <div className="flex items-center justify-center h-64">
-        <Spinner size="lg" />
-    </div>
-  );
+    return <AdminPageLoading message="Loading bookings…" />;
   }
 
   return (

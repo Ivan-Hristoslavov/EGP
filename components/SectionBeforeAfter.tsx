@@ -10,9 +10,9 @@ import { Card, CardBody } from "@heroui/react";
 export default function SectionBeforeAfter() {
   const { galleryItems, loading, error } = useGallery();
 
-  // Filter items that have both before and after images and map to BeforeAfterItem format
+  // Filter items that have both before and after images, map to BeforeAfterItem format, featured first
   const beforeAfterItems = galleryItems
-    .filter(item => 
+    .filter(item =>
       item.before_image_url && item.after_image_url
     )
     .map(item => ({
@@ -26,10 +26,11 @@ export default function SectionBeforeAfter() {
       before_image_url: item.before_image_url,
       after_image_url: item.after_image_url,
       description: item.description || undefined,
-      // Full category/service objects for badges
+      is_featured: item.is_featured ?? false,
       categoryData: item.category,
       serviceData: item.service,
-    }));
+    }))
+    .sort((a, b) => (a.is_featured === b.is_featured ? 0 : a.is_featured ? -1 : 1));
 
   // If no gallery items, show placeholder
   if (loading) {

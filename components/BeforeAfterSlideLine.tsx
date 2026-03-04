@@ -16,6 +16,7 @@ interface BeforeAfterItem {
   before_image_url: string;
   after_image_url: string;
   description?: string;
+  is_featured?: boolean;
   categoryData?: {
     id: string;
     name: string;
@@ -311,6 +312,11 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
           <div className="text-center mt-3 space-y-2">
             {/* Badges Row */}
             <div className="flex flex-wrap justify-center gap-1.5 mb-2">
+              {current.is_featured && (
+                <span className="inline-flex items-center px-2 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 border border-amber-300/60 dark:border-amber-700/60 rounded-full text-[11px] font-semibold">
+                  Featured
+                </span>
+              )}
               {current.categoryData && (
                 <span className="inline-flex items-center px-2 py-1 bg-gradient-to-r from-rose-500/10 to-pink-500/10 dark:from-rose-500/20 dark:to-pink-500/20 text-rose-700 dark:text-rose-300 border border-rose-300/50 dark:border-rose-700/50 rounded-full text-[11px] font-semibold">
                   <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
