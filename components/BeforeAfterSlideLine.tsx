@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Move } from "lucide-react";
 import { badgeBackgroundClass } from "@/config/badge-styles";
-import { typography, textColors, layout } from "@/config/typography";
+import { textColors, layout } from "@/config/typography";
 
 interface BeforeAfterItem {
   id: string;
@@ -178,28 +178,28 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
   }
 
   return (
-    <section className={`py-12 sm:py-16 md:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 ${className}`}>
+    <section className={`py-8 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 ${className}`}>
       <div className={layout.container}>
         {/* Section Header */}
-        <div className="text-center mb-6 sm:mb-8 md:mb-10">
-          <div className={`inline-block px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-xs sm:text-sm font-semibold mb-3 sm:mb-4 text-[#6b5f4b] dark:text-gray-200`}>
+        <div className="text-center mb-4 sm:mb-5 md:mb-6">
+          <div className={`inline-block px-2.5 sm:px-3 py-1 sm:py-1.5 ${badgeBackgroundClass} text-xs font-semibold mb-2 sm:mb-3 text-[#6b5f4b] dark:text-gray-200`}>
             Real Results
           </div>
-          <h2 className={`${typography.headingSection} ${textColors.heading} mb-3 sm:mb-4 px-4`}>
+          <h2 className={`text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold leading-tight ${textColors.heading} mb-2 sm:mb-3 px-4`}>
             Before & After Gallery
           </h2>
-          <p className={`${typography.lead} max-w-2xl mx-auto px-4`}>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-4 leading-relaxed">
             See the natural, beautiful transformations we've achieved for our clients
           </p>
         </div>
 
         {/* Main Before/After Comparison - compact for many images */}
-        <div className="max-w-2xl sm:max-w-3xl lg:max-w-4xl mx-auto mb-6">
-          <div className="relative bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg overflow-hidden">
+        <div className="max-w-2xl sm:max-w-3xl mx-auto mb-4">
+          <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
             {/* Interactive Before/After Container */}
             <div 
               ref={containerRef}
-              className="relative aspect-[4/3] overflow-hidden cursor-col-resize select-none"
+              className="relative w-full h-[45vh] min-h-[280px] overflow-hidden cursor-col-resize select-none"
               onMouseMove={handleMouseMove}
               onMouseDown={(e) => {
                 // Allow clicking anywhere on the container to set position
@@ -234,10 +234,10 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
                 <img
                   src={current.after_image_url}
                   alt={`${current.title} - After`}
-                  className="w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover"
                   draggable={false}
                 />
-                <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-green-500 text-white px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-medium shadow-lg">
+                <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-green-500 text-white px-2 py-0.5 rounded-full text-xs font-medium shadow-lg">
                   After
                 </div>
               </div>
@@ -253,10 +253,10 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
                 <img
                   src={current.before_image_url}
                   alt={`${current.title} - Before`}
-                  className="w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover"
                   draggable={false}
                 />
-                <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-red-500 text-white px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-medium shadow-lg">
+                <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-medium shadow-lg">
                   Before
                 </div>
               </div>
@@ -272,7 +272,7 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
 
               {/* Drag Handle */}
               <div 
-                className="absolute top-1/2 w-9 h-9 sm:w-12 sm:h-12 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg cursor-col-resize z-10 border-2 border-white"
+                className="absolute top-1/2 w-8 h-8 sm:w-10 sm:h-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg cursor-col-resize z-10 border-2 border-white"
                 style={{
                   left: `${sliderPosition}%`,
                   transform: 'translate(-50%, -50%)',
@@ -281,11 +281,11 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
                 onMouseDown={handleMouseDown}
                 onTouchStart={handleTouchStart}
               >
-                <Move className="w-4 h-4 sm:w-6 sm:h-6 text-gray-600 dark:text-gray-300" />
+                <Move className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
               </div>
 
               {/* Drag Instructions */}
-              <div className="absolute bottom-2 sm:bottom-3 left-1/2 transform -translate-x-1/2 bg-black/50 backdrop-blur-sm text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm">
+              <div className="absolute bottom-1.5 sm:bottom-2 left-1/2 transform -translate-x-1/2 bg-black/50 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-[10px] sm:text-xs">
                 Drag to compare • Swipe to navigate
               </div>
             </div>
@@ -293,51 +293,51 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
             {/* Navigation Arrows */}
             <button
               onClick={previous}
-              className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 w-8 h-8 sm:w-12 sm:h-12 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-all shadow-lg z-20"
+              className="absolute left-1.5 sm:left-3 top-1/2 transform -translate-y-1/2 w-7 h-7 sm:w-9 sm:h-9 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-all shadow-lg z-20"
               aria-label="Previous image"
             >
-              <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6 text-gray-600 dark:text-gray-300" />
+              <ChevronLeft className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
             </button>
             <button
               onClick={next}
-              className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 w-8 h-8 sm:w-12 sm:h-12 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-all shadow-lg z-20"
+              className="absolute right-1.5 sm:right-3 top-1/2 transform -translate-y-1/2 w-7 h-7 sm:w-9 sm:h-9 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-all shadow-lg z-20"
               aria-label="Next image"
             >
-              <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6 text-gray-600 dark:text-gray-300" />
+              <ChevronRight className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
             </button>
           </div>
 
           {/* Image Info with Badges */}
-          <div className="text-center mt-4 space-y-3">
+          <div className="text-center mt-3 space-y-2">
             {/* Badges Row */}
-            <div className="flex flex-wrap justify-center gap-2 mb-3">
+            <div className="flex flex-wrap justify-center gap-1.5 mb-2">
               {current.categoryData && (
-                <span className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-rose-500/10 to-pink-500/10 dark:from-rose-500/20 dark:to-pink-500/20 text-rose-700 dark:text-rose-300 border border-rose-300/50 dark:border-rose-700/50 rounded-full text-xs font-semibold">
-                  <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span className="inline-flex items-center px-2 py-1 bg-gradient-to-r from-rose-500/10 to-pink-500/10 dark:from-rose-500/20 dark:to-pink-500/20 text-rose-700 dark:text-rose-300 border border-rose-300/50 dark:border-rose-700/50 rounded-full text-[11px] font-semibold">
+                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                   </svg>
                   {current.categoryData.name}
                 </span>
               )}
               {current.serviceData && (
-                <span className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 dark:from-purple-500/20 dark:to-indigo-500/20 text-purple-700 dark:text-purple-300 border border-purple-300/50 dark:border-purple-700/50 rounded-full text-xs font-medium">
-                  <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span className="inline-flex items-center px-2 py-1 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 dark:from-purple-500/20 dark:to-indigo-500/20 text-purple-700 dark:text-purple-300 border border-purple-300/50 dark:border-purple-700/50 rounded-full text-[11px] font-medium">
+                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                   </svg>
                   {current.serviceData.name}
                 </span>
               )}
               {current.project_type && (
-                <span className="inline-flex items-center px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium">
-                  <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span className="inline-flex items-center px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-[11px] font-medium">
+                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6" />
                   </svg>
                   {current.project_type}
                 </span>
               )}
               {current.completion_date && (
-                <span className="inline-flex items-center px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs font-medium">
-                  <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span className="inline-flex items-center px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-[11px] font-medium">
+                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   {new Date(current.completion_date).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}
@@ -346,13 +346,13 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
             </div>
 
             {/* Title */}
-            <h3 className={`${typography.headingCard} ${textColors.heading} mb-1`}>
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-0.5">
               {current.title}
             </h3>
             
             {/* Description */}
             {current.description && (
-              <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              <p className="text-sm text-gray-600 dark:text-gray-300 max-w-2xl mx-auto line-clamp-2">
                 {current.description}
               </p>
             )}
@@ -361,7 +361,7 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
 
         {/* Thumbnail Navigation - more columns for 30-40 items */}
         <div className="max-w-4xl lg:max-w-5xl xl:max-w-6xl mx-auto">
-          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8 gap-2 sm:gap-3">
+          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8 gap-1.5 sm:gap-2">
             {items.map((item, index) => (
               <button
                 key={item.id}
@@ -369,9 +369,9 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
                   setCurrentIndex(index);
                   setSliderPosition(50); // Reset slider when changing images
                 }}
-                className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all group ${
+                className={`relative aspect-square rounded-md overflow-hidden border-2 transition-all group ${
                   currentIndex === index
-                    ? "border-rose-500 dark:border-rose-400 scale-[1.02] sm:scale-105 shadow-lg ring-2 ring-rose-500/20"
+                    ? "border-rose-500 dark:border-rose-400 scale-[1.02] shadow-md ring-2 ring-rose-500/20"
                     : "border-gray-200 dark:border-gray-700 hover:border-rose-300 dark:hover:border-rose-600"
                 }`}
               >
@@ -385,20 +385,20 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
                   
                   {/* Category Badge on Thumbnail */}
                   {item.categoryData && (
-                    <div className="absolute top-2 left-2 right-2">
-                      <span className="inline-flex items-center px-2 py-0.5 bg-rose-500/90 dark:bg-rose-600/90 text-white rounded-full text-[10px] font-semibold shadow-lg">
+                    <div className="absolute top-1 left-1 right-1">
+                      <span className="inline-flex items-center px-1.5 py-0.5 bg-rose-500/90 dark:bg-rose-600/90 text-white rounded text-[9px] font-semibold shadow">
                         {item.categoryData.name}
                       </span>
                     </div>
                   )}
                   
                   {/* Title and Service Badge */}
-                  <div className="absolute bottom-0 left-0 right-0 p-2">
-                    <div className="text-xs text-white font-semibold truncate mb-1 drop-shadow-lg">
+                  <div className="absolute bottom-0 left-0 right-0 p-1.5">
+                    <div className="text-[10px] sm:text-xs text-white font-semibold truncate drop-shadow-lg">
                       {item.title}
                     </div>
                     {item.serviceData && (
-                      <div className="text-[10px] text-white/90 truncate drop-shadow">
+                      <div className="text-[9px] text-white/90 truncate drop-shadow">
                         {item.serviceData.name}
                       </div>
                     )}
@@ -410,13 +410,13 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
         </div>
 
         {/* Progress Indicator - compact for many items */}
-        <div className="flex justify-center mt-6 overflow-x-auto pb-2 max-w-full">
-          <div className="flex flex-wrap justify-center gap-1 sm:gap-2">
+        <div className="flex justify-center mt-4 overflow-x-auto pb-1 max-w-full">
+          <div className="flex flex-wrap justify-center gap-1">
             {items.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentIndex(index)}
-                className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all flex-shrink-0 ${
+                className={`w-1.5 h-1.5 sm:w-2.5 sm:h-2.5 rounded-full transition-all flex-shrink-0 ${
                   currentIndex === index
                     ? "bg-blue-500 scale-125"
                     : "bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500"
@@ -428,7 +428,7 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
         </div>
 
         {/* Disclaimer */}
-        <p className={`${typography.small} text-center mt-6 px-4`}>
+        <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-4 px-4">
           Results may vary. All photos published with patient consent. Individual results depend on various factors.
         </p>
       </div>

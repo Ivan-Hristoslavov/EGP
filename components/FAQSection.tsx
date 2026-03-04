@@ -56,11 +56,11 @@ export function FAQSection() {
 
   if (isLoading) {
     return (
-      <section className="py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-500" id="faq">
+      <section className="py-8 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-500" id="faq">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <Spinner size="lg" />
-            <p className="mt-4 text-default-500">Loading FAQ...</p>
+            <p className="mt-3 text-default-500 text-sm">Loading FAQ...</p>
           </div>
         </div>
       </section>
@@ -69,14 +69,14 @@ export function FAQSection() {
 
   if (error || faqItems.length === 0) {
     return (
-      <section className="py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-500" id="faq">
+      <section className="py-8 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-500" id="faq">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-sm sm:text-base font-semibold mb-3 sm:mb-4`}>
+          <div className="text-center mb-8">
+            <div className={`inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-xs font-semibold mb-2 sm:mb-3`}>
               <HelpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>Questions & Answers</span>
             </div>
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-3">
               Frequently Asked Questions
             </h2>
             <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
@@ -89,17 +89,17 @@ export function FAQSection() {
   }
 
   return (
-    <section className="py-10 sm:py-12 md:py-16 lg:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-500" id="faq">
+    <section className="py-6 sm:py-8 md:py-10 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-500" id="faq">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-8 sm:mb-12 md:mb-16">
-          <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-sm sm:text-base font-semibold mb-3 sm:mb-4`}>
+        <div className="text-center mb-4 sm:mb-6 md:mb-8">
+          <div className={`inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-xs font-semibold mb-2 sm:mb-3`}>
             <HelpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>Questions & Answers</span>
           </div>
-          <h2 className={`${typography.headingSection} ${textColors.heading} mb-4`}>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3">
             Frequently Asked Questions
           </h2>
-          <p className={`${typography.lead} max-w-3xl mx-auto`}>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Find answers to common questions about our aesthetic treatments
           </p>
         </div>
@@ -112,9 +112,9 @@ export function FAQSection() {
           className="gap-0 px-0 divide-y divide-gray-200 dark:divide-gray-700"
           itemClasses={{
             base: "bg-transparent border-0 shadow-none rounded-none",
-            title: `${typography.headingSmall} ${textColors.heading}`,
-            content: "px-0 pb-4 sm:pb-5 pt-1",
-            trigger: "px-0 py-4 sm:py-5 hover:bg-transparent rounded-none",
+            title: "text-base sm:text-lg font-semibold text-gray-900 dark:text-white",
+            content: "px-0 pb-3 sm:pb-4 pt-1",
+            trigger: "px-0 py-3 sm:py-4 hover:bg-transparent rounded-none",
             indicator: "text-egp-green dark:text-egp-green-light transition-transform duration-300",
           }}
         >
@@ -136,7 +136,7 @@ export function FAQSection() {
         </Accordion>
 
         {(hasMore || showAllFaq) && (
-          <div className="mt-6 sm:mt-8 flex justify-center gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="mt-4 sm:mt-6 flex justify-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
             {hasMore && (
               <button
                 type="button"

@@ -859,7 +859,7 @@ export default function HeaderAesthetics() {
                                 <span className="relative z-10 ml-1 inline-block group-hover:translate-x-1 transition-transform duration-300">→</span>
                               </Link>
                             </div>
-                            <ul className="space-y-1 max-h-[min(78vh,680px)] overflow-y-auto menu-scroll pl-2 pr-2">
+                            <ul className="space-y-0.5 max-h-[min(78vh,680px)] overflow-y-auto overflow-x-hidden menu-scroll pl-2 pr-1">
                               {categoryServices.map((item) => {
                                 const hasDiscount = (item.originalPrice != null && item.originalPrice > item.price) || (item.discountPercentage != null && item.discountPercentage > 0);
                                 return (
@@ -872,14 +872,15 @@ export default function HeaderAesthetics() {
                                       }
                                       setActiveMenu(null);
                                     }}
-                                    className={`group relative flex px-2 py-1.5 -mx-2 rounded-md text-sm text-gray-800 dark:text-gray-200 font-montserrat transition-all duration-300 hover:bg-white/30 dark:hover:bg-white/10 ${hasDiscount ? 'flex-col gap-1.5 py-2 pr-12' : 'items-center justify-between gap-4'}`}
+                                    title={item.name}
+                                    className={`group relative flex px-2 py-1 -mx-2 rounded-md text-xs sm:text-sm text-gray-800 dark:text-gray-200 font-montserrat transition-all duration-300 hover:bg-white/30 dark:hover:bg-white/10 ${hasDiscount ? 'flex-col gap-1 py-1.5 pr-10' : 'items-center justify-between gap-2 min-w-0'}`}
                                   >
                                     {hasDiscount && item.discountPercentage != null && item.discountPercentage > 0 && (
                                       <span className="absolute top-1.5 right-2 z-10 inline-flex flex-shrink-0 text-[10px] font-semibold bg-egp-green text-white dark:bg-egp-beige dark:text-egp-green px-1.5 py-0.5 rounded">
                                         {item.discountPercentage}% off
                                       </span>
                                     )}
-                                    <span className="relative z-0 flex-1 min-w-0 group-hover:translate-x-1 text-gray-800 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-all duration-300 inline-flex items-center gap-2 flex-wrap">
+                                    <span className="relative z-0 flex-1 min-w-0 truncate group-hover:translate-x-1 text-gray-800 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-all duration-300">
                                       {item.name}
                                       <span className="absolute left-0 -bottom-0.5 w-0 h-px bg-egp-green dark:bg-egp-beige group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
                                     </span>
@@ -930,22 +931,23 @@ export default function HeaderAesthetics() {
                             const slice = col === 0 ? faceItems.slice(0, mid) : faceItems.slice(mid);
                             if (slice.length === 0) return null;
                             return (
-                              <ul key={`face-${col}`} className="space-y-1 max-h-[min(78vh,680px)] overflow-y-auto menu-scroll pl-2 pr-2">
+                              <ul key={`face-${col}`} className="space-y-0.5 max-h-[min(78vh,680px)] overflow-y-auto overflow-x-hidden menu-scroll pl-2 pr-1">
                                 {slice.map((condition) => {
                                   const priceInfo = getConditionPrice(condition);
                                   return (
                                     <li key={condition.id}>
                                       <Link
                                         href={`/conditions/${condition.slug}`}
-                                        className="group relative flex items-center justify-between gap-2 px-2 py-1.5 -mx-2 rounded-md text-sm text-gray-800 dark:text-gray-200 font-montserrat transition-all duration-300 hover:bg-white/30 dark:hover:bg-white/10"
+                                        title={condition.title}
+                                        className="group relative flex items-center justify-between gap-2 px-2 py-1 -mx-2 rounded-md text-xs sm:text-sm text-gray-800 dark:text-gray-200 font-montserrat transition-all duration-300 hover:bg-white/30 dark:hover:bg-white/10 min-w-0"
                                         onClick={() => setActiveMenu(null)}
                                       >
-                                        <span className="relative z-10 group-hover:translate-x-1 text-gray-800 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-all duration-300 inline-block min-w-0">
+                                        <span className="relative z-10 group-hover:translate-x-1 text-gray-800 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-all duration-300 truncate min-w-0">
                                           {condition.title}
                                           <span className="absolute left-0 -bottom-0.5 w-0 h-px bg-egp-green dark:bg-egp-beige group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
                                         </span>
                                         {priceInfo && (
-                                          <span className="relative z-10 text-xs font-semibold text-egp-green dark:text-egp-beige flex-shrink-0">
+                                          <span className="relative z-10 text-[11px] sm:text-xs font-semibold text-egp-green dark:text-egp-beige flex-shrink-0">
                                             £{Number.isInteger(priceInfo.price) ? priceInfo.price : priceInfo.price.toFixed(2)}
                                           </span>
                                         )}
@@ -984,17 +986,18 @@ export default function HeaderAesthetics() {
                             const slice = col === 0 ? bodyItems.slice(0, mid) : bodyItems.slice(mid);
                             if (slice.length === 0) return null;
                             return (
-                              <ul key={`body-${col}`} className="space-y-1 max-h-[min(78vh,680px)] overflow-y-auto menu-scroll pl-2 pr-2">
+                              <ul key={`body-${col}`} className="space-y-0.5 max-h-[min(78vh,680px)] overflow-y-auto overflow-x-hidden menu-scroll pl-2 pr-1">
                                 {slice.map((condition) => {
                                   const priceInfo = getConditionPrice(condition);
                                   return (
                                     <li key={condition.id}>
                                       <Link
                                         href={`/conditions/${condition.slug}`}
-                                        className="group relative flex items-center justify-between gap-2 px-2 py-1.5 -mx-2 rounded-md text-sm text-gray-800 dark:text-gray-200 font-montserrat transition-all duration-300 hover:bg-white/30 dark:hover:bg-white/10"
+                                        title={condition.title}
+                                        className="group relative flex items-center justify-between gap-2 px-2 py-1 -mx-2 rounded-md text-xs sm:text-sm text-gray-800 dark:text-gray-200 font-montserrat transition-all duration-300 hover:bg-white/30 dark:hover:bg-white/10 min-w-0"
                                         onClick={() => setActiveMenu(null)}
                                       >
-                                        <span className="relative z-10 group-hover:translate-x-1 text-gray-800 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-all duration-300 inline-block min-w-0">
+                                        <span className="relative z-10 group-hover:translate-x-1 text-gray-800 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-all duration-300 truncate min-w-0">
                                           {condition.title}
                                           <span className="absolute left-0 -bottom-0.5 w-0 h-px bg-egp-green dark:bg-egp-beige group-hover:w-full transition-all duration-300 ease-out origin-left"></span>
                                         </span>
@@ -1129,7 +1132,7 @@ export default function HeaderAesthetics() {
                                   View All →
                                 </Link>
                               </div>
-                              <ul className="space-y-1 max-h-[300px] overflow-y-auto menu-scroll pr-2">
+                              <ul className="space-y-0.5 max-h-[300px] overflow-y-auto overflow-x-hidden menu-scroll pr-1">
                                 {categoryServices.map((item) => {
                                   const hasDiscount = (item.originalPrice != null && item.originalPrice > item.price) || (item.discountPercentage != null && item.discountPercentage > 0);
                                   return (
@@ -1143,15 +1146,16 @@ export default function HeaderAesthetics() {
                                         setMobileMenuOpen(false);
                                         setActiveMenu(null);
                                       }}
-                                      className={`group relative flex px-3 py-2.5 min-h-[44px] text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md transition-all duration-200 active:scale-95 touch-manipulation font-montserrat pb-1 ${hasDiscount ? 'flex-col gap-1.5 items-stretch pr-12' : 'items-center justify-between gap-3'}`}
+                                      title={item.name}
+                                      className={`group relative flex px-2 py-2 min-h-[40px] text-xs sm:text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md transition-all duration-200 active:scale-95 touch-manipulation font-montserrat ${hasDiscount ? 'flex-col gap-1 items-stretch pr-10' : 'items-center justify-between gap-2 min-w-0'}`}
                                     >
                                       {hasDiscount && item.discountPercentage != null && item.discountPercentage > 0 && (
                                         <span className="absolute top-2 right-2 z-10 inline-flex flex-shrink-0 text-[10px] font-semibold bg-egp-green text-white dark:bg-egp-beige dark:text-egp-green px-1.5 py-0.5 rounded">
                                           {item.discountPercentage}% off
                                         </span>
                                       )}
-                                      <span className="relative flex-1 min-w-0 text-left leading-tight inline-flex items-center gap-2 flex-wrap pr-0">
-                                        <span className="relative z-0">
+                                      <span className="relative flex-1 min-w-0 text-left leading-tight truncate pr-0">
+                                        <span className="relative z-0 truncate block">
                                           {item.name}
                                         </span>
                                         <span className="absolute left-0 right-0 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
@@ -1213,26 +1217,27 @@ export default function HeaderAesthetics() {
                               View All →
                             </Link>
                           </div>
-                          <ul className="space-y-1 max-h-[250px] overflow-y-auto menu-scroll pr-2">
+                          <ul className="space-y-0.5 max-h-[250px] overflow-y-auto overflow-x-hidden menu-scroll pr-1">
                             {conditionsByCategory.face.map((condition) => {
                               const priceInfo = getConditionPrice(condition);
                               return (
                                 <li key={condition.id}>
                                   <Link
                                     href={`/conditions/${condition.slug}`}
-                                    className="group relative flex items-center justify-between gap-2 px-3 py-2.5 min-h-[44px] text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md transition-all duration-200 active:scale-95 touch-manipulation font-montserrat pb-1"
+                                    title={condition.title}
+                                    className="group relative flex items-center justify-between gap-2 px-2 py-2 min-h-[40px] text-xs sm:text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md transition-all duration-200 active:scale-95 touch-manipulation font-montserrat min-w-0"
                                     onClick={() => {
                                       setMobileMenuOpen(false);
                                       setActiveMenu(null);
                                     }}
                                   >
-                                    <span className="relative z-10 min-w-0">{condition.title}</span>
+                                    <span className="relative z-10 min-w-0 truncate">{condition.title}</span>
                                     {priceInfo && (
-                                      <span className="relative z-10 text-xs font-semibold text-egp-green dark:text-egp-beige flex-shrink-0">
+                                      <span className="relative z-10 text-[11px] sm:text-xs font-semibold text-egp-green dark:text-egp-beige flex-shrink-0">
                                         £{Number.isInteger(priceInfo.price) ? priceInfo.price : priceInfo.price.toFixed(2)}
                                       </span>
                                     )}
-                                    <span className="absolute left-3 right-3 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
+                                    <span className="absolute left-2 right-2 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
                                   </Link>
                                 </li>
                               );
@@ -1255,26 +1260,27 @@ export default function HeaderAesthetics() {
                               View All →
                             </Link>
                           </div>
-                          <ul className="space-y-1 max-h-[250px] overflow-y-auto menu-scroll pr-2">
+                          <ul className="space-y-0.5 max-h-[250px] overflow-y-auto overflow-x-hidden menu-scroll pr-1">
                             {conditionsByCategory.body.map((condition) => {
                               const priceInfo = getConditionPrice(condition);
                               return (
                                 <li key={condition.id}>
                                   <Link
                                     href={`/conditions/${condition.slug}`}
-                                    className="group relative flex items-center justify-between gap-2 px-3 py-2.5 min-h-[44px] text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md transition-all duration-200 active:scale-95 touch-manipulation font-montserrat pb-1"
+                                    title={condition.title}
+                                    className="group relative flex items-center justify-between gap-2 px-2 py-2 min-h-[40px] text-xs sm:text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md transition-all duration-200 active:scale-95 touch-manipulation font-montserrat min-w-0"
                                     onClick={() => {
                                       setMobileMenuOpen(false);
                                       setActiveMenu(null);
                                     }}
                                   >
-                                    <span className="relative z-10 min-w-0">{condition.title}</span>
+                                    <span className="relative z-10 min-w-0 truncate">{condition.title}</span>
                                     {priceInfo && (
-                                      <span className="relative z-10 text-xs font-semibold text-egp-green dark:text-egp-beige flex-shrink-0">
+                                      <span className="relative z-10 text-[11px] sm:text-xs font-semibold text-egp-green dark:text-egp-beige flex-shrink-0">
                                         £{Number.isInteger(priceInfo.price) ? priceInfo.price : priceInfo.price.toFixed(2)}
                                       </span>
                                     )}
-                                    <span className="absolute left-3 right-3 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
+                                    <span className="absolute left-2 right-2 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
                                   </Link>
                                 </li>
                               );

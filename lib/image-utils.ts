@@ -120,7 +120,14 @@ export async function convertHeicToJpeg(file: File): Promise<File | null> {
     
     return convertedFile;
   } catch (error) {
-    console.error('Error converting HEIC to JPEG:', error);
+    const message =
+      error instanceof Error
+        ? error.message
+        : typeof error === "string"
+        ? error
+        : "Unknown HEIC conversion error";
+
+    console.warn("Error converting HEIC to JPEG:", message);
     return null;
   }
 }

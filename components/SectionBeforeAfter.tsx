@@ -34,7 +34,7 @@ export default function SectionBeforeAfter() {
   // If no gallery items, show placeholder
   if (loading) {
     return (
-      <section className="py-12 sm:py-16 md:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <section className="py-8 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className={layout.container}>
           <div className="text-center">
             <Spinner size="lg" color="primary" />
@@ -46,7 +46,7 @@ export default function SectionBeforeAfter() {
 
   if (error || beforeAfterItems.length === 0) {
     return (
-      <section className="py-12 sm:py-16 md:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <section className="py-8 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className={layout.container}>
           <div className="text-center">
             <div className={`inline-block px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-xs sm:text-sm font-semibold mb-3 sm:mb-4 text-[#6b5f4b] dark:text-gray-200`}>
@@ -55,11 +55,11 @@ export default function SectionBeforeAfter() {
             <h2 className={`${typography.headingSection} ${textColors.heading} mb-3 sm:mb-4 px-4`}>
               Before & After Gallery
             </h2>
-            <p className={`${typography.lead} max-w-2xl mx-auto px-4 mb-8`}>
+            <p className={`${typography.lead} max-w-2xl mx-auto px-4 mb-6`}>
               See the natural, beautiful transformations we've achieved for our clients
             </p>
             <Card className="max-w-2xl mx-auto" shadow="lg">
-              <CardBody className="p-12 text-center">
+              <CardBody className="p-8 text-center">
               <div className="text-6xl mb-4">✨</div>
                 <h3 className={`${typography.headingCard} ${textColors.heading} mb-4`}>
                 Gallery Coming Soon

@@ -22,9 +22,9 @@ export function ReviewsSection() {
 
   if (isLoading) {
     return (
-      <section className="py-16 bg-egp-beige-lighter dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8">
-          <div className="text-center py-12">
+      <section className="py-8 sm:py-10 bg-egp-beige-lighter dark:bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-8">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#b5ad9d]"></div>
             <p className="mt-4 text-gray-600 dark:text-gray-400">Loading reviews...</p>
           </div>
@@ -35,9 +35,9 @@ export function ReviewsSection() {
 
   if (error) {
     return (
-      <section className="py-16 bg-egp-beige-lighter dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8">
-          <div className="text-center py-12 text-red-600">{error}</div>
+      <section className="py-8 sm:py-10 bg-egp-beige-lighter dark:bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-8 text-red-600">{error}</div>
         </div>
       </section>
     );
@@ -50,39 +50,39 @@ export function ReviewsSection() {
   const currentReviews = reviews.slice(startIndex, endIndex);
 
   return (
-    <section className="py-10 sm:py-12 md:py-16 bg-egp-beige-lighter dark:bg-gray-900" id="reviews">
+    <section className="py-6 sm:py-8 md:py-10 bg-egp-beige-lighter dark:bg-gray-900" id="reviews">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header - same title scale as other sections */}
-        <div className="text-center mb-8 sm:mb-12">
-          <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} mb-3 sm:mb-4`}>
-            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-[#9d9585]" fill="currentColor" viewBox="0 0 20 20">
+        {/* Header - compact */}
+        <div className="text-center mb-4 sm:mb-6 md:mb-8">
+          <div className={`inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 ${badgeBackgroundClass} mb-2 sm:mb-3`}>
+            <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#9d9585]" fill="currentColor" viewBox="0 0 20 20">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
-            <span className="text-xs sm:text-sm font-semibold text-[#6b5f4b]">Client Impressions</span>
+            <span className="text-xs font-semibold text-[#6b5f4b]">Client Impressions</span>
           </div>
-          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">What Our Clients Say</h2>
-          <p className="text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3">What Our Clients Say</h2>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Real experiences from valued customers who trust our services
           </p>
         </div>
 
         {reviews.length === 0 ? (
-          <div className="text-center py-16">
+          <div className="text-center py-8 sm:py-10">
             <div className="max-w-md mx-auto">
-              <div className="w-24 h-24 bg-[#ddd5c3]/60 dark:bg-gray-800/40 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <div className="w-20 h-20 bg-[#ddd5c3]/60 dark:bg-gray-800/40 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <svg className="w-12 h-12 text-[#9d9585]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                 </svg>
               </div>
-              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-3">
+              <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-2">
                 No Reviews Yet
               </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-8">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-5">
                 Be the first to share your experience and help others make informed decisions
               </p>
               <a
                 href="#leave-review"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-white font-semibold rounded-2xl hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
+                className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-white rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
                 onClick={(e) => {
                   e.preventDefault();
                   document.getElementById("leave-review")?.scrollIntoView({ behavior: "smooth" });
@@ -98,19 +98,19 @@ export function ReviewsSection() {
         ) : (
           <div>
             {/* Reviews Grid - smaller cards on mobile */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5 mb-5 sm:mb-8">
               {currentReviews.map((review, index) => {
                 const isLongComment = review.comment.length > 260;
                 return (
                 <div 
                   key={review.id} 
-                  className="group relative bg-white/90 dark:bg-gray-900/70 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-7 shadow-lg backdrop-blur border border-[#e4d9c8]/80 dark:border-gray-700 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  className="group relative bg-white/90 dark:bg-gray-900/70 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 shadow-lg backdrop-blur border border-[#e4d9c8]/80 dark:border-gray-700 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="absolute inset-x-6 -top-6 h-16 bg-gradient-to-br from-[#9d9585]/20 via-[#b5ad9d]/20 to-[#ddd5c3]/10 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
                   {/* Header */}
-                  <div className="flex items-start gap-3 sm:gap-4 mb-3 sm:mb-4">
+                  <div className="flex items-start gap-2 sm:gap-3 mb-2 sm:mb-3">
                     {/* Avatar */}
                     <div className="flex-shrink-0 relative">
                       <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#9d9585] rounded-full flex items-center justify-center shadow-lg">

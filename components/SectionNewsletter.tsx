@@ -166,11 +166,11 @@ export default function SectionNewsletter() {
   }
 
   return (
-      <section className="py-12 sm:py-16 md:py-20 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <section className="py-6 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className={layout.container}>
           <div className="max-w-3xl mx-auto">
             <div 
-              className="rounded-xl sm:rounded-2xl p-6 sm:p-8 shadow-lg"
+              className="rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg"
               style={{
                 backgroundColor: aestheticsColors.green.DEFAULT,
                 borderColor: aestheticsColors.green.border.dark,
@@ -178,17 +178,17 @@ export default function SectionNewsletter() {
                 borderStyle: 'solid',
               }}
             >
-            <div className="flex flex-col lg:flex-row lg:items-center gap-6 sm:gap-8">
+            <div className="flex flex-col lg:flex-row lg:items-center gap-4 sm:gap-6">
               {/* Content */}
               <div className="flex-1">
-                <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/20 backdrop-blur-sm text-white ${typography.body} font-semibold mb-3 sm:mb-4 rounded-full border border-white/30`}>
+                <div className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-white/20 backdrop-blur-sm text-white text-xs sm:text-sm font-semibold mb-2 sm:mb-3 rounded-full border border-white/30">
                   <Gift className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   <span>Exclusive Offer</span>
                 </div>
-                <h2 className={`${typography.headingSection} text-white mb-3 sm:mb-4`}>
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2 sm:mb-3">
                   Get {siteConfig.newsletter.welcomeDiscountPercent}% Off Your First Visit
                 </h2>
-                <p className={`${typography.body} text-white/90 mb-4 sm:mb-6`}>
+                <p className="text-sm sm:text-base text-white/90 mb-3 sm:mb-4">
                   Subscribe to our newsletter and receive exclusive beauty tips, treatment guides, and special offers
                 </p>
 

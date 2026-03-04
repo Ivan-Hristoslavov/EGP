@@ -101,9 +101,9 @@ export function ReviewForm() {
 
   if (submitResult) {
     return (
-      <section className="py-16 bg-egp-beige-lighter dark:bg-gray-900" id="leave-review">
-        <div className="max-w-xl mx-auto px-6 sm:px-8">
-          <div className={`relative overflow-hidden rounded-2xl p-8 text-center ${
+      <section className="py-8 sm:py-10 bg-egp-beige-lighter dark:bg-gray-900" id="leave-review">
+        <div className="max-w-xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className={`relative overflow-hidden rounded-xl sm:rounded-2xl p-5 sm:p-6 text-center ${
             submitResult.success 
               ? "bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800" 
               : "bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800"
@@ -135,11 +135,11 @@ export function ReviewForm() {
   }
 
   return (
-    <section className="py-12 sm:py-16 bg-egp-beige-lighter dark:bg-gray-900" id="leave-review">
-      <div className="max-w-2xl mx-auto px-6 sm:px-8">
+    <section className="py-6 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gray-900" id="leave-review">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-6 sm:mb-8">
-          <div className="flex items-center justify-center gap-1 sm:gap-1.5 mb-3 sm:mb-4">
+        <div className="text-center mb-4 sm:mb-6">
+          <div className="flex items-center justify-center gap-1 sm:gap-1.5 mb-2 sm:mb-3">
             {[1, 2, 3, 4, 5].map((star) => (
               <svg
                 key={star}
@@ -151,7 +151,7 @@ export function ReviewForm() {
               </svg>
             ))}
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-1.5 sm:mb-2">
             Share Your Experience
           </h2>
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
@@ -160,12 +160,12 @@ export function ReviewForm() {
         </div>
 
         {/* Form Card */}
-        <div className="bg-white/95 dark:bg-gray-900/70 rounded-3xl shadow-xl border border-[#e4d9c8] dark:border-gray-700 backdrop-blur overflow-hidden">
-          <div className="px-6 sm:px-8 py-4 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-[#3f3a31]">
-            <p className="text-sm sm:text-base font-semibold text-center tracking-wide uppercase">Your opinion matters to us</p>
+        <div className="bg-white/95 dark:bg-gray-900/70 rounded-2xl shadow-xl border border-[#e4d9c8] dark:border-gray-700 backdrop-blur overflow-hidden">
+          <div className="px-4 sm:px-6 py-3 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-[#3f3a31]">
+            <p className="text-xs sm:text-sm font-semibold text-center tracking-wide uppercase">Your opinion matters to us</p>
           </div>
           
-          <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6" noValidate>
+          <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-3 sm:space-y-4" noValidate>
             {/* Name & Email */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <Input
