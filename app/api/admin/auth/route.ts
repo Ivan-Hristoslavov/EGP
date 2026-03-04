@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 import { supabaseAdmin } from "@/lib/supabase";
@@ -29,8 +29,19 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  let email: string | null = null;
+  let password: string | null = null;
+
   try {
-    const { email, password } = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object") {
+      return NextResponse.json(
+        { error: "Invalid request" },
+        { status: 400 }
+      );
+    }
+    email = typeof body.email === "string" ? body.email : null;
+    password = typeof body.password === "string" ? body.password : null;
 
     if (!email || !password) {
       return NextResponse.json(
@@ -93,8 +104,8 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
-  } catch (error) {
-    console.error("Auth error:", error);
+  } catch {
+    // Do not log or expose error details (may contain sensitive data)
     return NextResponse.json(
       { error: "Authentication failed" },
       { status: 500 }
