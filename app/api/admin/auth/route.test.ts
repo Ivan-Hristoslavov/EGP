@@ -15,7 +15,7 @@ vi.mock("@/lib/supabase", () => ({
   },
 }));
 
-vi.mock("bcrypt", () => ({
+vi.mock("bcryptjs", () => ({
   default: {
     compare: vi.fn(() => Promise.resolve(false)),
   },
