@@ -80,6 +80,130 @@ interface PaymentFormProps {
   onProcessingChange?: (processing: boolean) => void;
 }
 
+function FreeBookingConfirmation({
+  formattedDate,
+  timeRangeDisplay,
+  totalDuration,
+  services,
+  customerData,
+  selectedDate,
+  selectedTime,
+  teamMemberId,
+  serviceDurationMinutes,
+  onPaymentSuccess,
+  onPaymentError,
+  onProcessingChange,
+}: {
+  formattedDate: string;
+  timeRangeDisplay: string;
+  totalDuration: number;
+  services: StripePaymentFormProps['services'];
+  customerData?: StripePaymentFormProps['customerData'];
+  selectedDate: string;
+  selectedTime: string;
+  teamMemberId?: string;
+  serviceDurationMinutes?: number | null;
+  onPaymentSuccess: (bookingId: string) => void;
+  onPaymentError: (error: string) => void;
+  onProcessingChange?: (processing: boolean) => void;
+}) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleConfirm = async () => {
+    setIsLoading(true);
+    setErrorMessage('');
+    onProcessingChange?.(true);
+
+    try {
+      const servicesSummary = services
+        .map((s) => `${s.name}${s.quantity > 1 ? ` (x${s.quantity})` : ''}`)
+        .join(', ');
+      const customerName =
+        customerData && (customerData.firstName || customerData.lastName)
+          ? `${customerData.firstName} ${customerData.lastName}`.trim()
+          : 'Guest Customer';
+
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_name: customerName,
+          customer_email: customerData?.email || null,
+          customer_phone: customerData?.phone || null,
+          service: servicesSummary,
+          date: selectedDate,
+          time: selectedTime,
+          amount: 0,
+          total_amount: 0,
+          amount_paid: 0,
+          remaining_amount: 0,
+          payment_type: 'full',
+          payment_method: 'free',
+          status: 'confirmed',
+          payment_status: 'paid',
+          team_member_id: teamMemberId || null,
+          service_duration_minutes: serviceDurationMinutes || null,
+          notes: 'Free consultation booking – no payment required',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data?.success || !data?.booking?.id) {
+        throw new Error(data?.error || 'Failed to create free booking');
+      }
+
+      onPaymentSuccess(data.booking.id);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Failed to create free booking';
+      setErrorMessage(message);
+      onPaymentError(message);
+    } finally {
+      setIsLoading(false);
+      onProcessingChange?.(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4 sm:space-y-6">
+      <div className="border border-emerald-200 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3 sm:p-4">
+        <p className="text-sm sm:text-base text-emerald-900 dark:text-emerald-100 font-medium mb-1">
+          No payment required
+        </p>
+        <p className="text-xs sm:text-sm text-emerald-800 dark:text-emerald-200">
+          This consultation is free. Confirm your booking below and you&apos;ll receive an email with the details.
+        </p>
+        <p className="mt-2 text-xs text-emerald-800 dark:text-emerald-200">
+          {formattedDate} · {timeRangeDisplay} · {totalDuration} min
+        </p>
+      </div>
+
+      {errorMessage && (
+        <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
+          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+          <p className="text-red-700 dark:text-red-400 text-sm sm:text-base break-words">{errorMessage}</p>
+        </div>
+      )}
+
+      <div className="flex justify-center">
+        <ButtonPrimary
+          type="button"
+          variant="primary"
+          size="lg"
+          isDisabled={isLoading}
+          isLoading={isLoading}
+          startContent={!isLoading ? <CheckCircle className="w-5 h-5" /> : undefined}
+          onPress={handleConfirm}
+        >
+          {isLoading ? 'Confirming...' : 'Confirm Free Booking'}
+        </ButtonPrimary>
+      </div>
+    </div>
+  );
+}
+
 function PaymentForm({
   amount,
   amountToCharge,
@@ -100,6 +224,7 @@ function PaymentForm({
   onProcessingChange,
 }: PaymentFormProps) {
   const chargeAmount = amountToCharge ?? amount;
+  const isFree = chargeAmount <= 0;
   const stripe = useStripe();
   const elements = useElements();
   const [isLoading, setIsLoading] = useState(false);
@@ -159,6 +284,73 @@ function PaymentForm({
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
+    // If this is a free booking (amount 0), skip Stripe entirely and just create a booking
+    if (isFree) {
+      event.preventDefault();
+      setIsLoading(true);
+      setPaymentStatus('processing');
+      setErrorMessage('');
+      onProcessingChange?.(true);
+
+      try {
+        const servicesSummary = services
+          .map((s) => `${s.name}${s.quantity > 1 ? ` (x${s.quantity})` : ''}`)
+          .join(', ');
+
+        const customerName =
+          customerData && (customerData.firstName || customerData.lastName)
+            ? `${customerData.firstName} ${customerData.lastName}`.trim()
+            : 'Guest Customer';
+
+        const response = await fetch('/api/bookings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            customer_name: customerName,
+            customer_email: customerData?.email || null,
+            customer_phone: customerData?.phone || null,
+            service: servicesSummary,
+            date: selectedDate,
+            time: selectedTime,
+            amount: 0,
+            total_amount: 0,
+            amount_paid: 0,
+            remaining_amount: 0,
+            payment_type: 'full',
+            payment_method: 'free',
+            status: 'confirmed',
+            payment_status: 'paid',
+            team_member_id: teamMemberId || null,
+            service_duration_minutes: serviceDurationMinutes || null,
+            notes: 'Free consultation booking – no payment required',
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data?.success || !data?.booking?.id) {
+          throw new Error(data?.error || 'Failed to create free booking');
+        }
+
+        setPaymentStatus('success');
+        onPaymentSuccess(data.booking.id);
+      } catch (error) {
+        console.error('Free booking error:', error);
+        const message =
+          error instanceof Error ? error.message : 'Failed to create free booking';
+        setPaymentStatus('error');
+        setErrorMessage(message);
+        onPaymentError(message);
+      } finally {
+        setIsLoading(false);
+        onProcessingChange?.(false);
+      }
+
+      return;
+    }
+
     event.preventDefault();
 
     if (!stripe || !elements) {
@@ -264,6 +456,49 @@ function PaymentForm({
     month: 'short',
     year: 'numeric'
   });
+
+  // If free, show a simple confirmation UI instead of Stripe
+  if (isFree) {
+    return (
+      <div className="space-y-4 sm:space-y-6">
+        <div className="border border-emerald-200 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3 sm:p-4">
+          <p className="text-sm sm:text-base text-emerald-900 dark:text-emerald-100 font-medium mb-1">
+            No payment required
+          </p>
+          <p className="text-xs sm:text-sm text-emerald-800 dark:text-emerald-200">
+            This consultation is free. Confirm your booking below and you&apos;ll receive an email with the details.
+          </p>
+          <p className="mt-2 text-xs text-emerald-800 dark:text-emerald-200">
+            {formattedDate} · {timeRangeDisplay} · {totalDuration} min
+          </p>
+        </div>
+
+        {paymentStatus === 'error' && (
+          <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
+            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+            <p className="text-red-700 dark:text-red-400 text-sm sm:text-base break-words">{errorMessage}</p>
+          </div>
+        )}
+
+        <div className="flex justify-center">
+          <ButtonPrimary
+            type="button"
+            variant="primary"
+            size="lg"
+            isDisabled={isLoading}
+            isLoading={isLoading}
+            startContent={!isLoading ? <CheckCircle className="w-5 h-5" /> : undefined}
+            onClick={(e) => {
+              // Reuse handleSubmit logic for free bookings
+              handleSubmit(e as unknown as React.FormEvent);
+            }}
+          >
+            {isLoading ? "Confirming..." : "Confirm Free Booking"}
+          </ButtonPrimary>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -521,6 +756,29 @@ export default function StripePaymentForm(props: StripePaymentFormProps) {
     month: 'short',
     year: 'numeric'
   });
+
+  const chargeAmount = props.amountToCharge ?? props.amount;
+  const isFreeBooking = chargeAmount <= 0;
+
+  // When amount is 0, show free-booking confirmation directly (no Stripe, no "Pay £0.00 Now")
+  if (isFreeBooking) {
+    return (
+      <FreeBookingConfirmation
+        formattedDate={formattedDate}
+        timeRangeDisplay={timeRangeDisplay}
+        totalDuration={totalDuration}
+        services={props.services}
+        customerData={props.customerData}
+        selectedDate={props.selectedDate}
+        selectedTime={props.selectedTime}
+        teamMemberId={props.teamMemberId}
+        serviceDurationMinutes={props.serviceDurationMinutes}
+        onPaymentSuccess={props.onPaymentSuccess}
+        onPaymentError={props.onPaymentError}
+        onProcessingChange={props.onProcessingChange}
+      />
+    );
+  }
 
   // Show initialization button if payment intent hasn't been created yet
   if (!clientSecret) {

@@ -1,6 +1,7 @@
 "use client";
+
 import { useState } from "react";
-import { Phone, Play, Calendar, MessageCircle, X, Menu, Minimize2, Instagram } from "lucide-react";
+import { Phone, Play, Calendar, MessageCircle, X, Menu, Instagram } from "lucide-react";
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import { useAdminProfile } from "@/components/AdminProfileContext";
@@ -11,14 +12,15 @@ type QuickAction = {
   labelDesktop: string;
   labelMobile: string;
   href: string;
-  gradient: string;
   icon: typeof Calendar;
   external?: boolean;
+  /** Subtle background + border, not loud gradient */
+  style: "book" | "call" | "whatsapp" | "videos" | "instagram";
 };
 
 export default function FloatingContactButtons() {
   const [isExpanded, setIsExpanded] = useState(false);
-  const handleActionClick = () => setIsExpanded(false);
+
   const adminProfile = useAdminProfile();
   const { socialLinks } = useSocialLinks();
 
@@ -32,137 +34,126 @@ export default function FloatingContactButtons() {
       labelDesktop: "Book Treatment",
       labelMobile: "Book",
       href: "/book",
-      gradient: "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800",
       icon: Calendar,
+      style: "book",
     },
     {
       id: "call",
       labelDesktop: "Call Now",
       labelMobile: "Call",
       href: `tel:${contactPhone}`,
-      gradient: "bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700",
       icon: Phone,
+      style: "call",
     },
     {
       id: "whatsapp",
       labelDesktop: "WhatsApp",
       labelMobile: "WhatsApp",
       href: whatsappUrl,
-      gradient: "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700",
       icon: MessageCircle,
       external: true,
+      style: "whatsapp",
     },
     ...(socialLinks.youtube
-      ? [{
-          id: "videos",
-          labelDesktop: "Videos",
-          labelMobile: "Videos",
-          href: socialLinks.youtube,
-          gradient: "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700",
-          icon: Play,
-          external: true,
-        }]
+      ? [{ id: "videos", labelDesktop: "Videos", labelMobile: "Videos", href: socialLinks.youtube, icon: Play, external: true, style: "videos" as const }]
       : []),
     ...(socialLinks.instagram
-      ? [{
-          id: "instagram",
-          labelDesktop: "Instagram",
-          labelMobile: "Instagram",
-          href: socialLinks.instagram,
-          gradient: "bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700",
-          icon: Instagram,
-          external: true,
-        }]
+      ? [{ id: "instagram", labelDesktop: "Instagram", labelMobile: "Instagram", href: socialLinks.instagram, icon: Instagram, external: true, style: "instagram" as const }]
       : []),
   ];
+
+  const styleClasses: Record<QuickAction["style"], string> = {
+    book:
+      "bg-slate-700 hover:bg-slate-800 text-white border border-slate-600/50 dark:bg-slate-600 dark:hover:bg-slate-500 dark:border-slate-500/50",
+    call:
+      "bg-rose-600/90 hover:bg-rose-600 text-white border border-rose-500/50 dark:bg-rose-700 dark:hover:bg-rose-600 dark:border-rose-600/50",
+    whatsapp:
+      "bg-emerald-600/90 hover:bg-emerald-600 text-white border border-emerald-500/50 dark:bg-emerald-700 dark:hover:bg-emerald-600 dark:border-emerald-600/50",
+    videos:
+      "bg-red-600/90 hover:bg-red-600 text-white border border-red-500/50 dark:bg-red-700 dark:hover:bg-red-600 dark:border-red-600/50",
+    instagram:
+      "bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border border-violet-500/40 dark:border-fuchsia-500/40",
+  };
 
   const renderAction = (action: QuickAction) => {
     const Icon = action.icon;
     const commonAnchorProps = action.external ? { target: "_blank", rel: "noopener noreferrer" } : undefined;
-
-    const baseClasses = [
-      "flex items-center justify-start sm:justify-between rounded-full text-white transition-all shadow-md sm:shadow-lg",
-      "px-3 sm:px-4",
-      "py-2 sm:py-2.5",
-      "gap-2 sm:gap-3",
-      "text-[12px] sm:text-sm",
-      "active:scale-95 touch-manipulation",
-      "sm:hover:shadow-xl sm:hover:scale-[1.02]",
+    const btnClass = [
+      "flex items-center gap-3 w-full min-w-[140px] sm:min-w-[160px] rounded-xl py-2.5 px-3 sm:px-4",
+      "text-[13px] sm:text-sm font-medium transition-all duration-200",
+      "active:scale-[0.98] touch-manipulation",
+      "shadow-sm hover:shadow-md",
+      styleClasses[action.style],
     ].join(" ");
-
-    const labelClass = `flex-1 text-left whitespace-nowrap font-medium`;
-    const iconClass = `w-4 h-4 sm:w-5 sm:h-5 shrink-0`;
 
     const content = (
       <>
-        <Icon className={iconClass} />
-        <span className={labelClass}>
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/15">
+          <Icon className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
+        </span>
+        <span className="flex-1 text-left truncate">
           <span className="sm:hidden">{action.labelMobile}</span>
           <span className="hidden sm:inline">{action.labelDesktop}</span>
         </span>
         {action.id === "whatsapp" && (
-          <span className="hidden sm:inline-block ml-1 w-2 h-2 rounded-full bg-green-300 animate-pulse" />
+          <span className="h-2 w-2 shrink-0 rounded-full bg-white/80 animate-pulse" aria-hidden />
         )}
       </>
     );
 
     if (action.href.startsWith("tel:")) {
       return (
-        <a key={action.id} href={action.href} className={`${baseClasses} ${action.gradient}`}>
+        <a key={action.id} href={action.href} className={btnClass} onClick={() => setIsExpanded(false)}>
           {content}
         </a>
       );
     }
-
     if (action.external) {
       return (
-        <a key={action.id} href={action.href} {...commonAnchorProps} className={`${baseClasses} ${action.gradient}`}>
+        <a key={action.id} href={action.href} {...commonAnchorProps} className={btnClass} onClick={() => setIsExpanded(false)}>
           {content}
         </a>
       );
     }
-
     return (
-      <Link key={action.id} href={action.href} className={`${baseClasses} ${action.gradient}`}>
+      <Link key={action.id} href={action.href} className={btnClass} onClick={() => setIsExpanded(false)}>
         {content}
       </Link>
     );
   };
 
   return (
-    <>
-      {/* Expandable Floating Button - All Breakpoints */}
-      <div className="fixed bottom-3 right-3 sm:bottom-6 sm:right-6 z-50">
-        <div className="relative flex flex-col items-end gap-3">
-          {/* Expanded Options */}
-          <div
-            className={`transition-all duration-300 ${
-              isExpanded ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-4 pointer-events-none"
-            }`}
-          >
-            <div className="flex flex-col gap-1.5 sm:gap-2">
-              {quickActions.map((action) => renderAction(action))}
-            </div>
+    <div className="fixed bottom-3 right-3 sm:bottom-6 sm:right-6 z-50">
+      <div className="relative flex flex-col items-end gap-3">
+        {/* Popup card - shown by default on every load */}
+        <div
+          className={`transition-all duration-300 ease-out ${
+            isExpanded
+              ? "opacity-100 translate-y-0 pointer-events-auto"
+              : "opacity-0 translate-y-3 pointer-events-none"
+          }`}
+        >
+          <div className="rounded-2xl border border-white/30 dark:border-white/10 bg-white/55 dark:bg-gray-900/55 backdrop-blur-xl shadow-xl p-2.5 sm:p-3 flex flex-col gap-1.5 sm:gap-2">
+            <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 px-2 pb-0.5">
+              Quick actions
+            </p>
+            {quickActions.map((action) => renderAction(action))}
           </div>
-
-          {/* Main Expandable Button */}
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className={`flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-xl transition-all duration-300 hover:shadow-2xl ${
-              isExpanded
-                ? "bg-[#9d9585] dark:bg-[#b5ad9d]"
-                : "bg-[#b5ad9d] hover:bg-[#9d9585] dark:bg-[#9d9585] dark:hover:bg-[#b5ad9d] hover:scale-110"
-            } text-white`}
-            aria-label={isExpanded ? "Close menu" : "Open contact menu"}
-          >
-            {isExpanded ? (
-              <X className="w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-300 rotate-0" />
-            ) : (
-              <Menu className="w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-300" />
-            )}
-          </button>
         </div>
+
+        <button
+          type="button"
+          onClick={() => setIsExpanded(!isExpanded)}
+          className={`flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
+            isExpanded
+              ? "bg-gray-600 hover:bg-gray-700 dark:bg-gray-500 dark:hover:bg-gray-600 text-white"
+              : "bg-[#9d9585] hover:bg-[#8a8272] dark:bg-[#b5ad9d] dark:hover:bg-[#9d9585] text-white shadow-lg hover:shadow-xl hover:scale-105"
+          }`}
+          aria-label={isExpanded ? "Close menu" : "Open contact menu"}
+        >
+          {isExpanded ? <X className="h-5 w-5 sm:h-6 sm:w-6" /> : <Menu className="h-5 w-5 sm:h-6 sm:w-6" />}
+        </button>
       </div>
-    </>
+    </div>
   );
 }

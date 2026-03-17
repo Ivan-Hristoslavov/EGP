@@ -553,11 +553,19 @@ function BookingPageContent() {
     if (pendingProcessedRef.current) return; // Already processed this session (avoids Strict Mode double-add)
 
     // Prefer URL param (reliable across navigations), then sessionStorage (legacy)
-    const pendingServiceId =
-      searchParams.get("pendingServiceId") ||
-      (typeof window !== "undefined"
+    // Also support ?service=slug (e.g. free-discovery-consultation)
+    const pendingServiceIdParam = searchParams.get("pendingServiceId");
+    const serviceSlug = searchParams.get("service");
+    const fromStorage =
+      typeof window !== "undefined"
         ? sessionStorage.getItem("pendingServiceId")
-        : null);
+        : null;
+
+    let pendingServiceId = pendingServiceIdParam || fromStorage;
+    if (!pendingServiceId && serviceSlug) {
+      const bySlug = services.find((s) => s.slug === serviceSlug);
+      if (bySlug) pendingServiceId = bySlug.id;
+    }
 
     if (pendingServiceId) {
       const service = servicesDataMap[pendingServiceId];
@@ -578,10 +586,11 @@ function BookingPageContent() {
             quantity: 1,
           },
         ]);
-        // Clear URL param without full reload
-        if (searchParams.get("pendingServiceId")) {
+        // Clear URL params without full reload
+        if (searchParams.get("pendingServiceId") || searchParams.get("service")) {
           const params = new URLSearchParams(searchParams.toString());
           params.delete("pendingServiceId");
+          params.delete("service");
           router.replace(
             params.toString() ? `/book?${params.toString()}` : "/book",
             { scroll: false },
@@ -591,9 +600,10 @@ function BookingPageContent() {
           sessionStorage.removeItem("pendingServiceId");
         }
       } else {
-        if (searchParams.get("pendingServiceId")) {
+        if (searchParams.get("pendingServiceId") || searchParams.get("service")) {
           const params = new URLSearchParams(searchParams.toString());
           params.delete("pendingServiceId");
+          params.delete("service");
           router.replace(
             params.toString() ? `/book?${params.toString()}` : "/book",
             { scroll: false },
@@ -647,6 +657,10 @@ function BookingPageContent() {
     payDepositOnly &&
     depositAmount > 0 &&
     depositAmount < totalAmount;
+
+  const isFreeDiscoveryOnly =
+    totalAmount === 0 &&
+    selectedServices.some((s) => s.name === "Free Discovery Consultation");
 
   // Helper function to check if adding a service would exceed working hours
   const wouldExceedWorkingHours = useCallback(
@@ -2239,7 +2253,7 @@ function BookingPageContent() {
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   {totalDuration} min total
                 </p>
-                {depositConfig.enabled && (
+                {depositConfig.enabled && totalAmount > 0 && (
                   <div id="deposit-option" className="rounded-lg border-2 border-egp-green/30 dark:border-egp-beige/30 bg-white/60 dark:bg-gray-800/40 p-3 sm:p-4 space-y-2 sm:space-y-3 scroll-mt-24">
                     <label className="flex items-start gap-3 cursor-pointer group">
                       <input
@@ -2273,9 +2287,15 @@ function BookingPageContent() {
                     variant="primary"
                     className="w-full mt-2"
                     size="md"
-                    startContent={<CreditCard className="w-4 h-4" />}
+                    startContent={
+                      isFreeDiscoveryOnly ? (
+                        <Calendar className="w-4 h-4" />
+                      ) : (
+                        <CreditCard className="w-4 h-4" />
+                      )
+                    }
                   >
-                    Pay
+                    {isFreeDiscoveryOnly ? "Book" : "Pay"}
                   </ButtonPrimary>
                 ) : null}
               </CardBody>
@@ -2294,19 +2314,21 @@ function BookingPageContent() {
               </div>
             )}
             <CardBody className="p-6 space-y-5">
-              <div className="flex items-center gap-3 p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-                <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/40">
-                  <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+              {!isFreeDiscoveryOnly && (
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                  <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/40">
+                    <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-green-800 dark:text-green-200">
+                      Secure payment by Stripe
+                    </p>
+                    <p className="text-sm text-green-700 dark:text-green-300/80">
+                      Your payment information is encrypted and secure.
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold text-green-800 dark:text-green-200">
-                    Secure payment by Stripe
-                  </p>
-                  <p className="text-sm text-green-700 dark:text-green-300/80">
-                    Your payment information is encrypted and secure.
-                  </p>
-                </div>
-              </div>
+              )}
 
               {/* Stripe Payment Form */}
               {(() => {
