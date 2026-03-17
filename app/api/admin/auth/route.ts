@@ -68,9 +68,8 @@ export async function POST(request: NextRequest) {
 
       const jwtSecret = process.env.JWT_SECRET;
       if (!jwtSecret) {
-        console.error("JWT_SECRET env var is not set");
         return NextResponse.json(
-          { error: "Server configuration error" },
+          { error: "Server configuration error. Set JWT_SECRET in your environment (e.g. Vercel → Settings → Environment Variables)." },
           { status: 500 }
         );
       }

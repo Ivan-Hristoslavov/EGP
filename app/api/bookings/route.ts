@@ -155,7 +155,16 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Validate required fields
-    if (!customer_name || !service || !date || !time || !amount) {
+    // Note: amount can legitimately be 0 for free bookings, so only treat it as missing
+    // when it is null or undefined (not when it's 0).
+    if (
+      !customer_name ||
+      !service ||
+      !date ||
+      !time ||
+      amount === undefined ||
+      amount === null
+    ) {
       return NextResponse.json(
         { error: "Missing required fields: customer_name, service, date, time, amount" },
         { status: 400 }
