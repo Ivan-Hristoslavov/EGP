@@ -12,6 +12,7 @@ import { SiteDataProvider } from "@/contexts/SiteDataContext";
 export interface ProvidersProps {
   children: React.ReactNode;
   themeProps?: ThemeProviderProps;
+  initialAdminProfile?: any;
 }
 
 declare module "@react-types/shared" {
@@ -22,7 +23,7 @@ declare module "@react-types/shared" {
   }
 }
 
-export function Providers({ children, themeProps }: ProvidersProps) {
+export function Providers({ children, themeProps, initialAdminProfile = null }: ProvidersProps) {
   const router = useRouter();
 
   return (
@@ -34,7 +35,7 @@ export function Providers({ children, themeProps }: ProvidersProps) {
       {...themeProps}
     >
       <HeroUIProvider navigate={router.push}>
-        <AdminProfileProvider>
+        <AdminProfileProvider initialProfile={initialAdminProfile}>
           <SiteDataProvider>
           {children}
           </SiteDataProvider>

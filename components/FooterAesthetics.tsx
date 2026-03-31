@@ -34,10 +34,10 @@ export default function FooterAesthetics() {
   const { loading: profileLoading } = useAdminProfileContext();
   const { socialLinks } = useSocialLinks();
 
-  // Get contact info from admin profile, fallback to siteConfig
-  const contactPhone = adminProfile?.phone || siteConfig.contact.phone;
-  const contactEmail = adminProfile?.business_email || adminProfile?.email || siteConfig.contact.email;
-  const contactWhatsapp = (adminProfile as { whatsapp?: string } | null)?.whatsapp || siteConfig.contact.whatsapp;
+  // Get contact info from admin profile only
+  const contactPhone = adminProfile?.phone || "";
+  const contactEmail = adminProfile?.business_email || adminProfile?.email || "";
+  const contactWhatsapp = (adminProfile as { whatsapp?: string } | null)?.whatsapp || adminProfile?.phone || "";
   const contactAddress = adminProfile?.company_address || siteConfig.contact.address.full || `${siteConfig.contact.address.city}, ${siteConfig.contact.address.country}`;
 
   useEffect(() => {
@@ -65,7 +65,7 @@ export default function FooterAesthetics() {
   useEffect(() => {
     const fetchPressPageSetting = async () => {
       try {
-        const response = await fetch('/api/admin/press-settings');
+        const response = await fetch('/api/press-settings');
         if (response.ok) {
           const data = await response.json();
           setIsPressPageEnabled(data.enabled !== false); // Default to true if not set

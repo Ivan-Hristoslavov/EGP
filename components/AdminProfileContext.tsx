@@ -13,11 +13,13 @@ interface AdminProfileContextType {
 const AdminProfileContext = createContext<AdminProfileContextType | undefined>(undefined);
 
 export function AdminProfileProvider({ 
-  children
+  children,
+  initialProfile = null,
 }: { 
   children: ReactNode;
+  initialProfile?: any;
 }) {
-  const { profile, loading, error, refresh } = useAdminProfileHook();
+  const { profile, loading, error, refresh } = useAdminProfileHook(initialProfile);
 
   return (
     <AdminProfileContext.Provider value={{ 

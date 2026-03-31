@@ -44,7 +44,7 @@ export default function SectionContact() {
   const businessData = {
     businessName: adminProfile?.company_name || "EGP",
     businessEmail: adminProfile?.business_email || "",
-    businessPhone: adminProfile?.phone || siteConfig.contact.phone,
+    businessPhone: adminProfile?.phone || "",
     businessAddress: adminProfile?.company_address || "London, UK",
     responseTime:
       adminSettings?.responseTime ||

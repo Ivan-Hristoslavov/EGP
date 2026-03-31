@@ -21,9 +21,9 @@ export default function HeaderAesthetics() {
   const { loading: profileLoading } = useAdminProfileContext();
   const { socialLinks } = useSocialLinks();
   
-  // Get contact info from admin profile, fallback to siteConfig
-  const contactPhone = adminProfile?.phone || siteConfig.contact.phone;
-  const contactEmail = adminProfile?.business_email || adminProfile?.email || siteConfig.contact.email;
+  // Get contact info from admin profile only
+  const contactPhone = adminProfile?.phone || "";
+  const contactEmail = adminProfile?.business_email || adminProfile?.email || "";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -42,7 +42,7 @@ export default function HeaderAesthetics() {
   useEffect(() => {
     const fetchPressPageSetting = async () => {
       try {
-        const response = await fetch('/api/admin/press-settings');
+        const response = await fetch('/api/press-settings');
         if (response.ok) {
           const data = await response.json();
           setIsPressPageEnabled(data.enabled !== false); // Default to true if not set

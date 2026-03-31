@@ -19,7 +19,7 @@ export default function ButtonBookNow({
   showIcon = true,
 }: ButtonBookNowProps) {
   const adminProfile = useAdminProfile();
-  const contactPhone = adminProfile?.phone || siteConfig.contact.phone;
+  const contactPhone = adminProfile?.phone || "";
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",

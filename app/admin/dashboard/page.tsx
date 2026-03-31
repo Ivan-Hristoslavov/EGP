@@ -22,7 +22,7 @@ import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Input } from "@heroui/input";
-import { AdminPageLoading } from "@/components/AdminPageLoading";
+import { Spinner } from "@heroui/spinner";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/dropdown";
 
 interface Booking {
@@ -175,7 +175,11 @@ export default function DashboardPage() {
   );
 
   if (loading) {
-    return <AdminPageLoading message="Loading dashboard…" />;
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Spinner size="lg" />
+      </div>
+    );
   }
 
   // Create stat cards from loaded data
@@ -290,7 +294,7 @@ export default function DashboardPage() {
                 ) : (
               <div className="space-y-3">
                     {todayBookings.map((booking) => (
-                  <Card key={booking.id} className="border border-divider hover:shadow-md transition-shadow">
+                  <Card key={booking.id} isPressable className="border border-divider hover:shadow-md transition-shadow">
                     <CardBody className="p-3 sm:p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 flex-1">
