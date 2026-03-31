@@ -19,7 +19,7 @@ export default function SectionHeroAesthetics() {
   const adminProfile = useAdminProfile();
   const { loading: profileLoading } = useAdminProfileContext();
   const { heroSection, isLoading: heroLoading } = useHeroSection();
-  const contactPhone = heroSection?.phone_number || adminProfile?.phone || siteConfig.contact.phone;
+  const contactPhone = heroSection?.phone_number || adminProfile?.phone || "";
   const [currentSlide, setCurrentSlide] = useState(0);
   const [imagesLoaded, setImagesLoaded] = useState<boolean[]>([]);
   const [isMounted, setIsMounted] = useState(false);

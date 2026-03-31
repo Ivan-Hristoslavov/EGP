@@ -1,8 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/admin-auth";
 
 // GET - Fetch admin profile
 export async function GET() {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const supabase = createClient();
     
@@ -56,6 +59,8 @@ export async function GET() {
 
 // PUT - Update admin profile
 export async function PUT(request: NextRequest) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const supabase = createClient();
     const body = await request.json();

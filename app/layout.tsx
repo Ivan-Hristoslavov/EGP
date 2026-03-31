@@ -260,7 +260,7 @@ export default async function RootLayout({
         suppressHydrationWarning
       >
         <ToastProvider>
-          <Providers>
+          <Providers initialAdminProfile={adminProfile}>
             <HashNavigation />
             <LayoutMain adminProfile={adminProfile}>{children}</LayoutMain>
             {/* First-visit discount popup (client) */}

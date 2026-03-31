@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { usePathname } from "next/navigation";
 
 interface AdminProfile {
   id: string;
@@ -24,14 +25,24 @@ interface AdminSettings {
   [key: string]: any;
 }
 
-export function useAdminProfile() {
-  const [profile, setProfile] = useState<AdminProfile | null>(null);
+export function useAdminProfile(initialProfile: AdminProfile | null = null) {
+  const pathname = usePathname();
+  const isAdminPanel = pathname?.startsWith("/admin");
+  const canCallAdminApis = isAdminPanel && pathname !== "/admin/login";
+  const [profile, setProfile] = useState<AdminProfile | null>(initialProfile);
   const [settings, setSettings] = useState<AdminSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const fetchData = useCallback(async () => {
+    // On public pages, use server-provided profile only.
+    // Admin APIs should only be called inside admin panel.
+    if (!canCallAdminApis) {
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -66,7 +77,7 @@ export function useAdminProfile() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [canCallAdminApis]);
 
   useEffect(() => {
     fetchData();

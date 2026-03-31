@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { requireAdmin } from '@/lib/admin-auth';
 
 // GET: List all day off periods
 export async function GET() {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   const supabase = createClient();
   const { data, error } = await supabase
     .from('day_off_periods')
@@ -16,6 +19,8 @@ export async function GET() {
 
 // POST: Create new day off period
 export async function POST(req: NextRequest) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   const supabase = createClient();
   const body = await req.json();
   const { data, error } = await supabase
@@ -31,6 +36,8 @@ export async function POST(req: NextRequest) {
 
 // PUT: Update day off period (expects id in body)
 export async function PUT(req: NextRequest) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   const supabase = createClient();
   const body = await req.json();
   if (!body.id) {
@@ -50,6 +57,8 @@ export async function PUT(req: NextRequest) {
 
 // DELETE: Delete day off period (expects id in body)
 export async function DELETE(req: NextRequest) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   const supabase = createClient();
   const body = await req.json();
   if (!body.id) {

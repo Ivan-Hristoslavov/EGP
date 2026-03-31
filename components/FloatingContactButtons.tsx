@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Phone, Play, Calendar, MessageCircle, X, Menu, Instagram } from "lucide-react";
 import Link from "next/link";
-import { siteConfig } from "@/config/site";
 import { useAdminProfile } from "@/components/AdminProfileContext";
 import { useSocialLinks } from "@/hooks/useSocialLinks";
 
@@ -24,8 +23,8 @@ export default function FloatingContactButtons() {
   const adminProfile = useAdminProfile();
   const { socialLinks } = useSocialLinks();
 
-  const contactPhone = adminProfile?.phone || siteConfig.contact.phone;
-  const whatsappNumber = (adminProfile?.whatsapp || adminProfile?.phone || siteConfig.contact.whatsapp).replace(/\s/g, "").replace(/\+/g, "");
+  const contactPhone = adminProfile?.phone || "";
+  const whatsappNumber = (adminProfile?.whatsapp || adminProfile?.phone || "").replace(/\s/g, "").replace(/\+/g, "");
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hi! I'd like to book a treatment.")}`;
 
   const quickActions: QuickAction[] = [
@@ -37,23 +36,27 @@ export default function FloatingContactButtons() {
       icon: Calendar,
       style: "book",
     },
-    {
-      id: "call",
-      labelDesktop: "Call Now",
-      labelMobile: "Call",
-      href: `tel:${contactPhone}`,
-      icon: Phone,
-      style: "call",
-    },
-    {
-      id: "whatsapp",
-      labelDesktop: "WhatsApp",
-      labelMobile: "WhatsApp",
-      href: whatsappUrl,
-      icon: MessageCircle,
-      external: true,
-      style: "whatsapp",
-    },
+    ...(contactPhone
+      ? [{
+          id: "call",
+          labelDesktop: "Call Now",
+          labelMobile: "Call",
+          href: `tel:${contactPhone}`,
+          icon: Phone,
+          style: "call" as const,
+        }]
+      : []),
+    ...(whatsappNumber
+      ? [{
+          id: "whatsapp",
+          labelDesktop: "WhatsApp",
+          labelMobile: "WhatsApp",
+          href: whatsappUrl,
+          icon: MessageCircle,
+          external: true,
+          style: "whatsapp" as const,
+        }]
+      : []),
     ...(socialLinks.youtube
       ? [{ id: "videos", labelDesktop: "Videos", labelMobile: "Videos", href: socialLinks.youtube, icon: Play, external: true, style: "videos" as const }]
       : []),

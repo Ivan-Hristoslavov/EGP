@@ -43,7 +43,7 @@ export default function FormBooking() {
   }>>([]);
 
   // Get business phone from admin profile
-  const businessPhone = adminProfile?.phone || siteConfig.contact.phone;
+  const businessPhone = adminProfile?.phone || "";
   const hasSelectedService = Boolean(selectedService);
 
   // Get today's date for the minimum date and default value

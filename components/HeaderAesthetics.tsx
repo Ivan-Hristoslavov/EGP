@@ -9,6 +9,7 @@ import { Phone, Mail, MapPin, X, ChevronDown } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import { useConditions } from "@/hooks/useConditions";
 import { PriceWithDiscount } from "@/components/PriceWithDiscount";
+import { formatUkPhoneForDisplay } from "@/lib/phone";
 import type { Condition } from "@/hooks/useConditions";
 import type { Service } from "@/hooks/useServices";
 import { useAdminProfile, useAdminProfileContext } from "@/components/AdminProfileContext";
@@ -21,9 +22,10 @@ export default function HeaderAesthetics() {
   const { loading: profileLoading } = useAdminProfileContext();
   const { socialLinks } = useSocialLinks();
   
-  // Get contact info from admin profile, fallback to siteConfig
-  const contactPhone = adminProfile?.phone || siteConfig.contact.phone;
-  const contactEmail = adminProfile?.business_email || adminProfile?.email || siteConfig.contact.email;
+  // Get contact info from admin profile only
+  const contactPhone = adminProfile?.phone || "";
+  const contactPhoneDisplay = formatUkPhoneForDisplay(contactPhone);
+  const contactEmail = adminProfile?.business_email || adminProfile?.email || "";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -42,7 +44,7 @@ export default function HeaderAesthetics() {
   useEffect(() => {
     const fetchPressPageSetting = async () => {
       try {
-        const response = await fetch('/api/admin/press-settings');
+        const response = await fetch('/api/press-settings');
         if (response.ok) {
           const data = await response.json();
           setIsPressPageEnabled(data.enabled !== false); // Default to true if not set
@@ -336,7 +338,7 @@ export default function HeaderAesthetics() {
                     <Phone className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                     <span className="relative inline-block">
                       <span className="hidden sm:inline relative z-10 text-xs">
-                        {contactPhone}
+                        {contactPhoneDisplay}
                       </span>
                       <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-all duration-300 ease-out group-hover:w-full"></span>
                     </span>
@@ -471,7 +473,7 @@ export default function HeaderAesthetics() {
                       <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                       <span className="relative inline-block">
                         <span className="relative z-10">
-                          {contactPhone}
+                          {contactPhoneDisplay}
                         </span>
                         <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-all duration-300 ease-out group-hover:w-full"></span>
                       </span>

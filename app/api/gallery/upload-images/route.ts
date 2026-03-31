@@ -2,24 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { validateImageFile, processImageFile } from "@/lib/image-utils";
 
-/** Server-side HEIC to JPEG using heic-decode + jpeg-js (Supabase does not accept image/heic). */
-async function convertHeicBufferToJpeg(inputBuffer: Buffer | Uint8Array): Promise<Buffer> {
-  const uint8 = inputBuffer instanceof Uint8Array ? inputBuffer : new Uint8Array(inputBuffer);
-  if (uint8.length < 12) {
-    throw new Error("File too small to be a valid HEIC image");
-  }
-  const decode = (await import("heic-decode")).default;
-  const jpegJs = (await import("jpeg-js")).encode;
-  const { width, height, data } = await decode({ buffer: uint8 });
-  const encoded = jpegJs({ data, width, height }, 85);
-  return Buffer.from(encoded.data);
-}
-
-function isHeicFile(file: File): boolean {
-  const name = file.name.toLowerCase();
-  return name.endsWith(".heic") || name.endsWith(".heif") || file.type === "image/heic" || file.type === "image/heif";
-}
-
 // Validate environment variables
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -76,43 +58,27 @@ export async function POST(request: NextRequest) {
       console.log('Processing before image:', beforeImage.name);
       
       try {
-        const validation = validateImageFile(beforeImage, 10);
-        if (!validation.isValid) {
-          return NextResponse.json({ error: validation.error }, { status: 400 });
-        }
+        // Use new image validation and processing
+        const processedImage = await processImageFile(beforeImage, 10);
         
-        const arrayBuffer = await beforeImage.arrayBuffer();
-        const bytes = new Uint8Array(arrayBuffer);
-        let buffer = Buffer.from(bytes);
-        let contentType: string;
-        let baseName: string;
+        console.log('Image processing result:', {
+          originalType: processedImage.originalType,
+          finalType: processedImage.finalType,
+          wasConverted: processedImage.wasConverted,
+          fileName: processedImage.file.name
+        });
         
-        if (isHeicFile(beforeImage)) {
-          console.log('Converting HEIC to JPEG (server):', beforeImage.name);
-          try {
-            buffer = await convertHeicBufferToJpeg(bytes);
-          } catch (heicError) {
-            const msg = heicError instanceof Error ? heicError.message : String(heicError);
-            console.warn('Server HEIC conversion failed:', msg);
-            return NextResponse.json(
-              { error: 'HEIC conversion failed. Please use a JPEG/PNG image, or try again in Chrome/Firefox (they convert HEIC in the browser).' },
-              { status: 400 }
-            );
-          }
-          contentType = 'image/jpeg';
-          baseName = beforeImage.name.replace(/\.[^.]+$/i, '').replace(/[^a-zA-Z0-9.-]/g, '_') + '.jpg';
-        } else {
-          const processedImage = await processImageFile(beforeImage, 10);
-          buffer = Buffer.from(await processedImage.file.arrayBuffer());
-          contentType = processedImage.finalType;
-          baseName = processedImage.file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-        }
+        const bytes = await processedImage.file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
         
+        // Generate unique filename
         const timestamp = Date.now();
-        const filename = `before_${timestamp}_${baseName}`;
+        const originalName = processedImage.file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const filename = `before_${timestamp}_${originalName}`;
         
         console.log('Uploading before image as:', filename);
         
+        // Test bucket access first
         const { data: bucketTest, error: bucketError } = await supabase.storage
           .from('egp')
           .list('', { limit: 1 });
@@ -125,10 +91,13 @@ export async function POST(request: NextRequest) {
           );
         }
         
+        console.log('Bucket access test successful');
+        
+        // Upload to Supabase Storage
         const { data, error } = await supabase.storage
           .from('egp')
           .upload(filename, buffer, {
-            contentType,
+            contentType: processedImage.finalType,
             cacheControl: '3600',
             upsert: false
           });
@@ -164,47 +133,31 @@ export async function POST(request: NextRequest) {
       console.log('Processing after image:', afterImage.name);
       
       try {
-        const validation = validateImageFile(afterImage, 10);
-        if (!validation.isValid) {
-          return NextResponse.json({ error: validation.error }, { status: 400 });
-        }
+        // Use new image validation and processing
+        const processedImage = await processImageFile(afterImage, 10);
         
-        const arrayBuffer = await afterImage.arrayBuffer();
-        const bytes = new Uint8Array(arrayBuffer);
-        let buffer = Buffer.from(bytes);
-        let contentType: string;
-        let baseName: string;
+        console.log('Image processing result:', {
+          originalType: processedImage.originalType,
+          finalType: processedImage.finalType,
+          wasConverted: processedImage.wasConverted,
+          fileName: processedImage.file.name
+        });
         
-        if (isHeicFile(afterImage)) {
-          console.log('Converting HEIC to JPEG (server):', afterImage.name);
-          try {
-            buffer = await convertHeicBufferToJpeg(bytes);
-          } catch (heicError) {
-            const msg = heicError instanceof Error ? heicError.message : String(heicError);
-            console.warn('Server HEIC conversion failed:', msg);
-            return NextResponse.json(
-              { error: 'HEIC conversion failed. Please use a JPEG/PNG image, or try again in Chrome/Firefox (they convert HEIC in the browser).' },
-              { status: 400 }
-            );
-          }
-          contentType = 'image/jpeg';
-          baseName = afterImage.name.replace(/\.[^.]+$/i, '').replace(/[^a-zA-Z0-9.-]/g, '_') + '.jpg';
-        } else {
-          const processedImage = await processImageFile(afterImage, 10);
-          buffer = Buffer.from(await processedImage.file.arrayBuffer());
-          contentType = processedImage.finalType;
-          baseName = processedImage.file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-        }
+        const bytes = await processedImage.file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
         
+        // Generate unique filename
         const timestamp = Date.now();
-        const filename = `after_${timestamp}_${baseName}`;
+        const originalName = processedImage.file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const filename = `after_${timestamp}_${originalName}`;
         
         console.log('Uploading after image as:', filename);
         
+        // Upload to Supabase Storage
         const { data, error } = await supabase.storage
           .from('egp')
           .upload(filename, buffer, {
-            contentType,
+            contentType: processedImage.finalType,
             cacheControl: '3600',
             upsert: false
           });

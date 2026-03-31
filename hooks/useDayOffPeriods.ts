@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { usePathname } from "next/navigation";
 
 export interface DayOffPeriod {
   id?: string;
@@ -20,6 +21,8 @@ let cacheTimestamp = 0;
 const CACHE_DURATION = 30000; // 30 seconds cache
 
 export function useDayOffPeriods() {
+  const pathname = usePathname();
+  const isAdminPanel = pathname?.startsWith("/admin");
   const [periods, setPeriods] = useState<DayOffPeriod[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +43,7 @@ export function useDayOffPeriods() {
     try {
       setError(null);
       
-      const response = await fetch('/api/admin/day-off');
+      const response = await fetch(isAdminPanel ? '/api/admin/day-off' : '/api/day-off');
       if (!response.ok) {
         throw new Error('Failed to fetch day-off periods');
       }
@@ -64,7 +67,7 @@ export function useDayOffPeriods() {
         setLoading(false);
       }
     }
-  }, []);
+  }, [isAdminPanel]);
 
   useEffect(() => {
     isMountedRef.current = true;

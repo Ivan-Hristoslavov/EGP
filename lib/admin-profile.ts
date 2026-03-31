@@ -24,19 +24,19 @@ export interface AdminProfile {
 
 export async function getAdminProfile(): Promise<AdminProfile | null> {
   try {
-    const supabase = createClient();
-    
-    const { data: profile, error } = await supabase
+    // Use service-role for stable server-side reads on public pages as well.
+    // Also avoid `.single()` so we don't fail if historical duplicate rows exist.
+    const { data: profiles, error } = await supabaseAdmin
       .from('admin_profile')
       .select('*')
-      .single();
+      .order('updated_at', { ascending: false })
+      .limit(1);
 
     if (error) {
       console.error('Error fetching admin profile:', error);
       return null;
     }
-
-    return profile;
+    return (profiles?.[0] as AdminProfile) || null;
   } catch (error) {
     console.error('Error in getAdminProfile:', error);
     return null;
