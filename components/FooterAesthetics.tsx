@@ -16,6 +16,7 @@ import {
 import { siteConfig } from "@/config/site";
 import { useAdminProfile, useAdminProfileContext } from "@/components/AdminProfileContext";
 import { useSocialLinks } from "@/hooks/useSocialLinks";
+import { formatUkPhoneForDisplay } from "@/lib/phone";
 
 type WorkingHoursData = {
   [key: string]: {
@@ -36,6 +37,7 @@ export default function FooterAesthetics() {
 
   // Get contact info from admin profile only
   const contactPhone = adminProfile?.phone || "";
+  const contactPhoneDisplay = formatUkPhoneForDisplay(contactPhone);
   const contactEmail = adminProfile?.business_email || adminProfile?.email || "";
   const contactWhatsapp = (adminProfile as { whatsapp?: string } | null)?.whatsapp || adminProfile?.phone || "";
   const contactAddress = adminProfile?.company_address || siteConfig.contact.address.full || `${siteConfig.contact.address.city}, ${siteConfig.contact.address.country}`;
@@ -257,7 +259,7 @@ export default function FooterAesthetics() {
                   ) : (
                     <a href={`tel:${contactPhone}`} className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">
                       <Phone className="w-3.5 h-3.5 flex-shrink-0" />
-                      <span className="break-all">{contactPhone}</span>
+                      <span className="break-all">{contactPhoneDisplay}</span>
                     </a>
                   )}
                 </li>

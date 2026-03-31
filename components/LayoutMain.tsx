@@ -68,7 +68,7 @@ export default function LayoutMain({
     <div className="min-h-screen flex flex-col">
       {/* Free Discovery Consultation popup */}
       {showFreeConsultationPopup && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-[2px] sm:backdrop-blur-sm px-4">
           <div className="max-w-lg w-full bg-[#f5efe2]/95 dark:bg-gray-900/95 rounded-3xl shadow-2xl border border-[#e4d9c8] dark:border-gray-700 p-5 sm:p-6 relative overflow-hidden">
             <div className="pointer-events-none absolute -top-20 -left-16 h-48 w-48 rounded-full bg-[#c9c1b0]/25 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-20 -right-16 h-56 w-56 rounded-full bg-egp-green/15 blur-3xl" />
@@ -85,10 +85,10 @@ export default function LayoutMain({
             <h2 className="text-[28px] sm:text-[34px] leading-tight font-semibold text-gray-900 dark:text-white text-center mb-2">
               Free Discovery Consultation
             </h2>
-            <p className="text-sm text-gray-700 dark:text-gray-300 text-center mb-5 max-w-[34ch] mx-auto leading-relaxed">
+            <p className="text-sm text-gray-700 dark:text-gray-300 text-center mb-4 max-w-[34ch] mx-auto leading-relaxed">
               Get your personalised treatment plan with a complimentary consultation.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 mt-2">
+            <div className="flex flex-col sm:flex-row gap-3 mt-1.5">
               <button
                 className="flex-1 inline-flex items-center justify-center rounded-full bg-egp-green hover:bg-egp-green-dark text-white text-sm font-semibold py-3 px-4 transition-colors shadow-lg"
                 onClick={() => {
@@ -99,7 +99,7 @@ export default function LayoutMain({
                 Book Free Consultation
               </button>
               <button
-                className="flex-1 inline-flex items-center justify-center rounded-full border border-[#c9c1b0] dark:border-gray-600 text-gray-800 dark:text-gray-100 text-sm font-medium py-3 px-4 bg-white/70 dark:bg-gray-800/70 hover:bg-white dark:hover:bg-gray-800 transition-colors"
+                className="flex-1 inline-flex items-center justify-center rounded-full border border-[#b5ad9d] dark:border-gray-500 text-gray-800 dark:text-gray-100 text-sm font-medium py-3 px-4 bg-white/70 dark:bg-gray-800/70 hover:bg-white dark:hover:bg-gray-800 transition-colors"
                 onClick={dismissFreeConsultPopup}
               >
                 Maybe Later
