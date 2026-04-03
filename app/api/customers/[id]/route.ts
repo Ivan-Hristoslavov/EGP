@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { requireAdmin } from "@/lib/admin-auth";
+
+function supabaseErrorMessage(error: { message?: string; details?: string; hint?: string; code?: string }) {
+  const parts = [error.message, error.details, error.hint].filter(
+    (p): p is string => typeof p === "string" && p.length > 0
+  );
+  return parts.length > 0 ? parts.join(" — ") : error.code || "Database error";
+}
 
 export async function GET(
   request: NextRequest,
@@ -88,24 +96,75 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const { id: customerId } = await params;
+
+    if (!customerId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(customerId)) {
+      return NextResponse.json({ error: "Invalid customer ID format" }, { status: 400 });
+    }
+
     const body = await request.json();
+    const { name, email, phone, address, notes, postcode, city, marketing_emails } = body as Record<
+      string,
+      unknown
+    >;
+
+    const nameStr = typeof name === "string" ? name.trim() : "";
+    const nameParts = nameStr.split(/\s+/).filter(Boolean);
+    const first_name = nameParts[0] || "";
+    const last_name = nameParts.slice(1).join(" ") || "";
+
+    if (!first_name) {
+      return NextResponse.json({ error: "Name is required" }, { status: 400 });
+    }
+
+    if (typeof email !== "string" || !email.trim()) {
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+    }
+
+    const updatePayload: Record<string, unknown> = {
+      first_name,
+      last_name,
+      email: email.trim(),
+      phone: typeof phone === "string" ? phone.trim() || null : phone ?? null,
+      address: typeof address === "string" ? address.trim() || null : address ?? null,
+      notes: notes === "" || notes === null || notes === undefined ? null : String(notes),
+    };
+
+    if (postcode !== undefined) {
+      updatePayload.postcode = postcode === null || postcode === "" ? null : String(postcode);
+    }
+    if (city !== undefined) {
+      updatePayload.city = city === null || city === "" ? null : String(city);
+    }
+    if (typeof marketing_emails === "boolean") {
+      updatePayload.marketing_emails = marketing_emails;
+    }
 
     const { data, error } = await supabaseAdmin
       .from("customers")
-      .update(body)
+      .update(updatePayload)
       .eq("id", customerId)
       .select()
       .single();
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error("PUT /api/customers/[id] supabase error:", error);
+      return NextResponse.json({ error: supabaseErrorMessage(error) }, { status: 500 });
     }
 
     return NextResponse.json(data);
   } catch (error) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    console.error("PUT /api/customers/[id]:", error);
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : "Internal server error",
+      },
+      { status: 500 }
+    );
   }
 }
 

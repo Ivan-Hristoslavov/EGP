@@ -12,10 +12,24 @@ export default function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
+  const normalizeEmail = (value: string) =>
+    value
+      .replace(/[\u200B-\u200D\uFEFF]/g, "")
+      .trim()
+      .toLowerCase();
+
+  const normalizePassword = (value: string) =>
+    value.replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
+
+    const payload = {
+      email: normalizeEmail(email),
+      password: normalizePassword(password),
+    };
 
     try {
       // Send credentials to API for authentication
@@ -24,7 +38,7 @@ export default function AdminLoginPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
@@ -97,6 +111,10 @@ export default function AdminLoginPage() {
                 <input
                   required
                   autoComplete="email"
+                  inputMode="email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all duration-200 sm:text-sm"
                   id="email"
                   name="email"
@@ -122,6 +140,9 @@ export default function AdminLoginPage() {
                 <input
                   required
                   autoComplete="current-password"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all duration-200 sm:text-sm"
                   id="password"
                   name="password"

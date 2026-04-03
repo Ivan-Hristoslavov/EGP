@@ -14,6 +14,7 @@ import { Spinner } from "@heroui/spinner";
 import { Users, Plus, Eye, Edit, Trash2, Mail, Phone, MapPin, Table2, Grid3x3, Tag, Ticket, Send, CheckCircle, XCircle, Clock, Search } from "lucide-react";
 import { Select, SelectItem } from "@heroui/select";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useToast } from "@/components/Toast";
 
 type DiscountCode = {
   id: string;
@@ -57,6 +58,7 @@ type Customer = {
 const DUMMY_CUSTOMERS: Customer[] = [];
 
 export default function CustomersPage() {
+  const { showError } = useToast();
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
     null
   );
@@ -261,8 +263,17 @@ export default function CustomersPage() {
         setShowEditModal(false);
         setEditingCustomer(null);
       } else {
-        const error = await response.json();
-        console.error("Failed to update customer:", error);
+        let message = "Failed to update customer";
+        try {
+          const errBody = await response.json();
+          if (errBody && typeof errBody.error === "string" && errBody.error) {
+            message = errBody.error;
+          }
+        } catch {
+          message = response.statusText || message;
+        }
+        showError("Could not save customer", message);
+        console.error("Failed to update customer:", message);
       }
     } catch (error) {
       console.error("Error updating customer:", error);
@@ -682,60 +693,63 @@ export default function CustomersPage() {
 
             {/* Cards View - always on mobile, or when cards selected on desktop */}
             {(!isMdOrLarger || viewMode === "cards") && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 items-stretch">
                 {filteredCustomers.map((customer) => (
-                <Card key={customer.id} isPressable className="border border-divider hover:shadow-lg transition-shadow">
-                  <CardBody className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                            <div className="relative">
-                          <div className="w-14 h-14 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-2xl flex items-center justify-center shadow-lg">
-                                <span className="text-white font-bold text-lg">
-                                  {customer.name.charAt(0).toUpperCase()}
-                                </span>
-                              </div>
-                          <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-success-500 rounded-full border-2 border-background"></div>
+                <Card
+                  key={customer.id}
+                  className="border border-divider hover:shadow-lg transition-shadow h-full flex flex-col min-h-0"
+                >
+                  <CardBody className="p-3 sm:p-4 flex flex-col flex-1 min-h-0 gap-0">
+                    <div className="flex flex-col flex-1 min-h-0 justify-between gap-2">
+                      <div className="min-h-0 space-y-2">
+                        <div className="flex items-start gap-2.5">
+                          <div className="relative shrink-0">
+                            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center shadow-md">
+                              <span className="text-white font-bold text-sm">
+                                {customer.name.charAt(0).toUpperCase()}
+                              </span>
                             </div>
-                        <div>
-                          <h3 className="text-lg font-bold mb-1">
-                                {customer.name}
-                              </h3>
+                            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-success-500 rounded-full border-2 border-background" />
+                          </div>
+                          <div className="min-w-0 flex-1 pt-0.5">
+                            <h3 className="text-sm sm:text-base font-semibold leading-tight truncate">{customer.name}</h3>
                           </div>
                         </div>
-                      </div>
-                    
-                      {/* Contact Info */}
-                    <div className="space-y-3 mb-4">
-                      <div className="flex items-center text-sm text-default-600">
-                        <Mail className="w-4 h-4 mr-3 text-default-400" />
-                          <span className="truncate font-medium">{customer.email}</span>
-                        </div>
-                      <div className="flex items-center text-sm text-default-600">
-                        <Phone className="w-4 h-4 mr-3 text-default-400" />
-                          <span className="font-medium">{customer.phone}</span>
-                        </div>
-                      <div className="flex items-start text-sm text-default-600">
-                        <MapPin className="w-4 h-4 mr-3 mt-0.5 text-default-400 flex-shrink-0" />
-                          <span className="break-words">{customer.address}</span>
-                        </div>
-                      </div>
 
-                      {/* Discount Code Badge */}
-                      {(() => {
-                        const dc = getActiveDiscount(customer);
-                        if (!dc) return null;
-                        const st = getDiscountStatus(dc);
-                        return (
-                          <div className="flex items-center gap-2 mb-3">
-                            <Ticket className="w-3.5 h-3.5 text-default-400" />
-                            <code className="text-xs font-mono font-semibold">{dc.code}</code>
-                            <Chip size="sm" variant="flat" color={st.color}>{st.label}</Chip>
+                        <div className="space-y-1.5">
+                          <div className="flex items-center text-xs text-default-600">
+                            <Mail className="w-3.5 h-3.5 mr-2 text-default-400 shrink-0" />
+                            <span className="truncate font-medium">{customer.email}</span>
                           </div>
-                        );
-                      })()}
+                          <div className="flex items-center text-xs text-default-600">
+                            <Phone className="w-3.5 h-3.5 mr-2 text-default-400 shrink-0" />
+                            <span className="font-medium truncate">{customer.phone}</span>
+                          </div>
+                          <div className="flex items-start text-xs text-default-600">
+                            <MapPin className="w-3.5 h-3.5 mr-2 mt-0.5 text-default-400 flex-shrink-0" />
+                            <span className="break-words line-clamp-3">{customer.address}</span>
+                          </div>
+                        </div>
 
-                      {/* Action Buttons */}
-                    <div className="flex gap-2 pt-4 border-t border-divider">
+                        {(() => {
+                          const dc = getActiveDiscount(customer);
+                          if (!dc) return null;
+                          const st = getDiscountStatus(dc);
+                          return (
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <Ticket className="w-3 h-3 text-default-400 shrink-0" />
+                              <code className="text-[11px] font-mono font-semibold truncate max-w-[min(100%,9rem)]">
+                                {dc.code}
+                              </code>
+                              <Chip size="sm" variant="flat" color={st.color} className="h-5 text-[10px]">
+                                {st.label}
+                              </Chip>
+                            </div>
+                          );
+                        })()}
+                      </div>
+
+                      <div className="flex gap-1.5 pt-2.5 border-t border-divider shrink-0">
                       <Button
                         variant="flat"
                         size="sm"
@@ -769,6 +783,7 @@ export default function CustomersPage() {
                         <Trash2 className="w-4 h-4" />
                       </Button>
                       </div>
+                    </div>
                   </CardBody>
                 </Card>
                 ))}

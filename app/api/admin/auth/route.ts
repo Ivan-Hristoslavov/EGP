@@ -11,6 +11,14 @@ const loginAttempts = new Map<string, { count: number; blockedUntil: number }>()
 const MAX_ATTEMPTS = 5;
 const BLOCK_DURATION_MS = 15 * 60 * 1000; // 15 minutes
 
+function normalizeLoginEmail(value: string): string {
+  return value.replace(/[\u200B-\u200D\uFEFF]/g, "").trim().toLowerCase();
+}
+
+function normalizeLoginPassword(value: string): string {
+  return value.replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
+}
+
 function getClientIp(request: NextRequest): string {
   return request.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
 }
@@ -40,8 +48,11 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    email = typeof body.email === "string" ? body.email : null;
-    password = typeof body.password === "string" ? body.password : null;
+    const rawEmail = typeof body.email === "string" ? body.email : null;
+    const rawPassword = typeof body.password === "string" ? body.password : null;
+
+    email = rawEmail ? normalizeLoginEmail(rawEmail) : null;
+    password = rawPassword ? normalizeLoginPassword(rawPassword) : null;
 
     if (!email || !password) {
       return NextResponse.json(
@@ -50,7 +61,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get admin profile by email (use service role to bypass RLS)
+    // Get admin profile by email (use service role to bypass RLS).
+    // Email is normalized to lowercase + trim so autofill / locale quirks match DB.
     const { data: adminProfile, error } = await supabaseAdmin
       .from("admin_profile")
       .select("email, password")

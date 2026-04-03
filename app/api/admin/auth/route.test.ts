@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { NextRequest } from "next/server";
 import { POST } from "./route";
 
 vi.mock("next/headers", () => ({
@@ -27,7 +28,7 @@ describe("POST /api/admin/auth", () => {
   });
 
   it("returns 400 when email is missing", async () => {
-    const req = new Request("http://localhost/api/admin/auth", {
+    const req = new NextRequest("http://localhost/api/admin/auth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password: "secret" }),
@@ -39,7 +40,7 @@ describe("POST /api/admin/auth", () => {
   });
 
   it("returns 400 when password is missing", async () => {
-    const req = new Request("http://localhost/api/admin/auth", {
+    const req = new NextRequest("http://localhost/api/admin/auth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: "admin@test.com" }),

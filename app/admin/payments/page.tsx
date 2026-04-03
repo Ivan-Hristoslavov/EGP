@@ -284,6 +284,53 @@ export default function PaymentsPage() {
     }
   };
 
+  /** Card / row border accent by payment_status */
+  const getPaymentStatusBorderClass = (status: string) => {
+    switch (status) {
+      case "paid":
+        return "border-2 border-emerald-500/75 dark:border-emerald-400/65";
+      case "pending":
+        return "border-2 border-amber-500/75 dark:border-amber-400/65";
+      case "refunded":
+        return "border-2 border-sky-500/75 dark:border-sky-400/65";
+      case "failed":
+        return "border-2 border-red-500/75 dark:border-red-400/65";
+      default:
+        return "border border-divider";
+    }
+  };
+
+  const getPaymentStatusRowAccentClass = (status: string) => {
+    switch (status) {
+      case "paid":
+        return "border-l-[3px] border-l-emerald-500 dark:border-l-emerald-400";
+      case "pending":
+        return "border-l-[3px] border-l-amber-500 dark:border-l-amber-400";
+      case "refunded":
+        return "border-l-[3px] border-l-sky-500 dark:border-l-sky-400";
+      case "failed":
+        return "border-l-[3px] border-l-red-500 dark:border-l-red-400";
+      default:
+        return "border-l-[3px] border-l-zinc-400 dark:border-l-zinc-500";
+    }
+  };
+
+  /** Very subtle inner background gradient by status (cards + table rows) */
+  const getPaymentStatusGradientClass = (status: string) => {
+    switch (status) {
+      case "paid":
+        return "bg-gradient-to-br from-emerald-500/[0.06] via-transparent to-transparent dark:from-emerald-400/[0.07]";
+      case "pending":
+        return "bg-gradient-to-br from-amber-500/[0.06] via-transparent to-transparent dark:from-amber-400/[0.07]";
+      case "refunded":
+        return "bg-gradient-to-br from-sky-500/[0.06] via-transparent to-transparent dark:from-sky-400/[0.07]";
+      case "failed":
+        return "bg-gradient-to-br from-red-500/[0.06] via-transparent to-transparent dark:from-red-400/[0.07]";
+      default:
+        return "";
+    }
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'paid':
@@ -582,85 +629,87 @@ export default function PaymentsPage() {
         </Button>
       </div>
 
-      {/* Deposit options - compact layout */}
+      {/* Deposit options — single compact row (wraps only on very narrow screens) */}
       <Card className="border border-divider">
-        <CardBody className="p-4 sm:p-5">
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
-              <h3 className="text-sm font-semibold text-foreground">Deposit options</h3>
-              <Checkbox
-                isSelected={depositSettings.enabled}
-                onValueChange={(v) => handleDepositSettingsChange({ enabled: v })}
-                size="sm"
-                classNames={{ label: "text-sm" }}
-              >
-                <span className="text-sm">Allow deposit only (rest on arrival)</span>
-              </Checkbox>
-              {depositSettings.enabled && (
-                <div className="flex items-center gap-4 pl-6 sm:pl-0">
-                  <div className="flex items-center gap-3">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="depositType"
-                        checked={depositSettings.type === "percentage"}
-                        onChange={() => handleDepositSettingsChange({ type: "percentage" })}
-                        className="rounded-full w-4 h-4"
-                      />
-                      <span className="text-sm">%</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="depositType"
-                        checked={depositSettings.type === "fixed"}
-                        onChange={() => handleDepositSettingsChange({ type: "fixed" })}
-                        className="rounded-full w-4 h-4"
-                      />
-                      <span className="text-sm">£ Fixed</span>
-                    </label>
-                  </div>
-                  {depositSettings.type === "percentage" ? (
-                    <Input
-                      type="number"
-                      min={1}
-                      max={100}
-                      value={String(depositSettings.percentage ?? "")}
-                      onChange={(e) => handleDepositSettingsChange({ percentage: e.target.value ? Number(e.target.value) : null })}
-                      placeholder="50"
-                      endContent="%"
-                      size="sm"
-                      className="max-w-[80px]"
+        <CardBody className="p-2 sm:p-3">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 sm:gap-x-3">
+            <h3 className="text-xs font-semibold text-foreground shrink-0">Deposit options</h3>
+            <Checkbox
+              isSelected={depositSettings.enabled}
+              onValueChange={(v) => handleDepositSettingsChange({ enabled: v })}
+              size="sm"
+              classNames={{ base: "shrink-0 max-w-none", label: "text-xs whitespace-nowrap" }}
+            >
+              Allow deposit only (rest on arrival)
+            </Checkbox>
+            {depositSettings.enabled && (
+              <>
+                <div className="flex items-center gap-2 shrink-0">
+                  <label className="flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
+                    <input
+                      type="radio"
+                      name="depositType"
+                      checked={depositSettings.type === "percentage"}
+                      onChange={() => handleDepositSettingsChange({ type: "percentage" })}
+                      className="rounded-full w-3.5 h-3.5 shrink-0"
                     />
-                  ) : (
-                    <Input
-                      type="number"
-                      min={0}
-                      step={0.01}
-                      value={String(depositSettings.fixedAmount ?? "")}
-                      onChange={(e) => handleDepositSettingsChange({ fixedAmount: e.target.value ? Number(e.target.value) : null })}
-                      placeholder="100"
-                      startContent={<span className="text-default-500 text-sm">£</span>}
-                      size="sm"
-                      className="max-w-[100px]"
+                    <span className="text-xs">%</span>
+                  </label>
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="depositType"
+                      checked={depositSettings.type === "fixed"}
+                      onChange={() => handleDepositSettingsChange({ type: "fixed" })}
+                      className="rounded-full w-3.5 h-3.5 shrink-0"
                     />
-                  )}
+                    <span className="text-xs whitespace-nowrap">£ Fixed</span>
+                  </label>
                 </div>
-              )}
-            </div>
-            <div className="flex justify-center">
-              <Button
-                color="primary"
-                variant="flat"
-                size="sm"
-                onPress={handleSaveDepositSettings}
-                isLoading={isSavingDeposit}
-                startContent={!isSavingDeposit && <Save className="w-3.5 h-3.5" />}
-                className="min-h-[40px]"
-              >
-                {isSavingDeposit ? "Saving..." : "Save deposit settings"}
-              </Button>
-            </div>
+                {depositSettings.type === "percentage" ? (
+                  <Input
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={String(depositSettings.percentage ?? "")}
+                    onChange={(e) =>
+                      handleDepositSettingsChange({ percentage: e.target.value ? Number(e.target.value) : null })
+                    }
+                    placeholder="50"
+                    endContent="%"
+                    size="sm"
+                    classNames={{ inputWrapper: "min-h-8 h-8", input: "text-xs" }}
+                    className="w-[4.5rem] min-w-0 shrink"
+                  />
+                ) : (
+                  <Input
+                    type="number"
+                    min={0}
+                    step={0.01}
+                    value={String(depositSettings.fixedAmount ?? "")}
+                    onChange={(e) =>
+                      handleDepositSettingsChange({ fixedAmount: e.target.value ? Number(e.target.value) : null })
+                    }
+                    placeholder="100"
+                    startContent={<span className="text-default-500 text-xs">£</span>}
+                    size="sm"
+                    classNames={{ inputWrapper: "min-h-8 h-8", input: "text-xs" }}
+                    className="w-[5.5rem] min-w-0 shrink"
+                  />
+                )}
+              </>
+            )}
+            <Button
+              color="primary"
+              variant="flat"
+              size="sm"
+              onPress={handleSaveDepositSettings}
+              isLoading={isSavingDeposit}
+              startContent={!isSavingDeposit && <Save className="w-3 h-3" />}
+              className="min-h-8 h-8 px-2.5 text-xs shrink-0 ml-auto"
+            >
+              {isSavingDeposit ? "Saving..." : "Save deposit settings"}
+            </Button>
           </div>
         </CardBody>
       </Card>
@@ -795,52 +844,84 @@ export default function PaymentsPage() {
         ) : (
           <>
             {/* Card view - always on mobile, or when cards selected on desktop */}
-            <div className={(isMdOrLarger ? viewMode === "cards" : true) ? "p-4 space-y-4" : "hidden"}>
+            <div
+              className={
+                (isMdOrLarger ? viewMode === "cards" : true)
+                  ? "p-3 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3"
+                  : "hidden"
+              }
+            >
               {filteredPayments.map((payment) => (
-                <Card key={payment.id} className="border border-divider shadow-sm overflow-visible">
-                  <CardBody className="p-4 sm:p-5 space-y-3">
-                  <div className="flex items-start justify-between gap-3">
+                <Card
+                  key={payment.id}
+                  className={`shadow-sm overflow-visible h-full flex flex-col min-h-0 rounded-xl ${getPaymentStatusBorderClass(payment.payment_status)}`}
+                >
+                  <CardBody
+                    className={`p-3 flex flex-col flex-1 gap-2 min-h-0 ${getPaymentStatusGradientClass(payment.payment_status)}`}
+                  >
+                  <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                      <h4 className="font-semibold text-foreground truncate">
+                      <h4 className="text-sm font-semibold text-foreground truncate leading-tight">
                         {payment.customers?.name || payment.bookings?.customer_name || "Unknown Customer"}
                       </h4>
                       {payment.customers?.email && (
-                        <p className="text-sm text-default-500 truncate mt-0.5">{payment.customers.email}</p>
+                        <p className="text-xs text-default-500 truncate mt-0.5">{payment.customers.email}</p>
                       )}
                     </div>
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      <Button isIconOnly variant="light" size="md" className="min-h-[44px] min-w-[44px]" onPress={() => setSelectedPayment(payment)}>
-                        <Eye className="w-4 h-4" />
+                    <div className="flex items-center gap-0.5 flex-shrink-0">
+                      <Button isIconOnly variant="light" size="sm" className="min-w-8 min-h-8" onPress={() => setSelectedPayment(payment)}>
+                        <Eye className="w-3.5 h-3.5" />
                       </Button>
-                      <Button isIconOnly color="primary" variant="light" size="md" className="min-h-[44px] min-w-[44px]" onPress={() => { setEditingPayment(payment); setShowEditModal(true); }}>
-                        <Edit className="w-4 h-4" />
+                      <Button isIconOnly color="primary" variant="light" size="sm" className="min-w-8 min-h-8" onPress={() => { setEditingPayment(payment); setShowEditModal(true); }}>
+                        <Edit className="w-3.5 h-3.5" />
                       </Button>
-                      <Button isIconOnly color="danger" variant="light" size="md" className="min-h-[44px] min-w-[44px]" onPress={() => { setPaymentToDelete(payment); setShowDeleteModal(true); }}>
-                        <Trash2 className="w-4 h-4" />
+                      <Button isIconOnly color="danger" variant="light" size="sm" className="min-w-8 min-h-8" onPress={() => { setPaymentToDelete(payment); setShowDeleteModal(true); }}>
+                        <Trash2 className="w-3.5 h-3.5" />
                       </Button>
                     </div>
                   </div>
-                  <div className="text-sm text-foreground">{payment.bookings?.service || "Manual Payment"}</div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-semibold text-foreground">£{payment.amount.toFixed(2)}</span>
-                    {payment.payment_type === "deposit" && (
-                      <Chip size="sm" variant="flat" color="secondary">Deposit</Chip>
-                    )}
-                    <span className="flex items-center gap-1 text-sm text-default-600">
-                      {getMethodIcon(payment.payment_method)}
-                      <span className="capitalize">{payment.payment_method.replace("_", " ")}</span>
-                    </span>
-                    <Chip color={getStatusColor(payment.payment_status)} variant="flat" size="sm" startContent={getStatusIcon(payment.payment_status)}>
-                      {payment.payment_status}
-                    </Chip>
-                  </div>
-                  <div className="flex items-center justify-between text-sm text-default-500">
-                    <span>{new Date(payment.payment_date).toLocaleDateString()}</span>
-                    {(payment.bookings?.booking_number || payment.reference) && (
-                      <span className="truncate max-w-[140px]" title={payment.bookings?.booking_number || payment.reference || ""}>
-                        #{payment.bookings?.booking_number || payment.reference}
+                  <p className="text-xs text-foreground line-clamp-2 leading-snug min-h-[2rem]">
+                    {payment.bookings?.service || "Manual Payment"}
+                  </p>
+                  <div className="pt-2 border-t border-divider space-y-1.5 shrink-0">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+                      <span className="font-semibold text-foreground tabular-nums">£{payment.amount.toFixed(2)}</span>
+                      {payment.payment_type === "deposit" && (
+                        <Chip size="sm" variant="flat" color="secondary" className="h-5 text-[10px]">
+                          Deposit
+                        </Chip>
+                      )}
+                      <span className="inline-flex items-center gap-0.5 text-default-600">
+                        {getMethodIcon(payment.payment_method)}
+                        <span className="capitalize">{payment.payment_method.replace("_", " ")}</span>
                       </span>
-                    )}
+                      <Chip
+                        color={getStatusColor(payment.payment_status)}
+                        variant="flat"
+                        size="sm"
+                        className="h-5 text-[10px]"
+                        startContent={getStatusIcon(payment.payment_status)}
+                      >
+                        {payment.payment_status}
+                      </Chip>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 text-[11px] text-default-500">
+                      <span>
+                        {new Date(payment.payment_date).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </span>
+                      {(payment.bookings?.booking_number || payment.reference) && (
+                        <span
+                          className="truncate max-w-[55%] text-right font-mono"
+                          title={payment.bookings?.booking_number || payment.reference || ""}
+                        >
+                          #{payment.bookings?.booking_number || payment.reference}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   </CardBody>
                 </Card>
@@ -880,7 +961,10 @@ export default function PaymentsPage() {
               </thead>
               <tbody className="divide-y divide-divider">
                 {filteredPayments.map((payment) => (
-                  <tr key={payment.id} className="hover:bg-default-50 transition-colors">
+                  <tr
+                    key={payment.id}
+                    className={`hover:bg-default-50 transition-colors border-b border-divider ${getPaymentStatusRowAccentClass(payment.payment_status)} ${getPaymentStatusGradientClass(payment.payment_status)}`}
+                  >
                     <td className="px-3 py-2.5 min-w-0">
                       <div className="min-w-0 overflow-hidden">
                         <div className="text-sm font-medium text-foreground truncate" title={payment.customers?.name || payment.bookings?.customer_name || 'Unknown Customer'}>
