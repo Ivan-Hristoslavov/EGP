@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { siteConfig } from "@/config/site";
+import { canonicalUrl, defaultOgImages, toMetaDescription } from "@/lib/seo";
 import { typography, layout, textColors } from "@/config/typography";
 import Link from "next/link";
 import { Calendar, CheckCircle, Star, ArrowRight, Phone, Target } from "lucide-react";
@@ -43,11 +44,29 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
+  const title = (condition.seo_title || `${condition.title} Treatment`) + ` | ${siteConfig.name}`;
+  const description = toMetaDescription(condition.seo_description || condition.description);
+
   return {
-    title: (condition.seo_title || `${condition.title} Treatment`) + ` | ${siteConfig.name}`,
-    description: condition.seo_description || condition.description,
+    title,
+    description,
     alternates: {
-      canonical: `${siteConfig.url}/conditions/${slug}`,
+      canonical: canonicalUrl(`/conditions/${slug}`),
+    },
+    openGraph: {
+      title: condition.seo_title || `${condition.title} — Treatment options`,
+      description,
+      url: canonicalUrl(`/conditions/${slug}`),
+      type: "website",
+      locale: "en_GB",
+      siteName: siteConfig.name,
+      images: defaultOgImages(condition.title),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: condition.title,
+      description,
+      images: [canonicalUrl("/opengraph-image")],
     },
   };
 }

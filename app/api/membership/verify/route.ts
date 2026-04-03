@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
+import type Stripe from "stripe";
 import { supabase } from "@/lib/supabase";
-import Stripe from "stripe";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+import { getStripeServer } from "@/lib/stripe";
 
 export async function POST(request: NextRequest) {
   try {
+    const stripe = getStripeServer();
+    if (!stripe) {
+      return NextResponse.json(
+        { error: "Payment service is not configured" },
+        { status: 503 }
+      );
+    }
+
     const { sessionId } = await request.json();
 
     if (!sessionId) {

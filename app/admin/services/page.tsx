@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Plus,
   Edit,
@@ -31,6 +31,23 @@ import { Switch } from "@heroui/switch";
 import { Select, SelectItem } from "@heroui/select";
 import { Chip } from "@heroui/chip";
 import { Card, CardBody } from "@heroui/card";
+import { useToast } from "@/components/Toast";
+import Pagination from "@/components/Pagination";
+
+const SERVICES_PAGE_SIZE = 6;
+
+async function getResponseErrorMessage(
+  response: Response,
+  fallback: string,
+): Promise<string> {
+  try {
+    const data = (await response.json()) as { error?: string };
+    if (typeof data?.error === "string" && data.error.trim()) return data.error;
+  } catch {
+    /* ignore */
+  }
+  return fallback;
+}
 
 type Service = ReturnType<typeof useServices>["services"][0];
 type ServiceCategory = Service["category"];
@@ -45,6 +62,7 @@ type DiscountGroup = { id: string; name: string; discount_percentage: number; is
 
 export default function AdminServicesPage() {
   const { confirm, modalProps } = useConfirmation();
+  const { showSuccess, showError } = useToast();
 
   // Main state
   const [activeView, setActiveView] = useState<"services" | "categories" | "discounts">("services");
@@ -60,6 +78,7 @@ export default function AdminServicesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [servicesPage, setServicesPage] = useState(1);
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -183,7 +202,10 @@ export default function AdminServicesPage() {
 
   // Service CRUD operations
   const handleAddService = async () => {
-    if (!formData.name || !formData.category_id) return;
+    if (!formData.name || !formData.category_id) {
+      showError("Missing fields", "Please enter a service name and select a category.");
+      return;
+    }
     try {
       const serviceData = {
         ...formData,
@@ -201,9 +223,19 @@ export default function AdminServicesPage() {
         await loadServices();
         resetServiceForm();
         setIsModalOpen(false);
+        showSuccess("Service created", `"${formData.name}" has been added.`);
+      } else {
+        showError(
+          "Could not create service",
+          await getResponseErrorMessage(response, "Please try again."),
+        );
       }
     } catch (error) {
       console.error("Error adding service:", error);
+      showError(
+        "Could not create service",
+        error instanceof Error ? error.message : "Network error.",
+      );
     }
   };
 
@@ -250,9 +282,19 @@ export default function AdminServicesPage() {
         await loadServices();
         resetServiceForm();
         setIsModalOpen(false);
+        showSuccess("Service updated", `"${formData.name}" has been saved.`);
+      } else {
+        showError(
+          "Update failed",
+          await getResponseErrorMessage(response, "Could not save changes."),
+        );
       }
     } catch (error) {
       console.error("Error updating service:", error);
+      showError(
+        "Update failed",
+        error instanceof Error ? error.message : "Network error.",
+      );
     }
   };
 
@@ -271,9 +313,19 @@ export default function AdminServicesPage() {
           });
           if (response.ok) {
             await loadServices();
+            showSuccess("Service deleted", "The service has been removed.");
+          } else {
+            showError(
+              "Delete failed",
+              await getResponseErrorMessage(response, "Could not delete this service."),
+            );
           }
         } catch (error) {
           console.error("Error deleting service:", error);
+          showError(
+            "Delete failed",
+            error instanceof Error ? error.message : "Network error.",
+          );
         }
       }
     );
@@ -298,9 +350,20 @@ export default function AdminServicesPage() {
           benefits: Array.isArray(service.benefits) ? service.benefits : [],
         }),
       });
-      if (!response.ok) {
+      if (response.ok) {
+        showSuccess(
+          newFeaturedStatus ? "Featured" : "Removed from featured",
+          newFeaturedStatus
+            ? `"${service.name}" is now highlighted on the site.`
+            : `"${service.name}" is no longer featured.`,
+        );
+      } else {
         setServices((prev) =>
           prev.map((s) => (s.id === service.id ? { ...s, is_featured: service.is_featured } : s))
+        );
+        showError(
+          "Could not update featured",
+          await getResponseErrorMessage(response, "Please try again."),
         );
       }
     } catch (error) {
@@ -308,6 +371,10 @@ export default function AdminServicesPage() {
         prev.map((s) => (s.id === service.id ? { ...s, is_featured: service.is_featured } : s))
       );
       console.error("Error toggling featured status:", error);
+      showError(
+        "Could not update featured",
+        error instanceof Error ? error.message : "Network error.",
+      );
     }
   };
 
@@ -537,18 +604,37 @@ export default function AdminServicesPage() {
   };
 
   // Filter logic
-  const filteredServices = services.filter((service) => {
-    const serviceMainTabSlug = service.main_tab?.slug;
-    const matchesMainTab = serviceMainTabSlug === mainTab;
-    const matchesSearch =
-      service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (service.description || "")
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase());
-    const matchesCategory =
-      categoryFilter === "all" || service.category.id === categoryFilter;
-    return matchesMainTab && matchesSearch && matchesCategory;
-  });
+  const filteredServices = useMemo(() => {
+    const q = searchQuery.toLowerCase();
+    return services.filter((service) => {
+      const serviceMainTabSlug = service.main_tab?.slug;
+      const matchesMainTab = serviceMainTabSlug === mainTab;
+      const matchesSearch =
+        service.name.toLowerCase().includes(q) ||
+        (service.description || "").toLowerCase().includes(q);
+      const matchesCategory =
+        categoryFilter === "all" || service.category.id === categoryFilter;
+      return matchesMainTab && matchesSearch && matchesCategory;
+    });
+  }, [services, mainTab, searchQuery, categoryFilter]);
+
+  const totalServicePages = Math.max(
+    1,
+    Math.ceil(filteredServices.length / SERVICES_PAGE_SIZE),
+  );
+
+  const paginatedServices = useMemo(() => {
+    const start = (servicesPage - 1) * SERVICES_PAGE_SIZE;
+    return filteredServices.slice(start, start + SERVICES_PAGE_SIZE);
+  }, [filteredServices, servicesPage]);
+
+  useEffect(() => {
+    setServicesPage(1);
+  }, [mainTab, categoryFilter, searchQuery]);
+
+  useEffect(() => {
+    setServicesPage((p) => Math.min(p, totalServicePages));
+  }, [filteredServices.length, totalServicePages]);
 
   const currentCategories = categories.filter((cat) => {
     const catMainTabSlug = cat.main_tab?.slug;
@@ -578,107 +664,168 @@ export default function AdminServicesPage() {
 
   return (
     <div className="w-full">
-      <div className="space-y-6">
-        {/* Main Tabs */}
-        <div className="flex gap-2 sm:gap-3 mb-4 sm:mb-6">
-          <button
-            onClick={() => setMainTab("book-now")}
-            className={`flex-1 px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all ${
-              mainTab === "book-now"
-                ? "bg-gradient-to-r from-[#5a6259] to-[#464C45] text-white shadow-lg"
-                : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
-            }`}
-          >
-            BOOK NOW
-          </button>
-          <button
-            onClick={() => setMainTab("by-condition")}
-            className={`flex-1 px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all ${
-              mainTab === "by-condition"
-                ? "bg-gradient-to-r from-[#464C45] to-[#5a6259] text-white shadow-lg"
-                : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
-            }`}
-          >
-            BY CONDITION
-          </button>
-        </div>
+      <div className="space-y-4">
+        {/* Site area + admin task — compact segmented controls with labels */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-4">
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-default-500">
+              Which part of the site
+            </p>
+            <p className="text-xs text-default-400 hidden sm:block">
+              Filters services and categories shown to visitors (Book now vs Treatments by condition).
+            </p>
+            <div
+              className="inline-flex w-full max-w-md rounded-lg border border-default-200 bg-default-100/40 p-0.5 dark:border-default-100 dark:bg-default-50/30"
+              role="group"
+              aria-label="Site section"
+            >
+              <button
+                type="button"
+                onClick={() => setMainTab("book-now")}
+                className={`min-w-0 flex-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors sm:text-sm ${
+                  mainTab === "book-now"
+                    ? "bg-[#464C45] text-white shadow-sm"
+                    : "text-default-600 hover:bg-default-100 dark:text-default-400 dark:hover:bg-default-100/10"
+                }`}
+              >
+                Book now
+              </button>
+              <button
+                type="button"
+                onClick={() => setMainTab("by-condition")}
+                className={`min-w-0 flex-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors sm:text-sm ${
+                  mainTab === "by-condition"
+                    ? "bg-[#464C45] text-white shadow-sm"
+                    : "text-default-600 hover:bg-default-100 dark:text-default-400 dark:hover:bg-default-100/10"
+                }`}
+              >
+                By condition
+              </button>
+            </div>
+          </div>
 
-        {/* View Tabs */}
-        <div className="flex gap-2 sm:gap-3 mb-4 sm:mb-6">
-          <button
-            onClick={() => setActiveView("services")}
-            className={`flex-1 px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all ${
-              activeView === "services"
-                ? "bg-white dark:bg-gray-800 text-[#464C45] dark:text-[#464C45] border-2 border-[#464C45] shadow-lg"
-                : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-2 border-gray-200 dark:border-gray-700"
-            }`}
-          >
-            <div className="flex items-center justify-center gap-2">
-              <Package className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="hidden xs:inline">Services</span>
-              <span className="xs:hidden">Services</span>
+          <div className="min-w-0 flex-1 space-y-1.5 sm:max-w-xl">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-default-500">
+              What you are editing
+            </p>
+            <div
+              className="flex gap-1 rounded-lg border border-default-200 bg-content1 p-0.5 dark:border-default-100"
+              role="tablist"
+              aria-label="Admin section"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeView === "services"}
+                onClick={() => setActiveView("services")}
+                className={`flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors sm:gap-2 sm:px-3 sm:text-sm ${
+                  activeView === "services"
+                    ? "bg-default-200 text-foreground shadow-sm dark:bg-default-100"
+                    : "text-default-500 hover:bg-default-100/80 dark:hover:bg-default-100/10"
+                }`}
+              >
+                <Package className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+                <span>Services</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeView === "categories"}
+                onClick={() => setActiveView("categories")}
+                className={`flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors sm:gap-2 sm:px-3 sm:text-sm ${
+                  activeView === "categories"
+                    ? "bg-default-200 text-foreground shadow-sm dark:bg-default-100"
+                    : "text-default-500 hover:bg-default-100/80 dark:hover:bg-default-100/10"
+                }`}
+              >
+                <FolderTree className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+                <span>Categories</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeView === "discounts"}
+                onClick={() => setActiveView("discounts")}
+                className={`flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors sm:gap-2 sm:px-3 sm:text-sm ${
+                  activeView === "discounts"
+                    ? "bg-default-200 text-foreground shadow-sm dark:bg-default-100"
+                    : "text-default-500 hover:bg-default-100/80 dark:hover:bg-default-100/10"
+                }`}
+              >
+                <TrendingUp className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Discounts</span>
+                <span className="xs:hidden">Offers</span>
+              </button>
             </div>
-          </button>
-          <button
-            onClick={() => setActiveView("categories")}
-            className={`flex-1 px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all ${
-              activeView === "categories"
-                ? "bg-white dark:bg-gray-800 text-[#464C45] dark:text-[#464C45] border-2 border-[#464C45] shadow-lg"
-                : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-2 border-gray-200 dark:border-gray-700"
-            }`}
-          >
-            <div className="flex items-center justify-center gap-2">
-              <FolderTree className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="hidden xs:inline">Categories</span>
-              <span className="xs:hidden">Category</span>
-            </div>
-          </button>
-          <button
-            onClick={() => setActiveView("discounts")}
-            className={`flex-1 px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all ${
-              activeView === "discounts"
-                ? "bg-white dark:bg-gray-800 text-[#464C45] dark:text-[#464C45] border-2 border-[#464C45] shadow-lg"
-                : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-2 border-gray-200 dark:border-gray-700"
-            }`}
-          >
-            <div className="flex items-center justify-center gap-2">
-              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="hidden xs:inline">Discounts</span>
-              <span className="xs:hidden">Offers</span>
-            </div>
-          </button>
+          </div>
         </div>
 
         {/* Services View */}
         {activeView === "services" && (
-          <div className="space-y-6">
-            {/* Actions Bar */}
-            <div className="mb-6">
-              <div className="flex gap-2 items-center">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+          <div className="space-y-4">
+            {/* Compact stats + search row */}
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
+              <div className="flex flex-wrap items-stretch gap-2">
+                <div
+                  className="flex min-w-[5.5rem] flex-col justify-center rounded-lg border border-default-200 bg-content1 px-2.5 py-1.5 dark:border-default-100"
+                  title="Services matching filters below"
+                >
+                  <span className="text-[10px] font-medium uppercase tracking-wide text-default-500">
+                    In list
+                  </span>
+                  <span className="text-lg font-semibold tabular-nums leading-tight text-foreground">
+                    {filteredServices.length}
+                  </span>
+                </div>
+                <div className="flex min-w-[5.5rem] flex-col justify-center rounded-lg border border-default-200 bg-content1 px-2.5 py-1.5 dark:border-default-100">
+                  <span className="text-[10px] font-medium uppercase tracking-wide text-default-500">
+                    Categories
+                  </span>
+                  <span className="text-lg font-semibold tabular-nums leading-tight text-foreground">
+                    {currentCategories.length}
+                  </span>
+                </div>
+                <div className="flex min-w-[5.5rem] flex-col justify-center rounded-lg border border-default-200 bg-content1 px-2.5 py-1.5 dark:border-default-100">
+                  <span className="text-[10px] font-medium uppercase tracking-wide text-default-500">
+                    Featured
+                  </span>
+                  <span className="text-lg font-semibold tabular-nums leading-tight text-foreground">
+                    {filteredServices.filter((s) => s.is_featured).length}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+                <div className="min-w-0 flex-1 sm:max-w-xs lg:max-w-md">
                   <Input
                     placeholder="Search services..."
                     value={searchQuery}
                     onValueChange={setSearchQuery}
                     variant="bordered"
-                    className="pl-10"
-                    size="lg"
+                    size="sm"
+                    startContent={<Search className="h-4 w-4 shrink-0 text-default-400" />}
+                    classNames={{
+                      input: "text-sm",
+                      inputWrapper: "h-9 min-h-9",
+                    }}
                   />
                 </div>
                 <Select
-                  placeholder="All Categories"
+                  placeholder="All categories"
                   selectedKeys={categoryFilter === "all" ? [] : [categoryFilter]}
                   onSelectionChange={(keys) => {
                     const key = Array.from(keys)[0] as string;
                     setCategoryFilter(key || "all");
                   }}
                   variant="bordered"
-                  size="lg"
-                  className="w-48"
+                  size="sm"
+                  className="w-full sm:w-44"
+                  classNames={{
+                    trigger: "h-9 min-h-9",
+                  }}
                 >
                   <>
-                    <SelectItem key="all">All Categories</SelectItem>
+                    <SelectItem key="all">All categories</SelectItem>
                     {currentCategories.map((cat) => (
                       <SelectItem key={cat.id}>{cat.name}</SelectItem>
                     ))}
@@ -686,40 +833,14 @@ export default function AdminServicesPage() {
                 </Select>
                 <Button
                   onClick={openAddServiceModal}
-                  className="bg-gradient-to-r from-rose-500 to-pink-500 text-white min-w-[48px]"
-                  size="lg"
+                  className="h-9 min-h-9 min-w-9 shrink-0 bg-gradient-to-r from-rose-500 to-pink-500 text-white"
+                  size="sm"
                   isIconOnly
+                  aria-label="Add service"
                 >
-                  <Plus className="w-5 h-5" />
+                  <Plus className="h-4 w-4" />
                 </Button>
               </div>
-            </div>
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
-              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                <CardBody className="p-3 sm:p-4">
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Total</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                    {filteredServices.length}
-                  </p>
-                </CardBody>
-              </Card>
-              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                <CardBody className="p-3 sm:p-4">
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Categories</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                    {currentCategories.length}
-                  </p>
-                </CardBody>
-              </Card>
-              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                <CardBody className="p-3 sm:p-4">
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Featured</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                    {filteredServices.filter((s) => s.is_featured).length}
-                  </p>
-                </CardBody>
-              </Card>
             </div>
             {/* Services Grid or Info */}
             {currentCategories.length === 0 ? (
@@ -749,120 +870,106 @@ export default function AdminServicesPage() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                {filteredServices.map((service) => (
+              <>
+              <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-2">
+                {paginatedServices.map((service) => (
                   <Card
                     key={service.id}
-                    className="hover:shadow-xl transition-all group border border-gray-200 dark:border-gray-700 flex flex-col"
+                    className="hover:shadow-xl transition-all group border border-gray-200 dark:border-gray-700 flex flex-col min-w-0"
                   >
-                    <CardBody className="p-4 sm:p-6 flex flex-col flex-1">
+                    <CardBody className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
                       {/* Top Section */}
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2 truncate">
+                      <div className="min-h-0 flex-1 space-y-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <h3 className="text-sm font-semibold leading-snug text-foreground sm:text-base break-words">
                               {service.name}
                             </h3>
-                            <Chip size="sm" variant="flat" color="danger">
-                              {service.category.name}
-                            </Chip>
-                          </div>
-                          {service.is_featured && (
-                            <Chip
-                              size="sm"
-                              color="warning"
-                              variant="flat"
-                              className="ml-2"
-                            >
-                              <CheckCircle2 className="w-3 h-3 mr-1" />
-                            </Chip>
-                          )}
-                        </div>
-                        <div className="mb-3">
-                          {service.description ? (
-                            <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">
-                              {service.description}
-                            </p>
-                          ) : (
-                            <p className="text-gray-400 dark:text-gray-500 text-sm italic">
-                              Missing information
-                            </p>
-                          )}
-                        </div>
-                        {service.benefits && service.benefits.length > 0 ? (
-                          <div className="mb-3">
-                            <div className="flex flex-wrap gap-1">
-                              {service.benefits.slice(0, 3).map((benefit, idx) => (
-                                <Chip
-                                  key={idx}
-                                  size="sm"
-                                  variant="flat"
-                                  color="danger"
-                                  className="text-xs"
-                                >
-                                  {benefit}
-                                </Chip>
-                              ))}
-                              {service.benefits.length > 3 && (
-                                <Chip
-                                  size="sm"
-                                  variant="flat"
-                                  className="text-xs"
-                                >
-                                  +{service.benefits.length - 3}
+                            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                              <Chip size="sm" variant="flat" color="danger">
+                                {service.category.name}
+                              </Chip>
+                              {service.is_featured && (
+                                <Chip size="sm" color="warning" variant="flat">
+                                  <CheckCircle2 className="mr-1 h-3 w-3" />
+                                  Featured
                                 </Chip>
                               )}
                             </div>
                           </div>
-                        ) : (
-                          <div className="mb-3">
-                            <p className="text-gray-400 dark:text-gray-500 text-xs italic">
-                              Benefits not filled
+                        </div>
+                        <div>
+                          <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wide text-default-500 dark:text-default-400">
+                            Short description
+                          </p>
+                          {service.description ? (
+                            <div className="max-h-24 overflow-y-auto overscroll-contain rounded border border-default-200 bg-default-50/80 px-2 py-1.5 dark:border-default-100 dark:bg-zinc-900/80">
+                              <p className="text-xs leading-snug text-slate-800 dark:text-zinc-100 whitespace-pre-wrap break-words">
+                                {service.description}
+                              </p>
+                            </div>
+                          ) : (
+                            <p className="text-xs italic text-default-400">Missing information</p>
+                          )}
+                        </div>
+                        {service.benefits && service.benefits.length > 0 ? (
+                          <div>
+                            <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wide text-default-500 dark:text-default-400">
+                              Benefits
                             </p>
+                            <div className="max-h-20 overflow-y-auto overscroll-contain rounded border border-rose-200/80 bg-rose-50/95 px-2 py-1.5 dark:border-rose-800/60 dark:bg-rose-950/50">
+                              <ul className="list-inside list-disc space-y-0.5 text-[11px] leading-snug text-rose-950 dark:text-rose-50">
+                                {service.benefits.map((benefit, idx) => (
+                                  <li key={idx} className="break-words pl-0.5 marker:text-rose-500 dark:marker:text-rose-300">
+                                    {benefit}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
                           </div>
+                        ) : (
+                          <p className="text-[11px] italic text-default-400">Benefits not filled</p>
                         )}
                         {service.details ? (
-                          <div className="mb-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                            <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1">
-                              Details:
+                          <div>
+                            <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wide text-default-500 dark:text-default-400">
+                              Details
                             </p>
-                            <p className="text-xs text-gray-700 dark:text-gray-300 line-clamp-2">
-                              {service.details}
-                            </p>
+                            <div className="max-h-28 overflow-y-auto overscroll-contain rounded border border-blue-200/70 bg-blue-50 px-2 py-1.5 dark:border-slate-600 dark:bg-slate-900/95">
+                              <p className="text-[11px] leading-snug text-slate-900 dark:text-zinc-50 whitespace-pre-wrap break-words">
+                                {service.details}
+                              </p>
+                            </div>
                           </div>
                         ) : (
-                          <div className="mb-3">
-                            <p className="text-gray-400 dark:text-gray-500 text-xs italic">
-                              Details not filled
-                            </p>
-                          </div>
+                          <p className="text-[11px] italic text-default-400">Details not filled</p>
                         )}
                       </div>
-                      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <div className="flex items-center justify-between mb-3">
+                      <div className="mt-2 border-t border-gray-200 pt-3 dark:border-gray-700">
+                        <div className="mb-2 flex items-center justify-between">
                           <div>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                            <p className="mb-0.5 text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
                               Price
                             </p>
-                            <span className="text-rose-600 dark:text-rose-400 font-bold text-xl">
+                            <span className="text-lg font-bold text-rose-600 dark:text-rose-400">
                               £{service.price || 0}
                             </span>
                           </div>
                           <div className="text-right">
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                            <p className="mb-0.5 text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
                               Duration
                             </p>
-                            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 text-sm">
-                              <span>⏱</span>
+                            <div className="flex items-center justify-end gap-1.5 text-xs text-gray-700 dark:text-gray-200">
+                              <span aria-hidden>⏱</span>
                               <span>{service.duration || 0} min</span>
                             </div>
                           </div>
                         </div>
-                        <div className="space-y-2">
-                          <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold mb-2">
-                            Additional Information:
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            Extra
                           </p>
-                          <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px]">
                             {service.requires_consultation ? (
                               <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
                                 <svg
@@ -935,7 +1042,7 @@ export default function AdminServicesPage() {
                           </div>
                         </div>
                         {/* Action Buttons */}
-                        <div className="flex gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <div className="mt-2 flex gap-1.5 border-t border-gray-200 pt-2 dark:border-gray-700">
                           <Button
                             size="sm"
                             variant={service.is_featured ? "solid" : "flat"}
@@ -971,6 +1078,17 @@ export default function AdminServicesPage() {
                   </Card>
                 ))}
               </div>
+              <Pagination
+                currentPage={servicesPage}
+                totalPages={totalServicePages}
+                totalCount={filteredServices.length}
+                limit={SERVICES_PAGE_SIZE}
+                onPageChange={async (page) => {
+                  setServicesPage(page);
+                }}
+                className="mt-6"
+              />
+              </>
             )}
           </div>
         )}

@@ -1,14 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
+import { getStripeServer } from '@/lib/stripe';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendEmail } from '@/lib/sendgrid-smtp';
 import { getAdminContactInfo } from '@/lib/admin-profile';
 import { getEmailHead, EMAIL } from '@/lib/email-theme';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
 export async function POST(request: NextRequest) {
   try {
+    const stripe = getStripeServer();
+    if (!stripe) {
+      return NextResponse.json(
+        { error: 'Payment service is not configured' },
+        { status: 503 }
+      );
+    }
+
     const body = await request.json();
     const { paymentIntentId } = body;
 

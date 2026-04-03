@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
 
-import { supabase } from "../../../../lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
 import { requireAdmin } from "@/lib/admin-auth";
 
 // GET - Fetch single payment by ID (admin only)
@@ -16,9 +14,7 @@ export async function GET(
   const { id } = await params;
 
   try {
-    const supabase = createRouteHandlerClient({ cookies });
-
-    const { data: payment, error } = await supabase
+    const { data: payment, error } = await supabaseAdmin
       .from("payments")
       .select(
         `
@@ -71,7 +67,6 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const supabase = createRouteHandlerClient({ cookies });
 
     const {
       customer_id,
@@ -123,7 +118,7 @@ export async function PUT(
     if (payment_type !== undefined) {
       updateData.payment_type = payment_type;
     }
-    const { data: payment, error } = await supabase
+    const { data: payment, error } = await supabaseAdmin
       .from("payments")
       .update(updateData)
       .eq("id", id)
@@ -159,7 +154,7 @@ export async function DELETE(
   const { id } = await params;
 
   try {
-    const { error } = await supabase.from("payments").delete().eq("id", id);
+    const { error } = await supabaseAdmin.from("payments").delete().eq("id", id);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });

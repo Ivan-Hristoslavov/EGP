@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { siteConfig } from "@/config/site";
+import { canonicalUrl, defaultOgImages, toMetaDescription } from "@/lib/seo";
 import { layout, textColors } from "@/config/typography";
 import Link from "next/link";
 import { Calendar, Clock, User, ArrowLeft, ArrowRight } from "lucide-react";
@@ -64,11 +65,50 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
+  const title = post.seo_title || `${post.title} | ${siteConfig.name}`;
+  const description = toMetaDescription(
+    post.seo_description || post.excerpt || `Read about ${post.title} at EGP Aesthetics London.`
+  );
+  const published = post.published_at ? new Date(post.published_at) : undefined;
+  const modified = post.updated_at ? new Date(post.updated_at) : published;
+
   return {
-    title: post.seo_title || `${post.title} | ${siteConfig.name}`,
-    description: post.seo_description || post.excerpt || `Read about ${post.title} at EGP Aesthetics London.`,
+    title,
+    description,
     alternates: {
-      canonical: `${siteConfig.url}/blog/${slug}`,
+      canonical: canonicalUrl(`/blog/${slug}`),
+    },
+    openGraph: {
+      title: post.title,
+      description,
+      url: canonicalUrl(`/blog/${slug}`),
+      type: "article",
+      locale: "en_GB",
+      siteName: siteConfig.name,
+      publishedTime: published?.toISOString(),
+      modifiedTime: modified?.toISOString(),
+      images: post.featured_image_url
+        ? [
+            {
+              url: post.featured_image_url.startsWith("http")
+                ? post.featured_image_url
+                : canonicalUrl(post.featured_image_url.startsWith("/") ? post.featured_image_url : `/${post.featured_image_url}`),
+              alt: post.title,
+            },
+          ]
+        : defaultOgImages(post.title),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description,
+      images: post.featured_image_url
+        ? [
+            post.featured_image_url.startsWith("http")
+              ? post.featured_image_url
+              : canonicalUrl(post.featured_image_url.startsWith("/") ? post.featured_image_url : `/${post.featured_image_url}`),
+          ]
+        : [canonicalUrl("/opengraph-image")],
     },
   };
 }
