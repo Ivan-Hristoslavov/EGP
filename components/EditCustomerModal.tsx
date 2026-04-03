@@ -62,10 +62,6 @@ export function EditCustomerModal({
       newErrors.phone = "Phone number is required";
     }
 
-    if (!formData.address.trim()) {
-      newErrors.address = "Address is required";
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -79,7 +75,7 @@ export function EditCustomerModal({
       name: formData.name.trim(),
       email: formData.email.trim(),
       phone: formData.phone.trim(),
-      address: formData.address.trim(),
+      address: formData.address.trim() || null,
       notes: formData.notes.trim() || null
     };
 
@@ -185,14 +181,13 @@ export function EditCustomerModal({
               <div className={formLayout.fullWidth}>
                     <Textarea
                       label="Address"
-                      placeholder="Full address including postcode"
+                      placeholder="Optional — full address including postcode"
                   value={formData.address}
                   onChange={(e) => {
                     setFormData({ ...formData, address: e.target.value });
                     setErrors(prev => ({ ...prev, address: '' }));
                   }}
                   rows={3}
-                      isRequired
                       isInvalid={!!errors.address}
                       errorMessage={errors.address}
                       isDisabled={isLoading}

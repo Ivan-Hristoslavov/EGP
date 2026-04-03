@@ -82,19 +82,26 @@ export const siteConfig = {
   // SEO Defaults
   seo: {
     titleTemplate: "%s | EGP Aesthetics London",
-    defaultTitle: "EGP Aesthetics London - Premier Aesthetic Clinic",
-    defaultDescription: "Expert aesthetic treatments in London. Botox, fillers, skin boosters, body contouring. Book your treatment now.",
+    defaultTitle: "EGP Aesthetics London | Aesthetic Clinic London — Botox, Fillers & Body Treatments",
+    defaultDescription:
+      "Award-focused aesthetic clinic in London: anti-wrinkle injections, dermal fillers, skin boosters, body contouring and personalised consultations. Book online.",
     keywords: [
       "aesthetic clinic london",
+      "medical aesthetics london",
       "botox london",
+      "anti wrinkle injections london",
       "dermal fillers london",
-      "anti-wrinkle injections",
-      "skin treatments london",
-      "facial aesthetics",
+      "lip fillers london",
+      "skin boosters london",
+      "profhilo london",
+      "microneedling london",
+      "facial aesthetics london",
       "body contouring london",
-      "aesthetic practitioner",
-      "beauty clinic london",
-      "cosmetic treatments"
+      "fat freezing london",
+      "aesthetic practitioner london",
+      "beauty clinic south west london",
+      "cosmetic clinic london",
+      "book aesthetic appointment london",
     ],
     openGraph: {
       type: "website",

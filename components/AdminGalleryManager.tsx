@@ -444,11 +444,11 @@ export function AdminGalleryManager({
       <>
           {/* Existing Gallery Items */}
           {/* Gallery Items List */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 items-stretch">
             {paginatedItems.map((item) => (
               <div
                 key={item.id}
-                className="relative bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-5 flex flex-col group overflow-hidden hover:border-rose-300 dark:hover:border-rose-700"
+                className="relative bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-4 flex flex-col h-full min-h-0 group overflow-hidden hover:border-rose-300 dark:hover:border-rose-700"
               >
                 {/* Floating Action Buttons */}
                 <div className="absolute top-3 right-3 flex gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -481,7 +481,7 @@ export function AdminGalleryManager({
                   </button>
                 </div>
                 {/* Title + Featured badge */}
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 truncate pr-16 flex items-center gap-2 flex-wrap">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 truncate pr-16 flex items-center gap-2 flex-wrap shrink-0">
                   {item.title || <span className="italic text-gray-400">(No title)</span>}
                   {item.is_featured && (
                     <span className="inline-flex items-center px-2 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 rounded text-xs font-semibold shrink-0">
@@ -491,7 +491,7 @@ export function AdminGalleryManager({
                 </h3>
                 
                 {/* Before/After Images */}
-                <div className="flex gap-3 mb-4">
+                <div className="flex gap-3 mb-2 shrink-0">
                   {/* Before Card */}
                   <div className="flex-1 relative bg-gray-100 dark:bg-gray-700 rounded-xl border-2 border-red-200 dark:border-red-800 overflow-hidden group/image">
                     <div className="absolute top-2 left-2 z-10 bg-red-500 text-white px-2.5 py-1 rounded-lg text-xs font-bold shadow-lg">
@@ -527,13 +527,21 @@ export function AdminGalleryManager({
                     )}
                   </div>
                 </div>
-                
-                {/* Description */}
-                {item.description && (
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">{item.description}</p>
-                )}
+
+                {/* Text + badges + date: flex-1 so date stays at card bottom */}
+                <div className="flex flex-col flex-1 min-h-0 mt-1">
+                {/* Description — fixed min height so rows align across grid */}
+                <div className="min-h-[2.75rem] mb-2 shrink-0">
+                  {item.description ? (
+                    <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{item.description}</p>
+                  ) : (
+                    <p className="text-sm text-transparent select-none" aria-hidden>
+                      &nbsp;
+                    </p>
+                  )}
+                </div>
                 {/* Service & Category Badges */}
-                <div className="flex flex-wrap gap-2 mb-2">
+                <div className="flex flex-wrap gap-2 mb-2 shrink-0">
                   {item.category && (
                     <span className="inline-flex items-center px-2.5 py-1 bg-gradient-to-r from-rose-500/10 to-pink-500/10 dark:from-rose-500/20 dark:to-pink-500/20 text-rose-700 dark:text-rose-300 border border-rose-300/50 dark:border-rose-700/50 rounded-full text-xs font-semibold">
                       <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
@@ -559,13 +567,16 @@ export function AdminGalleryManager({
                     </span>
                   )}
                 </div>
-                {/* Completion Date */}
-                {item.completion_date && (
-                  <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mb-1">
-                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} /></svg>
-                    {new Date(item.completion_date).toLocaleDateString('en-GB')}
-                  </div>
-                )}
+                {/* Completion Date — always at bottom of card */}
+                <div className="mt-auto pt-2 border-t border-gray-200/80 dark:border-gray-600/50 shrink-0 flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                  <svg className="w-4 h-4 mr-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} /></svg>
+                  <span>
+                    {item.completion_date
+                      ? new Date(item.completion_date).toLocaleDateString("en-GB")
+                      : "—"}
+                  </span>
+                </div>
+                </div>
               </div>
             ))}
           </div>
@@ -632,10 +643,10 @@ export function AdminGalleryManager({
 
                 {/* Modal Content */}
                 <div className="p-6 md:p-7 space-y-6">
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                    {/* Column 1 – Treatment details */}
-                    <div className="lg:col-span-1 space-y-4 rounded-2xl bg-white/80 dark:bg-gray-900/70 border border-gray-100 dark:border-gray-800 p-4 md:p-5 shadow-sm">
-                      <div className="pb-3 border-b border-gray-100 dark:border-gray-800">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:items-stretch">
+                    {/* Column 1 – Treatment details (date pinned to bottom of column) */}
+                    <div className="lg:col-span-1 flex flex-col rounded-2xl bg-white/80 dark:bg-gray-900/70 border border-gray-100 dark:border-gray-800 p-4 md:p-5 shadow-sm h-full min-h-[260px]">
+                      <div className="pb-3 border-b border-gray-100 dark:border-gray-800 shrink-0">
                         <h5 className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 flex items-center gap-2">
                           <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-rose-100 text-rose-600 dark:bg-rose-900/40 dark:text-rose-200 text-[11px]">
                             1
@@ -644,7 +655,7 @@ export function AdminGalleryManager({
                         </h5>
                       </div>
 
-                      <div className="space-y-4">
+                      <div className="flex flex-col flex-1 min-h-0 gap-4 pt-4">
                         <div>
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                             Treatment Category *
@@ -716,7 +727,7 @@ export function AdminGalleryManager({
                           </p>
                         </div>
 
-                        <div>
+                        <div className="mt-auto pt-3 border-t border-gray-100 dark:border-gray-800">
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                             Treatment Date *
                           </label>
@@ -744,7 +755,7 @@ export function AdminGalleryManager({
                     </div>
 
                     {/* Column 2 – Story / Description */}
-                    <div className="lg:col-span-1 space-y-4 rounded-2xl bg-white/80 dark:bg-gray-900/70 border border-gray-100 dark:border-gray-800 p-4 md:p-5 shadow-sm">
+                    <div className="lg:col-span-1 flex flex-col rounded-2xl bg-white/80 dark:bg-gray-900/70 border border-gray-100 dark:border-gray-800 p-4 md:p-5 shadow-sm h-full min-h-0">
                       <div className="pb-3 border-b border-gray-100 dark:border-gray-800">
                         <h5 className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 flex items-center gap-2">
                           <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-rose-100 text-rose-600 dark:bg-rose-900/40 dark:text-rose-200 text-[11px]">
@@ -754,7 +765,7 @@ export function AdminGalleryManager({
                         </h5>
                       </div>
 
-                      <div className="space-y-4">
+                      <div className="space-y-4 pt-4">
                         <div>
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                             Transformation Title *
@@ -825,7 +836,7 @@ export function AdminGalleryManager({
                     </div>
 
                     {/* Column 3 – Images & preview */}
-                    <div className="lg:col-span-1 space-y-4 rounded-2xl bg-white/90 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-4 md:p-5 shadow-sm">
+                    <div className="lg:col-span-1 flex flex-col space-y-4 rounded-2xl bg-white/90 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-4 md:p-5 shadow-sm h-full min-h-0">
                       <div className="pb-3 border-b border-gray-100 dark:border-gray-800">
                         <div className="flex items-center gap-2">
                           <h5 className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 flex items-center gap-2">
@@ -1003,8 +1014,8 @@ export function AdminGalleryManager({
                     </div>
                   </div>
 
-                  {/* Form Actions */}
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-gray-200/70 dark:border-gray-800 sticky bottom-0 bg-gradient-to-r from-rose-50/95 via-white/95 to-purple-50/95 dark:from-gray-900/98 dark:via-gray-900/98 dark:to-gray-950/98 backdrop-blur-sm">
+                  {/* Form Actions — solid bg in dark mode (no white gradient strip) */}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 mt-2 border-t border-gray-200 dark:border-gray-800 bg-gray-100/90 dark:bg-gray-950/90 dark:text-gray-100 rounded-xl px-4 py-3">
                     <label className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200 cursor-pointer order-last sm:order-first">
                       <input
                         type="checkbox"
@@ -1015,7 +1026,7 @@ export function AdminGalleryManager({
                             is_featured: e.target.checked,
                           }))
                         }
-                        className="w-4 h-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500 shrink-0"
+                        className="w-4 h-4 rounded border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800 text-rose-600 focus:ring-rose-500 shrink-0"
                       />
                       <span>Feature this transformation</span>
                     </label>

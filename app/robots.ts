@@ -14,8 +14,6 @@ export default function robots(): MetadataRoute.Robots {
           '/_next/',
           '/private/',
           '/temp/',
-          '/*.json',
-          '/*.xml',
         ],
       },
       {

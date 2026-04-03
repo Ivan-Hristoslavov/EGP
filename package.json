@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint --fix",
+    "lint:ci": "eslint .",
+    "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage"
@@ -82,7 +84,7 @@
     "@typescript-eslint/parser": "8.31.1",
     "@vitejs/plugin-react": "^5.1.4",
     "autoprefixer": "^10.4.21",
-    "baseline-browser-mapping": "^2.9.2",
+    "baseline-browser-mapping": "^2.10.13",
     "eslint": "9.25.1",
     "eslint-config-next": "^16.0.1",
     "eslint-config-prettier": "10.1.2",

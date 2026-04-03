@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { siteConfig } from "@/config/site";
+import { canonicalUrl, defaultOgImages, toMetaDescription } from "@/lib/seo";
 import { typography, layout, textColors } from "@/config/typography";
 import Link from "next/link";
 import { Calendar, Clock, CheckCircle, Star, ArrowRight, Phone, Shield } from "lucide-react";
@@ -383,13 +384,30 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const staticService = servicesData[slug as keyof typeof servicesData];
   
   const serviceTitle = dbService?.name || staticService?.title || 'Service';
-  const serviceDescription = dbService?.description || staticService?.description || '';
-  
+  const serviceDescription = toMetaDescription(
+    dbService?.description || staticService?.description || `Book ${serviceTitle} at our London aesthetic clinic.`
+  );
+
   return {
     title: `${serviceTitle} | ${siteConfig.name}`,
     description: serviceDescription,
     alternates: {
-      canonical: `${siteConfig.url}/services/${slug}`,
+      canonical: canonicalUrl(`/services/${slug}`),
+    },
+    openGraph: {
+      title: `${serviceTitle} | ${siteConfig.name}`,
+      description: serviceDescription,
+      url: canonicalUrl(`/services/${slug}`),
+      type: "website",
+      locale: "en_GB",
+      siteName: siteConfig.name,
+      images: defaultOgImages(serviceTitle),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${serviceTitle} | ${siteConfig.shortName}`,
+      description: serviceDescription,
+      images: [canonicalUrl("/opengraph-image")],
     },
   };
 }

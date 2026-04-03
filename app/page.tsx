@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { siteConfig } from "@/config/site";
+import { canonicalUrl, defaultOgImages } from "@/lib/seo";
 import SectionHeroAesthetics from "@/components/SectionHeroAesthetics";
 import SectionFeaturedServices from "@/components/SectionFeaturedServices";
 import SectionWhyChooseUs from "@/components/SectionWhyChooseUs";
@@ -12,34 +13,28 @@ import { ClientOnly } from "@/components/ClientOnly";
 // import SectionContact from "@/components/SectionContact"; // COMMENTED OUT - Will use direct booking with payment instead
 
 export async function generateMetadata(): Promise<Metadata> {
+  const ogImages = defaultOgImages(siteConfig.name);
   return {
     title: siteConfig.seo.defaultTitle,
     description: siteConfig.seo.defaultDescription,
     keywords: siteConfig.seo.keywords,
     alternates: {
-      canonical: siteConfig.url,
+      canonical: canonicalUrl("/"),
     },
     openGraph: {
       title: siteConfig.name,
       description: siteConfig.description,
-      url: siteConfig.url,
+      url: canonicalUrl("/"),
       type: "website",
       locale: "en_GB",
       siteName: siteConfig.name,
-      images: [
-        {
-          url: `${siteConfig.url}/images/og-image.jpg`,
-          width: 1200,
-          height: 630,
-          alt: siteConfig.name,
-        },
-      ],
+      images: ogImages,
     },
     twitter: {
       card: "summary_large_image",
       title: siteConfig.name,
       description: siteConfig.description,
-      images: [`${siteConfig.url}/images/og-image.jpg`],
+      images: [canonicalUrl("/opengraph-image")],
     },
   };
 }

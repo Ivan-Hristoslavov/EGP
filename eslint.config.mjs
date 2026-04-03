@@ -48,7 +48,8 @@ export default defineConfig([globalIgnores([
         "plugin:prettier/recommended",
         "plugin:react-hooks/recommended",
         "plugin:jsx-a11y/recommended",
-        "plugin:@next/next/recommended",
+        // Note: plugin:@next/next/recommended breaks ESLint 9 + FlatCompat (invalid "name" in schema).
+        // Re-enable when eslint-config-next supports flat compat, or add @next/eslint-plugin-next rules manually.
     )),
 
     plugins: {

@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import Stripe from "stripe";
+import { getStripeServer } from "@/lib/stripe";
 import jwt from "jsonwebtoken";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(request: NextRequest) {
   try {
+    const stripe = getStripeServer();
+    if (!stripe) {
+      return NextResponse.json(
+        { error: "Payment service is not configured" },
+        { status: 503 }
+      );
+    }
+
     const authHeader = request.headers.get("authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return NextResponse.json(

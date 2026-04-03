@@ -15,6 +15,7 @@ import LayoutMain from "@/components/LayoutMain";
 import { getAdminProfile } from "@/lib/admin-profile";
 import { createClient } from "@/lib/supabase/server";
 import { siteConfig } from "@/config/site";
+import { canonicalUrl, defaultOgImages, sameAsFromSiteConfig } from "@/lib/seo";
 
 // Using Montserrat font loaded via CSS @font-face
 
@@ -22,7 +23,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const profile = await getAdminProfile();
   const companyName = profile?.company_name || siteConfig.name;
   const description = siteConfig.seo.defaultDescription;
-  
+  const ogImages = defaultOgImages(`${companyName} — London aesthetic clinic`);
+  const twitterHandle = process.env.NEXT_PUBLIC_TWITTER_HANDLE?.replace(/^@/, "") || "egpaesthetics";
+
   return {
     metadataBase: new URL(siteConfig.url),
     title: {
@@ -31,7 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description,
     keywords: siteConfig.seo.keywords,
-    authors: [{ name: companyName }],
+    authors: [{ name: companyName, url: siteConfig.url }],
     creator: companyName,
     publisher: companyName,
     formatDetection: {
@@ -51,15 +54,15 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       siteName: companyName,
       url: siteConfig.url,
-      images: [],
+      images: ogImages,
     },
     twitter: {
       card: "summary_large_image",
       title: siteConfig.seo.defaultTitle,
       description,
-      images: [],
-      creator: "@egp",
-      site: "@egp",
+      images: [canonicalUrl("/opengraph-image")],
+      creator: twitterHandle ? `@${twitterHandle}` : undefined,
+      site: twitterHandle ? `@${twitterHandle}` : undefined,
     },
     robots: {
       index: true,
@@ -202,18 +205,22 @@ export default async function RootLayout({
         }
       })) || []
     },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": 5.0,
-      "bestRating": 5,
-      "worstRating": 1,
-      "reviewCount": 1
-    },
-    "sameAs": []
+    "sameAs": sameAsFromSiteConfig()
+  };
+
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${siteConfig.url}#website`,
+    name: adminProfile?.company_name || siteConfig.name,
+    url: siteConfig.url,
+    description: siteConfig.description,
+    inLanguage: "en-GB",
+    publisher: { "@id": `${siteConfig.url}#business` },
   };
 
   return (
-    <html suppressHydrationWarning lang="en">
+    <html suppressHydrationWarning lang="en-GB">
       <head>
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="shortcut icon" href="/favicon.ico" />
@@ -230,6 +237,12 @@ export default async function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(structuredData),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(websiteSchema),
           }}
         />
         

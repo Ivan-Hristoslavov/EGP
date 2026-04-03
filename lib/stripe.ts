@@ -9,6 +9,23 @@ export const stripe = isStripeConfigured
   ? new Stripe(process.env.STRIPE_SECRET_KEY!)
   : null;
 
+let stripeServerLazy: Stripe | null | undefined;
+
+/**
+ * Stripe for API routes: only `STRIPE_SECRET_KEY` is required.
+ * Returns null if unset so `next build` / CI does not throw when env is missing.
+ */
+export function getStripeServer(): Stripe | null {
+  if (stripeServerLazy !== undefined) return stripeServerLazy;
+  const key = process.env.STRIPE_SECRET_KEY?.trim();
+  if (!key) {
+    stripeServerLazy = null;
+    return null;
+  }
+  stripeServerLazy = new Stripe(key);
+  return stripeServerLazy;
+}
+
 // Client-side Stripe instance
 export const getStripe = () => {
   if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
