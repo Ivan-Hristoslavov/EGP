@@ -1,4 +1,16 @@
+import type Stripe from "stripe";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+
+/** Real `Stripe` types do not expose `vi.fn` mocks; tests use this to assert calls. */
+function stripeTestMocks(stripe: Stripe | null) {
+  return stripe as unknown as {
+    products: { create: ReturnType<typeof vi.fn> };
+    prices: { create: ReturnType<typeof vi.fn> };
+    customers: { list: ReturnType<typeof vi.fn>; create: ReturnType<typeof vi.fn> };
+    paymentLinks: { create: ReturnType<typeof vi.fn> };
+    checkout: { sessions: { create: ReturnType<typeof vi.fn> } };
+  };
+}
 
 vi.mock("stripe", () => {
   class StripeMock {
@@ -68,43 +80,46 @@ describe("lib/stripe payment helpers (mocked SDK)", () => {
     });
     expect(link.url).toBe("https://stripe.test/pay");
     const { stripe } = await import("./stripe");
-    expect(stripe?.products.create).toHaveBeenCalled();
-    expect(stripe?.prices.create).toHaveBeenCalledWith(
+    const m = stripeTestMocks(stripe);
+    expect(m.products.create).toHaveBeenCalled();
+    expect(m.prices.create).toHaveBeenCalledWith(
       expect.objectContaining({
         unit_amount: 4999,
         currency: "gbp",
         product: "prod_test",
       })
     );
-    expect(stripe?.paymentLinks.create).toHaveBeenCalled();
+    expect(m.paymentLinks.create).toHaveBeenCalled();
   });
 
   it("createPaymentLink creates customer when email given and none exist", async () => {
     const { createPaymentLink, stripe } = await import("./stripe");
+    const m = stripeTestMocks(stripe);
     await createPaymentLink({
       amount: 10,
       description: "Item",
       customerEmail: "buyer@example.com",
     });
-    expect(stripe?.customers.list).toHaveBeenCalledWith({
+    expect(m.customers.list).toHaveBeenCalledWith({
       email: "buyer@example.com",
       limit: 1,
     });
-    expect(stripe?.customers.create).toHaveBeenCalled();
+    expect(m.customers.create).toHaveBeenCalled();
   });
 
   it("createPaymentLink uses existing customer when list returns data", async () => {
     const { createPaymentLink, stripe } = await import("./stripe");
-    stripe!.customers.list = vi.fn(async () => ({
+    const m = stripeTestMocks(stripe);
+    m.customers.list.mockResolvedValue({
       data: [{ id: "cus_existing" }],
-    }));
+    });
     await createPaymentLink({
       amount: 10,
       description: "Item",
       customerEmail: "old@example.com",
     });
-    expect(stripe?.customers.create).not.toHaveBeenCalled();
-    expect(stripe?.paymentLinks.create).toHaveBeenCalledWith(
+    expect(m.customers.create).not.toHaveBeenCalled();
+    expect(m.paymentLinks.create).toHaveBeenCalledWith(
       expect.objectContaining({
         metadata: expect.objectContaining({
           stripe_customer_id: "cus_existing",
@@ -115,6 +130,7 @@ describe("lib/stripe payment helpers (mocked SDK)", () => {
 
   it("createCheckoutSession builds session and sets expiry", async () => {
     const { createCheckoutSession, stripe } = await import("./stripe");
+    const m = stripeTestMocks(stripe);
     const session = await createCheckoutSession({
       amount: 100,
       description: "Service",
@@ -122,14 +138,14 @@ describe("lib/stripe payment helpers (mocked SDK)", () => {
       cancelUrl: "https://example.com/cancel",
     });
     expect(session.id).toBe("cs_test");
-    expect(stripe?.checkout.sessions.create).toHaveBeenCalledWith(
+    expect(m.checkout.sessions.create).toHaveBeenCalledWith(
       expect.objectContaining({
         mode: "payment",
         success_url: "https://example.com/ok",
         cancel_url: "https://example.com/cancel",
       })
     );
-    const call = stripe!.checkout.sessions.create.mock.calls[0][0];
+    const call = m.checkout.sessions.create.mock.calls[0][0];
     expect(call.expires_at).toBeGreaterThan(Math.floor(Date.now() / 1000));
   });
 
