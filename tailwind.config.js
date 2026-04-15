@@ -12,10 +12,10 @@ const config = {
     extend: {
       colors: {
         'warm-beige': {
-          DEFAULT: '#ddd5c3',
-          light: '#f0ede7',
-          lighter: '#f7f5f2',
-          dark: '#c9c1b0',
+          DEFAULT: '#E6DDD1',
+          light: '#EFEAE3',
+          lighter: '#FAF7F3',
+          dark: '#D4C9BC',
         },
         'egp-green': {
           DEFAULT: '#464C45',
@@ -24,12 +24,12 @@ const config = {
           darker: '#2d322c',
         },
         'egp-beige': {
-          DEFAULT: '#ddd5c3',
-          light: '#f0ede7',
-          lighter: '#f5f1e9',
-          dark: '#c9c1b0',
-          darker: '#b5ad9d',
-          darkest: '#9d9585',
+          DEFAULT: '#E6DDD1',
+          light: '#EFEAE3',
+          lighter: '#F5F1EC',
+          dark: '#D4C9BC',
+          darker: '#CFC4B6',
+          darkest: '#B8A99A',
         },
       },
       fontFamily: {
@@ -38,9 +38,9 @@ const config = {
         mono: ["var(--font-mono)"],
       },
       backgroundColor: {
-        'light-theme': '#ddd5c3',
-        'light-theme-light': '#f0ede7',
-        'light-theme-lighter': '#f7f5f2',
+        'light-theme': '#E6DDD1',
+        'light-theme-light': '#EFEAE3',
+        'light-theme-lighter': '#FAF7F3',
       },
     },
   },

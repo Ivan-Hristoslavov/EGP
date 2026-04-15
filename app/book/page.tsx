@@ -1043,7 +1043,7 @@ function BookingPageContent() {
                           className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-[#e4d9c8] dark:border-gray-700"
                         />
                       ) : (
-                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-[#9d9585] to-[#c9c1b0] flex items-center justify-center border-2 border-[#e4d9c8] dark:border-gray-700">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-[#D4C9BC] to-[#E6DDD1] flex items-center justify-center border-2 border-[#e4d9c8] dark:border-gray-700">
                           <span className="text-2xl sm:text-3xl font-bold text-white">
                             {member.name.charAt(0).toUpperCase()}
                           </span>
@@ -1524,7 +1524,7 @@ function BookingPageContent() {
                     let statusClasses = "";
                     if (isSelected) {
                       statusClasses =
-                        "bg-gradient-to-br from-[#9d9585] to-[#c9c1b0] text-white shadow-lg border border-transparent";
+                        "bg-gradient-to-br from-[#CFC4B6] to-[#E6DDD1] text-[#3f3a31] shadow-lg border border-transparent";
                     } else if (isClosed) {
                       statusClasses =
                         "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border border-transparent cursor-not-allowed";

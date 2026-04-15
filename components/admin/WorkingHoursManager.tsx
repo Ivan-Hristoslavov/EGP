@@ -254,7 +254,7 @@ export default function WorkingHoursManager() {
           <Button
             onPress={generateTimeSlots}
             isLoading={generatingSlots}
-            className="bg-gradient-to-r from-[#b5ad9d] to-[#ddd5c3] text-[#3f3a31] hover:from-[#9d9585] hover:to-[#c9c1b0] font-semibold"
+            className="bg-gradient-to-r from-[#D4C9BC] to-[#E6DDD1] text-[#3f3a31] hover:from-[#CFC4B6] hover:to-[#DDD5CA] font-semibold"
             startContent={<Calendar className="w-4 h-4" />}
           >
             Generate Slots
@@ -262,7 +262,7 @@ export default function WorkingHoursManager() {
           <Button
             onPress={saveWorkingHours}
             isLoading={saving}
-            className="bg-gradient-to-r from-[#9d9585] to-[#c9c1b0] text-[#3f3a31] hover:from-[#8c846f] hover:to-[#b5ad9d] font-semibold"
+            className="bg-gradient-to-r from-[#CFC4B6] to-[#E6DDD1] text-[#3f3a31] hover:from-[#B8A99A] hover:to-[#D4C9BC] font-semibold"
             startContent={<Save className="w-4 h-4" />}
           >
             Save Changes
@@ -296,7 +296,7 @@ export default function WorkingHoursManager() {
                           {dayInfo?.short}
                         </span>
                         {isToday && (
-                          <span className="text-xs font-bold text-white bg-gradient-to-r from-[#9d9585] to-[#b5ad9d] dark:from-[#6b5f4b] dark:to-[#9d9585] px-3 py-1 rounded-full shadow-sm">
+                          <span className="text-xs font-bold text-[#3f3a31] bg-gradient-to-r from-[#CFC4B6] to-[#E6DDD1] dark:from-[#6b5f4b] dark:to-[#9d9585] px-3 py-1 rounded-full shadow-sm">
                             Today
                           </span>
                         )}

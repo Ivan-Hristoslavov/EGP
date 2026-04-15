@@ -276,12 +276,12 @@ export default function HeaderAesthetics() {
         ref={headerRef}
         className={`fixed top-0 left-0 right-0 transition-all duration-300 ${
           scrolled
-            ? "bg-[#ddd5c3] dark:bg-gray-900 shadow-lg"
-            : "bg-[#ddd5c3]/95 dark:bg-gray-900/95 backdrop-blur-sm"
+            ? "bg-[#E6DDD1] dark:bg-gray-900 shadow-lg"
+            : "bg-[#E6DDD1]/95 dark:bg-gray-900/95 backdrop-blur-sm"
         }`}
         style={{ zIndex: 9998 }}
       >
-        <div className="bg-[#c9c1b0] dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+        <div className="bg-[#D4C9BC] dark:bg-gray-800 text-gray-900 dark:text-gray-100">
           <div className="container mx-auto px-2 sm:px-4">
             {/* Mobile: Three sections - Find Us | Contacts | Social Networks - reduced gap */}
             <div className="lg:hidden flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-2.5 text-[10px] sm:text-xs md:text-sm">
@@ -294,7 +294,7 @@ export default function HeaderAesthetics() {
                   <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span className="relative inline-block">
                     <span className="relative z-10">Find Us</span>
-                    <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#b09a7d] via-[#c9b79b] to-[#ddd5c3] transition-all duration-300 ease-out group-hover:w-full"></span>
+                    <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] transition-all duration-300 ease-out group-hover:w-full"></span>
                   </span>
                 </Link>
               </div>
@@ -324,7 +324,7 @@ export default function HeaderAesthetics() {
                       <span className="hidden sm:inline relative z-10 text-xs">
                         {contactEmail}
                       </span>
-                      <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-all duration-300 ease-out group-hover:w-full"></span>
+                      <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] transition-all duration-300 ease-out group-hover:w-full"></span>
                     </span>
                   </a>
                 )}
@@ -343,7 +343,7 @@ export default function HeaderAesthetics() {
                       <span className="hidden sm:inline relative z-10 text-xs">
                         {contactPhoneDisplay}
                       </span>
-                      <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-all duration-300 ease-out group-hover:w-full"></span>
+                      <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] transition-all duration-300 ease-out group-hover:w-full"></span>
                     </span>
                   </a>
                 )}
@@ -425,7 +425,7 @@ export default function HeaderAesthetics() {
                   <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   <span className="relative inline-block">
                     <span className="relative z-10">Find Us</span>
-                    <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#b09a7d] via-[#c9b79b] to-[#ddd5c3] transition-all duration-300 ease-out group-hover:w-full"></span>
+                    <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] transition-all duration-300 ease-out group-hover:w-full"></span>
                   </span>
                 </Link>
               </div>
@@ -453,7 +453,7 @@ export default function HeaderAesthetics() {
                         <span className="relative z-10">
                           {contactEmail}
                         </span>
-                        <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-all duration-300 ease-out group-hover:w-full"></span>
+                        <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] transition-all duration-300 ease-out group-hover:w-full"></span>
                       </span>
                     </a>
                   )}
@@ -478,7 +478,7 @@ export default function HeaderAesthetics() {
                         <span className="relative z-10">
                           {contactPhoneDisplay}
                         </span>
-                        <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-all duration-300 ease-out group-hover:w-full"></span>
+                        <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] transition-all duration-300 ease-out group-hover:w-full"></span>
                       </span>
                     </a>
                   )}
@@ -551,7 +551,7 @@ export default function HeaderAesthetics() {
         </div>
 
         {/* Main Navigation Header - Clean No Filter Clinic Style */}
-        <div className="border-b border-[#c9c1b0] dark:border-gray-800">
+        <div className="border-b border-[#D4C9BC] dark:border-gray-800">
           <div className="container mx-auto px-4">
             <div
               className={`grid w-full grid-cols-[1fr_auto_1fr] items-center gap-x-2 sm:gap-x-2 lg:gap-x-3 xl:gap-x-5 transition-all duration-300 ${
@@ -573,7 +573,7 @@ export default function HeaderAesthetics() {
                   <span className="relative z-10 transition-all duration-300 group-hover:text-gray-900 dark:group-hover:text-white">
                     About Us
                   </span>
-                  <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
+                  <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
                   <span
                     className="absolute inset-0 bg-white/75 dark:bg-gray-900/85 backdrop-blur-md rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-md group-hover:shadow-lg border border-white/30 dark:border-gray-700/20"
                     style={{
@@ -672,7 +672,7 @@ export default function HeaderAesthetics() {
                   <ChevronDown
                     className={`relative z-10 w-2.5 h-2.5 transition-all duration-300 ${activeMenu === "conditions" ? "rotate-180 text-gray-900 dark:text-white" : "group-hover:text-gray-900 dark:group-hover:text-white"}`}
                   />
-                  <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
+                  <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
                   <span
                     className={`absolute inset-0 bg-white/75 dark:bg-gray-900/85 backdrop-blur-md rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-md group-hover:shadow-lg border border-white/30 dark:border-gray-700/20`}
                     style={{
@@ -681,7 +681,7 @@ export default function HeaderAesthetics() {
                     }}
                   ></span>
                   <span
-                    className={`absolute inset-0 bg-gradient-to-r from-[#9d9585]/15 via-[#b5ad9d]/15 to-[#c9c1b0]/15 rounded-md transition-all duration-300 ${
+                    className={`absolute inset-0 bg-gradient-to-r from-[#CFC4B6]/15 via-[#E6DDD1]/15 to-[#F4EFE8]/15 rounded-md transition-all duration-300 ${
                       activeMenu === "conditions"
                         ? "opacity-100"
                         : "opacity-0 group-hover:opacity-100"
@@ -698,7 +698,7 @@ export default function HeaderAesthetics() {
                   <span className="relative z-10 transition-all duration-300 group-hover:text-gray-900 dark:group-hover:text-white">
                     Blog
                   </span>
-                  <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
+                  <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
                   <span
                     className="absolute inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-md group-hover:shadow-lg border border-white/20 dark:border-gray-700/20"
                     style={{
@@ -717,7 +717,7 @@ export default function HeaderAesthetics() {
                     <span className="relative z-10 transition-all duration-300 group-hover:text-gray-900 dark:group-hover:text-white">
                       Awards &amp; Press
                     </span>
-                    <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
+                    <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
                     <span
                       className="absolute inset-0 bg-white/75 dark:bg-gray-900/85 backdrop-blur-md rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-md group-hover:shadow-lg border border-white/30 dark:border-gray-700/20"
                       style={{
@@ -744,7 +744,7 @@ export default function HeaderAesthetics() {
               </nav>
 
               <button
-                className="lg:hidden shrink-0 p-3 rounded-full transition-all duration-500 hover:scale-110 transform hover:-translate-y-1 text-gray-700 dark:text-gray-300 hover:text-gray-900 hover:bg-[#c9c1b0] dark:hover:bg-[#b5ad9d] shadow-lg hover:shadow-xl"
+                className="lg:hidden shrink-0 p-3 rounded-full transition-all duration-500 hover:scale-110 transform hover:-translate-y-1 text-gray-700 dark:text-gray-300 hover:text-gray-900 hover:bg-[#D4C9BC] dark:hover:bg-[#CFC4B6] shadow-lg hover:shadow-xl"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label="Toggle menu"
                 aria-expanded={mobileMenuOpen}
@@ -1068,15 +1068,15 @@ export default function HeaderAesthetics() {
             />
 
             {/* Slide-in Menu */}
-            <div className="lg:hidden fixed inset-y-0 right-0 w-[90%] max-w-[420px] bg-[#ddd5c3] dark:bg-gray-900 shadow-2xl overflow-y-auto touch-manipulation animate-slideInRight pointer-events-auto">
+            <div className="lg:hidden fixed inset-y-0 right-0 w-[90%] max-w-[420px] bg-[#E6DDD1] dark:bg-gray-900 shadow-2xl overflow-y-auto touch-manipulation animate-slideInRight pointer-events-auto">
               {/* Mobile Menu Header with Close Button */}
-              <div className="sticky top-0 z-10 bg-[#ddd5c3] dark:bg-gray-900 border-b border-[#c9c1b0] dark:border-gray-700 px-4 py-4 flex items-center justify-between">
+              <div className="sticky top-0 z-10 bg-[#E6DDD1] dark:bg-gray-900 border-b border-[#D4C9BC] dark:border-gray-700 px-4 py-4 flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white font-montserrat">
                   Menu
                 </h2>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="p-2 -mr-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-[#c9c1b0] dark:hover:bg-gray-800 transition-colors touch-manipulation"
+                  className="p-2 -mr-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-[#D4C9BC] dark:hover:bg-gray-800 transition-colors touch-manipulation"
                   aria-label="Close menu"
                 >
                   <X className="w-6 h-6" />
@@ -1089,11 +1089,11 @@ export default function HeaderAesthetics() {
                   <li>
                     <Link
                       href="/about"
-                      className="group relative flex px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#c9c1b0] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 font-montserrat uppercase tracking-widest items-center pb-1"
+                      className="group relative flex px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#D4C9BC] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 font-montserrat uppercase tracking-widest items-center pb-1"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <span className="relative z-10">About Us</span>
-                      <span className="absolute left-4 right-4 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
+                      <span className="absolute left-4 right-4 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
                     </Link>
                   </li>
                   <li>
@@ -1103,7 +1103,7 @@ export default function HeaderAesthetics() {
                           activeMenu === "treatments" ? null : "treatments"
                         )
                       }
-                      className="w-full flex items-center justify-between px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#c9c1b0] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 touch-manipulation font-montserrat uppercase tracking-widest"
+                      className="w-full flex items-center justify-between px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#D4C9BC] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 touch-manipulation font-montserrat uppercase tracking-widest"
                     >
                       <span>Book Now</span>
                       <ChevronDown
@@ -1113,7 +1113,7 @@ export default function HeaderAesthetics() {
                       />
                     </button>
                     {activeMenu === "treatments" && (
-                      <div className="mt-3 pl-2 space-y-4 bg-[#f0ede7] dark:bg-gray-800/50 rounded-lg p-4 border border-[#c9c1b0] dark:border-gray-700">
+                      <div className="mt-3 pl-2 space-y-4 bg-[#EFEAE3] dark:bg-gray-800/50 rounded-lg p-4 border border-[#D4C9BC] dark:border-gray-700">
                         {bookNowCategories.map((category) => {
                           const categoryServices =
                             bookNowServices[category.id]?.services || [];
@@ -1160,7 +1160,7 @@ export default function HeaderAesthetics() {
                                         <span className="relative z-0 truncate block">
                                           {item.name}
                                         </span>
-                                        <span className="absolute left-0 right-0 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
+                                        <span className="absolute left-0 right-0 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
                                       </span>
                                       <span className={`flex-shrink-0 text-right min-w-0 z-0 ${hasDiscount ? 'w-full flex justify-end' : ''}`}>
                                         <PriceWithDiscount
@@ -1192,7 +1192,7 @@ export default function HeaderAesthetics() {
                           activeMenu === "conditions" ? null : "conditions"
                         )
                       }
-                      className="w-full flex items-center justify-between px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#c9c1b0] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 touch-manipulation font-montserrat uppercase tracking-widest"
+                      className="w-full flex items-center justify-between px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#D4C9BC] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 touch-manipulation font-montserrat uppercase tracking-widest"
                     >
                       <span>By Condition</span>
                       <ChevronDown
@@ -1202,7 +1202,7 @@ export default function HeaderAesthetics() {
                       />
                     </button>
                     {activeMenu === "conditions" && (
-                      <div className="mt-3 pl-2 space-y-4 bg-[#f0ede7] dark:bg-gray-800/50 rounded-lg p-4 border border-[#c9c1b0] dark:border-gray-700">
+                      <div className="mt-3 pl-2 space-y-4 bg-[#EFEAE3] dark:bg-gray-800/50 rounded-lg p-4 border border-[#D4C9BC] dark:border-gray-700">
                         <div>
                           <div className="flex items-center justify-between mb-3 px-2">
                             <h4 className="text-xs font-semibold text-gray-900 dark:text-gray-200 uppercase tracking-wider font-montserrat">
@@ -1239,7 +1239,7 @@ export default function HeaderAesthetics() {
                                         £{Number.isInteger(priceInfo.price) ? priceInfo.price : priceInfo.price.toFixed(2)}
                                       </span>
                                     )}
-                                    <span className="absolute left-2 right-2 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
+                                    <span className="absolute left-2 right-2 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
                                   </Link>
                                 </li>
                               );
@@ -1282,7 +1282,7 @@ export default function HeaderAesthetics() {
                                         £{Number.isInteger(priceInfo.price) ? priceInfo.price : priceInfo.price.toFixed(2)}
                                       </span>
                                     )}
-                                    <span className="absolute left-2 right-2 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
+                                    <span className="absolute left-2 right-2 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
                                   </Link>
                                 </li>
                               );
@@ -1295,38 +1295,38 @@ export default function HeaderAesthetics() {
                   <li>
                     <Link
                       href="/blog"
-                      className="group relative flex px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#c9c1b0] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 font-montserrat uppercase tracking-widest items-center pb-1"
+                      className="group relative flex px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#D4C9BC] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 font-montserrat uppercase tracking-widest items-center pb-1"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <span className="relative z-10">Blog</span>
-                      <span className="absolute left-4 right-4 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
+                      <span className="absolute left-4 right-4 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
                     </Link>
                   </li>
                   {isPressPageEnabled === true && (
                     <li>
                       <Link
                         href="/press"
-                        className="group relative flex px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#c9c1b0] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 font-montserrat uppercase tracking-widest items-center pb-1"
+                        className="group relative flex px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#D4C9BC] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 font-montserrat uppercase tracking-widest items-center pb-1"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         <span className="relative z-10">Awards &amp; Press</span>
-                        <span className="absolute left-4 right-4 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
+                        <span className="absolute left-4 right-4 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
                       </Link>
                     </li>
                   )}
                   <li>
                     <Link
                       href="/find-us"
-                      className="group relative flex px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#c9c1b0] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 font-montserrat uppercase tracking-widest items-center pb-1"
+                      className="group relative flex px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#D4C9BC] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 font-montserrat uppercase tracking-widest items-center pb-1"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <span className="relative z-10">Find Us</span>
-                      <span className="absolute left-4 right-4 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
+                      <span className="absolute left-4 right-4 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
                     </Link>
                   </li>
                 </ul>
 
-                <div className="mt-6 flex justify-center border-t border-[#c9c1b0] dark:border-gray-700 pt-4">
+                <div className="mt-6 flex justify-center border-t border-[#D4C9BC] dark:border-gray-700 pt-4">
                   <ThemeToggleButton />
                 </div>
               </nav>

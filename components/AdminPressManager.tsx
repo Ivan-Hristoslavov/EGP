@@ -1146,7 +1146,7 @@ function PressItemCard({
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20 z-[1]" />
         </>
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#D4C9BC] via-[#E6DDD1] to-[#F4EFE8]" />
       )}
 
       {/* Featured Badge - Top Right */}

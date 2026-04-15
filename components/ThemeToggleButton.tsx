@@ -15,14 +15,14 @@ export default function ThemeToggleButton() {
 
   if (!mounted) {
     return (
-      <div className="p-2 rounded-full bg-white dark:bg-gray-800 border-2 border-[#ddd5c3] dark:border-[#b5ad9d] w-9 h-9" />
+      <div className="p-2 rounded-full bg-white dark:bg-gray-800 border-2 border-[#E6DDD1] dark:border-[#CFC4B6] w-9 h-9" />
     );
   }
 
   return (
     <button
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="p-2 rounded-full bg-white dark:bg-gray-800 border-2 border-[#ddd5c3] dark:border-[#b5ad9d] hover:border-[#c4b5a0] dark:hover:border-[#c9c1b0] transition-all shadow-md hover:shadow-lg active:scale-95"
+      className="p-2 rounded-full bg-white dark:bg-gray-800 border-2 border-[#E6DDD1] dark:border-[#CFC4B6] hover:border-[#D4C9BC] dark:hover:border-[#E6DDD1] transition-all shadow-md hover:shadow-lg active:scale-95"
       aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
     >
       {theme === "light" ? (

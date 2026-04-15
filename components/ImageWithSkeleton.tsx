@@ -53,7 +53,7 @@ export default function ImageWithSkeleton({
           <div
             className={`absolute inset-0 pointer-events-none transition-opacity duration-500 ${
               isLoaded ? "opacity-0" : "opacity-100"
-            } ${skeletonClassName || "animate-pulse bg-gradient-to-br from-[#ddd5c3]/70 via-[#c9c1b0]/40 to-white/30"}`}
+            } ${skeletonClassName || "animate-pulse bg-gradient-to-br from-[#E6DDD1]/70 via-[#D4C9BC]/40 to-white/30"}`}
           />
           <Image
             {...props}

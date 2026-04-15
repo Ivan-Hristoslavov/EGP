@@ -43,21 +43,9 @@ export async function generateMetadata(): Promise<Metadata> {
       telephone: false,
     },
     icons: {
-      icon: [
-        {
-          url: "/favicon-light.svg",
-          type: "image/svg+xml",
-          media: "(prefers-color-scheme: light)",
-        },
-        {
-          url: "/favicon-dark.svg",
-          type: "image/svg+xml",
-          media: "(prefers-color-scheme: dark)",
-        },
-        { url: "/favicon-light.svg", type: "image/svg+xml" },
-      ],
-      shortcut: "/favicon-light.svg",
-      apple: "/favicon-light.svg",
+      icon: [{ url: "/fav/LOGO.png", type: "image/png" }],
+      shortcut: "/fav/LOGO.png",
+      apple: "/fav/LOGO.png",
     },
     openGraph: {
       ...siteConfig.seo.openGraph,
@@ -236,11 +224,9 @@ export default async function RootLayout({
   return (
     <html suppressHydrationWarning lang="en-GB">
       <head>
-        <link rel="icon" type="image/svg+xml" href="/favicon-light.svg" media="(prefers-color-scheme: light)" />
-        <link rel="icon" type="image/svg+xml" href="/favicon-dark.svg" media="(prefers-color-scheme: dark)" />
-        <link rel="icon" type="image/svg+xml" href="/favicon-light.svg" />
-        <link rel="shortcut icon" href="/favicon-light.svg" />
-        <link rel="apple-touch-icon" href="/favicon-light.svg" />
+        <link rel="icon" type="image/png" href="/fav/LOGO.png" />
+        <link rel="shortcut icon" href="/fav/LOGO.png" />
+        <link rel="apple-touch-icon" href="/fav/LOGO.png" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="msapplication-TileColor" content="#ffffff" />
         <meta name="application-name" content="EGP" />

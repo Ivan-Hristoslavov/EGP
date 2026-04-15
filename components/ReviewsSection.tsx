@@ -82,7 +82,7 @@ export function ReviewsSection() {
               </p>
               <a
                 href="#leave-review"
-                className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-white rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
+                className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] text-[#3f3a31] rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
                 onClick={(e) => {
                   e.preventDefault();
                   document.getElementById("leave-review")?.scrollIntoView({ behavior: "smooth" });
@@ -107,7 +107,7 @@ export function ReviewsSection() {
                   className="group relative bg-white/90 dark:bg-gray-900/70 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 shadow-lg backdrop-blur border border-[#e4d9c8]/80 dark:border-gray-700 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <div className="absolute inset-x-6 -top-6 h-16 bg-gradient-to-br from-[#9d9585]/20 via-[#b5ad9d]/20 to-[#ddd5c3]/10 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="absolute inset-x-6 -top-6 h-16 bg-gradient-to-br from-[#CFC4B6]/20 via-[#E6DDD1]/20 to-[#F4EFE8]/10 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
                   {/* Header */}
                   <div className="flex items-start gap-2 sm:gap-3 mb-2 sm:mb-3">
