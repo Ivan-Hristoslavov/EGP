@@ -2545,7 +2545,7 @@ function BookingPageContent() {
       <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-24 pb-16">
         {/* Header */}
         <div className="text-center mb-8 sm:mb-12 px-1 sm:px-0">
-          <h1 className={`${typography.headingPage} ${textColors.heading} mb-3 sm:mb-4 md:mb-6 font-playfair`}>
+          <h1 className={`${typography.headingPage} ${textColors.heading} mb-3 sm:mb-4 md:mb-6 font-montserrat`}>
             Book Your Treatment
           </h1>
           <p className={`${typography.lead} font-montserrat font-light max-w-3xl mx-auto`}>

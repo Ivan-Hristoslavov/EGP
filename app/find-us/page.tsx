@@ -134,7 +134,7 @@ export default function FindUsPage() {
           >
             Back
           </Button>
-          <h1 className="absolute left-1/2 -translate-x-1/2 text-base sm:text-xl md:text-2xl font-bold text-[#3a3428] dark:text-white font-playfair">
+          <h1 className="absolute left-1/2 -translate-x-1/2 text-base sm:text-xl md:text-2xl font-bold text-[#3a3428] dark:text-white font-montserrat">
             Find Us
           </h1>
           <div className="w-14 sm:w-16" aria-hidden />

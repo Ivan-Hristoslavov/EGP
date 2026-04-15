@@ -699,7 +699,7 @@ export default function BookingsPage() {
           <div className="relative px-8 py-10">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               <div>
-                <h1 className="text-4xl font-bold text-white mb-2 font-playfair">
+                <h1 className="text-4xl font-bold text-white mb-2 font-montserrat">
                   Bookings Management
                 </h1>
                 <p className="text-white/90 text-lg">

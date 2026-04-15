@@ -187,7 +187,7 @@ export function PressPageClient({ awards, pressFeatures }: PressPageClientProps)
             >
               Back
             </Button>
-            <h1 className={`absolute left-1/2 -translate-x-1/2 text-lg sm:text-2xl md:text-3xl font-bold ${textColors.heading} font-playfair`}>
+            <h1 className={`absolute left-1/2 -translate-x-1/2 text-lg sm:text-2xl md:text-3xl font-bold ${textColors.heading} font-montserrat`}>
               Awards & Press
             </h1>
             <div className="w-14 sm:w-16" aria-hidden />

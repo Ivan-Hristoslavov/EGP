@@ -426,7 +426,7 @@ function BookingSuccessContent() {
             <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-[#f5f1e9] dark:bg-[#9d9585]/30 rounded-full mb-2">
               <CheckCircle className="w-7 h-7 sm:w-8 sm:h-8 text-[#9d9585] dark:text-[#c9c1b0]" />
             </div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#464C45] dark:text-[#c9c1b0] mb-2 font-playfair">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#464C45] dark:text-[#c9c1b0] mb-2 font-montserrat">
               Booking Confirmed!
             </h1>
             <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 font-montserrat font-light">

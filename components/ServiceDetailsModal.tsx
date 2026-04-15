@@ -88,7 +88,7 @@ export function ServiceDetailsModal({
             <ModalHeader className="bg-[#464C45] dark:bg-gray-800 text-white rounded-t-2xl [&>button]:hidden py-5 sm:py-6">
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 w-full pr-10">
                 <div className="flex-1 min-w-0">
-                  <h2 className={`${typography.headingCard} text-white font-playfair`}>
+                  <h2 className={`${typography.headingCard} text-white font-montserrat`}>
                     {s.name}
                   </h2>
                   <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2 text-white/90 text-sm">

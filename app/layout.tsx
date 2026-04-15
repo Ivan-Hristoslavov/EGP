@@ -44,9 +44,20 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     icons: {
       icon: [
-        { url: "/favicon.ico", sizes: "32x32", type: "image/x-icon" },
+        {
+          url: "/favicon-light.svg",
+          type: "image/svg+xml",
+          media: "(prefers-color-scheme: light)",
+        },
+        {
+          url: "/favicon-dark.svg",
+          type: "image/svg+xml",
+          media: "(prefers-color-scheme: dark)",
+        },
+        { url: "/favicon-light.svg", type: "image/svg+xml" },
       ],
-      shortcut: "/favicon.ico",
+      shortcut: "/favicon-light.svg",
+      apple: "/favicon-light.svg",
     },
     openGraph: {
       ...siteConfig.seo.openGraph,
@@ -104,8 +115,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "black" },
+    { media: "(prefers-color-scheme: light)", color: "#E6DDD1" },
+    { media: "(prefers-color-scheme: dark)", color: "#1f2937" },
   ],
 };
 
@@ -222,8 +233,11 @@ export default async function RootLayout({
   return (
     <html suppressHydrationWarning lang="en-GB">
       <head>
-        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="icon" type="image/svg+xml" href="/favicon-light.svg" media="(prefers-color-scheme: light)" />
+        <link rel="icon" type="image/svg+xml" href="/favicon-dark.svg" media="(prefers-color-scheme: dark)" />
+        <link rel="icon" type="image/svg+xml" href="/favicon-light.svg" />
+        <link rel="shortcut icon" href="/favicon-light.svg" />
+        <link rel="apple-touch-icon" href="/favicon-light.svg" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="msapplication-TileColor" content="#ffffff" />
         <meta name="application-name" content="EGP" />
@@ -231,7 +245,8 @@ export default async function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="EGP" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="theme-color" content="#3b82f6" />
+        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#E6DDD1" />
+        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1f2937" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
         <script
           type="application/ld+json"

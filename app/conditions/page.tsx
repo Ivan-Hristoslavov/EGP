@@ -236,7 +236,7 @@ function ConditionsPageContent() {
             <ArrowLeft className="w-4 h-4" />
             <span className="text-sm font-medium">Back</span>
           </Link>
-          <h1 className={`absolute left-1/2 -translate-x-1/2 text-base sm:text-xl md:text-2xl font-bold ${textColors.heading} font-playfair`}>
+          <h1 className={`absolute left-1/2 -translate-x-1/2 text-base sm:text-xl md:text-2xl font-bold ${textColors.heading} font-montserrat`}>
             Conditions We Treat
           </h1>
           <div className="w-14 sm:w-20" aria-hidden />

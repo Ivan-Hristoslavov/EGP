@@ -15,6 +15,12 @@ import { useAdminProfile, useAdminProfileContext } from "@/components/AdminProfi
 import { useHeroSection } from "@/hooks/useHeroSection";
 import Link from "next/link";
 
+/** Base wash + left-weighted gradient so the photo reads clearly darker (overlay above image via z-index). */
+const heroOverlayBaseClass =
+  "pointer-events-none absolute inset-0 z-[2] bg-black/28 sm:bg-black/22";
+const heroOverlayGradientClass =
+  "pointer-events-none absolute inset-0 z-[3] bg-[linear-gradient(180deg,rgba(0,0,0,0.62)_0%,rgba(0,0,0,0.52)_38%,rgba(0,0,0,0.46)_100%)] sm:bg-[linear-gradient(90deg,rgba(0,0,0,0.58)_0%,rgba(0,0,0,0.52)_22%,rgba(0,0,0,0.34)_48%,rgba(0,0,0,0.14)_100%)]";
+
 export default function SectionHeroAesthetics() {
   const adminProfile = useAdminProfile();
   const { loading: profileLoading } = useAdminProfileContext();
@@ -89,10 +95,11 @@ export default function SectionHeroAesthetics() {
             <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-transparent"></div>
           </div>
         </div>
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 z-[1] bg-gradient-to-b sm:bg-gradient-to-r from-black/80 via-black/60 to-black/40 sm:to-transparent"></div>
+        {/* Darkening overlays (match loaded hero) */}
+        <div className={heroOverlayBaseClass} />
+        <div className={heroOverlayGradientClass} />
         {/* Content skeleton */}
-        <div className="relative z-30 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center sm:items-start sm:pt-32 pb-16 -mt-16 sm:mt-0">
+        <div className="relative z-30 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center sm:items-start sm:pt-28 md:pt-32 pb-16">
           <div className="w-full max-w-3xl text-center sm:text-left space-y-6">
             <div className="h-8 bg-white/20 rounded-full w-48 mx-auto sm:mx-0 animate-pulse"></div>
             <div className="h-16 bg-white/20 rounded-lg animate-pulse"></div>
@@ -134,7 +141,7 @@ export default function SectionHeroAesthetics() {
             fill
             priority={index === 0}
             sizes="100vw 100vh"
-            className={`object-cover transition-opacity duration-500 ${
+            className={`z-0 object-cover transition-opacity duration-500 ${
               imagesLoaded[index] ? "opacity-100" : "opacity-0"
             }`}
             style={{
@@ -158,21 +165,22 @@ export default function SectionHeroAesthetics() {
             onError={() => handleImageLoad(index)}
           />
           
-          {/* Gradient Overlay - Lighter for owners slide */}
-          <div className={`absolute inset-0 z-[1] ${
-            slide.image.includes("sisters.png") 
-              ? "bg-gradient-to-b sm:bg-gradient-to-r from-black/50 via-black/40 to-black/20 sm:to-transparent" 
-              : "bg-gradient-to-b sm:bg-gradient-to-r from-black/80 via-black/60 to-black/40 sm:to-transparent"
-          }`}></div>
+          {/* Darkening: base wash + gradient (z above image); gradient biased left toward headline */}
+          <div className={heroOverlayBaseClass} />
+          <div className={heroOverlayGradientClass} />
         </div>
       ))}
 
       {/* Content */}
-      <div className="relative z-30 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center sm:items-start sm:pt-32 pb-16 -mt-16 sm:mt-0">
+      <div className="relative z-30 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center sm:items-start sm:pt-28 md:pt-32 pb-16">
         <div className="w-full max-w-3xl text-center sm:text-left">
           {/* Badge */}
           {(heroSection?.badge_text || !heroSection) && (
-            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 backdrop-blur-md rounded-full text-white mb-4 sm:mb-6 border border-white/20">
+            <div
+              className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 backdrop-blur-md rounded-full text-white mb-4 sm:mb-6 border border-white/20 font-montserrat"
+              aria-label={`Rated 5 stars. ${heroSection?.badge_text || "Award-Winning Clinic"}`}
+            >
+              <span className="text-xs sm:text-sm font-bold tabular-nums">5</span>
               {(() => {
                 const iconType = heroSection?.badge_icon || "star";
                 const iconClass = "w-3.5 h-3.5 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400";
@@ -204,7 +212,7 @@ export default function SectionHeroAesthetics() {
           )}
 
           {/* Main Heading - shared scale for mobile/desktop */}
-          <h1 className={`${typography.headingHero} text-white mb-4 sm:mb-6 font-playfair`}>
+          <h1 className={`${typography.headingHero} text-white mb-4 sm:mb-6 font-montserrat`}>
             {slides[displaySlide]?.title || ""}
           </h1>
 

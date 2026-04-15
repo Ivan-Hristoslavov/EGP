@@ -155,7 +155,7 @@ export default async function BlogPostPage({ params }: PageProps) {
               )}
             </div>
 
-            <h1 className={`text-xl sm:text-2xl md:text-3xl font-bold leading-tight ${textColors.heading} mb-3 sm:mb-4 font-playfair`}>
+            <h1 className={`text-xl sm:text-2xl md:text-3xl font-bold leading-tight ${textColors.heading} mb-3 sm:mb-4 font-montserrat`}>
               {post.title}
             </h1>
 
