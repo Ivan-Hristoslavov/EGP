@@ -7,6 +7,8 @@ import { Calendar, Clock, User, ArrowLeft, ArrowRight } from "lucide-react";
 import { notFound } from 'next/navigation';
 import { createClient } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
 async function getBlogPost(slug: string) {
   try {
     const supabase = createClient();

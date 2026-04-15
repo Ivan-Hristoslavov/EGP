@@ -7,6 +7,8 @@ import { Calendar, CheckCircle, Star, ArrowRight, Phone, Target } from "lucide-r
 import { notFound } from 'next/navigation';
 import { createClient } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
 async function getCondition(slug: string) {
   try {
     const supabase = createClient();
