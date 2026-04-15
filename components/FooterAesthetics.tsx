@@ -30,7 +30,8 @@ export default function FooterAesthetics() {
   const currentYear = new Date().getFullYear();
   const [workingHours, setWorkingHours] = useState<WorkingHoursData | null>(null);
   const [loadingHours, setLoadingHours] = useState(true);
-  const [isPressPageEnabled, setIsPressPageEnabled] = useState(true); // Default to true
+  /** `null` until `/api/press-settings` responds — avoids showing Awards & Press when the page is disabled. */
+  const [isPressPageEnabled, setIsPressPageEnabled] = useState<boolean | null>(null);
   const adminProfile = useAdminProfile();
   const { loading: profileLoading } = useAdminProfileContext();
   const { socialLinks } = useSocialLinks();
@@ -70,12 +71,13 @@ export default function FooterAesthetics() {
         const response = await fetch('/api/press-settings');
         if (response.ok) {
           const data = await response.json();
-          setIsPressPageEnabled(data.enabled !== false); // Default to true if not set
+          setIsPressPageEnabled(data.enabled === true);
+        } else {
+          setIsPressPageEnabled(false);
         }
       } catch (error) {
         console.error('Failed to fetch press page setting:', error);
-        // Default to true on error
-        setIsPressPageEnabled(true);
+        setIsPressPageEnabled(false);
       }
     };
 
@@ -345,7 +347,7 @@ export default function FooterAesthetics() {
                 <li><Link href="/about" className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">About Us</Link></li>
                 <li><Link href="/blog" className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">Blog</Link></li>
                 <li><Link href="/find-us" className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">Find Us</Link></li>
-                {isPressPageEnabled && (
+                {isPressPageEnabled === true && (
                   <li><Link href="/press" className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">Awards & Press</Link></li>
                 )}
               </ul>
