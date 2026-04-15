@@ -3,6 +3,7 @@
 import { useState, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import Image from "next/image";
 import { siteConfig } from "@/config/site";
 import ThemeToggleButton from "./ThemeToggleButton";
 import { Phone, Mail, MapPin, X, ChevronDown } from "lucide-react";
@@ -551,16 +552,14 @@ export default function HeaderAesthetics() {
         <div className="border-b border-[#c9c1b0] dark:border-gray-800">
           <div className="container mx-auto px-4">
             <div
-              className={`flex items-center justify-between transition-all duration-300 ${
+              className={`grid w-full grid-cols-[1fr_auto_1fr] items-center gap-x-2 sm:gap-x-2 lg:gap-x-3 xl:gap-x-5 transition-all duration-300 ${
                 scrolled ? "h-16 md:h-18" : "h-20 md:h-24"
               }`}
             >
-              {/* Left Navigation Links */}
+              {/* Left column: nav flush left (desktop); empty cell on mobile balances logo */}
               <nav
-                className={`hidden lg:flex items-center transition-all duration-300 ${
-                  scrolled
-                    ? "gap-4 xl:gap-6 mr-6 xl:mr-8 2xl:mr-12"
-                    : "gap-6 xl:gap-8 mr-8 xl:mr-12 2xl:mr-16"
+                className={`col-start-1 row-start-1 hidden min-w-0 items-center justify-start justify-self-start lg:flex ${
+                  scrolled ? "gap-4 xl:gap-6" : "gap-5 xl:gap-7"
                 }`}
               >
                 <Link
@@ -619,6 +618,43 @@ export default function HeaderAesthetics() {
                     style={{ backdropFilter: "blur(4px)" }}
                   ></span>
                 </button>
+              </nav>
+
+              {/* Center column: logo in document flow (no overlap with nav) */}
+              <Link
+                href="/"
+                className="group col-start-2 row-start-1 flex shrink-0 items-center justify-center justify-self-center px-1 sm:px-2 transition-all duration-300 hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-egp-green rounded-md"
+              >
+                <span className="sr-only">{siteConfig.name}</span>
+                <Image
+                  src="/logos/LOGO_LONG BLACK.png"
+                  alt=""
+                  width={240}
+                  height={48}
+                  className={`w-auto object-contain dark:hidden ${
+                    scrolled ? "h-6 sm:h-7 md:h-8" : "h-7 sm:h-8 md:h-9 lg:h-10"
+                  }`}
+                  priority
+                />
+                <Image
+                  src="/logos/LOGO_LONG WHITE.png"
+                  alt=""
+                  width={240}
+                  height={48}
+                  className={`hidden w-auto object-contain dark:block ${
+                    scrolled ? "h-6 sm:h-7 md:h-8" : "h-7 sm:h-8 md:h-9 lg:h-10"
+                  }`}
+                  priority
+                />
+              </Link>
+
+              {/* Right column: nav flush right + mobile menu */}
+              <div className="col-start-3 row-start-1 flex min-w-0 items-center justify-end justify-self-end gap-2">
+              <nav
+                className={`hidden min-w-0 items-center justify-end lg:flex ${
+                  scrolled ? "gap-4 xl:gap-6" : "gap-5 xl:gap-7"
+                }`}
+              >
                 <button
                   className={`group relative font-montserrat text-gray-700 dark:text-gray-300 font-light transition-all duration-300 text-xs lg:text-sm uppercase tracking-widest flex items-center gap-1 px-3 py-1.5 -mx-3 -my-1.5 rounded-md ${
                     activeMenu === "conditions"
@@ -635,7 +671,6 @@ export default function HeaderAesthetics() {
                     className={`relative z-10 w-2.5 h-2.5 transition-all duration-300 ${activeMenu === "conditions" ? "rotate-180 text-gray-900 dark:text-white" : "group-hover:text-gray-900 dark:group-hover:text-white"}`}
                   />
                   <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
-                  {/* Blurred white/black background */}
                   <span
                     className={`absolute inset-0 bg-white/75 dark:bg-gray-900/85 backdrop-blur-md rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-md group-hover:shadow-lg border border-white/30 dark:border-gray-700/20`}
                     style={{
@@ -643,7 +678,6 @@ export default function HeaderAesthetics() {
                       WebkitBackdropFilter: "blur(8px)",
                     }}
                   ></span>
-                  {/* Gradient overlay */}
                   <span
                     className={`absolute inset-0 bg-gradient-to-r from-[#9d9585]/15 via-[#b5ad9d]/15 to-[#c9c1b0]/15 rounded-md transition-all duration-300 ${
                       activeMenu === "conditions"
@@ -653,43 +687,6 @@ export default function HeaderAesthetics() {
                     style={{ backdropFilter: "blur(4px)" }}
                   ></span>
                 </button>
-              </nav>
-
-              {/* Centered Logo - Clean & Clear with Maximum Distance from Navigation */}
-              <Link
-                href="/"
-                className="group absolute left-1/2 transform -translate-x-1/2 flex flex-col items-center justify-center text-center px-2 sm:px-4 md:px-6 transition-all duration-300 hover:scale-105 z-10"
-              >
-                <h1
-                  className={`font-playfair font-light text-gray-900 dark:text-white whitespace-nowrap leading-tight transition-all duration-300 group-hover:brightness-110 ${
-                    scrolled
-                      ? "text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl"
-                      : "text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl"
-                  }`}
-                >
-                  EGP AESTHETICS
-                </h1>
-                <p
-                  className={`font-montserrat text-gray-700 dark:text-gray-400 font-light tracking-[0.25em] sm:tracking-[0.3em] uppercase transition-all duration-300 group-hover:text-gray-900 dark:group-hover:text-white group-hover:tracking-[0.35em] sm:group-hover:tracking-[0.4em] ${
-                    scrolled
-                      ? "text-[7px] sm:text-[8px] md:text-[9px] mt-0.5"
-                      : "text-[8px] sm:text-[9px] md:text-[10px] lg:text-xs mt-0.5 sm:mt-1"
-                  }`}
-                >
-                  London
-                </p>
-                {/* Animated underline effect */}
-                <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-px bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] dark:from-[#c9c1b0] dark:via-[#ddd5c3] dark:to-[#c9c1b0] transition-all duration-300 group-hover:w-full"></div>
-              </Link>
-
-              {/* Right Navigation Links */}
-              <nav
-                className={`hidden lg:flex items-center transition-all duration-300 ${
-                  scrolled
-                    ? "gap-4 xl:gap-6 ml-6 xl:ml-8 2xl:ml-12"
-                    : "gap-6 xl:gap-8 ml-8 xl:ml-12 2xl:ml-16"
-                }`}
-              >
                 <Link
                   href="/blog"
                   className={`group relative font-montserrat text-gray-700 dark:text-gray-300 font-light transition-all duration-300 uppercase tracking-widest px-3 py-1.5 -mx-3 -my-1.5 rounded-md ${
@@ -745,7 +742,7 @@ export default function HeaderAesthetics() {
               </nav>
 
               <button
-                className="lg:hidden ml-auto p-3 rounded-full transition-all duration-500 hover:scale-110 transform hover:-translate-y-1 text-gray-700 dark:text-gray-300 hover:text-gray-900 hover:bg-[#c9c1b0] dark:hover:bg-[#b5ad9d] shadow-lg hover:shadow-xl"
+                className="lg:hidden shrink-0 p-3 rounded-full transition-all duration-500 hover:scale-110 transform hover:-translate-y-1 text-gray-700 dark:text-gray-300 hover:text-gray-900 hover:bg-[#c9c1b0] dark:hover:bg-[#b5ad9d] shadow-lg hover:shadow-xl"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label="Toggle menu"
                 aria-expanded={mobileMenuOpen}
@@ -778,6 +775,7 @@ export default function HeaderAesthetics() {
                   )}
                 </svg>
               </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1071,7 +1069,7 @@ export default function HeaderAesthetics() {
             <div className="lg:hidden fixed inset-y-0 right-0 w-[90%] max-w-[420px] bg-[#ddd5c3] dark:bg-gray-900 shadow-2xl overflow-y-auto touch-manipulation animate-slideInRight pointer-events-auto">
               {/* Mobile Menu Header with Close Button */}
               <div className="sticky top-0 z-10 bg-[#ddd5c3] dark:bg-gray-900 border-b border-[#c9c1b0] dark:border-gray-700 px-4 py-4 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white font-playfair">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white font-montserrat">
                   Menu
                 </h2>
                 <button

@@ -87,7 +87,7 @@ export default function AdminLoginPage() {
           <div className="mx-auto w-16 h-16 bg-gradient-to-br from-rose-500 via-pink-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl mb-4">
             <Shield className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent font-playfair">
+          <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent font-montserrat">
             EGP Aesthetics
           </h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 font-montserrat">

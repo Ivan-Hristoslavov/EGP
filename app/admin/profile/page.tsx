@@ -319,7 +319,7 @@ export default function ProfilePage() {
                   <User className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-base sm:text-lg font-bold text-white font-playfair truncate">
+                  <h2 className="text-base sm:text-lg font-bold text-white font-montserrat truncate">
                     {dbProfile?.name || profileData.companyName}
                   </h2>
                   <p className="text-white/90 text-xs sm:text-sm truncate">{profileData.companyName}</p>

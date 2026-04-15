@@ -9,7 +9,7 @@
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-playfair;
+    @apply font-montserrat;
   }
   
   /* Ensure smooth font rendering */
@@ -156,11 +156,11 @@ html {
 }
 
 .blog-content h2 {
-  @apply text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mt-8 mb-4 font-playfair;
+  @apply text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mt-8 mb-4 font-montserrat;
 }
 
 .blog-content h3 {
-  @apply text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-200 mt-6 mb-3 font-playfair;
+  @apply text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-200 mt-6 mb-3 font-montserrat;
 }
 
 .blog-content p {

@@ -249,7 +249,7 @@ export default function AdminLayout({
               <Shield className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white bg-gradient-to-r from-white to-white/90 bg-clip-text text-transparent font-playfair">
+              <h1 className="text-xl font-bold text-white bg-gradient-to-r from-white to-white/90 bg-clip-text text-transparent font-montserrat">
                 EGP Aesthetics
               </h1>
               <p className="text-xs text-white/80 font-medium">Admin Panel</p>

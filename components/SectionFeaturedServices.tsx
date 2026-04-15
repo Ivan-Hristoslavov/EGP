@@ -13,21 +13,9 @@ import { ServiceDetailsModal } from "@/components/ServiceDetailsModal";
 import { badgeBackgroundClass } from "@/config/badge-styles";
 import ButtonPrimary from "@/components/ButtonPrimary";
 
-// Gradient colors for different categories
-const categoryGradients: Record<string, string> = {
-  'FACE': 'from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3]',
-  'BODY': 'from-[#c4b5a0] via-[#b59c74] to-[#9d9585]',
-  'LIPS': 'from-[#d8c5a7] via-[#c4b5a0] to-[#b59c74]',
-  'ANTI-WRINKLE': 'from-[#4b5563] via-[#374151] to-[#1f2937]',
-  'FILLERS': 'from-[#c4b5a0] via-[#b5ad9d] to-[#9d9585]',
-  'SKIN': 'from-[#e4d9c8] via-[#ddd5c3] to-[#c4b5a0]',
-  'HAIR': 'from-[#b5ad9d] via-[#9d9585] to-[#7a6f5a]',
-  'default': 'from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3]',
-};
-
-function getCategoryGradient(categoryName: string): string {
-  return categoryGradients[categoryName.toUpperCase()] || categoryGradients['default'];
-}
+/** Unified cream header gradient for all featured service cards */
+const featuredCardHeaderGradient =
+  "from-[#E6DDD1] via-[#dfd4c8] to-[#cfc4b6]";
 
 function hasDiscount(s: Service): boolean {
   return (
@@ -261,8 +249,6 @@ export default function SectionFeaturedServices() {
         {/* Services Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 mb-6 sm:mb-10">
           {paginatedServices.map((service) => {
-            const gradient = getCategoryGradient(service.category.name);
-            
             return (
               <div
                 key={service.id}
@@ -278,10 +264,10 @@ export default function SectionFeaturedServices() {
                         alt={service.name}
                         className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
-                      <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-60 group-hover:opacity-70 transition-opacity`}></div>
+                      <div className={`absolute inset-0 bg-gradient-to-br ${featuredCardHeaderGradient} opacity-75 group-hover:opacity-90 transition-opacity`} />
                     </>
                   ) : (
-                    <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-90`}></div>
+                    <div className={`absolute inset-0 bg-gradient-to-br ${featuredCardHeaderGradient} opacity-90`} />
                   )}
                   
                   {/* Service Name Overlay */}

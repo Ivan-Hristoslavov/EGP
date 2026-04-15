@@ -162,7 +162,8 @@ export function ReviewForm() {
         {/* Form Card */}
         <div className="bg-white/95 dark:bg-gray-900/70 rounded-2xl shadow-xl border border-[#e4d9c8] dark:border-gray-700 backdrop-blur overflow-hidden">
           <div className="px-4 sm:px-6 py-3 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-[#3f3a31]">
-            <p className="text-xs sm:text-sm font-semibold text-center tracking-wide uppercase">Your opinion matters to us</p>
+            <p className="text-xs sm:text-sm font-semibold text-center tracking-wide uppercase text-white">Your opinion matters to us</p>
+       
           </div>
           
           <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-3 sm:space-y-4" noValidate>
