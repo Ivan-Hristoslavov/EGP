@@ -6,9 +6,11 @@ This project uses **Vitest** for unit and integration tests, with **React Testin
 
 ```bash
 npm run test        # Watch mode - re-runs on file changes
-npm run test:run    # Single run (CI)
-npm run test:coverage  # Coverage report
+npm run test:run    # Single run (no coverage)
+npm run test:coverage  # Single run + coverage report + threshold enforcement (same as CI)
 ```
+
+CI runs **`npm run test:coverage`**, which fails the job if global coverage drops below the thresholds in [`vitest.config.ts`](vitest.config.ts) (requires dev dependency `@vitest/coverage-v8`).
 
 ## Test Structure
 
@@ -16,8 +18,18 @@ Tests live next to the code they test:
 
 - `config/typography.test.ts` → tests `config/typography.ts`
 - `lib/image-utils.test.ts` → tests `lib/image-utils.ts`
+- `lib/image-utils.heic.node.test.ts` → HEIC helper in Node (no `window`)
+- `lib/stripe.test.ts` / `lib/stripe-server.test.ts` → Stripe constants and env-gated helpers
+- `lib/stripe-payment.test.ts` → `createPaymentLink` / `createCheckoutSession` with mocked Stripe SDK
+- `lib/image-utils.browser.test.ts` → canvas / HEIC / `processImageFile` paths in jsdom
+- `lib/email-theme.test.ts` → tests `lib/email-theme.ts`
 - `components/ButtonPrimary.test.tsx` → tests `components/ButtonPrimary.tsx`
-- `app/api/admin/auth/route.test.ts` → tests API route
+- `components/ImageWithSkeleton.test.tsx` → tests `components/ImageWithSkeleton.tsx`
+- `components/Toast.test.tsx` → tests `ToastProvider` / `useToast`
+- `components/ReviewForm.test.tsx` → tests `components/ReviewForm.tsx`
+- `components/SectionWhyChooseUs.test.tsx` → tests `components/SectionWhyChooseUs.tsx`
+- `app/about/page.test.tsx` → tests `app/about/page.tsx`
+- `app/api/admin/auth/route.test.ts` → login (success, validation, rate limit, JWT error), logout
 
 ## What's Tested
 
@@ -25,7 +37,8 @@ Tests live next to the code they test:
 |-------|----------|
 | **Config** | typography tokens, layout |
 | **Lib** | image-utils, stripe constants, email-theme |
-| **Components** | ButtonPrimary, others |
+| **Components** | ButtonPrimary, ReviewForm, SectionWhyChooseUs |
+| **Pages** | About page (mocked CMS / Supabase) |
 | **API routes** | POST /api/admin/auth (validation) |
 
 ## Adding New Tests
@@ -76,4 +89,4 @@ Tests live next to the code they test:
 
 ## Coverage
 
-Run `npm run test:coverage` to generate a coverage report in `coverage/`.
+Run `npm run test:coverage` to generate a coverage report in `coverage/` and enforce minimum global coverage (lines, statements, functions, branches). Raise thresholds gradually as you add tests.

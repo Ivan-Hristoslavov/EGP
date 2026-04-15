@@ -5,6 +5,7 @@ import {
   validateImageFile,
   getSupportedImageFormats,
   getSupportedFormatsText,
+  processImageFile,
 } from "./image-utils";
 
 function createMockFile(
@@ -44,6 +45,22 @@ describe("lib/image-utils", () => {
     it("returns image/heic for .heic extension", () => {
       expect(getImageType(createMockFile("a.heic", "application/octet-stream"))).toBe("image/heic");
     });
+
+    it("returns image/heic for .heics extension", () => {
+      expect(getImageType(createMockFile("a.heics", ""))).toBe("image/heic");
+    });
+
+    it("returns image/heif for .heif and .heifs", () => {
+      expect(getImageType(createMockFile("b.heif", ""))).toBe("image/heif");
+      expect(getImageType(createMockFile("b.heifs", ""))).toBe("image/heif");
+    });
+
+    it("falls back to mime or octet-stream when unknown", () => {
+      expect(getImageType(createMockFile("x.bin", "application/octet-stream"))).toBe(
+        "application/octet-stream"
+      );
+      expect(getImageType(createMockFile("x", ""))).toBe("application/octet-stream");
+    });
   });
 
   describe("validateImageFile", () => {
@@ -71,6 +88,14 @@ describe("lib/image-utils", () => {
       const result = validateImageFile(emptyFile);
       expect(result.isValid).toBe(false);
       expect(result.error).toContain("empty");
+    });
+  });
+
+  describe("processImageFile", () => {
+    it("throws with validation message when file is not an image", async () => {
+      await expect(
+        processImageFile(createMockFile("doc.pdf", "application/pdf"))
+      ).rejects.toThrow(/not a supported image format/i);
     });
   });
 

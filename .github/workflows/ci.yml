@@ -27,8 +27,8 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Unit tests (lib + API routes)
-        run: npx vitest run
+      - name: Unit tests with coverage thresholds
+        run: npm run test:coverage
 
       - name: Build
         run: npm run build

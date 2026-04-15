@@ -20,6 +20,12 @@ export default defineConfig({
         "**/*.d.ts",
         "**/types/**",
       ],
+      thresholds: {
+        lines: 80,
+        statements: 80,
+        functions: 75,
+        branches: 78,
+      },
     },
   },
   resolve: {

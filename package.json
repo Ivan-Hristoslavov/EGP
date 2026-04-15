@@ -83,6 +83,7 @@
     "@typescript-eslint/eslint-plugin": "8.31.1",
     "@typescript-eslint/parser": "8.31.1",
     "@vitejs/plugin-react": "^5.1.4",
+    "@vitest/coverage-v8": "^4.0.18",
     "autoprefixer": "^10.4.21",
     "baseline-browser-mapping": "^2.10.13",
     "eslint": "9.25.1",
