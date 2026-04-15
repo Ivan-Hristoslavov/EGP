@@ -1,10 +1,14 @@
 import type { Metadata } from 'next';
-import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { siteConfig } from "@/config/site";
 import { createClient } from '@/lib/supabase/server';
 import ImageWithSkeleton from "@/components/ImageWithSkeleton";
+import { typography, textColors } from "@/config/typography";
+import {
+  aboutContentLooksLikeHtml,
+  sanitizeAboutBodyHtml,
+} from "@/lib/sanitize-about-html";
 
 type AboutContentSection = {
   id: string;
@@ -22,6 +26,39 @@ function contentToParagraphs(content: string | undefined): string[] {
     .split(/\n\n+/)
     .map((p) => p.trim())
     .filter(Boolean);
+}
+
+const aboutBodyClassName = `${typography.lead} ${textColors.body} leading-relaxed max-w-xl space-y-4 [&_a]:text-[#464C45] [&_a]:underline dark:[&_a]:text-[#c9c1b0] [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6`;
+
+function AboutSectionBody({ content }: { content?: string }) {
+  if (!content?.trim()) return null;
+
+  if (aboutContentLooksLikeHtml(content)) {
+    const html = sanitizeAboutBodyHtml(content);
+    return (
+      <div
+        className={`${aboutBodyClassName} [&_h1]:text-2xl [&_h1]:sm:text-3xl [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:dark:text-white [&_h2]:text-xl [&_h2]:sm:text-2xl [&_h2]:font-bold [&_h2]:text-gray-900 [&_h2]:dark:text-white [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-gray-900 [&_h3]:dark:text-white`}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+    );
+  }
+
+  const paras = contentToParagraphs(content);
+  if (paras.length > 0) {
+    return (
+      <div className={aboutBodyClassName}>
+        {paras.map((para, i) => (
+          <p key={i}>{para}</p>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className={aboutBodyClassName}>
+      <p>{content}</p>
+    </div>
+  );
 }
 
 async function getAboutContent(): Promise<AboutContentSection[]> {
@@ -98,15 +135,7 @@ export default async function AboutPage() {
                   {heroSection.heading}
                 </h1>
               )}
-              <div className="text-gray-600 dark:text-gray-300 text-base sm:text-lg leading-relaxed max-w-xl space-y-4">
-                {contentToParagraphs(heroSection.content).length > 0 ? (
-                  contentToParagraphs(heroSection.content).map((para, i) => (
-                    <p key={i}>{para}</p>
-                  ))
-                ) : (
-                  <p>{heroSection.content}</p>
-                )}
-              </div>
+              <AboutSectionBody content={heroSection.content} />
               <Link
                 href="/#services"
                 className="inline-block mt-8 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 bg-egp-green dark:bg-egp-green-dark text-white hover:opacity-90 shadow-md hover:shadow-lg w-auto min-w-0"
@@ -150,7 +179,6 @@ export default async function AboutPage() {
       {otherSections.length > 0 && (
         <div className="w-full max-w-4xl mx-auto px-6 sm:px-10 lg:px-16 py-16 lg:py-24 space-y-20">
           {otherSections.map((section) => {
-            const paras = contentToParagraphs(section.content);
             const label = sectionLabel[section.section_type] || section.section_type;
 
             return (
@@ -163,13 +191,7 @@ export default async function AboutPage() {
                     {section.heading}
                   </h2>
                 )}
-                <div className="text-gray-600 dark:text-gray-300 leading-relaxed space-y-4">
-                  {paras.length > 0 ? (
-                    paras.map((para, i) => <p key={i}>{para}</p>)
-                  ) : (
-                    <p>{section.content}</p>
-                  )}
-                </div>
+                <AboutSectionBody content={section.content} />
                 {section.bullet_points && section.bullet_points.length > 0 && (
                   <ul className="mt-6 space-y-3">
                     {section.bullet_points.map((bullet, idx) => (

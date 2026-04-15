@@ -32,7 +32,8 @@ export default function HeaderAesthetics() {
   const [scrolled, setScrolled] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isMounted, setIsMounted] = useState(false);
-  const [isPressPageEnabled, setIsPressPageEnabled] = useState(true); // Default to true
+  /** `null` until settings load — no flash of Awards/Press when disabled in admin. */
+  const [isPressPageEnabled, setIsPressPageEnabled] = useState<boolean | null>(null);
   const headerRef = useRef<HTMLElement>(null);
   const [megaMenuTop, setMegaMenuTop] = useState(0);
 
@@ -48,12 +49,13 @@ export default function HeaderAesthetics() {
         const response = await fetch('/api/press-settings');
         if (response.ok) {
           const data = await response.json();
-          setIsPressPageEnabled(data.enabled !== false); // Default to true if not set
+          setIsPressPageEnabled(data.enabled === true);
+        } else {
+          setIsPressPageEnabled(false);
         }
       } catch (error) {
         console.error('Failed to fetch press page setting:', error);
-        // Default to true on error
-        setIsPressPageEnabled(true);
+        setIsPressPageEnabled(false);
       }
     };
 
@@ -705,7 +707,7 @@ export default function HeaderAesthetics() {
                     }}
                   ></span>
                 </Link>
-                {isPressPageEnabled && (
+                {isPressPageEnabled === true && (
                   <Link
                     href="/press"
                     className={`group relative font-montserrat text-gray-700 dark:text-gray-300 font-light transition-all duration-300 uppercase tracking-widest px-3 py-1.5 -mx-3 -my-1.5 rounded-md ${
@@ -713,7 +715,7 @@ export default function HeaderAesthetics() {
                     }`}
                   >
                     <span className="relative z-10 transition-all duration-300 group-hover:text-gray-900 dark:group-hover:text-white">
-                      Awards/ Press
+                      Awards &amp; Press
                     </span>
                     <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10"></span>
                     <span
@@ -1300,14 +1302,14 @@ export default function HeaderAesthetics() {
                       <span className="absolute left-4 right-4 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
                     </Link>
                   </li>
-                  {isPressPageEnabled && (
+                  {isPressPageEnabled === true && (
                     <li>
                       <Link
                         href="/press"
                         className="group relative flex px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#c9c1b0] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 font-montserrat uppercase tracking-widest items-center pb-1"
                         onClick={() => setMobileMenuOpen(false)}
                       >
-                        <span className="relative z-10">Awards/ Press</span>
+                        <span className="relative z-10">Awards &amp; Press</span>
                         <span className="absolute left-4 right-4 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
                       </Link>
                     </li>
