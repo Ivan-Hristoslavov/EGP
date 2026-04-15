@@ -10,6 +10,9 @@ import {
   sanitizeAboutBodyHtml,
 } from "@/lib/sanitize-about-html";
 
+/** CMS content must not be frozen at build time (unlike `next dev`, production would serve stale HTML until redeploy). */
+export const dynamic = "force-dynamic";
+
 type AboutContentSection = {
   id: string;
   section_type: string;

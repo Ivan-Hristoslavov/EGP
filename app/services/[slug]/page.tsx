@@ -7,6 +7,8 @@ import { Calendar, Clock, CheckCircle, Star, ArrowRight, Phone, Shield } from "l
 import { notFound } from 'next/navigation';
 import { Button } from "@heroui/button";
 
+export const dynamic = "force-dynamic";
+
 // Fetch service from database
 async function getService(slug: string) {
   try {

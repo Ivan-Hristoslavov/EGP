@@ -4,6 +4,8 @@ import { PressPageClient } from "./PressPageClient";
 import { supabaseAdmin } from "@/lib/supabase";
 import { notFound } from 'next/navigation';
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `Awards & Press | ${siteConfig.name}`,

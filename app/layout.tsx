@@ -120,6 +120,9 @@ export const viewport: Viewport = {
   ],
 };
 
+/** Supabase-backed shell (profile, pricing cards, admin_settings) must not freeze at build time. */
+export const dynamic = "force-dynamic";
+
 export default async function RootLayout({
   children,
 }: {
