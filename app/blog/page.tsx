@@ -34,7 +34,7 @@ export default function BlogPage() {
             <Button
               onPress={() => window.location.reload()}
               color="primary"
-              className="bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-white"
+              className="bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] text-[#3f3a31]"
           >
             Retry
             </Button>

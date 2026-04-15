@@ -124,7 +124,7 @@ function BookingSuccessContent() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/book"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] text-white rounded-lg hover:from-[#857d68] hover:via-[#aea693] hover:to-[#c9c1b0] transition-all shadow-lg"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] text-[#3f3a31] rounded-lg hover:from-[#B8A99A] hover:via-[#D4C9BC] hover:to-[#EDE6DC] transition-all shadow-lg"
               >
                 <Calendar className="w-4 h-4" />
                 Book a New Appointment

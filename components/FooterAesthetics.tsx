@@ -210,7 +210,7 @@ export default function FooterAesthetics() {
   const groupedHours = getGroupedWorkingHours();
 
   return (
-    <footer className="relative bg-[#ddd5c3] dark:bg-gray-900 text-gray-900 dark:text-gray-300 border-t border-gray-200 dark:border-gray-700">
+    <footer className="relative bg-[#E6DDD1] dark:bg-gray-900 text-gray-900 dark:text-gray-300 border-t border-gray-200 dark:border-gray-700">
       <div className="relative">
         {/* Main Footer Content - 6 sections: EGP, Contact Us, Opening Hours, Quick Links, Follow Us, Legal */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">

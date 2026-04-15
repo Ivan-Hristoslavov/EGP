@@ -48,10 +48,10 @@
 
 /* CSS Variables for warm beige theme */
 :root {
-  --warm-beige: #ddd5c3;
-  --warm-beige-light: #f0ede7;
-  --warm-beige-lighter: #f5f1e9;
-  --warm-beige-dark: #c9c1b0;
+  --warm-beige: #E6DDD1;
+  --warm-beige-light: #EFEAE3;
+  --warm-beige-lighter: #F5F1EC;
+  --warm-beige-dark: #D4C9BC;
   --font-montserrat: 'Montserrat', system-ui, -apple-system, sans-serif;
 }
 

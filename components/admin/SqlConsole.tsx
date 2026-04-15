@@ -128,7 +128,7 @@ export default function SqlConsole() {
           <button
             onClick={runQuery}
             disabled={status === "loading"}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-[#9d9585] to-[#c9c1b0] text-[#3f3a31] font-semibold text-sm hover:from-[#8c846f] hover:to-[#b5ad9d] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-[#CFC4B6] to-[#E6DDD1] text-[#3f3a31] font-semibold text-sm hover:from-[#B8A99A] hover:to-[#D4C9BC] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
           >
             <Play className="w-4 h-4" />
             {status === "loading" ? "Running..." : "Run query"}

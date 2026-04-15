@@ -135,7 +135,7 @@ export default async function BlogPostPage({ params }: PageProps) {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
       {/* Hero Section - top padding so Back button is below header */}
-      <section className="pt-20 sm:pt-24 pb-5 sm:pb-8 md:pb-10 bg-gradient-to-br from-[#f5f1e9] via-[#eee6d9] to-[#e4d9c8] dark:from-gray-800 dark:via-gray-800 dark:to-gray-900">
+      <section className="pt-20 sm:pt-24 pb-5 sm:pb-8 md:pb-10 bg-gradient-to-br from-[#FAF7F3] via-[#E6DDD1] to-[#D4C9BC] dark:from-gray-800 dark:via-gray-800 dark:to-gray-900">
         <div className={layout.container}>
           <div className="max-w-4xl mx-auto">
             <Link 
@@ -253,7 +253,7 @@ export default async function BlogPostPage({ params }: PageProps) {
               <div className="mt-8 text-center">
                 <Link
                   href="/blog"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#c9c1b0] text-[#3f3a31] rounded-lg hover:from-[#8c846f] hover:via-[#aea693] hover:to-[#bfb6a5] transition-colors font-medium"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] text-[#3f3a31] rounded-lg hover:from-[#B8A99A] hover:via-[#D4C9BC] hover:to-[#EDE6DC] transition-colors font-medium"
                 >
                   <ArrowLeft className="w-5 h-5" />
                   View All Posts

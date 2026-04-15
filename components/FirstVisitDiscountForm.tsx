@@ -150,7 +150,7 @@ export function FirstVisitDiscountForm() {
                   style={{
                     background: copied
                       ? "linear-gradient(to right, #2d322c, #3a4039)"
-                      : "linear-gradient(to right, #9d9585, #b5ad9d, #ddd5c3)",
+                      : "linear-gradient(to right, #CFC4B6, #E6DDD1, #F4EFE8)",
                   }}
                 >
                   {copied ? (
@@ -176,7 +176,7 @@ export function FirstVisitDiscountForm() {
                   }}
                   className="px-6 py-3 text-white font-semibold rounded-full transition-all shadow-lg hover:shadow-xl"
                   style={{
-                    background: "linear-gradient(to right, #9d9585, #b5ad9d, #ddd5c3)",
+                    background: "linear-gradient(to right, #CFC4B6, #E6DDD1, #F4EFE8)",
                   }}
                 >
                   Close
@@ -237,7 +237,7 @@ export function FirstVisitDiscountForm() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full px-8 py-3 bg-gradient-to-r from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3] hover:from-[#8d8575] hover:via-[#a59d8d] hover:to-[#cdc5b3] text-white text-lg font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl hover:shadow-2xl active:scale-95"
+                      className="w-full px-8 py-3 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] hover:from-[#B8A99A] hover:via-[#D4C9BC] hover:to-[#EDE6DC] text-[#3f3a31] text-lg font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl hover:shadow-2xl active:scale-95"
                     >
                       {isSubmitting ? (
                         <div className="flex items-center justify-center gap-2 text-white">

@@ -1,14 +1,15 @@
 // EGP Aesthetics London - Luxury Color Palette
 // Feminine, elegant, professional aesthetic clinic colors
+// Main brand cream: #E6DDD1 — all cream gradients anchor here (not legacy taupe).
 
 export const aestheticsColors = {
-  // Primary - Warm Beige Gradient (main brand tone)
+  // Primary - cream gradient (main brand tone #E6DDD1)
   primary: {
-    light: "#f5f1e9",      // Soft warm beige
-    DEFAULT: "#ddd5c3",    // Main brand beige
-    dark: "#9d9585",       // Rich warm taupe
-    gradient: "from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3]",
-    gradientHover: "from-[#8c846f] via-[#aea693] to-[#c9c1b0]",
+    light: "#F4EFE8",      // Light cream (tint from main)
+    DEFAULT: "#E6DDD1",    // Main brand cream
+    dark: "#CFC4B6",       // Deeper cream for gradient stops
+    gradient: "from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8]",
+    gradientHover: "from-[#B8A99A] via-[#D4C9BC] to-[#EDE6DC]",
   },
 
   // Secondary - Green (Primary dark color for blocks and buttons)
@@ -21,50 +22,50 @@ export const aestheticsColors = {
     gradientHover: "from-[#2d322c] via-[#3a4039] to-[#464C45]",
   },
 
-  // Accent - Brushed Champagne
+  // Accent - Brushed Champagne (cream #E6DDD1 at center)
   accent: {
     light: "#f6e8d4",
     DEFAULT: "#d8c5a7",
     dark: "#b59c74",
-    gradient: "from-[#d8c5a7] via-[#c4b5a0] to-[#a68e6b]",
-    gradientHover: "from-[#c4b5a0] via-[#b19775] to-[#8c744f]",
+    gradient: "from-[#d8c5a7] via-[#E6DDD1] to-[#c4b5a0]",
+    gradientHover: "from-[#c4b5a0] via-[#DDD5CA] to-[#b19775]",
   },
 
-  // Luxury - Soft Metallic Beige
+  // Luxury - Soft Metallic Beige (anchored on #E6DDD1)
   luxury: {
-    gradient: "from-[#c9c1b0] via-[#ddd5c3] to-[#f0ede7]",
-    gradientShine: "from-[#f5f1e9] via-[#e4d9c8] to-[#c9c1b0]",
-    metallic: "from-[#b5a48c] via-[#d8cbb1] to-[#b5a48c]",
+    gradient: "from-[#D4C9BC] via-[#E6DDD1] to-[#F4EFE8]",
+    gradientShine: "from-[#F7F4EF] via-[#E6DDD1] to-[#CFC4B6]",
+    metallic: "from-[#CFC4B6] via-[#E6DDD1] to-[#D4C9BC]",
   },
 
-  // Neutrals - Soft & Warm (Warm Beige Theme) - Main Brand Color
+  // Neutrals - soft cream scale around main #E6DDD1
   neutral: {
-    lightest: "#f7f5f2",   // Warm beige lighter (#ddd5c3 variant)
-    light: "#f0ede7",      // Warm beige light
-    DEFAULT: "#ddd5c3",    // Warm beige (PRIMARY MAIN COLOR - Main brand color)
-    dark: "#c9c1b0",       // Warm beige dark
-    darker: "#b5ad9d",     // Warm beige darker
-    darkest: "#9d9585",    // Warm beige darkest
+    lightest: "#FAF7F3",
+    light: "#EFEAE3",
+    DEFAULT: "#E6DDD1",
+    dark: "#D4C9BC",
+    darker: "#CFC4B6",
+    darkest: "#B8A99A",
   },
   
-  // Main Brand Color Palette (based on #ddd5c3)
+  // Main brand palette (#E6DDD1)
   brand: {
-    lightest: "#f5f2ec",   // Very light beige
-    lighter: "#ebe8df",    // Light beige
-    light: "#ddd5c3",      // Main brand color (same as neutral.DEFAULT)
-    DEFAULT: "#ddd5c3",    // Main brand color
-    dark: "#c9c1b0",       // Dark beige
-    darker: "#b5ad9d",     // Darker beige
-    accent: "#c4b5a0",     // Accent beige for hover states
+    lightest: "#FAF7F3",
+    lighter: "#F0EBE4",
+    light: "#E6DDD1",
+    DEFAULT: "#E6DDD1",
+    dark: "#D4C9BC",
+    darker: "#CFC4B6",
+    accent: "#D8CEC3",
   },
 
   // Category Colors (для различните услуги)
   categories: {
     face: {
-      gradient: "from-[#b5ad9d] via-[#c9c1b0] to-[#ddd5c3]",
-      hover: "from-[#a89f8f] via-[#c4b5a0] to-[#d8cbb1]",
-      bg: "#f5f1e9",         // Soft beige background
-      text: "#6b5f4b",       // Warm taupe text
+      gradient: "from-[#D4C9BC] via-[#E6DDD1] to-[#F4EFE8]",
+      hover: "from-[#CFC4B6] via-[#DDD5CA] to-[#F0EAE2]",
+      bg: "#F7F4EF",
+      text: "#5c5348",
     },
     antiWrinkle: {
       gradient: "from-purple-400 via-violet-400 to-purple-500",
@@ -73,16 +74,16 @@ export const aestheticsColors = {
       text: "#6b21a8",       // Purple text
     },
     fillers: {
-      gradient: "from-[#d8c5a7] via-[#c4b5a0] to-[#b59c74]",
-      hover: "from-[#c4b5a0] via-[#b19775] to-[#8c744f]",
+      gradient: "from-[#d8c5a7] via-[#E6DDD1] to-[#c4b5a0]",
+      hover: "from-[#c4b5a0] via-[#ddd5ca] to-[#b19775]",
       bg: "#f4ede1",
       text: "#725f43",
     },
     body: {
-      gradient: "from-[#c9c1b0] via-[#ddd5c3] to-[#f0ede7]",
-      hover: "from-[#b5ad9d] via-[#c4b5a0] to-[#e4d9c8]",
-      bg: "#f7f2ea",
-      text: "#5b5243",
+      gradient: "from-[#D8CEC3] via-[#E6DDD1] to-[#F5F0E8]",
+      hover: "from-[#CFC4B6] via-[#E6DDD1] to-[#EFE8DF]",
+      bg: "#F7F4EF",
+      text: "#5c5348",
     },
   },
 
@@ -90,10 +91,10 @@ export const aestheticsColors = {
   buttons: {
     primary: "from-[#464C45] via-[#5a6259] to-[#464C45]", // Green gradient
     primaryHover: "from-[#3a4039] via-[#464C45] to-[#3a4039]",
-    secondary: "from-[#ddd5c3] via-[#c9c1b0] to-[#ddd5c3]", // Beige gradient
-    secondaryHover: "from-[#c9c1b0] via-[#b5ad9d] to-[#c9c1b0]",
-    accent: "from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3]", // Beige accent
-    accentHover: "from-[#857d68] via-[#aea693] to-[#c9c1b0]",
+    secondary: "from-[#E6DDD1] via-[#D4C9BC] to-[#E6DDD1]",
+    secondaryHover: "from-[#D4C9BC] via-[#CFC4B6] to-[#D4C9BC]",
+    accent: "from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8]",
+    accentHover: "from-[#B8A99A] via-[#D4C9BC] to-[#EDE6DC]",
     dark: "from-[#3a4039] via-[#464C45] to-[#2d322c]", // Dark green
     darkHover: "from-[#2d322c] via-[#3a4039] to-[#464C45]",
     whatsapp: "from-[#25D366] to-[#128C7E]", // WhatsApp green
@@ -102,12 +103,12 @@ export const aestheticsColors = {
 
   // Backgrounds - Beige + Green Palette
   backgrounds: {
-    hero: "from-[#9d9585] via-[#b5ad9d] to-[#ddd5c3]", // Beige gradient
-    section: "from-[#f5f1e9] via-[#f0ede7] to-[#e4d9c8]", // Light beige
+    hero: "from-[#D4C9BC] via-[#E6DDD1] to-[#F4EFE8]",
+    section: "from-[#FAF7F3] via-[#F0EBE4] to-[#E6DDD1]",
     sectionDark: "from-[#3a4039] via-[#464C45] to-[#2d322c]", // Green dark (replaces gray-900)
     card: "from-white to-[#f5f1e9]/60",
     cardDark: "from-[#464C45] to-[#3a4039]", // Green card (replaces gray-800)
-    luxury: "from-[#d8c5a7] via-[#c4b5a0] to-[#b59c74]",
+    luxury: "from-[#d8c5a7] via-[#E6DDD1] to-[#f4ede4]",
   },
 
   // Text Colors - Beige + Green Palette
@@ -117,9 +118,9 @@ export const aestheticsColors = {
     light: "#9ca3af",         // Light gray
     onDark: "#ffffff",        // White text on dark backgrounds
     onGreen: "#ffffff",       // White text on green backgrounds
-    accent: "#8c846f",        // Warm taupe accent
+    accent: "#7a6f62",        // Warm accent (cream family)
     green: "#464C45",          // Green text
-    beige: "#9d9585",         // Beige text
+    beige: "#8B7D6E",         // Beige text (readable on light cream)
   },
 
   // Trust & Success

@@ -13,15 +13,8 @@
   "categories": ["business", "professional", "services"],
   "icons": [
     {
-      "src": "/favicon-light.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/favicon-dark.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/fav/LOGO.png",
+      "type": "image/png",
       "purpose": "any"
     }
   ],
