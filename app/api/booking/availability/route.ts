@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { supabaseAdmin } from "../../../../lib/supabase";
 
 interface WorkingHour {
@@ -22,7 +23,9 @@ const DEFAULT_DAYS_AHEAD = 30;
 function toDate(date: string, time: string) {
   const [hour, minute] = time.split(":").map(Number);
   const base = new Date(`${date}T00:00:00`);
+
   base.setHours(hour, minute, 0, 0);
+
   return base;
 }
 
@@ -35,7 +38,9 @@ function toTimeString(date: Date) {
 
 function addMinutes(date: Date, minutes: number) {
   const next = new Date(date);
+
   next.setMinutes(next.getMinutes() + minutes);
+
   return next;
 }
 
@@ -50,7 +55,7 @@ function normalizeBookings(rows: BookingRow[]) {
 function buildSlots(
   date: string,
   workingHour: WorkingHour | null,
-  bookings: BookingRow[]
+  bookings: BookingRow[],
 ) {
   if (!workingHour || !workingHour.is_working_day) {
     return {
@@ -95,7 +100,7 @@ function buildSlots(
       (booking) =>
         booking.date === date &&
         booking.time === slotStartStr &&
-        booking.status !== "cancelled"
+        booking.status !== "cancelled",
     );
 
     allSlots.push(slotStartStr);
@@ -106,10 +111,14 @@ function buildSlots(
       availableSlots.push(slotStartStr);
     }
 
-    cursor = addMinutes(slotStart, SLOT_INTERVAL_MINUTES + (workingHour.buffer_minutes ?? 0));
+    cursor = addMinutes(
+      slotStart,
+      SLOT_INTERVAL_MINUTES + (workingHour.buffer_minutes ?? 0),
+    );
   }
 
-  const status: "full" | "available" = availableSlots.length > 0 ? "available" : "full";
+  const status: "full" | "available" =
+    availableSlots.length > 0 ? "available" : "full";
 
   return { date, status, availableSlots, bookedSlots, allSlots };
 }
@@ -124,35 +133,38 @@ export async function GET(request: NextRequest) {
     const startDate = startParam ? new Date(startParam) : today;
     const endDate = endParam
       ? new Date(endParam)
-      : new Date(startDate.getTime() + DEFAULT_DAYS_AHEAD * 24 * 60 * 60 * 1000);
+      : new Date(
+          startDate.getTime() + DEFAULT_DAYS_AHEAD * 24 * 60 * 60 * 1000,
+        );
 
     if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
       return NextResponse.json(
         { error: "Invalid start or end date" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (startDate > endDate) {
       return NextResponse.json(
         { error: "Start date must be before end date" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const { data: workingHoursRows, error: workingHoursError } = await supabaseAdmin
-      .from("working_hours")
-      .select("*");
+    const { data: workingHoursRows, error: workingHoursError } =
+      await supabaseAdmin.from("working_hours").select("*");
 
     if (workingHoursError) {
       console.error("Error fetching working hours:", workingHoursError);
+
       return NextResponse.json(
         { error: "Unable to load working hours" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     const workingHoursMap = new Map<number, WorkingHour>();
+
     (workingHoursRows ?? []).forEach((row) => {
       workingHoursMap.set(row.day_of_week, row as WorkingHour);
     });
@@ -168,25 +180,33 @@ export async function GET(request: NextRequest) {
 
     if (bookingsError) {
       console.error("Error fetching bookings:", bookingsError);
+
       return NextResponse.json(
         { error: "Unable to load bookings" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     const results = [] as Array<ReturnType<typeof buildSlots>>;
     const dayCount =
-      Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      Math.ceil(
+        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
+      ) + 1;
 
     for (let i = 0; i < dayCount; i++) {
       const day = new Date(startDate);
+
       day.setDate(startDate.getDate() + i);
       const isoDate = day.toISOString().split("T")[0];
       const dow = day.getDay();
       const workingHour = workingHoursMap.get(dow) ?? null;
-      const bookingsForDay = (bookingsRows ?? []).filter((row) => row.date === isoDate);
+      const bookingsForDay = (bookingsRows ?? []).filter(
+        (row) => row.date === isoDate,
+      );
 
-      results.push(buildSlots(isoDate, workingHour, bookingsForDay as BookingRow[]));
+      results.push(
+        buildSlots(isoDate, workingHour, bookingsForDay as BookingRow[]),
+      );
     }
 
     return NextResponse.json({
@@ -198,9 +218,10 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Unexpected error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

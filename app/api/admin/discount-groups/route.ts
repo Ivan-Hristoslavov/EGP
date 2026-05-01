@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET() {
@@ -11,12 +12,18 @@ export async function GET() {
 
     if (error) {
       console.error("Error fetching discount groups:", error);
+
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
     return NextResponse.json({ discountGroups: data ?? [] });
   } catch (error) {
     console.error("Unexpected error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
@@ -29,15 +36,16 @@ export async function POST(request: NextRequest) {
     if (!name || discount_percentage == null) {
       return NextResponse.json(
         { error: "name and discount_percentage are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const pct = Number(discount_percentage);
+
     if (Number.isNaN(pct) || pct < 0 || pct > 100) {
       return NextResponse.json(
         { error: "discount_percentage must be between 0 and 100" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -53,11 +61,17 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error("Error creating discount group:", error);
+
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
     return NextResponse.json({ discountGroup: data });
   } catch (error) {
     console.error("Unexpected error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

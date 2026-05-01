@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+
 import { siteConfig } from "@/config/site";
 
 export const ogImageSize = { width: 1200, height: 630 };
@@ -16,7 +17,8 @@ export function createDefaultOgImageResponse() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(145deg, #1c1917 0%, #292524 40%, #464C45 100%)",
+          background:
+            "linear-gradient(145deg, #1c1917 0%, #292524 40%, #464C45 100%)",
           color: "#fafaf9",
           fontFamily:
             'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif',
@@ -32,7 +34,14 @@ export function createDefaultOgImageResponse() {
             textAlign: "center",
           }}
         >
-          <div style={{ fontSize: 64, fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.1 }}>
+          <div
+            style={{
+              fontSize: 64,
+              fontWeight: 700,
+              letterSpacing: "-0.02em",
+              lineHeight: 1.1,
+            }}
+          >
             {siteConfig.shortName}
           </div>
           <div
@@ -61,6 +70,6 @@ export function createDefaultOgImageResponse() {
     ),
     {
       ...ogImageSize,
-    }
+    },
   );
 }

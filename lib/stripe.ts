@@ -2,10 +2,12 @@ import Stripe from "stripe";
 import { loadStripe } from "@stripe/stripe-js";
 
 // Check if Stripe is configured
-const isStripeConfigured = !!process.env.STRIPE_SECRET_KEY && !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+const isStripeConfigured =
+  !!process.env.STRIPE_SECRET_KEY &&
+  !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 
 // Server-side Stripe instance (only if configured)
-export const stripe = isStripeConfigured 
+export const stripe = isStripeConfigured
   ? new Stripe(process.env.STRIPE_SECRET_KEY!)
   : null;
 
@@ -18,20 +20,27 @@ let stripeServerLazy: Stripe | null | undefined;
 export function getStripeServer(): Stripe | null {
   if (stripeServerLazy !== undefined) return stripeServerLazy;
   const key = process.env.STRIPE_SECRET_KEY?.trim();
+
   if (!key) {
     stripeServerLazy = null;
+
     return null;
   }
   stripeServerLazy = new Stripe(key);
+
   return stripeServerLazy;
 }
 
 // Client-side Stripe instance
 export const getStripe = () => {
   if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
-    console.warn("Stripe not configured - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY missing");
+    console.warn(
+      "Stripe not configured - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY missing",
+    );
+
     return null;
   }
+
   return loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 };
 
@@ -68,7 +77,13 @@ export const createPaymentLink = async (params: {
     throw new Error("Stripe is not configured");
   }
 
-  const { amount, currency = "gbp", description, customerEmail, metadata = {} } = params;
+  const {
+    amount,
+    currency = "gbp",
+    description,
+    customerEmail,
+    metadata = {},
+  } = params;
 
   // First create a product
   const product = await stripe.products.create({
@@ -94,7 +109,7 @@ export const createPaymentLink = async (params: {
       created_at: new Date().toISOString(),
     },
     automatic_tax: { enabled: false },
-    customer_creation: "always"
+    customer_creation: "always",
   };
 
   // If customer email is provided, try to create/find customer and pre-fill
@@ -103,10 +118,11 @@ export const createPaymentLink = async (params: {
       // First, try to find existing customer by email
       const existingCustomers = await stripe.customers.list({
         email: customerEmail,
-        limit: 1
+        limit: 1,
       });
 
       let customer;
+
       if (existingCustomers.data.length > 0) {
         customer = existingCustomers.data[0];
         console.log("Found existing Stripe customer:", customer.id);
@@ -116,8 +132,8 @@ export const createPaymentLink = async (params: {
           email: customerEmail,
           metadata: {
             created_from: "payment_link",
-            created_at: new Date().toISOString()
-          }
+            created_at: new Date().toISOString(),
+          },
         });
         console.log("Created new Stripe customer:", customer.id);
       }
@@ -125,9 +141,11 @@ export const createPaymentLink = async (params: {
       // Add customer email to metadata for reference
       paymentLinkData.metadata.customer_email = customerEmail;
       paymentLinkData.metadata.stripe_customer_id = customer.id;
-      
     } catch (error) {
-      console.warn("Could not create/find customer, proceeding without pre-filled email:", error);
+      console.warn(
+        "Could not create/find customer, proceeding without pre-filled email:",
+        error,
+      );
     }
   }
 
@@ -150,7 +168,15 @@ export const createCheckoutSession = async (params: {
     throw new Error("Stripe is not configured");
   }
 
-  const { amount, currency = "gbp", description, customerEmail, successUrl, cancelUrl, metadata = {} } = params;
+  const {
+    amount,
+    currency = "gbp",
+    description,
+    customerEmail,
+    successUrl,
+    cancelUrl,
+    metadata = {},
+  } = params;
 
   // Create session data
   const sessionData: any = {
@@ -182,21 +208,25 @@ export const createCheckoutSession = async (params: {
       // First, try to find existing customer by email
       const existingCustomers = await stripe.customers.list({
         email: customerEmail,
-        limit: 1
+        limit: 1,
       });
 
       let customer;
+
       if (existingCustomers.data.length > 0) {
         customer = existingCustomers.data[0];
-        console.log("Found existing Stripe customer for checkout:", customer.id);
+        console.log(
+          "Found existing Stripe customer for checkout:",
+          customer.id,
+        );
       } else {
         // Create new customer with email
         customer = await stripe.customers.create({
           email: customerEmail,
           metadata: {
             created_from: "checkout_session",
-            created_at: new Date().toISOString()
-          }
+            created_at: new Date().toISOString(),
+          },
         });
         console.log("Created new Stripe customer for checkout:", customer.id);
       }
@@ -206,9 +236,11 @@ export const createCheckoutSession = async (params: {
       sessionData.customer_email = customerEmail;
       sessionData.metadata.customer_email = customerEmail;
       sessionData.metadata.stripe_customer_id = customer.id;
-      
     } catch (error) {
-      console.warn("Could not create/find customer for checkout, proceeding with email pre-fill:", error);
+      console.warn(
+        "Could not create/find customer for checkout, proceeding with email pre-fill:",
+        error,
+      );
       // Fallback to just pre-filling email
       sessionData.customer_email = customerEmail;
       sessionData.metadata.customer_email = customerEmail;

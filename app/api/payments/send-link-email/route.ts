@@ -1,16 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { supabase } from "../../../../lib/supabase";
 import { sendEmail } from "../../../../lib/sendgrid-smtp";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { payment_id, customer_email, customer_name, payment_link_url, amount } = body;
+    const {
+      payment_id,
+      customer_email,
+      customer_name,
+      payment_link_url,
+      amount,
+    } = body;
 
-    if (!payment_id || !customer_email || !customer_name || !payment_link_url || !amount) {
+    if (
+      !payment_id ||
+      !customer_email ||
+      !customer_name ||
+      !payment_link_url ||
+      !amount
+    ) {
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -23,7 +36,7 @@ export async function POST(request: NextRequest) {
     if (!adminProfile) {
       return NextResponse.json(
         { error: "Admin profile not found" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -67,7 +80,7 @@ body{margin:0;padding:0;font-family:Georgia,serif;background:#f5f3ef;color:#1c19
 <p style="font-size:14px;color:#78716c">Questions? Reply to this email or contact ${adminProfile.name}.</p>
 </div>
 <div class="ft">
-<p style="margin:0">${adminProfile.name} · ${adminProfile.company_name || ''}</p>
+<p style="margin:0">${adminProfile.name} · ${adminProfile.company_name || ""}</p>
 </div>
 </div>
 </body>
@@ -76,24 +89,33 @@ body{margin:0;padding:0;font-family:Georgia,serif;background:#f5f3ef;color:#1c19
 
     // Send email using SendGrid
     try {
-      console.log('Attempting to send email to:', customer_email);
-      console.log('Email subject:', emailSubject);
-      console.log('Admin profile email:', adminProfile.email);
-      
+      console.log("Attempting to send email to:", customer_email);
+      console.log("Email subject:", emailSubject);
+      console.log("Admin profile email:", adminProfile.email);
+
       await sendEmail({
         to: customer_email,
         subject: emailSubject,
         text: `Payment Request from ${adminProfile.company_name || adminProfile.name}\n\nDear ${customer_name},\n\nWe have prepared a secure payment link for your convenience.\n\nAmount: £${amount.toFixed(2)}\n\nPayment Link: ${payment_link_url}\n\nBest regards,\n${adminProfile.name}`,
         html: emailContent,
       });
-      
-      console.log('✅ Payment link email sent successfully to:', customer_email);
+
+      console.log(
+        "✅ Payment link email sent successfully to:",
+        customer_email,
+      );
     } catch (emailError: any) {
-      console.error('❌ Error sending payment link email:', emailError);
-      console.error('Error details:', emailError.response?.body || emailError.message);
+      console.error("❌ Error sending payment link email:", emailError);
+      console.error(
+        "Error details:",
+        emailError.response?.body || emailError.message,
+      );
+
       return NextResponse.json(
-        { error: `Failed to send payment link email: ${emailError.message || 'Unknown error'}` },
-        { status: 500 }
+        {
+          error: `Failed to send payment link email: ${emailError.message || "Unknown error"}`,
+        },
+        { status: 500 },
       );
     }
 
@@ -104,10 +126,11 @@ body{margin:0;padding:0;font-family:Georgia,serif;background:#f5f3ef;color:#1c19
       .select("notes")
       .eq("id", payment_id)
       .single();
-    
-    const currentNotes = currentPayment?.notes || '';
-    const newNotes = `${currentNotes} | Email sent to ${customer_email} at ${new Date().toISOString()}`.trim();
-    
+
+    const currentNotes = currentPayment?.notes || "";
+    const newNotes =
+      `${currentNotes} | Email sent to ${customer_email} at ${new Date().toISOString()}`.trim();
+
     const { error: updateError } = await supabase
       .from("payments")
       .update({
@@ -121,16 +144,16 @@ body{margin:0;padding:0;font-family:Georgia,serif;background:#f5f3ef;color:#1c19
       // Don't fail the request, just log the error
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      message: "Payment link email sent successfully" 
+    return NextResponse.json({
+      success: true,
+      message: "Payment link email sent successfully",
     });
-
   } catch (error) {
     console.error("Error sending payment link email:", error);
+
     return NextResponse.json(
       { error: "Failed to send payment link email" },
-      { status: 500 }
+      { status: 500 },
     );
   }
-} 
+}

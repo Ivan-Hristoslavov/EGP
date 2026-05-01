@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Mail, Gift, Copy, Check, Sparkles } from "lucide-react";
+import { Input, Button } from "@heroui/react";
+
 import { siteConfig } from "@/config/site";
 import { aestheticsColors } from "@/config/colors";
-import { Input, Button } from "@heroui/react";
 import { typography, layout, textColors } from "@/config/typography";
 
 export default function SectionNewsletter() {
@@ -32,6 +33,7 @@ export default function SectionNewsletter() {
     e.preventDefault();
     if (!firstName.trim() || !email.trim() || !mobile.trim()) {
       setStatus("error");
+
       return;
     }
     setIsSubmitting(true);
@@ -47,8 +49,10 @@ export default function SectionNewsletter() {
         }),
       });
       const data = await res.json().catch(() => ({}));
+
       if (!res.ok) {
         setStatus("error");
+
         return;
       }
       setDiscountCode(data.discountCode ?? "");
@@ -90,17 +94,24 @@ export default function SectionNewsletter() {
                         boxShadow: `0 4px 12px -2px rgba(70, 76, 69, 0.3)`,
                       }}
                     >
-                      <Sparkles className="w-6 h-6 text-white" strokeWidth={2} />
+                      <Sparkles
+                        className="w-6 h-6 text-white"
+                        strokeWidth={2}
+                      />
                     </div>
                     <div>
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold uppercase tracking-wider bg-egp-green/10 dark:bg-white/10 text-egp-green dark:text-white/90 border border-egp-green/20 dark:border-white/20 mb-1">
                         <Gift className="w-3 h-3" />
                         Exclusive Offer
                       </span>
-                      <h3 className={`${typography.headingCard} ${textColors.heading}`}>
+                      <h3
+                        className={`${typography.headingCard} ${textColors.heading}`}
+                      >
                         Welcome to EGP Aesthetics!
                       </h3>
-                      <p className={`${typography.small} ${textColors.muted} mt-0.5`}>
+                      <p
+                        className={`${typography.small} ${textColors.muted} mt-0.5`}
+                      >
                         Check your email for details.
                       </p>
                     </div>
@@ -118,7 +129,9 @@ export default function SectionNewsletter() {
                     >
                       <div className="flex flex-col gap-3">
                         <div className="min-w-0">
-                          <p className={`${typography.small} ${textColors.muted} mb-0.5 font-semibold uppercase tracking-wider`}>
+                          <p
+                            className={`${typography.small} ${textColors.muted} mb-0.5 font-semibold uppercase tracking-wider`}
+                          >
                             Your Discount Code
                           </p>
                           <p className="text-lg sm:text-xl font-bold tracking-[0.15em] text-egp-green dark:text-white select-all font-mono">
@@ -127,21 +140,28 @@ export default function SectionNewsletter() {
                         </div>
                         <div className="flex items-center gap-2">
                           <button
-                            type="button"
-                            onClick={handleCopyCode}
                             className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 ${
                               copied
                                 ? "bg-emerald-500/90 text-white shadow-md"
                                 : "bg-egp-green hover:bg-egp-green-dark text-white shadow-md hover:shadow-lg active:scale-[0.98]"
                             }`}
+                            type="button"
+                            onClick={handleCopyCode}
                           >
-                            {copied ? <Check className="w-3.5 h-3.5" strokeWidth={2.5} /> : <Copy className="w-3.5 h-3.5" />}
+                            {copied ? (
+                              <Check
+                                className="w-3.5 h-3.5"
+                                strokeWidth={2.5}
+                              />
+                            ) : (
+                              <Copy className="w-3.5 h-3.5" />
+                            )}
                             {copied ? "Copied!" : "Copy"}
                           </button>
                           <button
+                            className="px-4 py-2 rounded-lg font-semibold text-sm bg-egp-beige-dark hover:bg-egp-beige-darker text-white dark:bg-egp-green dark:hover:bg-egp-green-dark transition-colors"
                             type="button"
                             onClick={() => setStatus("idle")}
-                            className="px-4 py-2 rounded-lg font-semibold text-sm bg-egp-beige-dark hover:bg-egp-beige-darker text-white dark:bg-egp-green dark:hover:bg-egp-green-dark transition-colors"
                           >
                             Close
                           </button>
@@ -166,18 +186,18 @@ export default function SectionNewsletter() {
   }
 
   return (
-      <section className="py-6 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className={layout.container}>
-          <div className="max-w-3xl mx-auto">
-            <div 
-              className="rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg"
-              style={{
-                backgroundColor: aestheticsColors.green.DEFAULT,
-                borderColor: aestheticsColors.green.border.dark,
-                borderWidth: '2px',
-                borderStyle: 'solid',
-              }}
-            >
+    <section className="py-6 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className={layout.container}>
+        <div className="max-w-3xl mx-auto">
+          <div
+            className="rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg"
+            style={{
+              backgroundColor: aestheticsColors.green.DEFAULT,
+              borderColor: aestheticsColors.green.border.dark,
+              borderWidth: "2px",
+              borderStyle: "solid",
+            }}
+          >
             <div className="flex flex-col lg:flex-row lg:items-center gap-4 sm:gap-6">
               {/* Content */}
               <div className="flex-1">
@@ -186,86 +206,95 @@ export default function SectionNewsletter() {
                   <span>Exclusive Offer</span>
                 </div>
                 <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2 sm:mb-3">
-                  Get {siteConfig.newsletter.welcomeDiscountPercent}% Off Your First Visit
+                  Get {siteConfig.newsletter.welcomeDiscountPercent}% Off Your
+                  First Visit
                 </h2>
                 <p className="text-sm sm:text-base text-white/90 mb-3 sm:mb-4">
-                  Subscribe to our newsletter and receive exclusive beauty tips, treatment guides, and special offers
+                  Subscribe to our newsletter and receive exclusive beauty tips,
+                  treatment guides, and special offers
                 </p>
 
                 {/* Form */}
-                <form onSubmit={handleSubmit} className="space-y-3">
+                <form className="space-y-3" onSubmit={handleSubmit}>
                   <div className="flex flex-col gap-3">
                     <Input
-                      type="text"
                       isRequired
-                      value={firstName}
-                      onValueChange={setFirstName}
+                      classNames={{
+                        input: "bg-white dark:bg-gray-800",
+                        inputWrapper: "bg-white dark:bg-gray-800",
+                      }}
                       placeholder="First Name"
-                      variant="bordered"
                       size="lg"
+                      style={{
+                        borderColor: aestheticsColors.green.border.DEFAULT,
+                      }}
+                      type="text"
+                      value={firstName}
+                      variant="bordered"
+                      onValueChange={setFirstName}
+                    />
+                    <Input
+                      isRequired
                       classNames={{
                         input: "bg-white dark:bg-gray-800",
                         inputWrapper: "bg-white dark:bg-gray-800",
                       }}
-                      style={{
-                        borderColor: aestheticsColors.green.border.DEFAULT,
-                      }}
-                    />
-                    <Input
-                      type="email"
-                      isRequired
-                      value={email}
-                      onValueChange={setEmail}
                       placeholder="Your email address"
-                      variant="bordered"
                       size="lg"
-                      classNames={{
-                        input: "bg-white dark:bg-gray-800",
-                        inputWrapper: "bg-white dark:bg-gray-800",
-                      }}
                       style={{
                         borderColor: aestheticsColors.green.border.DEFAULT,
                       }}
+                      type="email"
+                      value={email}
+                      variant="bordered"
+                      onValueChange={setEmail}
                     />
                     <Input
-                      type="tel"
                       isRequired
-                      value={mobile}
-                      onValueChange={setMobile}
-                      placeholder="Mobile Number"
-                      variant="bordered"
-                      size="lg"
                       classNames={{
                         input: "bg-white dark:bg-gray-800",
                         inputWrapper: "bg-white dark:bg-gray-800",
                       }}
+                      placeholder="Mobile Number"
+                      size="lg"
                       style={{
                         borderColor: aestheticsColors.green.border.DEFAULT,
                       }}
+                      type="tel"
+                      value={mobile}
+                      variant="bordered"
+                      onValueChange={setMobile}
                     />
                   </div>
                   <Button
-                    type="submit"
-                    isLoading={isSubmitting}
-                    disabled={isSubmitting}
-                    size="lg"
                     className="w-full bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] text-[#3f3a31] font-bold shadow-xl hover:shadow-2xl"
+                    disabled={isSubmitting}
+                    isLoading={isSubmitting}
+                    size="lg"
                     startContent={!isSubmitting && <Mail className="w-5 h-5" />}
+                    type="submit"
                   >
                     {isSubmitting ? "Subscribing..." : "Get My Discount Code"}
                   </Button>
                 </form>
 
                 {status === "error" && (
-                  <p className={`mt-4 ${typography.small} text-red-200 dark:text-red-400`}>
-                    Sorry, there was an error. Please try again or contact us directly.
+                  <p
+                    className={`mt-4 ${typography.small} text-red-200 dark:text-red-400`}
+                  >
+                    Sorry, there was an error. Please try again or contact us
+                    directly.
                   </p>
                 )}
 
                 {/* Privacy */}
                 <p className={`mt-4 ${typography.small} text-white/80`}>
-                  By subscribing, you agree to receive marketing emails. Unsubscribe anytime. 
-                  <Link href="/privacy" className="underline hover:text-white ml-1 font-semibold transition-colors">
+                  By subscribing, you agree to receive marketing emails.
+                  Unsubscribe anytime.
+                  <Link
+                    className="underline hover:text-white ml-1 font-semibold transition-colors"
+                    href="/privacy"
+                  >
                     Privacy Policy
                   </Link>
                 </p>
@@ -273,13 +302,13 @@ export default function SectionNewsletter() {
 
               {/* Visual Element - Green Badge */}
               <div className="hidden lg:block">
-                <div 
+                <div
                   className="w-32 h-32 rounded-full flex items-center justify-center shadow-lg"
                   style={{
                     background: `linear-gradient(to bottom right, ${aestheticsColors.green.DEFAULT}, ${aestheticsColors.green.dark})`,
                     borderColor: aestheticsColors.green.border.light,
-                    borderWidth: '2px',
-                    borderStyle: 'solid',
+                    borderWidth: "2px",
+                    borderStyle: "solid",
                   }}
                 >
                   <div className="text-center">
@@ -287,7 +316,9 @@ export default function SectionNewsletter() {
                       {siteConfig.newsletter.welcomeDiscountPercent}%
                     </div>
                     <div className="text-white font-bold text-sm">OFF</div>
-                    <div className="text-white/90 text-xs mt-1 font-semibold">First Visit</div>
+                    <div className="text-white/90 text-xs mt-1 font-semibold">
+                      First Visit
+                    </div>
                   </div>
                 </div>
               </div>
@@ -298,4 +329,3 @@ export default function SectionNewsletter() {
     </section>
   );
 }
-

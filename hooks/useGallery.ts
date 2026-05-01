@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+
 import { GalleryItem } from "@/types";
 
 // Global cache to prevent multiple API calls
@@ -7,7 +8,7 @@ let cachePromise: Promise<GalleryItem[]> | null = null;
 
 export function useGallery() {
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>(
-    galleryCache || []
+    galleryCache || [],
   );
   const [loading, setLoading] = useState(!galleryCache);
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +25,7 @@ export function useGallery() {
       }
 
       const items = data.galleryItems || [];
+
       galleryCache = items; // Update cache
       setGalleryItems(items);
       setError(null);
@@ -36,7 +38,10 @@ export function useGallery() {
   };
 
   const addGalleryItem = async (
-    itemData: Omit<GalleryItem, "id" | "admin_id" | "created_at" | "updated_at">
+    itemData: Omit<
+      GalleryItem,
+      "id" | "admin_id" | "created_at" | "updated_at"
+    >,
   ) => {
     try {
       const response = await fetch("/api/gallery", {
@@ -52,6 +57,7 @@ export function useGallery() {
       }
 
       setGalleryItems((prev) => [...prev, data.galleryItem]);
+
       return data.galleryItem;
     } catch (err) {
       throw new Error(err instanceof Error ? err.message : "An error occurred");
@@ -60,7 +66,7 @@ export function useGallery() {
 
   const updateGalleryItem = async (
     id: string,
-    itemData: Partial<GalleryItem>
+    itemData: Partial<GalleryItem>,
   ) => {
     try {
       const response = await fetch(`/api/gallery`, {
@@ -75,10 +81,9 @@ export function useGallery() {
         throw new Error(data.error || "Failed to update gallery item");
       }
       setGalleryItems((prev) =>
-        prev.map((item) =>
-          item.id === id ? data.galleryItem : item
-        )
+        prev.map((item) => (item.id === id ? data.galleryItem : item)),
       );
+
       return data.galleryItem;
     } catch (err) {
       throw new Error(err instanceof Error ? err.message : "An error occurred");
@@ -93,6 +98,7 @@ export function useGallery() {
 
       if (!response.ok) {
         const data = await response.json();
+
         throw new Error(data.error || "Failed to delete gallery item");
       }
 
@@ -110,6 +116,7 @@ export function useGallery() {
     if (galleryCache) {
       setGalleryItems(galleryCache);
       setLoading(false);
+
       return;
     }
 
@@ -124,6 +131,7 @@ export function useGallery() {
           setError(err instanceof Error ? err.message : "Unknown error");
           setLoading(false);
         });
+
       return;
     }
 
@@ -135,9 +143,11 @@ export function useGallery() {
           throw new Error("Failed to fetch gallery items");
         }
         const items = data.galleryItems || [];
+
         galleryCache = items;
         setGalleryItems(items);
         setLoading(false);
+
         return items;
       })
       .catch((err) => {

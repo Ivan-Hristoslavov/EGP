@@ -1,13 +1,41 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, User, Phone, Mail, MapPin, Filter, Search, Edit, Trash2, Eye, CheckCircle, XCircle, AlertCircle } from "lucide-react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Card, CardBody, CardHeader, Divider, Badge, useDisclosure } from "@heroui/react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Calendar as CalendarIcon,
+  Clock,
+  User,
+  Phone,
+  Mail,
+  MapPin,
+  Search,
+  Edit,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+} from "lucide-react";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Divider,
+  useDisclosure,
+} from "@heroui/react";
 import { Chip } from "@heroui/chip";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
 import { Spinner } from "@heroui/spinner";
 import { Textarea } from "@heroui/react";
+
 import { useToast } from "@/components/Toast";
 
 interface Booking {
@@ -31,12 +59,13 @@ interface Booking {
 
 const getCurrentToday = () => {
   const today = new Date();
-  return today.toISOString().split('T')[0];
+
+  return today.toISOString().split("T")[0];
 };
 
 // Helper function to format time to HH:MM
 const formatTime = (timeString: string) => {
-  if (!timeString) return 'N/A';
+  if (!timeString) return "N/A";
   // If time is already in HH:MM format, return as is
   if (timeString.match(/^\d{2}:\d{2}$/)) {
     return timeString;
@@ -47,8 +76,9 @@ const formatTime = (timeString: string) => {
   }
   // For other formats, try to parse and format
   try {
-    const [hours, minutes] = timeString.split(':');
-    return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+    const [hours, minutes] = timeString.split(":");
+
+    return `${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}`;
   } catch {
     return timeString;
   }
@@ -56,8 +86,10 @@ const formatTime = (timeString: string) => {
 
 const getCurrentTomorrow = () => {
   const tomorrow = new Date();
+
   tomorrow.setDate(tomorrow.getDate() + 1);
-  return tomorrow.toISOString().split('T')[0];
+
+  return tomorrow.toISOString().split("T")[0];
 };
 
 // Empty bookings array - will be populated from database
@@ -68,14 +100,18 @@ const getWeekDays = (date: Date) => {
   const startOfWeek = new Date(date);
   const day = startOfWeek.getDay();
   const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+
   startOfWeek.setDate(diff);
-  
+
   const days = [];
+
   for (let i = 0; i < 7; i++) {
     const day = new Date(startOfWeek);
+
     day.setDate(startOfWeek.getDate() + i);
     days.push(day);
   }
+
   return days;
 };
 
@@ -83,37 +119,43 @@ const getWeekRange = (date: Date) => {
   const weekDays = getWeekDays(date);
   const start = weekDays[0];
   const end = weekDays[6];
-  
+
   if (start.getMonth() === end.getMonth()) {
-    return `${start.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} - Week of ${start.getDate()}-${end.getDate()}`;
+    return `${start.toLocaleDateString("en-US", { month: "long", year: "numeric" })} - Week of ${start.getDate()}-${end.getDate()}`;
   } else {
-    return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+    return `${start.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${end.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
   }
 };
 
 const getTimeSlots = () => {
   const slots = [];
+
   for (let hour = 8; hour < 20; hour++) {
     for (let minute = 0; minute < 60; minute += 30) {
-      const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+      const time = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
+
       slots.push(time);
     }
   }
+
   return slots;
 };
 
 const isToday = (date: Date) => {
   const today = new Date();
-  return date.getDate() === today.getDate() &&
-         date.getMonth() === today.getMonth() &&
-         date.getFullYear() === today.getFullYear();
+
+  return (
+    date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear()
+  );
 };
 
 export default function CalendarPage() {
   const { showSuccess, showError } = useToast();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(getCurrentToday());
-  const [view, setView] = useState<'month' | 'week' | 'day'>('month');
+  const [view, setView] = useState<"month" | "week" | "day">("month");
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -124,49 +166,54 @@ export default function CalendarPage() {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
   const [bookingToDelete, setBookingToDelete] = useState<Booking | null>(null);
-  
+
   // State for booking details modal
   const [showBookingDetailsModal, setShowBookingDetailsModal] = useState(false);
-  const [selectedBookingDetails, setSelectedBookingDetails] = useState<Booking | null>(null);
-  
+  const [selectedBookingDetails, setSelectedBookingDetails] =
+    useState<Booking | null>(null);
+
   // State for status change modal
-  const { isOpen: isStatusModalOpen, onOpen: onStatusModalOpen, onClose: onStatusModalClose } = useDisclosure();
+  const {
+    isOpen: isStatusModalOpen,
+    onOpen: onStatusModalOpen,
+    onClose: onStatusModalClose,
+  } = useDisclosure();
   const [selectedStatus, setSelectedStatus] = useState<string>("");
-  
+
   // State for expanded day view
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
   const [expandedDayBookings, setExpandedDayBookings] = useState<Booking[]>([]);
-  
+
   // Move booking modal state (simplified drag and drop)
   const [showMoveModal, setShowMoveModal] = useState(false);
   const [bookingToMove, setBookingToMove] = useState<Booking | null>(null);
-  const [moveTargetDate, setMoveTargetDate] = useState<string>('');
+  const [moveTargetDate, setMoveTargetDate] = useState<string>("");
   const [moveAvailableSlots, setMoveAvailableSlots] = useState<string[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
-  const [customTime, setCustomTime] = useState<string>('');
+  const [customTime, setCustomTime] = useState<string>("");
   const [useCustomTime, setUseCustomTime] = useState(false);
-  
+
   // Simple drag state
   const [draggedBooking, setDraggedBooking] = useState<Booking | null>(null);
-  
+
   // Edit modal form state
   const [editFormData, setEditFormData] = useState({
-    customer_name: '',
-    customer_email: '',
-    customer_phone: '',
-    service: '',
-    date: '',
-    time: '',
-    amount: '',
-    payment_method: 'card' as 'cash' | 'card' | 'cash_and_card',
-    cash_amount: '',
-    card_amount: '',
-    payment_type: 'full' as 'full' | 'deposit',
-    deposit_amount: '',
-    status: 'pending',
-    payment_status: 'pending',
-    address: '',
-    notes: ''
+    customer_name: "",
+    customer_email: "",
+    customer_phone: "",
+    service: "",
+    date: "",
+    time: "",
+    amount: "",
+    payment_method: "card" as "cash" | "card" | "cash_and_card",
+    cash_amount: "",
+    card_amount: "",
+    payment_type: "full" as "full" | "deposit",
+    deposit_amount: "",
+    status: "pending",
+    payment_status: "pending",
+    address: "",
+    notes: "",
   });
   const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
   const [editAvailableSlots, setEditAvailableSlots] = useState<string[]>([]);
@@ -174,25 +221,27 @@ export default function CalendarPage() {
 
   // New booking form state
   const [newBookingForm, setNewBookingForm] = useState({
-    customer_name: '',
-    customer_email: '',
-    customer_phone: '',
-    service: '',
+    customer_name: "",
+    customer_email: "",
+    customer_phone: "",
+    service: "",
     date: getCurrentToday(),
-    time: '',
-    amount: '',
-    payment_method: 'card' as 'cash' | 'card' | 'cash_and_card',
-    cash_amount: '',
-    card_amount: '',
-    payment_type: 'full' as 'full' | 'deposit',
-    deposit_amount: '',
-    status: 'pending',
-    payment_status: 'pending',
-    address: '',
-    notes: ''
+    time: "",
+    amount: "",
+    payment_method: "card" as "cash" | "card" | "cash_and_card",
+    cash_amount: "",
+    card_amount: "",
+    payment_type: "full" as "full" | "deposit",
+    deposit_amount: "",
+    status: "pending",
+    payment_status: "pending",
+    address: "",
+    notes: "",
   });
   const [isSubmittingNew, setIsSubmittingNew] = useState(false);
-  const [newBookingAvailableSlots, setNewBookingAvailableSlots] = useState<string[]>([]);
+  const [newBookingAvailableSlots, setNewBookingAvailableSlots] = useState<
+    string[]
+  >([]);
   const [loadingNewBookingSlots, setLoadingNewBookingSlots] = useState(false);
 
   // Load bookings on component mount - load all bookings once
@@ -218,25 +267,26 @@ export default function CalendarPage() {
   useEffect(() => {
     if (editingBooking) {
       const eb = editingBooking as any;
+
       setEditFormData({
-        customer_name: editingBooking.customer_name || '',
-        customer_email: editingBooking.customer_email || '',
-        customer_phone: editingBooking.customer_phone || '',
-        service: editingBooking.service || '',
-        date: editingBooking.date || '',
-        time: editingBooking.time || '',
-        amount: (eb.total_amount ?? editingBooking.amount)?.toString() || '',
-        payment_method: eb.payment_method || 'card',
-        cash_amount: eb.cash_amount?.toString() || '',
-        card_amount: eb.card_amount?.toString() || '',
-        payment_type: eb.payment_type || 'full',
-        deposit_amount: eb.amount_paid?.toString() || '',
-        status: editingBooking.status || 'pending',
-        payment_status: editingBooking.payment_status || 'pending',
-        address: editingBooking.address || '',
-        notes: editingBooking.notes || ''
+        customer_name: editingBooking.customer_name || "",
+        customer_email: editingBooking.customer_email || "",
+        customer_phone: editingBooking.customer_phone || "",
+        service: editingBooking.service || "",
+        date: editingBooking.date || "",
+        time: editingBooking.time || "",
+        amount: (eb.total_amount ?? editingBooking.amount)?.toString() || "",
+        payment_method: eb.payment_method || "card",
+        cash_amount: eb.cash_amount?.toString() || "",
+        card_amount: eb.card_amount?.toString() || "",
+        payment_type: eb.payment_type || "full",
+        deposit_amount: eb.amount_paid?.toString() || "",
+        status: editingBooking.status || "pending",
+        payment_status: editingBooking.payment_status || "pending",
+        address: editingBooking.address || "",
+        notes: editingBooking.notes || "",
       });
-      
+
       // Fetch available time slots for the booking's date
       if (editingBooking.date) {
         fetchEditTimeSlots(editingBooking.date);
@@ -250,15 +300,16 @@ export default function CalendarPage() {
     try {
       const response = await fetch(`/api/admin/time-slots?date=${dateStr}`);
       const data = await response.json();
-      
+
       if (data.success && data.slots) {
         const slots = data.slots.map((slot: any) => slot.start_time).sort();
+
         setEditAvailableSlots(slots);
       } else {
         setEditAvailableSlots([]);
       }
     } catch (error) {
-      console.error('Error fetching time slots for edit:', error);
+      console.error("Error fetching time slots for edit:", error);
       setEditAvailableSlots([]);
     } finally {
       setLoadingEditSlots(false);
@@ -271,15 +322,16 @@ export default function CalendarPage() {
     try {
       const response = await fetch(`/api/admin/time-slots?date=${dateStr}`);
       const data = await response.json();
-      
+
       if (data.success && data.slots) {
         const slots = data.slots.map((slot: any) => slot.start_time).sort();
+
         setNewBookingAvailableSlots(slots);
       } else {
         setNewBookingAvailableSlots([]);
       }
     } catch (error) {
-      console.error('Error fetching time slots for new booking:', error);
+      console.error("Error fetching time slots for new booking:", error);
       setNewBookingAvailableSlots([]);
     } finally {
       setLoadingNewBookingSlots(false);
@@ -289,12 +341,12 @@ export default function CalendarPage() {
   const loadBookings = async () => {
     try {
       setLoading(true);
-      
+
       // Load all bookings without filters - we'll filter on the frontend
-      const response = await fetch('/api/bookings?page=1&limit=1000', {
-        method: 'GET',
+      const response = await fetch("/api/bookings?page=1&limit=1000", {
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
 
@@ -302,85 +354,99 @@ export default function CalendarPage() {
         const data = await response.json();
         // Normalize booking dates to ensure consistent format (YYYY-MM-DD)
         // Some databases return dates with time or timezone info, we need just the date part
-        const normalizedBookings = (data.bookings || []).map((booking: Booking) => ({
-          ...booking,
-          date: booking.date ? booking.date.split('T')[0] : booking.date
-        }));
+        const normalizedBookings = (data.bookings || []).map(
+          (booking: Booking) => ({
+            ...booking,
+            date: booking.date ? booking.date.split("T")[0] : booking.date,
+          }),
+        );
+
         setBookings(normalizedBookings);
       } else {
-        console.error('Error loading bookings:', response.statusText);
+        console.error("Error loading bookings:", response.statusText);
         setBookings([]);
       }
     } catch (error) {
-      console.error('Error loading bookings:', error);
+      console.error("Error loading bookings:", error);
       setBookings([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const getStatusColor = (status: string): "success" | "warning" | "danger" | "default" | "primary" => {
+  const getStatusColor = (
+    status: string,
+  ): "success" | "warning" | "danger" | "default" | "primary" => {
     switch (status) {
-      case 'completed':
-      case 'confirmed':
-        return 'success';
-      case 'scheduled':
-        return 'primary';
-      case 'pending':
-        return 'warning';
-      case 'cancelled':
-        return 'danger';
+      case "completed":
+      case "confirmed":
+        return "success";
+      case "scheduled":
+        return "primary";
+      case "pending":
+        return "warning";
+      case "cancelled":
+        return "danger";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed':
+      case "completed":
         return <CheckCircle className="w-4 h-4" />;
-      case 'confirmed':
+      case "confirmed":
         return <CheckCircle className="w-4 h-4" />;
-      case 'scheduled':
+      case "scheduled":
         return <CheckCircle className="w-4 h-4" />;
-      case 'pending':
+      case "pending":
         return <AlertCircle className="w-4 h-4" />;
-      case 'cancelled':
+      case "cancelled":
         return <XCircle className="w-4 h-4" />;
       default:
         return <AlertCircle className="w-4 h-4" />;
     }
   };
 
-  const getPaymentStatusColor = (status: string): "success" | "warning" | "danger" | "default" => {
+  const getPaymentStatusColor = (
+    status: string,
+  ): "success" | "warning" | "danger" | "default" => {
     switch (status) {
-      case 'paid':
-        return 'success';
-      case 'pending':
-        return 'warning';
-      case 'refunded':
-        return 'danger';
+      case "paid":
+        return "success";
+      case "pending":
+        return "warning";
+      case "refunded":
+        return "danger";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   // Get bookings for the selected date in day view
   const getBookingsForSelectedDate = () => {
-    return bookings.filter(booking => {
+    return bookings.filter((booking) => {
       // Filter by selected date - normalize booking dates (remove time if present)
-      const bookingDate = booking.date ? booking.date.split('T')[0] : '';
+      const bookingDate = booking.date ? booking.date.split("T")[0] : "";
       const matchesDate = bookingDate === selectedDate;
-      
+
       // Apply search filter
-      const matchesSearch = !searchTerm || 
-        booking.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      const matchesSearch =
+        !searchTerm ||
+        booking.customer_name
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
         booking.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (booking.customer_email && booking.customer_email.toLowerCase().includes(searchTerm.toLowerCase()));
-      
+        (booking.customer_email &&
+          booking.customer_email
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()));
+
       // Apply status filter
-      const matchesStatus = statusFilter === 'all' || booking.status === statusFilter;
-      
+      const matchesStatus =
+        statusFilter === "all" || booking.status === statusFilter;
+
       return matchesDate && matchesSearch && matchesStatus;
     });
   };
@@ -389,24 +455,35 @@ export default function CalendarPage() {
 
   // Calculate statistics for month view
   const monthStats = useMemo(() => {
-    const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-    const monthStartStr = monthStart.toISOString().split('T')[0];
-    const monthEndStr = monthEnd.toISOString().split('T')[0];
-    
-    const monthBookings = bookings.filter(booking => {
-      const bookingDate = booking.date ? booking.date.split('T')[0] : '';
+    const monthStart = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1,
+    );
+    const monthEnd = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0,
+    );
+    const monthStartStr = monthStart.toISOString().split("T")[0];
+    const monthEndStr = monthEnd.toISOString().split("T")[0];
+
+    const monthBookings = bookings.filter((booking) => {
+      const bookingDate = booking.date ? booking.date.split("T")[0] : "";
+
       return bookingDate >= monthStartStr && bookingDate <= monthEndStr;
     });
-    
+
     return {
       total: monthBookings.length,
-      completed: monthBookings.filter(b => b.status === 'completed').length,
-      scheduled: monthBookings.filter(b => b.status === 'scheduled' || b.status === 'confirmed').length,
-      pending: monthBookings.filter(b => b.status === 'pending').length,
-      cancelled: monthBookings.filter(b => b.status === 'cancelled').length,
-      paid: monthBookings.filter(b => b.payment_status === 'paid').length,
-      totalAmount: monthBookings.reduce((sum, b) => sum + (b.amount || 0), 0)
+      completed: monthBookings.filter((b) => b.status === "completed").length,
+      scheduled: monthBookings.filter(
+        (b) => b.status === "scheduled" || b.status === "confirmed",
+      ).length,
+      pending: monthBookings.filter((b) => b.status === "pending").length,
+      cancelled: monthBookings.filter((b) => b.status === "cancelled").length,
+      paid: monthBookings.filter((b) => b.payment_status === "paid").length,
+      totalAmount: monthBookings.reduce((sum, b) => sum + (b.amount || 0), 0),
     };
   }, [currentDate, bookings]);
 
@@ -415,33 +492,41 @@ export default function CalendarPage() {
     const weekDays = getWeekDays(currentDate);
     const weekStart = weekDays[0];
     const weekEnd = weekDays[6];
-    const weekStartStr = weekStart.toISOString().split('T')[0];
-    const weekEndStr = weekEnd.toISOString().split('T')[0];
-    
-    const weekBookings = bookings.filter(booking => {
-      const bookingDate = booking.date ? booking.date.split('T')[0] : '';
+    const weekStartStr = weekStart.toISOString().split("T")[0];
+    const weekEndStr = weekEnd.toISOString().split("T")[0];
+
+    const weekBookings = bookings.filter((booking) => {
+      const bookingDate = booking.date ? booking.date.split("T")[0] : "";
+
       return bookingDate >= weekStartStr && bookingDate <= weekEndStr;
     });
-    
+
     return {
       total: weekBookings.length,
-      completed: weekBookings.filter(b => b.status === 'completed').length,
-      scheduled: weekBookings.filter(b => b.status === 'scheduled' || b.status === 'confirmed').length,
-      pending: weekBookings.filter(b => b.status === 'pending').length,
-      cancelled: weekBookings.filter(b => b.status === 'cancelled').length,
-      paid: weekBookings.filter(b => b.payment_status === 'paid').length,
-      totalAmount: weekBookings.reduce((sum, b) => sum + (b.amount || 0), 0)
+      completed: weekBookings.filter((b) => b.status === "completed").length,
+      scheduled: weekBookings.filter(
+        (b) => b.status === "scheduled" || b.status === "confirmed",
+      ).length,
+      pending: weekBookings.filter((b) => b.status === "pending").length,
+      cancelled: weekBookings.filter((b) => b.status === "cancelled").length,
+      paid: weekBookings.filter((b) => b.payment_status === "paid").length,
+      totalAmount: weekBookings.reduce((sum, b) => sum + (b.amount || 0), 0),
     };
   }, [currentDate, bookings]);
 
   // Function to handle clicking on a day in the month view
   const handleDayClick = (day: number) => {
     if (day) {
-      const clickedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-      const dateStr = clickedDate.toISOString().split('T')[0];
+      const clickedDate = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        day,
+      );
+      const dateStr = clickedDate.toISOString().split("T")[0];
+
       setSelectedDate(dateStr); // Set selectedDate to YYYY-MM-DD
       // Switch to day view when clicking on a day
-      setView('day');
+      setView("day");
     }
   };
 
@@ -461,16 +546,16 @@ export default function CalendarPage() {
   // Function to handle status change confirmation
   const handleStatusChangeConfirm = () => {
     if (!selectedBookingDetails || !selectedStatus) return;
-    
+
     handleStatusChange(selectedBookingDetails.id, selectedStatus);
     onStatusModalClose();
     setSelectedStatus("");
   };
 
   const handleExpandDay = (date: number, month: number, year: number) => {
-    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(date).padStart(2, "0")}`;
     const dayBookings = getBookingsForDate(date, month, year);
-    
+
     setExpandedDay(dateStr);
     setExpandedDayBookings(dayBookings);
   };
@@ -482,91 +567,108 @@ export default function CalendarPage() {
 
   const handleStatusChange = async (bookingId: string, newStatus: string) => {
     try {
-      console.log('Updating booking:', bookingId, 'to status:', newStatus);
-      console.log('Booking ID type:', typeof bookingId);
-      console.log('Booking ID length:', bookingId.length);
-      
+      console.log("Updating booking:", bookingId, "to status:", newStatus);
+      console.log("Booking ID type:", typeof bookingId);
+      console.log("Booking ID length:", bookingId.length);
+
       // Update local state immediately for better UX
-      setBookings(bookings.map(booking => 
-        booking.id === bookingId 
-          ? { ...booking, status: newStatus as any }
-          : booking
-      ));
-      
+      setBookings(
+        bookings.map((booking) =>
+          booking.id === bookingId
+            ? { ...booking, status: newStatus as any }
+            : booking,
+        ),
+      );
+
       // Update expanded day bookings if it's open
       if (expandedDayBookings.length > 0) {
-        setExpandedDayBookings(expandedDayBookings.map(booking => 
-          booking.id === bookingId 
-            ? { ...booking, status: newStatus as any }
-            : booking
-        ));
+        setExpandedDayBookings(
+          expandedDayBookings.map((booking) =>
+            booking.id === bookingId
+              ? { ...booking, status: newStatus as any }
+              : booking,
+          ),
+        );
       }
-      
+
       // Update selected booking details if it's open
       if (selectedBookingDetails && selectedBookingDetails.id === bookingId) {
-        setSelectedBookingDetails(prev => prev ? { ...prev, status: newStatus as any } : null);
+        setSelectedBookingDetails((prev) =>
+          prev ? { ...prev, status: newStatus as any } : null,
+        );
       }
-      
+
       // Update booking status via API
       const response = await fetch(`/api/bookings/${bookingId}`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ status: newStatus }),
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-      
+      console.log("Response status:", response.status);
+      console.log(
+        "Response headers:",
+        Object.fromEntries(response.headers.entries()),
+      );
+
       if (response.ok) {
         const result = await response.json();
-        console.log('Update successful:', result);
+
+        console.log("Update successful:", result);
       } else {
         const errorText = await response.text();
-        console.error('Update failed - Status:', response.status);
-        console.error('Update failed - Response:', errorText);
-        
+
+        console.error("Update failed - Status:", response.status);
+        console.error("Update failed - Response:", errorText);
+
         // Revert the local state change if API call failed
-        setBookings(bookings.map(booking => 
-          booking.id === bookingId 
-            ? { ...booking, status: booking.status } // Keep original status
-            : booking
-        ));
-        
-        if (expandedDayBookings.length > 0) {
-          setExpandedDayBookings(expandedDayBookings.map(booking => 
-            booking.id === bookingId 
+        setBookings(
+          bookings.map((booking) =>
+            booking.id === bookingId
               ? { ...booking, status: booking.status } // Keep original status
-              : booking
-          ));
+              : booking,
+          ),
+        );
+
+        if (expandedDayBookings.length > 0) {
+          setExpandedDayBookings(
+            expandedDayBookings.map((booking) =>
+              booking.id === bookingId
+                ? { ...booking, status: booking.status } // Keep original status
+                : booking,
+            ),
+          );
         }
-        
+
         if (selectedBookingDetails && selectedBookingDetails.id === bookingId) {
-          setSelectedBookingDetails(prev => prev ? { ...prev, status: prev.status } : null);
+          setSelectedBookingDetails((prev) =>
+            prev ? { ...prev, status: prev.status } : null,
+          );
         }
-        
+
         alert(`Failed to update booking status. Error: ${response.status}`);
       }
     } catch (error) {
-      console.error('Error updating booking status:', error);
-      alert('Network error occurred while updating booking status');
+      console.error("Error updating booking status:", error);
+      alert("Network error occurred while updating booking status");
     }
   };
 
   const handleDeleteBooking = async (bookingId: string) => {
     try {
       const response = await fetch(`/api/bookings/${bookingId}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (response.ok) {
-        setBookings(bookings.filter(booking => booking.id !== bookingId));
+        setBookings(bookings.filter((booking) => booking.id !== bookingId));
         setShowDeleteModal(false);
         setBookingToDelete(null);
       }
     } catch (error) {
-      console.error('Error deleting booking:', error);
+      console.error("Error deleting booking:", error);
     }
   };
 
@@ -575,33 +677,33 @@ export default function CalendarPage() {
   const handleMoveBookingClick = (booking: Booking) => {
     setBookingToMove(booking);
     setShowMoveModal(true);
-    setMoveTargetDate('');
+    setMoveTargetDate("");
     setMoveAvailableSlots([]);
-    setCustomTime('');
+    setCustomTime("");
     setUseCustomTime(false);
   };
 
   // Simple drag handlers
   const handleDragStart = (e: React.DragEvent, booking: Booking) => {
     setDraggedBooking(booking);
-    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.effectAllowed = "move";
     // Add visual feedback
     if (e.currentTarget instanceof HTMLElement) {
-      e.currentTarget.style.opacity = '0.5';
+      e.currentTarget.style.opacity = "0.5";
     }
   };
 
   const handleDragEnd = (e: React.DragEvent) => {
     // Reset visual feedback
     if (e.currentTarget instanceof HTMLElement) {
-      e.currentTarget.style.opacity = '1';
+      e.currentTarget.style.opacity = "1";
     }
     setDraggedBooking(null);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
+    e.dataTransfer.dropEffect = "move";
   };
 
   const handleDrop = (e: React.DragEvent, targetDay: number) => {
@@ -609,12 +711,17 @@ export default function CalendarPage() {
     if (!draggedBooking) return;
 
     // Create target date
-    const targetDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), targetDay);
-    const targetDateStr = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}`;
+    const targetDate = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      targetDay,
+    );
+    const targetDateStr = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, "0")}-${String(targetDate.getDate()).padStart(2, "0")}`;
 
     // Check if dropping on same day
     if (draggedBooking.date === targetDateStr) {
       setDraggedBooking(null);
+
       return;
     }
 
@@ -631,15 +738,16 @@ export default function CalendarPage() {
     try {
       const response = await fetch(`/api/admin/time-slots?date=${dateStr}`);
       const data = await response.json();
-      
+
       if (data.success && data.slots) {
         const slots = data.slots.map((slot: any) => slot.start_time).sort();
+
         setMoveAvailableSlots(slots);
       } else {
         setMoveAvailableSlots([]);
       }
     } catch (error) {
-      console.error('Error fetching time slots:', error);
+      console.error("Error fetching time slots:", error);
       setMoveAvailableSlots([]);
     } finally {
       setLoadingSlots(false);
@@ -649,62 +757,65 @@ export default function CalendarPage() {
   // Handle move booking to new date and time
   const handleMoveBooking = async (targetTime?: string) => {
     if (!bookingToMove || !moveTargetDate) return;
-    
+
     // Use custom time if enabled, otherwise use the provided targetTime
     const finalTime = useCustomTime ? customTime : targetTime;
+
     if (!finalTime) return;
-    
+
     try {
-      const moveResponse = await fetch(`/api/bookings/${bookingToMove.id}/move`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ newDate: moveTargetDate, newTime: finalTime }),
-      });
+      const moveResponse = await fetch(
+        `/api/bookings/${bookingToMove.id}/move`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ newDate: moveTargetDate, newTime: finalTime }),
+        },
+      );
 
       const moveData = await moveResponse.json();
 
       if (moveData.success) {
         // Update bookings in state
-        setBookings(bookings.map(booking => 
-          booking.id === bookingToMove.id 
-            ? { ...booking, date: moveTargetDate, time: finalTime }
-            : booking
-        ));
-        
+        setBookings(
+          bookings.map((booking) =>
+            booking.id === bookingToMove.id
+              ? { ...booking, date: moveTargetDate, time: finalTime }
+              : booking,
+          ),
+        );
+
         // Update expanded day bookings if open
         if (expandedDayBookings.length > 0) {
-          setExpandedDayBookings(expandedDayBookings.map(booking => 
-            booking.id === bookingToMove.id 
-              ? { ...booking, date: moveTargetDate, time: finalTime }
-              : booking
-          ));
+          setExpandedDayBookings(
+            expandedDayBookings.map((booking) =>
+              booking.id === bookingToMove.id
+                ? { ...booking, date: moveTargetDate, time: finalTime }
+                : booking,
+            ),
+          );
         }
-        
+
         const targetDate = new Date(moveTargetDate);
+
         showSuccess(
-          'Booking Moved',
-          `Booking moved to ${targetDate.toLocaleDateString()} at ${formatTime(finalTime)}`
+          "Booking Moved",
+          `Booking moved to ${targetDate.toLocaleDateString()} at ${formatTime(finalTime)}`,
         );
-        
+
         // Close modal and reset
         setShowMoveModal(false);
         setBookingToMove(null);
-        setMoveTargetDate('');
+        setMoveTargetDate("");
         setMoveAvailableSlots([]);
-        setCustomTime('');
+        setCustomTime("");
         setUseCustomTime(false);
       } else {
-        showError(
-          'Move Failed',
-          `Failed to move booking: ${moveData.error}`
-        );
+        showError("Move Failed", `Failed to move booking: ${moveData.error}`);
       }
     } catch (error) {
-      console.error('Error moving booking:', error);
-      showError(
-        'Move Error',
-        'Error moving booking'
-      );
+      console.error("Error moving booking:", error);
+      showError("Move Error", "Error moving booking");
     }
   };
 
@@ -716,99 +827,125 @@ export default function CalendarPage() {
 
     try {
       const totalAmount = parseFloat(editFormData.amount) || 0;
-      const isDeposit = editFormData.payment_type === 'deposit';
-      const depositAmount = isDeposit ? (parseFloat(editFormData.deposit_amount) || 0) : totalAmount;
+      const isDeposit = editFormData.payment_type === "deposit";
+      const depositAmount = isDeposit
+        ? parseFloat(editFormData.deposit_amount) || 0
+        : totalAmount;
 
       const response = await fetch(`/api/bookings?id=${editingBooking.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...editFormData,
           amount: isDeposit ? depositAmount : totalAmount,
           total_amount: totalAmount,
           amount_paid: depositAmount,
-          remaining_amount: isDeposit ? Math.max(0, totalAmount - depositAmount) : 0,
+          remaining_amount: isDeposit
+            ? Math.max(0, totalAmount - depositAmount)
+            : 0,
           payment_type: editFormData.payment_type,
           payment_method: editFormData.payment_method,
-          cash_amount: editFormData.payment_method === 'cash_and_card' ? (parseFloat(editFormData.cash_amount) || 0) : undefined,
-          card_amount: editFormData.payment_method === 'cash_and_card' ? (parseFloat(editFormData.card_amount) || 0) : undefined,
+          cash_amount:
+            editFormData.payment_method === "cash_and_card"
+              ? parseFloat(editFormData.cash_amount) || 0
+              : undefined,
+          card_amount:
+            editFormData.payment_method === "cash_and_card"
+              ? parseFloat(editFormData.card_amount) || 0
+              : undefined,
         }),
       });
 
       if (response.ok) {
         const updatedBooking = await response.json();
-        
+
         // Update bookings in state
-        setBookings(bookings.map(booking => 
-          booking.id === editingBooking.id ? updatedBooking : booking
-        ));
-        
+        setBookings(
+          bookings.map((booking) =>
+            booking.id === editingBooking.id ? updatedBooking : booking,
+          ),
+        );
+
         // Update expanded day bookings if open
         if (expandedDayBookings.length > 0) {
-          setExpandedDayBookings(expandedDayBookings.map(booking => 
-            booking.id === editingBooking.id ? updatedBooking : booking
-          ));
+          setExpandedDayBookings(
+            expandedDayBookings.map((booking) =>
+              booking.id === editingBooking.id ? updatedBooking : booking,
+            ),
+          );
         }
-        
+
         // Update selected booking details if it's open
         if (selectedBookingDetails?.id === editingBooking.id) {
           setSelectedBookingDetails(updatedBooking);
         }
-        
-        showSuccess('Booking Updated', 'Booking has been successfully updated');
-        
+
+        showSuccess("Booking Updated", "Booking has been successfully updated");
+
         // Close modal and reset
         setShowEditModal(false);
         setEditingBooking(null);
       } else {
         const errorData = await response.json();
-        showError('Update Failed', errorData.error || 'Failed to update booking');
+
+        showError(
+          "Update Failed",
+          errorData.error || "Failed to update booking",
+        );
       }
     } catch (error) {
-      console.error('Error updating booking:', error);
-      showError('Update Error', 'Error updating booking');
+      console.error("Error updating booking:", error);
+      showError("Update Error", "Error updating booking");
     } finally {
       setIsSubmittingEdit(false);
     }
   };
 
   // Handle edit form input changes
-  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleEditInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
     const { name, value } = e.target;
-    setEditFormData(prev => ({
+
+    setEditFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   // Handle date change in edit form - fetch new time slots
   const handleEditDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
-    setEditFormData(prev => ({
+
+    setEditFormData((prev) => ({
       ...prev,
       date: value,
-      time: '' // Clear time when date changes
+      time: "", // Clear time when date changes
     }));
-    
+
     // Fetch available time slots for the new date
     if (value) {
       fetchEditTimeSlots(value);
     }
   };
 
-  const navigateDate = (direction: 'prev' | 'next') => {
+  const navigateDate = (direction: "prev" | "next") => {
     const newDate = new Date(currentDate);
-      if (direction === 'prev') {
+
+    if (direction === "prev") {
       newDate.setMonth(newDate.getMonth() - 1);
-      } else {
+    } else {
       newDate.setMonth(newDate.getMonth() + 1);
     }
     setCurrentDate(newDate);
   };
 
-  const navigateWeek = (direction: 'prev' | 'next') => {
+  const navigateWeek = (direction: "prev" | "next") => {
     const newDate = new Date(currentDate);
-    if (direction === 'prev') {
+
+    if (direction === "prev") {
       newDate.setDate(newDate.getDate() - 7);
     } else {
       newDate.setDate(newDate.getDate() + 7);
@@ -817,30 +954,39 @@ export default function CalendarPage() {
   };
 
   const handleTimeSlotClick = (day: Date, timeSlot: string) => {
-    const dateStr = day.toISOString().split('T')[0];
+    const dateStr = day.toISOString().split("T")[0];
+
     setSelectedDate(dateStr);
-    setNewBookingForm(prev => ({ ...prev, date: dateStr, time: timeSlot }));
+    setNewBookingForm((prev) => ({ ...prev, date: dateStr, time: timeSlot }));
     setShowAddModal(true);
   };
 
   // Handle new booking form input changes
-  const handleNewBookingInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleNewBookingInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
     const { name, value } = e.target;
-    setNewBookingForm(prev => ({
+
+    setNewBookingForm((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   // Handle date change in new booking form - fetch new time slots
-  const handleNewBookingDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNewBookingDateChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const { value } = e.target;
-    setNewBookingForm(prev => ({
+
+    setNewBookingForm((prev) => ({
       ...prev,
       date: value,
-      time: '' // Clear time when date changes
+      time: "", // Clear time when date changes
     }));
-    
+
     // Fetch available time slots for the new date
     if (value) {
       fetchNewBookingTimeSlots(value);
@@ -849,8 +995,15 @@ export default function CalendarPage() {
 
   // Handle new booking form submission
   const handleNewBookingSubmit = async () => {
-    if (!newBookingForm.customer_name || !newBookingForm.service || !newBookingForm.date || !newBookingForm.time || !newBookingForm.amount) {
-      showError('Validation Error', 'Please fill in all required fields');
+    if (
+      !newBookingForm.customer_name ||
+      !newBookingForm.service ||
+      !newBookingForm.date ||
+      !newBookingForm.time ||
+      !newBookingForm.amount
+    ) {
+      showError("Validation Error", "Please fill in all required fields");
+
       return;
     }
 
@@ -858,12 +1011,14 @@ export default function CalendarPage() {
 
     try {
       const totalAmount = parseFloat(newBookingForm.amount) || 0;
-      const isDeposit = newBookingForm.payment_type === 'deposit';
-      const depositAmount = isDeposit ? (parseFloat(newBookingForm.deposit_amount) || 0) : totalAmount;
+      const isDeposit = newBookingForm.payment_type === "deposit";
+      const depositAmount = isDeposit
+        ? parseFloat(newBookingForm.deposit_amount) || 0
+        : totalAmount;
 
-      const response = await fetch('/api/bookings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customer_name: newBookingForm.customer_name,
           customer_email: newBookingForm.customer_email || null,
@@ -874,49 +1029,65 @@ export default function CalendarPage() {
           amount: isDeposit ? depositAmount : totalAmount,
           total_amount: totalAmount,
           amount_paid: depositAmount,
-          remaining_amount: isDeposit ? Math.max(0, totalAmount - depositAmount) : 0,
+          remaining_amount: isDeposit
+            ? Math.max(0, totalAmount - depositAmount)
+            : 0,
           payment_type: newBookingForm.payment_type,
           payment_method: newBookingForm.payment_method,
-          cash_amount: newBookingForm.payment_method === 'cash_and_card' ? (parseFloat(newBookingForm.cash_amount) || 0) : undefined,
-          card_amount: newBookingForm.payment_method === 'cash_and_card' ? (parseFloat(newBookingForm.card_amount) || 0) : undefined,
+          cash_amount:
+            newBookingForm.payment_method === "cash_and_card"
+              ? parseFloat(newBookingForm.cash_amount) || 0
+              : undefined,
+          card_amount:
+            newBookingForm.payment_method === "cash_and_card"
+              ? parseFloat(newBookingForm.card_amount) || 0
+              : undefined,
           status: newBookingForm.status,
           payment_status: newBookingForm.payment_status,
           address: newBookingForm.address || null,
-          notes: newBookingForm.notes || null
+          notes: newBookingForm.notes || null,
         }),
       });
 
       if (response.ok) {
         const newBooking = await response.json();
+
         setBookings([...bookings, newBooking]);
-        showSuccess('Booking Created', 'New booking has been successfully created');
-        
+        showSuccess(
+          "Booking Created",
+          "New booking has been successfully created",
+        );
+
         setNewBookingForm({
-          customer_name: '',
-          customer_email: '',
-          customer_phone: '',
-          service: '',
+          customer_name: "",
+          customer_email: "",
+          customer_phone: "",
+          service: "",
           date: getCurrentToday(),
-          time: '',
-          amount: '',
-          payment_method: 'card',
-          cash_amount: '',
-          card_amount: '',
-          payment_type: 'full',
-          deposit_amount: '',
-          status: 'pending',
-          payment_status: 'pending',
-          address: '',
-          notes: ''
+          time: "",
+          amount: "",
+          payment_method: "card",
+          cash_amount: "",
+          card_amount: "",
+          payment_type: "full",
+          deposit_amount: "",
+          status: "pending",
+          payment_status: "pending",
+          address: "",
+          notes: "",
         });
         setShowAddModal(false);
       } else {
         const errorData = await response.json();
-        showError('Creation Failed', errorData.error || errorData.message || 'Failed to create booking');
+
+        showError(
+          "Creation Failed",
+          errorData.error || errorData.message || "Failed to create booking",
+        );
       }
     } catch (error) {
-      console.error('Error creating booking:', error);
-      showError('Creation Error', 'Error creating booking');
+      console.error("Error creating booking:", error);
+      showError("Creation Error", "Error creating booking");
     } finally {
       setIsSubmittingNew(false);
     }
@@ -931,55 +1102,63 @@ export default function CalendarPage() {
     const startingDayOfWeek = firstDay.getDay();
 
     const days = [];
-    
+
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
     }
-    
+
     // Add days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(day);
     }
-    
+
     return days;
   };
 
   const getBookingsForDate = (date: number, month: number, year: number) => {
     if (!date) return [];
     // Construct the date string in YYYY-MM-DD format
-    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-    
+    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(date).padStart(2, "0")}`;
+
     // Filter bookings and apply client-side filters
     // Normalize booking dates (remove time if present, handle different formats)
-    let filteredBookings = bookings.filter(booking => {
-      const bookingDate = booking.date ? booking.date.split('T')[0] : '';
+    let filteredBookings = bookings.filter((booking) => {
+      const bookingDate = booking.date ? booking.date.split("T")[0] : "";
+
       return bookingDate === dateStr;
     });
-    
+
     // Apply search filter
     if (searchTerm) {
-      filteredBookings = filteredBookings.filter(booking => 
-        booking.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        booking.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (booking.customer_email && booking.customer_email.toLowerCase().includes(searchTerm.toLowerCase()))
+      filteredBookings = filteredBookings.filter(
+        (booking) =>
+          booking.customer_name
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          booking.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (booking.customer_email &&
+            booking.customer_email
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase())),
       );
     }
-    
+
     // Apply status filter
-    if (statusFilter !== 'all') {
-      filteredBookings = filteredBookings.filter(booking => booking.status === statusFilter);
+    if (statusFilter !== "all") {
+      filteredBookings = filteredBookings.filter(
+        (booking) => booking.status === statusFilter,
+      );
     }
-    
+
     return filteredBookings;
   };
-
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  </div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+      </div>
     );
   }
 
@@ -989,37 +1168,37 @@ export default function CalendarPage() {
       <div className="mt-6 flex justify-end items-center">
         <Button
           color="primary"
+          startContent={<Plus className="w-4 h-4" />}
           onPress={() => {
             setShowAddModal(true);
-            setNewBookingForm(prev => ({ ...prev, date: selectedDate }));
+            setNewBookingForm((prev) => ({ ...prev, date: selectedDate }));
             if (selectedDate) {
               fetchNewBookingTimeSlots(selectedDate);
             }
           }}
-          startContent={<Plus className="w-4 h-4" />}
         >
           New Booking
         </Button>
-                    </div>
+      </div>
 
       {/* Filters */}
       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="relative">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
-                      <input
-                        type="text"
-              placeholder="Search bookings..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+            <input
               className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                      />
-                    </div>
-                    
+              placeholder="Search bookings..."
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
           <select
+            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
             <option value="all">All Status</option>
             <option value="pending">Pending</option>
@@ -1027,117 +1206,141 @@ export default function CalendarPage() {
             <option value="completed">Completed</option>
             <option value="cancelled">Cancelled</option>
           </select>
-          
+
           <input
+            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             type="date"
             value={selectedDate}
             onChange={(e) => {
               setSelectedDate(e.target.value);
               // Switch to day view when date filter changes
-              if (view !== 'day') {
-                setView('day');
+              if (view !== "day") {
+                setView("day");
               }
             }}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           />
-          
+
           <div className="flex gap-2 flex-wrap">
-                      <button
-              onClick={() => setView('month')}
+            <button
               className={`min-h-[44px] flex-1 min-w-[70px] px-4 py-2 rounded-lg font-medium ${
-                view === 'month' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                view === "month"
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
               }`}
+              onClick={() => setView("month")}
             >
               Month
-                      </button>
-                      <button
-              onClick={() => setView('week')}
+            </button>
+            <button
               className={`min-h-[44px] flex-1 min-w-[70px] px-4 py-2 rounded-lg font-medium ${
-                view === 'week' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                view === "week"
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
               }`}
+              onClick={() => setView("week")}
             >
               Week
-                      </button>
-                      <button
-              onClick={() => setView('day')}
+            </button>
+            <button
               className={`min-h-[44px] flex-1 min-w-[70px] px-4 py-2 rounded-lg font-medium ${
-                view === 'day' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                view === "day"
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
               }`}
+              onClick={() => setView("day")}
             >
               Day
-                    </button>
-                    </div>
-                  </div>
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Calendar View */}
-      {view === 'month' && (
+      {view === "month" && (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 overflow-hidden">
           {/* Calendar Header */}
           <div className="p-4 border-b dark:border-gray-700">
             <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-            </h2>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => navigateDate('prev')}
-                className="min-h-[44px] min-w-[44px] p-2 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setCurrentDate(new Date())}
-                className="min-h-[44px] px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                Today
-              </button>
-              <button
-                onClick={() => navigateDate('next')}
-                className="min-h-[44px] min-w-[44px] p-2 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-                </div>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {currentDate.toLocaleDateString("en-US", {
+                  month: "long",
+                  year: "numeric",
+                })}
+              </h2>
+              <div className="flex items-center gap-2">
+                <button
+                  className="min-h-[44px] min-w-[44px] p-2 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300"
+                  onClick={() => navigateDate("prev")}
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  className="min-h-[44px] px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  onClick={() => setCurrentDate(new Date())}
+                >
+                  Today
+                </button>
+                <button
+                  className="min-h-[44px] min-w-[44px] p-2 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300"
+                  onClick={() => navigateDate("next")}
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
             </div>
             {/* Booking Statistics */}
             {monthStats.total > 0 && (
               <div className="flex items-center gap-4 flex-wrap pt-3 border-t dark:border-gray-700">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                    <span className="font-semibold text-gray-900 dark:text-white">{monthStats.total}</span> Total
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      {monthStats.total}
+                    </span>{" "}
+                    Total
                   </span>
                 </div>
                 {monthStats.completed > 0 && (
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-green-500 rounded-full" />
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">{monthStats.completed}</span> Completed
+                      <span className="font-semibold text-gray-900 dark:text-white">
+                        {monthStats.completed}
+                      </span>{" "}
+                      Completed
                     </span>
                   </div>
                 )}
                 {monthStats.scheduled > 0 && (
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full" />
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">{monthStats.scheduled}</span> Scheduled
+                      <span className="font-semibold text-gray-900 dark:text-white">
+                        {monthStats.scheduled}
+                      </span>{" "}
+                      Scheduled
                     </span>
                   </div>
                 )}
                 {monthStats.pending > 0 && (
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full" />
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">{monthStats.pending}</span> Pending
+                      <span className="font-semibold text-gray-900 dark:text-white">
+                        {monthStats.pending}
+                      </span>{" "}
+                      Pending
                     </span>
                   </div>
                 )}
                 {monthStats.cancelled > 0 && (
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-red-500 rounded-full" />
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">{monthStats.cancelled}</span> Cancelled
+                      <span className="font-semibold text-gray-900 dark:text-white">
+                        {monthStats.cancelled}
+                      </span>{" "}
+                      Cancelled
                     </span>
                   </div>
                 )}
@@ -1145,7 +1348,10 @@ export default function CalendarPage() {
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-green-500" />
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">{monthStats.paid}</span> Paid
+                      <span className="font-semibold text-gray-900 dark:text-white">
+                        {monthStats.paid}
+                      </span>{" "}
+                      Paid
                     </span>
                   </div>
                 )}
@@ -1158,160 +1364,203 @@ export default function CalendarPage() {
                 )}
               </div>
             )}
-              </div>
-
-              {/* Calendar Grid - scroll horizontally on mobile */}
-          <div className="overflow-x-auto">
-          <div className="grid grid-cols-7 min-w-[320px]">
-            {/* Day headers */}
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-              <div key={day} className="p-3 text-center text-sm font-medium text-gray-500 dark:text-gray-400 border-b dark:border-gray-700">
-                      {day}
-                    </div>
-                  ))}
-
-                {/* Calendar days */}
-            {getDaysInMonth(currentDate).map((day, index) => {
-              const dayBookings = day ? getBookingsForDate(day, currentDate.getMonth(), currentDate.getFullYear()) : [];
-              const isToday = day && new Date().getDate() === day && 
-                             new Date().getMonth() === currentDate.getMonth() && 
-                             new Date().getFullYear() === currentDate.getFullYear();
-              
-              return (
-                <div
-                      key={index}
-                  className={`min-h-[120px] p-2 border-b border-r dark:border-gray-700 transition-colors relative ${
-                    isToday ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-800'
-                  } hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer`}
-                  onClick={() => day && handleDayClick(day)}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => day && handleDrop(e, day)}
-                >
-                  {day && (
-                    <>
-                      <div className={`text-sm font-medium mb-1 ${
-                        isToday ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'
-                      }`}>
-                        {day}
-                      </div>
-                      <div className="space-y-1">
-                        {dayBookings.slice(0, 3).map(booking => (
-                          <div
-                            key={booking.id}
-                            draggable
-                            onDragStart={(e) => handleDragStart(e, booking)}
-                            onDragEnd={handleDragEnd}
-                            className={`text-xs p-1 rounded truncate cursor-move transition-all duration-200 hover:scale-105 ${
-                              booking.status === 'completed' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' :
-                              booking.status === 'scheduled' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300' :
-                              booking.status === 'pending' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300' :
-                              'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
-                            } ${draggedBooking?.id === booking.id ? 'opacity-50' : ''}`}
-                            onClick={(e) => {
-                              e.stopPropagation(); // Prevent day click from firing
-                              handleBookingClick(booking);
-                            }}
-                            title={`${formatTime(booking.time)} - ${booking.customer_name} (${booking.service}) - £${booking.amount} - Drag to move`}
-                          >
-                            <div className="flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {formatTime(booking.time)}
-                            </div>
-                            <div className="truncate font-medium">{booking.customer_name}</div>
-                            <div className="truncate text-xs opacity-75">{booking.service}</div>
-                          </div>
-                        ))}
-                        {dayBookings.length > 3 && (
-                          <div 
-                            className="text-xs text-blue-600 dark:text-blue-400 font-medium cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors duration-200 py-1 text-center"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleExpandDay(day, currentDate.getMonth(), currentDate.getFullYear());
-                            }}
-                            title={`Click to see all ${dayBookings.length} bookings for this day`}
-                          >
-                            +{dayBookings.length - 3} more
-                          </div>
-                        )}
-                      </div>
-                    </>
-                  )}
-                </div>
-              );
-            })}
           </div>
+
+          {/* Calendar Grid - scroll horizontally on mobile */}
+          <div className="overflow-x-auto">
+            <div className="grid grid-cols-7 min-w-[320px]">
+              {/* Day headers */}
+              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                <div
+                  key={day}
+                  className="p-3 text-center text-sm font-medium text-gray-500 dark:text-gray-400 border-b dark:border-gray-700"
+                >
+                  {day}
+                </div>
+              ))}
+
+              {/* Calendar days */}
+              {getDaysInMonth(currentDate).map((day, index) => {
+                const dayBookings = day
+                  ? getBookingsForDate(
+                      day,
+                      currentDate.getMonth(),
+                      currentDate.getFullYear(),
+                    )
+                  : [];
+                const isToday =
+                  day &&
+                  new Date().getDate() === day &&
+                  new Date().getMonth() === currentDate.getMonth() &&
+                  new Date().getFullYear() === currentDate.getFullYear();
+
+                return (
+                  <div
+                    key={index}
+                    className={`min-h-[120px] p-2 border-b border-r dark:border-gray-700 transition-colors relative ${
+                      isToday
+                        ? "bg-blue-50 dark:bg-blue-900/20"
+                        : "bg-white dark:bg-gray-800"
+                    } hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer`}
+                    onClick={() => day && handleDayClick(day)}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => day && handleDrop(e, day)}
+                  >
+                    {day && (
+                      <>
+                        <div
+                          className={`text-sm font-medium mb-1 ${
+                            isToday
+                              ? "text-blue-600 dark:text-blue-400"
+                              : "text-gray-900 dark:text-white"
+                          }`}
+                        >
+                          {day}
+                        </div>
+                        <div className="space-y-1">
+                          {dayBookings.slice(0, 3).map((booking) => (
+                            <div
+                              key={booking.id}
+                              draggable
+                              className={`text-xs p-1 rounded truncate cursor-move transition-all duration-200 hover:scale-105 ${
+                                booking.status === "completed"
+                                  ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
+                                  : booking.status === "scheduled"
+                                    ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300"
+                                    : booking.status === "pending"
+                                      ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300"
+                                      : "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
+                              } ${draggedBooking?.id === booking.id ? "opacity-50" : ""}`}
+                              title={`${formatTime(booking.time)} - ${booking.customer_name} (${booking.service}) - £${booking.amount} - Drag to move`}
+                              onClick={(e) => {
+                                e.stopPropagation(); // Prevent day click from firing
+                                handleBookingClick(booking);
+                              }}
+                              onDragEnd={handleDragEnd}
+                              onDragStart={(e) => handleDragStart(e, booking)}
+                            >
+                              <div className="flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {formatTime(booking.time)}
+                              </div>
+                              <div className="truncate font-medium">
+                                {booking.customer_name}
+                              </div>
+                              <div className="truncate text-xs opacity-75">
+                                {booking.service}
+                              </div>
+                            </div>
+                          ))}
+                          {dayBookings.length > 3 && (
+                            <div
+                              className="text-xs text-blue-600 dark:text-blue-400 font-medium cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors duration-200 py-1 text-center"
+                              title={`Click to see all ${dayBookings.length} bookings for this day`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleExpandDay(
+                                  day,
+                                  currentDate.getMonth(),
+                                  currentDate.getFullYear(),
+                                );
+                              }}
+                            >
+                              +{dayBookings.length - 3} more
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
 
       {/* Week View */}
-      {view === 'week' && (
+      {view === "week" && (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 overflow-hidden">
           {/* Week Header */}
           <div className="p-4 border-b dark:border-gray-700">
             <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {getWeekRange(currentDate)}
-            </h2>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => navigateWeek('prev')}
-                className="min-h-[44px] min-w-[44px] p-2 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setCurrentDate(new Date())}
-                className="min-h-[44px] px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                This Week
-              </button>
-              <button
-                onClick={() => navigateWeek('next')}
-                className="min-h-[44px] min-w-[44px] p-2 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {getWeekRange(currentDate)}
+              </h2>
+              <div className="flex items-center gap-2">
+                <button
+                  className="min-h-[44px] min-w-[44px] p-2 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300"
+                  onClick={() => navigateWeek("prev")}
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  className="min-h-[44px] px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  onClick={() => setCurrentDate(new Date())}
+                >
+                  This Week
+                </button>
+                <button
+                  className="min-h-[44px] min-w-[44px] p-2 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300"
+                  onClick={() => navigateWeek("next")}
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
             </div>
             {/* Booking Statistics */}
             {weekStats.total > 0 && (
               <div className="flex items-center gap-4 flex-wrap pt-3 border-t dark:border-gray-700">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                    <span className="font-semibold text-gray-900 dark:text-white">{weekStats.total}</span> Total
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      {weekStats.total}
+                    </span>{" "}
+                    Total
                   </span>
                 </div>
                 {weekStats.completed > 0 && (
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-green-500 rounded-full" />
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">{weekStats.completed}</span> Completed
+                      <span className="font-semibold text-gray-900 dark:text-white">
+                        {weekStats.completed}
+                      </span>{" "}
+                      Completed
                     </span>
                   </div>
                 )}
                 {weekStats.scheduled > 0 && (
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full" />
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">{weekStats.scheduled}</span> Scheduled
+                      <span className="font-semibold text-gray-900 dark:text-white">
+                        {weekStats.scheduled}
+                      </span>{" "}
+                      Scheduled
                     </span>
                   </div>
                 )}
                 {weekStats.pending > 0 && (
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full" />
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">{weekStats.pending}</span> Pending
+                      <span className="font-semibold text-gray-900 dark:text-white">
+                        {weekStats.pending}
+                      </span>{" "}
+                      Pending
                     </span>
                   </div>
                 )}
                 {weekStats.cancelled > 0 && (
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-red-500 rounded-full" />
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">{weekStats.cancelled}</span> Cancelled
+                      <span className="font-semibold text-gray-900 dark:text-white">
+                        {weekStats.cancelled}
+                      </span>{" "}
+                      Cancelled
                     </span>
                   </div>
                 )}
@@ -1319,7 +1568,10 @@ export default function CalendarPage() {
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-green-500" />
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">{weekStats.paid}</span> Paid
+                      <span className="font-semibold text-gray-900 dark:text-white">
+                        {weekStats.paid}
+                      </span>{" "}
+                      Paid
                     </span>
                   </div>
                 )}
@@ -1336,397 +1588,483 @@ export default function CalendarPage() {
 
           {/* Week Grid - scroll horizontally on mobile */}
           <div className="overflow-x-auto">
-          <div className="grid grid-cols-8 min-w-[560px]">
-            {/* Time column header */}
-            <div className="p-3 text-center text-sm font-medium text-gray-500 dark:text-gray-400 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
-              Time
-            </div>
-            
-            {/* Day headers */}
-            {getWeekDays(currentDate).map(day => {
-              const dayDateStr = day.toISOString().split('T')[0];
-              const isSelected = selectedDate === dayDateStr;
-              return (
-                <div 
-                  key={day.toISOString()} 
-                  className={`p-3 text-center text-sm font-medium border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 cursor-pointer transition-colors ${
-                    isSelected 
-                      ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' 
-                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600'
-                  }`}
-                  onClick={() => {
-                    setSelectedDate(dayDateStr);
-                    setView('day');
-                  }}
-                >
-                <div className="font-semibold">{day.toLocaleDateString('en-US', { weekday: 'short' })}</div>
-                <div className={`text-xs mt-1 ${
-                    isToday(day) ? 'text-blue-600 dark:text-blue-400 font-bold' : isSelected ? 'text-blue-700 dark:text-blue-300' : 'text-gray-500 dark:text-gray-400'
-                }`}>
-                  {day.getDate()}
-                </div>
+            <div className="grid grid-cols-8 min-w-[560px]">
+              {/* Time column header */}
+              <div className="p-3 text-center text-sm font-medium text-gray-500 dark:text-gray-400 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+                Time
               </div>
-              );
-            })}
 
-            {/* Time slots grouped by hours */}
-            {Array.from({ length: 12 }, (_, hourIndex) => {
-              const hour = 8 + hourIndex; // Start from 8 AM
-              const hourSlots = [
-                `${hour.toString().padStart(2, '0')}:00`,
-                `${hour.toString().padStart(2, '0')}:30`
-              ];
-              
-              return (
-                <React.Fragment key={hour}>
-                  {/* Hour header row */}
-                  <div className="col-span-8 p-2 text-sm font-semibold text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 bg-gray-100 dark:bg-gray-800">
-                    {hour}:00 - {hour + 1}:00
+              {/* Day headers */}
+              {getWeekDays(currentDate).map((day) => {
+                const dayDateStr = day.toISOString().split("T")[0];
+                const isSelected = selectedDate === dayDateStr;
+
+                return (
+                  <div
+                    key={day.toISOString()}
+                    className={`p-3 text-center text-sm font-medium border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 cursor-pointer transition-colors ${
+                      isSelected
+                        ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                        : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600"
+                    }`}
+                    onClick={() => {
+                      setSelectedDate(dayDateStr);
+                      setView("day");
+                    }}
+                  >
+                    <div className="font-semibold">
+                      {day.toLocaleDateString("en-US", { weekday: "short" })}
+                    </div>
+                    <div
+                      className={`text-xs mt-1 ${
+                        isToday(day)
+                          ? "text-blue-600 dark:text-blue-400 font-bold"
+                          : isSelected
+                            ? "text-blue-700 dark:text-blue-300"
+                            : "text-gray-500 dark:text-gray-400"
+                      }`}
+                    >
+                      {day.getDate()}
+                    </div>
                   </div>
-                  
-                  {/* 30-minute slots for this hour */}
-                  {hourSlots.map(timeSlot => (
-              <React.Fragment key={timeSlot}>
-                {/* Time label */}
-                      <div className="p-2 text-xs font-medium text-gray-600 dark:text-gray-400 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-center">
-                  {timeSlot}
-                </div>
-                
-                {/* Day columns */}
-                {getWeekDays(currentDate).map(day => {
-                        const dayDateStr = day.toISOString().split('T')[0];
-                  const dayBookings = getBookingsForDate(day.getDate(), day.getMonth(), day.getFullYear())
-                          .filter(booking => {
+                );
+              })}
+
+              {/* Time slots grouped by hours */}
+              {Array.from({ length: 12 }, (_, hourIndex) => {
+                const hour = 8 + hourIndex; // Start from 8 AM
+                const hourSlots = [
+                  `${hour.toString().padStart(2, "0")}:00`,
+                  `${hour.toString().padStart(2, "0")}:30`,
+                ];
+
+                return (
+                  <React.Fragment key={hour}>
+                    {/* Hour header row */}
+                    <div className="col-span-8 p-2 text-sm font-semibold text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 bg-gray-100 dark:bg-gray-800">
+                      {hour}:00 - {hour + 1}:00
+                    </div>
+
+                    {/* 30-minute slots for this hour */}
+                    {hourSlots.map((timeSlot) => (
+                      <React.Fragment key={timeSlot}>
+                        {/* Time label */}
+                        <div className="p-2 text-xs font-medium text-gray-600 dark:text-gray-400 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-center">
+                          {timeSlot}
+                        </div>
+
+                        {/* Day columns */}
+                        {getWeekDays(currentDate).map((day) => {
+                          const dayDateStr = day.toISOString().split("T")[0];
+                          const dayBookings = getBookingsForDate(
+                            day.getDate(),
+                            day.getMonth(),
+                            day.getFullYear(),
+                          ).filter((booking) => {
                             // Normalize booking time for comparison
-                            const bookingTime = booking.time ? booking.time.split(':').slice(0, 2).join(':') : '';
+                            const bookingTime = booking.time
+                              ? booking.time.split(":").slice(0, 2).join(":")
+                              : "";
+
                             return bookingTime === timeSlot;
                           });
-                  
-                  return (
-                    <div
-                      key={`${day.toISOString()}-${timeSlot}`}
-                            className={`min-h-[60px] p-1 border-b border-r dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors relative ${
-                              selectedDate === dayDateStr ? 'bg-blue-50 dark:bg-blue-900/20' : ''
-                            }`}
-                            onClick={() => {
-                              setSelectedDate(dayDateStr);
-                              handleTimeSlotClick(day, timeSlot);
-                            }}
-                          >
-                            {dayBookings.map(booking => {
-                              // Determine colors based on booking status
-                              const getStatusClasses = () => {
-                                switch (booking.status) {
-                                  case 'completed':
-                                    return {
-                                      bg: 'bg-green-100 dark:bg-green-900/30',
-                                      border: 'border-green-200 dark:border-green-800',
-                                      hover: 'hover:bg-green-200 dark:hover:bg-green-900/50',
-                                      text: 'text-green-900 dark:text-green-100',
-                                      textSecondary: 'text-green-700 dark:text-green-300'
-                                    };
-                                  case 'cancelled':
-                                    return {
-                                      bg: 'bg-red-100 dark:bg-red-900/30',
-                                      border: 'border-red-200 dark:border-red-800',
-                                      hover: 'hover:bg-red-200 dark:hover:bg-red-900/50',
-                                      text: 'text-red-900 dark:text-red-100',
-                                      textSecondary: 'text-red-700 dark:text-red-300'
-                                    };
-                                  case 'pending':
-                                    return {
-                                      bg: 'bg-yellow-100 dark:bg-yellow-900/30',
-                                      border: 'border-yellow-200 dark:border-yellow-800',
-                                      hover: 'hover:bg-yellow-200 dark:hover:bg-yellow-900/50',
-                                      text: 'text-yellow-900 dark:text-yellow-100',
-                                      textSecondary: 'text-yellow-700 dark:text-yellow-300'
-                                    };
-                                  case 'scheduled':
-                                  case 'confirmed':
-                                    return {
-                                      bg: 'bg-blue-100 dark:bg-blue-900/30',
-                                      border: 'border-blue-200 dark:border-blue-800',
-                                      hover: 'hover:bg-blue-200 dark:hover:bg-blue-900/50',
-                                      text: 'text-blue-900 dark:text-blue-100',
-                                      textSecondary: 'text-blue-700 dark:text-blue-300'
-                                    };
-                                  default:
-                                    return {
-                                      bg: 'bg-gray-100 dark:bg-gray-900/30',
-                                      border: 'border-gray-200 dark:border-gray-800',
-                                      hover: 'hover:bg-gray-200 dark:hover:bg-gray-900/50',
-                                      text: 'text-gray-900 dark:text-gray-100',
-                                      textSecondary: 'text-gray-700 dark:text-gray-300'
-                                    };
-                                }
-                              };
-                              
-                              const statusClasses = getStatusClasses();
-                              
-                              return (
-                        <div
-                          key={booking.id}
-                                  className={`${statusClasses.bg} border ${statusClasses.border} rounded p-1 mb-1 cursor-pointer ${statusClasses.hover} transition-colors`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleBookingClick(booking);
-                          }}
-                        >
-                                  <div className={`text-xs font-medium ${statusClasses.text} truncate`}>
-                            {booking.customer_name}
-                          </div>
-                                  <div className={`text-xs ${statusClasses.textSecondary} truncate`}>
-                            {booking.service}
-                          </div>
-                        </div>
-                              );
-                            })}
-                    </div>
-                  );
-                })}
-              </React.Fragment>
-            ))}
-                </React.Fragment>
-              );
-            })}
-          </div>
+
+                          return (
+                            <div
+                              key={`${day.toISOString()}-${timeSlot}`}
+                              className={`min-h-[60px] p-1 border-b border-r dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors relative ${
+                                selectedDate === dayDateStr
+                                  ? "bg-blue-50 dark:bg-blue-900/20"
+                                  : ""
+                              }`}
+                              onClick={() => {
+                                setSelectedDate(dayDateStr);
+                                handleTimeSlotClick(day, timeSlot);
+                              }}
+                            >
+                              {dayBookings.map((booking) => {
+                                // Determine colors based on booking status
+                                const getStatusClasses = () => {
+                                  switch (booking.status) {
+                                    case "completed":
+                                      return {
+                                        bg: "bg-green-100 dark:bg-green-900/30",
+                                        border:
+                                          "border-green-200 dark:border-green-800",
+                                        hover:
+                                          "hover:bg-green-200 dark:hover:bg-green-900/50",
+                                        text: "text-green-900 dark:text-green-100",
+                                        textSecondary:
+                                          "text-green-700 dark:text-green-300",
+                                      };
+                                    case "cancelled":
+                                      return {
+                                        bg: "bg-red-100 dark:bg-red-900/30",
+                                        border:
+                                          "border-red-200 dark:border-red-800",
+                                        hover:
+                                          "hover:bg-red-200 dark:hover:bg-red-900/50",
+                                        text: "text-red-900 dark:text-red-100",
+                                        textSecondary:
+                                          "text-red-700 dark:text-red-300",
+                                      };
+                                    case "pending":
+                                      return {
+                                        bg: "bg-yellow-100 dark:bg-yellow-900/30",
+                                        border:
+                                          "border-yellow-200 dark:border-yellow-800",
+                                        hover:
+                                          "hover:bg-yellow-200 dark:hover:bg-yellow-900/50",
+                                        text: "text-yellow-900 dark:text-yellow-100",
+                                        textSecondary:
+                                          "text-yellow-700 dark:text-yellow-300",
+                                      };
+                                    case "scheduled":
+                                    case "confirmed":
+                                      return {
+                                        bg: "bg-blue-100 dark:bg-blue-900/30",
+                                        border:
+                                          "border-blue-200 dark:border-blue-800",
+                                        hover:
+                                          "hover:bg-blue-200 dark:hover:bg-blue-900/50",
+                                        text: "text-blue-900 dark:text-blue-100",
+                                        textSecondary:
+                                          "text-blue-700 dark:text-blue-300",
+                                      };
+                                    default:
+                                      return {
+                                        bg: "bg-gray-100 dark:bg-gray-900/30",
+                                        border:
+                                          "border-gray-200 dark:border-gray-800",
+                                        hover:
+                                          "hover:bg-gray-200 dark:hover:bg-gray-900/50",
+                                        text: "text-gray-900 dark:text-gray-100",
+                                        textSecondary:
+                                          "text-gray-700 dark:text-gray-300",
+                                      };
+                                  }
+                                };
+
+                                const statusClasses = getStatusClasses();
+
+                                return (
+                                  <div
+                                    key={booking.id}
+                                    className={`${statusClasses.bg} border ${statusClasses.border} rounded p-1 mb-1 cursor-pointer ${statusClasses.hover} transition-colors`}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleBookingClick(booking);
+                                    }}
+                                  >
+                                    <div
+                                      className={`text-xs font-medium ${statusClasses.text} truncate`}
+                                    >
+                                      {booking.customer_name}
+                                    </div>
+                                    <div
+                                      className={`text-xs ${statusClasses.textSecondary} truncate`}
+                                    >
+                                      {booking.service}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          );
+                        })}
+                      </React.Fragment>
+                    ))}
+                  </React.Fragment>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
 
       {/* Day View */}
-      {view === 'day' && (
+      {view === "day" && (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700">
           <div className="p-4 border-b dark:border-gray-700">
             <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {new Date(selectedDate).toLocaleDateString('en-US', { 
-                      weekday: 'long', 
-                year: 'numeric', 
-                    month: 'long', 
-                day: 'numeric' 
-              })}
-            </h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {new Date(selectedDate).toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </h2>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => {
-                    const current = new Date(selectedDate);
-                    current.setDate(current.getDate() - 1);
-                    setSelectedDate(current.toISOString().split('T')[0]);
-                  }}
                   className="min-h-[44px] min-w-[44px] p-2 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300 transition-colors"
                   title="Previous Day"
+                  onClick={() => {
+                    const current = new Date(selectedDate);
+
+                    current.setDate(current.getDate() - 1);
+                    setSelectedDate(current.toISOString().split("T")[0]);
+                  }}
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
                 <button
+                  className="min-h-[44px] px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  title="Today"
                   onClick={() => {
                     setSelectedDate(getCurrentToday());
                   }}
-                  className="min-h-[44px] px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  title="Today"
                 >
                   Today
                 </button>
                 <button
-                  onClick={() => {
-                    const current = new Date(selectedDate);
-                    current.setDate(current.getDate() + 1);
-                    setSelectedDate(current.toISOString().split('T')[0]);
-                  }}
                   className="min-h-[44px] min-w-[44px] p-2 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300 transition-colors"
                   title="Next Day"
+                  onClick={() => {
+                    const current = new Date(selectedDate);
+
+                    current.setDate(current.getDate() + 1);
+                    setSelectedDate(current.toISOString().split("T")[0]);
+                  }}
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
             </div>
             {/* Booking Statistics */}
-            {filteredBookings.length > 0 && (() => {
-              const stats = {
-                total: filteredBookings.length,
-                completed: filteredBookings.filter(b => b.status === 'completed').length,
-                scheduled: filteredBookings.filter(b => b.status === 'scheduled' || b.status === 'confirmed').length,
-                pending: filteredBookings.filter(b => b.status === 'pending').length,
-                cancelled: filteredBookings.filter(b => b.status === 'cancelled').length,
-                paid: filteredBookings.filter(b => b.payment_status === 'paid').length,
-                totalAmount: filteredBookings.reduce((sum, b) => sum + (b.amount || 0), 0)
-              };
-              
-              return (
-                <div className="flex items-center gap-4 flex-wrap mt-3 pt-3 border-t dark:border-gray-700">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">{stats.total}</span> Total
-                    </span>
+            {filteredBookings.length > 0 &&
+              (() => {
+                const stats = {
+                  total: filteredBookings.length,
+                  completed: filteredBookings.filter(
+                    (b) => b.status === "completed",
+                  ).length,
+                  scheduled: filteredBookings.filter(
+                    (b) => b.status === "scheduled" || b.status === "confirmed",
+                  ).length,
+                  pending: filteredBookings.filter(
+                    (b) => b.status === "pending",
+                  ).length,
+                  cancelled: filteredBookings.filter(
+                    (b) => b.status === "cancelled",
+                  ).length,
+                  paid: filteredBookings.filter(
+                    (b) => b.payment_status === "paid",
+                  ).length,
+                  totalAmount: filteredBookings.reduce(
+                    (sum, b) => sum + (b.amount || 0),
+                    0,
+                  ),
+                };
+
+                return (
+                  <div className="flex items-center gap-4 flex-wrap mt-3 pt-3 border-t dark:border-gray-700">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        <span className="font-semibold text-gray-900 dark:text-white">
+                          {stats.total}
+                        </span>{" "}
+                        Total
+                      </span>
+                    </div>
+                    {stats.completed > 0 && (
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full" />
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                          <span className="font-semibold text-gray-900 dark:text-white">
+                            {stats.completed}
+                          </span>{" "}
+                          Completed
+                        </span>
+                      </div>
+                    )}
+                    {stats.scheduled > 0 && (
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                          <span className="font-semibold text-gray-900 dark:text-white">
+                            {stats.scheduled}
+                          </span>{" "}
+                          Scheduled
+                        </span>
+                      </div>
+                    )}
+                    {stats.pending > 0 && (
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                          <span className="font-semibold text-gray-900 dark:text-white">
+                            {stats.pending}
+                          </span>{" "}
+                          Pending
+                        </span>
+                      </div>
+                    )}
+                    {stats.cancelled > 0 && (
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-red-500 rounded-full" />
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                          <span className="font-semibold text-gray-900 dark:text-white">
+                            {stats.cancelled}
+                          </span>{" "}
+                          Cancelled
+                        </span>
+                      </div>
+                    )}
+                    {stats.paid > 0 && (
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                          <span className="font-semibold text-gray-900 dark:text-white">
+                            {stats.paid}
+                          </span>{" "}
+                          Paid
+                        </span>
+                      </div>
+                    )}
+                    {stats.totalAmount > 0 && (
+                      <div className="flex items-center gap-2 ml-auto">
+                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                          Total: £{stats.totalAmount.toFixed(2)}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                  {stats.completed > 0 && (
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        <span className="font-semibold text-gray-900 dark:text-white">{stats.completed}</span> Completed
-                      </span>
-                    </div>
-                  )}
-                  {stats.scheduled > 0 && (
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        <span className="font-semibold text-gray-900 dark:text-white">{stats.scheduled}</span> Scheduled
-                      </span>
-                    </div>
-                  )}
-                  {stats.pending > 0 && (
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        <span className="font-semibold text-gray-900 dark:text-white">{stats.pending}</span> Pending
-                      </span>
-                    </div>
-                  )}
-                  {stats.cancelled > 0 && (
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        <span className="font-semibold text-gray-900 dark:text-white">{stats.cancelled}</span> Cancelled
-                      </span>
-                    </div>
-                  )}
-                  {stats.paid > 0 && (
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-500" />
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        <span className="font-semibold text-gray-900 dark:text-white">{stats.paid}</span> Paid
-                      </span>
-                    </div>
-                  )}
-                  {stats.totalAmount > 0 && (
-                    <div className="flex items-center gap-2 ml-auto">
-                      <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                        Total: £{stats.totalAmount.toFixed(2)}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
+                );
+              })()}
           </div>
-          
+
           {filteredBookings.length === 0 ? (
             <div className="text-center py-12">
               <CalendarIcon className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No bookings for this date</h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-4">Create a new booking to get started.</p>
-                <button
-                onClick={() => setShowAddModal(true)}
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                No bookings for this date
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
+                Create a new booking to get started.
+              </p>
+              <button
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                onClick={() => setShowAddModal(true)}
               >
                 Create Booking
-                </button>
-                </div>
+              </button>
+            </div>
           ) : (
             <div className="p-4 space-y-4">
-              {filteredBookings.map(booking => {
+              {filteredBookings.map((booking) => {
                 // Determine border color based on status
                 const getStatusBorderColor = () => {
                   switch (booking.status) {
-                    case 'completed':
-                      return 'border-l-4 border-l-green-500';
-                    case 'cancelled':
-                      return 'border-l-4 border-l-red-500';
-                    case 'pending':
-                      return 'border-l-4 border-l-yellow-500';
-                    case 'scheduled':
-                    case 'confirmed':
-                      return 'border-l-4 border-l-blue-500';
+                    case "completed":
+                      return "border-l-4 border-l-green-500";
+                    case "cancelled":
+                      return "border-l-4 border-l-red-500";
+                    case "pending":
+                      return "border-l-4 border-l-yellow-500";
+                    case "scheduled":
+                    case "confirmed":
+                      return "border-l-4 border-l-blue-500";
                     default:
-                      return 'border-l-4 border-l-gray-400';
+                      return "border-l-4 border-l-gray-400";
                   }
                 };
-                
+
                 // Determine background color based on status
                 const getStatusBgColor = () => {
                   switch (booking.status) {
-                    case 'completed':
-                      return 'bg-green-50 dark:bg-green-900/10';
-                    case 'cancelled':
-                      return 'bg-red-50 dark:bg-red-900/10';
-                    case 'pending':
-                      return 'bg-yellow-50 dark:bg-yellow-900/10';
-                    case 'scheduled':
-                    case 'confirmed':
-                      return 'bg-blue-50 dark:bg-blue-900/10';
+                    case "completed":
+                      return "bg-green-50 dark:bg-green-900/10";
+                    case "cancelled":
+                      return "bg-red-50 dark:bg-red-900/10";
+                    case "pending":
+                      return "bg-yellow-50 dark:bg-yellow-900/10";
+                    case "scheduled":
+                    case "confirmed":
+                      return "bg-blue-50 dark:bg-blue-900/10";
                     default:
-                      return 'bg-white dark:bg-gray-800';
+                      return "bg-white dark:bg-gray-800";
                   }
                 };
-                
+
                 return (
-                <div 
-                  key={booking.id} 
+                  <div
+                    key={booking.id}
                     className={`border dark:border-gray-700 rounded-lg p-4 transition-colors cursor-pointer ${getStatusBorderColor()} ${getStatusBgColor()} hover:shadow-md`}
-                  onClick={() => handleBookingClick(booking)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="text-lg font-medium text-gray-900 dark:text-white">{formatTime(booking.time)}</div>
-                        <div>
-                        <div className="font-medium text-gray-900 dark:text-white">{booking.customer_name}</div>
-                        <div className="text-sm text-gray-600 dark:text-gray-300">{booking.service}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                          <Phone className="w-3 h-3" />
-                          {booking.customer_phone || 'N/A'}
-                            </div>
-                      </div>
-                          </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
-                        {getStatusIcon(booking.status)}
-                        {booking.status}
-                      </span>
-                      <div className="text-right">
-                        <div className="font-medium text-gray-900 dark:text-white">£{booking.amount}</div>
-                        {booking.duration && (
-                          <div className="text-sm text-gray-500 dark:text-gray-400">{booking.duration}min</div>
-                        )}
-              </div>
-                    </div>
-              </div>
-                    </div>
-                  );
-                })}
+                    onClick={() => handleBookingClick(booking)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="text-lg font-medium text-gray-900 dark:text-white">
+                          {formatTime(booking.time)}
                         </div>
-                )}
-                </div>
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">
+                            {booking.customer_name}
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-300">
+                            {booking.service}
+                          </div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                            <Phone className="w-3 h-3" />
+                            {booking.customer_phone || "N/A"}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}
+                        >
+                          {getStatusIcon(booking.status)}
+                          {booking.status}
+                        </span>
+                        <div className="text-right">
+                          <div className="font-medium text-gray-900 dark:text-white">
+                            £{booking.amount}
+                          </div>
+                          {booking.duration && (
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                              {booking.duration}min
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       )}
 
       {/* New Booking Modal */}
       <Modal
         isOpen={showAddModal}
+        scrollBehavior="inside"
+        size="3xl"
         onClose={() => {
           setShowAddModal(false);
           setNewBookingForm({
-            customer_name: '',
-            customer_email: '',
-            customer_phone: '',
-            service: '',
+            customer_name: "",
+            customer_email: "",
+            customer_phone: "",
+            service: "",
             date: getCurrentToday(),
-            time: '',
-            amount: '',
-            status: 'pending',
-            payment_status: 'pending',
-            address: '',
-            notes: '',
-            payment_method: 'card' as 'cash' | 'card' | 'cash_and_card',
-            cash_amount: '',
-            card_amount: '',
-            payment_type: 'full' as 'full' | 'deposit',
-            deposit_amount: '',
+            time: "",
+            amount: "",
+            status: "pending",
+            payment_status: "pending",
+            address: "",
+            notes: "",
+            payment_method: "card" as "cash" | "card" | "cash_and_card",
+            cash_amount: "",
+            card_amount: "",
+            payment_type: "full" as "full" | "deposit",
+            deposit_amount: "",
           });
         }}
-        size="3xl"
-        scrollBehavior="inside"
       >
         <ModalContent>
           {(onClose) => (
@@ -1737,7 +2075,9 @@ export default function CalendarPage() {
                     <Plus className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                   </div>
                   <div>
-                    <h2 className="text-xl sm:text-2xl font-bold">New Booking</h2>
+                    <h2 className="text-xl sm:text-2xl font-bold">
+                      New Booking
+                    </h2>
                     <p className="text-sm font-normal text-default-500">
                       Create a new appointment booking
                     </p>
@@ -1751,42 +2091,44 @@ export default function CalendarPage() {
                     <CardHeader className="pb-3">
                       <div className="flex items-center gap-2">
                         <User className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-                        <h3 className="text-lg font-semibold">Customer Information</h3>
+                        <h3 className="text-lg font-semibold">
+                          Customer Information
+                        </h3>
                       </div>
                     </CardHeader>
                     <CardBody className="pt-0">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Input
+                          isRequired
                           label="Customer Name"
                           name="customer_name"
+                          placeholder="Enter customer name"
                           value={newBookingForm.customer_name}
                           onChange={handleNewBookingInputChange}
-                          isRequired
-                          placeholder="Enter customer name"
                         />
                         <Input
                           label="Email"
                           name="customer_email"
+                          placeholder="Enter email address"
                           type="email"
                           value={newBookingForm.customer_email}
                           onChange={handleNewBookingInputChange}
-                          placeholder="Enter email address"
                         />
                         <Input
                           label="Phone"
                           name="customer_phone"
+                          placeholder="Enter phone number"
                           type="tel"
                           value={newBookingForm.customer_phone}
                           onChange={handleNewBookingInputChange}
-                          placeholder="Enter phone number"
                         />
                         <Input
+                          isRequired
                           label="Service"
                           name="service"
+                          placeholder="Enter service name"
                           value={newBookingForm.service}
                           onChange={handleNewBookingInputChange}
-                          isRequired
-                          placeholder="Enter service name"
                         />
                       </div>
                     </CardBody>
@@ -1797,19 +2139,21 @@ export default function CalendarPage() {
                     <CardHeader className="pb-3">
                       <div className="flex items-center gap-2">
                         <Clock className="w-5 h-5 text-success-600 dark:text-success-400" />
-                        <h3 className="text-lg font-semibold">Schedule Information</h3>
+                        <h3 className="text-lg font-semibold">
+                          Schedule Information
+                        </h3>
                       </div>
                     </CardHeader>
                     <CardBody className="pt-0">
                       <div className="grid grid-cols-2 gap-4">
                         <Input
+                          isRequired
                           label="Date"
+                          min={getCurrentToday()}
                           name="date"
                           type="date"
                           value={newBookingForm.date}
                           onChange={handleNewBookingDateChange}
-                          isRequired
-                          min={getCurrentToday()}
                         />
                         <div>
                           <label className="block text-sm font-medium text-foreground mb-2">
@@ -1831,14 +2175,22 @@ export default function CalendarPage() {
                             </div>
                           ) : newBookingAvailableSlots.length > 0 ? (
                             <Select
+                              isRequired
                               label="Select Time"
                               name="time"
-                              selectedKeys={newBookingForm.time ? [newBookingForm.time] : []}
+                              selectedKeys={
+                                newBookingForm.time ? [newBookingForm.time] : []
+                              }
                               onSelectionChange={(keys) => {
-                                const selectedTime = Array.from(keys)[0] as string;
-                                setNewBookingForm(prev => ({ ...prev, time: selectedTime || '' }));
+                                const selectedTime = Array.from(
+                                  keys,
+                                )[0] as string;
+
+                                setNewBookingForm((prev) => ({
+                                  ...prev,
+                                  time: selectedTime || "",
+                                }));
                               }}
-                              isRequired
                             >
                               {newBookingAvailableSlots.map((timeSlot) => (
                                 <SelectItem key={timeSlot}>
@@ -1849,12 +2201,13 @@ export default function CalendarPage() {
                           ) : (
                             <div className="px-3 py-2 border border-divider rounded-lg bg-default-50 text-default-500 text-sm">
                               No available time slots for this date
+                            </div>
+                          )}
                         </div>
-                )}
-                </div>
                       </div>
                       <div className="mt-3 text-xs text-default-500 bg-default-50 dark:bg-default-100 p-2 rounded">
-                        💡 Change date to see available time slots for that day. Time will be cleared when date changes.
+                        💡 Change date to see available time slots for that day.
+                        Time will be cleared when date changes.
                       </div>
                     </CardBody>
                   </Card>
@@ -1864,84 +2217,122 @@ export default function CalendarPage() {
                     <CardHeader className="pb-3">
                       <div className="flex items-center gap-2">
                         <div className="w-5 h-5 bg-warning-500 rounded-full flex items-center justify-center">
-                          <span className="text-white text-xs font-bold">£</span>
+                          <span className="text-white text-xs font-bold">
+                            £
+                          </span>
                         </div>
-                        <h3 className="text-lg font-semibold">Payment & Status</h3>
+                        <h3 className="text-lg font-semibold">
+                          Payment & Status
+                        </h3>
                       </div>
                     </CardHeader>
                     <CardBody className="pt-0 space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <Input
+                          isRequired
                           label="Total Amount (£)"
+                          min="0"
                           name="amount"
+                          placeholder="0.00"
+                          step="0.01"
                           type="number"
                           value={newBookingForm.amount}
                           onChange={(e) => {
                             handleNewBookingInputChange(e);
-                            if (newBookingForm.payment_method === 'cash_and_card') {
-                              setNewBookingForm(prev => ({ ...prev, amount: e.target.value, cash_amount: '', card_amount: '' }));
+                            if (
+                              newBookingForm.payment_method === "cash_and_card"
+                            ) {
+                              setNewBookingForm((prev) => ({
+                                ...prev,
+                                amount: e.target.value,
+                                cash_amount: "",
+                                card_amount: "",
+                              }));
                             }
                           }}
-                          isRequired
-                          step="0.01"
-                          min="0"
-                          placeholder="0.00"
                         />
                         <Select
                           label="Payment Method"
                           selectedKeys={[newBookingForm.payment_method]}
                           onSelectionChange={(keys) => {
                             const selected = Array.from(keys)[0] as string;
-                            setNewBookingForm(prev => ({
+
+                            setNewBookingForm((prev) => ({
                               ...prev,
-                              payment_method: selected as 'cash' | 'card' | 'cash_and_card',
-                              cash_amount: '', card_amount: '',
+                              payment_method: selected as
+                                | "cash"
+                                | "card"
+                                | "cash_and_card",
+                              cash_amount: "",
+                              card_amount: "",
                             }));
                           }}
                         >
                           <SelectItem key="card">Card</SelectItem>
                           <SelectItem key="cash">Cash</SelectItem>
-                          <SelectItem key="cash_and_card">Cash + Card</SelectItem>
+                          <SelectItem key="cash_and_card">
+                            Cash + Card
+                          </SelectItem>
                         </Select>
                       </div>
 
-                      {newBookingForm.payment_method === 'cash_and_card' && (
+                      {newBookingForm.payment_method === "cash_and_card" && (
                         <div className="grid grid-cols-2 gap-4">
                           <Input
                             label="Cash Amount (£)"
+                            max={newBookingForm.amount || undefined}
+                            min="0"
+                            placeholder="0.00"
+                            step="0.01"
                             type="number"
                             value={newBookingForm.cash_amount}
                             onChange={(e) => {
                               const cashVal = e.target.value;
-                              const total = parseFloat(newBookingForm.amount) || 0;
+                              const total =
+                                parseFloat(newBookingForm.amount) || 0;
                               const cashNum = parseFloat(cashVal) || 0;
-                              const cardNum = Math.max(0, Math.round((total - cashNum) * 100) / 100);
-                              setNewBookingForm(prev => ({
+                              const cardNum = Math.max(
+                                0,
+                                Math.round((total - cashNum) * 100) / 100,
+                              );
+
+                              setNewBookingForm((prev) => ({
                                 ...prev,
                                 cash_amount: cashVal,
-                                card_amount: cashNum > 0 && total > 0 ? cardNum.toFixed(2) : '',
+                                card_amount:
+                                  cashNum > 0 && total > 0
+                                    ? cardNum.toFixed(2)
+                                    : "",
                               }));
                             }}
-                            step="0.01" min="0" max={newBookingForm.amount || undefined}
-                            placeholder="0.00"
                           />
                           <Input
                             label="Card Amount (£)"
+                            max={newBookingForm.amount || undefined}
+                            min="0"
+                            placeholder="0.00"
+                            step="0.01"
                             type="number"
                             value={newBookingForm.card_amount}
                             onChange={(e) => {
                               const cardVal = e.target.value;
-                              const total = parseFloat(newBookingForm.amount) || 0;
+                              const total =
+                                parseFloat(newBookingForm.amount) || 0;
                               const cardNum = parseFloat(cardVal) || 0;
-                              const cashNum = Math.max(0, Math.round((total - cardNum) * 100) / 100);
-                              setNewBookingForm(prev => ({
+                              const cashNum = Math.max(
+                                0,
+                                Math.round((total - cardNum) * 100) / 100,
+                              );
+
+                              setNewBookingForm((prev) => ({
                                 ...prev,
                                 card_amount: cardVal,
-                                cash_amount: cardNum > 0 && total > 0 ? cashNum.toFixed(2) : '',
+                                cash_amount:
+                                  cardNum > 0 && total > 0
+                                    ? cashNum.toFixed(2)
+                                    : "",
                               }));
                             }}
-                            step="0.01" min="0" max={newBookingForm.amount || undefined}
-                            placeholder="0.00"
                           />
                         </div>
                       )}
@@ -1949,36 +2340,54 @@ export default function CalendarPage() {
                       {/* Deposit toggle */}
                       <div className="flex items-center gap-3 p-3 bg-default-50 rounded-lg border border-divider">
                         <input
-                          type="checkbox"
+                          checked={newBookingForm.payment_type === "deposit"}
+                          className="w-4 h-4 text-primary rounded border-default-300 focus:ring-primary"
                           id="new-deposit-toggle"
-                          checked={newBookingForm.payment_type === 'deposit'}
+                          type="checkbox"
                           onChange={(e) => {
-                            setNewBookingForm(prev => ({
+                            setNewBookingForm((prev) => ({
                               ...prev,
-                              payment_type: e.target.checked ? 'deposit' : 'full',
-                              deposit_amount: '',
+                              payment_type: e.target.checked
+                                ? "deposit"
+                                : "full",
+                              deposit_amount: "",
                             }));
                           }}
-                          className="w-4 h-4 text-primary rounded border-default-300 focus:ring-primary"
                         />
-                        <label htmlFor="new-deposit-toggle" className="text-sm font-medium text-foreground cursor-pointer">
+                        <label
+                          className="text-sm font-medium text-foreground cursor-pointer"
+                          htmlFor="new-deposit-toggle"
+                        >
                           Deposit payment (partial payment now, rest later)
                         </label>
                       </div>
 
-                      {newBookingForm.payment_type === 'deposit' && (
+                      {newBookingForm.payment_type === "deposit" && (
                         <div className="grid grid-cols-2 gap-4">
                           <Input
+                            isRequired
                             label="Deposit Amount (£)"
+                            max={newBookingForm.amount || undefined}
+                            min="0"
+                            placeholder="0.00"
+                            step="0.01"
                             type="number"
                             value={newBookingForm.deposit_amount}
-                            onChange={(e) => setNewBookingForm(prev => ({ ...prev, deposit_amount: e.target.value }))}
-                            step="0.01" min="0" max={newBookingForm.amount || undefined}
-                            placeholder="0.00"
-                            isRequired
+                            onChange={(e) =>
+                              setNewBookingForm((prev) => ({
+                                ...prev,
+                                deposit_amount: e.target.value,
+                              }))
+                            }
                           />
                           <div className="flex items-center px-3 text-sm text-default-500">
-                            Remaining: £{(Math.max(0, (parseFloat(newBookingForm.amount) || 0) - (parseFloat(newBookingForm.deposit_amount) || 0))).toFixed(2)}
+                            Remaining: £
+                            {Math.max(
+                              0,
+                              (parseFloat(newBookingForm.amount) || 0) -
+                                (parseFloat(newBookingForm.deposit_amount) ||
+                                  0),
+                            ).toFixed(2)}
                           </div>
                         </div>
                       )}
@@ -1988,8 +2397,14 @@ export default function CalendarPage() {
                           label="Status"
                           selectedKeys={[newBookingForm.status]}
                           onSelectionChange={(keys) => {
-                            const selectedStatus = Array.from(keys)[0] as string;
-                            setNewBookingForm(prev => ({ ...prev, status: selectedStatus || 'pending' }));
+                            const selectedStatus = Array.from(
+                              keys,
+                            )[0] as string;
+
+                            setNewBookingForm((prev) => ({
+                              ...prev,
+                              status: selectedStatus || "pending",
+                            }));
                           }}
                         >
                           <SelectItem key="pending">Pending</SelectItem>
@@ -2001,8 +2416,15 @@ export default function CalendarPage() {
                           label="Payment Status"
                           selectedKeys={[newBookingForm.payment_status]}
                           onSelectionChange={(keys) => {
-                            const selectedPaymentStatus = Array.from(keys)[0] as string;
-                            setNewBookingForm(prev => ({ ...prev, payment_status: selectedPaymentStatus || 'pending' }));
+                            const selectedPaymentStatus = Array.from(
+                              keys,
+                            )[0] as string;
+
+                            setNewBookingForm((prev) => ({
+                              ...prev,
+                              payment_status:
+                                selectedPaymentStatus || "pending",
+                            }));
                           }}
                         >
                           <SelectItem key="pending">Pending</SelectItem>
@@ -2018,44 +2440,43 @@ export default function CalendarPage() {
                     <CardHeader className="pb-3">
                       <div className="flex items-center gap-2">
                         <MapPin className="w-5 h-5 text-warning-600 dark:text-warning-400" />
-                        <h3 className="text-lg font-semibold">Service Details</h3>
+                        <h3 className="text-lg font-semibold">
+                          Service Details
+                        </h3>
                       </div>
                     </CardHeader>
                     <CardBody className="pt-0 space-y-4">
                       <Textarea
                         label="Address"
                         name="address"
-                        value={newBookingForm.address}
-                        onChange={handleNewBookingInputChange}
                         placeholder="Enter service address (optional)"
                         rows={3}
+                        value={newBookingForm.address}
+                        onChange={handleNewBookingInputChange}
                       />
                       <Textarea
                         label="Notes"
                         name="notes"
-                        value={newBookingForm.notes}
-                        onChange={handleNewBookingInputChange}
                         placeholder="Enter any additional notes (optional)"
                         rows={3}
+                        value={newBookingForm.notes}
+                        onChange={handleNewBookingInputChange}
                       />
                     </CardBody>
                   </Card>
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button
-                  variant="light"
-                  onPress={onClose}
-                >
+                <Button variant="light" onPress={onClose}>
                   Cancel
                 </Button>
                 <Button
                   color="primary"
-                  onPress={handleNewBookingSubmit}
-                  isLoading={isSubmittingNew}
                   disabled={isSubmittingNew}
+                  isLoading={isSubmittingNew}
+                  onPress={handleNewBookingSubmit}
                 >
-                  {isSubmittingNew ? 'Creating...' : 'Create Booking'}
+                  {isSubmittingNew ? "Creating..." : "Create Booking"}
                 </Button>
               </ModalFooter>
             </>
@@ -2064,11 +2485,11 @@ export default function CalendarPage() {
       </Modal>
 
       {/* Booking Details Modal */}
-      <Modal 
-        isOpen={showBookingDetailsModal} 
-        onClose={() => setShowBookingDetailsModal(false)}
-        size="3xl"
+      <Modal
+        isOpen={showBookingDetailsModal}
         scrollBehavior="inside"
+        size="3xl"
+        onClose={() => setShowBookingDetailsModal(false)}
       >
         <ModalContent>
           {(onClose) => (
@@ -2080,14 +2501,19 @@ export default function CalendarPage() {
                       <CalendarIcon className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl sm:text-2xl font-bold">Booking Details</h2>
+                      <h2 className="text-xl sm:text-2xl font-bold">
+                        Booking Details
+                      </h2>
                       <p className="text-sm text-default-500">
-                        {selectedBookingDetails && new Date(selectedBookingDetails.date).toLocaleDateString('en-US', { 
-                          weekday: 'long', 
-                          year: 'numeric', 
-                          month: 'long', 
-                          day: 'numeric' 
-                        })}
+                        {selectedBookingDetails &&
+                          new Date(
+                            selectedBookingDetails.date,
+                          ).toLocaleDateString("en-US", {
+                            weekday: "long",
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
                       </p>
                     </div>
                   </div>
@@ -2095,23 +2521,28 @@ export default function CalendarPage() {
                     <div className="flex items-center gap-2">
                       <Chip
                         color={getStatusColor(selectedBookingDetails.status)}
+                        startContent={getStatusIcon(
+                          selectedBookingDetails.status,
+                        )}
                         variant="flat"
-                        startContent={getStatusIcon(selectedBookingDetails.status)}
                       >
                         {selectedBookingDetails.status}
                       </Chip>
                       <Chip
-                        color={getPaymentStatusColor(selectedBookingDetails.payment_status)}
-                        variant="flat"
+                        color={getPaymentStatusColor(
+                          selectedBookingDetails.payment_status,
+                        )}
                         startContent={
-                          selectedBookingDetails.payment_status === 'paid' ? (
-                          <CheckCircle className="w-3 h-3" />
-                        ) : selectedBookingDetails.payment_status === 'pending' ? (
-                          <Clock className="w-3 h-3" />
-                        ) : (
-                          <XCircle className="w-3 h-3" />
+                          selectedBookingDetails.payment_status === "paid" ? (
+                            <CheckCircle className="w-3 h-3" />
+                          ) : selectedBookingDetails.payment_status ===
+                            "pending" ? (
+                            <Clock className="w-3 h-3" />
+                          ) : (
+                            <XCircle className="w-3 h-3" />
                           )
                         }
+                        variant="flat"
                       >
                         Payment: {selectedBookingDetails.payment_status}
                       </Chip>
@@ -2119,7 +2550,7 @@ export default function CalendarPage() {
                   )}
                 </div>
               </ModalHeader>
-              
+
               <ModalBody>
                 {selectedBookingDetails && (
                   <div className="space-y-6">
@@ -2128,18 +2559,28 @@ export default function CalendarPage() {
                       <CardHeader className="pb-3">
                         <div className="flex items-center gap-2">
                           <User className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-                          <h3 className="text-lg font-semibold">Customer & Service</h3>
+                          <h3 className="text-lg font-semibold">
+                            Customer & Service
+                          </h3>
                         </div>
                       </CardHeader>
                       <CardBody className="pt-0">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-sm font-medium text-default-500 mb-1">Customer Name</label>
-                            <p className="font-semibold text-lg">{selectedBookingDetails.customer_name}</p>
+                            <label className="block text-sm font-medium text-default-500 mb-1">
+                              Customer Name
+                            </label>
+                            <p className="font-semibold text-lg">
+                              {selectedBookingDetails.customer_name}
+                            </p>
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-default-500 mb-1">Service</label>
-                            <p className="font-medium">{selectedBookingDetails.service}</p>
+                            <label className="block text-sm font-medium text-default-500 mb-1">
+                              Service
+                            </label>
+                            <p className="font-medium">
+                              {selectedBookingDetails.service}
+                            </p>
                           </div>
                         </div>
                       </CardBody>
@@ -2156,22 +2597,34 @@ export default function CalendarPage() {
                       <CardBody className="pt-0">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
-                            <label className="block text-sm font-medium text-default-500 mb-1">Date</label>
+                            <label className="block text-sm font-medium text-default-500 mb-1">
+                              Date
+                            </label>
                             <p className="font-medium">
-                              {new Date(selectedBookingDetails.date).toLocaleDateString('en-US', { 
-                                weekday: 'short', 
-                                month: 'short', 
-                                day: 'numeric' 
+                              {new Date(
+                                selectedBookingDetails.date,
+                              ).toLocaleDateString("en-US", {
+                                weekday: "short",
+                                month: "short",
+                                day: "numeric",
                               })}
                             </p>
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-default-500 mb-1">Time</label>
-                            <p className="font-medium">{formatTime(selectedBookingDetails.time)}</p>
+                            <label className="block text-sm font-medium text-default-500 mb-1">
+                              Time
+                            </label>
+                            <p className="font-medium">
+                              {formatTime(selectedBookingDetails.time)}
+                            </p>
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-default-500 mb-1">Duration</label>
-                            <p className="font-medium">{selectedBookingDetails.duration || 'N/A'} min</p>
+                            <label className="block text-sm font-medium text-default-500 mb-1">
+                              Duration
+                            </label>
+                            <p className="font-medium">
+                              {selectedBookingDetails.duration || "N/A"} min
+                            </p>
                           </div>
                         </div>
                       </CardBody>
@@ -2182,27 +2635,35 @@ export default function CalendarPage() {
                       <CardHeader className="pb-3">
                         <div className="flex items-center gap-2">
                           <div className="w-5 h-5 bg-warning-500 rounded-full flex items-center justify-center">
-                            <span className="text-white text-xs font-bold">£</span>
+                            <span className="text-white text-xs font-bold">
+                              £
+                            </span>
                           </div>
                           <h3 className="text-lg font-semibold">Financial</h3>
                         </div>
                       </CardHeader>
                       <CardBody className="pt-0">
                         <div>
-                          <label className="block text-sm font-medium text-default-500 mb-1">Amount</label>
-                          <p className="text-xl sm:text-2xl md:text-3xl font-bold text-warning-600 dark:text-warning-400">£{selectedBookingDetails.amount.toFixed(2)}</p>
+                          <label className="block text-sm font-medium text-default-500 mb-1">
+                            Amount
+                          </label>
+                          <p className="text-xl sm:text-2xl md:text-3xl font-bold text-warning-600 dark:text-warning-400">
+                            £{selectedBookingDetails.amount.toFixed(2)}
+                          </p>
                         </div>
                       </CardBody>
                     </Card>
 
-
                     {/* Contact Information */}
-                    {(selectedBookingDetails.customer_email || selectedBookingDetails.customer_phone) && (
+                    {(selectedBookingDetails.customer_email ||
+                      selectedBookingDetails.customer_phone) && (
                       <Card className="border border-divider">
                         <CardHeader className="pb-3">
                           <div className="flex items-center gap-2">
                             <Phone className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-                            <h3 className="text-lg font-semibold">Contact Information</h3>
+                            <h3 className="text-lg font-semibold">
+                              Contact Information
+                            </h3>
                           </div>
                         </CardHeader>
                         <CardBody className="pt-0">
@@ -2217,11 +2678,11 @@ export default function CalendarPage() {
                                 </div>
                                 <Button
                                   isIconOnly
-                                  variant="light"
-                                  color="primary"
                                   as="a"
+                                  color="primary"
                                   href={`mailto:${selectedBookingDetails.customer_email}`}
                                   title="Send Email"
+                                  variant="light"
                                 >
                                   <Mail className="w-5 h-5" />
                                 </Button>
@@ -2237,11 +2698,11 @@ export default function CalendarPage() {
                                 </div>
                                 <Button
                                   isIconOnly
-                                  variant="light"
-                                  color="success"
                                   as="a"
+                                  color="success"
                                   href={`tel:${selectedBookingDetails.customer_phone}`}
                                   title="Call Customer"
+                                  variant="light"
                                 >
                                   <Phone className="w-5 h-5" />
                                 </Button>
@@ -2288,31 +2749,41 @@ export default function CalendarPage() {
 
                     {/* Metadata */}
                     <div className="flex justify-between items-center text-sm text-default-500">
-                      <span>Created: {new Date(selectedBookingDetails.created_at).toLocaleDateString('en-GB', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}</span>
-                      <span>Updated: {new Date(selectedBookingDetails.updated_at).toLocaleDateString('en-GB', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}</span>
+                      <span>
+                        Created:{" "}
+                        {new Date(
+                          selectedBookingDetails.created_at,
+                        ).toLocaleDateString("en-GB", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                      <span>
+                        Updated:{" "}
+                        {new Date(
+                          selectedBookingDetails.updated_at,
+                        ).toLocaleDateString("en-GB", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
                     </div>
                   </div>
                 )}
               </ModalBody>
-              
+
               <ModalFooter>
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-2">
                     {selectedBookingDetails && (
-                      <Button 
-                        color="warning" 
+                      <Button
+                        color="warning"
                         variant="flat"
                         onPress={() => {
                           handleOpenStatusModal(selectedBookingDetails);
@@ -2322,26 +2793,24 @@ export default function CalendarPage() {
                       </Button>
                     )}
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
-                    <Button 
-                      variant="light" 
-                      onPress={onClose}
-                    >
+                    <Button variant="light" onPress={onClose}>
                       Close
                     </Button>
-                    {selectedBookingDetails && selectedBookingDetails.status !== 'cancelled' && (
-                    <Button 
-                      color="primary" 
-                      onPress={() => {
-                        setEditingBooking(selectedBookingDetails);
-                        setShowEditModal(true);
-                        onClose();
-                      }}
-                    >
-                      Edit Booking
-                    </Button>
-                    )}
+                    {selectedBookingDetails &&
+                      selectedBookingDetails.status !== "cancelled" && (
+                        <Button
+                          color="primary"
+                          onPress={() => {
+                            setEditingBooking(selectedBookingDetails);
+                            setShowEditModal(true);
+                            onClose();
+                          }}
+                        >
+                          Edit Booking
+                        </Button>
+                      )}
                   </div>
                 </div>
               </ModalFooter>
@@ -2363,21 +2832,22 @@ export default function CalendarPage() {
                   </div>
                   <div>
                     <h2 className="text-xl sm:text-2xl md:text-3xl font-bold">
-                      {new Date(expandedDay).toLocaleDateString('en-US', { 
-                        weekday: 'long', 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
+                      {new Date(expandedDay).toLocaleDateString("en-US", {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
                       })}
                     </h2>
                     <p className="text-blue-100 text-lg">
-                      {expandedDayBookings.length} booking{expandedDayBookings.length !== 1 ? 's' : ''} scheduled
+                      {expandedDayBookings.length} booking
+                      {expandedDayBookings.length !== 1 ? "s" : ""} scheduled
                     </p>
                   </div>
                 </div>
                 <button
-                  onClick={handleCloseExpandedDay}
                   className="p-2 hover:bg-white/20 rounded-lg transition-colors duration-200"
+                  onClick={handleCloseExpandedDay}
                 >
                   <XCircle className="w-6 h-6" />
                 </button>
@@ -2391,198 +2861,226 @@ export default function CalendarPage() {
                   <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
                     <CalendarIcon className="w-12 h-12 text-gray-400" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No Bookings</h3>
-                  <p className="text-gray-600 dark:text-gray-400">No bookings scheduled for this day.</p>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                    No Bookings
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    No bookings scheduled for this day.
+                  </p>
                 </div>
               ) : (
                 <div className="grid gap-6">
                   {expandedDayBookings
                     .sort((a, b) => a.time.localeCompare(b.time))
                     .map((booking, index) => (
-                    <div 
-                      key={booking.id}
-                      className="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300"
-                    >
-                      {/* Header Section - Time, Client Info, Status */}
-                      <div className="flex items-center gap-6 mb-6">
-                        {/* Time Badge */}
-                        <div className="flex-shrink-0">
-                          <div className="bg-gradient-to-br from-blue-500 to-purple-600 text-white px-4 py-3 rounded-xl font-bold text-lg min-w-[80px] text-center">
-                            {formatTime(booking.time)}
+                      <div
+                        key={booking.id}
+                        className="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300"
+                      >
+                        {/* Header Section - Time, Client Info, Status */}
+                        <div className="flex items-center gap-6 mb-6">
+                          {/* Time Badge */}
+                          <div className="flex-shrink-0">
+                            <div className="bg-gradient-to-br from-blue-500 to-purple-600 text-white px-4 py-3 rounded-xl font-bold text-lg min-w-[80px] text-center">
+                              {formatTime(booking.time)}
+                            </div>
+                          </div>
+
+                          {/* Client & Service Info */}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+                              {booking.customer_name}
+                            </h3>
+                            <p className="text-gray-600 dark:text-gray-400 font-medium">
+                              {booking.service}
+                            </p>
+                          </div>
+
+                          {/* Status Badges */}
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium ${
+                                booking.status === "completed"
+                                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"
+                                  : booking.status === "confirmed"
+                                    ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                                    : booking.status === "scheduled"
+                                      ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                                      : booking.status === "pending"
+                                        ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+                                        : "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300"
+                              }`}
+                            >
+                              {getStatusIcon(booking.status)}
+                              {booking.status}
+                            </span>
+                            <span
+                              className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium ${
+                                booking.payment_status === "paid"
+                                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"
+                                  : booking.payment_status === "pending"
+                                    ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+                                    : "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300"
+                              }`}
+                            >
+                              {booking.payment_status === "paid" ? (
+                                <CheckCircle className="w-3 h-3" />
+                              ) : booking.payment_status === "pending" ? (
+                                <Clock className="w-3 h-3" />
+                              ) : (
+                                <XCircle className="w-3 h-3" />
+                              )}
+                              {booking.payment_status}
+                            </span>
                           </div>
                         </div>
 
-                        {/* Client & Service Info */}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-                            {booking.customer_name}
-                          </h3>
-                          <p className="text-gray-600 dark:text-gray-400 font-medium">
-                            {booking.service}
-                          </p>
-                        </div>
-                        
-                        {/* Status Badges */}
-                        <div className="flex items-center gap-2">
-                          <span className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium ${
-                            booking.status === 'completed' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' :
-                            booking.status === 'confirmed' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' :
-                            booking.status === 'scheduled' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' :
-                            booking.status === 'pending' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300' :
-                            'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300'
-                          }`}>
-                            {getStatusIcon(booking.status)}
-                            {booking.status}
-                          </span>
-                          <span className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium ${
-                            booking.payment_status === 'paid' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' :
-                            booking.payment_status === 'pending' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300' :
-                            'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300'
-                          }`}>
-                            {booking.payment_status === 'paid' ? (
-                              <CheckCircle className="w-3 h-3" />
-                            ) : booking.payment_status === 'pending' ? (
-                              <Clock className="w-3 h-3" />
-                            ) : (
-                              <XCircle className="w-3 h-3" />
-                            )}
-                            {booking.payment_status}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Main Content Grid */}
-                      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
-                        {/* Service Details */}
-                        <div className="space-y-3">
-                          <h4 className="font-semibold text-gray-900 dark:text-white text-sm uppercase tracking-wide flex items-center gap-2">
-                            <CalendarIcon className="w-4 h-4" />
-                            Service
-                          </h4>
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                              <Clock className="w-4 h-4" />
-                              <span>{booking.duration || 'N/A'} minutes</span>
-                            </div>
-                            {booking.address && (
+                        {/* Main Content Grid */}
+                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+                          {/* Service Details */}
+                          <div className="space-y-3">
+                            <h4 className="font-semibold text-gray-900 dark:text-white text-sm uppercase tracking-wide flex items-center gap-2">
+                              <CalendarIcon className="w-4 h-4" />
+                              Service
+                            </h4>
+                            <div className="space-y-2">
                               <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                                <MapPin className="w-4 h-4" />
-                                <span className="truncate">{booking.address}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Contact Information */}
-                        <div className="space-y-3">
-                          <h4 className="font-semibold text-gray-900 dark:text-white text-sm uppercase tracking-wide flex items-center gap-2">
-                            <Phone className="w-4 h-4" />
-                            Contact
-                          </h4>
-                          <div className="space-y-2">
-                            {booking.customer_phone && (
-                              <a 
-                                href={`tel:${booking.customer_phone}`}
-                                className="flex items-center gap-2 p-2 bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors text-sm"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <Phone className="w-4 h-4 text-green-600" />
-                                <span className="text-green-700 dark:text-green-300">{booking.customer_phone}</span>
-                              </a>
-                            )}
-                            {booking.customer_email && (
-                              <a 
-                                href={`mailto:${booking.customer_email}`}
-                                className="flex items-center gap-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors text-sm"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <Mail className="w-4 h-4 text-blue-600" />
-                                <span className="text-blue-700 dark:text-blue-300 truncate">{booking.customer_email}</span>
-                              </a>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Payment Information */}
-                        <div className="space-y-3">
-                          <h4 className="font-semibold text-gray-900 dark:text-white text-sm uppercase tracking-wide flex items-center gap-2">
-                            <div className="w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center">
-                              <span className="text-white text-xs font-bold">£</span>
-                            </div>
-                            Payment
-                          </h4>
-                          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
-                            <p className={`text-2xl font-bold ${
-                              booking.payment_status === 'paid' ? 'text-emerald-600 dark:text-emerald-400' :
-                              booking.payment_status === 'pending' ? 'text-amber-600 dark:text-amber-400' :
-                              'text-rose-600 dark:text-rose-400'
-                            }`}>
-                              £{booking.amount}
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                              {booking.payment_status === 'paid' ? 'Payment completed' : 
-                               booking.payment_status === 'pending' ? 'Payment pending' : 
-                               'Payment issue'}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Quick Actions */}
-                        <div className="space-y-3">
-                          <h4 className="font-semibold text-gray-900 dark:text-white text-sm uppercase tracking-wide flex items-center gap-2">
-                            <CheckCircle className="w-4 h-4" />
-                            Quick Actions
-                          </h4>
-                          <div className="space-y-2">
-                            {booking.status !== 'completed' && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleStatusChange(booking.id, 'completed');
-                                }}
-                                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors duration-200 text-sm"
-                              >
-                                <CheckCircle className="w-4 h-4" />
-                                Mark Completed
-                              </button>
-                            )}
-                            {booking.status === 'completed' && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleStatusChange(booking.id, 'scheduled');
-                                }}
-                                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200 text-sm"
-                              >
                                 <Clock className="w-4 h-4" />
-                                Mark Scheduled
+                                <span>{booking.duration || "N/A"} minutes</span>
+                              </div>
+                              {booking.address && (
+                                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                                  <MapPin className="w-4 h-4" />
+                                  <span className="truncate">
+                                    {booking.address}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Contact Information */}
+                          <div className="space-y-3">
+                            <h4 className="font-semibold text-gray-900 dark:text-white text-sm uppercase tracking-wide flex items-center gap-2">
+                              <Phone className="w-4 h-4" />
+                              Contact
+                            </h4>
+                            <div className="space-y-2">
+                              {booking.customer_phone && (
+                                <a
+                                  className="flex items-center gap-2 p-2 bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors text-sm"
+                                  href={`tel:${booking.customer_phone}`}
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <Phone className="w-4 h-4 text-green-600" />
+                                  <span className="text-green-700 dark:text-green-300">
+                                    {booking.customer_phone}
+                                  </span>
+                                </a>
+                              )}
+                              {booking.customer_email && (
+                                <a
+                                  className="flex items-center gap-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors text-sm"
+                                  href={`mailto:${booking.customer_email}`}
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <Mail className="w-4 h-4 text-blue-600" />
+                                  <span className="text-blue-700 dark:text-blue-300 truncate">
+                                    {booking.customer_email}
+                                  </span>
+                                </a>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Payment Information */}
+                          <div className="space-y-3">
+                            <h4 className="font-semibold text-gray-900 dark:text-white text-sm uppercase tracking-wide flex items-center gap-2">
+                              <div className="w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center">
+                                <span className="text-white text-xs font-bold">
+                                  £
+                                </span>
+                              </div>
+                              Payment
+                            </h4>
+                            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                              <p
+                                className={`text-2xl font-bold ${
+                                  booking.payment_status === "paid"
+                                    ? "text-emerald-600 dark:text-emerald-400"
+                                    : booking.payment_status === "pending"
+                                      ? "text-amber-600 dark:text-amber-400"
+                                      : "text-rose-600 dark:text-rose-400"
+                                }`}
+                              >
+                                £{booking.amount}
+                              </p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                {booking.payment_status === "paid"
+                                  ? "Payment completed"
+                                  : booking.payment_status === "pending"
+                                    ? "Payment pending"
+                                    : "Payment issue"}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Quick Actions */}
+                          <div className="space-y-3">
+                            <h4 className="font-semibold text-gray-900 dark:text-white text-sm uppercase tracking-wide flex items-center gap-2">
+                              <CheckCircle className="w-4 h-4" />
+                              Quick Actions
+                            </h4>
+                            <div className="space-y-2">
+                              {booking.status !== "completed" && (
+                                <button
+                                  className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors duration-200 text-sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleStatusChange(booking.id, "completed");
+                                  }}
+                                >
+                                  <CheckCircle className="w-4 h-4" />
+                                  Mark Completed
+                                </button>
+                              )}
+                              {booking.status === "completed" && (
+                                <button
+                                  className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200 text-sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleStatusChange(booking.id, "scheduled");
+                                  }}
+                                >
+                                  <Clock className="w-4 h-4" />
+                                  Mark Scheduled
+                                </button>
+                              )}
+                              <button
+                                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors duration-200 text-sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMoveBookingClick(booking);
+                                }}
+                              >
+                                <CalendarIcon className="w-4 h-4" />
+                                Move Booking
                               </button>
-                            )}
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleMoveBookingClick(booking);
-                              }}
-                              className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors duration-200 text-sm"
-                            >
-                              <CalendarIcon className="w-4 h-4" />
-                              Move Booking
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleBookingClick(booking);
-                              }}
-                              className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors duration-200 text-sm"
-                            >
-                              <CalendarIcon className="w-4 h-4" />
-                              View Details
-                            </button>
+                              <button
+                                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors duration-200 text-sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleBookingClick(booking);
+                                }}
+                              >
+                                <CalendarIcon className="w-4 h-4" />
+                                View Details
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               )}
             </div>
@@ -2594,8 +3092,8 @@ export default function CalendarPage() {
                   Click on any booking to view full details
                 </p>
                 <button
-                  onClick={handleCloseExpandedDay}
                   className="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors duration-200"
+                  onClick={handleCloseExpandedDay}
                 >
                   Close
                 </button>
@@ -2606,7 +3104,11 @@ export default function CalendarPage() {
       )}
 
       {/* Move Booking Modal */}
-      <Modal isOpen={showMoveModal} onClose={() => setShowMoveModal(false)} size="2xl">
+      <Modal
+        isOpen={showMoveModal}
+        size="2xl"
+        onClose={() => setShowMoveModal(false)}
+      >
         <ModalContent>
           <ModalHeader className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
@@ -2624,15 +3126,25 @@ export default function CalendarPage() {
               <div className="space-y-6">
                 {/* Current booking info */}
                 <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Current Booking</h4>
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
+                    Current Booking
+                  </h4>
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div>
-                      <span className="text-gray-600 dark:text-gray-400">Date:</span>
-                      <span className="ml-2 font-medium">{new Date(bookingToMove.date).toLocaleDateString()}</span>
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Date:
+                      </span>
+                      <span className="ml-2 font-medium">
+                        {new Date(bookingToMove.date).toLocaleDateString()}
+                      </span>
                     </div>
                     <div>
-                      <span className="text-gray-600 dark:text-gray-400">Time:</span>
-                      <span className="ml-2 font-medium">{formatTime(bookingToMove.time)}</span>
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Time:
+                      </span>
+                      <span className="ml-2 font-medium">
+                        {formatTime(bookingToMove.time)}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -2643,11 +3155,11 @@ export default function CalendarPage() {
                     Select New Date
                   </label>
                   <input
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                    min={getCurrentToday()}
                     type="date"
                     value={moveTargetDate}
                     onChange={(e) => setMoveTargetDate(e.target.value)}
-                    min={getCurrentToday()}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                   />
                 </div>
 
@@ -2660,13 +3172,16 @@ export default function CalendarPage() {
                       </label>
                       <div className="flex items-center gap-2">
                         <input
-                          type="checkbox"
-                          id="useCustomTime"
                           checked={useCustomTime}
-                          onChange={(e) => setUseCustomTime(e.target.checked)}
                           className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                          id="useCustomTime"
+                          type="checkbox"
+                          onChange={(e) => setUseCustomTime(e.target.checked)}
                         />
-                        <label htmlFor="useCustomTime" className="text-sm text-gray-600 dark:text-gray-400">
+                        <label
+                          className="text-sm text-gray-600 dark:text-gray-400"
+                          htmlFor="useCustomTime"
+                        >
                           Use custom time
                         </label>
                       </div>
@@ -2679,15 +3194,15 @@ export default function CalendarPage() {
                         </label>
                         <div className="flex gap-2">
                           <input
+                            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
                             type="time"
                             value={customTime}
                             onChange={(e) => setCustomTime(e.target.value)}
-                            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
                           />
                           <button
-                            onClick={() => handleMoveBooking()}
-                            disabled={!customTime}
                             className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+                            disabled={!customTime}
+                            onClick={() => handleMoveBooking()}
                           >
                             Move
                           </button>
@@ -2698,7 +3213,8 @@ export default function CalendarPage() {
                         {loadingSlots ? (
                           <div className="space-y-3">
                             <div className="text-sm text-gray-600 dark:text-gray-400">
-                              Available time slots for {new Date(moveTargetDate).toLocaleDateString()}:
+                              Available time slots for{" "}
+                              {new Date(moveTargetDate).toLocaleDateString()}:
                             </div>
                             <div className="grid grid-cols-4 gap-2 max-h-64 overflow-y-auto p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border">
                               {/* Skeleton loaders */}
@@ -2707,26 +3223,27 @@ export default function CalendarPage() {
                                   key={idx}
                                   className="px-3 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"
                                 >
-                                  <div className="h-4 w-12 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                                  <div className="h-4 w-12 bg-gray-300 dark:bg-gray-600 rounded" />
                                 </div>
                               ))}
                             </div>
                             <div className="flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-purple-600"></div>
+                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-purple-600" />
                               <span>Loading available slots...</span>
                             </div>
                           </div>
                         ) : moveAvailableSlots.length > 0 ? (
                           <div className="space-y-3">
                             <div className="text-sm text-gray-600 dark:text-gray-400">
-                              Available time slots for {new Date(moveTargetDate).toLocaleDateString()}:
+                              Available time slots for{" "}
+                              {new Date(moveTargetDate).toLocaleDateString()}:
                             </div>
                             <div className="grid grid-cols-4 gap-2 max-h-64 overflow-y-auto p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border">
                               {moveAvailableSlots.map((timeSlot) => (
                                 <button
                                   key={timeSlot}
-                                  onClick={() => handleMoveBooking(timeSlot)}
                                   className="px-3 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-800/50 transition-colors font-medium text-sm border border-green-200 dark:border-green-800"
+                                  onClick={() => handleMoveBooking(timeSlot)}
                                 >
                                   {formatTime(timeSlot)}
                                 </button>
@@ -2736,8 +3253,13 @@ export default function CalendarPage() {
                         ) : (
                           <div className="text-center py-8 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/50 rounded-lg border">
                             <div className="text-lg mb-2">📅</div>
-                            <div className="font-medium">No available time slots</div>
-                            <div className="text-sm">for {new Date(moveTargetDate).toLocaleDateString()}</div>
+                            <div className="font-medium">
+                              No available time slots
+                            </div>
+                            <div className="text-sm">
+                              for{" "}
+                              {new Date(moveTargetDate).toLocaleDateString()}
+                            </div>
                             <div className="text-xs mt-2 text-gray-400">
                               Try selecting a different date or use custom time
                             </div>
@@ -2751,9 +3273,9 @@ export default function CalendarPage() {
             )}
           </ModalBody>
           <ModalFooter>
-            <Button 
-              color="default" 
-              variant="light" 
+            <Button
+              color="default"
+              variant="light"
               onPress={() => setShowMoveModal(false)}
             >
               Cancel
@@ -2763,25 +3285,26 @@ export default function CalendarPage() {
       </Modal>
 
       {/* Edit Booking Modal */}
-      <Modal 
-        isOpen={showEditModal} 
-        onClose={() => setShowEditModal(false)} 
-        size="3xl"
+      <Modal
+        isOpen={showEditModal}
         scrollBehavior="inside"
+        size="3xl"
+        onClose={() => setShowEditModal(false)}
       >
         <ModalContent>
           <ModalHeader className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
               <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
                 <CalendarIcon className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-            </div>
+              </div>
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold">Edit Booking</h2>
-            {editingBooking && (
+                {editingBooking && (
                   <p className="text-sm font-normal text-default-500">
-                Editing: {editingBooking.customer_name} - {editingBooking.service}
-              </p>
-            )}
+                    Editing: {editingBooking.customer_name} -{" "}
+                    {editingBooking.service}
+                  </p>
+                )}
               </div>
             </div>
           </ModalHeader>
@@ -2796,346 +3319,424 @@ export default function CalendarPage() {
                   </h4>
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
-                      <span className="text-gray-600 dark:text-gray-400">Date:</span>
-                      <span className="ml-2 font-medium">{new Date(editingBooking.date).toLocaleDateString()}</span>
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Date:
+                      </span>
+                      <span className="ml-2 font-medium">
+                        {new Date(editingBooking.date).toLocaleDateString()}
+                      </span>
                     </div>
                     <div>
-                      <span className="text-gray-600 dark:text-gray-400">Time:</span>
-                      <span className="ml-2 font-medium">{formatTime(editingBooking.time)}</span>
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Time:
+                      </span>
+                      <span className="ml-2 font-medium">
+                        {formatTime(editingBooking.time)}
+                      </span>
                     </div>
                     <div>
-                      <span className="text-gray-600 dark:text-gray-400">Customer:</span>
-                      <span className="ml-2 font-medium">{editingBooking.customer_name}</span>
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Customer:
+                      </span>
+                      <span className="ml-2 font-medium">
+                        {editingBooking.customer_name}
+                      </span>
                     </div>
                     <div>
-                      <span className="text-gray-600 dark:text-gray-400">Service:</span>
-                      <span className="ml-2 font-medium">{editingBooking.service}</span>
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Service:
+                      </span>
+                      <span className="ml-2 font-medium">
+                        {editingBooking.service}
+                      </span>
                     </div>
                   </div>
                 </div>
               )}
 
-            <div className="space-y-6">
+              <div className="space-y-6">
                 {/* Customer Information */}
-              <Card className="border border-divider">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-2">
-                    <User className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-                    <h3 className="text-lg font-semibold">Customer Information</h3>
-                  </div>
-                </CardHeader>
-                <CardBody className="pt-0">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input
-                      label="Customer Name"
+                <Card className="border border-divider">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2">
+                      <User className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+                      <h3 className="text-lg font-semibold">
+                        Customer Information
+                      </h3>
+                    </div>
+                  </CardHeader>
+                  <CardBody className="pt-0">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Input
+                        isRequired
+                        label="Customer Name"
                         name="customer_name"
+                        placeholder="Enter customer name"
                         value={editFormData.customer_name}
                         onChange={handleEditInputChange}
-                      isRequired
-                      placeholder="Enter customer name"
-                    />
-                    <Input
-                      label="Email"
+                      />
+                      <Input
+                        label="Email"
                         name="customer_email"
-                      type="email"
+                        placeholder="Enter email address"
+                        type="email"
                         value={editFormData.customer_email}
                         onChange={handleEditInputChange}
-                      placeholder="Enter email address"
-                    />
-                    <Input
-                      label="Phone"
+                      />
+                      <Input
+                        label="Phone"
                         name="customer_phone"
-                      type="tel"
+                        placeholder="Enter phone number"
+                        type="tel"
                         value={editFormData.customer_phone}
                         onChange={handleEditInputChange}
-                      placeholder="Enter phone number"
-                    />
-                    <Input
-                      label="Service"
+                      />
+                      <Input
+                        isRequired
+                        label="Service"
                         name="service"
+                        placeholder="Enter service name"
                         value={editFormData.service}
                         onChange={handleEditInputChange}
-                      isRequired
-                      placeholder="Enter service name"
                       />
                     </div>
-                </CardBody>
-              </Card>
+                  </CardBody>
+                </Card>
 
-              {/* Schedule Information */}
-              <Card className="border border-divider">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-success-600 dark:text-success-400" />
-                    <h3 className="text-lg font-semibold">Schedule Information</h3>
-                  </div>
-                </CardHeader>
-                <CardBody className="pt-0">
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input
-                      label="Date"
+                {/* Schedule Information */}
+                <Card className="border border-divider">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-5 h-5 text-success-600 dark:text-success-400" />
+                      <h3 className="text-lg font-semibold">
+                        Schedule Information
+                      </h3>
+                    </div>
+                  </CardHeader>
+                  <CardBody className="pt-0">
+                    <div className="grid grid-cols-2 gap-4">
+                      <Input
+                        isRequired
+                        label="Date"
+                        min={getCurrentToday()}
                         name="date"
-                      type="date"
+                        type="date"
                         value={editFormData.date}
                         onChange={handleEditDateChange}
-                      isRequired
-                      min={getCurrentToday()}
                       />
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">
-                        Time *
-                      </label>
-                      {loadingEditSlots ? (
-                        <div className="relative">
-                          <Select
-                            isDisabled
-                            placeholder="Loading available times..."
-                          >
-                            <SelectItem key="loading">
-                              Loading...
-                            </SelectItem>
-                          </Select>
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                            <Spinner size="sm" />
+                      <div>
+                        <label className="block text-sm font-medium text-foreground mb-2">
+                          Time *
+                        </label>
+                        {loadingEditSlots ? (
+                          <div className="relative">
+                            <Select
+                              isDisabled
+                              placeholder="Loading available times..."
+                            >
+                              <SelectItem key="loading">Loading...</SelectItem>
+                            </Select>
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                              <Spinner size="sm" />
+                            </div>
                           </div>
-                        </div>
-                      ) : editAvailableSlots.length > 0 ? (
-                        <Select
-                          label="Select Time"
-                          name="time"
-                          selectedKeys={editFormData.time ? [editFormData.time] : []}
-                          onSelectionChange={(keys) => {
-                            const selectedTime = Array.from(keys)[0] as string;
-                            setEditFormData(prev => ({ ...prev, time: selectedTime || '' }));
-                          }}
-                          isRequired
-                        >
-                          {editAvailableSlots.map((timeSlot) => (
-                            <SelectItem key={timeSlot}>
-                              {timeSlot}
-                            </SelectItem>
-                          ))}
-                        </Select>
-                      ) : (
-                        <div className="px-3 py-2 border border-divider rounded-lg bg-default-50 text-default-500 text-sm">
-                          No available time slots for this date
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="mt-3 text-xs text-default-500 bg-default-50 dark:bg-default-100 p-2 rounded">
-                    💡 Change date to see available time slots for that day. Time will be cleared when date changes.
-                  </div>
-                </CardBody>
-              </Card>
+                        ) : editAvailableSlots.length > 0 ? (
+                          <Select
+                            isRequired
+                            label="Select Time"
+                            name="time"
+                            selectedKeys={
+                              editFormData.time ? [editFormData.time] : []
+                            }
+                            onSelectionChange={(keys) => {
+                              const selectedTime = Array.from(
+                                keys,
+                              )[0] as string;
 
-              {/* Payment & Status */}
-              <Card className="border border-divider">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 bg-warning-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">£</span>
-                    </div>
-                    <h3 className="text-lg font-semibold">Payment & Status</h3>
-                  </div>
-                </CardHeader>
-                <CardBody className="pt-0 space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input
-                      label="Total Amount (£)"
-                      name="amount"
-                      type="number"
-                      value={editFormData.amount}
-                      onChange={(e) => {
-                        handleEditInputChange(e);
-                        if (editFormData.payment_method === 'cash_and_card') {
-                          setEditFormData(prev => ({ ...prev, amount: e.target.value, cash_amount: '', card_amount: '' }));
-                        }
-                      }}
-                      isRequired
-                      step="0.01" min="0"
-                      placeholder="0.00"
-                    />
-                    <Select
-                      label="Payment Method"
-                      selectedKeys={[editFormData.payment_method]}
-                      onSelectionChange={(keys) => {
-                        const selected = Array.from(keys)[0] as string;
-                        setEditFormData(prev => ({
-                          ...prev,
-                          payment_method: selected as 'cash' | 'card' | 'cash_and_card',
-                          cash_amount: '', card_amount: '',
-                        }));
-                      }}
-                    >
-                      <SelectItem key="card">Card</SelectItem>
-                      <SelectItem key="cash">Cash</SelectItem>
-                      <SelectItem key="cash_and_card">Cash + Card</SelectItem>
-                    </Select>
-                  </div>
-
-                  {editFormData.payment_method === 'cash_and_card' && (
-                    <div className="grid grid-cols-2 gap-4">
-                      <Input
-                        label="Cash Amount (£)"
-                        type="number"
-                        value={editFormData.cash_amount}
-                        onChange={(e) => {
-                          const cashVal = e.target.value;
-                          const total = parseFloat(editFormData.amount) || 0;
-                          const cashNum = parseFloat(cashVal) || 0;
-                          const cardNum = Math.max(0, Math.round((total - cashNum) * 100) / 100);
-                          setEditFormData(prev => ({
-                            ...prev,
-                            cash_amount: cashVal,
-                            card_amount: cashNum > 0 && total > 0 ? cardNum.toFixed(2) : '',
-                          }));
-                        }}
-                        step="0.01" min="0" max={editFormData.amount || undefined}
-                        placeholder="0.00"
-                      />
-                      <Input
-                        label="Card Amount (£)"
-                        type="number"
-                        value={editFormData.card_amount}
-                        onChange={(e) => {
-                          const cardVal = e.target.value;
-                          const total = parseFloat(editFormData.amount) || 0;
-                          const cardNum = parseFloat(cardVal) || 0;
-                          const cashNum = Math.max(0, Math.round((total - cardNum) * 100) / 100);
-                          setEditFormData(prev => ({
-                            ...prev,
-                            card_amount: cardVal,
-                            cash_amount: cardNum > 0 && total > 0 ? cashNum.toFixed(2) : '',
-                          }));
-                        }}
-                        step="0.01" min="0" max={editFormData.amount || undefined}
-                        placeholder="0.00"
-                      />
-                    </div>
-                  )}
-
-                  <div className="flex items-center gap-3 p-3 bg-default-50 rounded-lg border border-divider">
-                    <input
-                      type="checkbox"
-                      id="edit-deposit-toggle"
-                      checked={editFormData.payment_type === 'deposit'}
-                      onChange={(e) => {
-                        setEditFormData(prev => ({
-                          ...prev,
-                          payment_type: e.target.checked ? 'deposit' : 'full',
-                          deposit_amount: '',
-                        }));
-                      }}
-                      className="w-4 h-4 text-primary rounded border-default-300 focus:ring-primary"
-                    />
-                    <label htmlFor="edit-deposit-toggle" className="text-sm font-medium text-foreground cursor-pointer">
-                      Deposit payment (partial payment now, rest later)
-                    </label>
-                  </div>
-
-                  {editFormData.payment_type === 'deposit' && (
-                    <div className="grid grid-cols-2 gap-4">
-                      <Input
-                        label="Deposit Amount (£)"
-                        type="number"
-                        value={editFormData.deposit_amount}
-                        onChange={(e) => setEditFormData(prev => ({ ...prev, deposit_amount: e.target.value }))}
-                        step="0.01" min="0" max={editFormData.amount || undefined}
-                        placeholder="0.00"
-                        isRequired
-                      />
-                      <div className="flex items-center px-3 text-sm text-default-500">
-                        Remaining: £{(Math.max(0, (parseFloat(editFormData.amount) || 0) - (parseFloat(editFormData.deposit_amount) || 0))).toFixed(2)}
+                              setEditFormData((prev) => ({
+                                ...prev,
+                                time: selectedTime || "",
+                              }));
+                            }}
+                          >
+                            {editAvailableSlots.map((timeSlot) => (
+                              <SelectItem key={timeSlot}>{timeSlot}</SelectItem>
+                            ))}
+                          </Select>
+                        ) : (
+                          <div className="px-3 py-2 border border-divider rounded-lg bg-default-50 text-default-500 text-sm">
+                            No available time slots for this date
+                          </div>
+                        )}
                       </div>
                     </div>
-                  )}
+                    <div className="mt-3 text-xs text-default-500 bg-default-50 dark:bg-default-100 p-2 rounded">
+                      💡 Change date to see available time slots for that day.
+                      Time will be cleared when date changes.
+                    </div>
+                  </CardBody>
+                </Card>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <Select
-                      label="Status"
-                      selectedKeys={[editFormData.status]}
-                      onSelectionChange={(keys) => {
-                        const selectedStatus = Array.from(keys)[0] as string;
-                        setEditFormData(prev => ({ ...prev, status: selectedStatus || 'pending' }));
-                      }}
-                    >
-                      <SelectItem key="pending">Pending</SelectItem>
-                      <SelectItem key="scheduled">Scheduled</SelectItem>
-                      <SelectItem key="confirmed">Confirmed</SelectItem>
-                      <SelectItem key="completed">Completed</SelectItem>
-                      <SelectItem key="cancelled">Cancelled</SelectItem>
-                    </Select>
-                    <Select
-                      label="Payment Status"
-                      selectedKeys={[editFormData.payment_status]}
-                      onSelectionChange={(keys) => {
-                        const selectedPaymentStatus = Array.from(keys)[0] as string;
-                        setEditFormData(prev => ({ ...prev, payment_status: selectedPaymentStatus || 'pending' }));
-                      }}
-                    >
-                      <SelectItem key="pending">Pending</SelectItem>
-                      <SelectItem key="paid">Paid</SelectItem>
-                      <SelectItem key="refunded">Refunded</SelectItem>
-                    </Select>
-                  </div>
-                </CardBody>
-              </Card>
+                {/* Payment & Status */}
+                <Card className="border border-divider">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 bg-warning-500 rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">£</span>
+                      </div>
+                      <h3 className="text-lg font-semibold">
+                        Payment & Status
+                      </h3>
+                    </div>
+                  </CardHeader>
+                  <CardBody className="pt-0 space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <Input
+                        isRequired
+                        label="Total Amount (£)"
+                        min="0"
+                        name="amount"
+                        placeholder="0.00"
+                        step="0.01"
+                        type="number"
+                        value={editFormData.amount}
+                        onChange={(e) => {
+                          handleEditInputChange(e);
+                          if (editFormData.payment_method === "cash_and_card") {
+                            setEditFormData((prev) => ({
+                              ...prev,
+                              amount: e.target.value,
+                              cash_amount: "",
+                              card_amount: "",
+                            }));
+                          }
+                        }}
+                      />
+                      <Select
+                        label="Payment Method"
+                        selectedKeys={[editFormData.payment_method]}
+                        onSelectionChange={(keys) => {
+                          const selected = Array.from(keys)[0] as string;
 
-              {/* Service Details */}
-              <Card className="border border-divider">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-warning-600 dark:text-warning-400" />
-                    <h3 className="text-lg font-semibold">Service Details</h3>
-                  </div>
-                </CardHeader>
-                <CardBody className="pt-0 space-y-4">
-                  <Textarea
-                    label="Address"
+                          setEditFormData((prev) => ({
+                            ...prev,
+                            payment_method: selected as
+                              | "cash"
+                              | "card"
+                              | "cash_and_card",
+                            cash_amount: "",
+                            card_amount: "",
+                          }));
+                        }}
+                      >
+                        <SelectItem key="card">Card</SelectItem>
+                        <SelectItem key="cash">Cash</SelectItem>
+                        <SelectItem key="cash_and_card">Cash + Card</SelectItem>
+                      </Select>
+                    </div>
+
+                    {editFormData.payment_method === "cash_and_card" && (
+                      <div className="grid grid-cols-2 gap-4">
+                        <Input
+                          label="Cash Amount (£)"
+                          max={editFormData.amount || undefined}
+                          min="0"
+                          placeholder="0.00"
+                          step="0.01"
+                          type="number"
+                          value={editFormData.cash_amount}
+                          onChange={(e) => {
+                            const cashVal = e.target.value;
+                            const total = parseFloat(editFormData.amount) || 0;
+                            const cashNum = parseFloat(cashVal) || 0;
+                            const cardNum = Math.max(
+                              0,
+                              Math.round((total - cashNum) * 100) / 100,
+                            );
+
+                            setEditFormData((prev) => ({
+                              ...prev,
+                              cash_amount: cashVal,
+                              card_amount:
+                                cashNum > 0 && total > 0
+                                  ? cardNum.toFixed(2)
+                                  : "",
+                            }));
+                          }}
+                        />
+                        <Input
+                          label="Card Amount (£)"
+                          max={editFormData.amount || undefined}
+                          min="0"
+                          placeholder="0.00"
+                          step="0.01"
+                          type="number"
+                          value={editFormData.card_amount}
+                          onChange={(e) => {
+                            const cardVal = e.target.value;
+                            const total = parseFloat(editFormData.amount) || 0;
+                            const cardNum = parseFloat(cardVal) || 0;
+                            const cashNum = Math.max(
+                              0,
+                              Math.round((total - cardNum) * 100) / 100,
+                            );
+
+                            setEditFormData((prev) => ({
+                              ...prev,
+                              card_amount: cardVal,
+                              cash_amount:
+                                cardNum > 0 && total > 0
+                                  ? cashNum.toFixed(2)
+                                  : "",
+                            }));
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-3 p-3 bg-default-50 rounded-lg border border-divider">
+                      <input
+                        checked={editFormData.payment_type === "deposit"}
+                        className="w-4 h-4 text-primary rounded border-default-300 focus:ring-primary"
+                        id="edit-deposit-toggle"
+                        type="checkbox"
+                        onChange={(e) => {
+                          setEditFormData((prev) => ({
+                            ...prev,
+                            payment_type: e.target.checked ? "deposit" : "full",
+                            deposit_amount: "",
+                          }));
+                        }}
+                      />
+                      <label
+                        className="text-sm font-medium text-foreground cursor-pointer"
+                        htmlFor="edit-deposit-toggle"
+                      >
+                        Deposit payment (partial payment now, rest later)
+                      </label>
+                    </div>
+
+                    {editFormData.payment_type === "deposit" && (
+                      <div className="grid grid-cols-2 gap-4">
+                        <Input
+                          isRequired
+                          label="Deposit Amount (£)"
+                          max={editFormData.amount || undefined}
+                          min="0"
+                          placeholder="0.00"
+                          step="0.01"
+                          type="number"
+                          value={editFormData.deposit_amount}
+                          onChange={(e) =>
+                            setEditFormData((prev) => ({
+                              ...prev,
+                              deposit_amount: e.target.value,
+                            }))
+                          }
+                        />
+                        <div className="flex items-center px-3 text-sm text-default-500">
+                          Remaining: £
+                          {Math.max(
+                            0,
+                            (parseFloat(editFormData.amount) || 0) -
+                              (parseFloat(editFormData.deposit_amount) || 0),
+                          ).toFixed(2)}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <Select
+                        label="Status"
+                        selectedKeys={[editFormData.status]}
+                        onSelectionChange={(keys) => {
+                          const selectedStatus = Array.from(keys)[0] as string;
+
+                          setEditFormData((prev) => ({
+                            ...prev,
+                            status: selectedStatus || "pending",
+                          }));
+                        }}
+                      >
+                        <SelectItem key="pending">Pending</SelectItem>
+                        <SelectItem key="scheduled">Scheduled</SelectItem>
+                        <SelectItem key="confirmed">Confirmed</SelectItem>
+                        <SelectItem key="completed">Completed</SelectItem>
+                        <SelectItem key="cancelled">Cancelled</SelectItem>
+                      </Select>
+                      <Select
+                        label="Payment Status"
+                        selectedKeys={[editFormData.payment_status]}
+                        onSelectionChange={(keys) => {
+                          const selectedPaymentStatus = Array.from(
+                            keys,
+                          )[0] as string;
+
+                          setEditFormData((prev) => ({
+                            ...prev,
+                            payment_status: selectedPaymentStatus || "pending",
+                          }));
+                        }}
+                      >
+                        <SelectItem key="pending">Pending</SelectItem>
+                        <SelectItem key="paid">Paid</SelectItem>
+                        <SelectItem key="refunded">Refunded</SelectItem>
+                      </Select>
+                    </div>
+                  </CardBody>
+                </Card>
+
+                {/* Service Details */}
+                <Card className="border border-divider">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-5 h-5 text-warning-600 dark:text-warning-400" />
+                      <h3 className="text-lg font-semibold">Service Details</h3>
+                    </div>
+                  </CardHeader>
+                  <CardBody className="pt-0 space-y-4">
+                    <Textarea
+                      label="Address"
                       name="address"
+                      placeholder="Enter service address (optional)"
+                      rows={3}
                       value={editFormData.address}
                       onChange={handleEditInputChange}
-                    placeholder="Enter service address (optional)"
-                      rows={3}
-                  />
-                  <Textarea
-                    label="Notes"
+                    />
+                    <Textarea
+                      label="Notes"
                       name="notes"
+                      placeholder="Enter any additional notes (optional)"
+                      rows={3}
                       value={editFormData.notes}
                       onChange={handleEditInputChange}
-                    placeholder="Enter any additional notes (optional)"
-                      rows={3}
                     />
-                </CardBody>
-              </Card>
-                  </div>
+                  </CardBody>
+                </Card>
+              </div>
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button 
-              variant="light" 
-              onPress={() => setShowEditModal(false)}
-            >
+            <Button variant="light" onPress={() => setShowEditModal(false)}>
               Cancel
             </Button>
-            <Button 
-              color="primary" 
-              onPress={handleEditSubmit}
-              isLoading={isSubmittingEdit}
+            <Button
+              color="primary"
               disabled={isSubmittingEdit}
+              isLoading={isSubmittingEdit}
+              onPress={handleEditSubmit}
             >
-              {isSubmittingEdit ? 'Updating...' : 'Update Booking'}
+              {isSubmittingEdit ? "Updating..." : "Update Booking"}
             </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
 
       {/* Change Status Modal */}
-      <Modal 
-        isOpen={isStatusModalOpen} 
-        onClose={onStatusModalClose}
+      <Modal
         backdrop="blur"
+        isOpen={isStatusModalOpen}
+        onClose={onStatusModalClose}
       >
         <ModalContent>
           {(onClose) => (
@@ -3144,20 +3745,22 @@ export default function CalendarPage() {
                 <h2 className="text-xl font-bold">Change Booking Status</h2>
                 {selectedBookingDetails && (
                   <p className="text-sm text-default-500">
-                    Booking: {selectedBookingDetails.customer_name} - {selectedBookingDetails.service}
+                    Booking: {selectedBookingDetails.customer_name} -{" "}
+                    {selectedBookingDetails.service}
                   </p>
                 )}
               </ModalHeader>
               <ModalBody>
                 <Select
+                  className="w-full"
                   label="Select Status"
                   placeholder="Choose a status"
                   selectedKeys={selectedStatus ? [selectedStatus] : []}
                   onSelectionChange={(keys) => {
                     const newStatus = Array.from(keys)[0] as string;
+
                     setSelectedStatus(newStatus || "");
                   }}
-                  className="w-full"
                 >
                   <SelectItem key="pending">Pending</SelectItem>
                   <SelectItem key="scheduled">Scheduled</SelectItem>
@@ -3165,26 +3768,26 @@ export default function CalendarPage() {
                   <SelectItem key="completed">Completed</SelectItem>
                   <SelectItem key="cancelled">Cancelled</SelectItem>
                 </Select>
-                {selectedStatus === 'cancelled' && selectedBookingDetails?.status !== 'cancelled' && (
-                  <div className="mt-2 p-3 bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-800 rounded-lg">
-                    <p className="text-sm text-danger-700 dark:text-danger-300">
-                      ⚠️ Warning: Cancelling this booking cannot be undone.
-                    </p>
-                  </div>
-                )}
+                {selectedStatus === "cancelled" &&
+                  selectedBookingDetails?.status !== "cancelled" && (
+                    <div className="mt-2 p-3 bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-800 rounded-lg">
+                      <p className="text-sm text-danger-700 dark:text-danger-300">
+                        ⚠️ Warning: Cancelling this booking cannot be undone.
+                      </p>
+                    </div>
+                  )}
               </ModalBody>
               <ModalFooter>
-                <Button 
-                  color="danger" 
-                  variant="light" 
-                  onPress={onClose}
-                >
+                <Button color="danger" variant="light" onPress={onClose}>
                   Cancel
                 </Button>
-                <Button 
-                  color="primary" 
+                <Button
+                  color="primary"
+                  isDisabled={
+                    !selectedStatus ||
+                    selectedStatus === selectedBookingDetails?.status
+                  }
                   onPress={handleStatusChangeConfirm}
-                  isDisabled={!selectedStatus || selectedStatus === selectedBookingDetails?.status}
                 >
                   OK
                 </Button>

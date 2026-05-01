@@ -1,8 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Save, Instagram, Facebook, Youtube, Linkedin, Twitter } from "lucide-react";
+import {
+  Save,
+  Instagram,
+  Facebook,
+  Youtube,
+  Linkedin,
+  Twitter,
+} from "lucide-react";
 import { Button, Input, Card, CardBody, Spinner } from "@heroui/react";
+
 import { useToast } from "@/components/Toast";
 import { siteConfig } from "@/config/site";
 import { inputClassNames, formLayout } from "@/config/design-system";
@@ -33,6 +41,7 @@ export default function AdminSocialPage() {
 
   useEffect(() => {
     let cancelled = false;
+
     fetch("/api/admin/settings?key=social_links", { credentials: "include" })
       .then((res) => (res.ok ? res.json() : null))
       .then((value) => {
@@ -52,7 +61,10 @@ export default function AdminSocialPage() {
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
-    return () => { cancelled = true; };
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleSave = async () => {
@@ -64,8 +76,12 @@ export default function AdminSocialPage() {
         credentials: "include",
         body: JSON.stringify({ social_links: links }),
       });
+
       if (!res.ok) throw new Error("Failed to save");
-      showSuccess("Saved", "Social links saved. They will appear in the footer and floating buttons.");
+      showSuccess(
+        "Saved",
+        "Social links saved. They will appear in the footer and floating buttons.",
+      );
     } catch (e) {
       showError("Error", "Could not save social links. Try again.");
     } finally {
@@ -81,20 +97,58 @@ export default function AdminSocialPage() {
     );
   }
 
-  const fields: { key: keyof SocialLinks; label: string; icon: React.ReactNode; placeholder: string }[] = [
-    { key: "instagram", label: "Instagram", icon: <Instagram className="w-5 h-5" />, placeholder: "https://instagram.com/yourprofile" },
-    { key: "facebook", label: "Facebook", icon: <Facebook className="w-5 h-5" />, placeholder: "https://facebook.com/yourpage" },
-    { key: "youtube", label: "YouTube", icon: <Youtube className="w-5 h-5" />, placeholder: "https://youtube.com/@yourchannel" },
-    { key: "tiktok", label: "TikTok", icon: <span className="text-lg">♪</span>, placeholder: "https://tiktok.com/@yourprofile" },
-    { key: "linkedin", label: "LinkedIn", icon: <Linkedin className="w-5 h-5" />, placeholder: "https://linkedin.com/company/yourpage" },
-    { key: "twitter", label: "Twitter / X", icon: <Twitter className="w-5 h-5" />, placeholder: "https://twitter.com/yourprofile" },
+  const fields: {
+    key: keyof SocialLinks;
+    label: string;
+    icon: React.ReactNode;
+    placeholder: string;
+  }[] = [
+    {
+      key: "instagram",
+      label: "Instagram",
+      icon: <Instagram className="w-5 h-5" />,
+      placeholder: "https://instagram.com/yourprofile",
+    },
+    {
+      key: "facebook",
+      label: "Facebook",
+      icon: <Facebook className="w-5 h-5" />,
+      placeholder: "https://facebook.com/yourpage",
+    },
+    {
+      key: "youtube",
+      label: "YouTube",
+      icon: <Youtube className="w-5 h-5" />,
+      placeholder: "https://youtube.com/@yourchannel",
+    },
+    {
+      key: "tiktok",
+      label: "TikTok",
+      icon: <span className="text-lg">♪</span>,
+      placeholder: "https://tiktok.com/@yourprofile",
+    },
+    {
+      key: "linkedin",
+      label: "LinkedIn",
+      icon: <Linkedin className="w-5 h-5" />,
+      placeholder: "https://linkedin.com/company/yourpage",
+    },
+    {
+      key: "twitter",
+      label: "Twitter / X",
+      icon: <Twitter className="w-5 h-5" />,
+      placeholder: "https://twitter.com/yourprofile",
+    },
   ];
 
   return (
     <div className="p-4 sm:p-6 max-w-2xl">
-      <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-2">Social Media</h1>
+      <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
+        Social Media
+      </h1>
       <p className="text-sm text-default-500 mb-6">
-        These links appear in the footer, floating contact buttons, and anywhere social icons are shown.
+        These links appear in the footer, floating contact buttons, and anywhere
+        social icons are shown.
       </p>
       <Card className="border border-divider">
         <CardBody className="p-4 sm:p-6">
@@ -102,25 +156,27 @@ export default function AdminSocialPage() {
             {fields.map(({ key, label, icon, placeholder }) => (
               <Input
                 key={key}
-                label={label}
-                value={links[key]}
-                onValueChange={(v) => setLinks((prev) => ({ ...prev, [key]: v }))}
-                placeholder={placeholder}
-                type="url"
-                startContent={icon}
-                variant="bordered"
-                labelPlacement="outside"
                 classNames={inputClassNames}
+                label={label}
+                labelPlacement="outside"
+                placeholder={placeholder}
+                startContent={icon}
+                type="url"
+                value={links[key]}
+                variant="bordered"
+                onValueChange={(v) =>
+                  setLinks((prev) => ({ ...prev, [key]: v }))
+                }
               />
             ))}
           </div>
           <Button
-            color="primary"
-            onPress={handleSave}
-            isLoading={saving}
-            isDisabled={saving}
-            startContent={!saving && <Save className="w-4 h-4" />}
             className="mt-4 min-h-[44px] w-full sm:w-auto"
+            color="primary"
+            isDisabled={saving}
+            isLoading={saving}
+            startContent={!saving && <Save className="w-4 h-4" />}
+            onPress={handleSave}
           >
             {saving ? "Saving..." : "Save social links"}
           </Button>

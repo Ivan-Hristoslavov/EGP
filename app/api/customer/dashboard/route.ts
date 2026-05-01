@@ -1,26 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
 import jwt from "jsonwebtoken";
+
+import { supabase } from "@/lib/supabase";
 
 export async function GET(request: NextRequest) {
   try {
     const authHeader = request.headers.get("authorization");
+
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return NextResponse.json(
         { error: "Authorization token required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const token = authHeader.substring(7);
-    
+
     // Verify JWT token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "fallback-secret") as any;
-    
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "fallback-secret",
+    ) as any;
+
     if (decoded.type !== "customer") {
       return NextResponse.json(
         { error: "Invalid token type" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -34,7 +39,7 @@ export async function GET(request: NextRequest) {
     if (customerError || !customer) {
       return NextResponse.json(
         { error: "Customer not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -67,9 +72,10 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Dashboard error:", error);
+
     return NextResponse.json(
       { error: "Invalid or expired token" },
-      { status: 401 }
+      { status: 401 },
     );
   }
 }

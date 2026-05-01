@@ -3,29 +3,24 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import ThemeToggleButton from "../../components/ThemeToggleButton";
-import { AdminProfileData } from "@/components/AdminProfileData";
-import { 
-  Shield, 
-  LayoutDashboard, 
-  Package, 
-  Users, 
-  Calendar, 
-  FileText, 
-  CreditCard, 
-  Image as ImageIcon, 
-  FileEdit, 
-  Settings, 
-  Mail, 
+import {
+  Shield,
+  LayoutDashboard,
+  Package,
+  Users,
+  Calendar,
+  CreditCard,
+  Image as ImageIcon,
+  FileEdit,
+  Mail,
   Star,
   Newspaper,
   Info,
   UsersRound,
-  Ban,
-  BookOpen,
-  Globe,
-  User
+  User,
 } from "lucide-react";
+
+import ThemeToggleButton from "../../components/ThemeToggleButton";
 
 // Navigation definition
 const navigation = [
@@ -38,8 +33,18 @@ const navigation = [
     name: "Bookings",
     href: "/admin/bookings",
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      <svg
+        className="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+        />
       </svg>
     ),
   },
@@ -97,8 +102,18 @@ const navigation = [
     name: "Social Media",
     href: "/admin/social",
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+      <svg
+        className="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+        />
       </svg>
     ),
   },
@@ -111,8 +126,18 @@ const navigation = [
     name: "Hero Section",
     href: "/admin/hero-section",
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      <svg
+        className="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+        />
       </svg>
     ),
   },
@@ -143,12 +168,14 @@ export default function AdminLayout({
   useEffect(() => {
     if (pathname === "/admin/login") {
       setIsLoading(false);
+
       return;
     }
     const timer = setTimeout(() => {
       setIsAuthenticated(true);
       setIsLoading(false);
     }, 300);
+
     return () => clearTimeout(timer);
   }, [pathname]);
 
@@ -161,8 +188,8 @@ export default function AdminLayout({
   if (pathname === "/admin/login") {
     return (
       <div
-        className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-800 transition-colors duration-500"
         suppressHydrationWarning
+        className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-800 transition-colors duration-500"
       >
         {children}
       </div>
@@ -173,8 +200,8 @@ export default function AdminLayout({
   if (isLoading) {
     return (
       <div
-        className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-800 transition-colors duration-500 flex"
         suppressHydrationWarning
+        className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-800 transition-colors duration-500 flex"
       >
         {/* Skeleton sidebar */}
         <div className="hidden lg:flex w-64 flex-col flex-shrink-0 bg-white dark:bg-gray-800 shadow-xl animate-pulse">
@@ -187,7 +214,10 @@ export default function AdminLayout({
           </div>
           <nav className="flex-1 px-4 py-6 space-y-2">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
-              <div key={i} className="h-10 rounded-lg bg-gray-200 dark:bg-gray-700" />
+              <div
+                key={i}
+                className="h-10 rounded-lg bg-gray-200 dark:bg-gray-700"
+              />
             ))}
           </nav>
         </div>
@@ -203,11 +233,22 @@ export default function AdminLayout({
                 <div className="w-14 h-14 rounded-full border-4 border-rose-200 dark:border-rose-800" />
                 <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-rose-500 dark:border-t-rose-400 animate-spin" />
               </div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Loading Admin Panel</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                Loading Admin Panel
+              </p>
               <div className="flex gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-rose-500 animate-bounce" style={{ animationDelay: "0ms" }} />
-                <span className="w-2 h-2 rounded-full bg-pink-500 animate-bounce" style={{ animationDelay: "120ms" }} />
-                <span className="w-2 h-2 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: "240ms" }} />
+                <span
+                  className="w-2 h-2 rounded-full bg-rose-500 animate-bounce"
+                  style={{ animationDelay: "0ms" }}
+                />
+                <span
+                  className="w-2 h-2 rounded-full bg-pink-500 animate-bounce"
+                  style={{ animationDelay: "120ms" }}
+                />
+                <span
+                  className="w-2 h-2 rounded-full bg-purple-500 animate-bounce"
+                  style={{ animationDelay: "240ms" }}
+                />
               </div>
             </div>
           </main>
@@ -223,8 +264,8 @@ export default function AdminLayout({
   // Render main layout only after hydration
   return (
     <div
-      className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-800 transition-colors duration-500"
       suppressHydrationWarning
+      className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-800 transition-colors duration-500"
     >
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
@@ -238,10 +279,10 @@ export default function AdminLayout({
 
       {/* Fixed Sidebar */}
       <div
+        suppressHydrationWarning
         className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-xl transform transition-all duration-300 ease-in-out flex flex-col ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
-        suppressHydrationWarning
       >
         <div className="flex items-center justify-between h-16 px-6 bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 flex-shrink-0">
           <Link className="flex items-center space-x-3" href="/admin/dashboard">
@@ -256,9 +297,9 @@ export default function AdminLayout({
             </div>
           </Link>
           <button
+            aria-label="Close menu"
             className="lg:hidden min-h-[44px] min-w-[44px] flex items-center justify-center text-white hover:text-gray-200 transition-colors -mr-2"
             onClick={() => setSidebarOpen(false)}
-            aria-label="Close menu"
           >
             <svg
               className="w-6 h-6"
@@ -281,6 +322,7 @@ export default function AdminLayout({
           <div className="space-y-2">
             {navigation.map((item) => {
               const isActive = pathname === item.href;
+
               return (
                 <Link
                   key={item.name}
@@ -344,15 +386,15 @@ export default function AdminLayout({
       </div>
 
       {/* Main content area with margin for fixed sidebar */}
-      <div className="lg:ml-64 min-w-0" suppressHydrationWarning>
+      <div suppressHydrationWarning className="lg:ml-64 min-w-0">
         {/* Top bar */}
         <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm border-b border-rose-200/50 dark:border-gray-700 sticky top-0 z-30 transition-colors duration-300">
           <div className="flex items-center justify-between h-16 px-4 sm:px-6">
             <div className="flex items-center">
               <button
+                aria-label="Open menu"
                 className="lg:hidden min-h-[44px] min-w-[44px] p-2 flex items-center justify-center rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 onClick={() => setSidebarOpen(true)}
-                aria-label="Open menu"
               >
                 <svg
                   className="w-6 h-6"
@@ -382,13 +424,14 @@ export default function AdminLayout({
         </header>
         {/* Page content */}
         <main
-          className="min-h-screen bg-gradient-to-br from-rose-50/30 via-pink-50/30 to-purple-50/30 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800 transition-colors duration-300"
           suppressHydrationWarning
+          className="min-h-screen bg-gradient-to-br from-rose-50/30 via-pink-50/30 to-purple-50/30 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800 transition-colors duration-300"
         >
-          <div className="p-3 sm:p-4 lg:p-6 xl:p-8 min-w-0 max-w-full overflow-x-hidden">{children}</div>
+          <div className="p-3 sm:p-4 lg:p-6 xl:p-8 min-w-0 max-w-full overflow-x-hidden">
+            {children}
+          </div>
         </main>
       </div>
     </div>
   );
 }
-

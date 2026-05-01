@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+
 import { EMAIL, getEmailHead } from "./email-theme";
 
 describe("lib/email-theme", () => {
@@ -17,6 +18,7 @@ describe("lib/email-theme", () => {
     it("uses the same token keys for light and dark palettes", () => {
       const lightKeys = Object.keys(EMAIL.light).sort();
       const darkKeys = Object.keys(EMAIL.dark).sort();
+
       expect(lightKeys).toEqual(darkKeys);
     });
 
@@ -33,6 +35,7 @@ describe("lib/email-theme", () => {
   describe("getEmailHead", () => {
     it("returns HTML string with meta and style", () => {
       const head = getEmailHead();
+
       expect(head).toContain("<meta charset");
       expect(head).toContain("viewport");
       expect(head).toContain("Montserrat");
@@ -42,14 +45,16 @@ describe("lib/email-theme", () => {
 
     it("declares light/dark color scheme support", () => {
       const head = getEmailHead();
+
       expect(head).toContain('name="color-scheme" content="light dark"');
       expect(head).toContain(
-        'name="supported-color-schemes" content="light dark"'
+        'name="supported-color-schemes" content="light dark"',
       );
     });
 
     it("inlines body font and dark-mode overrides for shared class names", () => {
       const head = getEmailHead();
+
       expect(head).toContain(`font-family: ${EMAIL.font}`);
       expect(head).toContain("prefers-color-scheme: dark");
       expect(head).toContain("body.email-body");

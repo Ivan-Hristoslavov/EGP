@@ -14,7 +14,7 @@ export function FlyDiscountForm({ onClose, isVisible }: FlyDiscountFormProps) {
     email: "",
     phone: "",
     treatment: "",
-    message: ""
+    message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -29,7 +29,7 @@ export function FlyDiscountForm({ onClose, isVisible }: FlyDiscountFormProps) {
     "Laser Hair Removal",
     "Chemical Peel",
     "Microneedling",
-    "Hydrafacial"
+    "Hydrafacial",
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,13 +38,13 @@ export function FlyDiscountForm({ onClose, isVisible }: FlyDiscountFormProps) {
 
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       // Here you would typically send the data to your backend
       console.log("Discount form submitted:", formData);
-      
+
       setIsSubmitted(true);
-      
+
       // Auto close after 3 seconds
       setTimeout(() => {
         onClose();
@@ -56,11 +56,16 @@ export function FlyDiscountForm({ onClose, isVisible }: FlyDiscountFormProps) {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -71,15 +76,15 @@ export function FlyDiscountForm({ onClose, isVisible }: FlyDiscountFormProps) {
       <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in-0 zoom-in-95 duration-300">
         {/* Close Button */}
         <button
-          onClick={onClose}
           className="absolute top-4 right-4 z-10 w-8 h-8 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full flex items-center justify-center transition-colors"
+          onClick={onClose}
         >
           <X className="w-4 h-4 text-gray-600 dark:text-gray-400" />
         </button>
 
         {/* Header */}
         <div className="relative bg-[#464C45] hover:bg-[#3a4039] p-6 text-white transition-colors">
-          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="absolute inset-0 bg-black/10" />
           <div className="relative">
             <div className="flex items-center justify-center mb-4">
               <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
@@ -106,7 +111,8 @@ export function FlyDiscountForm({ onClose, isVisible }: FlyDiscountFormProps) {
                 Thank You!
               </h3>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
-                We've received your request and will contact you within 24 hours with your special discount code.
+                We've received your request and will contact you within 24 hours
+                with your special discount code.
               </p>
               <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
                 <p className="text-sm text-green-800 dark:text-green-200 font-medium">
@@ -142,19 +148,19 @@ export function FlyDiscountForm({ onClose, isVisible }: FlyDiscountFormProps) {
               </div>
 
               {/* Form */}
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form className="space-y-4" onSubmit={handleSubmit}>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Full Name *
                   </label>
                   <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
                     required
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-transparent"
+                    name="name"
                     placeholder="Enter your full name"
+                    type="text"
+                    value={formData.name}
+                    onChange={handleInputChange}
                   />
                 </div>
 
@@ -163,13 +169,13 @@ export function FlyDiscountForm({ onClose, isVisible }: FlyDiscountFormProps) {
                     Email Address *
                   </label>
                   <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
                     required
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-transparent"
+                    name="email"
                     placeholder="your@email.com"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
                   />
                 </div>
 
@@ -178,12 +184,12 @@ export function FlyDiscountForm({ onClose, isVisible }: FlyDiscountFormProps) {
                     Phone Number
                   </label>
                   <input
-                    type="tel"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-transparent"
                     name="phone"
+                    placeholder="07944 24 20 79"
+                    type="tel"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-transparent"
-                    placeholder="07944 24 20 79"
                   />
                 </div>
 
@@ -192,10 +198,10 @@ export function FlyDiscountForm({ onClose, isVisible }: FlyDiscountFormProps) {
                     Treatment Interest
                   </label>
                   <select
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-transparent"
                     name="treatment"
                     value={formData.treatment}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-transparent"
                   >
                     <option value="">Select a treatment</option>
                     {treatments.map((treatment) => (
@@ -211,23 +217,23 @@ export function FlyDiscountForm({ onClose, isVisible }: FlyDiscountFormProps) {
                     Additional Message
                   </label>
                   <textarea
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-transparent resize-none"
                     name="message"
+                    placeholder="Tell us about your aesthetic goals..."
+                    rows={3}
                     value={formData.message}
                     onChange={handleInputChange}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-transparent resize-none"
-                    placeholder="Tell us about your aesthetic goals..."
                   />
                 </div>
 
                 <button
-                  type="submit"
-                  disabled={isSubmitting}
                   className="w-full bg-[#464C45] hover:bg-[#3a4039] text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  disabled={isSubmitting}
+                  type="submit"
                 >
                   {isSubmitting ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       Processing...
                     </>
                   ) : (
@@ -240,7 +246,8 @@ export function FlyDiscountForm({ onClose, isVisible }: FlyDiscountFormProps) {
               </form>
 
               <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-4">
-                By submitting this form, you agree to receive promotional emails. You can unsubscribe at any time.
+                By submitting this form, you agree to receive promotional
+                emails. You can unsubscribe at any time.
               </p>
             </>
           )}
@@ -280,22 +287,6 @@ export function useFlyDiscountForm() {
     isVisible,
     showForm,
     hideForm,
-    hasShown
+    hasShown,
   };
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

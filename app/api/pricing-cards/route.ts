@@ -1,35 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
   try {
     const supabase = createClient();
-    
+
     // Check if this is an admin request (for admin panel) or client request
     const url = new URL(request.url);
-    const isAdmin = url.searchParams.get('admin') === 'true';
-    
+    const isAdmin = url.searchParams.get("admin") === "true";
+
     let query = supabase
       .from("pricing_cards")
       .select("*")
       .order("order", { ascending: true });
-    
+
     // Only show enabled cards for client-side requests
     if (!isAdmin) {
-      query = query.eq('is_enabled', true);
+      query = query.eq("is_enabled", true);
     }
-    
+
     const { data: pricingCards, error } = await query;
 
     if (error) {
       console.error("Error fetching pricing cards:", error);
-      return NextResponse.json({ error: "Failed to fetch pricing cards" }, { status: 500 });
+
+      return NextResponse.json(
+        { error: "Failed to fetch pricing cards" },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json({ pricingCards });
   } catch (error) {
     console.error("Error in pricing cards GET:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
@@ -37,8 +46,16 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = createClient();
     const body = await request.json();
-    
-    const { title, subtitle, table_headers, table_rows, notes, order, is_enabled = true } = body;
+
+    const {
+      title,
+      subtitle,
+      table_headers,
+      table_rows,
+      notes,
+      order,
+      is_enabled = true,
+    } = body;
 
     // Get admin profile ID (assuming there's only one admin)
     const { data: adminProfile, error: adminError } = await supabase
@@ -47,7 +64,10 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (adminError || !adminProfile) {
-      return NextResponse.json({ error: "Admin profile not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Admin profile not found" },
+        { status: 404 },
+      );
     }
 
     const { data: pricingCard, error } = await supabase
@@ -67,12 +87,20 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error("Error creating pricing card:", error);
-      return NextResponse.json({ error: "Failed to create pricing card" }, { status: 500 });
+
+      return NextResponse.json(
+        { error: "Failed to create pricing card" },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json({ pricingCard });
   } catch (error) {
     console.error("Error in pricing cards POST:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
-} 
+}

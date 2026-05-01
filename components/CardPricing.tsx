@@ -94,7 +94,9 @@ export function CardPricing() {
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                   {tier.name}
                 </h3>
-                <p className="mt-4 text-gray-500 dark:text-gray-400">{tier.description}</p>
+                <p className="mt-4 text-gray-500 dark:text-gray-400">
+                  {tier.description}
+                </p>
                 <p className="mt-8">
                   <span className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
                     £{getPrice(tier.price)}
@@ -129,7 +131,9 @@ export function CardPricing() {
                           />
                         </svg>
                       </div>
-                      <p className="ml-3 text-base text-gray-500 dark:text-gray-400">{feature}</p>
+                      <p className="ml-3 text-base text-gray-500 dark:text-gray-400">
+                        {feature}
+                      </p>
                     </li>
                   ))}
                 </ul>

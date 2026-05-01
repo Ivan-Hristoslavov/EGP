@@ -5,19 +5,19 @@
 export const aestheticsColors = {
   // Primary - cream gradient (main brand tone #E6DDD1)
   primary: {
-    light: "#F4EFE8",      // Light cream (tint from main)
-    DEFAULT: "#E6DDD1",    // Main brand cream
-    dark: "#CFC4B6",       // Deeper cream for gradient stops
+    light: "#F4EFE8", // Light cream (tint from main)
+    DEFAULT: "#E6DDD1", // Main brand cream
+    dark: "#CFC4B6", // Deeper cream for gradient stops
     gradient: "from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8]",
     gradientHover: "from-[#B8A99A] via-[#D4C9BC] to-[#EDE6DC]",
   },
 
   // Secondary - Green (Primary dark color for blocks and buttons)
   secondary: {
-    light: "#e8f5e8",      // Light green background
-    DEFAULT: "#464C45",    // Main green (rgb(70 76 69))
-    dark: "#3a4039",       // Dark green
-    darker: "#2d322c",     // Darker green for dark mode
+    light: "#e8f5e8", // Light green background
+    DEFAULT: "#464C45", // Main green (rgb(70 76 69))
+    dark: "#3a4039", // Dark green
+    darker: "#2d322c", // Darker green for dark mode
     gradient: "from-[#3a4039] via-[#464C45] to-[#5a6259]",
     gradientHover: "from-[#2d322c] via-[#3a4039] to-[#464C45]",
   },
@@ -47,7 +47,7 @@ export const aestheticsColors = {
     darker: "#CFC4B6",
     darkest: "#B8A99A",
   },
-  
+
   // Main brand palette (#E6DDD1)
   brand: {
     lightest: "#FAF7F3",
@@ -70,8 +70,8 @@ export const aestheticsColors = {
     antiWrinkle: {
       gradient: "from-purple-400 via-violet-400 to-purple-500",
       hover: "from-purple-500 via-violet-500 to-purple-600",
-      bg: "#faf5ff",         // Soft purple background
-      text: "#6b21a8",       // Purple text
+      bg: "#faf5ff", // Soft purple background
+      text: "#6b21a8", // Purple text
     },
     fillers: {
       gradient: "from-[#d8c5a7] via-[#E6DDD1] to-[#c4b5a0]",
@@ -113,14 +113,14 @@ export const aestheticsColors = {
 
   // Text Colors - Beige + Green Palette
   text: {
-    primary: "#1f2937",       // Dark gray/charcoal
-    secondary: "#6b7280",     // Medium gray
-    light: "#9ca3af",         // Light gray
-    onDark: "#ffffff",        // White text on dark backgrounds
-    onGreen: "#ffffff",       // White text on green backgrounds
-    accent: "#7a6f62",        // Warm accent (cream family)
-    green: "#464C45",          // Green text
-    beige: "#8B7D6E",         // Beige text (readable on light cream)
+    primary: "#1f2937", // Dark gray/charcoal
+    secondary: "#6b7280", // Medium gray
+    light: "#9ca3af", // Light gray
+    onDark: "#ffffff", // White text on dark backgrounds
+    onGreen: "#ffffff", // White text on green backgrounds
+    accent: "#7a6f62", // Warm accent (cream family)
+    green: "#464C45", // Green text
+    beige: "#8B7D6E", // Beige text (readable on light cream)
   },
 
   // Trust & Success
@@ -133,21 +133,21 @@ export const aestheticsColors = {
   // Green - Primary button/badge color (change this value to update all green buttons/badges)
   // RGB: rgb(70 76 69) = #464C45
   green: {
-    DEFAULT: "#464C45",  // Main green color for buttons, badges, and accents (rgb(70 76 69))
-    light: "#5a6259",   // Lighter variant
-    dark: "#3a4039",    // Darker variant
-    hover: "#3a4039",   // Hover state
+    DEFAULT: "#464C45", // Main green color for buttons, badges, and accents (rgb(70 76 69))
+    light: "#5a6259", // Lighter variant
+    dark: "#3a4039", // Darker variant
+    hover: "#3a4039", // Hover state
     // Background variants for cards and sections
     bg: {
-      light: "#f0f7f0",      // Very light green background
-      DEFAULT: "#e8f5e8",    // Light green background
-      dark: "#d1e8d1",      // Medium light green background
+      light: "#f0f7f0", // Very light green background
+      DEFAULT: "#e8f5e8", // Light green background
+      dark: "#d1e8d1", // Medium light green background
     },
     // Border variants
     border: {
-      light: "#c3d9c3",      // Light green border
-      DEFAULT: "#9fbf9f",    // Default green border
-      dark: "#7a9f7a",      // Dark green border
+      light: "#c3d9c3", // Light green border
+      DEFAULT: "#9fbf9f", // Default green border
+      dark: "#7a9f7a", // Dark green border
     },
   },
 
@@ -176,26 +176,26 @@ export function getCategoryColor(category: string) {
 export const colorClasses = {
   // Primary button (Green) - Solid color, no gradient
   btnPrimary: `bg-egp-green hover:bg-egp-green-dark text-white`,
-  
+
   // Secondary button (Beige) - Solid color, no gradient
   btnSecondary: `bg-egp-beige hover:bg-egp-beige-dark text-gray-900`,
-  
+
   // Accent button (Beige) - Solid color, no gradient
   btnAccent: `bg-egp-beige-darkest hover:bg-egp-beige-darker text-white`,
-  
+
   // Dark button (Dark green) - Solid color, no gradient
   btnDark: `bg-egp-green-darker hover:bg-egp-green-dark text-white`,
-  
+
   // WhatsApp - Keep gradient for WhatsApp brand colors
   btnWhatsApp: `bg-gradient-to-r ${aestheticsColors.buttons.whatsapp} hover:${aestheticsColors.buttons.whatsappHover} text-white`,
 
   // Hero section
   hero: `bg-gradient-to-br ${aestheticsColors.backgrounds.hero}`,
-  
+
   // Section backgrounds
   section: `bg-gradient-to-b ${aestheticsColors.backgrounds.section}`,
   sectionDark: `bg-gradient-to-b ${aestheticsColors.backgrounds.sectionDark} text-white`,
-  
+
   // Card backgrounds
   card: `${aestheticsColors.backgrounds.card}`,
   cardDark: `bg-gradient-to-br ${aestheticsColors.backgrounds.cardDark} text-white`,
@@ -210,17 +210,17 @@ export const typography = {
   h4: "text-xl md:text-2xl lg:text-3xl font-semibold text-gray-900 dark:text-white",
   h5: "text-lg md:text-xl lg:text-2xl font-semibold text-gray-900 dark:text-white",
   h6: "text-base md:text-lg lg:text-xl font-semibold text-gray-900 dark:text-white",
-  
+
   // Body text
   body: "text-base text-gray-700 dark:text-gray-300",
   bodyLarge: "text-lg text-gray-700 dark:text-gray-300",
   bodySmall: "text-sm text-gray-600 dark:text-gray-400",
-  
+
   // Text on colored backgrounds
   onDark: "text-white",
   onGreen: "text-white",
   onBeige: "text-gray-900",
-  
+
   // Accent text
   accent: `text-[${aestheticsColors.text.accent}]`,
   green: `text-[${aestheticsColors.green.DEFAULT}]`,
@@ -230,17 +230,21 @@ export const typography = {
 // Form System
 export const forms = {
   // Input fields
-  input: "px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-[#464C45] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-[#464C45] transition-all",
-  inputError: "px-4 py-3 border border-red-500 rounded-xl bg-white dark:bg-[#464C45] text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-red-500",
-  
+  input:
+    "px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-[#464C45] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-[#464C45] transition-all",
+  inputError:
+    "px-4 py-3 border border-red-500 rounded-xl bg-white dark:bg-[#464C45] text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-red-500",
+
   // Labels
   label: "block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2",
-  labelRequired: "block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 after:content-['*'] after:ml-1 after:text-red-500",
-  
-  // Textarea
-  textarea: "px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-[#464C45] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-[#464C45] transition-all resize-none",
-  
-  // Select
-  select: "px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-[#464C45] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-[#464C45] transition-all",
-};
+  labelRequired:
+    "block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 after:content-['*'] after:ml-1 after:text-red-500",
 
+  // Textarea
+  textarea:
+    "px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-[#464C45] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-[#464C45] transition-all resize-none",
+
+  // Select
+  select:
+    "px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-[#464C45] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-[#464C45] transition-all",
+};

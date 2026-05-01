@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { X, Cookie, Shield, BarChart3, Settings } from "lucide-react";
-import ButtonPrimary from "./ButtonPrimary";
 import Link from "next/link";
+
+import ButtonPrimary from "./ButtonPrimary";
 
 const COOKIE_CONSENT_KEY = "egp_cookie_consent";
 
@@ -25,11 +26,13 @@ export default function CookieConsentModal() {
   useEffect(() => {
     // Check if user has already given consent
     const consent = localStorage.getItem(COOKIE_CONSENT_KEY);
+
     if (!consent) {
       // Show modal after a short delay for better UX
       const timer = setTimeout(() => {
         setIsOpen(true);
       }, 1000);
+
       return () => clearTimeout(timer);
     }
   }, []);
@@ -41,10 +44,15 @@ export default function CookieConsentModal() {
       marketing: true,
       timestamp: new Date().toISOString(),
     };
+
     localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify(consentData));
     setIsOpen(false);
     // Initialize analytics if accepted
-    if (consentData.analytics && typeof window !== "undefined" && (window as any).gtag) {
+    if (
+      consentData.analytics &&
+      typeof window !== "undefined" &&
+      (window as any).gtag
+    ) {
       // Analytics already initialized in layout.tsx
     }
   };
@@ -56,6 +64,7 @@ export default function CookieConsentModal() {
       marketing: false,
       timestamp: new Date().toISOString(),
     };
+
     localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify(consentData));
     setIsOpen(false);
   };
@@ -65,10 +74,15 @@ export default function CookieConsentModal() {
       ...preferences,
       timestamp: new Date().toISOString(),
     };
+
     localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify(consentData));
     setIsOpen(false);
     // Initialize analytics if accepted
-    if (consentData.analytics && typeof window !== "undefined" && (window as any).gtag) {
+    if (
+      consentData.analytics &&
+      typeof window !== "undefined" &&
+      (window as any).gtag
+    ) {
       // Analytics already initialized in layout.tsx
     }
   };
@@ -98,9 +112,9 @@ export default function CookieConsentModal() {
             <h2 className="text-2xl font-bold">Cookie & Privacy Preferences</h2>
           </div>
           <button
-            onClick={() => setIsOpen(false)}
-            className="p-2 hover:bg-white/20 rounded-full transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="Close"
+            className="p-2 hover:bg-white/20 rounded-full transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+            onClick={() => setIsOpen(false)}
           >
             <X className="w-6 h-6" />
           </button>
@@ -111,20 +125,23 @@ export default function CookieConsentModal() {
           {/* Introduction */}
           <div className="space-y-4">
             <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed">
-              We use cookies and similar technologies to enhance your browsing experience, analyze site traffic, and personalize content. By clicking "Accept All", you consent to our use of cookies. You can also customize your preferences or reject non-essential cookies.
+              We use cookies and similar technologies to enhance your browsing
+              experience, analyze site traffic, and personalize content. By
+              clicking "Accept All", you consent to our use of cookies. You can
+              also customize your preferences or reject non-essential cookies.
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               For more information, please read our{" "}
               <Link
-                href="/privacy"
                 className="text-[#464C45] dark:text-[#b5ad9d] hover:underline font-semibold"
+                href="/privacy"
               >
                 Privacy Policy
               </Link>{" "}
               and{" "}
               <Link
-                href="/terms"
                 className="text-[#464C45] dark:text-[#b5ad9d] hover:underline font-semibold"
+                href="/terms"
               >
                 Terms of Service
               </Link>
@@ -156,18 +173,21 @@ export default function CookieConsentModal() {
                         </span>
                       </div>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        These cookies are essential for the website to function properly. They enable basic features like page navigation and access to secure areas. The website cannot function properly without these cookies.
+                        These cookies are essential for the website to function
+                        properly. They enable basic features like page
+                        navigation and access to secure areas. The website
+                        cannot function properly without these cookies.
                       </p>
                     </div>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
-                      type="checkbox"
-                      checked={preferences.necessary}
                       disabled
+                      checked={preferences.necessary}
                       className="sr-only peer"
+                      type="checkbox"
                     />
-                    <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#464C45] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#464C45] opacity-60 cursor-not-allowed"></div>
+                    <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#464C45] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#464C45] opacity-60 cursor-not-allowed" />
                   </label>
                 </div>
               </div>
@@ -184,18 +204,21 @@ export default function CookieConsentModal() {
                         Analytics Cookies
                       </h4>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        These cookies help us understand how visitors interact with our website by collecting and reporting information anonymously. This helps us improve our website and services.
+                        These cookies help us understand how visitors interact
+                        with our website by collecting and reporting information
+                        anonymously. This helps us improve our website and
+                        services.
                       </p>
                     </div>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
-                      type="checkbox"
                       checked={preferences.analytics}
-                      onChange={() => handleTogglePreference("analytics")}
                       className="sr-only peer"
+                      type="checkbox"
+                      onChange={() => handleTogglePreference("analytics")}
                     />
-                    <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#464C45] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#464C45]"></div>
+                    <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#464C45] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#464C45]" />
                   </label>
                 </div>
               </div>
@@ -212,18 +235,21 @@ export default function CookieConsentModal() {
                         Marketing Cookies
                       </h4>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        These cookies are used to deliver personalized advertisements and track campaign performance. They may be set by our advertising partners to build a profile of your interests.
+                        These cookies are used to deliver personalized
+                        advertisements and track campaign performance. They may
+                        be set by our advertising partners to build a profile of
+                        your interests.
                       </p>
                     </div>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
-                      type="checkbox"
                       checked={preferences.marketing}
-                      onChange={() => handleTogglePreference("marketing")}
                       className="sr-only peer"
+                      type="checkbox"
+                      onChange={() => handleTogglePreference("marketing")}
                     />
-                    <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#464C45] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#464C45]"></div>
+                    <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#464C45] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#464C45]" />
                   </label>
                 </div>
               </div>
@@ -235,23 +261,23 @@ export default function CookieConsentModal() {
             {!showCustomize ? (
               <>
                 <ButtonPrimary
+                  className="flex-1 sm:flex-none px-6 py-3"
                   variant="secondary"
                   onClick={() => setShowCustomize(true)}
-                  className="flex-1 sm:flex-none px-6 py-3"
                 >
                   Customize Preferences
                 </ButtonPrimary>
                 <ButtonPrimary
+                  className="flex-1 sm:flex-none px-6 py-3"
                   variant="secondary"
                   onClick={handleRejectAll}
-                  className="flex-1 sm:flex-none px-6 py-3"
                 >
                   Reject All
                 </ButtonPrimary>
                 <ButtonPrimary
+                  className="flex-1 sm:flex-none px-6 py-3"
                   variant="primary"
                   onClick={handleAcceptAll}
-                  className="flex-1 sm:flex-none px-6 py-3"
                 >
                   Accept All
                 </ButtonPrimary>
@@ -259,16 +285,16 @@ export default function CookieConsentModal() {
             ) : (
               <>
                 <ButtonPrimary
+                  className="flex-1 sm:flex-none px-6 py-3"
                   variant="secondary"
                   onClick={() => setShowCustomize(false)}
-                  className="flex-1 sm:flex-none px-6 py-3"
                 >
                   Back
                 </ButtonPrimary>
                 <ButtonPrimary
+                  className="flex-1 sm:flex-none px-6 py-3"
                   variant="primary"
                   onClick={handleSavePreferences}
-                  className="flex-1 sm:flex-none px-6 py-3"
                 >
                   Save Preferences
                 </ButtonPrimary>

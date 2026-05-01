@@ -1,10 +1,19 @@
-import type { Metadata } from 'next';
+import type { Metadata } from "next";
+
+import Link from "next/link";
+import {
+  Calendar,
+  CheckCircle,
+  Star,
+  ArrowRight,
+  Phone,
+  Target,
+} from "lucide-react";
+import { notFound } from "next/navigation";
+
 import { siteConfig } from "@/config/site";
 import { canonicalUrl, defaultOgImages, toMetaDescription } from "@/lib/seo";
 import { typography, layout, textColors } from "@/config/typography";
-import Link from "next/link";
-import { Calendar, CheckCircle, Star, ArrowRight, Phone, Target } from "lucide-react";
-import { notFound } from 'next/navigation';
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +35,7 @@ async function getCondition(slug: string) {
     return condition;
   } catch (error) {
     console.error("Error fetching condition:", error);
+
     return null;
   }
 }
@@ -36,18 +46,24 @@ interface PageProps {
   }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const condition = await getCondition(slug);
-  
+
   if (!condition) {
     return {
       title: `Condition Not Found | ${siteConfig.name}`,
     };
   }
 
-  const title = (condition.seo_title || `${condition.title} Treatment`) + ` | ${siteConfig.name}`;
-  const description = toMetaDescription(condition.seo_description || condition.description);
+  const title =
+    (condition.seo_title || `${condition.title} Treatment`) +
+    ` | ${siteConfig.name}`;
+  const description = toMetaDescription(
+    condition.seo_description || condition.description,
+  );
 
   return {
     title,
@@ -82,33 +98,33 @@ export default async function ConditionPage({ params }: PageProps) {
   }
 
   // Parse treatments from JSONB array
-  const treatments = Array.isArray(condition.treatments) 
-    ? condition.treatments 
-    : typeof condition.treatments === 'string' 
-      ? JSON.parse(condition.treatments) 
+  const treatments = Array.isArray(condition.treatments)
+    ? condition.treatments
+    : typeof condition.treatments === "string"
+      ? JSON.parse(condition.treatments)
       : [];
 
   const treatmentProcess = [
     {
       step: "1",
       title: "Assessment",
-      description: "Comprehensive evaluation of your specific condition"
+      description: "Comprehensive evaluation of your specific condition",
     },
     {
       step: "2",
       title: "Treatment Plan",
-      description: "Personalised treatment recommendations"
+      description: "Personalised treatment recommendations",
     },
     {
       step: "3",
       title: "Treatment",
-      description: "Professional treatment by qualified practitioners"
+      description: "Professional treatment by qualified practitioners",
     },
     {
       step: "4",
       title: "Results",
-      description: "Monitor progress and plan follow-up treatments"
-    }
+      description: "Monitor progress and plan follow-up treatments",
+    },
   ];
 
   return (
@@ -128,7 +144,9 @@ export default async function ConditionPage({ params }: PageProps) {
                 {condition.category}
               </div>
             </div>
-            <h1 className={`${typography.headingPage} ${textColors.heading} mb-6`}>
+            <h1
+              className={`${typography.headingPage} ${textColors.heading} mb-6`}
+            >
               {condition.title}
             </h1>
             <p className={`${typography.body} ${textColors.body} mb-8`}>
@@ -136,15 +154,15 @@ export default async function ConditionPage({ params }: PageProps) {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                     href="/book/new"
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-egp-beige-darkest via-egp-beige-darker to-egp-beige-dark text-white text-base font-semibold rounded-full hover:from-egp-beige-darker hover:via-egp-beige-dark hover:to-egp-beige transition-all shadow-lg hover:shadow-xl"
+                href="/book/new"
               >
                 <Calendar className="w-4 h-4" />
                 Book Treatment Now
               </Link>
               <Link
-                href={`tel:${siteConfig.contact.phone}`}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-egp-beige-darkest text-egp-beige-darkest dark:text-egp-beige-darker text-base font-semibold rounded-full hover:bg-egp-beige-darkest hover:text-white transition-all"
+                href={`tel:${siteConfig.contact.phone}`}
               >
                 <Phone className="w-4 h-4" />
                 Call Us
@@ -161,31 +179,46 @@ export default async function ConditionPage({ params }: PageProps) {
             <div className="text-center space-y-8">
               {/* Condition Info */}
               <div>
-                <h2 className={`${typography.headingSection} ${textColors.heading} mb-6`}>
+                <h2
+                  className={`${typography.headingSection} ${textColors.heading} mb-6`}
+                >
                   Understanding {condition.title}
                 </h2>
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-6 max-w-2xl mx-auto">
-                  {condition.description}. Our expert practitioners have extensive experience treating this condition and can recommend the most effective treatment options for your specific needs.
+                  {condition.description}. Our expert practitioners have
+                  extensive experience treating this condition and can recommend
+                  the most effective treatment options for your specific needs.
                 </p>
                 <div className="flex items-center justify-center gap-3 mb-8">
                   <Target className="w-4 h-4 text-egp-beige-darkest" />
                   <div className="text-center">
-                    <div className="font-semibold text-gray-900 dark:text-white">Treatment Focus</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-300">Personalised approach</div>
+                    <div className="font-semibold text-gray-900 dark:text-white">
+                      Treatment Focus
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-300">
+                      Personalised approach
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Recommended Treatments */}
               <div>
-                <h3 className={`${typography.headingCard} ${textColors.heading} mb-6`}>
+                <h3
+                  className={`${typography.headingCard} ${textColors.heading} mb-6`}
+                >
                   Recommended Treatments
                 </h3>
                 <ul className="space-y-4 max-w-md mx-auto">
                   {treatments.map((treatment: string, index: number) => (
-                    <li key={index} className="flex items-center justify-center gap-3">
+                    <li
+                      key={index}
+                      className="flex items-center justify-center gap-3"
+                    >
                       <CheckCircle className="w-4 h-4 text-egp-green flex-shrink-0" />
-                      <span className="text-sm text-gray-600 dark:text-gray-300 text-center">{treatment}</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-300 text-center">
+                        {treatment}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -199,7 +232,9 @@ export default async function ConditionPage({ params }: PageProps) {
       <section className="py-16 md:py-24 bg-gray-50 dark:bg-gray-800">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-            <h2 className={`${typography.headingSection} ${textColors.heading} text-center mb-12`}>
+            <h2
+              className={`${typography.headingSection} ${textColors.heading} text-center mb-12`}
+            >
               Treatment Process
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -209,9 +244,13 @@ export default async function ConditionPage({ params }: PageProps) {
                   className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all text-center"
                 >
                   <div className="w-10 h-10 bg-gradient-to-br from-egp-beige-darkest via-egp-beige-darker to-egp-beige-dark rounded-full flex items-center justify-center mb-4 mx-auto">
-                    <span className="text-white font-bold text-base">{step.step}</span>
+                    <span className="text-white font-bold text-base">
+                      {step.step}
+                    </span>
                   </div>
-                  <h3 className={`${typography.headingCard} ${textColors.heading} mb-3`}>
+                  <h3
+                    className={`${typography.headingCard} ${textColors.heading} mb-3`}
+                  >
                     {step.title}
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300">
@@ -228,23 +267,26 @@ export default async function ConditionPage({ params }: PageProps) {
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className={`${typography.headingSection} ${textColors.heading} mb-6`}>
+            <h2
+              className={`${typography.headingSection} ${textColors.heading} mb-6`}
+            >
               Ready to Address Your Concerns?
             </h2>
             <p className={`${typography.body} ${textColors.body} mb-8`}>
-              Book your treatment now to discuss the best treatment options for {condition.title.toLowerCase()}
+              Book your treatment now to discuss the best treatment options for{" "}
+              {condition.title.toLowerCase()}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                     href="/book/new"
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-egp-beige-darkest hover:bg-egp-beige-darker text-white text-base font-semibold rounded-full transition-all shadow-lg hover:shadow-xl"
+                href="/book/new"
               >
                 <Calendar className="w-4 h-4" />
                 Book Treatment Now
               </Link>
               <Link
-                href="/conditions"
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-egp-beige-darkest text-egp-beige-darkest dark:text-egp-beige-darker text-base font-semibold rounded-full hover:bg-egp-beige-darkest hover:text-white transition-all"
+                href="/conditions"
               >
                 <ArrowRight className="w-4 h-4" />
                 View All Conditions

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { supabaseAdmin } from "@/lib/supabase";
 
 // GET - Fetch admin settings (service role bypasses RLS)
@@ -19,9 +20,10 @@ export async function GET(request: NextRequest) {
 
       data = result.data;
       error = result.error;
-      
+
       if (error) {
         console.error("Error fetching admin setting:", error);
+
         return NextResponse.json(
           { error: "Failed to fetch setting" },
           { status: 500 },
@@ -29,6 +31,7 @@ export async function GET(request: NextRequest) {
       }
 
       let value = data?.value;
+
       if (typeof value === "string") {
         try {
           value = JSON.parse(value);
@@ -36,6 +39,7 @@ export async function GET(request: NextRequest) {
           value = {};
         }
       }
+
       return NextResponse.json(value ?? {}, {
         headers: { "Cache-Control": "no-store, max-age=0" },
       });
@@ -45,27 +49,31 @@ export async function GET(request: NextRequest) {
       data = result.data;
       error = result.error;
 
-    if (error) {
-      console.error("Error fetching admin settings:", error);
+      if (error) {
+        console.error("Error fetching admin settings:", error);
+
         return NextResponse.json(
           { error: "Failed to fetch settings" },
           { status: 500 },
         );
       }
       // Convert array of settings to object format
-      const settingsObject = data?.reduce((acc, setting) => {
-        try {
-          acc[setting.key] = JSON.parse(setting.value);
-        } catch {
-          acc[setting.key] = setting.value;
-        }
-        return acc;
-      }, {}) || {};
+      const settingsObject =
+        data?.reduce((acc, setting) => {
+          try {
+            acc[setting.key] = JSON.parse(setting.value);
+          } catch {
+            acc[setting.key] = setting.value;
+          }
+
+          return acc;
+        }, {}) || {};
 
       return NextResponse.json(settingsObject);
     }
   } catch (error) {
     console.error("Unexpected error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -90,9 +98,11 @@ export async function PUT(request: NextRequest) {
     const results = await Promise.all(updatePromises);
 
     // Check for errors
-    const errors = results.filter(result => result.error);
+    const errors = results.filter((result) => result.error);
+
     if (errors.length > 0) {
       console.error("Error updating admin settings:", errors);
+
       return NextResponse.json(
         { error: "Failed to update some settings" },
         { status: 500 },
@@ -102,6 +112,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Unexpected error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -123,6 +134,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error("Error saving admin setting:", error);
+
       return NextResponse.json(
         { error: "Failed to save setting" },
         { status: 500 },
@@ -132,6 +144,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ setting });
   } catch (error) {
     console.error("Unexpected error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

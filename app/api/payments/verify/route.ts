@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { supabase } from "../../../../lib/supabase";
+
 import { stripe, isStripeAvailable } from "@/lib/stripe";
 
 // GET - Verify payment by session ID or test Stripe configuration
@@ -16,14 +17,15 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
           success: false,
           error: "Stripe is not configured",
-          message: "Please check your STRIPE_SECRET_KEY and NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY environment variables."
+          message:
+            "Please check your STRIPE_SECRET_KEY and NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY environment variables.",
         });
       }
 
       // Test Stripe connection by making a simple API call
       try {
         const account = await stripe!.accounts.retrieve();
-        
+
         return NextResponse.json({
           success: true,
           message: "Stripe is properly configured and connected",
@@ -32,24 +34,24 @@ export async function GET(request: NextRequest) {
             business_type: account.business_type,
             charges_enabled: account.charges_enabled,
             payouts_enabled: account.payouts_enabled,
-            country: account.country
-          }
+            country: account.country,
+          },
         });
       } catch (stripeError) {
         console.error("Stripe API error:", stripeError);
-        
+
         if (stripeError instanceof Error) {
           return NextResponse.json({
             success: false,
             error: "Stripe API error",
-            message: stripeError.message
+            message: stripeError.message,
           });
         }
-        
+
         return NextResponse.json({
           success: false,
           error: "Unknown Stripe error",
-          message: "Failed to connect to Stripe API"
+          message: "Failed to connect to Stripe API",
         });
       }
     }
@@ -88,7 +90,9 @@ export async function GET(request: NextRequest) {
             name:
               payment.customers.first_name && payment.customers.last_name
                 ? `${payment.customers.first_name} ${payment.customers.last_name}`
-                : payment.customers.first_name || payment.customers.last_name || "Unknown Customer",
+                : payment.customers.first_name ||
+                  payment.customers.last_name ||
+                  "Unknown Customer",
           }
         : null,
     };

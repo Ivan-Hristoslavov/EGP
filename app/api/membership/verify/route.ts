@@ -1,15 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
+
+import { NextRequest, NextResponse } from "next/server";
+
 import { supabase } from "@/lib/supabase";
 import { getStripeServer } from "@/lib/stripe";
 
 export async function POST(request: NextRequest) {
   try {
     const stripe = getStripeServer();
+
     if (!stripe) {
       return NextResponse.json(
         { error: "Payment service is not configured" },
-        { status: 503 }
+        { status: 503 },
       );
     }
 
@@ -18,19 +21,19 @@ export async function POST(request: NextRequest) {
     if (!sessionId) {
       return NextResponse.json(
         { error: "Session ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Retrieve the checkout session from Stripe
     const session = await stripe.checkout.sessions.retrieve(sessionId, {
-      expand: ['subscription'],
+      expand: ["subscription"],
     });
 
     if (!session.subscription) {
       return NextResponse.json(
         { error: "No subscription found for this session" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -42,7 +45,7 @@ export async function POST(request: NextRequest) {
     if (!customerId || !planId) {
       return NextResponse.json(
         { error: "Invalid session metadata" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -56,7 +59,7 @@ export async function POST(request: NextRequest) {
     if (planError || !plan) {
       return NextResponse.json(
         { error: "Membership plan not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -82,9 +85,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Create new membership record
-    const startDate = new Date((subscription as any).current_period_start * 1000);
+    const startDate = new Date(
+      (subscription as any).current_period_start * 1000,
+    );
     const endDate = new Date((subscription as any).current_period_end * 1000);
-    const nextBillingDate = new Date((subscription as any).current_period_end * 1000);
+    const nextBillingDate = new Date(
+      (subscription as any).current_period_end * 1000,
+    );
 
     const { data: membership, error: membershipError } = await supabase
       .from("customer_memberships")
@@ -93,13 +100,15 @@ export async function POST(request: NextRequest) {
           customer_id: customerId,
           plan_id: planId,
           stripe_subscription_id: subscription.id,
-          status: subscription.status === 'active' ? 'active' : 'pending',
-          start_date: startDate.toISOString().split('T')[0],
-          end_date: endDate.toISOString().split('T')[0],
-          next_billing_date: nextBillingDate.toISOString().split('T')[0],
+          status: subscription.status === "active" ? "active" : "pending",
+          start_date: startDate.toISOString().split("T")[0],
+          end_date: endDate.toISOString().split("T")[0],
+          next_billing_date: nextBillingDate.toISOString().split("T")[0],
           auto_renew: !subscription.cancel_at_period_end,
           free_treatments_used: 0,
-          free_treatments_reset_date: nextBillingDate.toISOString().split('T')[0],
+          free_treatments_reset_date: nextBillingDate
+            .toISOString()
+            .split("T")[0],
         },
       ])
       .select()
@@ -107,18 +116,19 @@ export async function POST(request: NextRequest) {
 
     if (membershipError) {
       console.error("Error creating membership:", membershipError);
+
       return NextResponse.json(
         { error: "Failed to create membership record" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     // Update customer's membership tier
     await supabase
       .from("customers")
-      .update({ 
+      .update({
         membership_tier: plan.slug,
-        membership_start_date: startDate.toISOString().split('T')[0],
+        membership_start_date: startDate.toISOString().split("T")[0],
         updated_at: new Date().toISOString(),
       })
       .eq("id", customerId);
@@ -136,9 +146,10 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Membership verification error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

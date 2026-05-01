@@ -5,7 +5,9 @@ import sanitizeHtml from "sanitize-html";
  */
 export function aboutContentLooksLikeHtml(content: string): boolean {
   const t = content.trim();
+
   if (t.length < 3 || !t.includes("<")) return false;
+
   return /<\/[a-z][a-z0-9]*>|<[a-z][a-z0-9]*[\s/>]/i.test(t);
 }
 

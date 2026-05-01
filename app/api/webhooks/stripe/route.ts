@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { stripe, STRIPE_TO_DB_STATUS, isStripeAvailable } from "../../../../lib/stripe";
+import {
+  stripe,
+  STRIPE_TO_DB_STATUS,
+  isStripeAvailable,
+} from "../../../../lib/stripe";
 import { supabase } from "../../../../lib/supabase";
 
 // Handle OPTIONS requests (preflight)
@@ -8,24 +12,25 @@ export async function OPTIONS(request: NextRequest) {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Stripe-Signature',
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Stripe-Signature",
     },
   });
 }
 
 export async function POST(request: NextRequest) {
-  console.log('🔔 Webhook received:', {
+  console.log("🔔 Webhook received:", {
     url: request.url,
     method: request.method,
     headers: Object.fromEntries(request.headers.entries()),
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 
   // Check if Stripe is configured
   if (!isStripeAvailable() || !stripe) {
-    console.error('❌ Stripe not configured');
+    console.error("❌ Stripe not configured");
+
     return NextResponse.json(
       { error: "Stripe webhooks are not configured" },
       { status: 503 },
@@ -37,9 +42,10 @@ export async function POST(request: NextRequest) {
 
   // Allow testing without signature in development
   const isDevelopment = process.env.NODE_ENV === "development";
-  
+
   if (!signature && !isDevelopment) {
-    console.error('❌ Missing stripe-signature header');
+    console.error("❌ Missing stripe-signature header");
+
     return NextResponse.json(
       { error: "Missing stripe-signature header" },
       { status: 400 },
@@ -47,7 +53,9 @@ export async function POST(request: NextRequest) {
   }
 
   if (!signature && isDevelopment) {
-    console.log('⚠️  Development mode: Processing webhook without signature verification');
+    console.log(
+      "⚠️  Development mode: Processing webhook without signature verification",
+    );
   }
 
   let event;
@@ -55,21 +63,19 @@ export async function POST(request: NextRequest) {
   try {
     if (signature) {
       const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
       if (!webhookSecret) {
-        console.error('❌ STRIPE_WEBHOOK_SECRET environment variable not set');
+        console.error("❌ STRIPE_WEBHOOK_SECRET environment variable not set");
+
         return NextResponse.json(
           { error: "Webhook secret not configured" },
-          { status: 500 }
+          { status: 500 },
         );
       }
 
-      console.log('🔐 Verifying webhook signature...');
-      event = stripe.webhooks.constructEvent(
-        body,
-        signature,
-        webhookSecret,
-      );
-      console.log('✅ Webhook signature verified successfully');
+      console.log("🔐 Verifying webhook signature...");
+      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+      console.log("✅ Webhook signature verified successfully");
     } else if (isDevelopment) {
       // For development testing, parse the body directly
       event = JSON.parse(body);
@@ -81,28 +87,31 @@ export async function POST(request: NextRequest) {
     console.error("Signature:", signature);
     console.error("Body length:", body.length);
 
-    return NextResponse.json({ 
-      error: "Invalid signature", 
-      details: err instanceof Error ? err.message : 'Unknown error' 
-    }, { status: 400 });
+    return NextResponse.json(
+      {
+        error: "Invalid signature",
+        details: err instanceof Error ? err.message : "Unknown error",
+      },
+      { status: 400 },
+    );
   }
 
   try {
-    console.log('🔄 Processing event:', {
+    console.log("🔄 Processing event:", {
       type: event.type,
       id: event.id,
       created: event.created,
-      livemode: event.livemode
+      livemode: event.livemode,
     });
 
     switch (event.type) {
       case "checkout.session.completed":
-        console.log('💳 Processing checkout session completed');
+        console.log("💳 Processing checkout session completed");
         await handleCheckoutSessionCompleted(event.data.object);
         break;
 
       case "checkout.session.expired":
-        console.log('⏰ Processing checkout session expired');
+        console.log("⏰ Processing checkout session expired");
         await handleCheckoutSessionExpired(event.data.object);
         break;
 
@@ -110,7 +119,7 @@ export async function POST(request: NextRequest) {
       case "payment_intent.payment_failed":
       case "payment_intent.canceled":
       case "payment_intent.requires_action":
-        console.log('💰 Processing payment intent update:', event.type);
+        console.log("💰 Processing payment intent update:", event.type);
         await handlePaymentIntentUpdate(event.data.object);
         break;
 
@@ -118,13 +127,17 @@ export async function POST(request: NextRequest) {
         console.log(`❓ Unhandled event type: ${event.type}`);
     }
 
-    console.log('✅ Webhook processed successfully');
+    console.log("✅ Webhook processed successfully");
+
     return NextResponse.json({ received: true, processed: true });
   } catch (error) {
     console.error("❌ Error handling webhook:", error);
 
     return NextResponse.json(
-      { error: "Webhook handler failed", details: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: "Webhook handler failed",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 },
     );
   }
@@ -232,7 +245,7 @@ async function handlePaymentIntentUpdate(paymentIntent: any) {
   const customerId = paymentIntent.customer;
   const latestCharge = paymentIntent.latest_charge;
   const paymentMethodId = paymentIntent.payment_method;
-  
+
   console.log(`🔍 Processing payment intent: ${paymentIntentId}`, {
     status,
     amount,
@@ -240,12 +253,12 @@ async function handlePaymentIntentUpdate(paymentIntent: any) {
     customerId,
     latestCharge,
     paymentMethodId,
-    metadata: paymentIntent.metadata
+    metadata: paymentIntent.metadata,
   });
 
   // Find payment in database by payment intent ID or metadata
   let payment = null;
-  
+
   // First try to find by payment intent ID (direct reference)
   const { data: paymentByRef, error: findError } = await supabase
     .from("payments")
@@ -258,43 +271,51 @@ async function handlePaymentIntentUpdate(paymentIntent: any) {
   } else {
     // If not found by reference, try to find by payment_id in metadata
     const paymentIdFromMetadata = paymentIntent.metadata?.payment_id;
+
     if (paymentIdFromMetadata) {
       const { data: paymentByMetadata, error: metadataError } = await supabase
         .from("payments")
         .select("*")
         .eq("id", paymentIdFromMetadata)
         .single();
-      
+
       if (!metadataError && paymentByMetadata) {
         payment = paymentByMetadata;
         console.log(`Found payment by metadata: ${paymentIdFromMetadata}`);
       }
     }
-    
+
     // If still not found, try to find by customer email for payment links
     if (!payment && customerId) {
       try {
         // Get the customer email from Stripe
         const stripeCustomer = await stripe?.customers.retrieve(customerId);
+
         if (stripeCustomer && !stripeCustomer.deleted && stripeCustomer.email) {
-          console.log(`Looking for pending payment for customer: ${stripeCustomer.email}`);
-          
+          console.log(
+            `Looking for pending payment for customer: ${stripeCustomer.email}`,
+          );
+
           // Find pending payment links for this customer
           const { data: pendingPayments, error: pendingError } = await supabase
             .from("payments")
-            .select(`
+            .select(
+              `
               *,
               customers!inner(email)
-            `)
+            `,
+            )
             .eq("payment_status", "pending")
             .like("reference", "plink_%")
             .eq("customers.email", stripeCustomer.email)
             .order("created_at", { ascending: false });
-          
+
           if (!pendingError && pendingPayments && pendingPayments.length > 0) {
             // Use the most recent pending payment link for this customer
             payment = pendingPayments[0];
-            console.log(`Found pending payment link for customer ${stripeCustomer.email}: ${payment.reference}`);
+            console.log(
+              `Found pending payment link for customer ${stripeCustomer.email}: ${payment.reference}`,
+            );
           }
         }
       } catch (error) {
@@ -305,7 +326,7 @@ async function handlePaymentIntentUpdate(paymentIntent: any) {
 
   if (!payment) {
     console.error("Payment not found for payment intent:", paymentIntentId);
-    
+
     // For succeeded payments, try to find a booking with this payment intent ID
     if (status === "succeeded") {
       // Check if there's a booking that references this payment intent
@@ -319,10 +340,13 @@ async function handlePaymentIntentUpdate(paymentIntent: any) {
         .single();
 
       if (!bookingError && booking) {
-        console.log(`Found booking ${booking.id} for payment intent ${paymentIntentId}`);
-        
+        console.log(
+          `Found booking ${booking.id} for payment intent ${paymentIntentId}`,
+        );
+
         // Find or create customer
         let customerId: string | null = null;
+
         if (booking.customer_email) {
           const { data: existingCustomer } = await supabase
             .from("customers")
@@ -334,9 +358,9 @@ async function handlePaymentIntentUpdate(paymentIntent: any) {
             customerId = existingCustomer.id;
           } else if (booking.customer_name) {
             // Create customer record
-            const nameParts = booking.customer_name.trim().split(' ');
-            const first_name = nameParts[0] || '';
-            const last_name = nameParts.slice(1).join(' ') || '';
+            const nameParts = booking.customer_name.trim().split(" ");
+            const first_name = nameParts[0] || "";
+            const last_name = nameParts.slice(1).join(" ") || "";
 
             const { data: newCustomer } = await supabase
               .from("customers")
@@ -366,23 +390,29 @@ async function handlePaymentIntentUpdate(paymentIntent: any) {
             payment_status: "paid",
             payment_date: new Date().toISOString().split("T")[0],
             reference: paymentIntentId,
-            notes: `Auto-created from webhook for booking ${booking.id || booking.booking_number || 'N/A'} | Payment Intent: ${paymentIntentId}`,
+            notes: `Auto-created from webhook for booking ${booking.id || booking.booking_number || "N/A"} | Payment Intent: ${paymentIntentId}`,
           });
 
         if (paymentInsertError) {
-          console.error("Error creating payment record from booking:", paymentInsertError);
+          console.error(
+            "Error creating payment record from booking:",
+            paymentInsertError,
+          );
         } else {
-          console.log(`✅ Created payment record for booking ${booking.id} from webhook`);
+          console.log(
+            `✅ Created payment record for booking ${booking.id} from webhook`,
+          );
+
           return; // Successfully created payment record
         }
       }
     }
-    
+
     // For succeeded payments, try to create a new payment record if we can find the customer
     if (status === "succeeded" && customerId) {
       await handleSucceededPaymentWithoutRecord(paymentIntent);
     }
-    
+
     return;
   }
 
@@ -393,9 +423,11 @@ async function handlePaymentIntentUpdate(paymentIntent: any) {
 
   // Determine payment method
   let paymentMethod = "card"; // Default
+
   if (paymentMethodId) {
     try {
       const pm = await stripe?.paymentMethods.retrieve(paymentMethodId);
+
       paymentMethod = pm?.type || "card";
     } catch (error) {
       console.warn("Could not retrieve payment method details:", error);
@@ -410,26 +442,33 @@ async function handlePaymentIntentUpdate(paymentIntent: any) {
   };
 
   // Store the original payment link reference before updating
-  const originalPaymentLinkRef = payment.reference && payment.reference.startsWith("plink_") ? payment.reference : null;
-  
+  const originalPaymentLinkRef =
+    payment.reference && payment.reference.startsWith("plink_")
+      ? payment.reference
+      : null;
+
   // Update reference to payment intent ID if it's different (for payment links)
   if (payment.reference !== paymentIntentId) {
     updateData.reference = paymentIntentId;
-    updateData.notes = `${payment.notes || ""} | Payment Intent: ${paymentIntentId}`.trim();
+    updateData.notes =
+      `${payment.notes || ""} | Payment Intent: ${paymentIntentId}`.trim();
   }
 
   // For succeeded payments, update amount if different (in case of partial payments)
   if (status === "succeeded" && amount) {
     const stripeAmount = amount / 100; // Convert from cents to pounds
+
     if (Math.abs(payment.amount - stripeAmount) > 0.01) {
       updateData.amount = stripeAmount;
-      updateData.notes = `${updateData.notes || payment.notes || ""} | Amount updated from Stripe: £${stripeAmount}`.trim();
+      updateData.notes =
+        `${updateData.notes || payment.notes || ""} | Amount updated from Stripe: £${stripeAmount}`.trim();
     }
   }
 
   // Add charge information to notes
   if (latestCharge) {
-    updateData.notes = `${updateData.notes || payment.notes || ""} | Stripe Charge: ${latestCharge}`.trim();
+    updateData.notes =
+      `${updateData.notes || payment.notes || ""} | Stripe Charge: ${latestCharge}`.trim();
   }
 
   const { error: updateError } = await supabase
@@ -439,6 +478,7 @@ async function handlePaymentIntentUpdate(paymentIntent: any) {
 
   if (updateError) {
     console.error("Error updating payment status:", updateError);
+
     return;
   }
 
@@ -458,12 +498,16 @@ async function handlePaymentIntentUpdate(paymentIntent: any) {
     try {
       console.log(`Disabling payment link: ${originalPaymentLinkRef}`);
       await stripe?.paymentLinks.update(originalPaymentLinkRef, {
-        active: false
+        active: false,
       });
-      console.log(`✅ Payment link ${originalPaymentLinkRef} disabled successfully`);
-      
+      console.log(
+        `✅ Payment link ${originalPaymentLinkRef} disabled successfully`,
+      );
+
       // Update notes to reflect that the link was disabled
-      const disabledNote = `${updateData.notes || payment.notes || ""} | Payment link ${originalPaymentLinkRef} disabled after successful payment`.trim();
+      const disabledNote =
+        `${updateData.notes || payment.notes || ""} | Payment link ${originalPaymentLinkRef} disabled after successful payment`.trim();
+
       await supabase
         .from("payments")
         .update({
@@ -471,9 +515,11 @@ async function handlePaymentIntentUpdate(paymentIntent: any) {
           updated_at: new Date().toISOString(),
         })
         .eq("id", payment.id);
-        
     } catch (disableError) {
-      console.error(`❌ Error disabling payment link ${originalPaymentLinkRef}:`, disableError);
+      console.error(
+        `❌ Error disabling payment link ${originalPaymentLinkRef}:`,
+        disableError,
+      );
       // Don't fail the webhook if we can't disable the link
     }
   }
@@ -486,12 +532,14 @@ async function handleSucceededPaymentWithoutRecord(paymentIntent: any) {
   const amount = paymentIntent.amount / 100; // Convert from cents
   const currency = paymentIntent.currency;
   const customerId = paymentIntent.customer;
-  
-  console.log(`Creating payment record for succeeded payment intent: ${paymentIntentId}`);
+
+  console.log(
+    `Creating payment record for succeeded payment intent: ${paymentIntentId}`,
+  );
 
   try {
     let customer = null;
-    
+
     // First try to find customer by stripe_customer_id if the field exists
     if (customerId) {
       const { data: customerByStripeId } = await supabase
@@ -499,30 +547,37 @@ async function handleSucceededPaymentWithoutRecord(paymentIntent: any) {
         .select("id, email")
         .eq("stripe_customer_id", customerId)
         .single();
-      
+
       if (customerByStripeId) {
         customer = customerByStripeId;
       } else {
         // If not found by Stripe ID, try to get customer email from Stripe and match by email
         try {
           const stripeCustomer = await stripe?.customers.retrieve(customerId);
-          if (stripeCustomer && !stripeCustomer.deleted && stripeCustomer.email) {
+
+          if (
+            stripeCustomer &&
+            !stripeCustomer.deleted &&
+            stripeCustomer.email
+          ) {
             const { data: customerByEmail } = await supabase
               .from("customers")
               .select("id, email")
               .eq("email", stripeCustomer.email)
               .single();
-            
+
             if (customerByEmail) {
               customer = customerByEmail;
-              
+
               // Update the customer with the Stripe customer ID for future use
               await supabase
                 .from("customers")
                 .update({ stripe_customer_id: customerId })
                 .eq("id", customer.id);
-              
-              console.log(`Updated customer ${customer.id} with Stripe ID: ${customerId}`);
+
+              console.log(
+                `Updated customer ${customer.id} with Stripe ID: ${customerId}`,
+              );
             }
           }
         } catch (stripeError) {
@@ -533,30 +588,32 @@ async function handleSucceededPaymentWithoutRecord(paymentIntent: any) {
 
     if (!customer) {
       console.warn(`Customer not found for Stripe customer ID: ${customerId}`);
+
       return;
     }
 
     // Create payment record
-    const { error: insertError } = await supabase
-      .from("payments")
-      .insert({
-        customer_id: customer.id,
-        amount: amount,
-        payment_method: "card",
-        payment_status: "paid",
-        payment_date: new Date().toISOString(),
-        reference: paymentIntentId,
-        notes: `Auto-created from Stripe webhook | Payment Intent: ${paymentIntentId} | Customer: ${customer.email}`,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      });
+    const { error: insertError } = await supabase.from("payments").insert({
+      customer_id: customer.id,
+      amount: amount,
+      payment_method: "card",
+      payment_status: "paid",
+      payment_date: new Date().toISOString(),
+      reference: paymentIntentId,
+      notes: `Auto-created from Stripe webhook | Payment Intent: ${paymentIntentId} | Customer: ${customer.email}`,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
 
     if (insertError) {
       console.error("Error creating payment record:", insertError);
+
       return;
     }
 
-    console.log(`Payment record created for payment intent: ${paymentIntentId}, customer: ${customer.email}`);
+    console.log(
+      `Payment record created for payment intent: ${paymentIntentId}, customer: ${customer.email}`,
+    );
   } catch (error) {
     console.error("Error handling succeeded payment without record:", error);
   }

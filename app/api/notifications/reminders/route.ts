@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { supabase } from "@/lib/supabase";
 import { sendEmail } from "@/lib/sendgrid-smtp";
 import { getAdminContactInfo } from "@/lib/admin-profile";
@@ -7,11 +8,11 @@ export async function POST(request: NextRequest) {
   try {
     // This endpoint can be called by a cron job or scheduled task
     const { type } = await request.json();
-    
+
     if (!type || !["24h", "1h", "followup"].includes(type)) {
       return NextResponse.json(
         { error: "Invalid reminder type. Must be '24h', '1h', or 'followup'" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -21,12 +22,14 @@ export async function POST(request: NextRequest) {
     if (type === "24h") {
       // Get bookings for tomorrow
       const tomorrow = new Date();
+
       tomorrow.setDate(tomorrow.getDate() + 1);
-      const tomorrowString = tomorrow.toISOString().split('T')[0];
-      
+      const tomorrowString = tomorrow.toISOString().split("T")[0];
+
       const { data, error } = await supabase
         .from("bookings")
-        .select(`
+        .select(
+          `
           *,
           customers (
             first_name,
@@ -34,26 +37,27 @@ export async function POST(request: NextRequest) {
             email,
             phone
           )
-        `)
+        `,
+        )
         .eq("date", tomorrowString)
         .in("status", ["confirmed", "pending"])
         .eq("reminder_24h_sent", false);
-      
+
       if (error) throw error;
       bookings = data || [];
       reminderTime = "24 hours";
-    } 
-    else if (type === "1h") {
+    } else if (type === "1h") {
       // Get bookings for today in the next 1-2 hours
       const now = new Date();
       const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
       const twoHoursFromNow = new Date(now.getTime() + 2 * 60 * 60 * 1000);
-      
-      const todayString = now.toISOString().split('T')[0];
-      
+
+      const todayString = now.toISOString().split("T")[0];
+
       const { data, error } = await supabase
         .from("bookings")
-        .select(`
+        .select(
+          `
           *,
           customers (
             first_name,
@@ -61,26 +65,28 @@ export async function POST(request: NextRequest) {
             email,
             phone
           )
-        `)
+        `,
+        )
         .eq("date", todayString)
         .in("status", ["confirmed", "pending"])
         .eq("reminder_1h_sent", false)
         .gte("time", oneHourFromNow.toTimeString().slice(0, 5))
         .lte("time", twoHoursFromNow.toTimeString().slice(0, 5));
-      
+
       if (error) throw error;
       bookings = data || [];
       reminderTime = "1 hour";
-    }
-    else if (type === "followup") {
+    } else if (type === "followup") {
       // Get completed bookings from 3 days ago for follow-up
       const threeDaysAgo = new Date();
+
       threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-      const threeDaysAgoString = threeDaysAgo.toISOString().split('T')[0];
-      
+      const threeDaysAgoString = threeDaysAgo.toISOString().split("T")[0];
+
       const { data, error } = await supabase
         .from("bookings")
-        .select(`
+        .select(
+          `
           *,
           customers (
             first_name,
@@ -88,11 +94,12 @@ export async function POST(request: NextRequest) {
             email,
             phone
           )
-        `)
+        `,
+        )
         .eq("date", threeDaysAgoString)
         .eq("status", "completed")
         .eq("followup_sent", false);
-      
+
       if (error) throw error;
       bookings = data || [];
     }
@@ -107,7 +114,11 @@ export async function POST(request: NextRequest) {
 
         if (type === "24h" || type === "1h") {
           subject = `Reminder: Your ${booking.service} appointment ${reminderTime} from now`;
-          emailContent = generateReminderEmail(booking, reminderTime, contactInfo);
+          emailContent = generateReminderEmail(
+            booking,
+            reminderTime,
+            contactInfo,
+          );
         } else if (type === "followup") {
           subject = `How was your ${booking.service} treatment?`;
           emailContent = generateFollowupEmail(booking, contactInfo);
@@ -118,13 +129,16 @@ export async function POST(request: NextRequest) {
           to: booking.customers.email,
           subject: subject,
           html: emailContent,
-          text: emailContent.replace(/<[^>]*>/g, ''), // Strip HTML tags for text version
+          text: emailContent.replace(/<[^>]*>/g, ""), // Strip HTML tags for text version
         });
 
         // Update booking to mark reminder as sent
-        const updateField = type === "24h" ? "reminder_24h_sent" : 
-                           type === "1h" ? "reminder_1h_sent" : 
-                           "followup_sent";
+        const updateField =
+          type === "24h"
+            ? "reminder_24h_sent"
+            : type === "1h"
+              ? "reminder_1h_sent"
+              : "followup_sent";
 
         await supabase
           .from("bookings")
@@ -137,7 +151,10 @@ export async function POST(request: NextRequest) {
           status: "sent",
         });
       } catch (error) {
-        console.error(`Failed to send reminder for booking ${booking.id}:`, error);
+        console.error(
+          `Failed to send reminder for booking ${booking.id}:`,
+          error,
+        );
         results.push({
           bookingId: booking.id,
           customerEmail: booking.customers.email,
@@ -155,21 +172,26 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Reminder processing error:", error);
+
     return NextResponse.json(
       { error: "Failed to process reminders" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
-function generateReminderEmail(booking: any, reminderTime: string, contactInfo: { phone: string; email: string }): string {
-  const appointmentDate = new Date(booking.date).toLocaleDateString('en-GB', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
+function generateReminderEmail(
+  booking: any,
+  reminderTime: string,
+  contactInfo: { phone: string; email: string },
+): string {
+  const appointmentDate = new Date(booking.date).toLocaleDateString("en-GB", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
-  const firstName = booking.customers?.first_name || 'there';
+  const firstName = booking.customers?.first_name || "there";
 
   return `
 <!DOCTYPE html>
@@ -211,7 +233,7 @@ body{margin:0;padding:0;font-family:Georgia,serif;background:#f5f3ef;color:#1c19
 <div class="row">${booking.service}</div>
 <div class="row">${appointmentDate}</div>
 <div class="row">${booking.time} · £${booking.amount}</div>
-${booking.address ? `<div class="row">${booking.address}</div>` : ''}
+${booking.address ? `<div class="row">${booking.address}</div>` : ""}
 </div>
 
 <p>Need to reschedule? Contact us as soon as possible. We look forward to seeing you.</p>
@@ -227,8 +249,11 @@ ${booking.address ? `<div class="row">${booking.address}</div>` : ''}
   `;
 }
 
-function generateFollowupEmail(booking: any, contactInfo: { phone: string; email: string }): string {
-  const firstName = booking.customers?.first_name || 'there';
+function generateFollowupEmail(
+  booking: any,
+  contactInfo: { phone: string; email: string },
+): string {
+  const firstName = booking.customers?.first_name || "there";
 
   return `
 <!DOCTYPE html>

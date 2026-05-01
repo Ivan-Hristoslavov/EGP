@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 export type BookingService = {
   id: string;
@@ -6,7 +6,7 @@ export type BookingService = {
   description: string;
   price: string;
   icon: string;
-  type: 'pricing_card';
+  type: "pricing_card";
 };
 
 export function usePricingCardsForBooking() {
@@ -17,46 +17,53 @@ export function usePricingCardsForBooking() {
   const fetchPricingCards = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/pricing-cards');
-      
+      const response = await fetch("/api/pricing-cards");
+
       if (!response.ok) {
-        throw new Error('Failed to fetch pricing cards');
+        throw new Error("Failed to fetch pricing cards");
       }
-      
+
       const data = await response.json();
       const pricingCards = data.pricingCards || [];
-      
-      // Convert pricing cards to booking services format
-      const bookingServices: BookingService[] = pricingCards.map((card: any) => {
-        // Get the first price from table_rows if available
-        let price = 'Contact for quote';
-        if (card.table_rows && card.table_rows.length > 0) {
-          const firstRow = card.table_rows[0];
-          // Look for price-like fields in the row
-          const priceField = Object.values(firstRow).find((value: any) => 
-            typeof value === 'string' && 
-            (value.includes('£') || value.includes('€') || value.includes('$') || 
-             /^\d+(\.\d{2})?$/.test(value))
-          );
-          if (priceField) {
-            price = priceField.toString();
-          }
-        }
 
-        return {
-          id: `pricing_${card.id}`,
-          name: card.title,
-          description: card.subtitle || 'Professional service',
-          price: price,
-          icon: '💆', // Default icon for aesthetic services
-          type: 'pricing_card' as const
-        };
-      });
-      
+      // Convert pricing cards to booking services format
+      const bookingServices: BookingService[] = pricingCards.map(
+        (card: any) => {
+          // Get the first price from table_rows if available
+          let price = "Contact for quote";
+
+          if (card.table_rows && card.table_rows.length > 0) {
+            const firstRow = card.table_rows[0];
+            // Look for price-like fields in the row
+            const priceField = Object.values(firstRow).find(
+              (value: any) =>
+                typeof value === "string" &&
+                (value.includes("£") ||
+                  value.includes("€") ||
+                  value.includes("$") ||
+                  /^\d+(\.\d{2})?$/.test(value)),
+            );
+
+            if (priceField) {
+              price = priceField.toString();
+            }
+          }
+
+          return {
+            id: `pricing_${card.id}`,
+            name: card.title,
+            description: card.subtitle || "Professional service",
+            price: price,
+            icon: "💆", // Default icon for aesthetic services
+            type: "pricing_card" as const,
+          };
+        },
+      );
+
       setServices(bookingServices);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Unknown error'));
+      setError(err instanceof Error ? err : new Error("Unknown error"));
       setServices([]);
     } finally {
       setIsLoading(false);
@@ -73,4 +80,4 @@ export function usePricingCardsForBooking() {
     error,
     refetch: fetchPricingCards,
   };
-} 
+}

@@ -271,7 +271,12 @@ export type Database = {
           service: string;
           date: string;
           time: string;
-          status: "scheduled" | "completed" | "cancelled" | "pending" | "confirmed";
+          status:
+            | "scheduled"
+            | "completed"
+            | "cancelled"
+            | "pending"
+            | "confirmed";
           payment_status: "pending" | "paid" | "refunded";
           amount: number;
           address: string | null;
@@ -290,7 +295,12 @@ export type Database = {
           service: string;
           date: string;
           time: string;
-          status?: "scheduled" | "completed" | "cancelled" | "pending" | "confirmed";
+          status?:
+            | "scheduled"
+            | "completed"
+            | "cancelled"
+            | "pending"
+            | "confirmed";
           payment_status?: "pending" | "paid" | "refunded";
           amount: number;
           address?: string | null;
@@ -309,7 +319,12 @@ export type Database = {
           service?: string;
           date?: string;
           time?: string;
-          status?: "scheduled" | "completed" | "cancelled" | "pending" | "confirmed";
+          status?:
+            | "scheduled"
+            | "completed"
+            | "cancelled"
+            | "pending"
+            | "confirmed";
           payment_status?: "pending" | "paid" | "refunded";
           amount?: number;
           address?: string | null;

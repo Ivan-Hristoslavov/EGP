@@ -1,4 +1,8 @@
-import { createDefaultOgImageResponse, defaultOgAlt, ogImageSize } from "@/lib/og-default-image";
+import {
+  createDefaultOgImageResponse,
+  defaultOgAlt,
+  ogImageSize,
+} from "@/lib/og-default-image";
 
 export const runtime = "edge";
 

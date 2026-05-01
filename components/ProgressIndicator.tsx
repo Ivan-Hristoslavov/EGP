@@ -7,11 +7,11 @@ interface ProgressIndicatorProps {
   className?: string;
 }
 
-export function ProgressIndicator({ 
-  currentStep, 
-  totalSteps, 
+export function ProgressIndicator({
+  currentStep,
+  totalSteps,
   steps = [],
-  className = "" 
+  className = "",
 }: ProgressIndicatorProps) {
   const progress = (currentStep / totalSteps) * 100;
 
@@ -21,11 +21,11 @@ export function ProgressIndicator({
       <div className="relative">
         <div className="overflow-hidden h-2 mb-4 text-xs flex rounded-full bg-gray-200 dark:bg-gray-700">
           <div
-            style={{ width: `${progress}%` }}
             className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500 ease-out"
+            style={{ width: `${progress}%` }}
           />
         </div>
-        
+
         {/* Step indicators */}
         {steps.length > 0 && (
           <div className="flex justify-between">
@@ -36,13 +36,23 @@ export function ProgressIndicator({
                     index < currentStep
                       ? "bg-green-500 text-white"
                       : index === currentStep
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-400"
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-400"
                   }`}
                 >
                   {index < currentStep ? (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M5 13l4 4L19 7"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                      />
                     </svg>
                   ) : (
                     index + 1
@@ -56,11 +66,11 @@ export function ProgressIndicator({
           </div>
         )}
       </div>
-      
+
       {/* Progress Text */}
       <div className="text-center text-sm text-gray-600 dark:text-gray-400 mt-2">
         Step {currentStep} of {totalSteps}
       </div>
     </div>
   );
-} 
+}

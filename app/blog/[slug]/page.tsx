@@ -1,10 +1,12 @@
-import type { Metadata } from 'next';
+import type { Metadata } from "next";
+
+import Link from "next/link";
+import { Calendar, Clock, User, ArrowLeft, ArrowRight } from "lucide-react";
+import { notFound } from "next/navigation";
+
 import { siteConfig } from "@/config/site";
 import { canonicalUrl, defaultOgImages, toMetaDescription } from "@/lib/seo";
 import { layout, textColors } from "@/config/typography";
-import Link from "next/link";
-import { Calendar, Clock, User, ArrowLeft, ArrowRight } from "lucide-react";
-import { notFound } from 'next/navigation';
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +28,7 @@ async function getBlogPost(slug: string) {
     return post;
   } catch (error) {
     console.error("Error fetching blog post:", error);
+
     return null;
   }
 }
@@ -47,6 +50,7 @@ async function getAllPosts() {
     return posts;
   } catch (error) {
     console.error("Error fetching all posts:", error);
+
     return [];
   }
 }
@@ -57,10 +61,12 @@ interface PageProps {
   }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const post = await getBlogPost(slug);
-  
+
   if (!post) {
     return {
       title: `Post Not Found | ${siteConfig.name}`,
@@ -69,7 +75,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const title = post.seo_title || `${post.title} | ${siteConfig.name}`;
   const description = toMetaDescription(
-    post.seo_description || post.excerpt || `Read about ${post.title} at EGP Aesthetics London.`
+    post.seo_description ||
+      post.excerpt ||
+      `Read about ${post.title} at EGP Aesthetics London.`,
   );
   const published = post.published_at ? new Date(post.published_at) : undefined;
   const modified = post.updated_at ? new Date(post.updated_at) : published;
@@ -94,7 +102,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
             {
               url: post.featured_image_url.startsWith("http")
                 ? post.featured_image_url
-                : canonicalUrl(post.featured_image_url.startsWith("/") ? post.featured_image_url : `/${post.featured_image_url}`),
+                : canonicalUrl(
+                    post.featured_image_url.startsWith("/")
+                      ? post.featured_image_url
+                      : `/${post.featured_image_url}`,
+                  ),
               alt: post.title,
             },
           ]
@@ -108,7 +120,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         ? [
             post.featured_image_url.startsWith("http")
               ? post.featured_image_url
-              : canonicalUrl(post.featured_image_url.startsWith("/") ? post.featured_image_url : `/${post.featured_image_url}`),
+              : canonicalUrl(
+                  post.featured_image_url.startsWith("/")
+                    ? post.featured_image_url
+                    : `/${post.featured_image_url}`,
+                ),
           ]
         : [canonicalUrl("/opengraph-image")],
     },
@@ -124,11 +140,12 @@ export default async function BlogPostPage({ params }: PageProps) {
   }
 
   const allPosts = await getAllPosts();
-  const currentIndex = allPosts.findIndex(p => p.id === post.id);
+  const currentIndex = allPosts.findIndex((p) => p.id === post.id);
   const nextPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
-  const prevPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
+  const prevPost =
+    currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
 
-  const publishedDate = post.published_at 
+  const publishedDate = post.published_at
     ? new Date(post.published_at)
     : new Date(post.created_at);
 
@@ -138,9 +155,9 @@ export default async function BlogPostPage({ params }: PageProps) {
       <section className="pt-20 sm:pt-24 pb-5 sm:pb-8 md:pb-10 bg-gradient-to-br from-[#FAF7F3] via-[#E6DDD1] to-[#D4C9BC] dark:from-gray-800 dark:via-gray-800 dark:to-gray-900">
         <div className={layout.container}>
           <div className="max-w-4xl mx-auto">
-            <Link 
-              href="/blog"
+            <Link
               className="inline-flex items-center gap-2 text-sm text-[#9d9585] dark:text-[#c9c1b0] hover:text-[#6b5f4b] dark:hover:text-[#e0d8c8] transition-colors mb-3 sm:mb-4"
+              href="/blog"
             >
               <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>Back</span>
@@ -157,7 +174,9 @@ export default async function BlogPostPage({ params }: PageProps) {
               )}
             </div>
 
-            <h1 className={`text-xl sm:text-2xl md:text-3xl font-bold leading-tight ${textColors.heading} mb-3 sm:mb-4 font-montserrat`}>
+            <h1
+              className={`text-xl sm:text-2xl md:text-3xl font-bold leading-tight ${textColors.heading} mb-3 sm:mb-4 font-montserrat`}
+            >
               {post.title}
             </h1>
 
@@ -169,10 +188,10 @@ export default async function BlogPostPage({ params }: PageProps) {
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                 <time dateTime={publishedDate.toISOString()}>
-                  {publishedDate.toLocaleDateString('en-GB', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
+                  {publishedDate.toLocaleDateString("en-GB", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
                   })}
                 </time>
               </div>
@@ -199,18 +218,18 @@ export default async function BlogPostPage({ params }: PageProps) {
             {post.featured_image_url && (
               <div className="mb-4 sm:mb-6 rounded-lg overflow-hidden">
                 <img
-                  src={post.featured_image_url}
                   alt={post.title}
                   className="w-full h-auto object-cover max-h-[200px] sm:max-h-[320px] md:max-h-none object-top"
+                  src={post.featured_image_url}
                 />
               </div>
             )}
 
             {/* Blog Content */}
             <article className="prose prose-sm sm:prose-base dark:prose-invert max-w-none prose-headings:text-base sm:prose-headings:text-lg md:prose-headings:text-xl prose-p:text-sm sm:prose-p:text-base prose-li:text-sm sm:prose-li:text-base">
-              <div 
-                className="blog-content"
+              <div
                 dangerouslySetInnerHTML={{ __html: post.content }}
+                className="blog-content"
               />
             </article>
 
@@ -219,28 +238,32 @@ export default async function BlogPostPage({ params }: PageProps) {
               <div className="flex flex-col sm:flex-row justify-between gap-6">
                 {prevPost ? (
                   <Link
-                    href={`/blog/${prevPost.slug}`}
                     className="group flex items-start gap-4 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    href={`/blog/${prevPost.slug}`}
                   >
                     <ArrowLeft className="w-5 h-5 text-gray-400 group-hover:text-[#9d9585] dark:group-hover:text-[#c9c1b0] transition-colors mt-1 flex-shrink-0" />
                     <div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Previous Post</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                        Previous Post
+                      </div>
                       <div className="font-semibold text-gray-900 dark:text-white group-hover:text-[#6b5f4b] dark:group-hover:text-[#d9d1c1] transition-colors">
                         {prevPost.title}
                       </div>
                     </div>
                   </Link>
                 ) : (
-                  <div></div>
+                  <div />
                 )}
 
                 {nextPost && (
                   <Link
-                    href={`/blog/${nextPost.slug}`}
                     className="group flex items-start gap-4 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-right sm:text-left"
+                    href={`/blog/${nextPost.slug}`}
                   >
                     <div className="flex-1">
-                      <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Next Post</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                        Next Post
+                      </div>
                       <div className="font-semibold text-gray-900 dark:text-white group-hover:text-[#6b5f4b] dark:group-hover:text-[#d9d1c1] transition-colors">
                         {nextPost.title}
                       </div>
@@ -252,8 +275,8 @@ export default async function BlogPostPage({ params }: PageProps) {
 
               <div className="mt-8 text-center">
                 <Link
-                  href="/blog"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] text-[#3f3a31] rounded-lg hover:from-[#B8A99A] hover:via-[#D4C9BC] hover:to-[#EDE6DC] transition-colors font-medium"
+                  href="/blog"
                 >
                   <ArrowLeft className="w-5 h-5" />
                   View All Posts
@@ -266,4 +289,3 @@ export default async function BlogPostPage({ params }: PageProps) {
     </div>
   );
 }
-

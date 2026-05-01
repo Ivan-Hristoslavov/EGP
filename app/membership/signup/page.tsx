@@ -3,7 +3,14 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Check, Star, ArrowLeft, CreditCard, Calendar, Gift } from "lucide-react";
+import {
+  Check,
+  Star,
+  ArrowLeft,
+  CreditCard,
+  Calendar,
+  Gift,
+} from "lucide-react";
 
 interface MembershipPlan {
   id: string;
@@ -24,7 +31,9 @@ interface MembershipPlan {
 export default function MembershipSignupPage() {
   const [plans, setPlans] = useState<MembershipPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<MembershipPlan | null>(null);
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">(
+    "monthly",
+  );
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
@@ -37,8 +46,10 @@ export default function MembershipSignupPage() {
   const loadMembershipPlans = async () => {
     try {
       const response = await fetch("/api/membership/plans");
+
       if (response.ok) {
         const data = await response.json();
+
         setPlans(data.plans);
         if (data.plans.length > 0) {
           setSelectedPlan(data.plans[1]); // Default to Premium plan
@@ -59,8 +70,10 @@ export default function MembershipSignupPage() {
 
     try {
       const token = localStorage.getItem("customer_token");
+
       if (!token) {
         router.push("/customer/login?redirect=/membership/signup");
+
         return;
       }
 
@@ -98,8 +111,10 @@ export default function MembershipSignupPage() {
   const getSavings = (plan: MembershipPlan) => {
     if (billingCycle === "yearly") {
       const monthlyTotal = plan.price_monthly * 12;
+
       return monthlyTotal - plan.price_yearly;
     }
+
     return 0;
   };
 
@@ -107,8 +122,10 @@ export default function MembershipSignupPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-pink-50/50 to-purple-50/50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading membership plans...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-400">
+            Loading membership plans...
+          </p>
         </div>
       </div>
     );
@@ -119,20 +136,21 @@ export default function MembershipSignupPage() {
       <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
-          <Link 
-            href="/membership" 
+          <Link
             className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-6 transition-colors"
+            href="/membership"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Membership
           </Link>
-          
+
           <div className="text-center">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent font-montserrat mb-4">
               Choose Your Membership Plan
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Join our exclusive membership program and enjoy premium benefits, priority booking, and exclusive discounts.
+              Join our exclusive membership program and enjoy premium benefits,
+              priority booking, and exclusive discounts.
             </p>
           </div>
         </div>
@@ -142,22 +160,22 @@ export default function MembershipSignupPage() {
           <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-1 shadow-lg border border-rose-100/50 dark:border-gray-700/50">
             <div className="flex">
               <button
-                onClick={() => setBillingCycle("monthly")}
                 className={`px-6 py-3 rounded-lg font-semibold transition-all ${
                   billingCycle === "monthly"
                     ? "bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-lg"
                     : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                 }`}
+                onClick={() => setBillingCycle("monthly")}
               >
                 Monthly
               </button>
               <button
-                onClick={() => setBillingCycle("yearly")}
                 className={`px-6 py-3 rounded-lg font-semibold transition-all ${
                   billingCycle === "yearly"
                     ? "bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-lg"
                     : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                 }`}
+                onClick={() => setBillingCycle("yearly")}
               >
                 Yearly
                 <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
@@ -172,7 +190,9 @@ export default function MembershipSignupPage() {
         {error && (
           <div className="max-w-4xl mx-auto mb-8">
             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-              <p className="text-red-600 dark:text-red-400 text-center">{error}</p>
+              <p className="text-red-600 dark:text-red-400 text-center">
+                {error}
+              </p>
             </div>
           </div>
         )}
@@ -229,7 +249,9 @@ export default function MembershipSignupPage() {
                     {plan.features.map((feature, index) => (
                       <div key={index} className="flex items-start">
                         <Check className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                        <span className="text-gray-700 dark:text-gray-300">{feature}</span>
+                        <span className="text-gray-700 dark:text-gray-300">
+                          {feature}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -251,7 +273,9 @@ export default function MembershipSignupPage() {
                     {plan.free_treatments_per_month > 0 && (
                       <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                         <Star className="w-4 h-4 mr-2" />
-                        {plan.free_treatments_per_month} free treatment{plan.free_treatments_per_month > 1 ? 's' : ''} per month
+                        {plan.free_treatments_per_month} free treatment
+                        {plan.free_treatments_per_month > 1 ? "s" : ""} per
+                        month
                       </div>
                     )}
                   </div>
@@ -276,13 +300,13 @@ export default function MembershipSignupPage() {
         {selectedPlan && (
           <div className="text-center mt-12">
             <button
-              onClick={handleSignup}
-              disabled={processing}
               className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 text-white font-semibold rounded-lg hover:from-rose-600 hover:via-pink-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-lg"
+              disabled={processing}
+              onClick={handleSignup}
             >
               {processing ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3" />
                   Processing...
                 </>
               ) : (

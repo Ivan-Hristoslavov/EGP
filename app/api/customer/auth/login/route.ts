@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+
+import { supabase } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,7 +11,7 @@ export async function POST(request: NextRequest) {
     if (!email || !password) {
       return NextResponse.json(
         { error: "Email and password are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -24,28 +25,32 @@ export async function POST(request: NextRequest) {
     if (customerError || !customer) {
       return NextResponse.json(
         { error: "Invalid email or password" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     // Verify password
-    const isValidPassword = await bcrypt.compare(password, customer.password_hash);
+    const isValidPassword = await bcrypt.compare(
+      password,
+      customer.password_hash,
+    );
+
     if (!isValidPassword) {
       return NextResponse.json(
         { error: "Invalid email or password" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     // Generate JWT token
     const token = jwt.sign(
-      { 
-        customerId: customer.id, 
+      {
+        customerId: customer.id,
         email: customer.email,
-        type: "customer"
+        type: "customer",
       },
       process.env.JWT_SECRET || "fallback-secret",
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     // Remove password hash from response
@@ -58,9 +63,10 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Login error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Calendar, X, Clock, User, Mail, Phone } from "lucide-react";
-import { siteConfig } from "@/config/site";
+
 import { useAdminProfile } from "@/components/AdminProfileContext";
 
 interface ButtonBookNowProps {
@@ -30,7 +30,9 @@ export default function ButtonBookNow({
     notes: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
+  const [submitStatus, setSubmitStatus] = useState<
+    "idle" | "success" | "error"
+  >("idle");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,7 +68,7 @@ export default function ButtonBookNow({
           preferredTime: "",
           notes: "",
         });
-        
+
         // Close modal after 2 seconds
         setTimeout(() => {
           setIsModalOpen(false);
@@ -84,8 +86,9 @@ export default function ButtonBookNow({
   };
 
   const getButtonClasses = () => {
-    const baseClasses = "inline-flex items-center justify-center gap-2 font-semibold rounded-full transition-all duration-300";
-    
+    const baseClasses =
+      "inline-flex items-center justify-center gap-2 font-semibold rounded-full transition-all duration-300";
+
     const sizeClasses = {
       sm: "px-4 py-2 text-sm",
       md: "px-6 py-3 text-base",
@@ -93,9 +96,12 @@ export default function ButtonBookNow({
     };
 
     const variantClasses = {
-      primary: "bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 text-white hover:from-rose-600 hover:via-pink-600 hover:to-rose-700 shadow-lg hover:shadow-xl hover:scale-105",
-      secondary: "bg-white text-rose-600 border-2 border-rose-500 hover:bg-rose-50 shadow-md hover:shadow-lg",
-      outline: "bg-transparent text-rose-600 border-2 border-rose-500 hover:bg-gradient-to-r hover:from-rose-500 hover:to-pink-600 hover:text-white",
+      primary:
+        "bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 text-white hover:from-rose-600 hover:via-pink-600 hover:to-rose-700 shadow-lg hover:shadow-xl hover:scale-105",
+      secondary:
+        "bg-white text-rose-600 border-2 border-rose-500 hover:bg-rose-50 shadow-md hover:shadow-lg",
+      outline:
+        "bg-transparent text-rose-600 border-2 border-rose-500 hover:bg-gradient-to-r hover:from-rose-500 hover:to-pink-600 hover:text-white",
     };
 
     return `${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]} ${className}`;
@@ -111,12 +117,14 @@ export default function ButtonBookNow({
             <div className="sticky top-0 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 text-white px-6 py-4 flex items-center justify-between rounded-t-2xl">
               <div>
                 <h2 className="text-3xl font-bold">Book Treatment Now</h2>
-                <p className="text-rose-100 text-base mt-2">Worth £50 - Absolutely FREE!</p>
+                <p className="text-rose-100 text-base mt-2">
+                  Worth £50 - Absolutely FREE!
+                </p>
               </div>
               <button
-                onClick={() => setIsModalOpen(false)}
-                className="p-2 hover:bg-white/20 rounded-full transition-colors"
                 aria-label="Close modal"
+                className="p-2 hover:bg-white/20 rounded-full transition-colors"
+                onClick={() => setIsModalOpen(false)}
               >
                 <X className="w-6 h-6" />
               </button>
@@ -133,11 +141,12 @@ export default function ButtonBookNow({
                     Consultation Booked!
                   </h3>
                   <p className="text-gray-600">
-                    Thank you! We'll contact you shortly to confirm your appointment.
+                    Thank you! We'll contact you shortly to confirm your
+                    appointment.
                   </p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form className="space-y-4" onSubmit={handleSubmit}>
                   {/* Name */}
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -145,12 +154,14 @@ export default function ButtonBookNow({
                       Full Name *
                     </label>
                     <input
-                      type="text"
                       required
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="w-full px-4 py-3 border border-rose-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/30 transition-colors"
                       placeholder="John Smith"
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
                     />
                   </div>
 
@@ -161,12 +172,14 @@ export default function ButtonBookNow({
                       Email Address *
                     </label>
                     <input
-                      type="email"
                       required
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="w-full px-4 py-3 border border-rose-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/30 transition-colors"
                       placeholder="john@example.com"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
                     />
                   </div>
 
@@ -177,12 +190,14 @@ export default function ButtonBookNow({
                       Phone Number *
                     </label>
                     <input
-                      type="tel"
                       required
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       className="w-full px-4 py-3 border border-rose-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/30 transition-colors"
                       placeholder="+44 7XXX XXXXXX"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) =>
+                        setFormData({ ...formData, phone: e.target.value })
+                      }
                     />
                   </div>
 
@@ -194,11 +209,16 @@ export default function ButtonBookNow({
                         Preferred Date
                       </label>
                       <input
+                        className="w-full px-4 py-3 border border-rose-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/30 transition-colors"
+                        min={new Date().toISOString().split("T")[0]}
                         type="date"
                         value={formData.preferredDate}
-                        onChange={(e) => setFormData({ ...formData, preferredDate: e.target.value })}
-                        min={new Date().toISOString().split("T")[0]}
-                        className="w-full px-4 py-3 border border-rose-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/30 transition-colors"
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            preferredDate: e.target.value,
+                          })
+                        }
                       />
                     </div>
                     <div>
@@ -207,9 +227,14 @@ export default function ButtonBookNow({
                         Preferred Time
                       </label>
                       <select
-                        value={formData.preferredTime}
-                        onChange={(e) => setFormData({ ...formData, preferredTime: e.target.value })}
                         className="w-full px-4 py-3 border border-rose-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/30 transition-colors"
+                        value={formData.preferredTime}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            preferredTime: e.target.value,
+                          })
+                        }
                       >
                         <option value="">Select time</option>
                         <option value="09:00">09:00 AM</option>
@@ -231,18 +256,21 @@ export default function ButtonBookNow({
                       Additional Notes (Optional)
                     </label>
                     <textarea
-                      value={formData.notes}
-                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      rows={3}
                       className="w-full px-4 py-3 border border-rose-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/30 transition-colors resize-none"
                       placeholder="Any specific concerns or questions?"
+                      rows={3}
+                      value={formData.notes}
+                      onChange={(e) =>
+                        setFormData({ ...formData, notes: e.target.value })
+                      }
                     />
                   </div>
 
                   {/* Error Message */}
                   {submitStatus === "error" && (
                     <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-                      Sorry, there was an error booking your consultation. Please try calling us directly.
+                      Sorry, there was an error booking your consultation.
+                      Please try calling us directly.
                     </div>
                   )}
 
@@ -274,9 +302,9 @@ export default function ButtonBookNow({
 
                   {/* Submit Button */}
                   <button
-                    type="submit"
-                    disabled={isSubmitting}
                     className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 text-white font-bold rounded-full hover:from-rose-600 hover:via-pink-600 hover:to-rose-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl hover:shadow-2xl"
+                    disabled={isSubmitting}
+                    type="submit"
                   >
                     {isSubmitting ? (
                       <>
@@ -293,10 +321,12 @@ export default function ButtonBookNow({
 
                   {/* Contact Alternative */}
                   <div className="text-center pt-4 border-t border-rose-100">
-                    <p className="text-sm text-gray-600 mb-2">Prefer to speak to us?</p>
+                    <p className="text-sm text-gray-600 mb-2">
+                      Prefer to speak to us?
+                    </p>
                     <a
-                      href={`tel:${contactPhone}`}
                       className="bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent hover:from-rose-700 hover:to-pink-700 font-bold text-sm"
+                      href={`tel:${contactPhone}`}
                     >
                       Call {contactPhone}
                     </a>
@@ -310,4 +340,3 @@ export default function ButtonBookNow({
     </>
   );
 }
-

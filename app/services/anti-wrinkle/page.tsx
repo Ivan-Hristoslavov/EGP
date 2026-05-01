@@ -1,34 +1,82 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Clock, ArrowRight, Filter, X } from "lucide-react";
+import {
+  Select,
+  SelectItem,
+  Chip,
+  Button,
+  Accordion,
+  AccordionItem,
+} from "@heroui/react";
+
 import ButtonBookNow from "@/components/ButtonBookNow";
-import { Select, SelectItem, Chip, Button, Accordion, AccordionItem } from "@heroui/react";
 
 const antiWrinkleServices = [
-  { name: "Baby Botox", price: 199, duration: 15, slug: "baby-botox", popular: true },
+  {
+    name: "Baby Botox",
+    price: 199,
+    duration: 15,
+    slug: "baby-botox",
+    popular: true,
+  },
   { name: "Brow Lift", price: 279, duration: 15, slug: "brow-lift" },
-  { name: "Eye Wrinkles (Crow's Feet)", price: 179, duration: 15, slug: "eye-wrinkles" },
-  { name: "Forehead Lines", price: 179, duration: 15, slug: "forehead-lines", popular: true },
-  { name: "Glabella Lines (Frown Lines)", price: 179, duration: 15, slug: "glabella-lines" },
+  {
+    name: "Eye Wrinkles (Crow's Feet)",
+    price: 179,
+    duration: 15,
+    slug: "eye-wrinkles",
+  },
+  {
+    name: "Forehead Lines",
+    price: 179,
+    duration: 15,
+    slug: "forehead-lines",
+    popular: true,
+  },
+  {
+    name: "Glabella Lines (Frown Lines)",
+    price: 179,
+    duration: 15,
+    slug: "glabella-lines",
+  },
   { name: "Barcode Lips", price: 129, duration: 10, slug: "barcode-lips" },
   { name: "Bunny Lines", price: 129, duration: 10, slug: "bunny-lines" },
   { name: "Lip Lines", price: 179, duration: 15, slug: "lip-lines" },
   { name: "Gummy Smile", price: 129, duration: 10, slug: "gummy-smile" },
   { name: "Neck Lift", price: 329, duration: 20, slug: "neck-lift" },
-  { name: "Jaw Slimming", price: 279, duration: 20, slug: "jaw-slimming", popular: true },
+  {
+    name: "Jaw Slimming",
+    price: 279,
+    duration: 20,
+    slug: "jaw-slimming",
+    popular: true,
+  },
   { name: "Pebble Chin", price: 179, duration: 10, slug: "pebble-chin" },
-  { name: "Bruxism Treatment (Teeth Grinding)", price: 279, duration: 20, slug: "bruxism" },
+  {
+    name: "Bruxism Treatment (Teeth Grinding)",
+    price: 279,
+    duration: 20,
+    slug: "bruxism",
+  },
 ];
 
-type SortOption = "popular" | "price-asc" | "price-desc" | "duration-asc" | "duration-desc" | "name-asc";
+type SortOption =
+  | "popular"
+  | "price-asc"
+  | "price-desc"
+  | "duration-asc"
+  | "duration-desc"
+  | "name-asc";
 
 export default function AntiWrinklePage() {
   const [sortBy, setSortBy] = useState<SortOption>("popular");
   const [showPopularOnly, setShowPopularOnly] = useState(false);
   const [priceRange, setPriceRange] = useState<string>("all");
   const [durationRange, setDurationRange] = useState<string>("all");
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero */}
@@ -53,21 +101,23 @@ export default function AntiWrinklePage() {
             {/* Quick Filters */}
             <div className="flex flex-wrap gap-3 items-center mb-4">
               <Chip
-                variant={showPopularOnly ? "solid" : "flat"}
                 className={showPopularOnly ? "bg-egp-green text-white" : ""}
-                onClick={() => setShowPopularOnly(!showPopularOnly)}
                 classNames={{
                   base: "cursor-pointer hover:opacity-80 transition-opacity",
                 }}
+                variant={showPopularOnly ? "solid" : "flat"}
+                onClick={() => setShowPopularOnly(!showPopularOnly)}
               >
                 Popular Only
               </Chip>
-              
-              {(priceRange !== "all" || durationRange !== "all" || showPopularOnly) && (
+
+              {(priceRange !== "all" ||
+                durationRange !== "all" ||
+                showPopularOnly) && (
                 <Button
-                  variant="light"
                   size="sm"
                   startContent={<X className="w-4 h-4" />}
+                  variant="light"
                   onClick={() => {
                     setShowPopularOnly(false);
                     setPriceRange("all");
@@ -81,31 +131,33 @@ export default function AntiWrinklePage() {
 
             {/* Filters Accordion */}
             <Accordion
-              selectionMode="multiple"
-              defaultExpandedKeys={["sort"]}
-              variant="bordered"
               className="bg-white rounded-lg"
+              defaultExpandedKeys={["sort"]}
               itemClasses={{
                 base: "px-4",
                 title: "text-sm font-semibold",
                 trigger: "py-3",
                 content: "pb-4",
               }}
+              selectionMode="multiple"
+              variant="bordered"
             >
               <AccordionItem
                 key="filters"
-                title="Filters"
                 startContent={<Filter className="w-4 h-4 text-egp-green" />}
+                title="Filters"
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Select
-                    label="Price Range"
-                    selectedKeys={[priceRange]}
-                    onSelectionChange={(keys) => setPriceRange(Array.from(keys)[0] as string)}
-                    size="sm"
                     classNames={{
                       trigger: "bg-white border border-gray-200",
                     }}
+                    label="Price Range"
+                    selectedKeys={[priceRange]}
+                    size="sm"
+                    onSelectionChange={(keys) =>
+                      setPriceRange(Array.from(keys)[0] as string)
+                    }
                   >
                     <SelectItem key="all">All Prices</SelectItem>
                     <SelectItem key="under-150">Under £150</SelectItem>
@@ -115,13 +167,15 @@ export default function AntiWrinklePage() {
                   </Select>
 
                   <Select
-                    label="Duration"
-                    selectedKeys={[durationRange]}
-                    onSelectionChange={(keys) => setDurationRange(Array.from(keys)[0] as string)}
-                    size="sm"
                     classNames={{
                       trigger: "bg-white border border-gray-200",
                     }}
+                    label="Duration"
+                    selectedKeys={[durationRange]}
+                    size="sm"
+                    onSelectionChange={(keys) =>
+                      setDurationRange(Array.from(keys)[0] as string)
+                    }
                   >
                     <SelectItem key="all">All Durations</SelectItem>
                     <SelectItem key="10">10 minutes</SelectItem>
@@ -133,16 +187,18 @@ export default function AntiWrinklePage() {
 
               <AccordionItem
                 key="sort"
-                title="Sort By"
                 startContent={<Clock className="w-4 h-4 text-egp-green" />}
+                title="Sort By"
               >
                 <Select
-                  selectedKeys={[sortBy]}
-                  onSelectionChange={(keys) => setSortBy(Array.from(keys)[0] as SortOption)}
-                  size="sm"
                   classNames={{
                     trigger: "bg-white border border-gray-200",
                   }}
+                  selectedKeys={[sortBy]}
+                  size="sm"
+                  onSelectionChange={(keys) =>
+                    setSortBy(Array.from(keys)[0] as SortOption)
+                  }
                 >
                   <SelectItem key="popular">Popular First</SelectItem>
                   <SelectItem key="price-asc">Price: Low to High</SelectItem>
@@ -162,20 +218,34 @@ export default function AntiWrinklePage() {
         <div className="container mx-auto px-4">
           {(() => {
             // Filter services
-            let filtered = antiWrinkleServices.filter(service => {
+            let filtered = antiWrinkleServices.filter((service) => {
               if (showPopularOnly && !service.popular) return false;
-              
+
               // Price filter
               if (priceRange !== "all") {
-                if (priceRange === "under-150" && service.price >= 150) return false;
-                if (priceRange === "150-200" && (service.price < 150 || service.price > 200)) return false;
-                if (priceRange === "200-300" && (service.price < 200 || service.price > 300)) return false;
-                if (priceRange === "over-300" && service.price <= 300) return false;
+                if (priceRange === "under-150" && service.price >= 150)
+                  return false;
+                if (
+                  priceRange === "150-200" &&
+                  (service.price < 150 || service.price > 200)
+                )
+                  return false;
+                if (
+                  priceRange === "200-300" &&
+                  (service.price < 200 || service.price > 300)
+                )
+                  return false;
+                if (priceRange === "over-300" && service.price <= 300)
+                  return false;
               }
-              
+
               // Duration filter
-              if (durationRange !== "all" && service.duration !== parseInt(durationRange)) return false;
-              
+              if (
+                durationRange !== "all" &&
+                service.duration !== parseInt(durationRange)
+              )
+                return false;
+
               return true;
             });
 
@@ -185,6 +255,7 @@ export default function AntiWrinklePage() {
                 case "popular":
                   if (a.popular && !b.popular) return -1;
                   if (!a.popular && b.popular) return 1;
+
                   return a.price - b.price; // Secondary sort by price
                 case "price-asc":
                   return a.price - b.price;
@@ -205,10 +276,12 @@ export default function AntiWrinklePage() {
               <>
                 {filtered.length === 0 ? (
                   <div className="text-center py-12">
-                    <p className="text-gray-600 text-lg">No services found matching your filters.</p>
+                    <p className="text-gray-600 text-lg">
+                      No services found matching your filters.
+                    </p>
                     <Button
-                      variant="light"
                       className="mt-4"
+                      variant="light"
                       onClick={() => {
                         setShowPopularOnly(false);
                         setPriceRange("all");
@@ -221,43 +294,48 @@ export default function AntiWrinklePage() {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filtered.map((service) => (
-              <div
-                key={service.slug}
-                className="group relative bg-white border-2 border-gray-200 rounded-xl p-5 hover:border-egp-green hover:shadow-xl transition-all duration-300 flex flex-col"
-              >
-                {service.popular && (
-                  <span className="absolute top-3 right-3 px-2 py-0.5 bg-gradient-to-r from-egp-green to-egp-green-dark text-white text-[10px] font-bold rounded-full">
-                    POPULAR
-                  </span>
-                )}
+                      <div
+                        key={service.slug}
+                        className="group relative bg-white border-2 border-gray-200 rounded-xl p-5 hover:border-egp-green hover:shadow-xl transition-all duration-300 flex flex-col"
+                      >
+                        {service.popular && (
+                          <span className="absolute top-3 right-3 px-2 py-0.5 bg-gradient-to-r from-egp-green to-egp-green-dark text-white text-[10px] font-bold rounded-full">
+                            POPULAR
+                          </span>
+                        )}
 
-                <Link href={`/services/${service.slug}`} className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2 pr-16 group-hover:text-egp-green transition-colors">
-                    {service.name}
-                  </h3>
+                        <Link
+                          className="flex-1"
+                          href={`/services/${service.slug}`}
+                        >
+                          <h3 className="text-lg font-bold text-gray-900 mb-2 pr-16 group-hover:text-egp-green transition-colors">
+                            {service.name}
+                          </h3>
 
-                  <div className="flex items-center gap-3 text-xs text-gray-600 mb-3">
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      <span>{service.duration} min</span>
-                    </div>
-                  </div>
-                </Link>
+                          <div className="flex items-center gap-3 text-xs text-gray-600 mb-3">
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              <span>{service.duration} min</span>
+                            </div>
+                          </div>
+                        </Link>
 
-                <div className="flex items-center justify-between pt-3 border-t border-gray-200 mt-auto">
-                  <div>
-                    <span className="text-xs text-gray-600">From</span>
-                    <div className="text-lg font-bold text-egp-green">£{service.price}</div>
-                  </div>
-                  <Link
-                    href="/book/new"
-                    className="flex items-center gap-2 text-egp-green font-semibold hover:text-egp-green-dark hover:gap-3 transition-all"
-                  >
-                    <span>Book</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
-                    </div>
+                        <div className="flex items-center justify-between pt-3 border-t border-gray-200 mt-auto">
+                          <div>
+                            <span className="text-xs text-gray-600">From</span>
+                            <div className="text-lg font-bold text-egp-green">
+                              £{service.price}
+                            </div>
+                          </div>
+                          <Link
+                            className="flex items-center gap-2 text-egp-green font-semibold hover:text-egp-green-dark hover:gap-3 transition-all"
+                            href="/book/new"
+                          >
+                            <span>Book</span>
+                            <ArrowRight className="w-4 h-4" />
+                          </Link>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -274,12 +352,16 @@ export default function AntiWrinklePage() {
             Start Your Anti-Aging Journey Today
           </h2>
           <p className="text-base sm:text-lg md:text-xl text-white/90 mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
-            Book your treatment now and discover how we can help you look and feel your best
+            Book your treatment now and discover how we can help you look and
+            feel your best
           </p>
-          <ButtonBookNow size="lg" variant="secondary" className="w-full sm:w-auto mx-4 sm:mx-0" />
+          <ButtonBookNow
+            className="w-full sm:w-auto mx-4 sm:mx-0"
+            size="lg"
+            variant="secondary"
+          />
         </div>
       </section>
     </div>
   );
 }
-

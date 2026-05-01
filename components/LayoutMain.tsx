@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 
-import { AdminProfile } from "@/lib/admin-profile";
-
 import HeaderAesthetics from "./HeaderAesthetics";
 import FloatingContactButtons from "./FloatingContactButtons";
-import FooterAesthetics from './FooterAesthetics';
+import FooterAesthetics from "./FooterAesthetics";
+
+import { AdminProfile } from "@/lib/admin-profile";
 
 export default function LayoutMain({
   children,
@@ -17,7 +17,8 @@ export default function LayoutMain({
   adminProfile: AdminProfile | null;
 }) {
   const [isMounted, setIsMounted] = useState(false);
-  const [showFreeConsultationPopup, setShowFreeConsultationPopup] = useState(false);
+  const [showFreeConsultationPopup, setShowFreeConsultationPopup] =
+    useState(false);
   const pathname = usePathname();
 
   // Check if we're in admin panel
@@ -45,19 +46,23 @@ export default function LayoutMain({
   useEffect(() => {
     if (!isMounted || isAdminPanel) return;
     try {
-      if (typeof window !== "undefined" && window.sessionStorage.getItem(FREE_CONSULT_SESSION_KEY)) {
+      if (
+        typeof window !== "undefined" &&
+        window.sessionStorage.getItem(FREE_CONSULT_SESSION_KEY)
+      ) {
         return; // already dismissed this session – don’t show until browser is closed
       }
     } catch {
       // ignore
     }
     const t = setTimeout(() => setShowFreeConsultationPopup(true), 2500);
+
     return () => clearTimeout(t);
   }, [isMounted, isAdminPanel]);
 
   // Always use default padding class to match server render
   // Only apply dynamic padding class after mount to avoid hydration mismatch
-  const paddingClass = 'pt-[90px] sm:pt-[100px]';
+  const paddingClass = "pt-[90px] sm:pt-[100px]";
 
   // If we're in admin panel, render only the children without main layout elements
   if (isAdminPanel) {
@@ -73,9 +78,9 @@ export default function LayoutMain({
             <div className="pointer-events-none absolute -top-20 -left-16 h-48 w-48 rounded-full bg-[#c9c1b0]/25 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-20 -right-16 h-56 w-56 rounded-full bg-egp-green/15 blur-3xl" />
             <button
+              aria-label="Close free consultation offer"
               className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 text-sm"
               onClick={dismissFreeConsultPopup}
-              aria-label="Close free consultation offer"
             >
               ✕
             </button>
@@ -86,14 +91,16 @@ export default function LayoutMain({
               Free Discovery Consultation
             </h2>
             <p className="text-sm text-gray-700 dark:text-gray-300 text-center mb-4 max-w-[34ch] mx-auto leading-relaxed">
-              Get your personalised treatment plan with a complimentary consultation.
+              Get your personalised treatment plan with a complimentary
+              consultation.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 mt-1.5">
               <button
                 className="flex-1 inline-flex items-center justify-center rounded-full bg-egp-green hover:bg-egp-green-dark text-white text-sm font-semibold py-3 px-4 transition-colors shadow-lg"
                 onClick={() => {
                   dismissFreeConsultPopup();
-                  window.location.href = "/book?service=free-discovery-consultation";
+                  window.location.href =
+                    "/book?service=free-discovery-consultation";
                 }}
               >
                 Book Free Consultation
@@ -111,18 +118,18 @@ export default function LayoutMain({
 
       {/* New Aesthetics Header - Fixed position */}
       <HeaderAesthetics />
-      
+
       {/* Floating Contact Buttons */}
       <FloatingContactButtons />
-      
+
       {/* Main content with padding for fixed header */}
-      <main 
+      <main
+        suppressHydrationWarning
         className={`flex-grow transition-all duration-300 ${paddingClass}`}
-        style={{ 
-          position: 'relative', 
+        style={{
+          position: "relative",
           zIndex: 1,
         }}
-        suppressHydrationWarning
       >
         {children}
       </main>

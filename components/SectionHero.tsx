@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+
 import { useAreas } from "@/hooks/useAreas";
 import { useAdminProfile } from "@/components/AdminProfileContext";
 import { useAdminSettings } from "@/hooks/useAdminSettings";
-import { AdminProfileData } from "@/components/AdminProfileData";
 import { useHeroSection } from "@/hooks/useHeroSection";
 
 export function SectionHero() {
@@ -32,6 +32,7 @@ export function SectionHero() {
     const id = setInterval(() => {
       setActiveIdx((i) => (i + 1) % heroImages.length);
     }, animationDuration);
+
     return () => clearInterval(id);
   }, [heroImages.length, animationDuration]);
 
@@ -43,15 +44,21 @@ export function SectionHero() {
   const handleImageLoad = (index: number) => {
     setImagesLoaded((prev) => {
       const newState = [...prev];
+
       newState[index] = true;
+
       return newState;
     });
   };
 
   // Check if credentials are available
   const hasGasSafe = adminProfile?.gas_safe_registered === true;
-  const hasInsurance = adminProfile?.fully_insured && adminProfile?.insurance_provider && adminProfile.insurance_provider.trim() !== "";
-  const hasCertifications = adminProfile?.certifications && adminProfile.certifications.trim() !== "";
+  const hasInsurance =
+    adminProfile?.fully_insured &&
+    adminProfile?.insurance_provider &&
+    adminProfile.insurance_provider.trim() !== "";
+  const hasCertifications =
+    adminProfile?.certifications && adminProfile.certifications.trim() !== "";
   const hasMscCertified = adminSettings?.mcsCertified === true;
 
   // Show skeleton loader while loading or if no images
@@ -64,7 +71,7 @@ export function SectionHero() {
         {/* Skeleton Loader */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 dark:from-gray-800 dark:via-gray-700 dark:to-gray-900 animate-pulse">
-            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-transparent" />
           </div>
         </div>
         {/* Overlay */}
@@ -72,9 +79,9 @@ export function SectionHero() {
         {/* Content skeleton */}
         <div className="relative z-20 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col items-center">
           <div className="w-full max-w-2xl space-y-6">
-            <div className="h-12 bg-white/20 rounded-lg animate-pulse"></div>
-            <div className="h-8 bg-white/20 rounded-lg animate-pulse w-3/4 mx-auto"></div>
-            <div className="h-6 bg-white/20 rounded-lg animate-pulse w-1/2 mx-auto"></div>
+            <div className="h-12 bg-white/20 rounded-lg animate-pulse" />
+            <div className="h-8 bg-white/20 rounded-lg animate-pulse w-3/4 mx-auto" />
+            <div className="h-6 bg-white/20 rounded-lg animate-pulse w-1/2 mx-auto" />
           </div>
         </div>
       </section>
@@ -96,21 +103,21 @@ export function SectionHero() {
             {/* Skeleton Loader */}
             {!imagesLoaded[idx] && (
               <div className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 dark:from-gray-800 dark:via-gray-700 dark:to-gray-900 animate-pulse">
-                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-transparent" />
               </div>
             )}
             {/* Background Image */}
             <Image
-              src={src}
-              alt="Hero background"
               fill
-              priority={idx === 0}
-              sizes="100vw"
+              alt="Hero background"
               className={`object-cover transition-opacity duration-500 ${
                 imagesLoaded[idx] ? "opacity-100" : "opacity-0"
               }`}
-              onLoad={() => handleImageLoad(idx)}
+              priority={idx === 0}
+              sizes="100vw"
+              src={src}
               onError={() => handleImageLoad(idx)}
+              onLoad={() => handleImageLoad(idx)}
             />
           </div>
         ))}
@@ -124,18 +131,18 @@ export function SectionHero() {
         <div className="flex flex-col items-center mb-6 w-full">
           {/* Availability Badge */}
           {heroSection?.badge_text && (
-          <div className="inline-flex items-center px-4 py-2 bg-black/40 backdrop-blur-md rounded-full text-white text-sm font-medium border border-white/20 mb-4">
+            <div className="inline-flex items-center px-4 py-2 bg-black/40 backdrop-blur-md rounded-full text-white text-sm font-medium border border-white/20 mb-4">
               {heroSection.badge_icon === "star" && (
-            <svg
+                <svg
                   className="w-4 h-4 mr-2 text-yellow-400"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
+                </svg>
               )}
               {heroSection.badge_text}
-          </div>
+            </div>
           )}
 
           {/* Trust Badges - Responsive, no text overflow */}
@@ -144,8 +151,16 @@ export function SectionHero() {
             {hasInsurance && (
               <div className="flex flex-1 items-center justify-center w-full md:min-w-[200px] md:max-w-[320px] min-h-[64px] bg-white/30 backdrop-blur-sm rounded-xl p-3 shadow-sm border border-white/20">
                 <div className="w-8 h-8 mr-3 flex-shrink-0 flex items-center justify-center text-blue-400">
-                  <svg viewBox="0 0 20 20" fill="currentColor" className="w-8 h-8">
-                    <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1h-2a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" clipRule="evenodd" />
+                  <svg
+                    className="w-8 h-8"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      clipRule="evenodd"
+                      d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1h-2a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"
+                      fillRule="evenodd"
+                    />
                   </svg>
                 </div>
                 <span className="text-white text-lg font-medium whitespace-nowrap overflow-hidden text-ellipsis">
@@ -153,13 +168,21 @@ export function SectionHero() {
                 </span>
               </div>
             )}
-            
+
             {/* Gas Safe Registered - Dynamic */}
             {hasGasSafe && (
               <div className="flex flex-1 items-center justify-center w-full md:min-w-[200px] md:max-w-[320px] min-h-[64px] bg-white/30 backdrop-blur-sm rounded-xl p-3 shadow-sm border border-white/20">
                 <div className="w-8 h-8 mr-3 flex-shrink-0 flex items-center justify-center text-green-400">
-                  <svg viewBox="0 0 20 20" fill="currentColor" className="w-8 h-8">
-                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                  <svg
+                    className="w-8 h-8"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      clipRule="evenodd"
+                      d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                      fillRule="evenodd"
+                    />
                   </svg>
                 </div>
                 <span className="text-white text-lg font-medium whitespace-nowrap overflow-hidden text-ellipsis">
@@ -167,7 +190,7 @@ export function SectionHero() {
                 </span>
               </div>
             )}
-            
+
             {/* MCS Certified - Dynamic */}
             {hasMscCertified && (
               <div className="flex flex-1 items-center justify-center w-full md:min-w-[200px] md:max-w-[320px] min-h-[64px] bg-white/30 backdrop-blur-sm rounded-xl p-3 shadow-sm border border-white/20">
@@ -177,11 +200,15 @@ export function SectionHero() {
                 </div>
               </div>
             )}
-            
+
             {/* Years of Experience - Always show */}
             <div className="flex flex-1 items-center justify-center w-full md:min-w-[200px] md:max-w-[320px] min-h-[64px] bg-white/30 backdrop-blur-sm rounded-xl p-3 shadow-sm border border-white/20">
               <div className="w-8 h-8 mr-3 flex-shrink-0 flex items-center justify-center text-yellow-400">
-                <svg viewBox="0 0 20 20" fill="currentColor" className="w-8 h-8">
+                <svg
+                  className="w-8 h-8"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
               </div>
@@ -196,23 +223,33 @@ export function SectionHero() {
         <div className="text-center mb-8">
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 animate-fade-in-up">
             <span className="text-white">
-              {heroSection?.main_headline || "Professional Aesthetic Treatments"}
+              {heroSection?.main_headline ||
+                "Professional Aesthetic Treatments"}
             </span>
           </h1>
 
           {heroSection?.sub_headline && (
-          <p
-            className="text-lg md:text-xl text-white/90 font-medium mb-4 animate-fade-in-up"
-            style={{ animationDelay: "0.2s" }}
-          >
+            <p
+              className="text-lg md:text-xl text-white/90 font-medium mb-4 animate-fade-in-up"
+              style={{ animationDelay: "0.2s" }}
+            >
               <span className="text-blue-200">{heroSection.sub_headline}</span>
             </p>
           )}
 
           {/* Features */}
-          {(heroSection?.feature_1_text || heroSection?.feature_2_text || heroSection?.feature_3_text) && (
-            <div className="flex flex-wrap justify-center gap-4 mb-4 animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
-              {[heroSection.feature_1_text, heroSection.feature_2_text, heroSection.feature_3_text]
+          {(heroSection?.feature_1_text ||
+            heroSection?.feature_2_text ||
+            heroSection?.feature_3_text) && (
+            <div
+              className="flex flex-wrap justify-center gap-4 mb-4 animate-fade-in-up"
+              style={{ animationDelay: "0.3s" }}
+            >
+              {[
+                heroSection.feature_1_text,
+                heroSection.feature_2_text,
+                heroSection.feature_3_text,
+              ]
                 .filter(Boolean)
                 .map((feature, idx) => (
                   <div key={idx} className="flex items-center text-white/90">
@@ -222,9 +259,9 @@ export function SectionHero() {
                       viewBox="0 0 20 20"
                     >
                       <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                         clipRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        fillRule="evenodd"
                       />
                     </svg>
                     <span>{feature}</span>
@@ -250,9 +287,9 @@ export function SectionHero() {
                 viewBox="0 0 20 20"
               >
                 <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                   clipRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  fillRule="evenodd"
                 />
               </svg>
               45-minute response time
@@ -268,10 +305,10 @@ export function SectionHero() {
                     className="bg-white/10 backdrop-blur-md rounded-lg py-3 px-2 text-center animate-pulse w-32 sm:w-36 lg:w-28 flex flex-col items-center justify-center"
                   >
                     <div className="flex justify-center mb-1">
-                      <div className="w-5 h-5 bg-white/20 rounded"></div>
+                      <div className="w-5 h-5 bg-white/20 rounded" />
                     </div>
-                    <div className="h-4 bg-white/20 rounded mb-1 w-full"></div>
-                    <div className="h-3 bg-white/20 rounded w-8 mx-auto"></div>
+                    <div className="h-4 bg-white/20 rounded mb-1 w-full" />
+                    <div className="h-3 bg-white/20 rounded w-8 mx-auto" />
                   </div>
                 ))
               : areas.map((area) => (
@@ -287,25 +324,23 @@ export function SectionHero() {
                         viewBox="0 0 24 24"
                       >
                         <path
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           strokeWidth={2}
-                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
                         />
                         <path
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           strokeWidth={2}
-                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                         />
                       </svg>
                     </div>
                     <div className="text-white font-semibold text-sm mb-1">
                       {area.name}
                     </div>
-                    <div className="text-blue-200 text-xs">
-                      {area.postcode}
-                    </div>
+                    <div className="text-blue-200 text-xs">{area.postcode}</div>
                   </div>
                 ))}
           </div>
@@ -317,32 +352,35 @@ export function SectionHero() {
           style={{ animationDelay: "0.6s" }}
         >
           {heroSection?.button_1_text && (
-          <a
+            <a
               className="group bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-lg text-base font-bold transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center justify-center w-full sm:w-auto"
               href={heroSection.button_1_link || "#contact"}
-            onClick={(e) => {
-                if (heroSection.button_1_type === "internal" && heroSection.button_1_link?.startsWith("#")) {
-              e.preventDefault();
-              document
+              onClick={(e) => {
+                if (
+                  heroSection.button_1_type === "internal" &&
+                  heroSection.button_1_link?.startsWith("#")
+                ) {
+                  e.preventDefault();
+                  document
                     .getElementById(heroSection.button_1_link.substring(1))
-                ?.scrollIntoView({ behavior: "smooth" });
+                    ?.scrollIntoView({ behavior: "smooth" });
                 }
-            }}
-          >
-              {heroSection.button_1_icon === "calendar" && (
-            <svg
-              className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+              }}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
+              {heroSection.button_1_icon === "calendar" && (
+                <svg
+                  className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
                     d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                  />
+                </svg>
               )}
               {heroSection.button_1_text}
             </a>
@@ -351,8 +389,14 @@ export function SectionHero() {
             <a
               className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-lg text-base font-bold transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center justify-center w-full sm:w-auto"
               href={heroSection.button_2_link || "#"}
-              target={heroSection.button_2_type === "external" ? "_blank" : undefined}
-              rel={heroSection.button_2_type === "external" ? "noopener noreferrer" : undefined}
+              rel={
+                heroSection.button_2_type === "external"
+                  ? "noopener noreferrer"
+                  : undefined
+              }
+              target={
+                heroSection.button_2_type === "external" ? "_blank" : undefined
+              }
             >
               {heroSection.button_2_icon === "whatsapp" && (
                 <svg
@@ -364,7 +408,7 @@ export function SectionHero() {
                 </svg>
               )}
               {heroSection.button_2_text}
-          </a>
+            </a>
           )}
         </div>
 
@@ -374,10 +418,12 @@ export function SectionHero() {
             className="text-center mt-4 animate-fade-in-up"
             style={{ animationDelay: "0.8s" }}
           >
-            <p className="text-white/70 text-sm mb-1">{heroSection.contact_label || "Or call us now:"}</p>
+            <p className="text-white/70 text-sm mb-1">
+              {heroSection.contact_label || "Or call us now:"}
+            </p>
             <a
-              href={`tel:${heroSection.phone_number}`}
               className="text-white font-bold text-lg hover:text-blue-300 transition-colors"
+              href={`tel:${heroSection.phone_number}`}
             >
               {heroSection.phone_number}
             </a>

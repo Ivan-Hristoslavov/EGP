@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { supabase } from "@/lib/supabase";
 
 export async function GET(request: NextRequest) {
@@ -11,9 +12,10 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error("Error fetching membership plans:", error);
+
       return NextResponse.json(
         { error: "Failed to fetch membership plans" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -23,9 +25,10 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Membership plans error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

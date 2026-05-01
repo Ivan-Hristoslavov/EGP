@@ -1,33 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
+
 import { supabase } from "@/lib/supabase";
 import { getStripeServer } from "@/lib/stripe";
-import jwt from "jsonwebtoken";
 
 export async function POST(request: NextRequest) {
   try {
     const stripe = getStripeServer();
+
     if (!stripe) {
       return NextResponse.json(
         { error: "Payment service is not configured" },
-        { status: 503 }
+        { status: 503 },
       );
     }
 
     const authHeader = request.headers.get("authorization");
+
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return NextResponse.json(
         { error: "Authorization token required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "fallback-secret") as any;
-    
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "fallback-secret",
+    ) as any;
+
     if (decoded.type !== "customer") {
       return NextResponse.json(
         { error: "Invalid token type" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -36,7 +42,7 @@ export async function POST(request: NextRequest) {
     if (!planId || !billingCycle) {
       return NextResponse.json(
         { error: "Plan ID and billing cycle are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -51,7 +57,7 @@ export async function POST(request: NextRequest) {
     if (planError || !plan) {
       return NextResponse.json(
         { error: "Membership plan not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -65,7 +71,7 @@ export async function POST(request: NextRequest) {
     if (customerError || !customer) {
       return NextResponse.json(
         { error: "Customer not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -80,32 +86,33 @@ export async function POST(request: NextRequest) {
     if (existingMembership) {
       return NextResponse.json(
         { error: "You already have an active membership" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
     // Get Stripe price ID
-    const stripePriceId = billingCycle === "yearly" 
-      ? plan.stripe_price_id_yearly 
-      : plan.stripe_price_id_monthly;
+    const stripePriceId =
+      billingCycle === "yearly"
+        ? plan.stripe_price_id_yearly
+        : plan.stripe_price_id_monthly;
 
     if (!stripePriceId) {
       return NextResponse.json(
         { error: "Stripe price not configured for this plan" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
+      payment_method_types: ["card"],
       line_items: [
         {
           price: stripePriceId,
           quantity: 1,
         },
       ],
-      mode: 'subscription',
+      mode: "subscription",
       customer_email: customer.email,
       metadata: {
         customer_id: customer.id,
@@ -130,9 +137,10 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Membership signup error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

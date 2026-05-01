@@ -23,7 +23,7 @@ export default function Pagination({
 
   const handlePageChange = async (page: number) => {
     if (page < 1 || page > totalPages || page === currentPage) return;
-    
+
     setIsLoading(true);
     await onPageChange(page);
     setIsLoading(false);
@@ -65,7 +65,9 @@ export default function Pagination({
   const endItem = Math.min(currentPage * limit, totalCount);
 
   return (
-    <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 ${className}`}>
+    <div
+      className={`flex flex-col sm:flex-row items-center justify-between gap-4 ${className}`}
+    >
       {/* Results info */}
       <div className="text-sm text-gray-700 dark:text-gray-300">
         Showing {startItem} to {endItem} of {totalCount} results
@@ -75,12 +77,22 @@ export default function Pagination({
       <div className="flex items-center space-x-1">
         {/* Previous button */}
         <button
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1 || isLoading}
           className="px-3 py-2 text-sm font-medium text-gray-500 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+          disabled={currentPage === 1 || isLoading}
+          onClick={() => handlePageChange(currentPage - 1)}
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M15 19l-7-7 7-7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+            />
           </svg>
         </button>
 
@@ -88,15 +100,15 @@ export default function Pagination({
         {getVisiblePages().map((page, index) => (
           <button
             key={index}
-            onClick={() => typeof page === "number" && handlePageChange(page)}
-            disabled={page === "..." || isLoading}
             className={`px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
               page === currentPage
                 ? "bg-[#b5ad9d] dark:bg-[#9d9585] text-white border border-[#b5ad9d] dark:border-[#9d9585]"
                 : page === "..."
-                ? "text-gray-400 cursor-default"
-                : "text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-[#ddd5c3] dark:hover:bg-gray-700"
+                  ? "text-gray-400 cursor-default"
+                  : "text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-[#ddd5c3] dark:hover:bg-gray-700"
             }`}
+            disabled={page === "..." || isLoading}
+            onClick={() => typeof page === "number" && handlePageChange(page)}
           >
             {page}
           </button>
@@ -104,15 +116,25 @@ export default function Pagination({
 
         {/* Next button */}
         <button
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages || isLoading}
           className="px-3 py-2 text-sm font-medium text-gray-500 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+          disabled={currentPage === totalPages || isLoading}
+          onClick={() => handlePageChange(currentPage + 1)}
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M9 5l7 7-7 7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+            />
           </svg>
         </button>
       </div>
     </div>
   );
-} 
+}

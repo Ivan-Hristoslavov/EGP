@@ -20,19 +20,18 @@ export default function ButtonBookNow({
   serviceId,
   conditionId,
 }: ButtonBookNowProps) {
-  
   // Build booking URL with parameters
   const buildBookingUrl = () => {
     const baseUrl = "/book";
     const params = new URLSearchParams();
-    
+
     if (serviceId) {
       params.append("service", serviceId);
     }
     if (conditionId) {
       params.append("condition", conditionId);
     }
-    
+
     return params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
   };
 
@@ -70,9 +69,9 @@ export default function ButtonBookNow({
 
   return (
     <Link
-      href={buildBookingUrl()}
-      className={baseClasses}
       aria-label="Book treatment now"
+      className={baseClasses}
+      href={buildBookingUrl()}
     >
       {showIcon && <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />}
       <span>Book Treatment Now</span>

@@ -1,22 +1,29 @@
 "use client";
 
-import { useReviews } from '@/hooks/useReviews';
-import { useState, useEffect } from 'react';
-import type { Review } from '@/types';
-import { badgeBackgroundClass } from '@/config/badge-styles';
+import type { Review } from "@/types";
+
+import { useState, useEffect } from "react";
+
+import { useReviews } from "@/hooks/useReviews";
+import { badgeBackgroundClass } from "@/config/badge-styles";
 
 export function ReviewsSection() {
   const { reviews, isLoading, error } = useReviews();
   const [currentPage, setCurrentPage] = useState(1);
   const [expandedReview, setExpandedReview] = useState<Review | null>(null);
   const [reviewsPerPage, setReviewsPerPage] = useState(3); // default 3 for mobile; desktop set in useEffect
+
   useEffect(() => {
     const update = () => {
       if (typeof window === "undefined") return;
-      setReviewsPerPage(window.matchMedia("(min-width: 768px)").matches ? 6 : 3);
+      setReviewsPerPage(
+        window.matchMedia("(min-width: 768px)").matches ? 6 : 3,
+      );
     };
+
     update();
     window.addEventListener("resize", update);
+
     return () => window.removeEventListener("resize", update);
   }, []);
 
@@ -25,8 +32,10 @@ export function ReviewsSection() {
       <section className="py-8 sm:py-10 bg-egp-beige-lighter dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#b5ad9d]"></div>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading reviews...</p>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#b5ad9d]" />
+            <p className="mt-4 text-gray-600 dark:text-gray-400">
+              Loading reviews...
+            </p>
           </div>
         </div>
       </section>
@@ -50,17 +59,30 @@ export function ReviewsSection() {
   const currentReviews = reviews.slice(startIndex, endIndex);
 
   return (
-    <section className="py-6 sm:py-8 md:py-10 bg-egp-beige-lighter dark:bg-gray-900" id="reviews">
+    <section
+      className="py-6 sm:py-8 md:py-10 bg-egp-beige-lighter dark:bg-gray-900"
+      id="reviews"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header - compact */}
         <div className="text-center mb-4 sm:mb-6 md:mb-8">
-          <div className={`inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 ${badgeBackgroundClass} mb-2 sm:mb-3`}>
-            <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#9d9585]" fill="currentColor" viewBox="0 0 20 20">
+          <div
+            className={`inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 ${badgeBackgroundClass} mb-2 sm:mb-3`}
+          >
+            <svg
+              className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#9d9585]"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
-            <span className="text-xs font-semibold text-[#6b5f4b]">Client Impressions</span>
+            <span className="text-xs font-semibold text-[#6b5f4b]">
+              Client Impressions
+            </span>
           </div>
-          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3">What Our Clients Say</h2>
+          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3">
+            What Our Clients Say
+          </h2>
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Real experiences from valued customers who trust our services
           </p>
@@ -70,26 +92,49 @@ export function ReviewsSection() {
           <div className="text-center py-8 sm:py-10">
             <div className="max-w-md mx-auto">
               <div className="w-20 h-20 bg-[#ddd5c3]/60 dark:bg-gray-800/40 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <svg className="w-12 h-12 text-[#9d9585]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                <svg
+                  className="w-12 h-12 text-[#9d9585]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                  />
                 </svg>
               </div>
               <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-2">
                 No Reviews Yet
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-5">
-                Be the first to share your experience and help others make informed decisions
+                Be the first to share your experience and help others make
+                informed decisions
               </p>
               <a
-                href="#leave-review"
                 className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] text-[#3f3a31] rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
+                href="#leave-review"
                 onClick={(e) => {
                   e.preventDefault();
-                  document.getElementById("leave-review")?.scrollIntoView({ behavior: "smooth" });
+                  document
+                    .getElementById("leave-review")
+                    ?.scrollIntoView({ behavior: "smooth" });
                 }}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                  />
                 </svg>
                 Write the First Review
               </a>
@@ -101,114 +146,143 @@ export function ReviewsSection() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5 mb-5 sm:mb-8">
               {currentReviews.map((review, index) => {
                 const isLongComment = review.comment.length > 260;
-                return (
-                <div 
-                  key={review.id} 
-                  className="group relative bg-white/90 dark:bg-gray-900/70 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 shadow-lg backdrop-blur border border-[#e4d9c8]/80 dark:border-gray-700 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  <div className="absolute inset-x-6 -top-6 h-16 bg-gradient-to-br from-[#CFC4B6]/20 via-[#E6DDD1]/20 to-[#F4EFE8]/10 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
-                  {/* Header */}
-                  <div className="flex items-start gap-2 sm:gap-3 mb-2 sm:mb-3">
-                    {/* Avatar */}
-                    <div className="flex-shrink-0 relative">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#9d9585] rounded-full flex items-center justify-center shadow-lg">
-                        <span className="text-white font-bold text-base sm:text-lg">
-                          {review.customer_name.charAt(0).toUpperCase()}
-                        </span>
+                return (
+                  <div
+                    key={review.id}
+                    className="group relative bg-white/90 dark:bg-gray-900/70 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 shadow-lg backdrop-blur border border-[#e4d9c8]/80 dark:border-gray-700 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <div className="absolute inset-x-6 -top-6 h-16 bg-gradient-to-br from-[#CFC4B6]/20 via-[#E6DDD1]/20 to-[#F4EFE8]/10 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                    {/* Header */}
+                    <div className="flex items-start gap-2 sm:gap-3 mb-2 sm:mb-3">
+                      {/* Avatar */}
+                      <div className="flex-shrink-0 relative">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#9d9585] rounded-full flex items-center justify-center shadow-lg">
+                          <span className="text-white font-bold text-base sm:text-lg">
+                            {review.customer_name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-900" />
                       </div>
-                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-900"></div>
-                    </div>
-                    
-                    {/* Name & Rating */}
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-gray-900 dark:text-white mb-1.5 truncate">
-                        {review.customer_name}
-                      </h4>
-                      <div className="flex items-center gap-1.5 mb-2">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <svg 
-                            key={i} 
-                            className={`w-4 h-4 ${i < review.rating ? 'text-amber-400 fill-amber-400' : 'text-gray-300 dark:text-gray-600'}`} 
-                            fill={i < review.rating ? "currentColor" : "none"}
+
+                      {/* Name & Rating */}
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-bold text-gray-900 dark:text-white mb-1.5 truncate">
+                          {review.customer_name}
+                        </h4>
+                        <div className="flex items-center gap-1.5 mb-2">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <svg
+                              key={i}
+                              className={`w-4 h-4 ${i < review.rating ? "text-amber-400 fill-amber-400" : "text-gray-300 dark:text-gray-600"}`}
+                              fill={i < review.rating ? "currentColor" : "none"}
+                              viewBox="0 0 20 20"
+                            >
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                          ))}
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {new Date(review.created_at).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            },
+                          )}
+                        </p>
+                      </div>
+                      <div className="flex-shrink-0">
+                        <div
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 ${badgeBackgroundClass} text-[10px] font-semibold tracking-wide uppercase text-[#6b5f4b] dark:text-gray-200`}
+                        >
+                          <svg
+                            className="w-3.5 h-3.5 text-green-500"
+                            fill="currentColor"
                             viewBox="0 0 20 20"
                           >
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            <path
+                              clipRule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                              fillRule="evenodd"
+                            />
                           </svg>
-                        ))}
-                      </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {new Date(review.created_at).toLocaleDateString('en-US', { 
-                          month: 'short', 
-                          day: 'numeric', 
-                          year: 'numeric' 
-                        })}
-                      </p>
-                    </div>
-                    <div className="flex-shrink-0">
-                      <div className={`inline-flex items-center gap-1 px-2.5 py-1 ${badgeBackgroundClass} text-[10px] font-semibold tracking-wide uppercase text-[#6b5f4b] dark:text-gray-200`}>
-                        <svg className="w-3.5 h-3.5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                        </svg>
-                        Verified
+                          Verified
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Review Text */}
-                  <div className={`text-gray-700 dark:text-gray-300 text-xs sm:text-sm leading-relaxed ${isLongComment ? 'line-clamp-4 sm:line-clamp-5' : ''}`}>
-                    {review.comment}
-                  </div>
-                  
-                  {isLongComment && (
-                    <button
-                      onClick={() => setExpandedReview(review)}
-                      className="mt-5 inline-flex items-center gap-2 text-[#8c846f] dark:text-[#c9c1b0] text-sm font-semibold hover:text-[#6b5f4b] dark:hover:text-[#ddd5c3] transition-colors"
+                    {/* Review Text */}
+                    <div
+                      className={`text-gray-700 dark:text-gray-300 text-xs sm:text-sm leading-relaxed ${isLongComment ? "line-clamp-4 sm:line-clamp-5" : ""}`}
                     >
-                      Read full review
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              );})}
+                      {review.comment}
+                    </div>
+
+                    {isLongComment && (
+                      <button
+                        className="mt-5 inline-flex items-center gap-2 text-[#8c846f] dark:text-[#c9c1b0] text-sm font-semibold hover:text-[#6b5f4b] dark:hover:text-[#ddd5c3] transition-colors"
+                        onClick={() => setExpandedReview(review)}
+                      >
+                        Read full review
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            d="M9 5l7 7-7 7"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                          />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             {/* Pagination - Previous, up to 3 page numbers, Next (left to right) */}
             {totalPages > 1 && (
               <div className="flex justify-center items-center gap-2 flex-wrap">
                 <button
-                  onClick={() => setCurrentPage(currentPage - 1)}
-                  disabled={currentPage === 1}
                   className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all border border-gray-300 dark:border-gray-700 text-sm font-medium shadow-sm hover:shadow"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(currentPage - 1)}
                 >
                   Previous
                 </button>
                 {(() => {
                   const pagesToShow: number[] = [];
+
                   for (let p = currentPage - 1; p <= currentPage + 1; p++) {
                     if (p >= 1 && p <= totalPages) pagesToShow.push(p);
                   }
+
                   return pagesToShow.map((page) => (
                     <button
                       key={page}
-                      onClick={() => setCurrentPage(page)}
                       className={`px-4 py-2 rounded-xl transition-all text-sm font-medium shadow-sm ${
                         page === currentPage
-                          ? 'bg-gray-700 dark:bg-gray-600 text-white shadow-md scale-105'
-                          : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-700 hover:shadow'
+                          ? "bg-gray-700 dark:bg-gray-600 text-white shadow-md scale-105"
+                          : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-700 hover:shadow"
                       }`}
+                      onClick={() => setCurrentPage(page)}
                     >
                       {page}
                     </button>
                   ));
                 })()}
                 <button
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                  disabled={currentPage === totalPages}
                   className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all border border-gray-300 dark:border-gray-700 text-sm font-medium shadow-sm hover:shadow"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(currentPage + 1)}
                 >
                   Next
                 </button>
@@ -219,7 +293,10 @@ export function ReviewsSection() {
       </div>
       {expandedReview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4 sm:px-6">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setExpandedReview(null)}></div>
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setExpandedReview(null)}
+          />
           <div className="relative w-full max-w-2xl bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-[#e4d9c8] dark:border-gray-700 overflow-hidden">
             <div className="flex items-start justify-between gap-6 px-6 sm:px-8 pt-8">
               <div>
@@ -228,13 +305,17 @@ export function ReviewsSection() {
                     {expandedReview.customer_name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">{expandedReview.customer_name}</h3>
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
+                      {expandedReview.customer_name}
+                    </h3>
                     <div className="flex items-center gap-1 mt-1">
                       {Array.from({ length: 5 }).map((_, i) => (
                         <svg
                           key={i}
-                          className={`w-4 h-4 ${i < expandedReview.rating ? 'text-amber-400 fill-amber-400' : 'text-gray-300 dark:text-gray-600'}`}
-                          fill={i < expandedReview.rating ? 'currentColor' : 'none'}
+                          className={`w-4 h-4 ${i < expandedReview.rating ? "text-amber-400 fill-amber-400" : "text-gray-300 dark:text-gray-600"}`}
+                          fill={
+                            i < expandedReview.rating ? "currentColor" : "none"
+                          }
                           viewBox="0 0 20 20"
                         >
                           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -243,27 +324,50 @@ export function ReviewsSection() {
                     </div>
                   </div>
                 </div>
-                <div className={`inline-flex items-center gap-2 px-3 py-1.5 ${badgeBackgroundClass} text-[11px] font-semibold tracking-widest uppercase text-[#6b5f4b] dark:text-gray-200`}>
-                  <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                <div
+                  className={`inline-flex items-center gap-2 px-3 py-1.5 ${badgeBackgroundClass} text-[11px] font-semibold tracking-widest uppercase text-[#6b5f4b] dark:text-gray-200`}
+                >
+                  <svg
+                    className="w-4 h-4 text-green-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      clipRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      fillRule="evenodd"
+                    />
                   </svg>
                   Verified Review
                 </div>
                 <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-                  {new Date(expandedReview.created_at).toLocaleDateString('en-US', {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric',
-                  })}
+                  {new Date(expandedReview.created_at).toLocaleDateString(
+                    "en-US",
+                    {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    },
+                  )}
                 </p>
               </div>
               <button
-                onClick={() => setExpandedReview(null)}
-                className="p-2 -mr-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
                 aria-label="Close review"
+                className="p-2 -mr-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                onClick={() => setExpandedReview(null)}
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M6 18L18 6M6 6l12 12"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                  />
                 </svg>
               </button>
             </div>

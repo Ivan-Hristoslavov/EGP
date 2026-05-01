@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import { X, Gift, Mail, Percent, Copy, Check } from "lucide-react";
+import { usePathname } from "next/navigation";
+
 import { siteConfig } from "@/config/site";
 import { setCookie, getCookie, COOKIE_NAMES } from "@/lib/cookies";
-import { usePathname } from "next/navigation";
 import { aestheticsColors } from "@/config/colors";
 
 export function FirstVisitDiscountForm() {
@@ -26,6 +27,7 @@ export function FirstVisitDiscountForm() {
     } catch {
       // fallback for older browsers
       const input = document.createElement("input");
+
       input.value = discountCode;
       document.body.appendChild(input);
       input.select();
@@ -59,6 +61,7 @@ export function FirstVisitDiscountForm() {
 
     if (!email) {
       setIsSubmitting(false);
+
       return;
     }
 
@@ -83,12 +86,16 @@ export function FirstVisitDiscountForm() {
       }
 
       setDiscountCode(data.discountCode);
-      
+
       // Set cookie to remember user has seen the discount popup
-      setCookie(COOKIE_NAMES.DISCOUNT_SHOWN, 'true', 365);
+      setCookie(COOKIE_NAMES.DISCOUNT_SHOWN, "true", 365);
     } catch (error) {
       console.error("Failed to subscribe:", error);
-      alert(error instanceof Error ? error.message : "Failed to subscribe. Please try again.");
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to subscribe. Please try again.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -100,23 +107,23 @@ export function FirstVisitDiscountForm() {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/70 backdrop-blur-sm pt-20 sm:pt-16">
       <div className="relative w-full max-w-2xl mx-4 animate-fade-in-up max-h-[90vh] overflow-y-auto">
         {/* Main card with improved colors and dark theme */}
-        <div 
+        <div
           className="relative rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden"
           style={{
             backgroundColor: aestheticsColors.green.DEFAULT,
             borderColor: aestheticsColors.green.border.dark,
-            borderWidth: '2px',
-            borderStyle: 'solid',
+            borderWidth: "2px",
+            borderStyle: "solid",
           }}
         >
           {/* Close Button */}
           <button
+            aria-label="Close discount form"
+            className="absolute top-4 right-4 z-20 w-8 h-8 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg border border-white/30"
             onClick={() => {
               setIsOpen(false);
-              setCookie(COOKIE_NAMES.DISCOUNT_SHOWN, 'true', 365);
+              setCookie(COOKIE_NAMES.DISCOUNT_SHOWN, "true", 365);
             }}
-            className="absolute top-4 right-4 z-20 w-8 h-8 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg border border-white/30"
-            aria-label="Close discount form"
           >
             <X className="w-5 h-5 text-white" />
           </button>
@@ -130,8 +137,12 @@ export function FirstVisitDiscountForm() {
               >
                 <Percent className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
               </div>
-              <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2">Congratulations!</h3>
-              <p className="text-white/90 text-base sm:text-lg mb-5">Here&apos;s your exclusive discount code:</p>
+              <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2">
+                Congratulations!
+              </h3>
+              <p className="text-white/90 text-base sm:text-lg mb-5">
+                Here&apos;s your exclusive discount code:
+              </p>
               <div
                 className="inline-flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 rounded-xl px-6 sm:px-8 py-4 sm:py-5 mb-5 border-2 backdrop-blur-sm"
                 style={{
@@ -140,18 +151,22 @@ export function FirstVisitDiscountForm() {
                 }}
               >
                 <div className="min-w-0">
-                  <div className="text-xs sm:text-sm text-white/80 mb-1 font-semibold uppercase tracking-wide">Your Discount Code</div>
-                  <div className="text-xl sm:text-2xl md:text-3xl font-bold text-white tracking-wider select-all">{discountCode}</div>
+                  <div className="text-xs sm:text-sm text-white/80 mb-1 font-semibold uppercase tracking-wide">
+                    Your Discount Code
+                  </div>
+                  <div className="text-xl sm:text-2xl md:text-3xl font-bold text-white tracking-wider select-all">
+                    {discountCode}
+                  </div>
                 </div>
                 <button
-                  type="button"
-                  onClick={handleCopyCode}
                   className="flex-shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-white transition-all shadow-lg hover:shadow-xl active:scale-95"
                   style={{
                     background: copied
                       ? "linear-gradient(to right, #2d322c, #3a4039)"
                       : "linear-gradient(to right, #CFC4B6, #E6DDD1, #F4EFE8)",
                   }}
+                  type="button"
+                  onClick={handleCopyCode}
                 >
                   {copied ? (
                     <>
@@ -166,17 +181,20 @@ export function FirstVisitDiscountForm() {
                   )}
                 </button>
               </div>
-              <p className="text-sm text-white/80 mb-6">Check your email for details. Valid for 30 days!</p>
+              <p className="text-sm text-white/80 mb-6">
+                Check your email for details. Valid for 30 days!
+              </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <button
+                  className="px-6 py-3 text-white font-semibold rounded-full transition-all shadow-lg hover:shadow-xl"
+                  style={{
+                    background:
+                      "linear-gradient(to right, #CFC4B6, #E6DDD1, #F4EFE8)",
+                  }}
                   type="button"
                   onClick={() => {
                     setIsOpen(false);
                     setCookie(COOKIE_NAMES.DISCOUNT_SHOWN, "true", 365);
-                  }}
-                  className="px-6 py-3 text-white font-semibold rounded-full transition-all shadow-lg hover:shadow-xl"
-                  style={{
-                    background: "linear-gradient(to right, #CFC4B6, #E6DDD1, #F4EFE8)",
                   }}
                 >
                   Close
@@ -190,58 +208,62 @@ export function FirstVisitDiscountForm() {
                 <div className="flex-1 text-white">
                   <div className="flex items-center gap-2 mb-4">
                     <Gift className="w-7 h-7 text-white" />
-                    <span className="px-3 py-1.5 sm:py-2 bg-white/20 backdrop-blur-sm text-white text-xs sm:text-sm font-semibold rounded-full border border-white/30">EXCLUSIVE OFFER</span>
+                    <span className="px-3 py-1.5 sm:py-2 bg-white/20 backdrop-blur-sm text-white text-xs sm:text-sm font-semibold rounded-full border border-white/30">
+                      EXCLUSIVE OFFER
+                    </span>
                   </div>
                   <h3 className="text-base sm:text-lg md:text-xl font-bold mb-2 text-white">
-                    Get {siteConfig.newsletter.welcomeDiscountPercent}% Off Your First Visit
+                    Get {siteConfig.newsletter.welcomeDiscountPercent}% Off Your
+                    First Visit
                   </h3>
                   <p className="text-white/90 text-sm sm:text-base mb-4">
-                    Subscribe to our newsletter and receive exclusive beauty tips, treatment guides, and special offers
+                    Subscribe to our newsletter and receive exclusive beauty
+                    tips, treatment guides, and special offers
                   </p>
 
                   {/* Form with improved styling */}
-                  <form onSubmit={handleSubmit} className="space-y-3">
+                  <form className="space-y-3" onSubmit={handleSubmit}>
                     <div className="flex flex-col gap-3">
                       <input
+                        className="w-full px-4 py-3 text-base rounded-lg bg-white dark:bg-gray-800 border border-white/30 focus:bg-white dark:focus:bg-gray-700 focus:ring-2 focus:ring-white/50 focus:border-white/50 outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                        placeholder="First Name"
+                        style={{
+                          borderColor: aestheticsColors.green.border.DEFAULT,
+                        }}
                         type="text"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
-                        placeholder="First Name"
+                      />
+                      <input
+                        required
                         className="w-full px-4 py-3 text-base rounded-lg bg-white dark:bg-gray-800 border border-white/30 focus:bg-white dark:focus:bg-gray-700 focus:ring-2 focus:ring-white/50 focus:border-white/50 outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                        placeholder="Your email address"
                         style={{
                           borderColor: aestheticsColors.green.border.DEFAULT,
                         }}
-                      />
-                      <input
                         type="email"
-                        required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Your email address"
+                      />
+                      <input
                         className="w-full px-4 py-3 text-base rounded-lg bg-white dark:bg-gray-800 border border-white/30 focus:bg-white dark:focus:bg-gray-700 focus:ring-2 focus:ring-white/50 focus:border-white/50 outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                        placeholder="Mobile Number"
                         style={{
                           borderColor: aestheticsColors.green.border.DEFAULT,
                         }}
-                      />
-                      <input
                         type="tel"
                         value={mobile}
                         onChange={(e) => setMobile(e.target.value)}
-                        placeholder="Mobile Number"
-                        className="w-full px-4 py-3 text-base rounded-lg bg-white dark:bg-gray-800 border border-white/30 focus:bg-white dark:focus:bg-gray-700 focus:ring-2 focus:ring-white/50 focus:border-white/50 outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
-                        style={{
-                          borderColor: aestheticsColors.green.border.DEFAULT,
-                        }}
                       />
                     </div>
                     <button
-                      type="submit"
-                      disabled={isSubmitting}
                       className="w-full px-8 py-3 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] hover:from-[#B8A99A] hover:via-[#D4C9BC] hover:to-[#EDE6DC] text-[#3f3a31] text-lg font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl hover:shadow-2xl active:scale-95"
+                      disabled={isSubmitting}
+                      type="submit"
                     >
                       {isSubmitting ? (
                         <div className="flex items-center justify-center gap-2 text-white">
-                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                           <span>Subscribing...</span>
                         </div>
                       ) : (
@@ -254,19 +276,23 @@ export function FirstVisitDiscountForm() {
                   </form>
 
                   <p className="mt-4 text-sm text-white/80 text-center lg:text-left">
-                    By subscribing, you agree to receive marketing emails. Unsubscribe anytime. <span className="underline hover:text-white transition-colors cursor-pointer font-semibold">Privacy Policy</span>
+                    By subscribing, you agree to receive marketing emails.
+                    Unsubscribe anytime.{" "}
+                    <span className="underline hover:text-white transition-colors cursor-pointer font-semibold">
+                      Privacy Policy
+                    </span>
                   </p>
                 </div>
 
                 {/* Visual Element - Green Badge */}
                 <div className="hidden lg:block flex-shrink-0">
-                  <div 
+                  <div
                     className="w-28 h-28 rounded-full flex items-center justify-center shadow-lg"
                     style={{
                       background: `linear-gradient(to bottom right, ${aestheticsColors.green.DEFAULT}, ${aestheticsColors.green.dark})`,
                       borderColor: aestheticsColors.green.border.light,
-                      borderWidth: '2px',
-                      borderStyle: 'solid',
+                      borderWidth: "2px",
+                      borderStyle: "solid",
                     }}
                   >
                     <div className="text-center">
@@ -274,7 +300,9 @@ export function FirstVisitDiscountForm() {
                         {siteConfig.newsletter.welcomeDiscountPercent}%
                       </div>
                       <div className="text-white font-bold text-xs">OFF</div>
-                      <div className="text-white/90 text-[10px] mt-1 font-semibold">First Visit</div>
+                      <div className="text-white/90 text-[10px] mt-1 font-semibold">
+                        First Visit
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -1,20 +1,55 @@
 import type { Metadata } from "next";
+
 import Link from "next/link";
 import { Clock, ArrowRight } from "lucide-react";
+
 import ButtonBookNow from "@/components/ButtonBookNow";
 import { typography, layout } from "@/config/typography";
 
 export const metadata: Metadata = {
   title: "Body Contouring & Sculpting Treatments in London",
-  description: "Professional body treatments including fat freezing, mesotherapy, RF skin tightening, and cellulite reduction. Transform your body from £170.",
+  description:
+    "Professional body treatments including fat freezing, mesotherapy, RF skin tightening, and cellulite reduction. Transform your body from £170.",
 };
 
 const bodyServices = [
-  { name: "Body Fat Burning Mesotherapy", price: 170, duration: 30, slug: "body-mesotherapy", description: "One area 20×20 cm", popular: true },
-  { name: "Radiofrequency & Ultrasound", price: 250, duration: 60, slug: "rf-ultrasound", description: "Skin tightening & anti-cellulite" },
-  { name: "Fat Freezing Treatment", price: 200, duration: 60, slug: "fat-freezing", description: "Abdomen, lose centimetres", featured: true },
-  { name: "Ultrasound Lift & Tighten", price: 190, duration: 45, slug: "ultrasound-lift", description: "Face or body" },
-  { name: "Ultrasound + Mesotherapy Combined", price: 350, duration: 75, slug: "ultrasound-mesotherapy", description: "Maximum results" },
+  {
+    name: "Body Fat Burning Mesotherapy",
+    price: 170,
+    duration: 30,
+    slug: "body-mesotherapy",
+    description: "One area 20×20 cm",
+    popular: true,
+  },
+  {
+    name: "Radiofrequency & Ultrasound",
+    price: 250,
+    duration: 60,
+    slug: "rf-ultrasound",
+    description: "Skin tightening & anti-cellulite",
+  },
+  {
+    name: "Fat Freezing Treatment",
+    price: 200,
+    duration: 60,
+    slug: "fat-freezing",
+    description: "Abdomen, lose centimetres",
+    featured: true,
+  },
+  {
+    name: "Ultrasound Lift & Tighten",
+    price: 190,
+    duration: 45,
+    slug: "ultrasound-lift",
+    description: "Face or body",
+  },
+  {
+    name: "Ultrasound + Mesotherapy Combined",
+    price: 350,
+    duration: 75,
+    slug: "ultrasound-mesotherapy",
+    description: "Maximum results",
+  },
 ];
 
 export default function BodyTreatmentsPage() {
@@ -55,13 +90,15 @@ export default function BodyTreatmentsPage() {
                   </span>
                 )}
 
-                <Link href={`/services/${service.slug}`} className="flex-1">
+                <Link className="flex-1" href={`/services/${service.slug}`}>
                   <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 pr-16 group-hover:text-egp-green transition-colors">
                     {service.name}
                   </h3>
 
                   {service.description && (
-                    <p className="text-xs text-gray-600 dark:text-gray-300 mb-3">{service.description}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300 mb-3">
+                      {service.description}
+                    </p>
                   )}
 
                   <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400 mb-3">
@@ -74,12 +111,16 @@ export default function BodyTreatmentsPage() {
 
                 <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-egp-green-dark mt-auto">
                   <div>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">From</span>
-                    <div className="text-lg font-bold text-egp-green dark:text-white">£{service.price}</div>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                      From
+                    </span>
+                    <div className="text-lg font-bold text-egp-green dark:text-white">
+                      £{service.price}
+                    </div>
                   </div>
                   <Link
-                    href={`/book?service=${service.slug}`}
                     className="flex items-center gap-2 text-egp-green dark:text-white font-semibold hover:text-egp-green-dark hover:gap-3 transition-all"
+                    href={`/book?service=${service.slug}`}
                   >
                     <span>Book</span>
                     <ArrowRight className="w-4 h-4" />
@@ -100,10 +141,13 @@ export default function BodyTreatmentsPage() {
           <p className="text-base sm:text-lg md:text-xl text-white/90 mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
             Advanced body contouring treatments with visible, lasting results
           </p>
-          <ButtonBookNow size="lg" variant="secondary" className="w-full sm:w-auto mx-4 sm:mx-0" />
+          <ButtonBookNow
+            className="w-full sm:w-auto mx-4 sm:mx-0"
+            size="lg"
+            variant="secondary"
+          />
         </div>
       </section>
     </div>
   );
 }
-

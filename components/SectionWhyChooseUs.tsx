@@ -1,40 +1,46 @@
 "use client";
 
 import { Award, Shield, Heart, Sparkles, Clock, Star } from "lucide-react";
+
 import { siteConfig } from "@/config/site";
 import { aestheticsColors } from "@/config/colors";
 import { badgeBackgroundClass } from "@/config/badge-styles";
-import { typography, textColors, layout } from "@/config/typography";
+import { textColors, layout } from "@/config/typography";
 
 const reasons = [
   {
     icon: Award,
     title: "Expert Practitioners",
-    description: "Highly qualified and experienced aesthetic professionals dedicated to your safety and satisfaction",
+    description:
+      "Highly qualified and experienced aesthetic professionals dedicated to your safety and satisfaction",
     gradient: "from-blue-500 to-indigo-500",
   },
   {
     icon: Shield,
     title: "Fully Insured",
-    description: "Comprehensive insurance coverage for your peace of mind and protection",
+    description:
+      "Comprehensive insurance coverage for your peace of mind and protection",
     gradient: "from-emerald-500 to-teal-500",
   },
   {
     icon: Heart,
     title: "Personalised Care",
-    description: "Tailored treatment plans designed specifically for your unique aesthetic goals",
+    description:
+      "Tailored treatment plans designed specifically for your unique aesthetic goals",
     gradient: "from-pink-500 to-rose-500",
   },
   {
     icon: Sparkles,
     title: "Natural Results",
-    description: "Subtle enhancements that look natural and enhance your inherent beauty",
+    description:
+      "Subtle enhancements that look natural and enhance your inherent beauty",
     gradient: "from-purple-500 to-pink-500",
   },
   {
     icon: Clock,
     title: "Flexible Appointments",
-    description: "Convenient booking times to fit your busy schedule, including evenings and weekends",
+    description:
+      "Convenient booking times to fit your busy schedule, including evenings and weekends",
     gradient: "from-orange-500 to-amber-500",
   },
   {
@@ -51,7 +57,9 @@ export default function SectionWhyChooseUs() {
       <div className={layout.container}>
         {/* Section Header - compact */}
         <div className="text-center mb-4 sm:mb-6 md:mb-8">
-          <div className={`inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 ${badgeBackgroundClass} ${textColors.heading} text-xs font-semibold mb-1.5 sm:mb-3`}>
+          <div
+            className={`inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 ${badgeBackgroundClass} ${textColors.heading} text-xs font-semibold mb-1.5 sm:mb-3`}
+          >
             <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             <span>Why Choose Us</span>
           </div>
@@ -59,7 +67,8 @@ export default function SectionWhyChooseUs() {
             Why Choose EGP Aesthetics?
           </h2>
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-2 sm:px-4 leading-relaxed">
-            Combining medical expertise with artistic vision to deliver exceptional results
+            Combining medical expertise with artistic vision to deliver
+            exceptional results
           </p>
         </div>
 
@@ -67,12 +76,13 @@ export default function SectionWhyChooseUs() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
           {reasons.map((reason) => {
             const Icon = reason.icon;
+
             return (
               <div
                 key={reason.title}
                 className="group bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 shadow-md hover:shadow-xl transition-all duration-300 sm:hover:-translate-y-1 border border-gray-100 dark:border-gray-700 text-center"
               >
-                <div 
+                <div
                   className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-lg flex items-center justify-center mb-1.5 sm:mb-3 group-hover:scale-105 transition-transform duration-300 shadow-lg mx-auto"
                   style={{ backgroundColor: aestheticsColors.green.DEFAULT }}
                 >
@@ -108,4 +118,3 @@ export default function SectionWhyChooseUs() {
     </section>
   );
 }
-

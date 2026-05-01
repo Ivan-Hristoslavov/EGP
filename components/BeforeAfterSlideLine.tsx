@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Move } from "lucide-react";
+
 import { badgeBackgroundClass } from "@/config/badge-styles";
 import { textColors, layout } from "@/config/typography";
 
@@ -48,7 +49,10 @@ interface BeforeAfterSlideLineProps {
   className?: string;
 }
 
-export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAfterSlideLineProps) {
+export default function BeforeAfterSlideLine({
+  items,
+  className = "",
+}: BeforeAfterSlideLineProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [sliderPosition, setSliderPosition] = useState(50); // Start at 50% (middle)
@@ -64,11 +68,12 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
 
     const handleGlobalMouseMove = (e: MouseEvent) => {
       if (!containerRef.current) return;
-      
+
       const rect = containerRef.current.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const percent = (mouseX / rect.width) * 100;
       const newPosition = Math.max(0, Math.min(100, percent));
+
       setSliderPosition(newPosition);
     };
 
@@ -78,11 +83,12 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
 
     const handleGlobalTouchMove = (e: TouchEvent) => {
       if (!containerRef.current || !e.touches[0]) return;
-      
+
       const rect = containerRef.current.getBoundingClientRect();
       const touchX = e.touches[0].clientX - rect.left;
       const percent = (touchX / rect.width) * 100;
       const newPosition = Math.max(0, Math.min(100, percent));
+
       setSliderPosition(newPosition);
     };
 
@@ -90,16 +96,18 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
       setIsDragging(false);
     };
 
-    window.addEventListener('mousemove', handleGlobalMouseMove);
-    window.addEventListener('mouseup', handleGlobalMouseUp);
-    window.addEventListener('touchmove', handleGlobalTouchMove, { passive: false });
-    window.addEventListener('touchend', handleGlobalTouchEnd);
+    window.addEventListener("mousemove", handleGlobalMouseMove);
+    window.addEventListener("mouseup", handleGlobalMouseUp);
+    window.addEventListener("touchmove", handleGlobalTouchMove, {
+      passive: false,
+    });
+    window.addEventListener("touchend", handleGlobalTouchEnd);
 
     return () => {
-      window.removeEventListener('mousemove', handleGlobalMouseMove);
-      window.removeEventListener('mouseup', handleGlobalMouseUp);
-      window.removeEventListener('touchmove', handleGlobalTouchMove);
-      window.removeEventListener('touchend', handleGlobalTouchEnd);
+      window.removeEventListener("mousemove", handleGlobalMouseMove);
+      window.removeEventListener("mouseup", handleGlobalMouseUp);
+      window.removeEventListener("touchmove", handleGlobalTouchMove);
+      window.removeEventListener("touchend", handleGlobalTouchEnd);
     };
   }, [isDragging]);
 
@@ -124,13 +132,14 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !containerRef.current) return;
     e.preventDefault();
-    
+
     const rect = containerRef.current.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const percent = (mouseX / rect.width) * 100;
-    
+
     // Constrain between 0% and 100% - allows dragging to edges
     const newPosition = Math.max(0, Math.min(100, percent));
+
     setSliderPosition(newPosition);
   };
 
@@ -143,6 +152,7 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
     if (!containerRef.current) return;
     setIsDragging(true);
     const touch = e.touches[0];
+
     setDragStart(touch.clientX);
     setStartPosition(sliderPosition);
   };
@@ -150,14 +160,15 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging || !containerRef.current) return;
     e.preventDefault();
-    
+
     const touch = e.touches[0];
     const rect = containerRef.current.getBoundingClientRect();
     const touchX = touch.clientX - rect.left;
     const percent = (touchX / rect.width) * 100;
-    
+
     // Constrain between 0% and 100%
     const newPosition = Math.max(0, Math.min(100, percent));
+
     setSliderPosition(newPosition);
   };
 
@@ -179,18 +190,25 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
   }
 
   return (
-    <section className={`py-8 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 ${className}`}>
+    <section
+      className={`py-8 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 ${className}`}
+    >
       <div className={layout.container}>
         {/* Section Header */}
         <div className="text-center mb-4 sm:mb-5 md:mb-6">
-          <div className={`inline-block px-2.5 sm:px-3 py-1 sm:py-1.5 ${badgeBackgroundClass} text-xs font-semibold mb-2 sm:mb-3 text-[#6b5f4b] dark:text-gray-200`}>
+          <div
+            className={`inline-block px-2.5 sm:px-3 py-1 sm:py-1.5 ${badgeBackgroundClass} text-xs font-semibold mb-2 sm:mb-3 text-[#6b5f4b] dark:text-gray-200`}
+          >
             Real Results
           </div>
-          <h2 className={`text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold leading-tight ${textColors.heading} mb-2 sm:mb-3 px-4`}>
+          <h2
+            className={`text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold leading-tight ${textColors.heading} mb-2 sm:mb-3 px-4`}
+          >
             Before & After Gallery
           </h2>
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-4 leading-relaxed">
-            See the natural, beautiful transformations we've achieved for our clients
+            See the natural, beautiful transformations we've achieved for our
+            clients
           </p>
         </div>
 
@@ -198,10 +216,9 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
         <div className="max-w-2xl sm:max-w-3xl mx-auto mb-4">
           <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
             {/* Interactive Before/After Container */}
-            <div 
+            <div
               ref={containerRef}
               className="relative w-full h-[45vh] min-h-[280px] overflow-hidden cursor-col-resize select-none"
-              onMouseMove={handleMouseMove}
               onMouseDown={(e) => {
                 // Allow clicking anywhere on the container to set position
                 if (!containerRef.current) return;
@@ -209,12 +226,16 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
                 const mouseX = e.clientX - rect.left;
                 const percent = (mouseX / rect.width) * 100;
                 const newPosition = Math.max(0, Math.min(100, percent));
+
                 setSliderPosition(newPosition);
                 setIsDragging(true);
                 setDragStart(e.clientX);
               }}
-              onMouseUp={handleMouseUp}
               onMouseLeave={() => setIsDragging(false)}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onTouchEnd={handleTouchEnd}
+              onTouchMove={handleTouchMove}
               onTouchStart={(e) => {
                 // Allow touching anywhere on the container to set position
                 if (!containerRef.current) return;
@@ -223,20 +244,19 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
                 const touchX = touch.clientX - rect.left;
                 const percent = (touchX / rect.width) * 100;
                 const newPosition = Math.max(0, Math.min(100, percent));
+
                 setSliderPosition(newPosition);
                 setIsDragging(true);
                 setDragStart(touch.clientX);
               }}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
             >
               {/* After Image (Background) */}
               <div className="absolute inset-0">
                 <img
-                  src={current.after_image_url}
                   alt={`${current.title} - After`}
                   className="absolute inset-0 w-full h-full object-cover"
                   draggable={false}
+                  src={current.after_image_url}
                 />
                 <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-green-500 text-white px-2 py-0.5 rounded-full text-xs font-medium shadow-lg">
                   After
@@ -244,18 +264,18 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
               </div>
 
               {/* Before Image (Overlay with drag control) */}
-              <div 
+              <div
                 className="absolute inset-0 overflow-hidden"
                 style={{
                   clipPath: `inset(0 ${100 - sliderPosition}% 0 0)`,
-                  transition: isDragging ? 'none' : 'clip-path 0.3s ease'
+                  transition: isDragging ? "none" : "clip-path 0.3s ease",
                 }}
               >
                 <img
-                  src={current.before_image_url}
                   alt={`${current.title} - Before`}
                   className="absolute inset-0 w-full h-full object-cover"
                   draggable={false}
+                  src={current.before_image_url}
                 />
                 <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-medium shadow-lg">
                   Before
@@ -263,21 +283,21 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
               </div>
 
               {/* Slider Line */}
-              <div 
+              <div
                 className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg z-10 pointer-events-none"
-                style={{ 
+                style={{
                   left: `${sliderPosition}%`,
-                  transform: 'translateX(-50%)'
+                  transform: "translateX(-50%)",
                 }}
               />
 
               {/* Drag Handle */}
-              <div 
+              <div
                 className="absolute top-1/2 w-8 h-8 sm:w-10 sm:h-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg cursor-col-resize z-10 border-2 border-white"
                 style={{
                   left: `${sliderPosition}%`,
-                  transform: 'translate(-50%, -50%)',
-                  transition: isDragging ? 'none' : 'left 0.3s ease'
+                  transform: "translate(-50%, -50%)",
+                  transition: isDragging ? "none" : "left 0.3s ease",
                 }}
                 onMouseDown={handleMouseDown}
                 onTouchStart={handleTouchStart}
@@ -293,16 +313,16 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
 
             {/* Navigation Arrows */}
             <button
-              onClick={previous}
-              className="absolute left-1.5 sm:left-3 top-1/2 transform -translate-y-1/2 w-7 h-7 sm:w-9 sm:h-9 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-all shadow-lg z-20"
               aria-label="Previous image"
+              className="absolute left-1.5 sm:left-3 top-1/2 transform -translate-y-1/2 w-7 h-7 sm:w-9 sm:h-9 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-all shadow-lg z-20"
+              onClick={previous}
             >
               <ChevronLeft className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
             </button>
             <button
-              onClick={next}
-              className="absolute right-1.5 sm:right-3 top-1/2 transform -translate-y-1/2 w-7 h-7 sm:w-9 sm:h-9 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-all shadow-lg z-20"
               aria-label="Next image"
+              className="absolute right-1.5 sm:right-3 top-1/2 transform -translate-y-1/2 w-7 h-7 sm:w-9 sm:h-9 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-all shadow-lg z-20"
+              onClick={next}
             >
               <ChevronRight className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
             </button>
@@ -319,34 +339,77 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
               )}
               {current.categoryData && (
                 <span className="inline-flex items-center px-2 py-1 bg-gradient-to-r from-rose-500/10 to-pink-500/10 dark:from-rose-500/20 dark:to-pink-500/20 text-rose-700 dark:text-rose-300 border border-rose-300/50 dark:border-rose-700/50 rounded-full text-[11px] font-semibold">
-                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                  <svg
+                    className="w-3 h-3 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
                   </svg>
                   {current.categoryData.name}
                 </span>
               )}
               {current.serviceData && (
                 <span className="inline-flex items-center px-2 py-1 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 dark:from-purple-500/20 dark:to-indigo-500/20 text-purple-700 dark:text-purple-300 border border-purple-300/50 dark:border-purple-700/50 rounded-full text-[11px] font-medium">
-                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                  <svg
+                    className="w-3 h-3 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
                   </svg>
                   {current.serviceData.name}
                 </span>
               )}
               {current.project_type && (
                 <span className="inline-flex items-center px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-[11px] font-medium">
-                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6" />
+                  <svg
+                    className="w-3 h-3 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
                   </svg>
                   {current.project_type}
                 </span>
               )}
               {current.completion_date && (
                 <span className="inline-flex items-center px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-[11px] font-medium">
-                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  <svg
+                    className="w-3 h-3 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
                   </svg>
-                  {new Date(current.completion_date).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}
+                  {new Date(current.completion_date).toLocaleDateString(
+                    "en-GB",
+                    { month: "short", year: "numeric" },
+                  )}
                 </span>
               )}
             </div>
@@ -355,7 +418,7 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
             <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-0.5">
               {current.title}
             </h3>
-            
+
             {/* Description */}
             {current.description && (
               <p className="text-sm text-gray-600 dark:text-gray-300 max-w-2xl mx-auto line-clamp-2">
@@ -371,24 +434,24 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
             {items.map((item, index) => (
               <button
                 key={item.id}
-                onClick={() => {
-                  setCurrentIndex(index);
-                  setSliderPosition(50); // Reset slider when changing images
-                }}
                 className={`relative aspect-square rounded-md overflow-hidden border-2 transition-all group ${
                   currentIndex === index
                     ? "border-rose-500 dark:border-rose-400 scale-[1.02] shadow-md ring-2 ring-rose-500/20"
                     : "border-gray-200 dark:border-gray-700 hover:border-rose-300 dark:hover:border-rose-600"
                 }`}
+                onClick={() => {
+                  setCurrentIndex(index);
+                  setSliderPosition(50); // Reset slider when changing images
+                }}
               >
                 <div className="relative w-full h-full">
                   <img
-                    src={item.before_image_url}
                     alt={`${item.title} - Before`}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    src={item.before_image_url}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent group-hover:from-black/70 transition-colors" />
-                  
+
                   {/* Category Badge on Thumbnail */}
                   {item.categoryData && (
                     <div className="absolute top-1 left-1 right-1">
@@ -397,7 +460,7 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
                       </span>
                     </div>
                   )}
-                  
+
                   {/* Title and Service Badge */}
                   <div className="absolute bottom-0 left-0 right-0 p-1.5">
                     <div className="text-[10px] sm:text-xs text-white font-semibold truncate drop-shadow-lg">
@@ -421,13 +484,13 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
             {items.map((_, index) => (
               <button
                 key={index}
-                onClick={() => setCurrentIndex(index)}
+                aria-label={`Go to slide ${index + 1}`}
                 className={`w-1.5 h-1.5 sm:w-2.5 sm:h-2.5 rounded-full transition-all flex-shrink-0 ${
                   currentIndex === index
                     ? "bg-blue-500 scale-125"
                     : "bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500"
                 }`}
-                aria-label={`Go to slide ${index + 1}`}
+                onClick={() => setCurrentIndex(index)}
               />
             ))}
           </div>
@@ -435,12 +498,10 @@ export default function BeforeAfterSlideLine({ items, className = "" }: BeforeAf
 
         {/* Disclaimer */}
         <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-4 px-4">
-          Results may vary. All photos published with patient consent. Individual results depend on various factors.
+          Results may vary. All photos published with patient consent.
+          Individual results depend on various factors.
         </p>
       </div>
     </section>
   );
 }
-
-
-

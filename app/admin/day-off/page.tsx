@@ -1,4 +1,4 @@
-import { AdminDayOffManager } from '@/components/AdminDayOffManager';
+import { AdminDayOffManager } from "@/components/AdminDayOffManager";
 
 export default function AdminDayOffPage() {
   return <AdminDayOffManager />;

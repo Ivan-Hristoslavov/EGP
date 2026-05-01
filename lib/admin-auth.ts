@@ -20,12 +20,15 @@ export async function requireAdmin(): Promise<NextResponse | null> {
     }
 
     const jwtSecret = process.env.JWT_SECRET;
+
     if (!jwtSecret) {
       console.error("JWT_SECRET env var is not set");
+
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const payload = jwt.verify(adminAuth.value, jwtSecret) as { type: string };
+
     if (payload.type !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

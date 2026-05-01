@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { createClient } from "@/lib/supabase/server";
 
 type GoogleCalendarConnection = {
@@ -24,13 +25,16 @@ type Booking = {
   updated_at: string;
 };
 
-async function refreshAccessToken(refreshToken: string): Promise<string | null> {
+async function refreshAccessToken(
+  refreshToken: string,
+): Promise<string | null> {
   try {
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
     if (!clientId || !clientSecret) {
       console.error("Missing Google OAuth credentials");
+
       return null;
     }
 
@@ -49,13 +53,16 @@ async function refreshAccessToken(refreshToken: string): Promise<string | null> 
 
     if (!response.ok) {
       console.error("Failed to refresh token");
+
       return null;
     }
 
     const tokens = await response.json();
+
     return tokens.access_token;
   } catch (error) {
     console.error("Error refreshing token:", error);
+
     return null;
   }
 }
@@ -63,12 +70,16 @@ async function refreshAccessToken(refreshToken: string): Promise<string | null> 
 async function createCalendarEvent(
   accessToken: string,
   calendarId: string,
-  booking: Booking
+  booking: Booking,
 ) {
   try {
     // Parse booking date and time
-    const bookingDateTime = new Date(`${booking.booking_date}T${booking.booking_time}`);
-    const endDateTime = new Date(bookingDateTime.getTime() + 2 * 60 * 60 * 1000); // Add 2 hours
+    const bookingDateTime = new Date(
+      `${booking.booking_date}T${booking.booking_time}`,
+    );
+    const endDateTime = new Date(
+      bookingDateTime.getTime() + 2 * 60 * 60 * 1000,
+    ); // Add 2 hours
 
     const event = {
       summary: `${booking.service_type} - ${booking.customer_name}`,
@@ -114,19 +125,23 @@ Booking ID: ${booking.id}
           "Content-Type": "application/json",
         },
         body: JSON.stringify(event),
-      }
+      },
     );
 
     if (!response.ok) {
       const errorData = await response.text();
+
       console.error("Failed to create calendar event:", errorData);
+
       return null;
     }
 
     const createdEvent = await response.json();
+
     return createdEvent.id;
   } catch (error) {
     console.error("Error creating calendar event:", error);
+
     return null;
   }
 }
@@ -134,7 +149,7 @@ Booking ID: ${booking.id}
 export async function POST(request: NextRequest) {
   try {
     const supabase = createClient();
-    
+
     // Get Google Calendar connection
     const { data: connectionData, error: connectionError } = await supabase
       .from("admin_settings")
@@ -145,16 +160,18 @@ export async function POST(request: NextRequest) {
     if (connectionError || !connectionData?.value) {
       return NextResponse.json(
         { error: "Google Calendar not connected" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const connection: GoogleCalendarConnection = JSON.parse(connectionData.value);
+    const connection: GoogleCalendarConnection = JSON.parse(
+      connectionData.value,
+    );
 
     if (!connection.isConnected || !connection.accessToken) {
       return NextResponse.json(
         { error: "Google Calendar not properly connected" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -168,14 +185,18 @@ export async function POST(request: NextRequest) {
 
     if (bookingsError) {
       console.error("Error fetching bookings:", bookingsError);
+
       return NextResponse.json(
         { error: "Failed to fetch bookings" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     if (!bookings || bookings.length === 0) {
-      return NextResponse.json({ message: "No new bookings to sync", synced: 0 });
+      return NextResponse.json({
+        message: "No new bookings to sync",
+        synced: 0,
+      });
     }
 
     let accessToken = connection.accessToken;
@@ -187,21 +208,24 @@ export async function POST(request: NextRequest) {
         let eventId = await createCalendarEvent(
           accessToken,
           connection.calendarId || "primary",
-          booking
+          booking,
         );
 
         // If failed due to expired token, try refreshing
         if (!eventId && connection.refreshToken) {
-          const newAccessToken = await refreshAccessToken(connection.refreshToken);
+          const newAccessToken = await refreshAccessToken(
+            connection.refreshToken,
+          );
+
           if (newAccessToken) {
             accessToken = newAccessToken;
-            
+
             // Update connection with new access token
             const updatedConnection = {
               ...connection,
               accessToken: newAccessToken,
             };
-            
+
             await supabase.from("admin_settings").upsert(
               {
                 key: "googleCalendarConnection",
@@ -209,14 +233,14 @@ export async function POST(request: NextRequest) {
               },
               {
                 onConflict: "key",
-              }
+              },
             );
 
             // Retry creating the event
             eventId = await createCalendarEvent(
               newAccessToken,
               connection.calendarId || "primary",
-              booking
+              booking,
             );
           }
         }
@@ -227,7 +251,7 @@ export async function POST(request: NextRequest) {
             .from("bookings")
             .update({ google_calendar_event_id: eventId })
             .eq("id", booking.id);
-          
+
           syncedCount++;
         }
       } catch (error) {
@@ -242,7 +266,7 @@ export async function POST(request: NextRequest) {
       accessToken,
       lastSync: new Date().toISOString(),
     };
-    
+
     await supabase.from("admin_settings").upsert(
       {
         key: "googleCalendarConnection",
@@ -250,7 +274,7 @@ export async function POST(request: NextRequest) {
       },
       {
         onConflict: "key",
-      }
+      },
     );
 
     return NextResponse.json({
@@ -260,9 +284,10 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Calendar sync error:", error);
+
     return NextResponse.json(
       { error: "Failed to sync calendar" },
-      { status: 500 }
+      { status: 500 },
     );
   }
-} 
+}

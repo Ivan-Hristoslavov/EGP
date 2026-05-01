@@ -1,23 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { createClient } from "@/lib/supabase/server";
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const supabase = createClient();
     const body = await request.json();
     const { id } = await params;
-    
-    const { 
-      title, 
-      subtitle, 
+
+    const {
+      title,
+      subtitle,
       table_headers,
       table_rows,
       notes,
       order,
-      is_enabled
+      is_enabled,
     } = body;
 
     const { data: pricingCard, error } = await supabase
@@ -38,19 +39,27 @@ export async function PUT(
 
     if (error) {
       console.error("Error updating pricing card:", error);
-      return NextResponse.json({ error: "Failed to update pricing card" }, { status: 500 });
+
+      return NextResponse.json(
+        { error: "Failed to update pricing card" },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json({ pricingCard });
   } catch (error) {
     console.error("Error in pricing card PUT:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const supabase = createClient();
@@ -63,12 +72,20 @@ export async function DELETE(
 
     if (error) {
       console.error("Error deleting pricing card:", error);
-      return NextResponse.json({ error: "Failed to delete pricing card" }, { status: 500 });
+
+      return NextResponse.json(
+        { error: "Failed to delete pricing card" },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error in pricing card DELETE:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
-} 
+}

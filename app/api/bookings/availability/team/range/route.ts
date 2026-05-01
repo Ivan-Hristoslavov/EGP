@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { supabaseAdmin } from "@/lib/supabase";
 
 // GET - Get available booking hours for a team member for a date range
@@ -8,27 +9,33 @@ export async function GET(request: NextRequest) {
     const teamMemberId = searchParams.get("team_member_id");
     const startDate = searchParams.get("start_date");
     const endDate = searchParams.get("end_date");
-    const serviceDurationMinutes = parseInt(searchParams.get("service_duration_minutes") || "30", 10);
+    const serviceDurationMinutes = parseInt(
+      searchParams.get("service_duration_minutes") || "30",
+      10,
+    );
 
     if (!teamMemberId || !startDate || !endDate) {
       return NextResponse.json(
         { error: "team_member_id, start_date, and end_date are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Get working hours from admin_settings (source of truth)
-    const { data: adminSettingsData, error: adminSettingsError } = await supabaseAdmin
-      .from("admin_settings")
-      .select("value")
-      .eq("key", "business_hours")
-      .single();
+    const { data: adminSettingsData, error: adminSettingsError } =
+      await supabaseAdmin
+        .from("admin_settings")
+        .select("value")
+        .eq("key", "business_hours")
+        .single();
 
     let businessHours: any = null;
+
     if (!adminSettingsError && adminSettingsData?.value) {
-      businessHours = typeof adminSettingsData.value === 'string' 
-        ? JSON.parse(adminSettingsData.value) 
-        : adminSettingsData.value;
+      businessHours =
+        typeof adminSettingsData.value === "string"
+          ? JSON.parse(adminSettingsData.value)
+          : adminSettingsData.value;
     }
 
     // Get all day off periods for the team member in the date range
@@ -43,19 +50,24 @@ export async function GET(request: NextRequest) {
     }
 
     // Create a helper function to check if a date is in any day off period
-    const isDateOnDayOff = (dateStr: string): { isOnDayOff: boolean; reason?: string } => {
+    const isDateOnDayOff = (
+      dateStr: string,
+    ): { isOnDayOff: boolean; reason?: string } => {
       if (!dayOffPeriods || dayOffPeriods.length === 0) {
         return { isOnDayOff: false };
       }
-      
+
       const checkDate = new Date(dateStr);
+
       for (const period of dayOffPeriods) {
         const startDate = new Date(period.start_date);
         const endDate = new Date(period.end_date);
+
         if (checkDate >= startDate && checkDate <= endDate) {
           return { isOnDayOff: true, reason: period.reason || undefined };
         }
       }
+
       return { isOnDayOff: false };
     };
 
@@ -70,14 +82,19 @@ export async function GET(request: NextRequest) {
 
     if (bookingsError) {
       console.error("Error fetching bookings:", bookingsError);
+
       return NextResponse.json(
         { error: "Failed to fetch existing bookings" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     // Group bookings by date
-    const bookingsByDate = new Map<string, Array<{ time: string; duration: number }>>();
+    const bookingsByDate = new Map<
+      string,
+      Array<{ time: string; duration: number }>
+    >();
+
     (existingBookings || []).forEach((booking) => {
       if (!bookingsByDate.has(booking.date)) {
         bookingsByDate.set(booking.date, []);
@@ -89,27 +106,61 @@ export async function GET(request: NextRequest) {
     });
 
     // Generate availability for each date in range
-    const results: Record<string, {
-      availableSlots: string[];
-      bookedSlots: string[];
-      workingHours?: { start: string; end: string; buffer_minutes?: number; max_appointments?: number };
-      status: 'available' | 'full' | 'closed' | 'day_off';
-      isOnDayOff?: boolean;
-      dayOffReason?: string;
-    }> = {};
+    const results: Record<
+      string,
+      {
+        availableSlots: string[];
+        bookedSlots: string[];
+        workingHours?: {
+          start: string;
+          end: string;
+          buffer_minutes?: number;
+          max_appointments?: number;
+        };
+        status: "available" | "full" | "closed" | "day_off";
+        isOnDayOff?: boolean;
+        dayOffReason?: string;
+      }
+    > = {};
 
     const start = new Date(startDate);
     const end = new Date(endDate);
     const currentDate = new Date(start);
 
     while (currentDate <= end) {
-      const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
-      
+      const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}`;
+
       // Calculate day of week (0 = Sunday, 1 = Monday, etc.)
-      const bookingDate = new Date(Date.UTC(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), 12, 0, 0, 0));
+      const bookingDate = new Date(
+        Date.UTC(
+          currentDate.getFullYear(),
+          currentDate.getMonth(),
+          currentDate.getDate(),
+          12,
+          0,
+          0,
+          0,
+        ),
+      );
       const dayOfWeek = bookingDate.getUTCDay();
-      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      const dayKeys = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const dayNames = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
+      const dayKeys = [
+        "sunday",
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+      ];
       const currentDayKey = dayKeys[dayOfWeek];
 
       // Get working hours for this day
@@ -121,6 +172,7 @@ export async function GET(request: NextRequest) {
 
       if (businessHours && businessHours[currentDayKey]) {
         const dayHours = businessHours[currentDayKey];
+
         isWorkingDay = dayHours.isOpen === true;
         startTime = dayHours.open;
         endTime = dayHours.close;
@@ -130,12 +182,12 @@ export async function GET(request: NextRequest) {
 
       // Check if team member is on day off for this date
       const dayOffCheck = isDateOnDayOff(dateStr);
-      
+
       if (!isWorkingDay || !startTime || !endTime || dayOffCheck.isOnDayOff) {
         results[dateStr] = {
           availableSlots: [],
           bookedSlots: [],
-          status: dayOffCheck.isOnDayOff ? 'day_off' : 'closed',
+          status: dayOffCheck.isOnDayOff ? "day_off" : "closed",
           isOnDayOff: dayOffCheck.isOnDayOff,
           dayOffReason: dayOffCheck.reason,
         };
@@ -154,11 +206,14 @@ export async function GET(request: NextRequest) {
 
       // Create booked ranges for this date (including buffer after each booking)
       const bookedRanges: Array<{ start: number; end: number }> = [];
+
       dateBookings.forEach((booking) => {
         const [hour, minute] = booking.time.split(":").map(Number);
         const bookingStartMinutes = hour * 60 + minute;
         // Add buffer after the booking ends
-        const bookingEndMinutes = bookingStartMinutes + booking.duration + bufferMinutes;
+        const bookingEndMinutes =
+          bookingStartMinutes + booking.duration + bufferMinutes;
+
         bookedRanges.push({
           start: bookingStartMinutes,
           end: bookingEndMinutes,
@@ -177,7 +232,11 @@ export async function GET(request: NextRequest) {
       const slotInterval = 15;
       const requiredDuration = serviceDurationMinutes;
 
-      for (let timeMinutes = startTimeMinutes; timeMinutes < endTimeMinutes; timeMinutes += slotInterval) {
+      for (
+        let timeMinutes = startTimeMinutes;
+        timeMinutes < endTimeMinutes;
+        timeMinutes += slotInterval
+      ) {
         const hours = Math.floor(timeMinutes / 60);
         const minutes = timeMinutes % 60;
         const timeString = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
@@ -193,9 +252,10 @@ export async function GET(request: NextRequest) {
           if (isMaxAppointmentsReached) {
             continue;
           }
-          
+
           // Check if this slot can accommodate the required duration + buffer
           const slotEndMinutes = timeMinutes + requiredDuration + bufferMinutes;
+
           if (slotEndMinutes <= endTimeMinutes) {
             // Check if the full duration + buffer is available (no overlap with booked times)
             const isAvailable = !bookedRanges.some((booked) => {
@@ -218,7 +278,7 @@ export async function GET(request: NextRequest) {
           buffer_minutes: bufferMinutes,
           max_appointments: maxAppointments,
         },
-        status: availableSlots.length > 0 ? 'available' : 'full',
+        status: availableSlots.length > 0 ? "available" : "full",
         isOnDayOff: false,
       };
 
@@ -231,14 +291,14 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error in availability range GET:", error);
+
     return NextResponse.json(
-      { 
+      {
         error: "Internal server error",
         availability: {},
-        message: error instanceof Error ? error.message : "Unknown error"
+        message: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

@@ -1,5 +1,7 @@
-import nodemailer from "nodemailer";
 import type { Transporter } from "nodemailer";
+
+import nodemailer from "nodemailer";
+
 import { createClient } from "@/lib/supabase/server";
 
 let cachedTransporter: Transporter | null = null;
@@ -17,7 +19,7 @@ function getSmtpTransporter(): Transporter {
 
   if (!smtpServer || !smtpPort || !smtpUsername || !smtpPassword) {
     throw new Error(
-      "SMTP configuration is incomplete. Please check SMTP_SERVER, SMTP_PORT, SMTP_USERNAME, and SMTP_PASSWORD environment variables."
+      "SMTP configuration is incomplete. Please check SMTP_SERVER, SMTP_PORT, SMTP_USERNAME, and SMTP_PASSWORD environment variables.",
     );
   }
 
@@ -63,6 +65,7 @@ const adminEmail = process.env.ADMIN_EMAIL;
 async function getSenderEmail(): Promise<string> {
   const fromAddress =
     process.env.SMTP_FROM_ADDRESS || process.env.EMAIL_FROM_ADDRESS;
+
   if (fromAddress) {
     return fromAddress;
   }
@@ -77,6 +80,7 @@ async function getSenderEmail(): Promise<string> {
 
     if (error) {
       console.warn("Could not fetch admin profile business_email:", error);
+
       return adminEmail || "noreply@egpaesthetics.co.uk";
     }
 
@@ -88,6 +92,7 @@ async function getSenderEmail(): Promise<string> {
     );
   } catch (error) {
     console.warn("Error getting sender email:", error);
+
     return adminEmail || "noreply@egpaesthetics.co.uk";
   }
 }
@@ -100,6 +105,7 @@ export function isSmtpConfigured(): boolean {
   const smtpPort = process.env.SMTP_PORT;
   const smtpUsername = process.env.SMTP_USERNAME;
   const smtpPassword = process.env.SMTP_PASSWORD;
+
   return !!(smtpServer && smtpPort && smtpUsername && smtpPassword);
 }
 
@@ -109,7 +115,7 @@ export function isSmtpConfigured(): boolean {
 export async function sendEmail(options: EmailOptions): Promise<boolean> {
   if (!isSmtpConfigured()) {
     throw new Error(
-      "SMTP configuration is incomplete. Please check SMTP_SERVER, SMTP_PORT, SMTP_USERNAME, and SMTP_PASSWORD environment variables."
+      "SMTP configuration is incomplete. Please check SMTP_SERVER, SMTP_PORT, SMTP_USERNAME, and SMTP_PASSWORD environment variables.",
     );
   }
 
@@ -163,6 +169,7 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
 export async function testSmtpConnection(): Promise<boolean> {
   if (!isSmtpConfigured()) {
     console.error("SMTP configuration is incomplete");
+
     return false;
   }
 
@@ -183,6 +190,7 @@ export async function testSmtpConnection(): Promise<boolean> {
     return true;
   } catch (error) {
     console.error("SMTP configuration test failed:", error);
+
     return false;
   }
 }
@@ -197,11 +205,14 @@ export async function verifySMTPConnection(): Promise<boolean> {
 
   try {
     const transporter = getSmtpTransporter();
+
     await transporter.verify();
     console.log("SMTP connection is ready");
+
     return true;
   } catch (error) {
     console.error("SMTP connection failed:", error);
+
     return false;
   }
 }

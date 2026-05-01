@@ -1,23 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+import { supabase } from "@/lib/supabase";
+
 export async function POST(request: NextRequest) {
   try {
-    const { firstName, lastName, email, phone, password } = await request.json();
+    const { firstName, lastName, email, phone, password } =
+      await request.json();
 
     if (!firstName || !lastName || !email || !phone || !password) {
       return NextResponse.json(
         { error: "All fields are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (password.length < 6) {
       return NextResponse.json(
         { error: "Password must be at least 6 characters" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -31,7 +33,7 @@ export async function POST(request: NextRequest) {
     if (existingCustomer) {
       return NextResponse.json(
         { error: "Customer with this email already exists" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -57,21 +59,22 @@ export async function POST(request: NextRequest) {
 
     if (customerError) {
       console.error("Customer creation error:", customerError);
+
       return NextResponse.json(
         { error: "Failed to create customer account" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     // Generate JWT token
     const token = jwt.sign(
-      { 
-        customerId: customer.id, 
+      {
+        customerId: customer.id,
         email: customer.email,
-        type: "customer"
+        type: "customer",
       },
       process.env.JWT_SECRET || "fallback-secret",
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     // Remove password hash from response
@@ -84,9 +87,10 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Registration error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

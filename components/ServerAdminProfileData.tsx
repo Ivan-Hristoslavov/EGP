@@ -1,5 +1,5 @@
-import { getAdminProfile } from '@/lib/admin-profile';
-import { AdminProfile } from '@/types';
+import { getAdminProfile } from "@/lib/admin-profile";
+import { AdminProfile } from "@/types";
 
 interface ServerAdminProfileDataProps {
   type: keyof AdminProfile;
@@ -7,17 +7,22 @@ interface ServerAdminProfileDataProps {
   className?: string;
 }
 
-export async function ServerAdminProfileData({ type, fallback = '', className }: ServerAdminProfileDataProps) {
+export async function ServerAdminProfileData({
+  type,
+  fallback = "",
+  className,
+}: ServerAdminProfileDataProps) {
   try {
     const profile = await getAdminProfile();
-    
+
     if (!profile) {
       return <span className={className}>{fallback}</span>;
     }
 
     const value = (profile as any)[type] || fallback;
+
     return <span className={className}>{value}</span>;
   } catch (error) {
     return <span className={className}>{fallback}</span>;
   }
-} 
+}

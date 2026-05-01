@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { supabaseAdmin } from "../../../lib/supabase";
+
 import { sendEmail } from "@/lib/sendgrid-smtp";
 import { getAdminContactInfo } from "@/lib/admin-profile";
 import { requireAdmin } from "@/lib/admin-auth";
@@ -8,6 +10,7 @@ import { getEmailHead, EMAIL } from "@/lib/email-theme";
 // GET - Fetch bookings with pagination and filtering (admin only)
 export async function GET(request: NextRequest) {
   const denied = await requireAdmin();
+
   if (denied) return denied;
 
   try {
@@ -20,54 +23,89 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search");
 
     // Build the base query
-    let countQuery = supabaseAdmin.from("bookings").select("*", { count: "exact", head: true });
+    let countQuery = supabaseAdmin
+      .from("bookings")
+      .select("*", { count: "exact", head: true });
     let bookingsQuery = supabaseAdmin.from("bookings").select("*");
 
     // Apply filters
-    if (status && status !== 'all') {
+    if (status && status !== "all") {
       countQuery = countQuery.eq("status", status);
       bookingsQuery = bookingsQuery.eq("status", status);
     }
 
-    if (date && date !== 'all') {
-      if (date === 'today') {
-        const today = new Date().toISOString().split('T')[0];
+    if (date && date !== "all") {
+      if (date === "today") {
+        const today = new Date().toISOString().split("T")[0];
+
         countQuery = countQuery.eq("date", today);
         bookingsQuery = bookingsQuery.eq("date", today);
-      } else if (date === 'tomorrow') {
+      } else if (date === "tomorrow") {
         const tomorrow = new Date();
+
         tomorrow.setDate(tomorrow.getDate() + 1);
-        const tomorrowStr = tomorrow.toISOString().split('T')[0];
+        const tomorrowStr = tomorrow.toISOString().split("T")[0];
+
         countQuery = countQuery.eq("date", tomorrowStr);
         bookingsQuery = bookingsQuery.eq("date", tomorrowStr);
-      } else if (date === 'this_week') {
+      } else if (date === "this_week") {
         const today = new Date();
         const weekStart = new Date(today);
+
         weekStart.setDate(today.getDate() - today.getDay());
         const weekEnd = new Date(weekStart);
+
         weekEnd.setDate(weekStart.getDate() + 6);
-        countQuery = countQuery.gte("date", weekStart.toISOString().split('T')[0]).lte("date", weekEnd.toISOString().split('T')[0]);
-        bookingsQuery = bookingsQuery.gte("date", weekStart.toISOString().split('T')[0]).lte("date", weekEnd.toISOString().split('T')[0]);
-      } else if (date === 'next_week') {
+        countQuery = countQuery
+          .gte("date", weekStart.toISOString().split("T")[0])
+          .lte("date", weekEnd.toISOString().split("T")[0]);
+        bookingsQuery = bookingsQuery
+          .gte("date", weekStart.toISOString().split("T")[0])
+          .lte("date", weekEnd.toISOString().split("T")[0]);
+      } else if (date === "next_week") {
         const today = new Date();
         const nextWeekStart = new Date(today);
+
         nextWeekStart.setDate(today.getDate() - today.getDay() + 7);
         const nextWeekEnd = new Date(nextWeekStart);
+
         nextWeekEnd.setDate(nextWeekStart.getDate() + 6);
-        countQuery = countQuery.gte("date", nextWeekStart.toISOString().split('T')[0]).lte("date", nextWeekEnd.toISOString().split('T')[0]);
-        bookingsQuery = bookingsQuery.gte("date", nextWeekStart.toISOString().split('T')[0]).lte("date", nextWeekEnd.toISOString().split('T')[0]);
-      } else if (date === 'this_month') {
+        countQuery = countQuery
+          .gte("date", nextWeekStart.toISOString().split("T")[0])
+          .lte("date", nextWeekEnd.toISOString().split("T")[0]);
+        bookingsQuery = bookingsQuery
+          .gte("date", nextWeekStart.toISOString().split("T")[0])
+          .lte("date", nextWeekEnd.toISOString().split("T")[0]);
+      } else if (date === "this_month") {
         const today = new Date();
         const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
         const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-        countQuery = countQuery.gte("date", monthStart.toISOString().split('T')[0]).lte("date", monthEnd.toISOString().split('T')[0]);
-        bookingsQuery = bookingsQuery.gte("date", monthStart.toISOString().split('T')[0]).lte("date", monthEnd.toISOString().split('T')[0]);
-      } else if (date === 'next_month') {
+
+        countQuery = countQuery
+          .gte("date", monthStart.toISOString().split("T")[0])
+          .lte("date", monthEnd.toISOString().split("T")[0]);
+        bookingsQuery = bookingsQuery
+          .gte("date", monthStart.toISOString().split("T")[0])
+          .lte("date", monthEnd.toISOString().split("T")[0]);
+      } else if (date === "next_month") {
         const today = new Date();
-        const nextMonthStart = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-        const nextMonthEnd = new Date(today.getFullYear(), today.getMonth() + 2, 0);
-        countQuery = countQuery.gte("date", nextMonthStart.toISOString().split('T')[0]).lte("date", nextMonthEnd.toISOString().split('T')[0]);
-        bookingsQuery = bookingsQuery.gte("date", nextMonthStart.toISOString().split('T')[0]).lte("date", nextMonthEnd.toISOString().split('T')[0]);
+        const nextMonthStart = new Date(
+          today.getFullYear(),
+          today.getMonth() + 1,
+          1,
+        );
+        const nextMonthEnd = new Date(
+          today.getFullYear(),
+          today.getMonth() + 2,
+          0,
+        );
+
+        countQuery = countQuery
+          .gte("date", nextMonthStart.toISOString().split("T")[0])
+          .lte("date", nextMonthEnd.toISOString().split("T")[0]);
+        bookingsQuery = bookingsQuery
+          .gte("date", nextMonthStart.toISOString().split("T")[0])
+          .lte("date", nextMonthEnd.toISOString().split("T")[0]);
       } else {
         // Assume it's a specific date
         countQuery = countQuery.eq("date", date);
@@ -77,8 +115,13 @@ export async function GET(request: NextRequest) {
 
     if (search) {
       const searchPattern = `%${search}%`;
-      countQuery = countQuery.or(`customer_name.ilike.${searchPattern},service.ilike.${searchPattern},customer_email.ilike.${searchPattern}`);
-      bookingsQuery = bookingsQuery.or(`customer_name.ilike.${searchPattern},service.ilike.${searchPattern},customer_email.ilike.${searchPattern}`);
+
+      countQuery = countQuery.or(
+        `customer_name.ilike.${searchPattern},service.ilike.${searchPattern},customer_email.ilike.${searchPattern}`,
+      );
+      bookingsQuery = bookingsQuery.or(
+        `customer_name.ilike.${searchPattern},service.ilike.${searchPattern},customer_email.ilike.${searchPattern}`,
+      );
     }
 
     // Get total count for pagination
@@ -86,9 +129,10 @@ export async function GET(request: NextRequest) {
 
     if (countError) {
       console.error("Error fetching booking count:", countError);
+
       return NextResponse.json(
         { error: "Failed to fetch booking count" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -100,9 +144,10 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error("Error fetching bookings:", error);
+
       return NextResponse.json(
         { error: "Failed to fetch bookings" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -121,9 +166,10 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Unexpected error fetching bookings:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -166,21 +212,24 @@ export async function POST(request: NextRequest) {
       amount === null
     ) {
       return NextResponse.json(
-        { error: "Missing required fields: customer_name, service, date, time, amount" },
-        { status: 400 }
+        {
+          error:
+            "Missing required fields: customer_name, service, date, time, amount",
+        },
+        { status: 400 },
       );
     }
 
     // Get working hours for this date to check max appointments
     const bookingDate = new Date(date);
     const dayOfWeek = bookingDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
-    
+
     const { data: workingHour, error: workingHourError } = await supabaseAdmin
       .from("working_hours")
       .select("max_appointments")
       .eq("day_of_week", dayOfWeek)
       .single();
-    
+
     const maxAppointments = workingHour?.max_appointments || 12;
 
     // Check for booking conflicts - same date and time
@@ -193,20 +242,21 @@ export async function POST(request: NextRequest) {
 
     if (conflictError) {
       console.error("Error checking booking conflicts:", conflictError);
+
       return NextResponse.json(
         { error: "Failed to check booking availability" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     if (existingBookings && existingBookings.length > 0) {
       return NextResponse.json(
-        { 
-          error: "Time slot already booked", 
+        {
+          error: "Time slot already booked",
           conflict: true,
-          message: `This time slot is already booked by ${existingBookings[0].customer_name}. Please select a different time.`
+          message: `This time slot is already booked by ${existingBookings[0].customer_name}. Please select a different time.`,
         },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -219,26 +269,29 @@ export async function POST(request: NextRequest) {
 
     if (dayBookingsError) {
       console.error("Error checking day bookings:", dayBookingsError);
+
       return NextResponse.json(
         { error: "Failed to check booking availability" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     const currentBookingsCount = (dayBookings || []).length;
+
     if (currentBookingsCount >= maxAppointments) {
       return NextResponse.json(
-        { 
-          error: "Maximum appointments reached", 
+        {
+          error: "Maximum appointments reached",
           conflict: true,
-          message: `This day has reached the maximum of ${maxAppointments} appointments. Please select a different date.`
+          message: `This day has reached the maximum of ${maxAppointments} appointments. Please select a different date.`,
         },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
     // Server-side customer upsert: look up by email or use provided customer_id
     let resolvedCustomerId: string | null = customer_id || null;
+
     if (!resolvedCustomerId && customer_email) {
       const { data: existingCustomer } = await supabaseAdmin
         .from("customers")
@@ -254,15 +307,25 @@ export async function POST(request: NextRequest) {
         const last_name = nameParts.slice(1).join(" ") || "";
         const { data: newCustomer } = await supabaseAdmin
           .from("customers")
-          .insert([{ first_name, last_name, email: customer_email, phone: customer_phone || null, address: address || null }])
+          .insert([
+            {
+              first_name,
+              last_name,
+              email: customer_email,
+              phone: customer_phone || null,
+              address: address || null,
+            },
+          ])
           .select("id")
           .single();
+
         if (newCustomer) resolvedCustomerId = newCustomer.id;
       }
     }
 
     const parsedAmount = parseFloat(amount);
-    const parsedTotalAmount = total_amount != null ? parseFloat(total_amount) : parsedAmount;
+    const parsedTotalAmount =
+      total_amount != null ? parseFloat(total_amount) : parsedAmount;
 
     const { data: booking, error: bookingError } = await supabaseAdmin
       .from("bookings")
@@ -277,8 +340,10 @@ export async function POST(request: NextRequest) {
           time,
           amount: parsedAmount,
           total_amount: parsedTotalAmount,
-          amount_paid: amount_paid != null ? parseFloat(amount_paid) : parsedAmount,
-          remaining_amount: remaining_amount != null ? parseFloat(remaining_amount) : 0,
+          amount_paid:
+            amount_paid != null ? parseFloat(amount_paid) : parsedAmount,
+          remaining_amount:
+            remaining_amount != null ? parseFloat(remaining_amount) : 0,
           payment_type: payment_type || "full",
           payment_method: payment_method || null,
           address: address || null,
@@ -294,9 +359,10 @@ export async function POST(request: NextRequest) {
 
     if (bookingError) {
       console.error("Error creating booking:", bookingError);
+
       return NextResponse.json(
         { error: `Failed to create booking: ${bookingError.message}` },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -315,7 +381,10 @@ export async function POST(request: NextRequest) {
         await sendCustomerBookingConfirmationEmail(booking);
         console.log("Customer booking confirmation email sent successfully");
       } catch (emailError) {
-        console.error("Error sending customer booking confirmation email:", emailError);
+        console.error(
+          "Error sending customer booking confirmation email:",
+          emailError,
+        );
         // Don't fail the booking creation if email fails
       }
     }
@@ -323,13 +392,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       booking,
-      message: "Booking created successfully"
+      message: "Booking created successfully",
     });
   } catch (error) {
     console.error("Unexpected error creating booking:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -339,16 +409,21 @@ async function sendBookingNotificationEmail(booking: any) {
   try {
     // Prefer ADMIN_EMAIL from env (e.g. info@egpaesthetics.co.uk), fallback to admin_profile
     let adminEmail = process.env.ADMIN_EMAIL;
+
     if (!adminEmail) {
       const { data: adminProfile } = await supabaseAdmin
         .from("admin_profile")
         .select("email")
         .single();
+
       adminEmail = adminProfile?.email;
     }
 
     if (!adminEmail) {
-      console.warn("No admin email found for booking notification. Set ADMIN_EMAIL in .env");
+      console.warn(
+        "No admin email found for booking notification. Set ADMIN_EMAIL in .env",
+      );
+
       return;
     }
 
@@ -359,9 +434,8 @@ async function sendBookingNotificationEmail(booking: any) {
       to: adminEmail,
       subject: emailSubject,
       text: emailBody,
-      html: generateBookingNotificationEmailHtml(booking)
+      html: generateBookingNotificationEmailHtml(booking),
     });
-
   } catch (error) {
     console.error("Error in sendBookingNotificationEmail:", error);
     throw error;
@@ -370,14 +444,14 @@ async function sendBookingNotificationEmail(booking: any) {
 
 function generateBookingNotificationEmail(booking: any): string {
   const bookingDate = new Date(booking.date).toLocaleDateString("en-GB");
-  
+
   return `
 New Booking Request Received
 
 Customer Details:
 - Name: ${booking.customer_name}
-- Email: ${booking.customer_email || 'Not provided'}
-- Phone: ${booking.customer_phone || 'Not provided'}
+- Email: ${booking.customer_email || "Not provided"}
+- Phone: ${booking.customer_phone || "Not provided"}
 
 Service Details:
 - Service: ${booking.service}
@@ -385,8 +459,8 @@ Service Details:
 - Time: ${booking.time}
 - Amount: £${booking.amount.toFixed(2)}
 
-${booking.address ? `Address: ${booking.address}` : ''}
-${booking.notes ? `Notes: ${booking.notes}` : ''}
+${booking.address ? `Address: ${booking.address}` : ""}
+${booking.notes ? `Notes: ${booking.notes}` : ""}
 
 Booking ID: ${booking.id}
 Created: ${new Date(booking.created_at).toLocaleString("en-GB")}
@@ -397,7 +471,7 @@ Please review and update the booking status in your admin panel.
 
 function generateBookingNotificationEmailHtml(booking: any): string {
   const bookingDate = new Date(booking.date).toLocaleDateString("en-GB");
-  
+
   return `
 <!DOCTYPE html>
 <html>
@@ -432,8 +506,8 @@ body{margin:0;padding:0;font-family:Georgia,serif;background:#f5f3ef;color:#1c19
 <div class="sect">
 <div class="sect-title">CUSTOMER</div>
 <div class="row">${booking.customer_name}</div>
-<div class="row">${booking.customer_email || '—'}</div>
-<div class="row">${booking.customer_phone || '—'}</div>
+<div class="row">${booking.customer_email || "—"}</div>
+<div class="row">${booking.customer_phone || "—"}</div>
 </div>
 <div class="sect">
 <div class="sect-title">APPOINTMENT</div>
@@ -441,8 +515,8 @@ body{margin:0;padding:0;font-family:Georgia,serif;background:#f5f3ef;color:#1c19
 <div class="row">${bookingDate} · ${booking.time}</div>
 <div class="row"><span class="amt">£${booking.amount.toFixed(2)}</span></div>
 </div>
-${booking.address ? `<div class="sect"><div class="sect-title">ADDRESS</div><div class="row">${booking.address}</div></div>` : ''}
-${booking.notes ? `<div class="sect"><div class="sect-title">NOTES</div><div class="row">${booking.notes}</div></div>` : ''}
+${booking.address ? `<div class="sect"><div class="sect-title">ADDRESS</div><div class="row">${booking.address}</div></div>` : ""}
+${booking.notes ? `<div class="sect"><div class="sect-title">NOTES</div><div class="row">${booking.notes}</div></div>` : ""}
 <p style="color:#78716c;font-size:13px;">Ref: ${booking.id} · ${new Date(booking.created_at).toLocaleString("en-GB")}</p>
 </div>
 <div class="ft">Booking system · EGP Aesthetics</div>
@@ -457,21 +531,29 @@ async function sendCustomerBookingConfirmationEmail(booking: any) {
   try {
     if (!booking.customer_email) {
       console.warn("No customer email provided for booking confirmation");
+
       return;
     }
 
     const contactInfo = await getAdminContactInfo();
     const paymentLink = await generateStripePaymentLink(booking);
     const emailSubject = `Booking Confirmation - ${booking.service} on ${new Date(booking.date).toLocaleDateString("en-GB")}`;
-    const emailBody = generateCustomerBookingConfirmationEmail(booking, paymentLink, contactInfo);
+    const emailBody = generateCustomerBookingConfirmationEmail(
+      booking,
+      paymentLink,
+      contactInfo,
+    );
 
     await sendEmail({
       to: booking.customer_email,
       subject: emailSubject,
       text: emailBody,
-      html: generateCustomerBookingConfirmationEmailHtml(booking, paymentLink, contactInfo),
+      html: generateCustomerBookingConfirmationEmailHtml(
+        booking,
+        paymentLink,
+        contactInfo,
+      ),
     });
-
   } catch (error) {
     console.error("Error in sendCustomerBookingConfirmationEmail:", error);
     throw error;
@@ -483,21 +565,29 @@ async function generateStripePaymentLink(booking: any) {
   try {
     // For now, we'll create a simple payment link
     // In a real implementation, you would integrate with Stripe API
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://egp.com';
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://egp.com";
     const paymentLink = `${baseUrl}/payment/${booking.id}`;
-    
+
     return paymentLink;
   } catch (error) {
     console.error("Error generating Stripe payment link:", error);
     // Return a fallback link
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://egp.com';
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://egp.com";
+
     return `${baseUrl}/contact`;
   }
 }
 
-function generateCustomerBookingConfirmationEmail(booking: any, paymentLink: string, contactInfo: { phone: string; email: string }): string {
+function generateCustomerBookingConfirmationEmail(
+  booking: any,
+  paymentLink: string,
+  contactInfo: { phone: string; email: string },
+): string {
   const bookingDate = new Date(booking.date).toLocaleDateString("en-GB");
-  const isDeposit = booking.payment_type === "deposit" && Number(booking.amount_paid) > 0 && Number(booking.remaining_amount) > 0;
+  const isDeposit =
+    booking.payment_type === "deposit" &&
+    Number(booking.amount_paid) > 0 &&
+    Number(booking.remaining_amount) > 0;
   const depositBlurb = isDeposit
     ? `\nYou have paid £${Number(booking.amount_paid).toFixed(2)} deposit. The remaining £${Number(booking.remaining_amount).toFixed(2)} is due when you attend.\n`
     : "";
@@ -544,13 +634,21 @@ Booking ID: ${booking.id}
   `.trim();
 }
 
-function generateCustomerBookingConfirmationEmailHtml(booking: any, paymentLink: string, contactInfo: { phone: string; email: string }): string {
+function generateCustomerBookingConfirmationEmailHtml(
+  booking: any,
+  paymentLink: string,
+  contactInfo: { phone: string; email: string },
+): string {
   const L = EMAIL.light;
   const bookingDate = new Date(booking.date).toLocaleDateString("en-GB");
-  const totalAmount = booking.total_amount != null ? parseFloat(booking.total_amount) : booking.amount;
+  const totalAmount =
+    booking.total_amount != null
+      ? parseFloat(booking.total_amount)
+      : booking.amount;
   const amountPaid = Number(booking.amount_paid ?? 0);
   const remainingAmount = Number(booking.remaining_amount ?? 0);
-  const isDeposit = booking.payment_type === "deposit" && amountPaid > 0 && remainingAmount > 0;
+  const isDeposit =
+    booking.payment_type === "deposit" && amountPaid > 0 && remainingAmount > 0;
 
   return `
 <!DOCTYPE html>
@@ -598,7 +696,7 @@ ${isDeposit ? `<div style="background:#e8f5e9;border:1px solid ${L.accent};paddi
 
 <div class="email-card" style="background:${L.cardBg};border:1px solid ${L.cardBorder};margin:24px 0;padding:20px;border-radius:8px">
 <div class="email-card-title" style="font-size:11px;letter-spacing:.12em;color:${L.green};margin-bottom:12px;font-weight:600">QUESTIONS?</div>
-<div style="padding:8px 0;color:${L.text}"><a href="tel:${contactInfo.phone.replace(/\s/g,"")}" class="email-link" style="color:${L.link};text-decoration:none;font-weight:500">${contactInfo.phone}</a></div>
+<div style="padding:8px 0;color:${L.text}"><a href="tel:${contactInfo.phone.replace(/\s/g, "")}" class="email-link" style="color:${L.link};text-decoration:none;font-weight:500">${contactInfo.phone}</a></div>
 <div style="padding:8px 0;color:${L.text}"><a href="mailto:${contactInfo.email}" class="email-link" style="color:${L.link};text-decoration:none;font-weight:500">${contactInfo.email}</a></div>
 </div>
 
@@ -617,6 +715,7 @@ ${isDeposit ? `<div style="background:#e8f5e9;border:1px solid ${L.accent};paddi
 // DELETE - Delete a booking (admin only)
 export async function DELETE(request: NextRequest) {
   const denied = await requireAdmin();
+
   if (denied) return denied;
 
   try {
@@ -626,7 +725,7 @@ export async function DELETE(request: NextRequest) {
     if (!bookingId) {
       return NextResponse.json(
         { error: "Booking ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -638,21 +737,23 @@ export async function DELETE(request: NextRequest) {
 
     if (error) {
       console.error("Error deleting booking:", error);
+
       return NextResponse.json(
         { error: `Failed to delete booking: ${error.message}` },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     return NextResponse.json({
       success: true,
-      message: "Booking deleted successfully"
+      message: "Booking deleted successfully",
     });
   } catch (error) {
     console.error("Unexpected error deleting booking:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -660,6 +761,7 @@ export async function DELETE(request: NextRequest) {
 // PUT - Update a booking (admin only)
 export async function PUT(request: NextRequest) {
   const denied = await requireAdmin();
+
   if (denied) return denied;
 
   try {
@@ -669,7 +771,7 @@ export async function PUT(request: NextRequest) {
     if (!bookingId) {
       return NextResponse.json(
         { error: "Booking ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -695,8 +797,11 @@ export async function PUT(request: NextRequest) {
 
     if (!customer_name || !service || !date || !time || !amount) {
       return NextResponse.json(
-        { error: "Missing required fields: customer_name, service, date, time, amount" },
-        { status: 400 }
+        {
+          error:
+            "Missing required fields: customer_name, service, date, time, amount",
+        },
+        { status: 400 },
       );
     }
 
@@ -711,14 +816,16 @@ export async function PUT(request: NextRequest) {
       amount: parsedAmount,
       address: address || null,
       notes: notes || null,
-      status: status || 'pending',
-      payment_status: payment_status || 'pending',
+      status: status || "pending",
+      payment_status: payment_status || "pending",
       updated_at: new Date().toISOString(),
     };
 
-    if (total_amount != null) updateData.total_amount = parseFloat(total_amount);
+    if (total_amount != null)
+      updateData.total_amount = parseFloat(total_amount);
     if (amount_paid != null) updateData.amount_paid = parseFloat(amount_paid);
-    if (remaining_amount != null) updateData.remaining_amount = parseFloat(remaining_amount);
+    if (remaining_amount != null)
+      updateData.remaining_amount = parseFloat(remaining_amount);
     if (payment_type) updateData.payment_type = payment_type;
     if (payment_method) updateData.payment_method = payment_method;
 
@@ -731,22 +838,24 @@ export async function PUT(request: NextRequest) {
 
     if (error) {
       console.error("Error updating booking:", error);
+
       return NextResponse.json(
         { error: `Failed to update booking: ${error.message}` },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     return NextResponse.json({
       success: true,
       booking,
-      message: "Booking updated successfully"
+      message: "Booking updated successfully",
     });
   } catch (error) {
     console.error("Unexpected error updating booking:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

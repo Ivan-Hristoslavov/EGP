@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 export interface Area {
   id: string;
@@ -21,5 +21,6 @@ export function useAreas() {
   const [areas] = useState<Area[]>([]);
   const loading = false;
   const error: string | null = null;
+
   return { areas, loading, error };
-} 
+}

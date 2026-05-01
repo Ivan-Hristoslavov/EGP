@@ -1,13 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
+
+import CustomDatePicker from "./CustomDatePicker";
+
 import { useToast, ToastMessages } from "@/components/Toast";
-import { usePricingCardsForBooking, type BookingService } from "@/hooks/usePricingCardsForBooking";
+import {
+  usePricingCardsForBooking,
+  type BookingService,
+} from "@/hooks/usePricingCardsForBooking";
 import { useWorkingHours } from "@/hooks/useWorkingHours";
 import { useAdminSettings } from "@/hooks/useAdminSettings";
 import { useAdminProfile } from "@/components/AdminProfileContext";
-import { siteConfig } from "@/config/site";
-import CustomDatePicker from "./CustomDatePicker";
 
 type DayOffSettings = {
   isEnabled: boolean;
@@ -18,14 +22,19 @@ type DayOffSettings = {
 
 export default function FormBooking() {
   const { showSuccess, showError } = useToast();
-  const { services, isLoading: isLoadingServices } = usePricingCardsForBooking();
+  const { services, isLoading: isLoadingServices } =
+    usePricingCardsForBooking();
   const { timeSlots, isLoading: isLoadingTimeSlots } = useWorkingHours();
-  const { settings: adminSettings, isLoading: isLoadingSettings } = useAdminSettings();
+  const { settings: adminSettings, isLoading: isLoadingSettings } =
+    useAdminSettings();
   const adminProfile = useAdminProfile();
   const [selectedService, setSelectedService] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formKey] = useState(() => Math.random().toString(36));
-  const [submitResult, setSubmitResult] = useState<null | { success: boolean; message: string }>(null);
+  const [submitResult, setSubmitResult] = useState<null | {
+    success: boolean;
+    message: string;
+  }>(null);
   const [bookedTimes, setBookedTimes] = useState<string[]>([]);
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
   const [dayOffInfo, setDayOffInfo] = useState<{
@@ -36,11 +45,13 @@ export default function FormBooking() {
   }>({ isDayOff: false });
 
   // State to store day-off periods for date validation
-  const [dayOffPeriods, setDayOffPeriods] = useState<Array<{
-    start_date: string;
-    end_date: string;
-    title: string;
-  }>>([]);
+  const [dayOffPeriods, setDayOffPeriods] = useState<
+    Array<{
+      start_date: string;
+      end_date: string;
+      title: string;
+    }>
+  >([]);
 
   // Get business phone from admin profile
   const businessPhone = adminProfile?.phone || "";
@@ -51,29 +62,36 @@ export default function FormBooking() {
   const minDate = today.toISOString().split("T")[0];
 
   // Function to find the next available date after day-off periods
-  const findNextAvailableDate = (dayOffPeriods: Array<{ start_date: string; end_date: string; title: string }>) => {
+  const findNextAvailableDate = (
+    dayOffPeriods: Array<{
+      start_date: string;
+      end_date: string;
+      title: string;
+    }>,
+  ) => {
     let checkDate = new Date(today);
-    
+
     // Check up to 30 days in the future
     for (let i = 0; i < 30; i++) {
       const dateString = checkDate.toISOString().split("T")[0];
-      
+
       // Check if this date is not in any day-off period
-      const isDisabled = dayOffPeriods.some(period => {
+      const isDisabled = dayOffPeriods.some((period) => {
         const checkDateObj = new Date(dateString);
         const startDate = new Date(period.start_date);
         const endDate = new Date(period.end_date);
+
         return checkDateObj >= startDate && checkDateObj <= endDate;
       });
-      
+
       if (!isDisabled) {
         return dateString;
       }
-      
+
       // Move to next day
       checkDate.setDate(checkDate.getDate() + 1);
     }
-    
+
     // If no available date found in 30 days, return today
     return minDate;
   };
@@ -84,15 +102,20 @@ export default function FormBooking() {
   // Check if a date is in day off period
   const isDateInDayOff = (date: string) => {
     const dayOffSettings = adminSettings?.dayOffSettings;
+
     if (!dayOffSettings || !dayOffSettings.isEnabled) return false;
-    
+
     const checkDate = new Date(date);
-    const startDate = dayOffSettings.startDate ? new Date(dayOffSettings.startDate) : null;
-    const endDate = dayOffSettings.endDate ? new Date(dayOffSettings.endDate) : null;
+    const startDate = dayOffSettings.startDate
+      ? new Date(dayOffSettings.startDate)
+      : null;
+    const endDate = dayOffSettings.endDate
+      ? new Date(dayOffSettings.endDate)
+      : null;
 
     if (startDate && checkDate < startDate) return false;
     if (endDate && checkDate > endDate) return false;
-    
+
     return true;
   };
 
@@ -100,7 +123,9 @@ export default function FormBooking() {
   const getMaxDate = () => {
     // Default to 3 months from now
     const defaultMaxDate = new Date();
+
     defaultMaxDate.setMonth(defaultMaxDate.getMonth() + 3);
+
     return defaultMaxDate.toISOString().split("T")[0];
   };
 
@@ -109,12 +134,15 @@ export default function FormBooking() {
     const fetchDayOffPeriods = async () => {
       try {
         const response = await fetch("/api/admin/day-off");
+
         if (response.ok) {
           const periods = await response.json();
+
           setDayOffPeriods(periods);
-          
+
           // Automatically set the next available date
           const nextAvailableDate = findNextAvailableDate(periods);
+
           setSelectedDate(nextAvailableDate);
         }
       } catch (error) {
@@ -127,10 +155,11 @@ export default function FormBooking() {
 
   // Check if a date is in a day-off period
   const isDateDisabled = (date: string) => {
-    return dayOffPeriods.some(period => {
+    return dayOffPeriods.some((period) => {
       const checkDate = new Date(date);
       const startDate = new Date(period.start_date);
       const endDate = new Date(period.end_date);
+
       return checkDate >= startDate && checkDate <= endDate;
     });
   };
@@ -146,6 +175,7 @@ export default function FormBooking() {
   useEffect(() => {
     if (dayOffPeriods.length > 0) {
       const nextAvailableDate = findNextAvailableDate(dayOffPeriods);
+
       setSelectedDate(nextAvailableDate);
     }
   }, [dayOffPeriods]);
@@ -154,9 +184,10 @@ export default function FormBooking() {
     setIsCheckingAvailability(true);
     try {
       const response = await fetch(`/api/bookings/availability?date=${date}`);
+
       if (response.ok) {
         const data = await response.json();
-        
+
         // Check if this date is in a day-off period
         if (data.isDayOff) {
           setBookedTimes([]); // No time slots available
@@ -164,14 +195,16 @@ export default function FormBooking() {
             isDayOff: true,
             title: data.dayOffTitle,
             description: data.dayOffDescription,
-            bannerMessage: data.bannerMessage
+            bannerMessage: data.bannerMessage,
           });
+
           return;
         }
-        
+
         // Reset day-off info if not in day-off period
         setDayOffInfo({ isDayOff: false });
         const bookedTimeSlots = data.bookedTimes.map((slot: any) => slot.time);
+
         setBookedTimes(bookedTimeSlots);
       } else {
         console.error("Failed to check availability");
@@ -190,16 +223,19 @@ export default function FormBooking() {
   // Normalize time to HH:mm (handles "HH:mm", "HH:mm:SS", "HH:mm - HH:mm" formats)
   function normalizeTime(str: string) {
     const time = str.split(" - ")[0].trim();
+
     if (time.length >= 5) return time.slice(0, 5);
+
     return time;
   }
 
   const isTimeSlotBooked = (timeSlot: string) => {
     const slotTime = normalizeTime(timeSlot);
-    return bookedTimes.some(t => normalizeTime(t) === slotTime);
+
+    return bookedTimes.some((t) => normalizeTime(t) === slotTime);
   };
 
-  const availableTimeSlots = dayOffInfo.isDayOff 
+  const availableTimeSlots = dayOffInfo.isDayOff
     ? [] // No time slots available during day-off periods
     : timeSlots.filter((slot: string) => !isTimeSlotBooked(slot));
 
@@ -231,27 +267,41 @@ export default function FormBooking() {
         !data.preferredDate ||
         !data.timeSlot
       ) {
-        showError(ToastMessages.general.validationError.title, "Please fill in all required fields");
+        showError(
+          ToastMessages.general.validationError.title,
+          "Please fill in all required fields",
+        );
         setIsSubmitting(false);
+
         return;
       }
 
       // Check if selected time slot is booked
       if (isTimeSlotBooked(data.timeSlot)) {
-        showError("Time Slot Unavailable", "This time slot is no longer available. Please select a different time.");
+        showError(
+          "Time Slot Unavailable",
+          "This time slot is no longer available. Please select a different time.",
+        );
         setIsSubmitting(false);
+
         return;
       }
 
       // Check if date is in day off period
       if (dayOffInfo.isDayOff) {
-        showError("Day Off Period", "Bookings are not available on this date. Please select another date.");
+        showError(
+          "Day Off Period",
+          "Bookings are not available on this date. Please select another date.",
+        );
         setIsSubmitting(false);
+
         return;
       }
 
       // Find selected service details
-      const selectedServiceData = services.find((s: BookingService) => s.id === data.service);
+      const selectedServiceData = services.find(
+        (s: BookingService) => s.id === data.service,
+      );
       const serviceName = selectedServiceData?.name || data.service;
 
       // Parse service price (e.g. "£80" or "From £50" → number)
@@ -283,17 +333,26 @@ export default function FormBooking() {
 
       if (!bookingResponse.ok) {
         const errorData = await bookingResponse.json();
+
         if (errorData.conflict) {
           showError("Time Slot Conflict", errorData.message);
         } else {
           throw new Error(errorData.error || "Failed to create booking");
         }
         setIsSubmitting(false);
+
         return;
       }
 
-      showSuccess(ToastMessages.bookings.submitted.title, ToastMessages.bookings.submitted.message);
-      setSubmitResult({ success: true, message: "Your booking request was sent successfully! We'll contact you soon." });
+      showSuccess(
+        ToastMessages.bookings.submitted.title,
+        ToastMessages.bookings.submitted.message,
+      );
+      setSubmitResult({
+        success: true,
+        message:
+          "Your booking request was sent successfully! We'll contact you soon.",
+      });
       setTimeout(() => {
         setSubmitResult(null);
         setSelectedService("");
@@ -307,9 +366,13 @@ export default function FormBooking() {
         ToastMessages.bookings.error.title,
         error instanceof Error
           ? error.message
-          : ToastMessages.bookings.error.message
+          : ToastMessages.bookings.error.message,
       );
-      setSubmitResult({ success: false, message: "There was an error sending your booking request. Please try again or call us directly." });
+      setSubmitResult({
+        success: false,
+        message:
+          "There was an error sending your booking request. Please try again or call us directly.",
+      });
       setTimeout(() => setSubmitResult(null), 5000);
     } finally {
       setIsSubmitting(false);
@@ -318,41 +381,63 @@ export default function FormBooking() {
 
   if (submitResult) {
     return (
-      <div className={`flex flex-col items-center justify-center min-h-[500px] w-full rounded-xl shadow-lg bg-white dark:bg-gray-800 p-8 transition-colors duration-300 ${submitResult.success ? 'border-green-400' : 'border-red-400'} border-2`}>
+      <div
+        className={`flex flex-col items-center justify-center min-h-[500px] w-full rounded-xl shadow-lg bg-white dark:bg-gray-800 p-8 transition-colors duration-300 ${submitResult.success ? "border-green-400" : "border-red-400"} border-2`}
+      >
         <svg
-          className={`w-16 h-16 mb-6 ${submitResult.success ? 'text-green-500' : 'text-red-500'}`}
+          className={`w-16 h-16 mb-6 ${submitResult.success ? "text-green-500" : "text-red-500"}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
           {submitResult.success ? (
-            <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+            <path
+              d="M5 13l4 4L19 7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+            />
           ) : (
-            <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+            <path
+              d="M6 18L18 6M6 6l12 12"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+            />
           )}
         </svg>
-        <h2 className={`text-2xl font-bold mb-4 ${submitResult.success ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>{submitResult.success ? 'Success!' : 'Error'}</h2>
-        <p className="text-lg text-gray-700 dark:text-gray-300 text-center mb-2">{submitResult.message}</p>
-        <p className="text-sm text-gray-500 dark:text-gray-400">This message will disappear in 5 seconds.</p>
+        <h2
+          className={`text-2xl font-bold mb-4 ${submitResult.success ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"}`}
+        >
+          {submitResult.success ? "Success!" : "Error"}
+        </h2>
+        <p className="text-lg text-gray-700 dark:text-gray-300 text-center mb-2">
+          {submitResult.message}
+        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          This message will disappear in 5 seconds.
+        </p>
       </div>
     );
   }
 
   return (
     <form key={formKey} className="space-y-6" onSubmit={handleSubmit}>
-      
       {/* Grid Layout for Form Fields */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-
         {/* Left Column - Service & Schedule */}
         <div className="space-y-4 sm:space-y-6">
           <div className="flex items-center space-x-3 mb-3 sm:mb-4">
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-green-600 dark:text-green-400 font-bold text-xs sm:text-sm">1</span>
+              <span className="text-green-600 dark:text-green-400 font-bold text-xs sm:text-sm">
+                1
+              </span>
             </div>
-            <h4 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Service & Schedule</h4>
+            <h4 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+              Service & Schedule
+            </h4>
           </div>
-          
+
           <div className="mb-4">
             <div className="flex items-center justify-between gap-3 mb-2">
               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
@@ -371,7 +456,10 @@ export default function FormBooking() {
             {isLoadingServices ? (
               <div className="space-y-2">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg h-16"></div>
+                  <div
+                    key={i}
+                    className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg h-16"
+                  />
                 ))}
               </div>
             ) : (
@@ -396,7 +484,9 @@ export default function FormBooking() {
                     />
                     <div className="flex items-center justify-between gap-2 sm:gap-3 w-full">
                       <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
-                        <span className="text-base sm:text-lg flex-shrink-0">{service.icon}</span>
+                        <span className="text-base sm:text-lg flex-shrink-0">
+                          {service.icon}
+                        </span>
                         <div className="flex-1 min-w-0">
                           <h5 className="font-medium text-gray-900 dark:text-white text-sm sm:text-base truncate">
                             {service.name}
@@ -412,8 +502,18 @@ export default function FormBooking() {
                         </span>
                         {selectedService === service.id && (
                           <div className="text-blue-500">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                d="M5 13l4 4L19 7"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                              />
                             </svg>
                           </div>
                         )}
@@ -433,26 +533,29 @@ export default function FormBooking() {
           {/* Date and Time */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="preferred-date">
+              <label
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                htmlFor="preferred-date"
+              >
                 Date *
               </label>
               <CustomDatePicker
+                className="w-full"
+                dayOffPeriods={dayOffPeriods}
+                maxDate={getMaxDate()}
+                minDate={minDate}
                 value={selectedDate}
                 onChange={(date) => {
                   setSelectedDate(date);
                   checkAvailability(date);
                 }}
-                minDate={minDate}
-                maxDate={getMaxDate()}
-                dayOffPeriods={dayOffPeriods}
-                className="w-full"
               />
               {/* Hidden input for form submission */}
               <input
-                type="hidden"
-                name="preferred-date"
-                value={selectedDate}
                 required
+                name="preferred-date"
+                type="hidden"
+                value={selectedDate}
               />
               {/* Date Status Messages */}
               <div className="mt-2 space-y-2">
@@ -460,8 +563,18 @@ export default function FormBooking() {
                 {selectedDate && selectedDate !== minDate && (
                   <div className="flex items-center gap-2 p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                     <div className="w-5 h-5 rounded-full bg-green-100 dark:bg-green-800 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-3 h-3 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      <svg
+                        className="w-3 h-3 text-green-600 dark:text-green-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M5 13l4 4L19 7"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                        />
                       </svg>
                     </div>
                     <div className="text-xs">
@@ -469,11 +582,11 @@ export default function FormBooking() {
                         Next available appointment
                       </p>
                       <p className="text-green-700 dark:text-green-300">
-                        {new Date(selectedDate).toLocaleDateString('en-GB', {
-                          weekday: 'long',
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric'
+                        {new Date(selectedDate).toLocaleDateString("en-GB", {
+                          weekday: "long",
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
                         })}
                       </p>
                     </div>
@@ -484,8 +597,18 @@ export default function FormBooking() {
                 {dayOffPeriods.length > 0 && (
                   <div className="flex items-start gap-2 p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                     <div className="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <svg className="w-3 h-3 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      <svg
+                        className="w-3 h-3 text-blue-600 dark:text-blue-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                        />
                       </svg>
                     </div>
                     <div className="text-xs">
@@ -493,9 +616,12 @@ export default function FormBooking() {
                         Business closed
                       </p>
                       <p className="text-blue-700 dark:text-blue-300">
-                        {dayOffPeriods.map(period => 
-                          `${new Date(period.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} - ${new Date(period.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} (${period.title})`
-                        ).join(', ')}
+                        {dayOffPeriods
+                          .map(
+                            (period) =>
+                              `${new Date(period.start_date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} - ${new Date(period.end_date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })} (${period.title})`,
+                          )
+                          .join(", ")}
                       </p>
                     </div>
                   </div>
@@ -506,16 +632,27 @@ export default function FormBooking() {
                 <div className="mt-2 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
                   <div className="flex items-start gap-3">
                     <div className="w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-800 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <svg className="w-4 h-4 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      <svg
+                        className="w-4 h-4 text-orange-600 dark:text-orange-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                        />
                       </svg>
                     </div>
                     <div className="text-xs">
                       <p className="font-medium text-orange-800 dark:text-orange-200 mb-1">
-                        {dayOffInfo.title || 'Business Closed'}
+                        {dayOffInfo.title || "Business Closed"}
                       </p>
                       <p className="text-orange-700 dark:text-orange-300 mb-2">
-                        {dayOffInfo.description || 'No appointments available on this date'}
+                        {dayOffInfo.description ||
+                          "No appointments available on this date"}
                       </p>
                       {dayOffInfo.bannerMessage && (
                         <p className="text-orange-600 dark:text-orange-400 text-xs">
@@ -529,7 +666,10 @@ export default function FormBooking() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="timeSlot">
+              <label
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                htmlFor="timeSlot"
+              >
                 Time *
                 {isCheckingAvailability && (
                   <span className="ml-1 text-xs text-blue-500">
@@ -538,27 +678,32 @@ export default function FormBooking() {
                 )}
               </label>
               {isLoadingTimeSlots ? (
-                <div className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg h-10 sm:h-11"></div>
+                <div className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg h-10 sm:h-11" />
               ) : (
                 <>
                   <select
                     required
                     className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white appearance-none text-sm sm:text-base min-h-[44px]"
+                    disabled={availableTimeSlots.length === 0}
                     id="timeSlot"
                     name="timeSlot"
-                    disabled={availableTimeSlots.length === 0}
                   >
                     <option value="">Select time slot</option>
                     {timeSlots.map((slot: string) => {
                       const isBooked = isTimeSlotBooked(slot);
+
                       return (
-                        <option 
-                          key={slot} 
-                          value={slot}
+                        <option
+                          key={slot}
                           disabled={isBooked}
-                          style={isBooked ? { color: '#9CA3AF', backgroundColor: '#F3F4F6' } : {}}
+                          style={
+                            isBooked
+                              ? { color: "#9CA3AF", backgroundColor: "#F3F4F6" }
+                              : {}
+                          }
+                          value={slot}
                         >
-                          {slot} {isBooked ? '(Booked)' : ''}
+                          {slot} {isBooked ? "(Booked)" : ""}
                         </option>
                       );
                     })}
@@ -566,8 +711,18 @@ export default function FormBooking() {
                   {availableTimeSlots.length === 0 && !dayOffInfo.isDayOff && (
                     <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
                       <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <svg
+                          className="w-4 h-4 text-gray-500 dark:text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                          />
                         </svg>
                         <p className="text-xs text-gray-600 dark:text-gray-300">
                           All time slots are booked for this date
@@ -585,14 +740,21 @@ export default function FormBooking() {
         <div className="space-y-4 sm:space-y-6">
           <div className="flex items-center space-x-3 sm:space-x-4 mb-4 sm:mb-6">
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-blue-600 dark:text-blue-400 font-bold text-xs sm:text-sm">2</span>
+              <span className="text-blue-600 dark:text-blue-400 font-bold text-xs sm:text-sm">
+                2
+              </span>
             </div>
-            <h4 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Your Details</h4>
+            <h4 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+              Your Details
+            </h4>
           </div>
 
           {/* Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="name">
+            <label
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              htmlFor="name"
+            >
               Full Name *
             </label>
             <input
@@ -608,7 +770,10 @@ export default function FormBooking() {
           {/* Email and Phone */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="email">
+              <label
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                htmlFor="email"
+              >
                 Email *
               </label>
               <input
@@ -622,7 +787,10 @@ export default function FormBooking() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="phone">
+              <label
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                htmlFor="phone"
+              >
                 Phone *
               </label>
               <input
@@ -638,7 +806,10 @@ export default function FormBooking() {
 
           {/* Address */}
           <div>
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="address">
+            <label
+              className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
+              htmlFor="address"
+            >
               Service Address *
             </label>
             <textarea
@@ -653,7 +824,10 @@ export default function FormBooking() {
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" htmlFor="description">
+            <label
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              htmlFor="description"
+            >
               Additional Notes (Optional)
             </label>
             <textarea
@@ -679,16 +853,36 @@ export default function FormBooking() {
           type="submit"
         >
           {isSubmitting ? (
-              <div className="flex items-center justify-center gap-2">
-              <svg className="w-5 h-5 sm:w-6 sm:h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+            <div className="flex items-center justify-center gap-2">
+              <svg
+                className="w-5 h-5 sm:w-6 sm:h-6 animate-spin"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                />
               </svg>
               <span>Sending...</span>
             </div>
           ) : (
             <div className="flex items-center justify-center gap-2">
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+              <svg
+                className="w-5 h-5 sm:w-6 sm:h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                />
               </svg>
               <span>Send Request</span>
             </div>
@@ -699,7 +893,10 @@ export default function FormBooking() {
       <div className="text-center px-4">
         <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
           * Required fields. Questions? Call{" "}
-          <a href={`tel:${businessPhone}`} className="font-bold text-blue-600 dark:text-blue-400 hover:underline break-all sm:break-normal">
+          <a
+            className="font-bold text-blue-600 dark:text-blue-400 hover:underline break-all sm:break-normal"
+            href={`tel:${businessPhone}`}
+          >
             {businessPhone}
           </a>
         </p>

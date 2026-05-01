@@ -40,7 +40,9 @@ let heroSectionCache: HeroSection | null = null;
 let cachePromise: Promise<HeroSection | null> | null = null;
 
 export function useHeroSection() {
-  const [heroSection, setHeroSection] = useState<HeroSection | null>(heroSectionCache);
+  const [heroSection, setHeroSection] = useState<HeroSection | null>(
+    heroSectionCache,
+  );
   const [isLoading, setIsLoading] = useState(!heroSectionCache);
   const [error, setError] = useState<string | null>(null);
   const hasInitialized = useRef(false);
@@ -53,6 +55,7 @@ export function useHeroSection() {
     if (heroSectionCache) {
       setHeroSection(heroSectionCache);
       setIsLoading(false);
+
       return;
     }
 
@@ -67,6 +70,7 @@ export function useHeroSection() {
           setError(err instanceof Error ? err.message : "Unknown error");
           setIsLoading(false);
         });
+
       return;
     }
 
@@ -76,13 +80,16 @@ export function useHeroSection() {
         if (!response.ok) {
           throw new Error("Failed to fetch hero section");
         }
+
         return response.json();
       })
       .then((data) => {
         const heroData = data.heroSection || null;
+
         heroSectionCache = heroData;
         setHeroSection(heroData);
         setIsLoading(false);
+
         return heroData;
       })
       .catch((err) => {
@@ -102,17 +109,21 @@ export function useHeroSection() {
 
     try {
       const response = await fetch("/api/hero-section");
+
       if (!response.ok) {
         throw new Error("Failed to fetch hero section");
       }
       const data = await response.json();
       const heroData = data.heroSection || null;
+
       heroSectionCache = heroData;
       setHeroSection(heroData);
       setIsLoading(false);
+
       return heroData;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error";
+
       setError(errorMessage);
       setIsLoading(false);
       throw err;
@@ -121,4 +132,3 @@ export function useHeroSection() {
 
   return { heroSection, isLoading, error, refetch };
 }
-

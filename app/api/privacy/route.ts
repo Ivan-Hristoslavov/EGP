@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET() {
   try {
     const supabase = createClient();
-    
+
     const { data: privacy, error } = await supabase
       .from("privacy_policy")
       .select("*")
@@ -14,13 +15,21 @@ export async function GET() {
 
     if (error) {
       console.error("Error fetching privacy policy:", error);
-      return NextResponse.json({ error: "Failed to fetch privacy policy" }, { status: 500 });
+
+      return NextResponse.json(
+        { error: "Failed to fetch privacy policy" },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json(privacy);
   } catch (error) {
     console.error("Error in privacy GET:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
@@ -31,7 +40,10 @@ export async function PUT(request: NextRequest) {
     const { content } = body;
 
     if (!content) {
-      return NextResponse.json({ error: "Content is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Content is required" },
+        { status: 400 },
+      );
     }
 
     // First, try to update existing privacy policy
@@ -52,7 +64,11 @@ export async function PUT(request: NextRequest) {
 
       if (updateError) {
         console.error("Error updating privacy policy:", updateError);
-        return NextResponse.json({ error: "Failed to update privacy policy" }, { status: 500 });
+
+        return NextResponse.json(
+          { error: "Failed to update privacy policy" },
+          { status: 500 },
+        );
       }
 
       return NextResponse.json(updatedPrivacy);
@@ -66,13 +82,21 @@ export async function PUT(request: NextRequest) {
 
       if (createError) {
         console.error("Error creating privacy policy:", createError);
-        return NextResponse.json({ error: "Failed to create privacy policy" }, { status: 500 });
+
+        return NextResponse.json(
+          { error: "Failed to create privacy policy" },
+          { status: 500 },
+        );
       }
 
       return NextResponse.json(newPrivacy);
     }
   } catch (error) {
     console.error("Error in privacy PUT:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
-} 
+}

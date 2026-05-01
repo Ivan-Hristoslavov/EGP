@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { testSendGridConnection, sendEmail } from "@/lib/sendgrid-smtp";
+
 import { getTemplate, type TemplateId } from "./templates";
+
+import { testSendGridConnection, sendEmail } from "@/lib/sendgrid-smtp";
 
 const TEMPLATE_IDS: TemplateId[] = [
   "simple",
@@ -19,7 +21,12 @@ export async function GET(request: NextRequest) {
 
     if (template && TEMPLATE_IDS.includes(template)) {
       const t = getTemplate(template);
-      return NextResponse.json({ subject: t.subject, html: t.html, text: t.text });
+
+      return NextResponse.json({
+        subject: t.subject,
+        html: t.html,
+        text: t.text,
+      });
     }
 
     const isConfigured = await testSendGridConnection();
@@ -33,13 +40,14 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error testing SMTP:", error);
+
     return NextResponse.json(
       {
         success: false,
         error: "Failed to test SMTP configuration",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -48,12 +56,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}));
-    const {
-      to,
-      subject,
-      message,
-      template,
-    } = body as {
+    const { to, subject, message, template } = body as {
       to?: string;
       subject?: string;
       message?: string;
@@ -68,12 +71,14 @@ export async function POST(request: NextRequest) {
 
     if (template && TEMPLATE_IDS.includes(template)) {
       const t = getTemplate(template);
+
       await sendEmail({
         to: toAddress,
         subject: t.subject,
         text: t.text,
         html: t.html,
       });
+
       return NextResponse.json({
         success: true,
         message: `Test email sent (${template})`,
@@ -131,13 +136,14 @@ body{margin:0;padding:0;font-family:Georgia,serif;background:#f5f3ef;color:#1c19
     });
   } catch (error) {
     console.error("Error sending test email:", error);
+
     return NextResponse.json(
       {
         success: false,
         error: "Failed to send test email",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

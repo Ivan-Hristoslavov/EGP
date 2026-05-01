@@ -1,11 +1,13 @@
 "use client";
 
+import type { Service } from "@/hooks/useServices";
+
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight, Sparkles, Filter } from "lucide-react";
+
 import { useServices } from "@/hooks/useServices";
 import Pagination from "@/components/Pagination";
-import type { Service } from "@/hooks/useServices";
 import { aestheticsColors } from "@/config/colors";
 import { typography, textColors, layout } from "@/config/typography";
 import { PriceWithDiscount } from "@/components/PriceWithDiscount";
@@ -14,8 +16,7 @@ import { badgeBackgroundClass } from "@/config/badge-styles";
 import ButtonPrimary from "@/components/ButtonPrimary";
 
 /** Unified cream header gradient for all featured service cards */
-const featuredCardHeaderGradient =
-  "from-[#E6DDD1] via-[#dfd4c8] to-[#cfc4b6]";
+const featuredCardHeaderGradient = "from-[#E6DDD1] via-[#dfd4c8] to-[#cfc4b6]";
 
 function hasDiscount(s: Service): boolean {
   return (
@@ -27,6 +28,7 @@ function hasDiscount(s: Service): boolean {
 // Responsive items per page: 3 on mobile, 6 on md, 8 on lg (default 3 for mobile-first)
 function useItemsPerPage() {
   const [perPage, setPerPage] = useState(3);
+
   useEffect(() => {
     const update = () => {
       if (typeof window === "undefined") return;
@@ -34,10 +36,13 @@ function useItemsPerPage() {
       else if (window.matchMedia("(min-width: 768px)").matches) setPerPage(6);
       else setPerPage(3);
     };
+
     update();
     window.addEventListener("resize", update);
+
     return () => window.removeEventListener("resize", update);
   }, []);
+
   return perPage;
 }
 
@@ -51,58 +56,69 @@ export default function SectionFeaturedServices() {
 
   // Whether any featured service has a discount (for showing "On offer" filter)
   const hasDiscountedFeatured = useMemo(() => {
-    const featured = services.filter(s =>
-      s.is_featured && (s.main_tab?.slug === 'book-now' || s.main_tab?.slug === 'by-condition')
+    const featured = services.filter(
+      (s) =>
+        s.is_featured &&
+        (s.main_tab?.slug === "book-now" ||
+          s.main_tab?.slug === "by-condition"),
     );
+
     return featured.some(hasDiscount);
   }, [services]);
 
   // Get unique categories from featured services only (for filters)
   const availableCategories = useMemo(() => {
     const categoriesMap = new Map<string, { id: string; name: string }>();
-    
+
     // Only get featured services from both 'book-now' and 'by-condition' tabs
-    const featuredServices = services.filter(s => 
-      s.is_featured && 
-      (s.main_tab?.slug === 'book-now' || s.main_tab?.slug === 'by-condition')
+    const featuredServices = services.filter(
+      (s) =>
+        s.is_featured &&
+        (s.main_tab?.slug === "book-now" ||
+          s.main_tab?.slug === "by-condition"),
     );
-    
+
     // Build category list from featured services only
-    featuredServices.forEach(service => {
+    featuredServices.forEach((service) => {
       if (!categoriesMap.has(service.category.id)) {
         categoriesMap.set(service.category.id, {
           id: service.category.id,
-          name: service.category.name
+          name: service.category.name,
         });
       }
     });
-    
-    return Array.from(categoriesMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+
+    return Array.from(categoriesMap.values()).sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
   }, [services]);
 
   // Filter services based on selected category and discount - only show featured services
   const filteredServices = useMemo(() => {
     // Only include featured services from both 'book-now' and 'by-condition' main tabs
-    let featured = services.filter(s => 
-      s.is_featured && 
-      (s.main_tab?.slug === 'book-now' || s.main_tab?.slug === 'by-condition')
+    let featured = services.filter(
+      (s) =>
+        s.is_featured &&
+        (s.main_tab?.slug === "book-now" ||
+          s.main_tab?.slug === "by-condition"),
     );
-    
+
     // Apply category filter if selected
     if (selectedCategory !== "all") {
-      featured = featured.filter(s => s.category.id === selectedCategory);
+      featured = featured.filter((s) => s.category.id === selectedCategory);
     }
-    
+
     // Apply discount filter
     if (showDiscountedOnly) {
       featured = featured.filter(hasDiscount);
     }
-    
+
     // Sort by display_order, then by name
     return featured.sort((a, b) => {
       if (a.display_order !== b.display_order) {
         return a.display_order - b.display_order;
       }
+
       return a.name.localeCompare(b.name);
     });
   }, [services, selectedCategory, showDiscountedOnly]);
@@ -123,25 +139,29 @@ export default function SectionFeaturedServices() {
       <section className="py-6 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className={layout.container}>
           <div className="text-center mb-4 sm:mb-6 md:mb-8">
-            <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-2 ${badgeBackgroundClass} text-xs sm:text-sm font-semibold mb-2 sm:mb-4 ${textColors.heading}`}>
+            <div
+              className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-2 ${badgeBackgroundClass} text-xs sm:text-sm font-semibold mb-2 sm:mb-4 ${textColors.heading}`}
+            >
               <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
               <span>Popular Treatments</span>
             </div>
-            <h2 className={`${typography.headingSection} ${textColors.heading} mb-2 sm:mb-4 px-4`}>
+            <h2
+              className={`${typography.headingSection} ${textColors.heading} mb-2 sm:mb-4 px-4`}
+            >
               Featured Services
             </h2>
             <p className={`${typography.lead} max-w-2xl mx-auto px-4`}>
               Discover our most popular aesthetic treatments
             </p>
           </div>
-          
+
           {/* Loading Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="animate-pulse">
-                <div className="aspect-[4/3] bg-gray-200 dark:bg-gray-700 rounded-2xl mb-4"></div>
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                <div className="aspect-[4/3] bg-gray-200 dark:bg-gray-700 rounded-2xl mb-4" />
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2" />
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
               </div>
             ))}
           </div>
@@ -155,18 +175,22 @@ export default function SectionFeaturedServices() {
       <section className="py-6 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className={layout.container}>
           <div className="text-center mb-4 sm:mb-6 md:mb-8">
-            <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-2 ${badgeBackgroundClass} text-xs sm:text-sm font-semibold mb-2 sm:mb-4 ${textColors.heading}`}>
+            <div
+              className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-2 ${badgeBackgroundClass} text-xs sm:text-sm font-semibold mb-2 sm:mb-4 ${textColors.heading}`}
+            >
               <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
               <span>Popular Treatments</span>
             </div>
-            <h2 className={`${typography.headingSection} ${textColors.heading} mb-2 sm:mb-4 px-4`}>
+            <h2
+              className={`${typography.headingSection} ${textColors.heading} mb-2 sm:mb-4 px-4`}
+            >
               Featured Services
             </h2>
             <p className={`${typography.lead} max-w-2xl mx-auto px-4`}>
               Discover our most popular aesthetic treatments
             </p>
           </div>
-          
+
           <div className="text-center py-12">
             <p className={typography.lead}>
               No featured services available at the moment.
@@ -178,11 +202,16 @@ export default function SectionFeaturedServices() {
   }
 
   return (
-    <section id="featured-services" className="py-6 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <section
+      className="py-6 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900"
+      id="featured-services"
+    >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header - compact */}
         <div className="text-center mb-4 sm:mb-6 md:mb-8">
-          <div className={`inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-xs font-semibold mb-1.5 sm:mb-3`}>
+          <div
+            className={`inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-xs font-semibold mb-1.5 sm:mb-3`}
+          >
             <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             <span>Popular Treatments</span>
           </div>
@@ -202,27 +231,29 @@ export default function SectionFeaturedServices() {
                 <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-egp-green/10 dark:bg-egp-green/20">
                   <Filter className="w-4 h-4 text-egp-green dark:text-egp-green-light" />
                 </div>
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Filter by</span>
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                  Filter by
+                </span>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <button
-                  onClick={() => setSelectedCategory("all")}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                     selectedCategory === "all"
                       ? "bg-egp-green dark:bg-egp-green-dark text-white shadow-md"
                       : "bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-transparent hover:border-gray-300 dark:hover:border-gray-600"
                   }`}
+                  onClick={() => setSelectedCategory("all")}
                 >
                   All
                 </button>
                 {hasDiscountedFeatured && (
                   <button
-                    onClick={() => setShowDiscountedOnly(!showDiscountedOnly)}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-1.5 ${
                       showDiscountedOnly
                         ? "bg-amber-500 dark:bg-amber-600 text-white shadow-md"
                         : "bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-transparent hover:border-gray-300 dark:hover:border-gray-600"
                     }`}
+                    onClick={() => setShowDiscountedOnly(!showDiscountedOnly)}
                   >
                     <span className="inline-block w-1.5 h-1.5 rounded-full bg-current opacity-90" />
                     On offer
@@ -231,12 +262,12 @@ export default function SectionFeaturedServices() {
                 {availableCategories.map((category) => (
                   <button
                     key={category.id}
-                    onClick={() => setSelectedCategory(category.id)}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                       selectedCategory === category.id
                         ? "bg-egp-green dark:bg-egp-green-dark text-white shadow-md"
                         : "bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-transparent hover:border-gray-300 dark:hover:border-gray-600"
                     }`}
+                    onClick={() => setSelectedCategory(category.id)}
                   >
                     {category.name}
                   </button>
@@ -260,26 +291,35 @@ export default function SectionFeaturedServices() {
                   {service.image_url ? (
                     <>
                       <img
-                        src={service.image_url}
                         alt={service.name}
                         className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        src={service.image_url}
                       />
-                      <div className={`absolute inset-0 bg-gradient-to-br ${featuredCardHeaderGradient} opacity-75 group-hover:opacity-90 transition-opacity`} />
+                      <div
+                        className={`absolute inset-0 bg-gradient-to-br ${featuredCardHeaderGradient} opacity-75 group-hover:opacity-90 transition-opacity`}
+                      />
                     </>
                   ) : (
-                    <div className={`absolute inset-0 bg-gradient-to-br ${featuredCardHeaderGradient} opacity-90`} />
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-br ${featuredCardHeaderGradient} opacity-90`}
+                    />
                   )}
-                  
+
                   {/* Service Name Overlay */}
                   <div className="absolute inset-0 flex items-center justify-center p-2 sm:p-3 md:p-4 z-10">
                     <h3 className="text-base sm:text-lg font-bold text-white text-center drop-shadow-lg line-clamp-2 leading-tight">
                       {service.name}
                     </h3>
                   </div>
-                  
+
                   {/* Featured Badge */}
                   <div className="absolute top-1.5 left-1.5 sm:top-3 sm:left-3 z-10">
-                    <span className="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 text-white text-[9px] sm:text-[10px] font-bold rounded-full shadow-lg backdrop-blur-sm" style={{ backgroundColor: aestheticsColors.green.DEFAULT }}>
+                    <span
+                      className="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 text-white text-[9px] sm:text-[10px] font-bold rounded-full shadow-lg backdrop-blur-sm"
+                      style={{
+                        backgroundColor: aestheticsColors.green.DEFAULT,
+                      }}
+                    >
                       <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" />
                       FEATURED
                     </span>
@@ -317,23 +357,53 @@ export default function SectionFeaturedServices() {
                   {/* Service Details */}
                   <div className="flex flex-wrap gap-x-3 gap-y-1 mb-2 sm:mb-3 text-xs text-gray-500 dark:text-gray-400">
                     <div className="flex items-center gap-1">
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      <svg
+                        className="w-3.5 h-3.5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                        />
                       </svg>
                       <span>{service.duration} min</span>
                     </div>
                     {service.downtime_days > 0 && (
                       <div className="flex items-center gap-1">
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        <svg
+                          className="w-3.5 h-3.5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                          />
                         </svg>
                         <span>{service.downtime_days} days</span>
                       </div>
                     )}
                     {service.requires_consultation && (
                       <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <svg
+                          className="w-3.5 h-3.5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                          />
                         </svg>
                         <span>Consultation</span>
                       </div>
@@ -341,29 +411,33 @@ export default function SectionFeaturedServices() {
                   </div>
 
                   {/* Spacer to push price and button to bottom */}
-                  <div className="flex-1"></div>
+                  <div className="flex-1" />
 
                   {/* Price & CTA */}
                   <div className="pt-3 border-t border-gray-200 dark:border-gray-700 space-y-2">
                     {/* Price */}
                     <div className="text-center flex flex-col items-center gap-1 w-full">
                       <PriceWithDiscount
-                        price={service.discounted_price ?? service.price}
-                        originalPrice={service.discount_percentage ? service.price : null}
-                        discountPercentage={service.discount_percentage}
-                        size="lg"
-                        layout="stack"
                         align="center"
+                        discountPercentage={service.discount_percentage}
+                        layout="stack"
+                        originalPrice={
+                          service.discount_percentage ? service.price : null
+                        }
+                        price={service.discounted_price ?? service.price}
+                        size="lg"
                       />
                     </div>
                     {/* Button */}
                     <ButtonPrimary
+                      className="w-full !bg-transparent border-2 border-egp-green dark:border-egp-beige !text-egp-green dark:!text-egp-beige hover:!bg-egp-green hover:!text-white dark:hover:!bg-egp-beige dark:hover:!text-gray-900 rounded-xl font-semibold transition-all duration-300 shadow-sm hover:shadow-md"
+                      endContent={
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      }
+                      variant="primary"
                       onPress={() => {
                         setSelectedService(service);
                       }}
-                      variant="primary"
-                      className="w-full !bg-transparent border-2 border-egp-green dark:border-egp-beige !text-egp-green dark:!text-egp-beige hover:!bg-egp-green hover:!text-white dark:hover:!bg-egp-beige dark:hover:!text-gray-900 rounded-xl font-semibold transition-all duration-300 shadow-sm hover:shadow-md"
-                      endContent={<ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
                     >
                       Learn More
                     </ButtonPrimary>
@@ -378,21 +452,26 @@ export default function SectionFeaturedServices() {
         {totalPages > 1 && (
           <div className="mb-8 sm:mb-12">
             <Pagination
+              className="justify-center"
               currentPage={currentPage}
-              totalPages={totalPages}
-              totalCount={filteredServices.length}
               limit={itemsPerPage}
+              totalCount={filteredServices.length}
+              totalPages={totalPages}
               onPageChange={(page) => {
                 setCurrentPage(page);
                 // Scroll to top of Featured Services section
-                const section = document.getElementById('featured-services');
+                const section = document.getElementById("featured-services");
+
                 if (section) {
                   const offset = 100; // Account for fixed header
-                  const sectionTop = section.getBoundingClientRect().top + window.pageYOffset - offset;
-                  window.scrollTo({ top: sectionTop, behavior: 'smooth' });
+                  const sectionTop =
+                    section.getBoundingClientRect().top +
+                    window.pageYOffset -
+                    offset;
+
+                  window.scrollTo({ top: sectionTop, behavior: "smooth" });
                 }
               }}
-              className="justify-center"
             />
           </div>
         )}
@@ -401,11 +480,11 @@ export default function SectionFeaturedServices() {
         <div className="text-center px-4">
           <ButtonPrimary
             as={Link}
-            href="/services"
-            variant="primary"
-            size="lg"
             className="w-full sm:w-auto"
             endContent={<ArrowRight className="w-5 h-5" />}
+            href="/services"
+            size="lg"
+            variant="primary"
           >
             View All Treatments
           </ButtonPrimary>
@@ -414,28 +493,35 @@ export default function SectionFeaturedServices() {
 
       {/* Service Details Modal */}
       <ServiceDetailsModal
-        isOpen={!!selectedService}
-        onClose={() => setSelectedService(null)}
-        service={selectedService ? {
-          id: selectedService.id,
-          name: selectedService.name,
-          price: selectedService.discounted_price ?? selectedService.price,
-          originalPrice: selectedService.discount_percentage ? selectedService.price : null,
-          discount_percentage: selectedService.discount_percentage,
-          category: selectedService.category.name,
-          duration: selectedService.duration,
-          description: selectedService.description,
-          details: selectedService.details,
-          benefits: selectedService.benefits,
-          preparation: selectedService.preparation,
-          aftercare: selectedService.aftercare,
-          requires_consultation: selectedService.requires_consultation,
-          downtime_days: selectedService.downtime_days,
-          results_duration_weeks: selectedService.results_duration_weeks,
-          image_url: selectedService.image_url,
-          slug: selectedService.slug,
-        } : null}
         showBookButton
+        isOpen={!!selectedService}
+        service={
+          selectedService
+            ? {
+                id: selectedService.id,
+                name: selectedService.name,
+                price:
+                  selectedService.discounted_price ?? selectedService.price,
+                originalPrice: selectedService.discount_percentage
+                  ? selectedService.price
+                  : null,
+                discount_percentage: selectedService.discount_percentage,
+                category: selectedService.category.name,
+                duration: selectedService.duration,
+                description: selectedService.description,
+                details: selectedService.details,
+                benefits: selectedService.benefits,
+                preparation: selectedService.preparation,
+                aftercare: selectedService.aftercare,
+                requires_consultation: selectedService.requires_consultation,
+                downtime_days: selectedService.downtime_days,
+                results_duration_weeks: selectedService.results_duration_weeks,
+                image_url: selectedService.image_url,
+                slug: selectedService.slug,
+              }
+            : null
+        }
+        onClose={() => setSelectedService(null)}
       />
     </section>
   );

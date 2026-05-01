@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import ThemeToggleButton from "../../../components/ThemeToggleButton";
 import { Mail, Lock, ArrowLeft, Shield } from "lucide-react";
+
+import ThemeToggleButton from "../../../components/ThemeToggleButton";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
@@ -46,6 +47,7 @@ export default function AdminLoginPage() {
         router.push("/admin/dashboard");
       } else {
         const data = await response.json();
+
         setError(data.error || "Invalid credentials");
       }
     } catch (error) {
@@ -59,22 +61,22 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-800 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-500">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-20 left-20 w-32 h-32 bg-rose-500 rounded-full blur-3xl"></div>
-        <div className="absolute top-40 right-20 w-24 h-24 bg-pink-500 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 left-1/4 w-16 h-16 bg-purple-500 rounded-full blur-3xl"></div>
+        <div className="absolute top-20 left-20 w-32 h-32 bg-rose-500 rounded-full blur-3xl" />
+        <div className="absolute top-40 right-20 w-24 h-24 bg-pink-500 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 left-1/4 w-16 h-16 bg-purple-500 rounded-full blur-3xl" />
       </div>
 
       {/* Theme Toggle */}
       <div className="absolute top-6 right-6 z-10">
         <ThemeToggleButton />
       </div>
-      
+
       {/* Back to Home Button */}
       <div className="absolute top-6 left-6 z-10">
         <button
+          aria-label="Back to home"
           className="flex items-center min-h-[44px] px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-rose-600 dark:hover:text-rose-400 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-800 rounded-xl shadow-sm border border-gray-200/50 dark:border-gray-600/50 transition-all duration-200 hover:shadow-lg"
           onClick={() => (window.location.href = "/")}
-          aria-label="Back to home"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back
@@ -110,16 +112,16 @@ export default function AdminLoginPage() {
                 </div>
                 <input
                   required
-                  autoComplete="email"
-                  inputMode="email"
                   autoCapitalize="none"
+                  autoComplete="email"
                   autoCorrect="off"
-                  spellCheck={false}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all duration-200 sm:text-sm"
                   id="email"
+                  inputMode="email"
                   name="email"
-                  type="email"
                   placeholder="admin@example.com"
+                  spellCheck={false}
+                  type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -139,15 +141,15 @@ export default function AdminLoginPage() {
                 </div>
                 <input
                   required
-                  autoComplete="current-password"
                   autoCapitalize="none"
+                  autoComplete="current-password"
                   autoCorrect="off"
-                  spellCheck={false}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all duration-200 sm:text-sm"
                   id="password"
                   name="password"
-                  type="password"
                   placeholder="Enter your password"
+                  spellCheck={false}
+                  type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -156,21 +158,39 @@ export default function AdminLoginPage() {
 
             {error && (
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3">
-                <p className="text-red-600 dark:text-red-400 text-sm text-center font-medium">{error}</p>
+                <p className="text-red-600 dark:text-red-400 text-sm text-center font-medium">
+                  {error}
+                </p>
               </div>
             )}
 
             <div>
               <button
-                disabled={isLoading}
                 className="w-full min-h-[48px] flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-semibold text-white bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 hover:from-rose-600 hover:via-pink-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+                disabled={isLoading}
                 type="submit"
               >
                 {isLoading ? (
                   <>
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        fill="currentColor"
+                      />
                     </svg>
                     Signing in...
                   </>

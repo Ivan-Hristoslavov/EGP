@@ -6,6 +6,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 
 export async function PUT(request: NextRequest) {
   const denied = await requireAdmin();
+
   if (denied) return denied;
 
   try {
@@ -15,14 +16,14 @@ export async function PUT(request: NextRequest) {
     if (!currentPassword || !newPassword) {
       return NextResponse.json(
         { error: "Current password and new password are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (newPassword.length < 6) {
       return NextResponse.json(
         { error: "New password must be at least 6 characters" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -34,21 +35,22 @@ export async function PUT(request: NextRequest) {
 
     if (fetchError || !adminProfile) {
       console.error("Error fetching admin profile:", fetchError);
+
       return NextResponse.json(
         { error: "Admin profile not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     const isCurrentValid = await bcrypt.compare(
       currentPassword,
-      adminProfile.password
+      adminProfile.password,
     );
 
     if (!isCurrentValid) {
       return NextResponse.json(
         { error: "Invalid current password" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -64,18 +66,20 @@ export async function PUT(request: NextRequest) {
 
     if (updateError) {
       console.error("Error updating password:", updateError);
+
       return NextResponse.json(
         { error: "Failed to update password" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Password change error:", error);
+
     return NextResponse.json(
       { error: "An error occurred while changing password" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

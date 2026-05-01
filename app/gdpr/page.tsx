@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
-import { getAdminProfile } from "@/lib/admin-profile";
+
 import GdprPageClient from "./gdpr-client";
+
+import { getAdminProfile } from "@/lib/admin-profile";
 
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getAdminProfile();

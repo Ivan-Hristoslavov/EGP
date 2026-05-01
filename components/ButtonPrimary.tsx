@@ -1,12 +1,18 @@
 "use client";
 
 import { Button as HeroUIButton, ButtonProps } from "@heroui/react";
-import { getButtonClasses } from "@/config/design-system";
 import { forwardRef } from "react";
 
-export type ButtonVariant = 'primary' | 'secondary' | 'accent' | 'dark' | 'whatsapp';
+import { getButtonClasses } from "@/config/design-system";
 
-interface ButtonPrimaryProps extends Omit<ButtonProps, 'variant'> {
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "accent"
+  | "dark"
+  | "whatsapp";
+
+interface ButtonPrimaryProps extends Omit<ButtonProps, "variant"> {
   variant?: ButtonVariant;
   useDesignSystem?: boolean;
 }
@@ -16,9 +22,14 @@ interface ButtonPrimaryProps extends Omit<ButtonProps, 'variant'> {
  * All button colors can be changed from one place (config/colors.ts)
  */
 const ButtonPrimary = forwardRef<HTMLButtonElement, ButtonPrimaryProps>(
-  ({ variant = 'primary', useDesignSystem = true, className = '', ...props }, ref) => {
-    const designSystemClasses = useDesignSystem ? getButtonClasses(variant) : '';
-    
+  (
+    { variant = "primary", useDesignSystem = true, className = "", ...props },
+    ref,
+  ) => {
+    const designSystemClasses = useDesignSystem
+      ? getButtonClasses(variant)
+      : "";
+
     return (
       <HeroUIButton
         ref={ref}
@@ -26,10 +37,9 @@ const ButtonPrimary = forwardRef<HTMLButtonElement, ButtonPrimaryProps>(
         className={`${designSystemClasses} ${className}`.trim()}
       />
     );
-  }
+  },
 );
 
 ButtonPrimary.displayName = "ButtonPrimary";
 
 export default ButtonPrimary;
-

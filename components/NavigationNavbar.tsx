@@ -6,28 +6,29 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 
-import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { ThemeToggle } from "./ThemeToggle";
+
+import { useScrollDirection } from "@/hooks/useScrollDirection";
 
 const navigation = [
   { name: "Home", href: "#home" },
   { name: "Services", href: "#services" },
-  { 
-    name: "About", 
+  {
+    name: "About",
     href: "#about",
     dropdown: [
       { name: "Our Story", href: "#our-story" },
       { name: "Service Areas", href: "#service-areas" },
-      { name: "Gallery", href: "#gallery" }
-    ]
+      { name: "Gallery", href: "#gallery" },
+    ],
   },
-  { 
-    name: "Support", 
+  {
+    name: "Support",
     href: "#faq",
     dropdown: [
       { name: "FAQ", href: "#faq" },
       { name: "Reviews", href: "#reviews" },
-    ]
+    ],
   },
   { name: "Contact", href: "#contact" },
 ];
@@ -53,7 +54,9 @@ export default function NavigationNavbar() {
     if (typeof document === "undefined") return;
     if (isMobileMenuOpen) {
       const originalOverflow = document.body.style.overflow;
+
       document.body.style.overflow = "hidden";
+
       return () => {
         document.body.style.overflow = originalOverflow;
       };
@@ -67,19 +70,22 @@ export default function NavigationNavbar() {
     const throttle = (func: () => void, delay: number) => {
       let timeoutId: NodeJS.Timeout | null = null;
       let lastExecTime = 0;
-      
+
       return () => {
         const currentTime = Date.now();
-        
+
         if (currentTime - lastExecTime > delay) {
           func();
           lastExecTime = currentTime;
         } else {
           if (timeoutId) clearTimeout(timeoutId);
-          timeoutId = setTimeout(() => {
-            func();
-            lastExecTime = Date.now();
-          }, delay - (currentTime - lastExecTime));
+          timeoutId = setTimeout(
+            () => {
+              func();
+              lastExecTime = Date.now();
+            },
+            delay - (currentTime - lastExecTime),
+          );
         }
       };
     };
@@ -88,26 +94,41 @@ export default function NavigationNavbar() {
 
     const handleScrollSpy = () => {
       const allSections = [
-        "home", "services", "about", "our-story", "service-areas", "gallery", "faq", "reviews", "contact"
+        "home",
+        "services",
+        "about",
+        "our-story",
+        "service-areas",
+        "gallery",
+        "faq",
+        "reviews",
+        "contact",
       ];
-      
+
       // Find the section that is currently in view
       let currentSection: string | null = null;
       let minDistance = Infinity;
-      
+
       allSections.forEach((section) => {
         const element = document.getElementById(section);
+
         if (element) {
           const rect = element.getBoundingClientRect();
-          
-          const dayOffBanner = document.querySelector('[data-day-off-banner]') as HTMLElement;
+
+          const dayOffBanner = document.querySelector(
+            "[data-day-off-banner]",
+          ) as HTMLElement;
           const navbarHeight = 0;
-          const bannerHeight = dayOffBanner && dayOffBanner.offsetHeight > 0 ? dayOffBanner.offsetHeight : 0;
+          const bannerHeight =
+            dayOffBanner && dayOffBanner.offsetHeight > 0
+              ? dayOffBanner.offsetHeight
+              : 0;
           const totalOffset = navbarHeight + bannerHeight + 80; // 80px threshold for better detection
-          
+
           // Check if section is in view with precise offset
           if (rect.top <= totalOffset && rect.bottom >= totalOffset) {
             const distance = Math.abs(rect.top - totalOffset);
+
             if (distance < minDistance) {
               minDistance = distance;
               currentSection = section;
@@ -119,14 +140,14 @@ export default function NavigationNavbar() {
       if (currentSection && currentSection !== previousSection) {
         setActiveSection(currentSection);
         previousSection = currentSection;
-        
+
         // Only update URL if we're on the home page to prevent excessive navigation
         if (pathname === "/" && currentSection !== "home") {
           // Debounce router updates to prevent excessive calls
           if (routerUpdateTimeoutRef.current) {
             clearTimeout(routerUpdateTimeoutRef.current);
           }
-          
+
           routerUpdateTimeoutRef.current = setTimeout(() => {
             try {
               router.replace(`/#${currentSection}`, { scroll: false });
@@ -141,31 +162,50 @@ export default function NavigationNavbar() {
     // Check if there's a hash in the URL on initial load
     if (typeof window !== "undefined" && window.location.hash) {
       const hash = window.location.hash.substring(1);
-      if (["home", "services", "about", "our-story", "service-areas", "gallery", "faq", "reviews", "contact"].includes(hash)) {
+
+      if (
+        [
+          "home",
+          "services",
+          "about",
+          "our-story",
+          "service-areas",
+          "gallery",
+          "faq",
+          "reviews",
+          "contact",
+        ].includes(hash)
+      ) {
         setActiveSection(hash);
         previousSection = hash;
-        
+
         // Scroll to the section after a short delay to ensure DOM is ready
         setTimeout(() => {
           const element = document.getElementById(hash);
+
           if (element) {
-            const dayOffBanner = document.querySelector('[data-day-off-banner]') as HTMLElement;
+            const dayOffBanner = document.querySelector(
+              "[data-day-off-banner]",
+            ) as HTMLElement;
             const navbarHeight = 0;
-            
+
             // Get banner height if it exists
-            const bannerHeight = dayOffBanner && dayOffBanner.offsetHeight > 0 ? dayOffBanner.offsetHeight : 0;
-            
+            const bannerHeight =
+              dayOffBanner && dayOffBanner.offsetHeight > 0
+                ? dayOffBanner.offsetHeight
+                : 0;
+
             // Calculate total offset with more precise positioning
             const totalOffset = navbarHeight + bannerHeight + 30; // 30px extra padding for better visibility
-            
+
             // Get element position and calculate final scroll position
             const elementTop = element.offsetTop;
             const finalScrollPosition = Math.max(0, elementTop - totalOffset);
-            
+
             // Scroll to precise position
             window.scrollTo({
               top: finalScrollPosition,
-              behavior: 'smooth'
+              behavior: "smooth",
             });
           }
         }, 100);
@@ -174,7 +214,7 @@ export default function NavigationNavbar() {
 
     // Throttle scroll handler to run at most every 300ms (increased from 200ms)
     const throttledHandleScrollSpy = throttle(handleScrollSpy, 300);
-    
+
     window.addEventListener("scroll", throttledHandleScrollSpy);
     // Initial check when component mounts
     handleScrollSpy();
@@ -192,7 +232,7 @@ export default function NavigationNavbar() {
     href: string,
   ) => {
     // If it's an anchor link (starts with #), prevent default and scroll
-    if (href.startsWith('#')) {
+    if (href.startsWith("#")) {
       e.preventDefault();
       const targetId = href.substring(1);
       const element = document.getElementById(targetId);
@@ -201,10 +241,10 @@ export default function NavigationNavbar() {
         // Close mobile menu and dropdowns if open
         setIsMobileMenuOpen(false);
         setOpenDropdown(null);
-        
+
         // Set active section immediately
         setActiveSection(targetId);
-        
+
         // Update URL to reflect the section
         if (pathname === "/") {
           router.replace(`/#${targetId}`, { scroll: false });
@@ -214,13 +254,18 @@ export default function NavigationNavbar() {
         // Calculate precise scroll position
         window.requestAnimationFrame(() => {
           const targetRect = element.getBoundingClientRect();
-          const scrollOffset = window.pageYOffset || document.documentElement.scrollTop;
-          const headerHeight = window.innerWidth >= 1024 ? (isScrolled ? 72 : 80) : 16;
-          const finalScrollPosition = Math.max(0, scrollOffset + targetRect.top - headerHeight);
+          const scrollOffset =
+            window.pageYOffset || document.documentElement.scrollTop;
+          const headerHeight =
+            window.innerWidth >= 1024 ? (isScrolled ? 72 : 80) : 16;
+          const finalScrollPosition = Math.max(
+            0,
+            scrollOffset + targetRect.top - headerHeight,
+          );
 
           window.scrollTo({
             top: finalScrollPosition,
-            behavior: 'smooth'
+            behavior: "smooth",
           });
         });
       }
@@ -231,7 +276,10 @@ export default function NavigationNavbar() {
 
   const isActiveDropdown = (item: any) => {
     if (!item.dropdown) return false;
-    return item.dropdown.some((subItem: any) => activeSection === subItem.href.substring(1));
+
+    return item.dropdown.some(
+      (subItem: any) => activeSection === subItem.href.substring(1),
+    );
   };
 
   // Don't render navigation on terms and privacy pages
@@ -241,31 +289,33 @@ export default function NavigationNavbar() {
 
   return (
     <nav className="w-full backdrop-blur-xl bg-[#ddd5c3]/90 dark:bg-gray-900/90 shadow-lg border-b border-[#ddd5c3]/30 dark:border-gray-800/30 transition-all duration-300">
-        <div className={`bg-[#ddd5c3]/95 dark:bg-gray-900/95 transition-all duration-300 ${isScrolled ? "lg:py-3 lg:border-b lg:border-[#c9c1b0]/50 lg:dark:border-gray-700/50 py-4" : "py-4"}`}>
+      <div
+        className={`bg-[#ddd5c3]/95 dark:bg-gray-900/95 transition-all duration-300 ${isScrolled ? "lg:py-3 lg:border-b lg:border-[#c9c1b0]/50 lg:dark:border-gray-700/50 py-4" : "py-4"}`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             {/* Logo */}
-            <Link href="/" className="flex items-center h-10 group relative">
+            <Link className="flex items-center h-10 group relative" href="/">
               {/* Pantone color glow effect on hover */}
-              <div className="absolute inset-0 -z-10 rounded-full bg-[#9d9585] opacity-0 group-hover:opacity-50 transition-opacity duration-500 blur-2xl scale-125 animate-pulse -left-8 -right-8 -top-2 -bottom-2"></div>
-              <div className="absolute inset-0 -z-10 rounded-full bg-[#b5ad9d] opacity-0 group-hover:opacity-40 transition-opacity duration-500 blur-xl scale-115 -left-4 -right-4 -top-1 -bottom-1"></div>
-              
+              <div className="absolute inset-0 -z-10 rounded-full bg-[#9d9585] opacity-0 group-hover:opacity-50 transition-opacity duration-500 blur-2xl scale-125 animate-pulse -left-8 -right-8 -top-2 -bottom-2" />
+              <div className="absolute inset-0 -z-10 rounded-full bg-[#b5ad9d] opacity-0 group-hover:opacity-40 transition-opacity duration-500 blur-xl scale-115 -left-4 -right-4 -top-1 -bottom-1" />
+
               <span className="relative block h-8 w-auto transition-all duration-300 group-hover:scale-110 group-hover:brightness-110 group-hover:drop-shadow-lg">
                 <Image
-                  src="/logos/LOGO_LONG BLACK.png"
-                  alt="EGP Aesthetics"
-                  width={180}
-                  height={32}
-                  className="h-8 w-auto dark:hidden transition-all duration-300 group-hover:opacity-90 group-hover:drop-shadow-xl"
                   priority
+                  alt="EGP Aesthetics"
+                  className="h-8 w-auto dark:hidden transition-all duration-300 group-hover:opacity-90 group-hover:drop-shadow-xl"
+                  height={32}
+                  src="/logos/LOGO_LONG BLACK.png"
+                  width={180}
                 />
                 <Image
-                  src="/logos/LOGO_LONG WHITE.png"
-                  alt="EGP Aesthetics"
-                  width={180}
-                  height={32}
-                  className="h-8 w-auto hidden dark:block transition-all duration-300 group-hover:opacity-90 group-hover:drop-shadow-xl"
                   priority
+                  alt="EGP Aesthetics"
+                  className="h-8 w-auto hidden dark:block transition-all duration-300 group-hover:opacity-90 group-hover:drop-shadow-xl"
+                  height={32}
+                  src="/logos/LOGO_LONG WHITE.png"
+                  width={180}
                 />
               </span>
             </Link>
@@ -286,36 +336,48 @@ export default function NavigationNavbar() {
                         onMouseLeave={() => setOpenDropdown(null)}
                       >
                         {item.name}
-                        <svg className="w-4 h-4 transition-transform duration-200 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+                        <svg
+                          className="w-4 h-4 transition-transform duration-200 group-hover:rotate-180"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            d="M19 9l-7 7-7-7"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                          />
                         </svg>
                         {isActiveDropdown(item) && (
                           <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-yellow-400 rounded-full animate-pulse shadow-lg" />
                         )}
                       </button>
-                      
+
                       {/* Dropdown Menu */}
                       <div
                         className={`absolute top-full left-0 mt-2 w-48 bg-[#f0ede7]/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-[#c9c1b0]/50 dark:border-gray-600/50 transition-all duration-300 ${
-                          openDropdown === item.name ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-2"
+                          openDropdown === item.name
+                            ? "opacity-100 visible translate-y-0"
+                            : "opacity-0 invisible -translate-y-2"
                         }`}
                         onMouseEnter={() => setOpenDropdown(item.name)}
                         onMouseLeave={() => setOpenDropdown(null)}
                       >
                         <div className="py-2">
                           {item.dropdown.map((subItem) => (
-                      <Link
-                        key={subItem.name}
-                        href={subItem.href}
-                        onClick={(e) => handleClick(e, subItem.href)}
-                        className={`block px-4 py-3 text-sm font-medium transition-all duration-300 hover:bg-[#9d9585] dark:hover:bg-gray-700/50 hover:text-white ${
-                          activeSection === subItem.href.substring(1)
-                            ? "text-white dark:text-gray-200 bg-[#9d9585] dark:bg-gray-700/50"
-                            : "text-gray-700 dark:text-gray-300 dark:hover:text-gray-200"
-                        }`}
-                      >
-                        {subItem.name}
-                      </Link>
+                            <Link
+                              key={subItem.name}
+                              className={`block px-4 py-3 text-sm font-medium transition-all duration-300 hover:bg-[#9d9585] dark:hover:bg-gray-700/50 hover:text-white ${
+                                activeSection === subItem.href.substring(1)
+                                  ? "text-white dark:text-gray-200 bg-[#9d9585] dark:bg-gray-700/50"
+                                  : "text-gray-700 dark:text-gray-300 dark:hover:text-gray-200"
+                              }`}
+                              href={subItem.href}
+                              onClick={(e) => handleClick(e, subItem.href)}
+                            >
+                              {subItem.name}
+                            </Link>
                           ))}
                         </div>
                       </div>
@@ -343,8 +405,8 @@ export default function NavigationNavbar() {
             {/* Book Now CTA + Theme Toggle */}
             <div className="hidden lg:flex items-center gap-3">
               <Link
-                href="/book"
                 className="px-5 py-2.5 text-sm font-semibold text-white bg-[#464C45] hover:bg-[#3a4039] rounded-full shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 transform"
+                href="/book"
               >
                 Book Now
               </Link>
@@ -392,7 +454,9 @@ export default function NavigationNavbar() {
           createPortal(
             <div
               className={`lg:hidden fixed inset-0 z-[999] transition-opacity duration-300 ${
-                isMobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+                isMobileMenuOpen
+                  ? "opacity-100 pointer-events-auto"
+                  : "opacity-0 pointer-events-none"
               }`}
             >
               <div
@@ -445,14 +509,14 @@ export default function NavigationNavbar() {
                     )}
                   </div>
                 ))}
-                
+
                 {/* Mobile Theme Toggle */}
                 <div className="flex justify-center pt-4 border-t border-[#c9c1b0] dark:border-gray-600">
                   <ThemeToggle size="lg" />
                 </div>
               </div>
             </div>,
-            document.body
+            document.body,
           )}
       </div>
     </nav>
