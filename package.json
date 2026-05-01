@@ -87,7 +87,7 @@
     "@vitejs/plugin-react": "^5.1.4",
     "@vitest/coverage-v8": "^4.0.18",
     "autoprefixer": "^10.4.21",
-    "baseline-browser-mapping": "^2.10.13",
+    "baseline-browser-mapping": "^2.10.25",
     "eslint": "9.25.1",
     "eslint-config-next": "^16.0.1",
     "eslint-config-prettier": "10.1.2",
