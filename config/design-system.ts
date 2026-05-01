@@ -2,7 +2,7 @@
 // Centralized design tokens for consistent styling across the site
 // Beige + Green color palette
 
-import { aestheticsColors, colorClasses, typography, forms } from './colors';
+import { aestheticsColors, colorClasses, typography, forms } from "./colors";
 
 // Export all design system tokens
 export const designSystem = {
@@ -13,7 +13,9 @@ export const designSystem = {
 };
 
 // Helper functions for common use cases
-export const getButtonClasses = (variant: 'primary' | 'secondary' | 'accent' | 'dark' | 'whatsapp' = 'primary') => {
+export const getButtonClasses = (
+  variant: "primary" | "secondary" | "accent" | "dark" | "whatsapp" = "primary",
+) => {
   const variants = {
     primary: colorClasses.btnPrimary,
     secondary: colorClasses.btnSecondary,
@@ -21,6 +23,7 @@ export const getButtonClasses = (variant: 'primary' | 'secondary' | 'accent' | '
     dark: colorClasses.btnDark,
     whatsapp: colorClasses.btnWhatsApp,
   };
+
   return variants[variant] || variants.primary;
 };
 
@@ -35,8 +38,12 @@ export const getCardClasses = (dark: boolean = false) => {
 };
 
 // Text color classes based on background
-export const getTextClasses = (onDark: boolean = false, onGreen: boolean = false) => {
+export const getTextClasses = (
+  onDark: boolean = false,
+  onGreen: boolean = false,
+) => {
   if (onGreen || onDark) return typography.onGreen;
+
   return typography.body;
 };
 
@@ -69,4 +76,3 @@ export const inputClassNames = {
 
 // Export default
 export default designSystem;
-

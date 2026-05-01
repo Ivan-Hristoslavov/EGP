@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { createClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase";
 
@@ -6,6 +7,7 @@ function extractFilePathFromUrl(url: string): string | null {
   if (!url) return null;
   try {
     const match = url.match(/\/storage\/v1\/object\/public\/egp\/(.+)/);
+
     return match ? match[1] : null;
   } catch {
     return null;
@@ -15,9 +17,13 @@ function extractFilePathFromUrl(url: string): string | null {
 async function deleteImageFromStorage(imageUrl: string | null): Promise<void> {
   if (!imageUrl || !supabaseAdmin) return;
   const filePath = extractFilePathFromUrl(imageUrl);
+
   if (!filePath) return;
   try {
-    const { error } = await supabaseAdmin.storage.from("egp").remove([filePath]);
+    const { error } = await supabaseAdmin.storage
+      .from("egp")
+      .remove([filePath]);
+
     if (error) console.error("Error deleting hero image from storage:", error);
   } catch (e) {
     console.error("Error in deleteImageFromStorage:", e);
@@ -27,7 +33,7 @@ async function deleteImageFromStorage(imageUrl: string | null): Promise<void> {
 export async function GET() {
   try {
     const supabase = createClient();
-    
+
     // Always get the first record (there should only be one)
     const { data: heroSections, error: listError } = await supabase
       .from("hero_section")
@@ -37,15 +43,25 @@ export async function GET() {
 
     if (listError) {
       console.error("Error fetching hero section:", listError);
-      return NextResponse.json({ error: "Failed to fetch hero section" }, { status: 500 });
+
+      return NextResponse.json(
+        { error: "Failed to fetch hero section" },
+        { status: 500 },
+      );
     }
 
     // Return the first record or null if none exists
-    const heroSection = heroSections && heroSections.length > 0 ? heroSections[0] : null;
+    const heroSection =
+      heroSections && heroSections.length > 0 ? heroSections[0] : null;
+
     return NextResponse.json({ heroSection });
   } catch (error) {
     console.error("Error in hero-section GET:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
@@ -58,8 +74,8 @@ export async function PUT(request: NextRequest) {
   try {
     const supabase = createClient();
     const body = await request.json();
-    
-    const { 
+
+    const {
       id,
       image_1_url,
       image_2_url,
@@ -89,7 +105,7 @@ export async function PUT(request: NextRequest) {
       image_max_height,
       image_quality,
       is_active,
-      animation_duration_ms
+      animation_duration_ms,
     } = body;
 
     // First, check if any record exists
@@ -99,7 +115,10 @@ export async function PUT(request: NextRequest) {
       .order("created_at", { ascending: true })
       .limit(1);
 
-    const existingId = existingRecords && existingRecords.length > 0 ? existingRecords[0].id : null;
+    const existingId =
+      existingRecords && existingRecords.length > 0
+        ? existingRecords[0].id
+        : null;
     const recordId = id || existingId;
 
     // If there are multiple records, delete all except the first one (and their images from bucket)
@@ -107,21 +126,19 @@ export async function PUT(request: NextRequest) {
       const idsToDelete = existingRecords
         .filter((r: { id: string }) => r.id !== recordId)
         .map((r: { id: string }) => r.id);
-      
+
       if (idsToDelete.length > 0) {
         const { data: toDelete } = await supabase
           .from("hero_section")
           .select("image_1_url, image_2_url, image_3_url")
           .in("id", idsToDelete);
+
         for (const row of toDelete || []) {
           await deleteImageFromStorage(row.image_1_url);
           await deleteImageFromStorage(row.image_2_url);
           await deleteImageFromStorage(row.image_3_url);
         }
-        await supabase
-          .from("hero_section")
-          .delete()
-          .in("id", idsToDelete);
+        await supabase.from("hero_section").delete().in("id", idsToDelete);
       }
     }
 
@@ -133,12 +150,20 @@ export async function PUT(request: NextRequest) {
         .select("image_1_url, image_2_url, image_3_url")
         .eq("id", recordId)
         .single();
-      const oldUrls = [existingHero?.image_1_url, existingHero?.image_2_url, existingHero?.image_3_url];
+      const oldUrls = [
+        existingHero?.image_1_url,
+        existingHero?.image_2_url,
+        existingHero?.image_3_url,
+      ];
       const newUrls = [image_1_url, image_2_url, image_3_url];
+
       for (let i = 0; i < 3; i++) {
         const oldU = oldUrls[i] ?? null;
-        const newU = newUrls[i] == null || newUrls[i] === "" ? null : newUrls[i];
-        if (oldU && (newU !== oldU || !newU)) await deleteImageFromStorage(oldU);
+        const newU =
+          newUrls[i] == null || newUrls[i] === "" ? null : newUrls[i];
+
+        if (oldU && (newU !== oldU || !newU))
+          await deleteImageFromStorage(oldU);
       }
 
       // Update existing record
@@ -182,7 +207,11 @@ export async function PUT(request: NextRequest) {
 
       if (error) {
         console.error("Error updating hero section:", error);
-        return NextResponse.json({ error: "Failed to update hero section" }, { status: 500 });
+
+        return NextResponse.json(
+          { error: "Failed to update hero section" },
+          { status: 500 },
+        );
       }
 
       return NextResponse.json({ heroSection });
@@ -226,14 +255,22 @@ export async function PUT(request: NextRequest) {
 
       if (error) {
         console.error("Error creating hero section:", error);
-        return NextResponse.json({ error: "Failed to create hero section" }, { status: 500 });
+
+        return NextResponse.json(
+          { error: "Failed to create hero section" },
+          { status: 500 },
+        );
       }
 
       return NextResponse.json({ heroSection });
     }
   } catch (error) {
     console.error("Error in hero-section PUT:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
@@ -244,7 +281,10 @@ export async function DELETE(request: NextRequest) {
     const id = url.searchParams.get("id");
 
     if (!id) {
-      return NextResponse.json({ error: "Hero section ID is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Hero section ID is required" },
+        { status: 400 },
+      );
     }
 
     const { data: existing } = await supabase
@@ -259,20 +299,24 @@ export async function DELETE(request: NextRequest) {
       await deleteImageFromStorage(existing.image_3_url);
     }
 
-    const { error } = await supabase
-      .from("hero_section")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabase.from("hero_section").delete().eq("id", id);
 
     if (error) {
       console.error("Error deleting hero section:", error);
-      return NextResponse.json({ error: "Failed to delete hero section" }, { status: 500 });
+
+      return NextResponse.json(
+        { error: "Failed to delete hero section" },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error in hero-section DELETE:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
-

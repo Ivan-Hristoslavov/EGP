@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from "react";
 
 interface TimeSlot {
   slot_id: string;
@@ -30,12 +30,12 @@ export function useTimeSlots(): UseTimeSlotsResult {
       if (data.success) {
         setTimeSlots(data.slots || []);
       } else {
-        setError(data.error || 'Failed to fetch time slots');
+        setError(data.error || "Failed to fetch time slots");
         setTimeSlots([]);
       }
     } catch (err) {
-      console.error('Error fetching time slots:', err);
-      setError('Network error occurred');
+      console.error("Error fetching time slots:", err);
+      setError("Network error occurred");
       setTimeSlots([]);
     } finally {
       setIsLoading(false);
@@ -46,6 +46,6 @@ export function useTimeSlots(): UseTimeSlotsResult {
     timeSlots,
     isLoading,
     error,
-    fetchTimeSlots
+    fetchTimeSlots,
   };
 }

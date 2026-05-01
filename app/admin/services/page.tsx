@@ -5,9 +5,7 @@ import {
   Plus,
   Edit,
   Trash2,
-  Upload,
   Search,
-  X,
   AlertCircle,
   CheckCircle2,
   Package,
@@ -15,9 +13,6 @@ import {
   TrendingUp,
   Star,
 } from "lucide-react";
-import { useServices } from "@/hooks/useServices";
-import { useConfirmation } from "@/hooks/useConfirmation";
-import { ConfirmationModal } from "@/components/ConfirmationModal";
 import { Input, Textarea } from "@heroui/input";
 import { Button } from "@heroui/button";
 import {
@@ -31,6 +26,10 @@ import { Switch } from "@heroui/switch";
 import { Select, SelectItem } from "@heroui/select";
 import { Chip } from "@heroui/chip";
 import { Card, CardBody } from "@heroui/card";
+
+import { ConfirmationModal } from "@/components/ConfirmationModal";
+import { useConfirmation } from "@/hooks/useConfirmation";
+import { useServices } from "@/hooks/useServices";
 import { useToast } from "@/components/Toast";
 import Pagination from "@/components/Pagination";
 
@@ -42,10 +41,12 @@ async function getResponseErrorMessage(
 ): Promise<string> {
   try {
     const data = (await response.json()) as { error?: string };
+
     if (typeof data?.error === "string" && data.error.trim()) return data.error;
   } catch {
     /* ignore */
   }
+
   return fallback;
 }
 
@@ -58,15 +59,24 @@ interface ExtendedServiceCategory extends ServiceCategory {
   description?: string;
 }
 
-type DiscountGroup = { id: string; name: string; discount_percentage: number; is_active: boolean };
+type DiscountGroup = {
+  id: string;
+  name: string;
+  discount_percentage: number;
+  is_active: boolean;
+};
 
 export default function AdminServicesPage() {
   const { confirm, modalProps } = useConfirmation();
   const { showSuccess, showError } = useToast();
 
   // Main state
-  const [activeView, setActiveView] = useState<"services" | "categories" | "discounts">("services");
-  const [mainTab, setMainTab] = useState<"book-now" | "by-condition">("book-now");
+  const [activeView, setActiveView] = useState<
+    "services" | "categories" | "discounts"
+  >("services");
+  const [mainTab, setMainTab] = useState<"book-now" | "by-condition">(
+    "book-now",
+  );
 
   // Data state
   const [services, setServices] = useState<Service[]>([]);
@@ -83,18 +93,23 @@ export default function AdminServicesPage() {
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
-  const [editingCategory, setEditingCategory] = useState<ExtendedServiceCategory | null>(null);
+  const [editingCategory, setEditingCategory] =
+    useState<ExtendedServiceCategory | null>(null);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const [isDiscountGroupModalOpen, setIsDiscountGroupModalOpen] = useState(false);
-  const [editingDiscountGroup, setEditingDiscountGroup] = useState<DiscountGroup | null>(null);
+  const [isDiscountGroupModalOpen, setIsDiscountGroupModalOpen] =
+    useState(false);
+  const [editingDiscountGroup, setEditingDiscountGroup] =
+    useState<DiscountGroup | null>(null);
   const [discountGroupForm, setDiscountGroupForm] = useState({
     name: "",
     discount_percentage: 50,
     is_active: true,
     selectedServiceIds: [] as string[],
   });
-  const [discountGroupServiceSearch, setDiscountGroupServiceSearch] = useState("");
-  const [discountGroupCategoryFilter, setDiscountGroupCategoryFilter] = useState("all");
+  const [discountGroupServiceSearch, setDiscountGroupServiceSearch] =
+    useState("");
+  const [discountGroupCategoryFilter, setDiscountGroupCategoryFilter] =
+    useState("all");
 
   // Form state
   const defaultFormData = {
@@ -131,11 +146,16 @@ export default function AdminServicesPage() {
   const loadServices = useCallback(async () => {
     try {
       const response = await fetch("/api/admin/services");
+
       if (response.ok) {
         const data = await response.json();
+
         setServices(data.services || []);
       } else {
-        console.error("Error loading services: Response not ok", response.status);
+        console.error(
+          "Error loading services: Response not ok",
+          response.status,
+        );
       }
     } catch (error) {
       console.error("Error loading services:", error);
@@ -145,11 +165,16 @@ export default function AdminServicesPage() {
   const loadCategories = useCallback(async () => {
     try {
       const response = await fetch("/api/admin/service-categories");
+
       if (response.ok) {
         const data = await response.json();
+
         setCategories(data.categories || []);
       } else {
-        console.error("Error loading categories: Response not ok", response.status);
+        console.error(
+          "Error loading categories: Response not ok",
+          response.status,
+        );
       }
     } catch (error) {
       console.error("Error loading categories:", error);
@@ -159,8 +184,10 @@ export default function AdminServicesPage() {
   const loadMainTabs = useCallback(async () => {
     try {
       const response = await fetch("/api/main-tabs");
+
       if (response.ok) {
         const data = await response.json();
+
         setMainTabs(data.mainTabs || []);
       }
     } catch (error) {
@@ -171,8 +198,10 @@ export default function AdminServicesPage() {
   const loadDiscountGroups = useCallback(async () => {
     try {
       const response = await fetch("/api/admin/discount-groups");
+
       if (response.ok) {
         const data = await response.json();
+
         setDiscountGroups(data.discountGroups ?? []);
       }
     } catch (error) {
@@ -186,7 +215,7 @@ export default function AdminServicesPage() {
       loadServices(),
       loadCategories(),
       loadMainTabs(),
-      loadDiscountGroups()
+      loadDiscountGroups(),
     ]);
     setIsLoading(false);
   }, [loadServices, loadCategories, loadMainTabs, loadDiscountGroups]);
@@ -203,7 +232,11 @@ export default function AdminServicesPage() {
   // Service CRUD operations
   const handleAddService = async () => {
     if (!formData.name || !formData.category_id) {
-      showError("Missing fields", "Please enter a service name and select a category.");
+      showError(
+        "Missing fields",
+        "Please enter a service name and select a category.",
+      );
+
       return;
     }
     try {
@@ -217,8 +250,9 @@ export default function AdminServicesPage() {
       const response = await fetch("/api/services", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(serviceData)
+        body: JSON.stringify(serviceData),
       });
+
       if (response.ok) {
         await loadServices();
         resetServiceForm();
@@ -242,6 +276,7 @@ export default function AdminServicesPage() {
   const handleEditService = (service: Service) => {
     setEditingService(service);
     const svc = service as Service & { discount_group_id?: string | null };
+
     setFormData({
       name: service.name,
       slug: service.slug,
@@ -278,6 +313,7 @@ export default function AdminServicesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+
       if (response.ok) {
         await loadServices();
         resetServiceForm();
@@ -302,7 +338,8 @@ export default function AdminServicesPage() {
     await confirm(
       {
         title: "Delete Service",
-        message: "Are you sure you want to delete this service? This action cannot be undone.",
+        message:
+          "Are you sure you want to delete this service? This action cannot be undone.",
         isDestructive: true,
         confirmText: "Delete",
       },
@@ -311,13 +348,17 @@ export default function AdminServicesPage() {
           const response = await fetch(`/api/services/${id}`, {
             method: "DELETE",
           });
+
           if (response.ok) {
             await loadServices();
             showSuccess("Service deleted", "The service has been removed.");
           } else {
             showError(
               "Delete failed",
-              await getResponseErrorMessage(response, "Could not delete this service."),
+              await getResponseErrorMessage(
+                response,
+                "Could not delete this service.",
+              ),
             );
           }
         } catch (error) {
@@ -327,17 +368,18 @@ export default function AdminServicesPage() {
             error instanceof Error ? error.message : "Network error.",
           );
         }
-      }
+      },
     );
   };
 
   const handleToggleFeatured = async (service: Service) => {
     // Optimistically update local state
     const newFeaturedStatus = !service.is_featured;
+
     setServices((prev) =>
       prev.map((s) =>
-        s.id === service.id ? { ...s, is_featured: newFeaturedStatus } : s
-      )
+        s.id === service.id ? { ...s, is_featured: newFeaturedStatus } : s,
+      ),
     );
     try {
       const response = await fetch(`/api/services/${service.id}`, {
@@ -350,6 +392,7 @@ export default function AdminServicesPage() {
           benefits: Array.isArray(service.benefits) ? service.benefits : [],
         }),
       });
+
       if (response.ok) {
         showSuccess(
           newFeaturedStatus ? "Featured" : "Removed from featured",
@@ -359,7 +402,11 @@ export default function AdminServicesPage() {
         );
       } else {
         setServices((prev) =>
-          prev.map((s) => (s.id === service.id ? { ...s, is_featured: service.is_featured } : s))
+          prev.map((s) =>
+            s.id === service.id
+              ? { ...s, is_featured: service.is_featured }
+              : s,
+          ),
         );
         showError(
           "Could not update featured",
@@ -368,7 +415,9 @@ export default function AdminServicesPage() {
       }
     } catch (error) {
       setServices((prev) =>
-        prev.map((s) => (s.id === service.id ? { ...s, is_featured: service.is_featured } : s))
+        prev.map((s) =>
+          s.id === service.id ? { ...s, is_featured: service.is_featured } : s,
+        ),
       );
       console.error("Error toggling featured status:", error);
       showError(
@@ -383,6 +432,7 @@ export default function AdminServicesPage() {
     if (!categoryFormData.name) return;
     try {
       const selectedMainTab = mainTabs.find((tab) => tab.slug === mainTab);
+
       if (!selectedMainTab) return;
       const categoryData = {
         main_tab_id: selectedMainTab.id,
@@ -398,6 +448,7 @@ export default function AdminServicesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(categoryData),
       });
+
       if (response.ok) {
         await loadCategories();
         resetCategoryForm();
@@ -427,8 +478,9 @@ export default function AdminServicesPage() {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(categoryFormData),
-        }
+        },
       );
+
       if (response.ok) {
         await loadCategories();
         resetCategoryForm();
@@ -443,7 +495,8 @@ export default function AdminServicesPage() {
     await confirm(
       {
         title: "Delete Category",
-        message: "Are you sure you want to delete this category? This action cannot be undone.",
+        message:
+          "Are you sure you want to delete this category? This action cannot be undone.",
         isDestructive: true,
         confirmText: "Delete",
       },
@@ -452,13 +505,14 @@ export default function AdminServicesPage() {
           const response = await fetch(`/api/service-categories/${id}`, {
             method: "DELETE",
           });
+
           if (response.ok) {
             await loadCategories();
           }
         } catch (error) {
           console.error("Error deleting category:", error);
         }
-      }
+      },
     );
   };
 
@@ -515,11 +569,15 @@ export default function AdminServicesPage() {
     setIsDiscountGroupModalOpen(true);
     try {
       const res = await fetch(`/api/admin/discount-groups/${dg.id}/services`);
+
       if (res.ok) {
         const data = await res.json();
+
         setDiscountGroupForm((prev) => ({
           ...prev,
-          selectedServiceIds: Array.isArray(data.serviceIds) ? data.serviceIds : [],
+          selectedServiceIds: Array.isArray(data.serviceIds)
+            ? data.serviceIds
+            : [],
         }));
       }
     } catch (e) {
@@ -530,15 +588,21 @@ export default function AdminServicesPage() {
   const handleSaveDiscountGroup = async () => {
     if (!discountGroupForm.name.trim()) return;
     const { selectedServiceIds, ...groupPayload } = discountGroupForm;
+
     try {
       let groupId: string | null = null;
+
       if (editingDiscountGroup) {
-        const res = await fetch(`/api/admin/discount-groups/${editingDiscountGroup.id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(groupPayload),
-        });
+        const res = await fetch(
+          `/api/admin/discount-groups/${editingDiscountGroup.id}`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(groupPayload),
+          },
+        );
         const data = res.ok ? await res.json() : null;
+
         groupId = data?.discountGroup?.id ?? editingDiscountGroup.id;
         if (!res.ok) return;
       } else {
@@ -548,14 +612,19 @@ export default function AdminServicesPage() {
           body: JSON.stringify(groupPayload),
         });
         const data = res.ok ? await res.json() : null;
+
         groupId = data?.discountGroup?.id ?? null;
         if (!res.ok || !groupId) return;
       }
-      const servicesRes = await fetch(`/api/admin/discount-groups/${groupId}/services`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ serviceIds: selectedServiceIds }),
-      });
+      const servicesRes = await fetch(
+        `/api/admin/discount-groups/${groupId}/services`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ serviceIds: selectedServiceIds }),
+        },
+      );
+
       if (servicesRes.ok) {
         await loadDiscountGroups();
         await loadServices();
@@ -570,18 +639,22 @@ export default function AdminServicesPage() {
     await confirm(
       {
         title: "Delete discount group",
-        message: "Are you sure? Services in this group will keep the group link until you change them.",
+        message:
+          "Are you sure? Services in this group will keep the group link until you change them.",
         isDestructive: true,
         confirmText: "Delete",
       },
       async () => {
         try {
-          const res = await fetch(`/api/admin/discount-groups/${id}`, { method: "DELETE" });
+          const res = await fetch(`/api/admin/discount-groups/${id}`, {
+            method: "DELETE",
+          });
+
           if (res.ok) await loadDiscountGroups();
         } catch (error) {
           console.error("Error deleting discount group:", error);
         }
-      }
+      },
     );
   };
 
@@ -606,6 +679,7 @@ export default function AdminServicesPage() {
   // Filter logic
   const filteredServices = useMemo(() => {
     const q = searchQuery.toLowerCase();
+
     return services.filter((service) => {
       const serviceMainTabSlug = service.main_tab?.slug;
       const matchesMainTab = serviceMainTabSlug === mainTab;
@@ -614,6 +688,7 @@ export default function AdminServicesPage() {
         (service.description || "").toLowerCase().includes(q);
       const matchesCategory =
         categoryFilter === "all" || service.category.id === categoryFilter;
+
       return matchesMainTab && matchesSearch && matchesCategory;
     });
   }, [services, mainTab, searchQuery, categoryFilter]);
@@ -625,6 +700,7 @@ export default function AdminServicesPage() {
 
   const paginatedServices = useMemo(() => {
     const start = (servicesPage - 1) * SERVICES_PAGE_SIZE;
+
     return filteredServices.slice(start, start + SERVICES_PAGE_SIZE);
   }, [filteredServices, servicesPage]);
 
@@ -638,6 +714,7 @@ export default function AdminServicesPage() {
 
   const currentCategories = categories.filter((cat) => {
     const catMainTabSlug = cat.main_tab?.slug;
+
     return catMainTabSlug === mainTab;
   });
 
@@ -653,7 +730,7 @@ export default function AdminServicesPage() {
     return (
       <div className="min-h-screen bg-[#f5f1e9] dark:bg-gray-950 flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#464C45] mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#464C45] mx-auto mb-4" />
           <p className="text-gray-600 dark:text-gray-400">
             Loading services...
           </p>
@@ -672,32 +749,33 @@ export default function AdminServicesPage() {
               Which part of the site
             </p>
             <p className="text-xs text-default-400 hidden sm:block">
-              Filters services and categories shown to visitors (Book now vs Treatments by condition).
+              Filters services and categories shown to visitors (Book now vs
+              Treatments by condition).
             </p>
             <div
+              aria-label="Site section"
               className="inline-flex w-full max-w-md rounded-lg border border-default-200 bg-default-100/40 p-0.5 dark:border-default-100 dark:bg-default-50/30"
               role="group"
-              aria-label="Site section"
             >
               <button
-                type="button"
-                onClick={() => setMainTab("book-now")}
                 className={`min-w-0 flex-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors sm:text-sm ${
                   mainTab === "book-now"
                     ? "bg-[#464C45] text-white shadow-sm"
                     : "text-default-600 hover:bg-default-100 dark:text-default-400 dark:hover:bg-default-100/10"
                 }`}
+                type="button"
+                onClick={() => setMainTab("book-now")}
               >
                 Book now
               </button>
               <button
-                type="button"
-                onClick={() => setMainTab("by-condition")}
                 className={`min-w-0 flex-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors sm:text-sm ${
                   mainTab === "by-condition"
                     ? "bg-[#464C45] text-white shadow-sm"
                     : "text-default-600 hover:bg-default-100 dark:text-default-400 dark:hover:bg-default-100/10"
                 }`}
+                type="button"
+                onClick={() => setMainTab("by-condition")}
               >
                 By condition
               </button>
@@ -709,48 +787,48 @@ export default function AdminServicesPage() {
               What you are editing
             </p>
             <div
+              aria-label="Admin section"
               className="flex gap-1 rounded-lg border border-default-200 bg-content1 p-0.5 dark:border-default-100"
               role="tablist"
-              aria-label="Admin section"
             >
               <button
-                type="button"
-                role="tab"
                 aria-selected={activeView === "services"}
-                onClick={() => setActiveView("services")}
                 className={`flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors sm:gap-2 sm:px-3 sm:text-sm ${
                   activeView === "services"
                     ? "bg-default-200 text-foreground shadow-sm dark:bg-default-100"
                     : "text-default-500 hover:bg-default-100/80 dark:hover:bg-default-100/10"
                 }`}
+                role="tab"
+                type="button"
+                onClick={() => setActiveView("services")}
               >
                 <Package className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
                 <span>Services</span>
               </button>
               <button
-                type="button"
-                role="tab"
                 aria-selected={activeView === "categories"}
-                onClick={() => setActiveView("categories")}
                 className={`flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors sm:gap-2 sm:px-3 sm:text-sm ${
                   activeView === "categories"
                     ? "bg-default-200 text-foreground shadow-sm dark:bg-default-100"
                     : "text-default-500 hover:bg-default-100/80 dark:hover:bg-default-100/10"
                 }`}
+                role="tab"
+                type="button"
+                onClick={() => setActiveView("categories")}
               >
                 <FolderTree className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
                 <span>Categories</span>
               </button>
               <button
-                type="button"
-                role="tab"
                 aria-selected={activeView === "discounts"}
-                onClick={() => setActiveView("discounts")}
                 className={`flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors sm:gap-2 sm:px-3 sm:text-sm ${
                   activeView === "discounts"
                     ? "bg-default-200 text-foreground shadow-sm dark:bg-default-100"
                     : "text-default-500 hover:bg-default-100/80 dark:hover:bg-default-100/10"
                 }`}
+                role="tab"
+                type="button"
+                onClick={() => setActiveView("discounts")}
               >
                 <TrendingUp className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
                 <span className="hidden xs:inline">Discounts</span>
@@ -798,30 +876,35 @@ export default function AdminServicesPage() {
               <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
                 <div className="min-w-0 flex-1 sm:max-w-xs lg:max-w-md">
                   <Input
-                    placeholder="Search services..."
-                    value={searchQuery}
-                    onValueChange={setSearchQuery}
-                    variant="bordered"
-                    size="sm"
-                    startContent={<Search className="h-4 w-4 shrink-0 text-default-400" />}
                     classNames={{
                       input: "text-sm",
                       inputWrapper: "h-9 min-h-9",
                     }}
+                    placeholder="Search services..."
+                    size="sm"
+                    startContent={
+                      <Search className="h-4 w-4 shrink-0 text-default-400" />
+                    }
+                    value={searchQuery}
+                    variant="bordered"
+                    onValueChange={setSearchQuery}
                   />
                 </div>
                 <Select
-                  placeholder="All categories"
-                  selectedKeys={categoryFilter === "all" ? [] : [categoryFilter]}
-                  onSelectionChange={(keys) => {
-                    const key = Array.from(keys)[0] as string;
-                    setCategoryFilter(key || "all");
-                  }}
-                  variant="bordered"
-                  size="sm"
                   className="w-full sm:w-44"
                   classNames={{
                     trigger: "h-9 min-h-9",
+                  }}
+                  placeholder="All categories"
+                  selectedKeys={
+                    categoryFilter === "all" ? [] : [categoryFilter]
+                  }
+                  size="sm"
+                  variant="bordered"
+                  onSelectionChange={(keys) => {
+                    const key = Array.from(keys)[0] as string;
+
+                    setCategoryFilter(key || "all");
                   }}
                 >
                   <>
@@ -832,11 +915,11 @@ export default function AdminServicesPage() {
                   </>
                 </Select>
                 <Button
-                  onClick={openAddServiceModal}
-                  className="h-9 min-h-9 min-w-9 shrink-0 bg-gradient-to-r from-rose-500 to-pink-500 text-white"
-                  size="sm"
                   isIconOnly
                   aria-label="Add service"
+                  className="h-9 min-h-9 min-w-9 shrink-0 bg-gradient-to-r from-rose-500 to-pink-500 text-white"
+                  size="sm"
+                  onClick={openAddServiceModal}
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
@@ -853,8 +936,8 @@ export default function AdminServicesPage() {
                   Please create categories first before adding services.
                 </p>
                 <Button
-                  onClick={() => setActiveView("categories")}
                   className="bg-gradient-to-r from-rose-500 to-pink-500 text-white"
+                  onClick={() => setActiveView("categories")}
                 >
                   Go to Categories
                 </Button>
@@ -871,223 +954,244 @@ export default function AdminServicesPage() {
               </div>
             ) : (
               <>
-              <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-2">
-                {paginatedServices.map((service) => (
-                  <Card
-                    key={service.id}
-                    className="hover:shadow-xl transition-all group border border-gray-200 dark:border-gray-700 flex flex-col min-w-0"
-                  >
-                    <CardBody className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
-                      {/* Top Section */}
-                      <div className="min-h-0 flex-1 space-y-2">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0 flex-1">
-                            <h3 className="text-sm font-semibold leading-snug text-foreground sm:text-base break-words">
-                              {service.name}
-                            </h3>
-                            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                              <Chip size="sm" variant="flat" color="danger">
-                                {service.category.name}
-                              </Chip>
-                              {service.is_featured && (
-                                <Chip size="sm" color="warning" variant="flat">
-                                  <CheckCircle2 className="mr-1 h-3 w-3" />
-                                  Featured
+                <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-2">
+                  {paginatedServices.map((service) => (
+                    <Card
+                      key={service.id}
+                      className="hover:shadow-xl transition-all group border border-gray-200 dark:border-gray-700 flex flex-col min-w-0"
+                    >
+                      <CardBody className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
+                        {/* Top Section */}
+                        <div className="min-h-0 flex-1 space-y-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0 flex-1">
+                              <h3 className="text-sm font-semibold leading-snug text-foreground sm:text-base break-words">
+                                {service.name}
+                              </h3>
+                              <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                                <Chip color="danger" size="sm" variant="flat">
+                                  {service.category.name}
                                 </Chip>
-                              )}
+                                {service.is_featured && (
+                                  <Chip
+                                    color="warning"
+                                    size="sm"
+                                    variant="flat"
+                                  >
+                                    <CheckCircle2 className="mr-1 h-3 w-3" />
+                                    Featured
+                                  </Chip>
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <div>
-                          <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wide text-default-500 dark:text-default-400">
-                            Short description
-                          </p>
-                          {service.description ? (
-                            <div className="max-h-24 overflow-y-auto overscroll-contain rounded border border-default-200 bg-default-50/80 px-2 py-1.5 dark:border-default-100 dark:bg-zinc-900/80">
-                              <p className="text-xs leading-snug text-slate-800 dark:text-zinc-100 whitespace-pre-wrap break-words">
-                                {service.description}
+                          <div>
+                            <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wide text-default-500 dark:text-default-400">
+                              Short description
+                            </p>
+                            {service.description ? (
+                              <div className="max-h-24 overflow-y-auto overscroll-contain rounded border border-default-200 bg-default-50/80 px-2 py-1.5 dark:border-default-100 dark:bg-zinc-900/80">
+                                <p className="text-xs leading-snug text-slate-800 dark:text-zinc-100 whitespace-pre-wrap break-words">
+                                  {service.description}
+                                </p>
+                              </div>
+                            ) : (
+                              <p className="text-xs italic text-default-400">
+                                Missing information
                               </p>
+                            )}
+                          </div>
+                          {service.benefits && service.benefits.length > 0 ? (
+                            <div>
+                              <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wide text-default-500 dark:text-default-400">
+                                Benefits
+                              </p>
+                              <div className="max-h-20 overflow-y-auto overscroll-contain rounded border border-rose-200/80 bg-rose-50/95 px-2 py-1.5 dark:border-rose-800/60 dark:bg-rose-950/50">
+                                <ul className="list-inside list-disc space-y-0.5 text-[11px] leading-snug text-rose-950 dark:text-rose-50">
+                                  {service.benefits.map((benefit, idx) => (
+                                    <li
+                                      key={idx}
+                                      className="break-words pl-0.5 marker:text-rose-500 dark:marker:text-rose-300"
+                                    >
+                                      {benefit}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
                             </div>
                           ) : (
-                            <p className="text-xs italic text-default-400">Missing information</p>
+                            <p className="text-[11px] italic text-default-400">
+                              Benefits not filled
+                            </p>
+                          )}
+                          {service.details ? (
+                            <div>
+                              <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wide text-default-500 dark:text-default-400">
+                                Details
+                              </p>
+                              <div className="max-h-28 overflow-y-auto overscroll-contain rounded border border-blue-200/70 bg-blue-50 px-2 py-1.5 dark:border-slate-600 dark:bg-slate-900/95">
+                                <p className="text-[11px] leading-snug text-slate-900 dark:text-zinc-50 whitespace-pre-wrap break-words">
+                                  {service.details}
+                                </p>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-[11px] italic text-default-400">
+                              Details not filled
+                            </p>
                           )}
                         </div>
-                        {service.benefits && service.benefits.length > 0 ? (
-                          <div>
-                            <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wide text-default-500 dark:text-default-400">
-                              Benefits
-                            </p>
-                            <div className="max-h-20 overflow-y-auto overscroll-contain rounded border border-rose-200/80 bg-rose-50/95 px-2 py-1.5 dark:border-rose-800/60 dark:bg-rose-950/50">
-                              <ul className="list-inside list-disc space-y-0.5 text-[11px] leading-snug text-rose-950 dark:text-rose-50">
-                                {service.benefits.map((benefit, idx) => (
-                                  <li key={idx} className="break-words pl-0.5 marker:text-rose-500 dark:marker:text-rose-300">
-                                    {benefit}
-                                  </li>
-                                ))}
-                              </ul>
+                        <div className="mt-2 border-t border-gray-200 pt-3 dark:border-gray-700">
+                          <div className="mb-2 flex items-center justify-between">
+                            <div>
+                              <p className="mb-0.5 text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                Price
+                              </p>
+                              <span className="text-lg font-bold text-rose-600 dark:text-rose-400">
+                                £{service.price || 0}
+                              </span>
+                            </div>
+                            <div className="text-right">
+                              <p className="mb-0.5 text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                Duration
+                              </p>
+                              <div className="flex items-center justify-end gap-1.5 text-xs text-gray-700 dark:text-gray-200">
+                                <span aria-hidden>⏱</span>
+                                <span>{service.duration || 0} min</span>
+                              </div>
                             </div>
                           </div>
-                        ) : (
-                          <p className="text-[11px] italic text-default-400">Benefits not filled</p>
-                        )}
-                        {service.details ? (
-                          <div>
-                            <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wide text-default-500 dark:text-default-400">
-                              Details
+                          <div className="space-y-1.5">
+                            <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                              Extra
                             </p>
-                            <div className="max-h-28 overflow-y-auto overscroll-contain rounded border border-blue-200/70 bg-blue-50 px-2 py-1.5 dark:border-slate-600 dark:bg-slate-900/95">
-                              <p className="text-[11px] leading-snug text-slate-900 dark:text-zinc-50 whitespace-pre-wrap break-words">
-                                {service.details}
-                              </p>
-                            </div>
-                          </div>
-                        ) : (
-                          <p className="text-[11px] italic text-default-400">Details not filled</p>
-                        )}
-                      </div>
-                      <div className="mt-2 border-t border-gray-200 pt-3 dark:border-gray-700">
-                        <div className="mb-2 flex items-center justify-between">
-                          <div>
-                            <p className="mb-0.5 text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                              Price
-                            </p>
-                            <span className="text-lg font-bold text-rose-600 dark:text-rose-400">
-                              £{service.price || 0}
-                            </span>
-                          </div>
-                          <div className="text-right">
-                            <p className="mb-0.5 text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                              Duration
-                            </p>
-                            <div className="flex items-center justify-end gap-1.5 text-xs text-gray-700 dark:text-gray-200">
-                              <span aria-hidden>⏱</span>
-                              <span>{service.duration || 0} min</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="space-y-1.5">
-                          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                            Extra
-                          </p>
-                          <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px]">
-                            {service.requires_consultation ? (
-                              <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
-                                <svg
-                                  className="w-3 h-3"
-                                  fill="currentColor"
-                                  viewBox="0 0 20 20"
-                                >
-                                  <path
-                                    fillRule="evenodd"
-                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                    clipRule="evenodd"
-                                  />
-                                </svg>
-                                <span>Consultation</span>
-                              </div>
-                            ) : (
-                              <p className="text-gray-400 dark:text-gray-500 text-xs italic">
-                                Consultation: Not specified
-                              </p>
-                            )}
-                            {service.downtime_days > 0 ? (
-                              <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
-                                <svg
-                                  className="w-3 h-3"
-                                  fill="currentColor"
-                                  viewBox="0 0 20 20"
-                                >
-                                  <path
-                                    fillRule="evenodd"
-                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                                    clipRule="evenodd"
-                                  />
-                                </svg>
-                                <span>{service.downtime_days}d downtime</span>
-                              </div>
-                            ) : (
-                              <p className="text-gray-400 dark:text-gray-500 text-xs italic">
-                                Downtime: Not specified
-                              </p>
-                            )}
-                            {service.results_duration_weeks ? (
-                              <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                                <svg
-                                  className="w-3 h-3"
-                                  fill="currentColor"
-                                  viewBox="0 0 20 20"
-                                >
-                                  <path
-                                    fillRule="evenodd"
-                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                    clipRule="evenodd"
-                                  />
-                                </svg>
-                                <span>
-                                  Lasts {service.results_duration_weeks}w
-                                </span>
-                              </div>
-                            ) : (
-                              <p className="text-gray-400 dark:text-gray-500 text-xs italic">
-                                Results duration: Not filled
-                              </p>
-                            )}
-                            {!service.requires_consultation &&
-                              service.downtime_days === 0 &&
-                              !service.results_duration_weeks && (
-                                <p className="text-gray-400 dark:text-gray-500 text-xs italic col-span-2">
-                                  No additional information
+                            <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px]">
+                              {service.requires_consultation ? (
+                                <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                                  <svg
+                                    className="w-3 h-3"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                  >
+                                    <path
+                                      clipRule="evenodd"
+                                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                      fillRule="evenodd"
+                                    />
+                                  </svg>
+                                  <span>Consultation</span>
+                                </div>
+                              ) : (
+                                <p className="text-gray-400 dark:text-gray-500 text-xs italic">
+                                  Consultation: Not specified
                                 </p>
                               )}
+                              {service.downtime_days > 0 ? (
+                                <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
+                                  <svg
+                                    className="w-3 h-3"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                  >
+                                    <path
+                                      clipRule="evenodd"
+                                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                                      fillRule="evenodd"
+                                    />
+                                  </svg>
+                                  <span>{service.downtime_days}d downtime</span>
+                                </div>
+                              ) : (
+                                <p className="text-gray-400 dark:text-gray-500 text-xs italic">
+                                  Downtime: Not specified
+                                </p>
+                              )}
+                              {service.results_duration_weeks ? (
+                                <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                                  <svg
+                                    className="w-3 h-3"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                  >
+                                    <path
+                                      clipRule="evenodd"
+                                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                      fillRule="evenodd"
+                                    />
+                                  </svg>
+                                  <span>
+                                    Lasts {service.results_duration_weeks}w
+                                  </span>
+                                </div>
+                              ) : (
+                                <p className="text-gray-400 dark:text-gray-500 text-xs italic">
+                                  Results duration: Not filled
+                                </p>
+                              )}
+                              {!service.requires_consultation &&
+                                service.downtime_days === 0 &&
+                                !service.results_duration_weeks && (
+                                  <p className="text-gray-400 dark:text-gray-500 text-xs italic col-span-2">
+                                    No additional information
+                                  </p>
+                                )}
+                            </div>
+                          </div>
+                          {/* Action Buttons */}
+                          <div className="mt-2 flex gap-1.5 border-t border-gray-200 pt-2 dark:border-gray-700">
+                            <Button
+                              className="flex-1 flex items-center justify-center"
+                              color={
+                                service.is_featured ? "warning" : "default"
+                              }
+                              size="sm"
+                              title={
+                                service.is_featured
+                                  ? "Remove from featured"
+                                  : "Make featured"
+                              }
+                              variant={service.is_featured ? "solid" : "flat"}
+                              onPress={() => handleToggleFeatured(service)}
+                            >
+                              <Star
+                                className={`w-4 h-4 ${service.is_featured ? "fill-current" : ""}`}
+                              />
+                            </Button>
+                            <Button
+                              className="flex-1 flex items-center justify-center"
+                              size="sm"
+                              title="Edit service"
+                              variant="flat"
+                              onPress={() => handleEditService(service)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              className="flex-1 flex items-center justify-center"
+                              color="danger"
+                              size="sm"
+                              title="Delete service"
+                              variant="flat"
+                              onPress={() => handleDeleteService(service.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
                         </div>
-                        {/* Action Buttons */}
-                        <div className="mt-2 flex gap-1.5 border-t border-gray-200 pt-2 dark:border-gray-700">
-                          <Button
-                            size="sm"
-                            variant={service.is_featured ? "solid" : "flat"}
-                            color={service.is_featured ? "warning" : "default"}
-                            onPress={() => handleToggleFeatured(service)}
-                            className="flex-1 flex items-center justify-center"
-                            title={service.is_featured ? "Remove from featured" : "Make featured"}
-                          >
-                            <Star className={`w-4 h-4 ${service.is_featured ? "fill-current" : ""}`} />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="flat"
-                            onPress={() => handleEditService(service)}
-                            className="flex-1 flex items-center justify-center"
-                            title="Edit service"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="flat"
-                            color="danger"
-                            onPress={() => handleDeleteService(service.id)}
-                            className="flex-1 flex items-center justify-center"
-                            title="Delete service"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardBody>
-                  </Card>
-                ))}
-              </div>
-              <Pagination
-                currentPage={servicesPage}
-                totalPages={totalServicePages}
-                totalCount={filteredServices.length}
-                limit={SERVICES_PAGE_SIZE}
-                onPageChange={async (page) => {
-                  setServicesPage(page);
-                }}
-                className="mt-6"
-              />
+                      </CardBody>
+                    </Card>
+                  ))}
+                </div>
+                <Pagination
+                  className="mt-6"
+                  currentPage={servicesPage}
+                  limit={SERVICES_PAGE_SIZE}
+                  totalCount={filteredServices.length}
+                  totalPages={totalServicePages}
+                  onPageChange={async (page) => {
+                    setServicesPage(page);
+                  }}
+                />
               </>
             )}
           </div>
@@ -1101,10 +1205,10 @@ export default function AdminServicesPage() {
                 Categories
               </h2>
               <Button
-                onClick={openAddCategoryModal}
+                isIconOnly
                 className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white"
                 size="sm"
-                isIconOnly
+                onClick={openAddCategoryModal}
               >
                 <Plus className="w-5 h-5" />
               </Button>
@@ -1134,20 +1238,20 @@ export default function AdminServicesPage() {
                       </p>
                       <div className="flex gap-2">
                         <Button
+                          className="flex-1"
                           size="sm"
                           variant="flat"
                           onPress={() => handleEditCategory(category)}
-                          className="flex-1"
                         >
                           <Edit className="w-4 h-4 mr-2" />
                           <span className="hidden xs:inline">Edit</span>
                         </Button>
                         <Button
+                          isIconOnly
+                          color="danger"
                           size="sm"
                           variant="flat"
-                          color="danger"
                           onPress={() => handleDeleteCategory(category.id)}
-                          isIconOnly
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -1168,42 +1272,65 @@ export default function AdminServicesPage() {
                 Discount groups
               </h2>
               <Button
-                onPress={openAddDiscountGroupModal}
                 className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white"
                 size="sm"
                 startContent={<Plus className="w-4 h-4" />}
+                onPress={openAddDiscountGroupModal}
               >
                 Add group
               </Button>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              Assign a discount group to a service when editing it. Customers will see the discounted price and a badge.
+              Assign a discount group to a service when editing it. Customers
+              will see the discounted price and a badge.
             </p>
             {discountGroups.length === 0 ? (
               <div className="text-center py-12">
                 <TrendingUp className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 dark:text-gray-400">No discount groups yet</p>
-                <Button className="mt-4" onPress={openAddDiscountGroupModal} color="primary">
+                <p className="text-gray-600 dark:text-gray-400">
+                  No discount groups yet
+                </p>
+                <Button
+                  className="mt-4"
+                  color="primary"
+                  onPress={openAddDiscountGroupModal}
+                >
                   Create discount group
                 </Button>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {discountGroups.map((dg) => (
-                  <Card key={dg.id} className="border border-gray-200 dark:border-gray-700">
+                  <Card
+                    key={dg.id}
+                    className="border border-gray-200 dark:border-gray-700"
+                  >
                     <CardBody className="p-4">
                       <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-bold text-gray-900 dark:text-white">{dg.name}</h3>
-                        <Chip size="sm" color="secondary">{dg.discount_percentage}% off</Chip>
+                        <h3 className="font-bold text-gray-900 dark:text-white">
+                          {dg.name}
+                        </h3>
+                        <Chip color="secondary" size="sm">
+                          {dg.discount_percentage}% off
+                        </Chip>
                       </div>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
                         {dg.is_active ? "Active" : "Inactive"}
                       </p>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="flat" onPress={() => handleEditDiscountGroup(dg)}>
+                        <Button
+                          size="sm"
+                          variant="flat"
+                          onPress={() => handleEditDiscountGroup(dg)}
+                        >
                           <Edit className="w-4 h-4 mr-1" /> Edit
                         </Button>
-                        <Button size="sm" variant="flat" color="danger" onPress={() => handleDeleteDiscountGroup(dg.id)}>
+                        <Button
+                          color="danger"
+                          size="sm"
+                          variant="flat"
+                          onPress={() => handleDeleteDiscountGroup(dg.id)}
+                        >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1217,17 +1344,17 @@ export default function AdminServicesPage() {
 
         {/* Service Modal */}
         <Modal
-          isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false);
-            resetServiceForm();
-          }}
-          size="2xl"
-          scrollBehavior="inside"
           classNames={{
             backdrop: "bg-black/50 backdrop-blur-sm",
             base: "bg-white dark:bg-gray-800 max-h-[90vh]",
             wrapper: "items-center",
+          }}
+          isOpen={isModalOpen}
+          scrollBehavior="inside"
+          size="2xl"
+          onClose={() => {
+            setIsModalOpen(false);
+            resetServiceForm();
           }}
         >
           <ModalContent>
@@ -1247,16 +1374,19 @@ export default function AdminServicesPage() {
                   <div className="space-y-4 sm:space-y-6">
                     {/* Category & Name */}
                     <Select
+                      isRequired
                       label="Category"
                       placeholder="Select category"
-                      selectedKeys={formData.category_id ? [formData.category_id] : []}
+                      selectedKeys={
+                        formData.category_id ? [formData.category_id] : []
+                      }
+                      size="lg"
+                      variant="bordered"
                       onSelectionChange={(keys) => {
                         const key = Array.from(keys)[0] as string;
+
                         setFormData((prev) => ({ ...prev, category_id: key }));
                       }}
-                      variant="bordered"
-                      size="lg"
-                      isRequired
                     >
                       <>
                         {currentCategories.map((cat) => (
@@ -1265,88 +1395,98 @@ export default function AdminServicesPage() {
                       </>
                     </Select>
                     <Input
+                      isRequired
                       label="Service Name"
                       placeholder="Enter service name"
+                      size="lg"
                       value={formData.name}
+                      variant="bordered"
                       onValueChange={(value) =>
                         setFormData((prev) => ({ ...prev, name: value }))
                       }
-                      variant="bordered"
-                      size="lg"
-                      isRequired
                     />
                     <Select
                       label="Discount group (optional)"
                       placeholder="None"
-                      selectedKeys={formData.discount_group_id ? [formData.discount_group_id] : []}
+                      selectedKeys={
+                        formData.discount_group_id
+                          ? [formData.discount_group_id]
+                          : []
+                      }
+                      size="lg"
+                      variant="bordered"
                       onSelectionChange={(keys) => {
                         const key = Array.from(keys)[0] as string;
-                        setFormData((prev) => ({ ...prev, discount_group_id: key || "" }));
+
+                        setFormData((prev) => ({
+                          ...prev,
+                          discount_group_id: key || "",
+                        }));
                       }}
-                      variant="bordered"
-                      size="lg"
                     >
                       <>
                         <SelectItem key="">None</SelectItem>
-                        {discountGroups.filter((g) => g.is_active).map((g) => (
-                          <SelectItem key={g.id}>
-                            {g.name} ({g.discount_percentage}% off)
-                          </SelectItem>
-                        ))}
+                        {discountGroups
+                          .filter((g) => g.is_active)
+                          .map((g) => (
+                            <SelectItem key={g.id}>
+                              {g.name} ({g.discount_percentage}% off)
+                            </SelectItem>
+                          ))}
                       </>
                     </Select>
                     <div className="grid grid-cols-2 gap-3 sm:gap-4">
                       <Input
+                        isRequired
                         label="Price (£)"
                         placeholder="0.00"
+                        size="lg"
                         type="number"
                         value={formData.price?.toString() ?? ""}
+                        variant="bordered"
                         onValueChange={(value) =>
                           setFormData((prev) => ({
                             ...prev,
                             price: parseFloat(value) || 0,
                           }))
                         }
-                        variant="bordered"
-                        size="lg"
-                        isRequired
                       />
                       <Input
+                        isRequired
                         label="Duration (min)"
                         placeholder="30"
+                        size="lg"
                         type="number"
                         value={formData.duration?.toString() ?? ""}
+                        variant="bordered"
                         onValueChange={(value) =>
                           setFormData((prev) => ({
                             ...prev,
                             duration: parseInt(value) || 30,
                           }))
                         }
-                        variant="bordered"
-                        size="lg"
-                        isRequired
                       />
                     </div>
                     {/* Description & Details */}
                     <Textarea
                       label="Description"
+                      minRows={3}
                       placeholder="Brief description"
                       value={formData.description}
+                      variant="bordered"
                       onValueChange={(value) =>
                         setFormData((prev) => ({ ...prev, description: value }))
                       }
-                      variant="bordered"
-                      minRows={3}
                     />
                     <Textarea
                       label="Details"
+                      minRows={4}
                       placeholder="Detailed information"
                       value={formData.details}
+                      variant="bordered"
                       onValueChange={(value) =>
                         setFormData((prev) => ({ ...prev, details: value }))
                       }
-                      variant="bordered"
-                      minRows={4}
                     />
                     {/* Benefits */}
                     <div>
@@ -1355,22 +1495,22 @@ export default function AdminServicesPage() {
                       </label>
                       <div className="flex gap-2 mb-2">
                         <Input
+                          className="flex-1"
                           placeholder="Enter benefit"
+                          size="lg"
                           value={newBenefit}
-                          onValueChange={setNewBenefit}
+                          variant="bordered"
                           onKeyDown={(e) =>
                             e.key === "Enter" &&
                             (e.preventDefault(), addBenefit())
                           }
-                          variant="bordered"
-                          className="flex-1"
-                          size="lg"
+                          onValueChange={setNewBenefit}
                         />
                         <Button
-                          onClick={addBenefit}
-                          size="lg"
-                          color="danger"
                           isIconOnly
+                          color="danger"
+                          size="lg"
+                          onClick={addBenefit}
                         >
                           <Plus className="w-5 h-5" />
                         </Button>
@@ -1380,10 +1520,10 @@ export default function AdminServicesPage() {
                           {formData.benefits.map((benefit, index) => (
                             <Chip
                               key={index}
-                              onClose={() => removeBenefit(index)}
-                              variant="flat"
                               color="danger"
                               size="lg"
+                              variant="flat"
+                              onClose={() => removeBenefit(index)}
                             >
                               {benefit}
                             </Chip>
@@ -1394,44 +1534,48 @@ export default function AdminServicesPage() {
                     {/* Preparation & Aftercare */}
                     <Textarea
                       label="Preparation"
+                      minRows={3}
                       placeholder="Pre-treatment instructions"
                       value={formData.preparation}
+                      variant="bordered"
                       onValueChange={(value) =>
                         setFormData((prev) => ({ ...prev, preparation: value }))
                       }
-                      variant="bordered"
-                      minRows={3}
                     />
                     <Textarea
                       label="Aftercare"
+                      minRows={3}
                       placeholder="Post-treatment instructions"
                       value={formData.aftercare}
+                      variant="bordered"
                       onValueChange={(value) =>
                         setFormData((prev) => ({ ...prev, aftercare: value }))
                       }
-                      variant="bordered"
-                      minRows={3}
                     />
                     <div className="grid grid-cols-2 gap-3 sm:gap-4">
                       <Input
                         label="Downtime (days)"
                         placeholder="0"
+                        size="lg"
                         type="number"
                         value={formData.downtime_days?.toString() ?? ""}
+                        variant="bordered"
                         onValueChange={(value) =>
                           setFormData((prev) => ({
                             ...prev,
                             downtime_days: parseInt(value) || 0,
                           }))
                         }
-                        variant="bordered"
-                        size="lg"
                       />
                       <Input
                         label="Results (weeks)"
                         placeholder="12"
+                        size="lg"
                         type="number"
-                        value={formData.results_duration_weeks?.toString() || ""}
+                        value={
+                          formData.results_duration_weeks?.toString() || ""
+                        }
+                        variant="bordered"
                         onValueChange={(value) =>
                           setFormData((prev) => ({
                             ...prev,
@@ -1440,8 +1584,6 @@ export default function AdminServicesPage() {
                               : null,
                           }))
                         }
-                        variant="bordered"
-                        size="lg"
                       />
                     </div>
                     <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
@@ -1471,15 +1613,15 @@ export default function AdminServicesPage() {
                   </div>
                 </ModalBody>
                 <ModalFooter className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                  <Button variant="light" onPress={onClose} className="flex-1">
+                  <Button className="flex-1" variant="light" onPress={onClose}>
                     Cancel
                   </Button>
                   <Button
+                    className="flex-1 bg-gradient-to-r from-rose-500 to-pink-500"
                     color="danger"
                     onPress={
                       editingService ? handleUpdateService : handleAddService
                     }
-                    className="flex-1 bg-gradient-to-r from-rose-500 to-pink-500"
                   >
                     {editingService ? "Update" : "Create"}
                   </Button>
@@ -1491,16 +1633,16 @@ export default function AdminServicesPage() {
 
         {/* Category Modal */}
         <Modal
-          isOpen={isCategoryModalOpen}
-          onClose={() => {
-            setIsCategoryModalOpen(false);
-            resetCategoryForm();
-          }}
-          size="md"
           classNames={{
             backdrop: "bg-black/50 backdrop-blur-sm",
             base: "bg-white dark:bg-gray-800",
             wrapper: "items-center",
+          }}
+          isOpen={isCategoryModalOpen}
+          size="md"
+          onClose={() => {
+            setIsCategoryModalOpen(false);
+            resetCategoryForm();
           }}
         >
           <ModalContent>
@@ -1519,44 +1661,44 @@ export default function AdminServicesPage() {
                 <ModalBody className="py-6">
                   <div className="space-y-4">
                     <Input
+                      isRequired
                       label="Category Name"
                       placeholder="Enter category name"
+                      size="lg"
                       value={categoryFormData.name}
+                      variant="bordered"
                       onValueChange={(value) =>
                         setCategoryFormData((prev) => ({
                           ...prev,
                           name: value,
                         }))
                       }
-                      variant="bordered"
-                      size="lg"
-                      isRequired
                     />
                     <Textarea
                       label="Description"
+                      minRows={3}
                       placeholder="Enter category description"
                       value={categoryFormData.description}
+                      variant="bordered"
                       onValueChange={(value) =>
                         setCategoryFormData((prev) => ({
                           ...prev,
                           description: value,
                         }))
                       }
-                      variant="bordered"
-                      minRows={3}
                     />
                   </div>
                 </ModalBody>
                 <ModalFooter className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                  <Button variant="light" onPress={onClose} className="flex-1">
+                  <Button className="flex-1" variant="light" onPress={onClose}>
                     Cancel
                   </Button>
                   <Button
+                    className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500"
                     color="success"
                     onPress={
                       editingCategory ? handleUpdateCategory : handleAddCategory
                     }
-                    className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500"
                   >
                     {editingCategory ? "Update" : "Create"}
                   </Button>
@@ -1568,45 +1710,59 @@ export default function AdminServicesPage() {
 
         {/* Discount group modal */}
         <Modal
-          isOpen={isDiscountGroupModalOpen}
-          onClose={() => setIsDiscountGroupModalOpen(false)}
-          size="lg"
           classNames={{
             backdrop: "bg-black/50 backdrop-blur-sm",
             base: "bg-white dark:bg-gray-800",
             wrapper: "items-center",
           }}
+          isOpen={isDiscountGroupModalOpen}
+          size="lg"
+          onClose={() => setIsDiscountGroupModalOpen(false)}
         >
           <ModalContent>
             {(onClose) => (
               <>
                 <ModalHeader className="border-b border-gray-200 dark:border-gray-700 pb-4">
                   <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                    {editingDiscountGroup ? "Edit discount group" : "Add discount group"}
+                    {editingDiscountGroup
+                      ? "Edit discount group"
+                      : "Add discount group"}
                   </h2>
                 </ModalHeader>
                 <ModalBody className="py-6 space-y-4">
                   <Input
                     label="Group name"
                     placeholder="e.g. Winter promo"
-                    value={discountGroupForm.name}
-                    onValueChange={(v) => setDiscountGroupForm((prev) => ({ ...prev, name: v }))}
-                    variant="bordered"
                     size="lg"
+                    value={discountGroupForm.name}
+                    variant="bordered"
+                    onValueChange={(v) =>
+                      setDiscountGroupForm((prev) => ({ ...prev, name: v }))
+                    }
                   />
                   <Input
                     label="Discount (%)"
-                    type="number"
-                    min={1}
                     max={100}
-                    value={discountGroupForm.discount_percentage.toString()}
-                    onValueChange={(v) => setDiscountGroupForm((prev) => ({ ...prev, discount_percentage: parseInt(v) || 0 }))}
-                    variant="bordered"
+                    min={1}
                     size="lg"
+                    type="number"
+                    value={discountGroupForm.discount_percentage.toString()}
+                    variant="bordered"
+                    onValueChange={(v) =>
+                      setDiscountGroupForm((prev) => ({
+                        ...prev,
+                        discount_percentage: parseInt(v) || 0,
+                      }))
+                    }
                   />
                   <Switch
                     isSelected={discountGroupForm.is_active}
-                    onValueChange={(v) => setDiscountGroupForm((prev) => ({ ...prev, is_active: v }))}
+                    onValueChange={(v) =>
+                      setDiscountGroupForm((prev) => ({
+                        ...prev,
+                        is_active: v,
+                      }))
+                    }
                   >
                     Active (shown to customers)
                   </Switch>
@@ -1615,26 +1771,32 @@ export default function AdminServicesPage() {
                       Services that use this offer
                     </label>
                     <p className="text-xs text-default-500 mb-2">
-                      Select which services get this discount. Customers will see the reduced price and a badge.
+                      Select which services get this discount. Customers will
+                      see the reduced price and a badge.
                     </p>
                     {discountGroupForm.selectedServiceIds.length > 0 && (
                       <div className="mb-3 p-3 rounded-lg bg-default-100 dark:bg-default-50 border border-default-200 dark:border-default-100">
                         <p className="text-xs font-medium text-default-600 dark:text-default-400 mb-2">
-                          Selected for this offer ({discountGroupForm.selectedServiceIds.length})
+                          Selected for this offer (
+                          {discountGroupForm.selectedServiceIds.length})
                         </p>
                         <div className="flex flex-wrap gap-2">
                           {discountGroupForm.selectedServiceIds.map((id) => {
                             const svc = services.find((s) => s.id === id);
+
                             return (
                               <Chip
                                 key={id}
+                                color="primary"
                                 size="sm"
                                 variant="flat"
-                                color="primary"
                                 onClose={() =>
                                   setDiscountGroupForm((prev) => ({
                                     ...prev,
-                                    selectedServiceIds: prev.selectedServiceIds.filter((sid) => sid !== id),
+                                    selectedServiceIds:
+                                      prev.selectedServiceIds.filter(
+                                        (sid) => sid !== id,
+                                      ),
                                   }))
                                 }
                               >
@@ -1647,25 +1809,28 @@ export default function AdminServicesPage() {
                     )}
                     <div className="flex flex-col sm:flex-row gap-2 mb-3">
                       <Input
-                        placeholder="Search services..."
-                        value={discountGroupServiceSearch}
-                        onValueChange={setDiscountGroupServiceSearch}
-                        variant="bordered"
-                        size="sm"
                         className="flex-1"
-                        startContent={<Search className="w-4 h-4 text-default-400" />}
+                        placeholder="Search services..."
+                        size="sm"
+                        startContent={
+                          <Search className="w-4 h-4 text-default-400" />
+                        }
+                        value={discountGroupServiceSearch}
+                        variant="bordered"
+                        onValueChange={setDiscountGroupServiceSearch}
                       />
                       <Select
+                        aria-label="Filter by category"
+                        className="w-full sm:w-40"
                         placeholder="Category"
                         selectedKeys={[discountGroupCategoryFilter]}
+                        size="sm"
+                        variant="bordered"
                         onSelectionChange={(keys) => {
                           const key = Array.from(keys)[0] as string;
+
                           setDiscountGroupCategoryFilter(key ?? "all");
                         }}
-                        variant="bordered"
-                        size="sm"
-                        className="w-full sm:w-40"
-                        aria-label="Filter by category"
                       >
                         <>
                           <SelectItem key="all">All categories</SelectItem>
@@ -1677,17 +1842,32 @@ export default function AdminServicesPage() {
                     </div>
                     <div className="max-h-48 overflow-y-auto rounded-lg border border-default-200 dark:border-default-100 p-3 space-y-2">
                       {services.length === 0 ? (
-                        <p className="text-sm text-default-500">No services yet. Add services in the Services tab first.</p>
-                      ) : (() => {
-                          const q = discountGroupServiceSearch.trim().toLowerCase();
-                          const catId = discountGroupCategoryFilter === "all" ? null : discountGroupCategoryFilter;
+                        <p className="text-sm text-default-500">
+                          No services yet. Add services in the Services tab
+                          first.
+                        </p>
+                      ) : (
+                        (() => {
+                          const q = discountGroupServiceSearch
+                            .trim()
+                            .toLowerCase();
+                          const catId =
+                            discountGroupCategoryFilter === "all"
+                              ? null
+                              : discountGroupCategoryFilter;
                           const filtered = services.filter((svc) => {
-                            const matchSearch = !q || svc.name.toLowerCase().includes(q);
-                            const matchCategory = !catId || svc.category?.id === catId;
+                            const matchSearch =
+                              !q || svc.name.toLowerCase().includes(q);
+                            const matchCategory =
+                              !catId || svc.category?.id === catId;
+
                             return matchSearch && matchCategory;
                           });
+
                           return filtered.length === 0 ? (
-                            <p className="text-sm text-default-500">No services match your search or filter.</p>
+                            <p className="text-sm text-default-500">
+                              No services match your search or filter.
+                            </p>
                           ) : (
                             filtered.map((svc) => (
                               <label
@@ -1695,30 +1875,42 @@ export default function AdminServicesPage() {
                                 className="flex items-center gap-2 cursor-pointer hover:bg-default-100 dark:hover:bg-default-50 rounded px-2 py-1.5"
                               >
                                 <input
+                                  checked={discountGroupForm.selectedServiceIds.includes(
+                                    svc.id,
+                                  )}
+                                  className="rounded border-default-300 text-primary"
                                   type="checkbox"
-                                  checked={discountGroupForm.selectedServiceIds.includes(svc.id)}
                                   onChange={(e) => {
                                     const checked = e.target.checked;
+
                                     setDiscountGroupForm((prev) => ({
                                       ...prev,
                                       selectedServiceIds: checked
                                         ? [...prev.selectedServiceIds, svc.id]
-                                        : prev.selectedServiceIds.filter((id) => id !== svc.id),
+                                        : prev.selectedServiceIds.filter(
+                                            (id) => id !== svc.id,
+                                          ),
                                     }));
                                   }}
-                                  className="rounded border-default-300 text-primary"
                                 />
-                                <span className="text-sm text-foreground truncate">{svc.name}</span>
-                                <span className="text-xs text-default-400 shrink-0">£{svc.price}</span>
+                                <span className="text-sm text-foreground truncate">
+                                  {svc.name}
+                                </span>
+                                <span className="text-xs text-default-400 shrink-0">
+                                  £{svc.price}
+                                </span>
                               </label>
                             ))
                           );
-                        })()}
+                        })()
+                      )}
                     </div>
                   </div>
                 </ModalBody>
                 <ModalFooter className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                  <Button variant="light" onPress={onClose}>Cancel</Button>
+                  <Button variant="light" onPress={onClose}>
+                    Cancel
+                  </Button>
                   <Button color="primary" onPress={handleSaveDiscountGroup}>
                     {editingDiscountGroup ? "Update" : "Create"}
                   </Button>
@@ -1728,7 +1920,7 @@ export default function AdminServicesPage() {
           </ModalContent>
         </Modal>
 
-      <ConfirmationModal {...modalProps} />
+        <ConfirmationModal {...modalProps} />
       </div>
     </div>
   );

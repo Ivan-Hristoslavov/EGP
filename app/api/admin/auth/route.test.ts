@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
+
 import { POST, DELETE } from "./route";
 
 const authMocks = vi.hoisted(() => ({
@@ -14,7 +15,7 @@ vi.mock("next/headers", () => ({
     Promise.resolve({
       set: authMocks.cookieSet,
       delete: authMocks.cookieDelete,
-    })
+    }),
   ),
 }));
 
@@ -68,13 +69,15 @@ describe("POST /api/admin/auth", () => {
       }),
     });
     const res = await POST(req);
+
     expect(res.status).toBe(200);
     const json = await res.json();
+
     expect(json.success).toBe(true);
     expect(authMocks.cookieSet).toHaveBeenCalledWith(
       "adminAuth",
       expect.any(String),
-      expect.objectContaining({ httpOnly: true, sameSite: "lax" })
+      expect.objectContaining({ httpOnly: true, sameSite: "lax" }),
     );
   });
 
@@ -92,8 +95,10 @@ describe("POST /api/admin/auth", () => {
       body: JSON.stringify({ email: "a@b.com", password: "x" }),
     });
     const res = await POST(req);
+
     expect(res.status).toBe(500);
     const json = await res.json();
+
     expect(json.error).toMatch(/JWT_SECRET/i);
   });
 
@@ -104,6 +109,7 @@ describe("POST /api/admin/auth", () => {
       body: JSON.stringify({ email: "nobody@test.com", password: "wrong" }),
     });
     const res = await POST(req);
+
     expect(res.status).toBe(401);
   });
 
@@ -114,8 +120,10 @@ describe("POST /api/admin/auth", () => {
       body: JSON.stringify({ password: "secret" }),
     });
     const res = await POST(req);
+
     expect(res.status).toBe(400);
     const json = await res.json();
+
     expect(json.error).toContain("required");
   });
 
@@ -126,8 +134,10 @@ describe("POST /api/admin/auth", () => {
       body: JSON.stringify({ email: "admin@test.com" }),
     });
     const res = await POST(req);
+
     expect(res.status).toBe(400);
     const json = await res.json();
+
     expect(json.error).toContain("required");
   });
 
@@ -138,14 +148,17 @@ describe("POST /api/admin/auth", () => {
       body: "not-json",
     });
     const res = await POST(req);
+
     expect(res.status).toBe(400);
     const json = await res.json();
+
     expect(json.error).toMatch(/invalid/i);
   });
 
   it("returns 429 after repeated failures from same IP", async () => {
     vi.resetModules();
     const { POST: postFresh } = await import("./route");
+
     authMocks.maybeSingle.mockResolvedValue({ data: null, error: null });
     authMocks.bcryptCompare.mockResolvedValue(false);
 
@@ -160,8 +173,10 @@ describe("POST /api/admin/auth", () => {
       expect((await postFresh(loginAttempt())).status).toBe(401);
     }
     const blocked = await postFresh(loginAttempt());
+
     expect(blocked.status).toBe(429);
     const json = await blocked.json();
+
     expect(json.error).toMatch(/too many/i);
     expect(blocked.headers.get("Retry-After")).toBeTruthy();
   });
@@ -174,6 +189,7 @@ describe("DELETE /api/admin/auth", () => {
 
   it("clears admin cookie", async () => {
     const res = await DELETE();
+
     expect(res.status).toBe(200);
     expect(authMocks.cookieDelete).toHaveBeenCalledWith("adminAuth");
   });

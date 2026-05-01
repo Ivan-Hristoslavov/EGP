@@ -6,13 +6,19 @@ import jwt from "jsonwebtoken";
 import { supabaseAdmin } from "@/lib/supabase";
 
 // Rate limiting: keyed by IP address
-const loginAttempts = new Map<string, { count: number; blockedUntil: number }>();
+const loginAttempts = new Map<
+  string,
+  { count: number; blockedUntil: number }
+>();
 
 const MAX_ATTEMPTS = 5;
 const BLOCK_DURATION_MS = 15 * 60 * 1000; // 15 minutes
 
 function normalizeLoginEmail(value: string): string {
-  return value.replace(/[\u200B-\u200D\uFEFF]/g, "").trim().toLowerCase();
+  return value
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .trim()
+    .toLowerCase();
 }
 
 function normalizeLoginPassword(value: string): string {
@@ -20,7 +26,9 @@ function normalizeLoginPassword(value: string): string {
 }
 
 function getClientIp(request: NextRequest): string {
-  return request.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+  return (
+    request.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown"
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -29,11 +37,13 @@ export async function POST(request: NextRequest) {
 
   // Check rate limit
   const record = loginAttempts.get(ip);
+
   if (record && record.blockedUntil > now) {
     const retryAfter = Math.ceil((record.blockedUntil - now) / 1000);
+
     return NextResponse.json(
       { error: "Too many failed attempts. Please try again later." },
-      { status: 429, headers: { "Retry-After": retryAfter.toString() } }
+      { status: 429, headers: { "Retry-After": retryAfter.toString() } },
     );
   }
 
@@ -42,14 +52,13 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json().catch(() => null);
+
     if (!body || typeof body !== "object") {
-      return NextResponse.json(
-        { error: "Invalid request" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }
     const rawEmail = typeof body.email === "string" ? body.email : null;
-    const rawPassword = typeof body.password === "string" ? body.password : null;
+    const rawPassword =
+      typeof body.password === "string" ? body.password : null;
 
     email = rawEmail ? normalizeLoginEmail(rawEmail) : null;
     password = rawPassword ? normalizeLoginPassword(rawPassword) : null;
@@ -57,7 +66,7 @@ export async function POST(request: NextRequest) {
     if (!email || !password) {
       return NextResponse.json(
         { error: "Email and password are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -79,20 +88,25 @@ export async function POST(request: NextRequest) {
       loginAttempts.delete(ip);
 
       const jwtSecret = process.env.JWT_SECRET;
+
       if (!jwtSecret) {
         return NextResponse.json(
-          { error: "Server configuration error. Set JWT_SECRET in your environment (e.g. Vercel → Settings → Environment Variables)." },
-          { status: 500 }
+          {
+            error:
+              "Server configuration error. Set JWT_SECRET in your environment (e.g. Vercel → Settings → Environment Variables).",
+          },
+          { status: 500 },
         );
       }
 
       const token = jwt.sign(
         { type: "admin", email: adminProfile.email },
         jwtSecret,
-        { expiresIn: "7d" }
+        { expiresIn: "7d" },
       );
 
       const cookieStore = await cookies();
+
       cookieStore.set("adminAuth", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -104,6 +118,7 @@ export async function POST(request: NextRequest) {
     } else {
       // Increment failure counter
       const current = loginAttempts.get(ip) ?? { count: 0, blockedUntil: 0 };
+
       current.count += 1;
       if (current.count >= MAX_ATTEMPTS) {
         current.blockedUntil = now + BLOCK_DURATION_MS;
@@ -112,14 +127,14 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json(
         { error: "Invalid credentials" },
-        { status: 401 }
+        { status: 401 },
       );
     }
   } catch {
     // Do not log or expose error details (may contain sensitive data)
     return NextResponse.json(
       { error: "Authentication failed" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -128,10 +143,13 @@ export async function POST(request: NextRequest) {
 export async function DELETE() {
   try {
     const cookieStore = await cookies();
+
     cookieStore.delete("adminAuth");
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Logout error:", error);
+
     return NextResponse.json({ error: "Logout failed" }, { status: 500 });
   }
 }

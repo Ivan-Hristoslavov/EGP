@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { usePathname } from "next/navigation";
 
 interface AdminProfile {
@@ -16,7 +16,9 @@ interface AdminProfile {
   how_to_reach_us?: string;
   google_maps_address?: string;
   transport_options?: string | object;
-  nearby_landmarks?: string | Array<{ name: string; type: string; distance: string }>;
+  nearby_landmarks?:
+    | string
+    | Array<{ name: string; type: string; distance: string }>;
   created_at: string;
   updated_at: string;
 }
@@ -40,17 +42,18 @@ export function useAdminProfile(initialProfile: AdminProfile | null = null) {
     // Admin APIs should only be called inside admin panel.
     if (!canCallAdminApis) {
       setLoading(false);
+
       return;
     }
 
     try {
       setLoading(true);
       setError(null);
-      
+
       // Fetch both profile and settings
       const [profileResponse, settingsResponse] = await Promise.all([
-        fetch('/api/admin/profile'),
-        fetch('/api/admin/settings')
+        fetch("/api/admin/profile"),
+        fetch("/api/admin/settings"),
       ]);
 
       if (!profileResponse.ok) {
@@ -58,10 +61,11 @@ export function useAdminProfile(initialProfile: AdminProfile | null = null) {
         if (profileResponse.status === 404) {
           setProfile(null);
         } else {
-          throw new Error('Failed to fetch profile');
+          throw new Error("Failed to fetch profile");
         }
       } else {
         const profileData = await profileResponse.json();
+
         // Handle null response (profile doesn't exist)
         setProfile(profileData || null);
       }
@@ -69,11 +73,11 @@ export function useAdminProfile(initialProfile: AdminProfile | null = null) {
       // Settings are optional, don't fail if they don't exist
       if (settingsResponse.ok) {
         const settingsData = await settingsResponse.json();
+
         setSettings(settingsData);
       }
-
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
     }
@@ -89,13 +93,13 @@ export function useAdminProfile(initialProfile: AdminProfile | null = null) {
   }, [profile]);
 
   const refresh = useCallback(() => {
-    setRefreshTrigger(prev => prev + 1);
+    setRefreshTrigger((prev) => prev + 1);
   }, []);
 
-  return { 
-    profile: combinedProfile, 
-    loading, 
+  return {
+    profile: combinedProfile,
+    loading,
     error,
-    refresh
+    refresh,
   };
-} 
+}

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { supabase } from "../../../../lib/supabase";
 import { createPaymentLink, isStripeAvailable } from "../../../../lib/stripe";
 import { sendEmail } from "../../../../lib/sendgrid-smtp";
@@ -6,20 +7,29 @@ import { sendEmail } from "../../../../lib/sendgrid-smtp";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { customer_id, booking_id, amount, description, currency = "gbp" } = body;
+    const {
+      customer_id,
+      booking_id,
+      amount,
+      description,
+      currency = "gbp",
+    } = body;
 
     if (!customer_id || !amount) {
       return NextResponse.json(
         { error: "Customer ID and amount are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Check if Stripe is configured
     if (!isStripeAvailable()) {
       return NextResponse.json(
-        { error: "Stripe is not configured. Please contact support for payment options." },
-        { status: 503 }
+        {
+          error:
+            "Stripe is not configured. Please contact support for payment options.",
+        },
+        { status: 503 },
       );
     }
 
@@ -31,19 +41,21 @@ export async function POST(request: NextRequest) {
       .single();
 
     let booking = null;
+
     if (booking_id) {
       const { data: bookingData } = await supabase
         .from("bookings")
         .select("service, date")
         .eq("id", booking_id)
         .single();
+
       booking = bookingData;
     }
 
     if (!customer) {
       return NextResponse.json(
         { error: "Customer not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -73,14 +85,17 @@ export async function POST(request: NextRequest) {
 
     if (paymentError) {
       console.error("Error creating payment record:", paymentError);
+
       return NextResponse.json(
         { error: "Failed to create payment record" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     // Create Stripe Payment Link
-    const productName = description || (booking ? `Payment for ${booking.service}` : "Service Payment");
+    const productName =
+      description ||
+      (booking ? `Payment for ${booking.service}` : "Service Payment");
 
     const paymentLink = await createPaymentLink({
       amount,
@@ -99,6 +114,7 @@ export async function POST(request: NextRequest) {
 
     // Update payment record with payment link details
     const updatedNotes = `Stripe Payment Link: ${paymentLink.id} (${currency.toUpperCase()}) | URL: ${paymentLink.url} | Created via email`;
+
     await supabase
       .from("payments")
       .update({
@@ -116,7 +132,7 @@ export async function POST(request: NextRequest) {
     if (!adminProfile) {
       return NextResponse.json(
         { error: "Admin profile not found" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -157,7 +173,7 @@ body{margin:0;padding:0;font-family:Georgia,serif;background:#f5f3ef;color:#1c19
 <div class="card-title">Details</div>
 <div class="row">£${amount.toFixed(2)}</div>
 <div class="row">${productName}</div>
-${booking ? `<div class="row">${booking.service} · ${new Date(booking.date).toLocaleDateString()}</div>` : ''}
+${booking ? `<div class="row">${booking.service} · ${new Date(booking.date).toLocaleDateString()}</div>` : ""}
 </div>
 <div style="text-align:center;margin:28px 0">
 <a href="${paymentLink.url}" class="btn">Pay Now — £${amount.toFixed(2)}</a>
@@ -165,7 +181,7 @@ ${booking ? `<div class="row">${booking.service} · ${new Date(booking.date).toL
 <p style="font-size:14px;color:#78716c">Secure payment via Stripe. Questions? Contact ${adminProfile.name}.</p>
 </div>
 <div class="ft">
-<p style="margin:0">${adminProfile.name} · ${adminProfile.company_name || ''}</p>
+<p style="margin:0">${adminProfile.name} · ${adminProfile.company_name || ""}</p>
 </div>
 </div>
 </body>
@@ -196,14 +212,14 @@ ${booking ? `<div class="row">${booking.service} · ${new Date(booking.date).toL
       payment_link_id: paymentLink.id,
       email_sent: true,
       customer_email: customer.email,
-      message: "Payment link created and email sent successfully"
+      message: "Payment link created and email sent successfully",
     });
-
   } catch (error) {
     console.error("Error creating payment link and sending email:", error);
+
     return NextResponse.json(
       { error: "Failed to create payment link and send email" },
-      { status: 500 }
+      { status: 500 },
     );
   }
-} 
+}

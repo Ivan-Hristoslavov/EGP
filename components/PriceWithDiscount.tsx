@@ -28,9 +28,17 @@ type PriceWithDiscountProps = {
 };
 
 const sizeClasses = {
-  sm: { main: "text-sm", original: "text-xs", badge: "text-[10px] px-1.5 py-0.5" },
+  sm: {
+    main: "text-sm",
+    original: "text-xs",
+    badge: "text-[10px] px-1.5 py-0.5",
+  },
   md: { main: "text-base", original: "text-xs", badge: "text-xs px-2 py-1" },
-  lg: { main: "text-lg sm:text-xl", original: "text-sm", badge: "text-xs px-2.5 py-1" },
+  lg: {
+    main: "text-lg sm:text-xl",
+    original: "text-sm",
+    badge: "text-xs px-2.5 py-1",
+  },
 };
 
 export function PriceWithDiscount({
@@ -46,26 +54,35 @@ export function PriceWithDiscount({
   compact = false,
 }: PriceWithDiscountProps) {
   const total = price * quantity;
-  const originalTotal = originalPrice != null && originalPrice > price ? originalPrice * quantity : null;
+  const originalTotal =
+    originalPrice != null && originalPrice > price
+      ? originalPrice * quantity
+      : null;
   const hasDiscount = originalTotal != null && originalTotal > total;
   const sizes = sizeClasses[size];
 
   if (!hasDiscount) {
-    const displayTotal = Number.isInteger(total) ? total.toFixed(0) : total.toFixed(2);
+    const displayTotal = Number.isInteger(total)
+      ? total.toFixed(0)
+      : total.toFixed(2);
+
     return (
-      <span className={`font-semibold text-gray-900 dark:text-white ${sizes.main} ${className}`}>
+      <span
+        className={`font-semibold text-gray-900 dark:text-white ${sizes.main} ${className}`}
+      >
         £{displayTotal}
       </span>
     );
   }
 
-  const badgeEl = showBadge && discountPercentage != null && discountPercentage > 0 ? (
-    <span
-      className={`font-semibold rounded-full ${sizes.badge} bg-egp-green text-white dark:bg-egp-beige dark:text-egp-green shadow-sm ring-1 ring-egp-green/20 dark:ring-egp-beige/20`}
-    >
-      {discountPercentage}% off
-    </span>
-  ) : null;
+  const badgeEl =
+    showBadge && discountPercentage != null && discountPercentage > 0 ? (
+      <span
+        className={`font-semibold rounded-full ${sizes.badge} bg-egp-green text-white dark:bg-egp-beige dark:text-egp-green shadow-sm ring-1 ring-egp-green/20 dark:ring-egp-beige/20`}
+      >
+        {discountPercentage}% off
+      </span>
+    ) : null;
 
   const alignClass =
     align === "center"
@@ -74,36 +91,60 @@ export function PriceWithDiscount({
         ? "items-end text-right"
         : "items-start";
   const rowClass =
-    align === "center" ? "justify-center" : align === "end" ? "justify-end" : "";
+    align === "center"
+      ? "justify-center"
+      : align === "end"
+        ? "justify-end"
+        : "";
 
   const originalPriceClass = `${sizes.original} font-medium line-through decoration-2 text-gray-600 dark:text-gray-300 decoration-gray-500 dark:decoration-gray-400`;
   const gapClass = compact ? "gap-1" : "gap-2";
 
   if (layout === "stack") {
     return (
-      <div className={`flex flex-col gap-1.5 ${alignClass} ${className}`} role="group" aria-label={`Price: was £${originalTotal?.toFixed(2)}, now £${total.toFixed(2)}`}>
+      <div
+        aria-label={`Price: was £${originalTotal?.toFixed(2)}, now £${total.toFixed(2)}`}
+        className={`flex flex-col gap-1.5 ${alignClass} ${className}`}
+        role="group"
+      >
         <div className={`flex items-center gap-1.5 flex-nowrap ${rowClass}`}>
           <span className={originalPriceClass}>
             £{originalTotal.toFixed(2)}
           </span>
           {badgeEl}
         </div>
-        <span className={`font-bold tracking-tight text-gray-900 dark:text-white ${sizes.main} leading-tight`}>
-           £{total.toFixed(2)}
+        <span
+          className={`font-bold tracking-tight text-gray-900 dark:text-white ${sizes.main} leading-tight`}
+        >
+          £{total.toFixed(2)}
         </span>
       </div>
     );
   }
 
   const inlineAlignClass =
-    align === "center" ? "justify-center" : align === "end" ? "justify-end" : "";
+    align === "center"
+      ? "justify-center"
+      : align === "end"
+        ? "justify-end"
+        : "";
+
   return (
-    <span className={`inline-flex items-center ${gapClass} flex-nowrap ${inlineAlignClass} ${className}`} role="group" aria-label={`Price: was £${originalTotal?.toFixed(2)}, now £${total.toFixed(2)}`}>
-      <span className={originalPriceClass}>
-        £{originalTotal.toFixed(2)}
+    <span
+      aria-label={`Price: was £${originalTotal?.toFixed(2)}, now £${total.toFixed(2)}`}
+      className={`inline-flex items-center ${gapClass} flex-nowrap ${inlineAlignClass} ${className}`}
+      role="group"
+    >
+      <span className={originalPriceClass}>£{originalTotal.toFixed(2)}</span>
+      <span
+        aria-hidden="true"
+        className="flex-shrink-0 text-gray-600 dark:text-gray-400 font-normal"
+      >
+        →
       </span>
-      <span className="flex-shrink-0 text-gray-600 dark:text-gray-400 font-normal" aria-hidden="true">→</span>
-      <span className={`font-bold tracking-tight text-gray-900 dark:text-white ${sizes.main} flex-shrink-0`}>
+      <span
+        className={`font-bold tracking-tight text-gray-900 dark:text-white ${sizes.main} flex-shrink-0`}
+      >
         £{total.toFixed(2)}
       </span>
       {badgeEl}

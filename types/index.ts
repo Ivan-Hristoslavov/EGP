@@ -61,8 +61,8 @@ export type Booking = {
   service: string;
   date: string;
   time: string;
-  status: 'scheduled' | 'completed' | 'cancelled' | 'pending';
-  payment_status: 'pending' | 'paid' | 'refunded';
+  status: "scheduled" | "completed" | "cancelled" | "pending";
+  payment_status: "pending" | "paid" | "refunded";
   amount: number;
   address?: string;
   notes?: string;
@@ -89,7 +89,7 @@ export type Invoice = {
   vat_rate: number;
   vat_amount: number;
   total_amount: number;
-  status: 'pending' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+  status: "pending" | "sent" | "paid" | "overdue" | "cancelled";
   sent_date?: string;
   paid_date?: string;
   company_name: string;
@@ -113,8 +113,8 @@ export type Payment = {
   booking_id?: string;
   customer_id?: string;
   amount: number;
-  payment_method: 'cash' | 'card' | 'bank_transfer' | 'cheque';
-  payment_status: 'pending' | 'paid' | 'refunded' | 'failed';
+  payment_method: "cash" | "card" | "bank_transfer" | "cheque";
+  payment_status: "pending" | "paid" | "refunded" | "failed";
   payment_date: string;
   reference?: string;
   notes?: string;
@@ -255,7 +255,7 @@ export type DayOffPeriod = {
   start_date: string;
   end_date: string;
   is_recurring: boolean;
-  recurrence_type?: 'weekly' | 'monthly' | 'yearly';
+  recurrence_type?: "weekly" | "monthly" | "yearly";
   show_banner: boolean;
   banner_message?: string;
   created_at: string;
@@ -264,8 +264,13 @@ export type DayOffPeriod = {
 
 export type ActivityLog = {
   id: string;
-  activity_type: 'booking_created' | 'booking_updated' | 'payment_received' | 'invoice_sent' | 'customer_added';
-  entity_type: 'booking' | 'payment' | 'invoice' | 'customer';
+  activity_type:
+    | "booking_created"
+    | "booking_updated"
+    | "payment_received"
+    | "invoice_sent"
+    | "customer_added";
+  entity_type: "booking" | "payment" | "invoice" | "customer";
   entity_id: string;
   message: string;
   metadata?: any; // JSONB field

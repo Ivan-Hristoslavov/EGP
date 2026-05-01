@@ -1,4 +1,5 @@
-import type { Metadata } from 'next';
+import type { Metadata } from "next";
+
 import { siteConfig } from "@/config/site";
 import { canonicalUrl, defaultOgImages } from "@/lib/seo";
 import SectionHeroAesthetics from "@/components/SectionHeroAesthetics";
@@ -14,6 +15,7 @@ import { ClientOnly } from "@/components/ClientOnly";
 
 export async function generateMetadata(): Promise<Metadata> {
   const ogImages = defaultOgImages(siteConfig.name);
+
   return {
     title: siteConfig.seo.defaultTitle,
     description: siteConfig.seo.defaultDescription,
@@ -58,9 +60,12 @@ export default async function HomePage() {
       <ReviewsSection />
 
       {/* Review Form - ClientOnly avoids HeroUI useId hydration mismatch */}
-        <ClientOnly
+      <ClientOnly
         fallback={
-          <section className="py-6 sm:py-10 bg-egp-beige-lighter dark:bg-gray-900" id="leave-review">
+          <section
+            className="py-6 sm:py-10 bg-egp-beige-lighter dark:bg-gray-900"
+            id="leave-review"
+          >
             <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="h-72 bg-white/50 dark:bg-gray-800/30 rounded-2xl animate-pulse" />
             </div>
@@ -73,7 +78,10 @@ export default async function HomePage() {
       {/* FAQ Section - ClientOnly avoids conditional render hydration mismatch */}
       <ClientOnly
         fallback={
-          <section className="py-8 sm:py-10 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900" id="faq">
+          <section
+            className="py-8 sm:py-10 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900"
+            id="faq"
+          >
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="h-48 bg-white/30 dark:bg-gray-800/30 rounded-2xl animate-pulse" />
             </div>

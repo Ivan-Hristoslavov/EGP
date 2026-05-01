@@ -1,9 +1,10 @@
 "use client";
 
-import { useAdminProfile } from '@/hooks/useAdminProfile';
-import { useAdminSettings } from '@/hooks/useAdminSettings';
-import { AdminProfile } from '@/types';
-import { useState } from 'react';
+import { useState } from "react";
+
+import { useAdminProfile } from "@/hooks/useAdminProfile";
+import { useAdminSettings } from "@/hooks/useAdminSettings";
+import { AdminProfile } from "@/types";
 
 interface ListManagerProps {
   value: string;
@@ -13,8 +14,14 @@ interface ListManagerProps {
   description?: string;
 }
 
-function ListManager({ value, onChange, placeholder, label, description }: ListManagerProps) {
-  const [newItem, setNewItem] = useState('');
+function ListManager({
+  value,
+  onChange,
+  placeholder,
+  label,
+  description,
+}: ListManagerProps) {
+  const [newItem, setNewItem] = useState("");
 
   // Parse the current value into items
   const items = value
@@ -25,18 +32,20 @@ function ListManager({ value, onChange, placeholder, label, description }: ListM
   const handleAddItem = () => {
     if (newItem.trim()) {
       const updatedItems = [...items, newItem.trim()];
-      onChange(updatedItems.join('. '));
-      setNewItem('');
+
+      onChange(updatedItems.join(". "));
+      setNewItem("");
     }
   };
 
   const handleRemoveItem = (index: number) => {
     const updatedItems = items.filter((_, i) => i !== index);
-    onChange(updatedItems.join('. '));
+
+    onChange(updatedItems.join(". "));
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       handleAddItem();
     }
@@ -47,23 +56,38 @@ function ListManager({ value, onChange, placeholder, label, description }: ListM
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
         {label}
       </label>
-      
+
       {/* Current items */}
       {items.length > 0 && (
         <div className="space-y-1">
           {items.map((item, index) => (
-            <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div
+              key={index}
+              className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg"
+            >
               <span className="flex items-center">
-                <span className="w-1.5 h-1.5 bg-blue-500 dark:bg-blue-400 rounded-full mr-2"></span>
-                <span className="text-gray-700 dark:text-gray-300 text-sm">{item}</span>
+                <span className="w-1.5 h-1.5 bg-blue-500 dark:bg-blue-400 rounded-full mr-2" />
+                <span className="text-gray-700 dark:text-gray-300 text-sm">
+                  {item}
+                </span>
               </span>
               <button
+                className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors duration-200"
                 type="button"
                 onClick={() => handleRemoveItem(index)}
-                className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors duration-200"
               >
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M6 18L18 6M6 6l12 12"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                  />
                 </svg>
               </button>
             </div>
@@ -75,20 +99,30 @@ function ListManager({ value, onChange, placeholder, label, description }: ListM
       <div className="flex space-x-2">
         <input
           className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300 text-sm"
-          type="text"
           placeholder={placeholder}
+          type="text"
           value={newItem}
           onChange={(e) => setNewItem(e.target.value)}
           onKeyPress={handleKeyPress}
         />
         <button
+          className="px-3 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300"
+          disabled={!newItem.trim()}
           type="button"
           onClick={handleAddItem}
-          disabled={!newItem.trim()}
-          className="px-3 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300"
         >
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          <svg
+            className="w-3 h-3"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+            />
           </svg>
         </button>
       </div>
@@ -103,13 +137,18 @@ function ListManager({ value, onChange, placeholder, label, description }: ListM
 }
 
 interface AdminProfileDataProps {
-  type: keyof AdminProfile | 'company_status';
+  type: keyof AdminProfile | "company_status";
   fallback?: string;
   className?: string;
   asList?: boolean;
 }
 
-export function AdminProfileData({ type, fallback = '', className, asList = false }: AdminProfileDataProps) {
+export function AdminProfileData({
+  type,
+  fallback = "",
+  className,
+  asList = false,
+}: AdminProfileDataProps) {
   const { profile } = useAdminProfile();
   const { settings: adminSettings } = useAdminSettings();
 
@@ -118,15 +157,16 @@ export function AdminProfileData({ type, fallback = '', className, asList = fals
   }
 
   // Handle company_status from admin settings
-  if (type === 'company_status') {
+  if (type === "company_status") {
     const value = adminSettings?.companyStatus || fallback;
+
     return <span className={className}>{value}</span>;
   }
 
   // Handle list-based fields (removed - no longer used)
   if (asList && false) {
     const value = (profile as any)?.[type] || fallback;
-    
+
     if (!value) {
       return <span className={className}>{fallback}</span>;
     }
@@ -145,8 +185,10 @@ export function AdminProfileData({ type, fallback = '', className, asList = fals
       <ul className={`${className} space-y-1`}>
         {items.map((item: string, index: number) => (
           <li key={index} className="flex items-start">
-            <span className="w-1.5 h-1.5 bg-blue-500 dark:bg-blue-400 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
-            <span className="text-gray-700 dark:text-gray-300 text-sm">{item}</span>
+            <span className="w-1.5 h-1.5 bg-blue-500 dark:bg-blue-400 rounded-full mt-1.5 mr-2 flex-shrink-0" />
+            <span className="text-gray-700 dark:text-gray-300 text-sm">
+              {item}
+            </span>
           </li>
         ))}
       </ul>
@@ -155,7 +197,8 @@ export function AdminProfileData({ type, fallback = '', className, asList = fals
 
   // Handle regular profile fields
   const value = (profile as any)?.[type] || fallback;
+
   return <span className={className}>{value}</span>;
 }
 
-export { ListManager }; 
+export { ListManager };

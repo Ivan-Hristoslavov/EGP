@@ -1,12 +1,22 @@
-import type { Metadata } from 'next';
-import { siteConfig } from "@/config/site";
+import type { Metadata } from "next";
+
 import Link from "next/link";
-import { Calendar, Clock, CheckCircle, Star, ArrowRight, Phone } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  CheckCircle,
+  Star,
+  ArrowRight,
+  Phone,
+} from "lucide-react";
+
+import { siteConfig } from "@/config/site";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `Book Treatment Now | ${siteConfig.name}`,
-    description: "Book your treatment now at EGP Aesthetics London. Expert assessment and personalised treatment planning.",
+    description:
+      "Book your treatment now at EGP Aesthetics London. Expert assessment and personalised treatment planning.",
     alternates: {
       canonical: `${siteConfig.url}/services/book-treatment-now`,
     },
@@ -20,30 +30,32 @@ export default function BookTreatmentNowPage() {
     "Transparent pricing information",
     "No-obligation consultation",
     "Professional advice from qualified practitioners",
-    "Customised treatment plan creation"
+    "Customised treatment plan creation",
   ];
 
   const whatToExpect = [
     {
       step: "1",
       title: "Welcome & Introduction",
-      description: "Meet your practitioner and discuss your aesthetic goals"
+      description: "Meet your practitioner and discuss your aesthetic goals",
     },
     {
-      step: "2", 
+      step: "2",
       title: "Skin Analysis",
-      description: "Comprehensive assessment of your skin condition and concerns"
+      description:
+        "Comprehensive assessment of your skin condition and concerns",
     },
     {
       step: "3",
       title: "Treatment Planning",
-      description: "Personalised recommendations based on your individual needs"
+      description:
+        "Personalised recommendations based on your individual needs",
     },
     {
       step: "4",
       title: "Q&A Session",
-      description: "Answer all your questions about treatments and procedures"
-    }
+      description: "Answer all your questions about treatments and procedures",
+    },
   ];
 
   return (
@@ -60,19 +72,20 @@ export default function BookTreatmentNowPage() {
               Book Treatment Now
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8">
-              Start your aesthetic journey with a personalised 30-minute consultation
+              Start your aesthetic journey with a personalised 30-minute
+              consultation
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/book-consultation"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-lg font-semibold rounded-full hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl"
+                href="/book-consultation"
               >
                 <Calendar className="w-5 h-5" />
                 Book Now - £50
               </Link>
               <Link
-                href={`tel:${siteConfig.contact.phone}`}
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-rose-500 text-rose-500 dark:text-rose-400 text-lg font-semibold rounded-full hover:bg-rose-500 hover:text-white transition-all"
+                href={`tel:${siteConfig.contact.phone}`}
               >
                 <Phone className="w-5 h-5" />
                 Call Us
@@ -93,7 +106,9 @@ export default function BookTreatmentNowPage() {
                   About This Consultation
                 </h2>
                 <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
-                  Our consultation is designed to help you understand your aesthetic options and create a personalised treatment plan that aligns with your goals and budget.
+                  Our consultation is designed to help you understand your
+                  aesthetic options and create a personalised treatment plan
+                  that aligns with your goals and budget.
                 </p>
                 <div className="flex items-center gap-4 mb-8">
                   <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
@@ -116,7 +131,9 @@ export default function BookTreatmentNowPage() {
                   {consultationBenefits.map((benefit, index) => (
                     <li key={index} className="flex items-start">
                       <CheckCircle className="w-6 h-6 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-600 dark:text-gray-300">{benefit}</span>
+                      <span className="text-gray-600 dark:text-gray-300">
+                        {benefit}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -140,7 +157,9 @@ export default function BookTreatmentNowPage() {
                   className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all"
                 >
                   <div className="w-12 h-12 bg-gradient-to-br from-rose-500 to-pink-500 rounded-full flex items-center justify-center mb-4">
-                    <span className="text-white font-bold text-lg">{step.step}</span>
+                    <span className="text-white font-bold text-lg">
+                      {step.step}
+                    </span>
                   </div>
                   <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3">
                     {step.title}
@@ -163,19 +182,20 @@ export default function BookTreatmentNowPage() {
               Ready to Start Your Journey?
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8">
-              Book your consultation today and discover how we can help you achieve your aesthetic goals
+              Book your consultation today and discover how we can help you
+              achieve your aesthetic goals
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/book-consultation"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-lg font-semibold rounded-full hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl"
+                href="/book-consultation"
               >
                 <Calendar className="w-5 h-5" />
                 Book Treatment Now
               </Link>
               <Link
-                href="/services"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-egp-green hover:bg-egp-green-dark text-white text-lg font-semibold rounded-full transition-all shadow-lg hover:shadow-xl"
+                href="/services"
               >
                 <ArrowRight className="w-5 h-5" />
                 View All Services

@@ -2,19 +2,22 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Clock, 
+import {
+  MapPin,
+  Phone,
+  Mail,
   MessageCircle,
-  Instagram, 
-  Facebook, 
+  Instagram,
+  Facebook,
   Youtube,
-  Heart
+  Heart,
 } from "lucide-react";
+
 import { siteConfig } from "@/config/site";
-import { useAdminProfile, useAdminProfileContext } from "@/components/AdminProfileContext";
+import {
+  useAdminProfile,
+  useAdminProfileContext,
+} from "@/components/AdminProfileContext";
 import { useSocialLinks } from "@/hooks/useSocialLinks";
 import { formatUkPhoneForDisplay } from "@/lib/phone";
 
@@ -28,10 +31,14 @@ type WorkingHoursData = {
 
 export default function FooterAesthetics() {
   const currentYear = new Date().getFullYear();
-  const [workingHours, setWorkingHours] = useState<WorkingHoursData | null>(null);
+  const [workingHours, setWorkingHours] = useState<WorkingHoursData | null>(
+    null,
+  );
   const [loadingHours, setLoadingHours] = useState(true);
   /** `null` until `/api/press-settings` responds — avoids showing Awards & Press when the page is disabled. */
-  const [isPressPageEnabled, setIsPressPageEnabled] = useState<boolean | null>(null);
+  const [isPressPageEnabled, setIsPressPageEnabled] = useState<boolean | null>(
+    null,
+  );
   const adminProfile = useAdminProfile();
   const { loading: profileLoading } = useAdminProfileContext();
   const { socialLinks } = useSocialLinks();
@@ -39,23 +46,32 @@ export default function FooterAesthetics() {
   // Get contact info from admin profile only
   const contactPhone = adminProfile?.phone || "";
   const contactPhoneDisplay = formatUkPhoneForDisplay(contactPhone);
-  const contactEmail = adminProfile?.business_email || adminProfile?.email || "";
-  const contactWhatsapp = (adminProfile as { whatsapp?: string } | null)?.whatsapp || adminProfile?.phone || "";
-  const contactAddress = adminProfile?.company_address || siteConfig.contact.address.full || `${siteConfig.contact.address.city}, ${siteConfig.contact.address.country}`;
+  const contactEmail =
+    adminProfile?.business_email || adminProfile?.email || "";
+  const contactWhatsapp =
+    (adminProfile as { whatsapp?: string } | null)?.whatsapp ||
+    adminProfile?.phone ||
+    "";
+  const contactAddress =
+    adminProfile?.company_address ||
+    siteConfig.contact.address.full ||
+    `${siteConfig.contact.address.city}, ${siteConfig.contact.address.country}`;
 
   useEffect(() => {
     // Fetch working hours from public API
     const fetchWorkingHours = async () => {
       try {
-        const response = await fetch('/api/working-hours');
+        const response = await fetch("/api/working-hours");
+
         if (response.ok) {
           const data = await response.json();
+
           if (data.normalized) {
             setWorkingHours(data.normalized);
           }
         }
       } catch (error) {
-        console.error('Error fetching working hours:', error);
+        console.error("Error fetching working hours:", error);
       } finally {
         setLoadingHours(false);
       }
@@ -68,15 +84,17 @@ export default function FooterAesthetics() {
   useEffect(() => {
     const fetchPressPageSetting = async () => {
       try {
-        const response = await fetch('/api/press-settings');
+        const response = await fetch("/api/press-settings");
+
         if (response.ok) {
           const data = await response.json();
+
           setIsPressPageEnabled(data.enabled === true);
         } else {
           setIsPressPageEnabled(false);
         }
       } catch (error) {
-        console.error('Failed to fetch press page setting:', error);
+        console.error("Failed to fetch press page setting:", error);
         setIsPressPageEnabled(false);
       }
     };
@@ -87,63 +105,73 @@ export default function FooterAesthetics() {
   // Helper function to convert 24-hour time to 12-hour format
   const formatTime12Hour = (time24: string | null): string => {
     if (!time24) return "Closed";
-    
+
     // Handle format like "10:00:00" or "10:00"
-    const parts = time24.split(':');
+    const parts = time24.split(":");
     const hours = parseInt(parts[0], 10);
     const minutes = parts[1] ? parseInt(parts[1], 10) : 0;
-    
-    const period = hours >= 12 ? 'PM' : 'AM';
+
+    const period = hours >= 12 ? "PM" : "AM";
     const hours12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
-    
+
     // Always show minutes if they exist, otherwise just show hour
     if (minutes === 0) {
       return `${hours12}:00 ${period}`;
     }
-    
-    return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
+
+    return `${hours12}:${minutes.toString().padStart(2, "0")} ${period}`;
   };
 
   // Helper function to format hours
   const formatHours = (day: string) => {
     if (!workingHours || !workingHours[day]) {
       // Fallback to siteConfig
-      const dayConfig = siteConfig.businessHours[day as keyof typeof siteConfig.businessHours];
+      const dayConfig =
+        siteConfig.businessHours[day as keyof typeof siteConfig.businessHours];
+
       if (dayConfig && dayConfig.isOpen) {
         return `${dayConfig.open} - ${dayConfig.close}`;
       }
+
       return "Closed";
     }
 
     const dayHours = workingHours[day];
+
     if (dayHours.isOpen && dayHours.open && dayHours.close) {
       const openTime = formatTime12Hour(dayHours.open);
       const closeTime = formatTime12Hour(dayHours.close);
+
       return `${openTime} - ${closeTime}`;
     }
+
     return "Closed";
   };
 
   // Helper to check if day is open
   const isDayOpen = (day: string) => {
     if (!workingHours || !workingHours[day]) {
-      const dayConfig = siteConfig.businessHours[day as keyof typeof siteConfig.businessHours];
+      const dayConfig =
+        siteConfig.businessHours[day as keyof typeof siteConfig.businessHours];
+
       return dayConfig?.isOpen || false;
     }
+
     return workingHours[day].isOpen;
   };
 
   // Helper function to get day name with proper capitalization
   const getDayName = (dayKey: string): string => {
     const dayNames: Record<string, string> = {
-      monday: 'Monday',
-      tuesday: 'Tuesday',
-      wednesday: 'Wednesday',
-      thursday: 'Thursday',
-      friday: 'Friday',
-      saturday: 'Saturday',
-      sunday: 'Sunday'
+      monday: "Monday",
+      tuesday: "Tuesday",
+      wednesday: "Wednesday",
+      thursday: "Thursday",
+      friday: "Friday",
+      saturday: "Saturday",
+      sunday: "Sunday",
     };
+
     return dayNames[dayKey] || dayKey;
   };
 
@@ -151,20 +179,38 @@ export default function FooterAesthetics() {
   const getGroupedWorkingHours = () => {
     if (!workingHours) return [];
 
-    const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-    const groups: Array<{ days: string[], hours: string, isOpen: boolean }> = [];
-    
-    let currentGroup: { days: string[], hours: string, isOpen: boolean } | null = null;
+    const dayOrder = [
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+      "sunday",
+    ];
+    const groups: Array<{ days: string[]; hours: string; isOpen: boolean }> =
+      [];
+
+    let currentGroup: {
+      days: string[];
+      hours: string;
+      isOpen: boolean;
+    } | null = null;
 
     dayOrder.forEach((dayKey) => {
       const dayData = workingHours[dayKey];
+
       if (!dayData) return;
 
       const hours = formatHours(dayKey);
       const isOpen = !!(dayData.isOpen && dayData.open && dayData.close);
 
       // Check if this day matches the current group
-      if (currentGroup && currentGroup.hours === hours && currentGroup.isOpen === isOpen) {
+      if (
+        currentGroup &&
+        currentGroup.hours === hours &&
+        currentGroup.isOpen === isOpen
+      ) {
         // Add to current group
         currentGroup.days.push(dayKey);
       } else {
@@ -175,7 +221,7 @@ export default function FooterAesthetics() {
         currentGroup = {
           days: [dayKey],
           hours,
-          isOpen
+          isOpen,
         };
       }
     });
@@ -186,8 +232,9 @@ export default function FooterAesthetics() {
     }
 
     // Format day ranges
-    return groups.map(group => {
-      let dayLabel = '';
+    return groups.map((group) => {
+      let dayLabel = "";
+
       if (group.days.length === 1) {
         dayLabel = getDayName(group.days[0]);
       } else if (group.days.length === 2) {
@@ -196,13 +243,14 @@ export default function FooterAesthetics() {
         // Format like "Monday - Wednesday"
         const firstDay = getDayName(group.days[0]);
         const lastDay = getDayName(group.days[group.days.length - 1]);
+
         dayLabel = `${firstDay} - ${lastDay}`;
       }
 
       return {
         label: dayLabel,
         hours: group.hours,
-        isOpen: group.isOpen
+        isOpen: group.isOpen,
       };
     });
   };
@@ -229,19 +277,27 @@ export default function FooterAesthetics() {
               <div className="grid grid-cols-2 gap-2 pt-1">
                 <div className="flex items-center gap-1.5 px-2 py-1.5 bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-700">
                   <div className="w-3 h-3 bg-green-500 rounded-full shrink-0" />
-                  <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Certified</span>
+                  <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">
+                    Certified
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5 px-2 py-1.5 bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-700">
                   <div className="w-3 h-3 bg-blue-500 rounded-full shrink-0" />
-                  <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Insured</span>
+                  <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">
+                    Insured
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5 px-2 py-1.5 bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-700">
                   <div className="w-3 h-3 bg-purple-500 rounded-full shrink-0" />
-                  <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Expert</span>
+                  <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">
+                    Expert
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5 px-2 py-1.5 bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-700">
                   <div className="w-3 h-3 bg-amber-500 rounded-full shrink-0" />
-                  <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">5★ Rated</span>
+                  <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">
+                    5★ Rated
+                  </span>
                 </div>
               </div>
             </div>
@@ -259,7 +315,10 @@ export default function FooterAesthetics() {
                       <div className="h-3 w-20 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
                     </div>
                   ) : (
-                    <a href={`tel:${contactPhone}`} className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">
+                    <a
+                      className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                      href={`tel:${contactPhone}`}
+                    >
                       <Phone className="w-3.5 h-3.5 flex-shrink-0" />
                       <span className="break-all">{contactPhoneDisplay}</span>
                     </a>
@@ -272,7 +331,10 @@ export default function FooterAesthetics() {
                       <div className="h-3 w-24 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
                     </div>
                   ) : (
-                    <a href={`mailto:${contactEmail}`} className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">
+                    <a
+                      className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                      href={`mailto:${contactEmail}`}
+                    >
                       <Mail className="w-3.5 h-3.5 flex-shrink-0" />
                       <span className="break-all">{contactEmail}</span>
                     </a>
@@ -285,7 +347,13 @@ export default function FooterAesthetics() {
                       <div className="h-3 w-16 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
                     </div>
                   ) : (
-                    <a href={`https://wa.me/${contactWhatsapp.replace(/\s/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]" aria-label="WhatsApp">
+                    <a
+                      aria-label="WhatsApp"
+                      className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                      href={`https://wa.me/${contactWhatsapp.replace(/\s/g, "")}`}
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
                       <MessageCircle className="w-3.5 h-3.5 flex-shrink-0" />
                       <span>WhatsApp</span>
                     </a>
@@ -304,9 +372,11 @@ export default function FooterAesthetics() {
                     <div className="flex items-start gap-2 text-left text-xs text-gray-700 dark:text-gray-400">
                       <MapPin className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
                       <div className="min-w-0">
-                        {contactAddress.split(',').map((part: string, i: number) => (
-                          <div key={i}>{part.trim()}</div>
-                        ))}
+                        {contactAddress
+                          .split(",")
+                          .map((part: string, i: number) => (
+                            <div key={i}>{part.trim()}</div>
+                          ))}
                       </div>
                     </div>
                   )}
@@ -328,7 +398,11 @@ export default function FooterAesthetics() {
                   groupedHours.map((group, i) => (
                     <li key={i} className="flex justify-between gap-3">
                       <span>{group.label}:</span>
-                      <span className={`font-medium shrink-0 ${group.isOpen ? 'text-gray-900 dark:text-white' : ''}`}>{group.hours}</span>
+                      <span
+                        className={`font-medium shrink-0 ${group.isOpen ? "text-gray-900 dark:text-white" : ""}`}
+                      >
+                        {group.hours}
+                      </span>
                     </li>
                   ))
                 )}
@@ -341,14 +415,63 @@ export default function FooterAesthetics() {
                 Quick Links
               </h3>
               <ul className="flex flex-wrap justify-evenly gap-x-4 gap-y-2.5 text-center sm:justify-between sm:gap-x-6">
-                <li><Link href="/book" className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">Book Appointment</Link></li>
-                <li><Link href="/services" className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">Our Services</Link></li>
-                <li><Link href="/conditions" className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">Conditions We Treat</Link></li>
-                <li><Link href="/about" className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">About Us</Link></li>
-                <li><Link href="/blog" className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">Blog</Link></li>
-                <li><Link href="/find-us" className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">Find Us</Link></li>
+                <li>
+                  <Link
+                    className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                    href="/book"
+                  >
+                    Book Appointment
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                    href="/services"
+                  >
+                    Our Services
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                    href="/conditions"
+                  >
+                    Conditions We Treat
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                    href="/about"
+                  >
+                    About Us
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                    href="/blog"
+                  >
+                    Blog
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                    href="/find-us"
+                  >
+                    Find Us
+                  </Link>
+                </li>
                 {isPressPageEnabled === true && (
-                  <li><Link href="/press" className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">Awards & Press</Link></li>
+                  <li>
+                    <Link
+                      className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                      href="/press"
+                    >
+                      Awards & Press
+                    </Link>
+                  </li>
                 )}
               </ul>
             </div>
@@ -360,23 +483,51 @@ export default function FooterAesthetics() {
               </h3>
               <div className="flex gap-2 flex-wrap justify-center">
                 {socialLinks.instagram && (
-                  <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700" aria-label="Instagram">
+                  <a
+                    aria-label="Instagram"
+                    className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700"
+                    href={socialLinks.instagram}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
                     <Instagram className="w-4 h-4 text-gray-700 dark:text-gray-300" />
                   </a>
                 )}
                 {socialLinks.facebook && (
-                  <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700" aria-label="Facebook">
+                  <a
+                    aria-label="Facebook"
+                    className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700"
+                    href={socialLinks.facebook}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
                     <Facebook className="w-4 h-4 text-gray-700 dark:text-gray-300" />
                   </a>
                 )}
                 {socialLinks.youtube && (
-                  <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700" aria-label="YouTube">
+                  <a
+                    aria-label="YouTube"
+                    className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700"
+                    href={socialLinks.youtube}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
                     <Youtube className="w-4 h-4 text-gray-700 dark:text-gray-300" />
                   </a>
                 )}
                 {socialLinks.tiktok && (
-                  <a href={socialLinks.tiktok} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700" aria-label="TikTok">
-                    <svg className="w-4 h-4 text-gray-700 dark:text-gray-300" viewBox="0 0 24 24" fill="currentColor">
+                  <a
+                    aria-label="TikTok"
+                    className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700"
+                    href={socialLinks.tiktok}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    <svg
+                      className="w-4 h-4 text-gray-700 dark:text-gray-300"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
                       <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
                     </svg>
                   </a>
@@ -390,11 +541,26 @@ export default function FooterAesthetics() {
                 Legal
               </h3>
               <p className="text-xs text-gray-700 dark:text-gray-400 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center">
-                <Link href="/terms" className="hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">Terms</Link>
+                <Link
+                  className="hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                  href="/terms"
+                >
+                  Terms
+                </Link>
                 <span className="text-gray-400 dark:text-gray-500">·</span>
-                <Link href="/privacy" className="hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">Privacy</Link>
+                <Link
+                  className="hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                  href="/privacy"
+                >
+                  Privacy
+                </Link>
                 <span className="text-gray-400 dark:text-gray-500">·</span>
-                <Link href="/gdpr" className="hover:text-[#9d9585] dark:hover:text-[#c9c1b0]">GDPR</Link>
+                <Link
+                  className="hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                  href="/gdpr"
+                >
+                  GDPR
+                </Link>
               </p>
             </div>
           </div>
@@ -406,22 +572,29 @@ export default function FooterAesthetics() {
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
               <p className="text-xs text-gray-600 dark:text-gray-500 text-center sm:order-2 sm:text-left order-1">
                 Made with{" "}
-                <Heart className="w-3 h-3 inline text-red-500 dark:text-red-400 animate-pulse" fill="currentColor" />{" "}
+                <Heart
+                  className="w-3 h-3 inline text-red-500 dark:text-red-400 animate-pulse"
+                  fill="currentColor"
+                />{" "}
                 for beautiful transformations
               </p>
               <p className="text-xs text-gray-600 dark:text-gray-500 text-center sm:order-3 sm:text-right order-2">
                 Developed by{" "}
                 <a
-                  href="https://serenity.rapid-frame.co.uk/"
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="text-[#9d9585] dark:text-[#c9c1b0] hover:text-[#b5ad9d] dark:hover:text-[#ddd5c3] transition-colors font-semibold"
+                  href="https://serenity.rapid-frame.co.uk/"
+                  rel="noopener noreferrer"
+                  target="_blank"
                 >
                   Serenity Web Studio
                 </a>
               </p>
               <p className="text-sm text-gray-700 dark:text-gray-400 text-center sm:order-1 sm:text-left order-3">
-                © {currentYear} <span className="font-bold text-gray-900 dark:text-white">{siteConfig.name}</span>. All rights reserved.
+                © {currentYear}{" "}
+                <span className="font-bold text-gray-900 dark:text-white">
+                  {siteConfig.name}
+                </span>
+                . All rights reserved.
               </p>
             </div>
           </div>

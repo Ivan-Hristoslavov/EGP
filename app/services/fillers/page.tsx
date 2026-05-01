@@ -1,24 +1,66 @@
 import type { Metadata } from "next";
+
 import Link from "next/link";
 import { Clock, ArrowRight } from "lucide-react";
+
 import ButtonBookNow from "@/components/ButtonBookNow";
 
 export const metadata: Metadata = {
   title: "Dermal Fillers in London | Lip, Cheek & Jawline Enhancement",
-  description: "Expert dermal filler treatments in London. Lip enhancement, cheek fillers, jawline contouring, tear trough treatment. Natural results from £150.",
+  description:
+    "Expert dermal filler treatments in London. Lip enhancement, cheek fillers, jawline contouring, tear trough treatment. Natural results from £150.",
 };
 
 const fillerServices = [
-  { name: "Cheek & Mid-Face Filler", price: 390, duration: 45, slug: "cheek-filler", popular: true },
+  {
+    name: "Cheek & Mid-Face Filler",
+    price: 390,
+    duration: 45,
+    slug: "cheek-filler",
+    popular: true,
+  },
   { name: "Chin Filler", price: 290, duration: 30, slug: "chin-filler" },
-  { name: "Filler for Marionette Lines", price: 290, duration: 30, slug: "marionette-lines" },
-  { name: "Filler for Nasolabial Folds", price: 290, duration: 30, slug: "nasolabial-folds" },
-  { name: "Jawline Filler", price: 550, duration: 60, slug: "jawline-filler", featured: true },
-  { name: "Lip Enhancement", price: 290, duration: 30, slug: "lip-enhancement", popular: true },
+  {
+    name: "Filler for Marionette Lines",
+    price: 290,
+    duration: 30,
+    slug: "marionette-lines",
+  },
+  {
+    name: "Filler for Nasolabial Folds",
+    price: 290,
+    duration: 30,
+    slug: "nasolabial-folds",
+  },
+  {
+    name: "Jawline Filler",
+    price: 550,
+    duration: 60,
+    slug: "jawline-filler",
+    featured: true,
+  },
+  {
+    name: "Lip Enhancement",
+    price: 290,
+    duration: 30,
+    slug: "lip-enhancement",
+    popular: true,
+  },
   { name: "Lip Hydration", price: 190, duration: 20, slug: "lip-hydration" },
-  { name: "Tear Trough Filler", price: 390, duration: 45, slug: "tear-trough", popular: true },
+  {
+    name: "Tear Trough Filler",
+    price: 390,
+    duration: 45,
+    slug: "tear-trough",
+    popular: true,
+  },
   { name: "Temple Filler", price: 290, duration: 30, slug: "temple-filler" },
-  { name: "Filler Dissolving", price: 150, duration: 20, slug: "filler-dissolving" },
+  {
+    name: "Filler Dissolving",
+    price: 150,
+    duration: 20,
+    slug: "filler-dissolving",
+  },
 ];
 
 export default function FillersPage() {
@@ -59,7 +101,7 @@ export default function FillersPage() {
                   </span>
                 )}
 
-                <Link href={`/services/${service.slug}`} className="flex-1">
+                <Link className="flex-1" href={`/services/${service.slug}`}>
                   <h3 className="text-lg font-bold text-gray-900 mb-2 pr-16 group-hover:text-egp-green transition-colors">
                     {service.name}
                   </h3>
@@ -75,11 +117,13 @@ export default function FillersPage() {
                 <div className="flex items-center justify-between pt-3 border-t border-gray-200 mt-auto">
                   <div>
                     <span className="text-xs text-gray-600">From</span>
-                    <div className="text-lg font-bold text-egp-green">£{service.price}</div>
+                    <div className="text-lg font-bold text-egp-green">
+                      £{service.price}
+                    </div>
                   </div>
                   <Link
-                    href="/book/new"
                     className="flex items-center gap-2 text-egp-green font-semibold hover:text-egp-green-dark hover:gap-3 transition-all"
+                    href="/book/new"
                   >
                     <span>Book</span>
                     <ArrowRight className="w-4 h-4" />
@@ -100,10 +144,13 @@ export default function FillersPage() {
           <p className="text-base sm:text-lg md:text-xl text-white/90 mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
             Expert dermal filler treatments with natural-looking results
           </p>
-          <ButtonBookNow size="lg" variant="secondary" className="w-full sm:w-auto mx-4 sm:mx-0" />
+          <ButtonBookNow
+            className="w-full sm:w-auto mx-4 sm:mx-0"
+            size="lg"
+            variant="secondary"
+          />
         </div>
       </section>
     </div>
   );
 }
-

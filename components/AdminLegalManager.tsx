@@ -1,17 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
+
 import { supabase } from "@/lib/supabase";
 import { MarkdownEditor } from "@/components/MarkdownEditor";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
-import { useToast, ToastMessages } from "@/components/Toast";
+import { useToast } from "@/components/Toast";
 
 type LegalContent = {
   terms: string;
   privacy_policy: string;
 };
 
-export function AdminLegalManager({ triggerModal }: { triggerModal?: boolean }) {
+export function AdminLegalManager({
+  triggerModal,
+}: {
+  triggerModal?: boolean;
+}) {
   const [activeTab, setActiveTab] = useState<"terms" | "privacy">("terms");
   const [content, setContent] = useState<LegalContent>({
     terms: "",
@@ -28,11 +33,11 @@ export function AdminLegalManager({ triggerModal }: { triggerModal?: boolean }) 
   const loadLegalContent = async () => {
     try {
       setLoading(true);
-      
+
       // Load from separate tables
       const [termsResult, privacyResult] = await Promise.all([
         supabase.from("terms").select("content").single(),
-        supabase.from("privacy_policy").select("content").single()
+        supabase.from("privacy_policy").select("content").single(),
       ]);
 
       let termsContent = "";
@@ -60,28 +65,28 @@ export function AdminLegalManager({ triggerModal }: { triggerModal?: boolean }) 
   const handleSave = async () => {
     try {
       setSaving(true);
-      
+
       // Update both tables
       const promises = [];
-      
+
       // Update terms
       promises.push(
-        supabase.from("terms").upsert({ 
-          id: 1, 
-          content: content.terms 
-        })
+        supabase.from("terms").upsert({
+          id: 1,
+          content: content.terms,
+        }),
       );
-      
+
       // Update privacy policy
       promises.push(
-        supabase.from("privacy_policy").upsert({ 
-          id: 1, 
-          content: content.privacy_policy 
-        })
+        supabase.from("privacy_policy").upsert({
+          id: 1,
+          content: content.privacy_policy,
+        }),
       );
 
       const results = await Promise.all(promises);
-      
+
       // Check for errors
       for (const result of results) {
         if (result.error) {
@@ -89,40 +94,66 @@ export function AdminLegalManager({ triggerModal }: { triggerModal?: boolean }) 
         }
       }
 
-      showSuccess("Legal Content Updated", "Terms and Privacy Policy have been saved successfully!");
+      showSuccess(
+        "Legal Content Updated",
+        "Terms and Privacy Policy have been saved successfully!",
+      );
     } catch (error) {
       console.error("Error saving legal content:", error);
-      showError("Save Error", "Failed to save legal content. Please try again.");
+      showError(
+        "Save Error",
+        "Failed to save legal content. Please try again.",
+      );
     } finally {
       setSaving(false);
     }
   };
 
   const tabs = [
-    { 
-      id: "terms", 
-      name: "Terms & Conditions", 
+    {
+      id: "terms",
+      name: "Terms & Conditions",
       icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+          />
         </svg>
-      )
+      ),
     },
-    { 
-      id: "privacy", 
-      name: "Privacy Policy", 
+    {
+      id: "privacy",
+      name: "Privacy Policy",
       icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+          />
         </svg>
-      )
+      ),
     },
   ];
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent" />
       </div>
     );
   }
@@ -137,19 +168,29 @@ export function AdminLegalManager({ triggerModal }: { triggerModal?: boolean }) 
           </p>
         </div>
         <button
-          onClick={handleSave}
-          disabled={saving}
           className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors duration-300 flex items-center justify-center space-x-2 text-sm"
+          disabled={saving}
+          onClick={handleSave}
         >
           {saving ? (
             <>
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
               <span>Saving...</span>
             </>
           ) : (
             <>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M5 13l4 4L19 7"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                />
               </svg>
               <span>Save Changes</span>
             </>
@@ -165,7 +206,9 @@ export function AdminLegalManager({ triggerModal }: { triggerModal?: boolean }) 
         <ul className="space-y-1 text-sm text-blue-800 dark:text-blue-200">
           <li>• Use clear, simple language your customers can understand</li>
           <li>• Include data collection, usage, and storage information</li>
-          <li>• Specify service terms, cancellation policies, and payment terms</li>
+          <li>
+            • Specify service terms, cancellation policies, and payment terms
+          </li>
           <li>• Add contact information for legal inquiries</li>
         </ul>
       </div>
@@ -176,12 +219,12 @@ export function AdminLegalManager({ triggerModal }: { triggerModal?: boolean }) 
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as "terms" | "privacy")}
               className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors duration-300 flex items-center ${
                 activeTab === tab.id
                   ? "border-blue-500 text-blue-600 dark:text-blue-400"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
               }`}
+              onClick={() => setActiveTab(tab.id as "terms" | "privacy")}
             >
               <span className="mr-2 flex-shrink-0">{tab.icon}</span>
               {tab.name}
@@ -199,13 +242,14 @@ export function AdminLegalManager({ triggerModal }: { triggerModal?: boolean }) 
             </h3>
             <div className="mb-4">
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                Use Markdown formatting for rich text. This content will be displayed on your Terms of Service page.
+                Use Markdown formatting for rich text. This content will be
+                displayed on your Terms of Service page.
               </p>
             </div>
             <MarkdownEditor
+              placeholder="Enter your Terms & Conditions here using Markdown formatting..."
               value={content.terms}
               onChange={(value) => setContent({ ...content, terms: value })}
-              placeholder="Enter your Terms & Conditions here using Markdown formatting..."
             />
           </div>
         )}
@@ -217,13 +261,16 @@ export function AdminLegalManager({ triggerModal }: { triggerModal?: boolean }) 
             </h3>
             <div className="mb-4">
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                Use Markdown formatting for rich text. This content will be displayed on your Privacy Policy page.
+                Use Markdown formatting for rich text. This content will be
+                displayed on your Privacy Policy page.
               </p>
             </div>
             <MarkdownEditor
-              value={content.privacy_policy}
-              onChange={(value) => setContent({ ...content, privacy_policy: value })}
               placeholder="Enter your Privacy Policy here using Markdown formatting..."
+              value={content.privacy_policy}
+              onChange={(value) =>
+                setContent({ ...content, privacy_policy: value })
+              }
             />
           </div>
         )}
@@ -248,4 +295,4 @@ export function AdminLegalManager({ triggerModal }: { triggerModal?: boolean }) 
       </div>
     </div>
   );
-} 
+}

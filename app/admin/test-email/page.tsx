@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+
 import { useToast } from "@/components/Toast";
 
 type TemplateId =
@@ -13,10 +14,19 @@ type TemplateId =
 
 const TEMPLATE_OPTIONS: { value: TemplateId; label: string }[] = [
   { value: "simple", label: "Simple SMTP test" },
-  { value: "booking_confirmation", label: "Booking confirmation (customer, with deposit)" },
-  { value: "payment_confirmed", label: "Payment confirmed (customer, after Stripe)" },
+  {
+    value: "booking_confirmation",
+    label: "Booking confirmation (customer, with deposit)",
+  },
+  {
+    value: "payment_confirmed",
+    label: "Payment confirmed (customer, after Stripe)",
+  },
   { value: "admin_new_paid_booking", label: "New paid booking (admin)" },
-  { value: "admin_booking_request", label: "New booking request (admin, pending)" },
+  {
+    value: "admin_booking_request",
+    label: "New booking request (admin, pending)",
+  },
   { value: "newsletter_welcome", label: "Newsletter welcome (discount code)" },
 ];
 
@@ -28,7 +38,8 @@ interface TestResults {
 
 export default function TestEmailPage() {
   const [testEmail, setTestEmail] = useState("");
-  const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>("simple");
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<TemplateId>("simple");
   const [isTesting, setIsTesting] = useState(false);
   const [testResults, setTestResults] = useState<TestResults | null>(null);
   const [previewSubject, setPreviewSubject] = useState<string>("");
@@ -39,6 +50,7 @@ export default function TestEmailPage() {
   // Load preview when template changes
   useEffect(() => {
     let cancelled = false;
+
     setPreviewLoading(true);
     fetch(`/api/test-email?template=${encodeURIComponent(selectedTemplate)}`)
       .then((res) => res.json())
@@ -61,6 +73,7 @@ export default function TestEmailPage() {
       .finally(() => {
         if (!cancelled) setPreviewLoading(false);
       });
+
     return () => {
       cancelled = true;
     };
@@ -71,10 +84,10 @@ export default function TestEmailPage() {
     try {
       const response = await fetch("/api/test-email");
       const result = await response.json();
-      
+
       setTestResults((prev: TestResults | null) => ({
         ...prev,
-        sendgrid: result
+        sendgrid: result,
       }));
 
       if (result.success && result.configured) {
@@ -96,11 +109,13 @@ export default function TestEmailPage() {
       const payload: Record<string, unknown> = {
         ...(testEmail && { to: testEmail }),
       };
+
       if (selectedTemplate !== "simple") {
         payload.template = selectedTemplate;
       } else {
         payload.subject = "Test Email from Admin Panel";
-        payload.message = "This is a test email to verify that SMTP (Gmail) is working correctly with the admin panel.";
+        payload.message =
+          "This is a test email to verify that SMTP (Gmail) is working correctly with the admin panel.";
       }
 
       const response = await fetch("/api/test-email", {
@@ -117,8 +132,14 @@ export default function TestEmailPage() {
       }));
 
       if (result.success) {
-        const templateLabel = TEMPLATE_OPTIONS.find((o) => o.value === selectedTemplate)?.label ?? selectedTemplate;
-        showSuccess("Test Email", `"${templateLabel}" sent to ${result.recipient || testEmail}`);
+        const templateLabel =
+          TEMPLATE_OPTIONS.find((o) => o.value === selectedTemplate)?.label ??
+          selectedTemplate;
+
+        showSuccess(
+          "Test Email",
+          `"${templateLabel}" sent to ${result.recipient || testEmail}`,
+        );
       } else {
         showError("Test Email", result.error || "Failed to send test email");
       }
@@ -135,10 +156,10 @@ export default function TestEmailPage() {
     try {
       const response = await fetch("/api/payments/verify?test=true");
       const result = await response.json();
-      
+
       setTestResults((prev: TestResults | null) => ({
         ...prev,
-        stripe: result
+        stripe: result,
       }));
 
       if (result.success) {
@@ -163,7 +184,8 @@ export default function TestEmailPage() {
             Test Email & Payment Configuration
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1 transition-colors duration-300">
-            Test SMTP (Gmail) email functionality and Stripe payment configuration.
+            Test SMTP (Gmail) email functionality and Stripe payment
+            configuration.
           </p>
         </div>
       </div>
@@ -176,36 +198,43 @@ export default function TestEmailPage() {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               SMTP Email (Gmail)
             </h3>
-            <div className={`w-3 h-3 rounded-full ${
-              testResults?.sendgrid?.configured 
-                ? 'bg-green-500' 
-                : testResults?.sendgrid 
-                  ? 'bg-red-500' 
-                  : 'bg-gray-300'
-            }`} />
+            <div
+              className={`w-3 h-3 rounded-full ${
+                testResults?.sendgrid?.configured
+                  ? "bg-green-500"
+                  : testResults?.sendgrid
+                    ? "bg-red-500"
+                    : "bg-gray-300"
+              }`}
+            />
           </div>
-          
+
           <div className="space-y-4">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                SMTP configuration (SMTP_SERVER, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD) is verified when you run the test below. These are server-side environment variables.
+                SMTP configuration (SMTP_SERVER, SMTP_PORT, SMTP_USERNAME,
+                SMTP_PASSWORD) is verified when you run the test below. These
+                are server-side environment variables.
               </p>
             </div>
 
             <button
-              onClick={testSendGridConfig}
-              disabled={isTesting}
               className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              disabled={isTesting}
+              onClick={testSendGridConfig}
             >
               {isTesting ? "Testing..." : "Test SMTP Configuration"}
             </button>
 
             {testResults?.sendgrid && (
-              <div className={`p-3 rounded-md text-sm ${
-                testResults.sendgrid.success && testResults.sendgrid.configured
-                  ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
-                  : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
-              }`}>
+              <div
+                className={`p-3 rounded-md text-sm ${
+                  testResults.sendgrid.success &&
+                  testResults.sendgrid.configured
+                    ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300"
+                    : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300"
+                }`}
+              >
                 {testResults.sendgrid.message}
               </div>
             )}
@@ -218,15 +247,17 @@ export default function TestEmailPage() {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               Stripe Configuration
             </h3>
-            <div className={`w-3 h-3 rounded-full ${
-              testResults?.stripe?.success 
-                ? 'bg-green-500' 
-                : testResults?.stripe 
-                  ? 'bg-red-500' 
-                  : 'bg-gray-300'
-            }`} />
+            <div
+              className={`w-3 h-3 rounded-full ${
+                testResults?.stripe?.success
+                  ? "bg-green-500"
+                  : testResults?.stripe
+                    ? "bg-red-500"
+                    : "bg-gray-300"
+              }`}
+            />
           </div>
-          
+
           <div className="space-y-4">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
@@ -234,38 +265,52 @@ export default function TestEmailPage() {
               </p>
               <div className="space-y-1">
                 <div className="flex items-center space-x-2">
-                  <span className={`w-2 h-2 rounded-full ${
-                    process.env.STRIPE_SECRET_KEY ? 'bg-green-500' : 'bg-red-500'
-                  }`} />
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      process.env.STRIPE_SECRET_KEY
+                        ? "bg-green-500"
+                        : "bg-red-500"
+                    }`}
+                  />
                   <span className="text-sm font-mono text-gray-700 dark:text-gray-300">
-                    STRIPE_SECRET_KEY: {process.env.STRIPE_SECRET_KEY ? '✓ Set' : '✗ Missing'}
+                    STRIPE_SECRET_KEY:{" "}
+                    {process.env.STRIPE_SECRET_KEY ? "✓ Set" : "✗ Missing"}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className={`w-2 h-2 rounded-full ${
-                    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ? 'bg-green-500' : 'bg-red-500'
-                  }`} />
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+                        ? "bg-green-500"
+                        : "bg-red-500"
+                    }`}
+                  />
                   <span className="text-sm font-mono text-gray-700 dark:text-gray-300">
-                    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: {process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ? '✓ Set' : '✗ Missing'}
+                    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:{" "}
+                    {process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+                      ? "✓ Set"
+                      : "✗ Missing"}
                   </span>
                 </div>
               </div>
             </div>
 
             <button
-              onClick={testStripeConfig}
-              disabled={isTesting}
               className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              disabled={isTesting}
+              onClick={testStripeConfig}
             >
               {isTesting ? "Testing..." : "Test Stripe Configuration"}
             </button>
 
             {testResults?.stripe && (
-              <div className={`p-3 rounded-md text-sm ${
-                testResults.stripe.success
-                  ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
-                  : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
-              }`}>
+              <div
+                className={`p-3 rounded-md text-sm ${
+                  testResults.stripe.success
+                    ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300"
+                    : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300"
+                }`}
+              >
                 {testResults.stripe.message || testResults.stripe.error}
               </div>
             )}
@@ -280,18 +325,21 @@ export default function TestEmailPage() {
         </h3>
 
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          Choose a template to send a test email with autofilled data (1:1 with real booking/newsletter emails).
+          Choose a template to send a test email with autofilled data (1:1 with
+          real booking/newsletter emails).
         </p>
-        
+
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Template
             </label>
             <select
-              value={selectedTemplate}
-              onChange={(e) => setSelectedTemplate(e.target.value as TemplateId)}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={selectedTemplate}
+              onChange={(e) =>
+                setSelectedTemplate(e.target.value as TemplateId)
+              }
             >
               {TEMPLATE_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -305,52 +353,65 @@ export default function TestEmailPage() {
               Email Address
             </label>
             <input
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Leave blank to use SMTP_TO_ADDRESS or ADMIN_EMAIL"
               type="email"
               value={testEmail}
               onChange={(e) => setTestEmail(e.target.value)}
-              placeholder="Leave blank to use SMTP_TO_ADDRESS or ADMIN_EMAIL"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           <button
-            onClick={sendTestEmail}
-            disabled={isTesting}
             className="w-full px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            disabled={isTesting}
+            onClick={sendTestEmail}
           >
-            {isTesting ? "Sending..." : `Send "${TEMPLATE_OPTIONS.find((o) => o.value === selectedTemplate)?.label ?? selectedTemplate}" test email`}
+            {isTesting
+              ? "Sending..."
+              : `Send "${TEMPLATE_OPTIONS.find((o) => o.value === selectedTemplate)?.label ?? selectedTemplate}" test email`}
           </button>
 
           {/* Email preview */}
           <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
-            <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Preview</h4>
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+              Preview
+            </h4>
             {previewSubject && (
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                Subject: <span className="font-medium text-gray-700 dark:text-gray-300">{previewSubject}</span>
+                Subject:{" "}
+                <span className="font-medium text-gray-700 dark:text-gray-300">
+                  {previewSubject}
+                </span>
               </p>
             )}
             <div className="rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-900 overflow-hidden">
               {previewLoading ? (
-                <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">Loading preview…</div>
+                <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
+                  Loading preview…
+                </div>
               ) : previewHtml ? (
                 <iframe
-                  title="Email preview"
-                  srcDoc={previewHtml}
                   className="w-full min-h-[420px] max-h-[70vh] border-0 bg-white dark:bg-white"
                   sandbox="allow-same-origin"
+                  srcDoc={previewHtml}
+                  title="Email preview"
                 />
               ) : (
-                <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">Select a template to preview</div>
+                <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
+                  Select a template to preview
+                </div>
               )}
             </div>
           </div>
 
           {testResults?.emailSent && (
-            <div className={`p-3 rounded-md text-sm ${
-              testResults.emailSent.success
-                ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
-                : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
-            }`}>
+            <div
+              className={`p-3 rounded-md text-sm ${
+                testResults.emailSent.success
+                  ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300"
+                  : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300"
+              }`}
+            >
               {testResults.emailSent.message || testResults.emailSent.error}
             </div>
           )}
@@ -366,9 +427,17 @@ export default function TestEmailPage() {
           <div>
             <strong>Gmail SMTP Setup:</strong>
             <ol className="list-decimal list-inside mt-1 ml-4 space-y-1">
-              <li>Add SMTP_SERVER=smtp.gmail.com, SMTP_PORT=465, SMTP_SECURITY=SSL to .env</li>
-              <li>Set SMTP_USERNAME and SMTP_FROM_ADDRESS to your Gmail address</li>
-              <li>Use an App Password for SMTP_PASSWORD (Google Account → Security → 2-Step Verification → App passwords)</li>
+              <li>
+                Add SMTP_SERVER=smtp.gmail.com, SMTP_PORT=465, SMTP_SECURITY=SSL
+                to .env
+              </li>
+              <li>
+                Set SMTP_USERNAME and SMTP_FROM_ADDRESS to your Gmail address
+              </li>
+              <li>
+                Use an App Password for SMTP_PASSWORD (Google Account → Security
+                → 2-Step Verification → App passwords)
+              </li>
               <li>Optionally set SMTP_TO_ADDRESS for default test recipient</li>
             </ol>
           </div>
@@ -377,19 +446,22 @@ export default function TestEmailPage() {
             <ol className="list-decimal list-inside mt-1 ml-4 space-y-1">
               <li>Create a Stripe account at stripe.com</li>
               <li>Get your API keys from the Stripe dashboard</li>
-              <li>Add STRIPE_SECRET_KEY and NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY to environment variables</li>
+              <li>
+                Add STRIPE_SECRET_KEY and NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY to
+                environment variables
+              </li>
               <li>Configure webhook endpoints if needed</li>
             </ol>
           </div>
           <div>
             <strong>Sender Email Logic:</strong>
             <p className="mt-1 ml-4">
-              The system uses SMTP_FROM_ADDRESS from environment, or falls back to business_email from admin profile, 
-              then ADMIN_EMAIL.
+              The system uses SMTP_FROM_ADDRESS from environment, or falls back
+              to business_email from admin profile, then ADMIN_EMAIL.
             </p>
           </div>
         </div>
       </div>
     </div>
   );
-} 
+}

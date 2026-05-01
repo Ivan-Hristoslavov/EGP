@@ -9,15 +9,12 @@ import {
   useRef,
 } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { siteConfig } from "@/config/site";
-import { typography, layout, textColors } from "@/config/typography";
 import {
   Calendar,
   Clock,
   CreditCard,
   CheckCircle,
   Plus,
-  Minus,
   X,
   ArrowLeft,
   Info,
@@ -27,21 +24,16 @@ import {
   Trash2,
   Loader2,
 } from "lucide-react";
-import StripePaymentForm from "@/components/StripePaymentForm";
-import { ServiceDetailsModal } from "@/components/ServiceDetailsModal";
-import { useServices } from "@/hooks/useServices";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@heroui/modal";
 import { Button } from "@heroui/button";
 import { Card, CardBody, CardHeader } from "@heroui/react";
 import { Chip } from "@heroui/react";
 import { Spinner } from "@heroui/react";
 import { Input } from "@heroui/react";
+
+import { useServices } from "@/hooks/useServices";
+import { ServiceDetailsModal } from "@/components/ServiceDetailsModal";
+import { typography, textColors } from "@/config/typography";
+import StripePaymentForm from "@/components/StripePaymentForm";
 import { inputClassNames } from "@/config/design-system";
 import { useToast } from "@/components/Toast";
 import ButtonPrimary from "@/components/ButtonPrimary";
@@ -211,6 +203,7 @@ function BookingPageContent() {
     const targetIndex = stepOrder.indexOf(stepKey);
     const canAccess =
       targetIndex <= currentStepIndex || isStepUnlocked(stepKey);
+
     if (!canAccess || currentStep === stepKey) {
       return;
     }
@@ -224,8 +217,10 @@ function BookingPageContent() {
   // Create a lookup map from services for easy access (using ID as key). Use discounted price when available.
   const servicesDataMap = useMemo(() => {
     const map: Record<string, any> = {};
+
     services.forEach((service) => {
       const effectivePrice = service.discounted_price ?? service.price;
+
       map[service.id] = {
         name: service.name,
         price: effectivePrice,
@@ -245,19 +240,23 @@ function BookingPageContent() {
         slug: service.slug, // Keep slug for backwards compatibility if needed
       };
     });
+
     return map;
   }, [services]);
 
   // Group services by category (using ID as key)
   const servicesByCategory = useMemo(() => {
     const grouped: Record<string, Array<[string, any]>> = {};
+
     services.forEach((service) => {
       const categoryName = service.category.name;
+
       if (!grouped[categoryName]) {
         grouped[categoryName] = [];
       }
       grouped[categoryName].push([service.id, servicesDataMap[service.id]]);
     });
+
     return grouped;
   }, [services, servicesDataMap]);
 
@@ -282,13 +281,16 @@ function BookingPageContent() {
       ? services.filter(hasDiscount)
       : services;
     const grouped: Record<string, Array<[string, any]>> = {};
+
     list.forEach((service) => {
       const categoryName = service.category.name;
+
       if (!grouped[categoryName]) {
         grouped[categoryName] = [];
       }
       grouped[categoryName].push([service.id, servicesDataMap[service.id]]);
     });
+
     return grouped;
   }, [services, servicesDataMap, serviceSelectorDiscountedOnly, hasDiscount]);
 
@@ -299,6 +301,7 @@ function BookingPageContent() {
       try {
         const response = await fetch("/api/team");
         const data = await response.json();
+
         if (response.ok && data.team) {
           // /api/team returns active members with dayOffPeriods already included
           let activeMembers = data.team;
@@ -317,6 +320,7 @@ function BookingPageContent() {
                 if (!member.service_ids || member.service_ids.length === 0) {
                   return false;
                 }
+
                 // Check if member can perform ALL selected services
                 return selectedServiceIds.every((serviceId) =>
                   member.service_ids?.includes(serviceId),
@@ -342,6 +346,7 @@ function BookingPageContent() {
               const currentMember = activeMembers.find(
                 (m: TeamMember) => m.id === selectedTeamMember,
               );
+
               if (!currentMember) {
                 // Selected team member is no longer available, clear selection
                 setSelectedTeamMember("");
@@ -353,6 +358,7 @@ function BookingPageContent() {
                 const canPerformAll = selectedServiceIds.every((serviceId) =>
                   currentMember.service_ids?.includes(serviceId),
                 );
+
                 if (!canPerformAll) {
                   setSelectedTeamMember("");
                 }
@@ -371,11 +377,13 @@ function BookingPageContent() {
         setTeamMembersLoading(false);
       }
     };
+
     loadTeamMembers();
   }, [selectedServices, services]); // Removed selectedTeamMember from dependencies
 
   const fetchDepositConfig = useCallback(() => {
     const url = `/api/deposit-settings?t=${Date.now()}`;
+
     fetch(url, { cache: "no-store", headers: { Pragma: "no-cache" } })
       .then((res) => (res.ok ? res.json() : null))
       .then((raw) => {
@@ -415,6 +423,7 @@ function BookingPageContent() {
     // Prevent concurrent calls - but allow if previous call completed
     if (isLoadingRef.current) {
       console.log("loadAvailability: Already loading, skipping...");
+
       return;
     }
 
@@ -427,6 +436,7 @@ function BookingPageContent() {
       const now = new Date();
       const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const end = new Date(start);
+
       end.setDate(start.getDate() + 30);
 
       // Team member is required - only show availability if team member is selected
@@ -436,6 +446,7 @@ function BookingPageContent() {
           const year = date.getFullYear();
           const month = String(date.getMonth() + 1).padStart(2, "0");
           const day = String(date.getDate()).padStart(2, "0");
+
           return `${year}-${month}-${day}`;
         };
 
@@ -467,6 +478,7 @@ function BookingPageContent() {
               const dateStr = formatDateLocal(currentDate);
 
               const dateAvailability = availability[dateStr];
+
               if (dateAvailability) {
                 dates.push({
                   date: dateStr,
@@ -542,6 +554,7 @@ function BookingPageContent() {
 
   // Check for pending service from URL or sessionStorage (from + Book on services page, featured services, etc.)
   const pendingProcessedRef = useRef(false);
+
   useEffect(() => {
     if (
       servicesLoading ||
@@ -562,13 +575,16 @@ function BookingPageContent() {
         : null;
 
     let pendingServiceId = pendingServiceIdParam || fromStorage;
+
     if (!pendingServiceId && serviceSlug) {
       const bySlug = services.find((s) => s.slug === serviceSlug);
+
       if (bySlug) pendingServiceId = bySlug.id;
     }
 
     if (pendingServiceId) {
       const service = servicesDataMap[pendingServiceId];
+
       if (
         service &&
         !selectedServices.some((s) => s.serviceId === pendingServiceId)
@@ -587,8 +603,12 @@ function BookingPageContent() {
           },
         ]);
         // Clear URL params without full reload
-        if (searchParams.get("pendingServiceId") || searchParams.get("service")) {
+        if (
+          searchParams.get("pendingServiceId") ||
+          searchParams.get("service")
+        ) {
           const params = new URLSearchParams(searchParams.toString());
+
           params.delete("pendingServiceId");
           params.delete("service");
           router.replace(
@@ -600,8 +620,12 @@ function BookingPageContent() {
           sessionStorage.removeItem("pendingServiceId");
         }
       } else {
-        if (searchParams.get("pendingServiceId") || searchParams.get("service")) {
+        if (
+          searchParams.get("pendingServiceId") ||
+          searchParams.get("service")
+        ) {
           const params = new URLSearchParams(searchParams.toString());
+
           params.delete("pendingServiceId");
           params.delete("service");
           router.replace(
@@ -638,6 +662,7 @@ function BookingPageContent() {
       return Math.min(Number(depositConfig.fixedAmount), totalAmount);
     }
     const pct = depositConfig.percentage ?? 50;
+
     return Math.round(((totalAmount * pct) / 100) * 100) / 100;
   }, [
     depositConfig.enabled,
@@ -697,6 +722,7 @@ function BookingPageContent() {
 
   const addService = (serviceId: string): boolean => {
     const service = servicesDataMap[serviceId];
+
     if (!service) {
       console.error(`Service not found in servicesDataMap: ${serviceId}`);
       console.log("Available services:", Object.keys(servicesDataMap));
@@ -704,6 +730,7 @@ function BookingPageContent() {
         "Service Not Found",
         `The service "${serviceId}" could not be found. Please try selecting it from the list.`,
       );
+
       return false;
     }
 
@@ -711,21 +738,25 @@ function BookingPageContent() {
     const existingIndex = selectedServices.findIndex(
       (item) => item.serviceId === serviceId,
     );
+
     if (existingIndex >= 0) {
       showError(
         "Service Already Added",
         "This service is already in your selection. Each service can only be added once.",
       );
+
       return false;
     }
 
     // Check if adding this service would exceed working hours
     const additionalDuration = service.duration;
+
     if (wouldExceedWorkingHours(additionalDuration)) {
       showError(
         "Cannot Add Service",
         `Adding this service would exceed working hours. The appointment would end after closing time.`,
       );
+
       return false;
     }
 
@@ -742,6 +773,7 @@ function BookingPageContent() {
         quantity: 1,
       },
     ]);
+
     return true;
   };
 
@@ -754,6 +786,7 @@ function BookingPageContent() {
   const updateQuantity = (serviceId: string, quantity: number) => {
     if (quantity <= 0) {
       removeService(serviceId);
+
       return;
     }
 
@@ -761,14 +794,17 @@ function BookingPageContent() {
     const service = selectedServices.find(
       (item) => item.serviceId === serviceId,
     );
+
     if (service && quantity > service.quantity) {
       const additionalDuration =
         service.duration * (quantity - service.quantity);
+
       if (wouldExceedWorkingHours(additionalDuration)) {
         showError(
           "Cannot Increase Quantity",
           `Increasing the quantity would exceed working hours. The appointment would end after closing time.`,
         );
+
         return;
       }
     }
@@ -776,6 +812,7 @@ function BookingPageContent() {
     const updated = selectedServices.map((item) =>
       item.serviceId === serviceId ? { ...item, quantity } : item,
     );
+
     setSelectedServices(updated);
   };
 
@@ -818,8 +855,10 @@ function BookingPageContent() {
     // Add all consecutive hours starting from the selected time
     for (let i = 0; i < durationHours; i++) {
       const hour = startHour + i;
+
       if (hour >= 24) break; // Don't go past midnight
       const timeStr = `${String(hour).padStart(2, "0")}:${String(startMinute).padStart(2, "0")}`;
+
       selectedSlots.push(timeStr);
     }
 
@@ -874,10 +913,10 @@ function BookingPageContent() {
             always adjust later.
           </p>
           <ButtonPrimary
-            onPress={() => setShowServiceSelector(true)}
-            variant="primary"
             size="md"
             startContent={<Plus className="w-4 h-4" />}
+            variant="primary"
+            onPress={() => setShowServiceSelector(true)}
           >
             Browse
           </ButtonPrimary>
@@ -887,6 +926,7 @@ function BookingPageContent() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {selectedServices.map((item) => {
               const serviceData = servicesDataMap[item.serviceId];
+
               return (
                 <Card
                   key={item.serviceId}
@@ -900,10 +940,10 @@ function BookingPageContent() {
                           {item.name}
                         </h4>
                         <Chip
-                          size="sm"
-                          variant="flat"
-                          startContent={<Clock className="w-3 h-3" />}
                           className="flex-shrink-0 bg-egp-green/10 text-egp-green dark:bg-egp-green-dark/20 dark:text-white"
+                          size="sm"
+                          startContent={<Clock className="w-3 h-3" />}
+                          variant="flat"
                         >
                           {item.duration} min
                         </Chip>
@@ -914,9 +954,9 @@ function BookingPageContent() {
                           Subtotal
                         </p>
                         <PriceWithDiscount
-                          price={item.price}
-                          originalPrice={item.originalPrice}
                           discountPercentage={item.discountPercentage}
+                          originalPrice={item.originalPrice}
+                          price={item.price}
                           quantity={item.quantity}
                           size="md"
                         />
@@ -925,22 +965,22 @@ function BookingPageContent() {
 
                     <div className="flex items-center gap-2 mt-auto">
                       <Button
-                        onPress={() => setServiceInfoModal(item.serviceId)}
-                        variant="bordered"
-                        size="sm"
                         className="flex-1 border-egp-green text-egp-green dark:border-egp-green dark:text-white hover:bg-egp-green/10"
+                        size="sm"
                         startContent={<Info className="w-4 h-4" />}
+                        variant="bordered"
+                        onPress={() => setServiceInfoModal(item.serviceId)}
                       >
                         Details
                       </Button>
                       <Button
-                        onPress={() => removeService(item.serviceId)}
                         isIconOnly
-                        variant="light"
+                        aria-label="Remove service"
+                        className="hover:bg-danger-50 dark:hover:bg-danger-900/20"
                         color="danger"
                         size="sm"
-                        className="hover:bg-danger-50 dark:hover:bg-danger-900/20"
-                        aria-label="Remove service"
+                        variant="light"
+                        onPress={() => removeService(item.serviceId)}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -953,19 +993,15 @@ function BookingPageContent() {
 
           <div className="border-t border-divider pt-4 mt-5 flex flex-row items-center justify-between gap-2 sm:gap-3">
             <ButtonPrimary
-              onPress={() => setShowServiceSelector(true)}
-              variant="secondary"
-              size="md"
               className="flex-1 min-w-0 border-2 border-egp-beige-dark bg-egp-beige hover:bg-egp-beige-dark text-gray-900 dark:bg-egp-beige-darkest dark:text-white dark:border-egp-beige-darker dark:hover:bg-egp-beige-darker text-sm"
+              size="md"
               startContent={<Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+              variant="secondary"
+              onPress={() => setShowServiceSelector(true)}
             >
               Add
             </ButtonPrimary>
             <ButtonPrimary
-              onPress={() => setCurrentStep("team")}
-              isDisabled={selectedServices.length === 0}
-              variant="primary"
-              size="md"
               className={`flex-1 min-w-0 text-sm ${selectedServices.length === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
               endContent={
                 selectedServices.length === 0 ? (
@@ -974,8 +1010,14 @@ function BookingPageContent() {
                   <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
                 )
               }
+              isDisabled={selectedServices.length === 0}
+              size="md"
+              variant="primary"
+              onPress={() => setCurrentStep("team")}
             >
-              {selectedServices.length === 0 ? "Add service first" : "Practitioner"}
+              {selectedServices.length === 0
+                ? "Add service first"
+                : "Practitioner"}
             </ButtonPrimary>
           </div>
         </>
@@ -987,7 +1029,7 @@ function BookingPageContent() {
     <div className="space-y-6">
       {teamMembersLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Spinner size="lg" color="primary" />
+          <Spinner color="primary" size="lg" />
           <span className="ml-3 text-sm text-default-500">
             Loading practitioners...
           </span>
@@ -1011,21 +1053,21 @@ function BookingPageContent() {
               <Card
                 key={member.id}
                 isPressable
-                onPress={() => setSelectedTeamMember(member.id)}
                 className={`group relative transition-all duration-200 ${
                   selectedTeamMember === member.id
                     ? "border-2 border-[#9d9585] dark:border-[#c9c1b0] bg-[#f5f1e9] dark:bg-gray-800/50 shadow-lg scale-[1.02]"
                     : ""
                 }`}
                 shadow={selectedTeamMember === member.id ? "lg" : "sm"}
+                onPress={() => setSelectedTeamMember(member.id)}
               >
                 {/* Selected Indicator */}
                 {selectedTeamMember === member.id && (
                   <div className="absolute top-3 right-3 z-10">
                     <Chip
-                      size="sm"
-                      color="primary"
                       className="bg-[#9d9585] dark:bg-[#c9c1b0]"
+                      color="primary"
+                      size="sm"
                     >
                       <CheckCircle className="w-4 h-4 text-white" />
                     </Chip>
@@ -1038,9 +1080,9 @@ function BookingPageContent() {
                     <div className="relative flex-shrink-0">
                       {member.image_url ? (
                         <img
-                          src={member.image_url}
                           alt={member.name}
                           className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-[#e4d9c8] dark:border-gray-700"
+                          src={member.image_url}
                         />
                       ) : (
                         <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-[#D4C9BC] to-[#E6DDD1] flex items-center justify-center border-2 border-[#e4d9c8] dark:border-gray-700">
@@ -1059,11 +1101,13 @@ function BookingPageContent() {
                           member.dayOffPeriods.length > 0 &&
                           (() => {
                             const today = new Date();
+
                             today.setHours(0, 0, 0, 0);
                             const isOnDayOff = member.dayOffPeriods.some(
                               (period) => {
                                 const start = new Date(period.start_date);
                                 const end = new Date(period.end_date);
+
                                 return today >= start && today <= end;
                               },
                             );
@@ -1082,6 +1126,7 @@ function BookingPageContent() {
                                 </span>
                               );
                             }
+
                             return null;
                           })()}
                       </div>
@@ -1124,11 +1169,11 @@ function BookingPageContent() {
           {selectedTeamMember && (
             <div className="border-t border-divider pt-4 mt-5 flex justify-center">
               <ButtonPrimary
-                onPress={() => setCurrentStep("date")}
-                variant="primary"
-                size="md"
                 className="w-full sm:w-auto min-w-[140px]"
                 endContent={<ArrowLeft className="w-3.5 h-3.5 rotate-180" />}
+                size="md"
+                variant="primary"
+                onPress={() => setCurrentStep("date")}
               >
                 Date & Time
               </ButtonPrimary>
@@ -1142,9 +1187,11 @@ function BookingPageContent() {
   const renderServiceInfoModal = () => (
     <ServiceDetailsModal
       isOpen={!!serviceInfoModal}
-      onClose={() => setServiceInfoModal(null)}
-      service={serviceInfoModal ? servicesDataMap[serviceInfoModal] ?? null : null}
+      service={
+        serviceInfoModal ? (servicesDataMap[serviceInfoModal] ?? null) : null
+      }
       showBookButton={false}
+      onClose={() => setServiceInfoModal(null)}
     />
   );
 
@@ -1165,14 +1212,16 @@ function BookingPageContent() {
         >
           {/* Header - visible on both light and dark */}
           <div className="bg-[#3a3428] dark:bg-gray-950 text-white px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between rounded-t-xl sm:rounded-t-2xl flex-shrink-0 border-b border-[#4a4438] dark:border-gray-700 relative z-[10002]">
-            <h2 className={`${typography.headingCard} text-white`}>Select Services</h2>
+            <h2 className={`${typography.headingCard} text-white`}>
+              Select Services
+            </h2>
             <button
+              aria-label="Close"
+              className="p-2 hover:bg-gray-700 rounded-full transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center relative z-[10003]"
               onClick={(e) => {
                 e.stopPropagation();
                 setShowServiceSelector(false);
               }}
-              className="p-2 hover:bg-gray-700 rounded-full transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center relative z-[10003]"
-              aria-label="Close"
             >
               <X className="w-6 h-6 text-white" />
             </button>
@@ -1181,26 +1230,28 @@ function BookingPageContent() {
           {/* Discount filter - only show if any service has discount */}
           {services.some(hasDiscount) && (
             <div className="px-4 sm:px-6 py-2 sm:py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex flex-wrap items-center gap-2">
-              <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Filter:</span>
+              <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                Filter:
+              </span>
               <button
-                type="button"
-                onClick={() => setServiceSelectorDiscountedOnly(false)}
                 className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors ${
                   !serviceSelectorDiscountedOnly
                     ? "bg-egp-green text-white"
                     : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
                 }`}
+                type="button"
+                onClick={() => setServiceSelectorDiscountedOnly(false)}
               >
                 All
               </button>
               <button
-                type="button"
-                onClick={() => setServiceSelectorDiscountedOnly(true)}
                 className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors ${
                   serviceSelectorDiscountedOnly
                     ? "bg-egp-green text-white"
                     : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
                 }`}
+                type="button"
+                onClick={() => setServiceSelectorDiscountedOnly(true)}
               >
                 On offer
               </button>
@@ -1224,12 +1275,15 @@ function BookingPageContent() {
 
                 return (
                   <div key={category} className="mb-4 sm:mb-8">
-                    <h3 className={`${typography.headingSmall} text-gray-900 dark:text-white mb-3 sm:mb-5`}>
+                    <h3
+                      className={`${typography.headingSmall} text-gray-900 dark:text-white mb-3 sm:mb-5`}
+                    >
                       {category}
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
                       {availableServices.map(([serviceId, service]) => {
                         if (!service) return null;
+
                         return (
                           <Card
                             key={serviceId}
@@ -1240,8 +1294,8 @@ function BookingPageContent() {
                               {/* Category Badge - Top Left */}
                               <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
                                 <Chip
-                                  size="sm"
                                   className="bg-gray-600 dark:bg-gray-700 text-white text-[10px] sm:text-xs font-semibold"
+                                  size="sm"
                                   variant="flat"
                                 >
                                   {service.category || category}
@@ -1251,10 +1305,12 @@ function BookingPageContent() {
                               {/* Duration Badge - Top Right */}
                               <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
                                 <Chip
-                                  size="sm"
-                                  startContent={<Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />}
-                                  variant="flat"
                                   className="bg-gray-600 dark:bg-gray-700 text-white text-[10px] sm:text-xs"
+                                  size="sm"
+                                  startContent={
+                                    <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                                  }
+                                  variant="flat"
                                 >
                                   {service.duration} min
                                 </Chip>
@@ -1267,14 +1323,14 @@ function BookingPageContent() {
                                 </h4>
                                 <div className="flex flex-col items-center gap-1 w-full [&_.line-through]:text-gray-500 [&_.font-bold]:text-gray-900 dark:[&_.font-bold]:text-white">
                                   <PriceWithDiscount
-                                    price={service.price}
-                                    originalPrice={service.originalPrice}
+                                    align="center"
                                     discountPercentage={
                                       service.discount_percentage
                                     }
-                                    size="lg"
                                     layout="stack"
-                                    align="center"
+                                    originalPrice={service.originalPrice}
+                                    price={service.price}
+                                    size="lg"
                                   />
                                 </div>
                               </div>
@@ -1291,25 +1347,26 @@ function BookingPageContent() {
                               {/* Action Buttons - Stacked */}
                               <div className="flex flex-col gap-1.5 sm:gap-2 pt-3 sm:pt-4 mt-auto border-t border-gray-200 dark:border-gray-700">
                                 <Button
-                                  onPress={() => setServiceInfoModal(serviceId)}
-                                  variant="bordered"
-                                  size="sm"
                                   className="w-full border-gray-400 text-gray-700 dark:border-gray-600 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                                  size="sm"
                                   startContent={<Info className="w-4 h-4" />}
+                                  variant="bordered"
+                                  onPress={() => setServiceInfoModal(serviceId)}
                                 >
                                   Details
                                 </Button>
                                 <ButtonPrimary
+                                  className="w-full bg-egp-green hover:bg-egp-green-dark dark:bg-gray-700 dark:hover:bg-gray-600 text-white"
+                                  size="sm"
+                                  startContent={<Plus className="w-4 h-4" />}
+                                  variant="primary"
                                   onPress={() => {
                                     const success = addService(serviceId);
+
                                     if (success) {
                                       setShowServiceSelector(false);
                                     }
                                   }}
-                                  variant="primary"
-                                  className="w-full bg-egp-green hover:bg-egp-green-dark dark:bg-gray-700 dark:hover:bg-gray-600 text-white"
-                                  size="sm"
-                                  startContent={<Plus className="w-4 h-4" />}
                                 >
                                   Book
                                 </ButtonPrimary>
@@ -1342,7 +1399,7 @@ function BookingPageContent() {
           </h3>
           <Card>
             <CardBody className="flex items-center gap-3">
-              <Spinner size="md" color="primary" />
+              <Spinner color="primary" size="md" />
               <span className="text-sm sm:text-base text-default-600">
                 Loading availability...
               </span>
@@ -1362,7 +1419,7 @@ function BookingPageContent() {
             <p className="text-sm sm:text-base text-[#7f2b27] dark:text-red-200">
               {availabilityError}
             </p>
-            <ButtonPrimary onPress={loadAvailability} variant="primary">
+            <ButtonPrimary variant="primary" onPress={loadAvailability}>
               Retry loading availability
             </ButtonPrimary>
           </div>
@@ -1384,9 +1441,9 @@ function BookingPageContent() {
             </p>
             {selectedTeamMember && (
               <ButtonPrimary
-                onPress={loadAvailability}
-                variant="primary"
                 className="mx-auto"
+                variant="primary"
+                onPress={loadAvailability}
               >
                 Refresh availability
               </ButtonPrimary>
@@ -1413,6 +1470,7 @@ function BookingPageContent() {
       // Get day of week: 0 = Sunday, 1 = Monday, etc.
       // Adjust to Monday = 0: (dayOfWeek + 6) % 7
       let firstDayOfWeek = firstDateUTC.getUTCDay();
+
       // Convert Sunday (0) to 6, Monday (1) to 0, etc. for Monday-first calendar
       firstDayOfWeek = (firstDayOfWeek + 6) % 7;
 
@@ -1423,6 +1481,7 @@ function BookingPageContent() {
 
       // Add all available dates (limit to 28 days for 4 weeks)
       const daysToShow = Math.min(availableDates.length, 28 - firstDayOfWeek);
+
       for (let i = 0; i < daysToShow; i++) {
         calendarGrid.push(availableDates[i]);
       }
@@ -1466,16 +1525,16 @@ function BookingPageContent() {
           <>
             <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
               <span className="inline-flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#d9534f]"></span>{" "}
-                Fully booked
+                <span className="w-3 h-3 rounded-full bg-[#d9534f]" /> Fully
+                booked
               </span>
               <span className="inline-flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#80c48f]"></span>{" "}
-                Slots available
+                <span className="w-3 h-3 rounded-full bg-[#80c48f]" /> Slots
+                available
               </span>
               <span className="inline-flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-gray-200"></span>{" "}
-                Clinic closed
+                <span className="w-3 h-3 rounded-full bg-gray-200" /> Clinic
+                closed
               </span>
             </div>
 
@@ -1522,6 +1581,7 @@ function BookingPageContent() {
                     const disabled = isClosed || isFull || !hasSlots;
 
                     let statusClasses = "";
+
                     if (isSelected) {
                       statusClasses =
                         "bg-gradient-to-br from-[#CFC4B6] to-[#E6DDD1] text-[#3f3a31] shadow-lg border border-transparent";
@@ -1539,13 +1599,13 @@ function BookingPageContent() {
                     return (
                       <button
                         key={dateInfo.date}
-                        onClick={() => handleDateSelect(dateInfo.date)}
-                        disabled={disabled}
                         className={`
                         aspect-square rounded-md text-sm sm:text-base font-medium transition-all touch-manipulation min-h-[24px] sm:min-h-[28px]
                     ${statusClasses}
                     ${isToday ? "border-2 border-green-500 dark:border-green-400" : ""}
                   `}
+                        disabled={disabled}
+                        onClick={() => handleDateSelect(dateInfo.date)}
                       >
                         {day}
                       </button>
@@ -1572,11 +1632,11 @@ function BookingPageContent() {
                       </p>
                       {selectedTimeSlots.length > 0 && (
                         <button
+                          className="mt-2 px-3 py-1.5 text-xs sm:text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg border border-red-300 dark:border-red-700 transition-colors"
                           onClick={() => {
                             setSelectedTime("");
                             setSelectedTimeSlots([]);
                           }}
-                          className="mt-2 px-3 py-1.5 text-xs sm:text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg border border-red-300 dark:border-red-700 transition-colors"
                         >
                           Clear Selection
                         </button>
@@ -1621,6 +1681,7 @@ function BookingPageContent() {
                               const hours = Math.floor(timeMinutes / 60);
                               const minutes = timeMinutes % 60;
                               const timeString = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+
                               allTimeSlots.push(timeString);
                             }
                           } else {
@@ -1629,10 +1690,12 @@ function BookingPageContent() {
                               ...(selectedDateSlots.timeSlots || []),
                               ...(selectedDateSlots.bookedSlots || []),
                             ];
+
                             if (allSlots.length > 0) {
                               // Find min and max hours
                               const hours = allSlots.map((slot) => {
                                 const [h] = slot.split(":").map(Number);
+
                                 return h;
                               });
                               const minHour = Math.min(...hours);
@@ -1730,6 +1793,7 @@ function BookingPageContent() {
                             // Check each hour in the required duration
                             for (let i = 0; i < durationHours; i++) {
                               const checkHour = startHour + i;
+
                               if (checkHour >= 24) {
                                 return false; // Goes past midnight
                               }
@@ -1838,7 +1902,6 @@ function BookingPageContent() {
                                   return (
                                     <button
                                       key={time}
-                                      onClick={() => handleTimeSelect(time)}
                                       className={`px-2 py-1.5 min-h-[36px] rounded-md text-xs sm:text-sm font-medium transition-all touch-manipulation active:scale-95 border-2 flex items-center justify-center
                               ${
                                 isStartTime
@@ -1848,6 +1911,7 @@ function BookingPageContent() {
                                     : "border-egp-green dark:border-egp-green-light bg-egp-green/10 dark:bg-egp-green-dark/20 text-egp-green dark:text-white hover:bg-egp-green/20 dark:hover:bg-egp-green-dark/30 hover:border-egp-green-dark"
                               }
                             `}
+                                      onClick={() => handleTimeSelect(time)}
                                     >
                                       {time}
                                     </button>
@@ -1872,13 +1936,13 @@ function BookingPageContent() {
                               {selectedTime && (
                                 <div className="mt-4 flex justify-center">
                                   <ButtonPrimary
-                                    onPress={() => setCurrentStep("customer")}
-                                    variant="primary"
-                                    size="md"
                                     className="w-full sm:w-auto min-w-[140px]"
                                     endContent={
                                       <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
                                     }
+                                    size="md"
+                                    variant="primary"
+                                    onPress={() => setCurrentStep("customer")}
                                   >
                                     Your Details
                                   </ButtonPrimary>
@@ -1942,6 +2006,7 @@ function BookingPageContent() {
     }
 
     setCustomerDataErrors(errors);
+
     return isValid;
   };
 
@@ -1950,92 +2015,92 @@ function BookingPageContent() {
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
+            isRequired
+            classNames={inputClassNames}
+            errorMessage={customerDataErrors.firstName}
+            isInvalid={!!customerDataErrors.firstName}
             label="First Name"
+            labelPlacement="outside"
             placeholder="Enter your first name"
+            size="lg"
             value={customerData.firstName}
+            variant="bordered"
             onValueChange={(value) =>
               setCustomerData({ ...customerData, firstName: value })
             }
-            isRequired
-            isInvalid={!!customerDataErrors.firstName}
-            errorMessage={customerDataErrors.firstName}
-            variant="bordered"
-            size="lg"
-            labelPlacement="outside"
-            classNames={inputClassNames}
           />
           <Input
+            isRequired
+            classNames={inputClassNames}
+            errorMessage={customerDataErrors.lastName}
+            isInvalid={!!customerDataErrors.lastName}
             label="Last Name"
+            labelPlacement="outside"
             placeholder="Enter your last name"
+            size="lg"
             value={customerData.lastName}
+            variant="bordered"
             onValueChange={(value) =>
               setCustomerData({ ...customerData, lastName: value })
             }
-            isRequired
-            isInvalid={!!customerDataErrors.lastName}
-            errorMessage={customerDataErrors.lastName}
-            variant="bordered"
-            size="lg"
-            labelPlacement="outside"
-            classNames={inputClassNames}
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
+            isRequired
+            classNames={inputClassNames}
+            errorMessage={customerDataErrors.email}
+            isInvalid={!!customerDataErrors.email}
             label="Email"
-            type="email"
+            labelPlacement="outside"
             placeholder="your.email@example.com"
+            size="lg"
+            type="email"
             value={customerData.email}
+            variant="bordered"
             onValueChange={(value) =>
               setCustomerData({ ...customerData, email: value })
             }
-            isRequired
-            isInvalid={!!customerDataErrors.email}
-            errorMessage={customerDataErrors.email}
-            variant="bordered"
-            size="lg"
-            labelPlacement="outside"
-            classNames={inputClassNames}
           />
           <Input
+            isRequired
+            classNames={inputClassNames}
+            errorMessage={customerDataErrors.phone}
+            isInvalid={!!customerDataErrors.phone}
             label="Phone"
-            type="tel"
+            labelPlacement="outside"
             placeholder="+44 7XXX XXXXXX"
+            size="lg"
+            type="tel"
             value={customerData.phone}
+            variant="bordered"
             onValueChange={(value) =>
               setCustomerData({ ...customerData, phone: value })
             }
-            isRequired
-            isInvalid={!!customerDataErrors.phone}
-            errorMessage={customerDataErrors.phone}
-            variant="bordered"
-            size="lg"
-            labelPlacement="outside"
-            classNames={inputClassNames}
           />
         </div>
 
         <div className="flex gap-2 sm:gap-3 pt-4">
           <Button
-            variant="bordered"
-            onPress={() => setCurrentStep("date")}
-            startContent={<ArrowLeft className="w-3.5 h-3.5" />}
             className="flex-1 min-w-0 text-sm"
             size="md"
+            startContent={<ArrowLeft className="w-3.5 h-3.5" />}
+            variant="bordered"
+            onPress={() => setCurrentStep("date")}
           >
             Back
           </Button>
           <ButtonPrimary
+            className="flex-1 min-w-0 text-sm"
+            endContent={<ArrowLeft className="w-3.5 h-3.5 rotate-180" />}
+            size="md"
+            variant="primary"
             onPress={() => {
               if (validateCustomerData()) {
                 setCurrentStep("preview");
               }
             }}
-            variant="primary"
-            size="md"
-            className="flex-1 min-w-0 text-sm"
-            endContent={<ArrowLeft className="w-3.5 h-3.5 rotate-180" />}
           >
             Review
           </ButtonPrimary>
@@ -2058,6 +2123,7 @@ function BookingPageContent() {
 
     // Calculate end time based on start time and total duration
     let timeRange = formattedAppointmentTime;
+
     if (selectedTime && totalServiceDuration > 0) {
       const [startHour, startMin] = selectedTime.split(":").map(Number);
       const durationHours = Math.floor(totalServiceDuration / 60);
@@ -2076,6 +2142,7 @@ function BookingPageContent() {
       }
 
       const endTime = `${String(endHour).padStart(2, "0")}:${String(endMin).padStart(2, "0")}`;
+
       timeRange = `${selectedTime} to ${endTime}`;
     }
 
@@ -2101,9 +2168,9 @@ function BookingPageContent() {
                   <div className="flex items-center gap-4">
                     {selectedTeamMemberData.image_url ? (
                       <img
-                        src={selectedTeamMemberData.image_url}
                         alt=""
                         className="w-14 h-14 rounded-full object-cover border-2 border-[#e4d9c8] dark:border-gray-600 flex-shrink-0"
+                        src={selectedTeamMemberData.image_url}
                       />
                     ) : (
                       <div className="w-14 h-14 rounded-full bg-egp-green/10 dark:bg-egp-green/20 flex items-center justify-center flex-shrink-0">
@@ -2226,9 +2293,9 @@ function BookingPageContent() {
                       </div>
                       <div className="flex-shrink-0 text-right">
                         <PriceWithDiscount
-                          price={item.price}
-                          originalPrice={item.originalPrice}
                           discountPercentage={item.discountPercentage}
+                          originalPrice={item.originalPrice}
+                          price={item.price}
                           quantity={item.quantity}
                           size="sm"
                         />
@@ -2254,13 +2321,16 @@ function BookingPageContent() {
                   {totalDuration} min total
                 </p>
                 {depositConfig.enabled && totalAmount > 0 && (
-                  <div id="deposit-option" className="rounded-lg border-2 border-egp-green/30 dark:border-egp-beige/30 bg-white/60 dark:bg-gray-800/40 p-3 sm:p-4 space-y-2 sm:space-y-3 scroll-mt-24">
+                  <div
+                    className="rounded-lg border-2 border-egp-green/30 dark:border-egp-beige/30 bg-white/60 dark:bg-gray-800/40 p-3 sm:p-4 space-y-2 sm:space-y-3 scroll-mt-24"
+                    id="deposit-option"
+                  >
                     <label className="flex items-start gap-3 cursor-pointer group">
                       <input
-                        type="checkbox"
                         checked={payDepositOnly}
-                        onChange={(e) => setPayDepositOnly(e.target.checked)}
                         className="mt-0.5 rounded border-gray-300 text-egp-green focus:ring-egp-green shrink-0 w-4 h-4 min-w-[16px]"
+                        type="checkbox"
+                        onChange={(e) => setPayDepositOnly(e.target.checked)}
                       />
                       <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white">
                         Pay deposit only (rest on arrival)
@@ -2277,14 +2347,13 @@ function BookingPageContent() {
                       </div>
                     )}
                     <p className="text-xs text-amber-700 dark:text-amber-300/90">
-                      Cancel or request a refund up to 24 hours before your appointment.
+                      Cancel or request a refund up to 24 hours before your
+                      appointment.
                     </p>
                   </div>
                 )}
                 {!showPaymentForm ? (
                   <ButtonPrimary
-                    onPress={proceedToPayment}
-                    variant="primary"
                     className="w-full mt-2"
                     size="md"
                     startContent={
@@ -2294,6 +2363,8 @@ function BookingPageContent() {
                         <CreditCard className="w-4 h-4" />
                       )
                     }
+                    variant="primary"
+                    onPress={proceedToPayment}
                   >
                     {isFreeDiscoveryOnly ? "Book" : "Pay"}
                   </ButtonPrimary>
@@ -2351,6 +2422,12 @@ function BookingPageContent() {
                   <StripePaymentForm
                     amount={totalAmount}
                     amountToCharge={amountToCharge}
+                    customerData={{
+                      firstName: customerData.firstName.trim(),
+                      lastName: customerData.lastName?.trim() || "",
+                      email: customerData.email.trim(),
+                      phone: customerData.phone.trim(),
+                    }}
                     depositMetadata={
                       isDepositPayment
                         ? {
@@ -2361,25 +2438,26 @@ function BookingPageContent() {
                           }
                         : undefined
                     }
+                    selectedDate={selectedDate}
+                    selectedTime={selectedTime}
+                    serviceDurationMinutes={totalServiceDuration || undefined}
                     services={selectedServices.map((item) => ({
                       name: item.name,
                       price: item.price,
                       quantity: item.quantity,
                       duration: item.duration,
                     }))}
-                    selectedDate={selectedDate}
-                    selectedTime={selectedTime}
+                    teamMemberEmail={
+                      selectedTeamMember
+                        ? teamMembers.find((m) => m.id === selectedTeamMember)
+                            ?.email
+                        : undefined
+                    }
                     teamMemberId={selectedTeamMember || undefined}
                     teamMemberName={
                       selectedTeamMember
                         ? teamMembers.find((m) => m.id === selectedTeamMember)
                             ?.name
-                        : undefined
-                    }
-                    teamMemberRole={
-                      selectedTeamMember
-                        ? teamMembers.find((m) => m.id === selectedTeamMember)
-                            ?.role
                         : undefined
                     }
                     teamMemberPhone={
@@ -2388,23 +2466,16 @@ function BookingPageContent() {
                             ?.phone
                         : undefined
                     }
-                    teamMemberEmail={
+                    teamMemberRole={
                       selectedTeamMember
                         ? teamMembers.find((m) => m.id === selectedTeamMember)
-                            ?.email
+                            ?.role
                         : undefined
                     }
-                    serviceDurationMinutes={totalServiceDuration || undefined}
-                    customerData={{
-                      firstName: customerData.firstName.trim(),
-                      lastName: customerData.lastName?.trim() || "",
-                      email: customerData.email.trim(),
-                      phone: customerData.phone.trim(),
-                    }}
-                    onPaymentSuccess={handlePaymentSuccess}
                     onPaymentError={handlePaymentError}
-                    onTestBooking={handlePaymentSuccess}
+                    onPaymentSuccess={handlePaymentSuccess}
                     onProcessingChange={setIsPaymentProcessing}
+                    onTestBooking={handlePaymentSuccess}
                   />
                 );
               })()}
@@ -2420,8 +2491,8 @@ function BookingPageContent() {
       <div className="space-y-6">
         <div className="flex items-center gap-4 mb-6">
           <button
-            onClick={() => setCurrentStep("preview")}
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            onClick={() => setCurrentStep("preview")}
           >
             <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
           </button>
@@ -2456,6 +2527,7 @@ function BookingPageContent() {
                 phone: customerData.phone,
               },
             );
+
             return (
               <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                 <p className="text-yellow-800 dark:text-yellow-200 text-sm">
@@ -2470,6 +2542,12 @@ function BookingPageContent() {
             <StripePaymentForm
               amount={totalAmount}
               amountToCharge={amountToCharge}
+              customerData={{
+                firstName: customerData.firstName.trim(),
+                lastName: customerData.lastName?.trim() || "",
+                email: customerData.email.trim(),
+                phone: customerData.phone?.trim() || undefined,
+              }}
               depositMetadata={
                 isDepositPayment
                   ? {
@@ -2480,23 +2558,24 @@ function BookingPageContent() {
                     }
                   : undefined
               }
+              selectedDate={selectedDate}
+              selectedTime={selectedTime}
+              serviceDurationMinutes={totalServiceDuration || undefined}
               services={selectedServices.map((item) => ({
                 name: item.name,
                 price: item.price,
                 quantity: item.quantity,
                 duration: item.duration,
               }))}
-              selectedDate={selectedDate}
-              selectedTime={selectedTime}
+              teamMemberEmail={
+                selectedTeamMember
+                  ? teamMembers.find((m) => m.id === selectedTeamMember)?.email
+                  : undefined
+              }
               teamMemberId={selectedTeamMember || undefined}
               teamMemberName={
                 selectedTeamMember
                   ? teamMembers.find((m) => m.id === selectedTeamMember)?.name
-                  : undefined
-              }
-              teamMemberRole={
-                selectedTeamMember
-                  ? teamMembers.find((m) => m.id === selectedTeamMember)?.role
                   : undefined
               }
               teamMemberPhone={
@@ -2504,20 +2583,13 @@ function BookingPageContent() {
                   ? teamMembers.find((m) => m.id === selectedTeamMember)?.phone
                   : undefined
               }
-              teamMemberEmail={
+              teamMemberRole={
                 selectedTeamMember
-                  ? teamMembers.find((m) => m.id === selectedTeamMember)?.email
+                  ? teamMembers.find((m) => m.id === selectedTeamMember)?.role
                   : undefined
               }
-              serviceDurationMinutes={totalServiceDuration || undefined}
-              customerData={{
-                firstName: customerData.firstName.trim(),
-                lastName: customerData.lastName?.trim() || "",
-                email: customerData.email.trim(),
-                phone: customerData.phone?.trim() || undefined,
-              }}
-              onPaymentSuccess={handlePaymentSuccess}
               onPaymentError={handlePaymentError}
+              onPaymentSuccess={handlePaymentSuccess}
               onTestBooking={handlePaymentSuccess} // Use same success handler for test bookings
             />
           );
@@ -2531,7 +2603,7 @@ function BookingPageContent() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <Spinner size="lg" color="primary" className="mb-4" />
+          <Spinner className="mb-4" color="primary" size="lg" />
           <p className="text-gray-600 dark:text-gray-300">
             Loading services...
           </p>
@@ -2545,10 +2617,14 @@ function BookingPageContent() {
       <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-24 pb-16">
         {/* Header */}
         <div className="text-center mb-8 sm:mb-12 px-1 sm:px-0">
-          <h1 className={`${typography.headingPage} ${textColors.heading} mb-3 sm:mb-4 md:mb-6 font-montserrat`}>
+          <h1
+            className={`${typography.headingPage} ${textColors.heading} mb-3 sm:mb-4 md:mb-6 font-montserrat`}
+          >
             Book Your Treatment
           </h1>
-          <p className={`${typography.lead} font-montserrat font-light max-w-3xl mx-auto`}>
+          <p
+            className={`${typography.lead} font-montserrat font-light max-w-3xl mx-auto`}
+          >
             Select services, choose date & time, and pay securely
           </p>
         </div>
@@ -2588,14 +2664,14 @@ function BookingPageContent() {
                   className="rounded-2xl sm:rounded-3xl border border-[#e4d9c8] dark:border-gray-800 bg-white/60 dark:bg-gray-900/50 backdrop-blur-sm shadow-md"
                 >
                   <button
-                    type="button"
-                    onClick={() => handleStepToggle(step.key)}
-                    disabled={!canInteract}
                     className={`w-full flex items-center justify-between gap-3 px-4 sm:px-5 py-4 sm:py-5 text-left rounded-2xl sm:rounded-3xl transition-colors ${
                       canInteract
                         ? "hover:bg-white/80 dark:hover:bg-gray-900/70"
                         : "opacity-70 cursor-not-allowed"
                     }`}
+                    disabled={!canInteract}
+                    type="button"
+                    onClick={() => handleStepToggle(step.key)}
                   >
                     <div className="flex items-center gap-3 sm:gap-4">
                       <span
@@ -2657,7 +2733,7 @@ export default function BookingPage() {
       fallback={
         <div className="min-h-screen bg-default-50 flex items-center justify-center">
           <div className="text-center">
-            <Spinner size="lg" color="primary" className="mb-4" />
+            <Spinner className="mb-4" color="primary" size="lg" />
             <p className="text-default-600">Loading...</p>
           </div>
         </div>

@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { STRIPE_TO_DB_STATUS, STRIPE_TO_DB_METHOD, isStripeAvailable } from "./stripe";
+
+import {
+  STRIPE_TO_DB_STATUS,
+  STRIPE_TO_DB_METHOD,
+  isStripeAvailable,
+} from "./stripe";
 
 describe("lib/stripe", () => {
   describe("STRIPE_TO_DB_STATUS", () => {
@@ -20,6 +25,7 @@ describe("lib/stripe", () => {
   describe("isStripeAvailable", () => {
     it("returns boolean", () => {
       const result = isStripeAvailable();
+
       expect(typeof result).toBe("boolean");
     });
   });

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { supabaseAdmin } from "@/lib/supabase";
 
 /**
@@ -15,7 +16,11 @@ export async function GET() {
 
     if (error) {
       console.error("Error fetching team:", error);
-      return NextResponse.json({ error: "Failed to fetch team" }, { status: 500 });
+
+      return NextResponse.json(
+        { error: "Failed to fetch team" },
+        { status: 500 },
+      );
     }
 
     // Fetch day-off periods for each team member (public data for availability)
@@ -26,13 +31,18 @@ export async function GET() {
           .select("start_date, end_date, reason")
           .eq("team_member_id", member.id)
           .order("start_date", { ascending: true });
+
         return { ...member, dayOffPeriods: dayOffPeriods || [] };
-      })
+      }),
     );
 
     return NextResponse.json({ team: teamWithDayOff });
   } catch (error) {
     console.error("Error in team GET:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

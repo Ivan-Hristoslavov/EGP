@@ -3,12 +3,15 @@
  * Data matches a typical booking (e.g. deposit, two services) so previews match production.
  * Uses shared email theme (Montserrat, #f5f1e9 light / dark green for dark mode).
  */
+import { siteConfig } from "@/config/site";
 import { getEmailHead, EMAIL } from "@/lib/email-theme";
 
 // Shared sample data used across templates (1:1 like a real booking)
 const nextMonday = (() => {
   const d = new Date();
+
   d.setDate(d.getDate() + ((1 + 7 - d.getDay()) % 7));
+
   return d;
 })();
 
@@ -22,7 +25,12 @@ export const SAMPLE = {
     { name: "HydraFacial", price: 150, quantity: 1 },
   ],
   date: nextMonday.toISOString().slice(0, 10),
-  dateFormatted: nextMonday.toLocaleDateString("en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric" }),
+  dateFormatted: nextMonday.toLocaleDateString("en-GB", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }),
   dateShort: nextMonday.toLocaleDateString("en-GB"),
   time: "14:00",
   duration: "1h 20m",
@@ -32,9 +40,8 @@ export const SAMPLE = {
   bookingNumber: "BK-2026-0002",
   bookingId: "test-booking-id-123",
   teamMember: "Eli (Senior Aesthetic Practitioner)",
-  // Use fixed demo numbers so test email preview always shows full number (not env placeholders like +447XXXXXXXXXX)
-  contactPhone: "07944 24 20 79",
-  contactEmail: "info@egpaesthetics.co.uk",
+  contactPhone: siteConfig.contact.phone,
+  contactEmail: siteConfig.contact.email,
   discountCode: "WELCOME10-ABC12",
   welcomeDiscountPercent: 10,
   discountValidDays: 30,
@@ -49,10 +56,13 @@ export type TemplateId =
   | "admin_booking_request"
   | "newsletter_welcome";
 
-export function getTemplate(
-  template: TemplateId
-): { subject: string; html: string; text: string } {
+export function getTemplate(template: TemplateId): {
+  subject: string;
+  html: string;
+  text: string;
+} {
   const s = SAMPLE;
+
   switch (template) {
     case "simple":
       return getSimple(s);
@@ -71,9 +81,14 @@ export function getTemplate(
   }
 }
 
-function getSimple(s: typeof SAMPLE): { subject: string; html: string; text: string } {
+function getSimple(s: typeof SAMPLE): {
+  subject: string;
+  html: string;
+  text: string;
+} {
   const message = "This is a test email to verify SMTP configuration.";
   const L = EMAIL.light;
+
   return {
     subject: "Test Email from EGP Aesthetics",
     text: `${message}\n\nThis email confirms that SMTP is configured correctly.`,
@@ -91,11 +106,16 @@ function getSimple(s: typeof SAMPLE): { subject: string; html: string; text: str
   };
 }
 
-function getBookingConfirmation(s: typeof SAMPLE): { subject: string; html: string; text: string } {
+function getBookingConfirmation(s: typeof SAMPLE): {
+  subject: string;
+  html: string;
+  text: string;
+} {
   const totalAmount = s.totalAmount;
   const amountPaid = s.amountPaid;
   const remainingAmount = s.remainingAmount;
   const L = EMAIL.light;
+
   return {
     subject: `Booking Confirmation - ${s.serviceNames} on ${s.dateShort}`,
     text: [
@@ -153,7 +173,7 @@ function getBookingConfirmation(s: typeof SAMPLE): { subject: string; html: stri
 </div>
 <div class="email-card" style="background:${L.cardBg};border:1px solid ${L.cardBorder};margin:24px 0;padding:20px;border-radius:8px">
 <div class="email-card-title" style="font-size:11px;letter-spacing:.12em;color:${L.green};margin-bottom:12px;font-weight:600">QUESTIONS?</div>
-<div style="padding:8px 0;color:${L.text}"><a href="tel:${s.contactPhone.replace(/\s/g,"")}" class="email-link" style="color:${L.link};text-decoration:none;font-weight:500">${s.contactPhone}</a></div>
+<div style="padding:8px 0;color:${L.text}"><a href="tel:${s.contactPhone.replace(/\s/g, "")}" class="email-link" style="color:${L.link};text-decoration:none;font-weight:500">${s.contactPhone}</a></div>
 <div style="padding:8px 0;color:${L.text}"><a href="mailto:${s.contactEmail}" class="email-link" style="color:${L.link};text-decoration:none;font-weight:500">${s.contactEmail}</a></div>
 </div>
 <p style="margin-top:28px;color:${L.text}">We look forward to welcoming you.</p>
@@ -168,18 +188,23 @@ function getBookingConfirmation(s: typeof SAMPLE): { subject: string; html: stri
   };
 }
 
-function getPaymentConfirmed(s: typeof SAMPLE): { subject: string; html: string; text: string } {
+function getPaymentConfirmed(s: typeof SAMPLE): {
+  subject: string;
+  html: string;
+  text: string;
+} {
   const L = EMAIL.light;
   const servicesList = s.services
     .map(
       (srv) =>
-        `<tr><td style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text};font-size:15px">${srv.name}</td><td style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text};font-weight:500;text-align:right">£${(srv.price * srv.quantity).toFixed(2)}</td></tr>`
+        `<tr><td style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text};font-size:15px">${srv.name}</td><td style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text};font-weight:500;text-align:right">£${(srv.price * srv.quantity).toFixed(2)}</td></tr>`,
     )
     .join("");
   const paymentBreakdown = `
 <tr><td colspan="2" style="padding:12px 0;border-top:2px solid #e7e4df"></td></tr>
 <tr><td style="padding:8px 0;color:${L.green};font-size:13px">Paid now (deposit)</td><td style="padding:8px 0;color:${L.deposit};font-weight:600;text-align:right;font-size:15px">£${s.amountPaid.toFixed(2)}</td></tr>
 <tr><td style="padding:8px 0;color:${L.green};font-size:13px">Due on arrival</td><td style="padding:8px 0;color:${L.text};font-weight:500;text-align:right;font-size:15px">£${s.remainingAmount.toFixed(2)}</td></tr>`;
+
   return {
     subject: `Payment Confirmed - Booking for ${s.serviceNames}`,
     text: [
@@ -236,7 +261,7 @@ function getPaymentConfirmed(s: typeof SAMPLE): { subject: string; html: string;
 </div>
 <div class="email-card" style="background:${L.cardBg};border:1px solid ${L.cardBorder};margin:24px 0;padding:20px;border-radius:8px">
 <div class="email-card-title" style="font-size:11px;letter-spacing:.12em;color:${L.green};margin-bottom:12px;font-weight:600">CONTACT US</div>
-<div style="padding:10px 0;color:${L.text}"><a href="tel:${s.contactPhone.replace(/\s/g,"")}" class="email-link" style="color:${L.link};text-decoration:none;font-weight:500">${s.contactPhone}</a></div>
+<div style="padding:10px 0;color:${L.text}"><a href="tel:${s.contactPhone.replace(/\s/g, "")}" class="email-link" style="color:${L.link};text-decoration:none;font-weight:500">${s.contactPhone}</a></div>
 <div style="padding:10px 0;color:${L.text}"><a href="mailto:${s.contactEmail}" class="email-link" style="color:${L.link};text-decoration:none;font-weight:500">${s.contactEmail}</a></div>
 </div>
 <p style="margin-top:28px;color:${L.text}">We look forward to seeing you.</p>
@@ -251,11 +276,16 @@ function getPaymentConfirmed(s: typeof SAMPLE): { subject: string; html: string;
   };
 }
 
-function getAdminNewPaidBooking(s: typeof SAMPLE): { subject: string; html: string; text: string } {
+function getAdminNewPaidBooking(s: typeof SAMPLE): {
+  subject: string;
+  html: string;
+  text: string;
+} {
   const L = EMAIL.light;
   const adminDepositRows = `
 <div style="padding:10px 0;border-bottom:1px solid #e7e4df"><span style="color:${L.muted};font-size:13px">Paid (deposit)</span> · <span style="color:${L.text};font-weight:600">£${s.amountPaid.toFixed(2)}</span></div>
 <div style="padding:10px 0"><span style="color:${L.muted};font-size:13px">Due on arrival</span> · <span style="color:${L.text};font-weight:500">£${s.remainingAmount.toFixed(2)}</span></div>`;
+
   return {
     subject: `New Paid Booking - ${s.customerName}`,
     text: [
@@ -304,8 +334,13 @@ function getAdminNewPaidBooking(s: typeof SAMPLE): { subject: string; html: stri
   };
 }
 
-function getAdminBookingRequest(s: typeof SAMPLE): { subject: string; html: string; text: string } {
+function getAdminBookingRequest(s: typeof SAMPLE): {
+  subject: string;
+  html: string;
+  text: string;
+} {
   const L = EMAIL.light;
+
   return {
     subject: `New Booking Request - ${s.customerName}`,
     text: [
@@ -350,9 +385,14 @@ function getAdminBookingRequest(s: typeof SAMPLE): { subject: string; html: stri
   };
 }
 
-function getNewsletterWelcome(s: typeof SAMPLE): { subject: string; html: string; text: string } {
+function getNewsletterWelcome(s: typeof SAMPLE): {
+  subject: string;
+  html: string;
+  text: string;
+} {
   const L = EMAIL.light;
   const firstName = s.customerName.split(" ")[0] || "Valued Customer";
+
   return {
     subject: `Welcome! Your ${s.welcomeDiscountPercent}% Discount Code`,
     text: [

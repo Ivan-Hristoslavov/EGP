@@ -1,13 +1,25 @@
 import { NextResponse } from "next/server";
+
 import { createClient } from "@/lib/supabase/server";
 
-const DAY_KEYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"] as const;
+const DAY_KEYS = [
+  "sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+] as const;
 
-type NormalizedHours = Record<(typeof DAY_KEYS)[number], {
-  isOpen: boolean;
-  open: string | null;
-  close: string | null;
-}>;
+type NormalizedHours = Record<
+  (typeof DAY_KEYS)[number],
+  {
+    isOpen: boolean;
+    open: string | null;
+    close: string | null;
+  }
+>;
 
 function normalizeWorkingHours(rows: any[]): NormalizedHours {
   const fallback: NormalizedHours = DAY_KEYS.reduce((acc, day) => {
@@ -16,11 +28,13 @@ function normalizeWorkingHours(rows: any[]): NormalizedHours {
       open: null,
       close: null,
     };
+
     return acc;
   }, {} as NormalizedHours);
 
   rows.forEach((row) => {
     const dayKey = DAY_KEYS[row.day_of_week] ?? null;
+
     if (!dayKey) return;
 
     fallback[dayKey] = {
@@ -37,7 +51,7 @@ function normalizeWorkingHours(rows: any[]): NormalizedHours {
 export async function GET() {
   try {
     const supabase = createClient();
-    
+
     const { data: workingHours, error } = await supabase
       .from("working_hours")
       .select("*")
@@ -45,9 +59,10 @@ export async function GET() {
 
     if (error) {
       console.error("Error fetching working hours:", error);
+
       return NextResponse.json(
         { error: "Failed to fetch working hours" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -56,10 +71,10 @@ export async function GET() {
     return NextResponse.json({ workingHours: workingHours ?? [], normalized });
   } catch (error) {
     console.error("Unexpected error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

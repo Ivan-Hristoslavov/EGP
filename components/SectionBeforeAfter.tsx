@@ -1,21 +1,21 @@
 "use client";
 
-import { useGallery } from "@/hooks/useGallery";
-import BeforeAfterSlideLine from "./BeforeAfterSlideLine";
-import { badgeBackgroundClass } from "@/config/badge-styles";
-import { typography, textColors, layout } from "@/config/typography";
 import { Spinner } from "@heroui/react";
 import { Card, CardBody } from "@heroui/react";
+
+import BeforeAfterSlideLine from "./BeforeAfterSlideLine";
+
+import { useGallery } from "@/hooks/useGallery";
+import { badgeBackgroundClass } from "@/config/badge-styles";
+import { typography, textColors, layout } from "@/config/typography";
 
 export default function SectionBeforeAfter() {
   const { galleryItems, loading, error } = useGallery();
 
   // Filter items that have both before and after images, map to BeforeAfterItem format, featured first
   const beforeAfterItems = galleryItems
-    .filter(item =>
-      item.before_image_url && item.after_image_url
-    )
-    .map(item => ({
+    .filter((item) => item.before_image_url && item.after_image_url)
+    .map((item) => ({
       id: item.id,
       title: item.title,
       category: item.category?.name || item.project_type || "Treatment",
@@ -30,7 +30,9 @@ export default function SectionBeforeAfter() {
       categoryData: item.category,
       serviceData: item.service,
     }))
-    .sort((a, b) => (a.is_featured === b.is_featured ? 0 : a.is_featured ? -1 : 1));
+    .sort((a, b) =>
+      a.is_featured === b.is_featured ? 0 : a.is_featured ? -1 : 1,
+    );
 
   // If no gallery items, show placeholder
   if (loading) {
@@ -38,7 +40,7 @@ export default function SectionBeforeAfter() {
       <section className="py-8 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className={layout.container}>
           <div className="text-center">
-            <Spinner size="lg" color="primary" />
+            <Spinner color="primary" size="lg" />
           </div>
         </div>
       </section>
@@ -50,24 +52,32 @@ export default function SectionBeforeAfter() {
       <section className="py-8 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className={layout.container}>
           <div className="text-center">
-            <div className={`inline-block px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-xs sm:text-sm font-semibold mb-3 sm:mb-4 text-[#6b5f4b] dark:text-gray-200`}>
+            <div
+              className={`inline-block px-3 sm:px-4 py-1.5 sm:py-2 ${badgeBackgroundClass} text-xs sm:text-sm font-semibold mb-3 sm:mb-4 text-[#6b5f4b] dark:text-gray-200`}
+            >
               Real Results
             </div>
-            <h2 className={`${typography.headingSection} ${textColors.heading} mb-3 sm:mb-4 px-4`}>
+            <h2
+              className={`${typography.headingSection} ${textColors.heading} mb-3 sm:mb-4 px-4`}
+            >
               Before & After Gallery
             </h2>
             <p className={`${typography.lead} max-w-2xl mx-auto px-4 mb-6`}>
-              See the natural, beautiful transformations we've achieved for our clients
+              See the natural, beautiful transformations we've achieved for our
+              clients
             </p>
             <Card className="max-w-2xl mx-auto" shadow="lg">
               <CardBody className="p-8 text-center">
-              <div className="text-6xl mb-4">✨</div>
-                <h3 className={`${typography.headingCard} ${textColors.heading} mb-4`}>
-                Gallery Coming Soon
-              </h3>
+                <div className="text-6xl mb-4">✨</div>
+                <h3
+                  className={`${typography.headingCard} ${textColors.heading} mb-4`}
+                >
+                  Gallery Coming Soon
+                </h3>
                 <p className={`${typography.body} ${textColors.body}`}>
-                We're currently updating our before and after gallery. Check back soon to see our amazing results!
-              </p>
+                  We're currently updating our before and after gallery. Check
+                  back soon to see our amazing results!
+                </p>
               </CardBody>
             </Card>
           </div>
@@ -78,4 +88,3 @@ export default function SectionBeforeAfter() {
 
   return <BeforeAfterSlideLine items={beforeAfterItems} />;
 }
-

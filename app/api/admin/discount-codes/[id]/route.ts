@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { supabaseAdmin } from "@/lib/supabase";
 
 // PATCH - Update discount code (toggle active, mark as used)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -45,20 +46,28 @@ export async function PATCH(
 
     if (error) {
       console.error("Error updating discount code:", error);
-      return NextResponse.json({ error: "Failed to update discount code" }, { status: 500 });
+
+      return NextResponse.json(
+        { error: "Failed to update discount code" },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json({ discountCode: data });
   } catch (error) {
     console.error("Unexpected error updating discount code:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
 // DELETE - Delete a discount code
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -70,12 +79,20 @@ export async function DELETE(
 
     if (error) {
       console.error("Error deleting discount code:", error);
-      return NextResponse.json({ error: "Failed to delete discount code" }, { status: 500 });
+
+      return NextResponse.json(
+        { error: "Failed to delete discount code" },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json({ message: "Discount code deleted successfully" });
   } catch (error) {
     console.error("Unexpected error deleting discount code:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

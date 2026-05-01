@@ -9,6 +9,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const denied = await requireAdmin();
+
   if (denied) return denied;
 
   const { id } = await params;
@@ -39,7 +40,9 @@ export async function GET(
             name:
               payment.customers.first_name && payment.customers.last_name
                 ? `${payment.customers.first_name} ${payment.customers.last_name}`
-                : payment.customers.first_name || payment.customers.last_name || "Unknown Customer",
+                : payment.customers.first_name ||
+                  payment.customers.last_name ||
+                  "Unknown Customer",
           }
         : null,
       service: payment.bookings?.service,
@@ -59,9 +62,10 @@ export async function GET(
 // PUT - Update payment
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const denied = await requireAdmin();
+
   if (denied) return denied;
 
   try {
@@ -84,7 +88,7 @@ export async function PUT(
     if (!amount || !payment_method || !payment_date || !payment_status) {
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -92,14 +96,14 @@ export async function PUT(
     if (customer_id && customer_id.trim() === "") {
       return NextResponse.json(
         { error: "Invalid customer_id" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (booking_id && booking_id.trim() === "") {
       return NextResponse.json(
         { error: "Invalid booking_id" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -115,6 +119,7 @@ export async function PUT(
       payment_status,
       updated_at: new Date().toISOString(),
     };
+
     if (payment_type !== undefined) {
       updateData.payment_type = payment_type;
     }
@@ -127,18 +132,20 @@ export async function PUT(
 
     if (error) {
       console.error("Error updating payment:", error);
+
       return NextResponse.json(
         { error: "Failed to update payment" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     return NextResponse.json({ payment });
   } catch (error) {
     console.error("Error updating payment:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -149,12 +156,16 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const denied = await requireAdmin();
+
   if (denied) return denied;
 
   const { id } = await params;
 
   try {
-    const { error } = await supabaseAdmin.from("payments").delete().eq("id", id);
+    const { error } = await supabaseAdmin
+      .from("payments")
+      .delete()
+      .eq("id", id);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });

@@ -1,13 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AdminProfileData } from "@/components/AdminProfileData";
-import FormBooking from "@/components/FormBooking";
+
 import { useWorkingHours } from "@/hooks/useWorkingHours";
 import { useAdminSettings } from "@/hooks/useAdminSettings";
-import { useToast, ToastMessages } from "@/components/Toast";
+import { useToast } from "@/components/Toast";
 import { useAdminProfile } from "@/components/AdminProfileContext";
-import { siteConfig } from "@/config/site";
 
 type ServiceArea = {
   id: number;
@@ -54,8 +52,6 @@ export default function SectionContact() {
     standardRate: adminSettings?.standardRate || "75",
   };
 
-
-
   useEffect(() => {
     // Areas (admin_areas_cover) are not used; keep service areas empty
     setServiceAreas([]);
@@ -89,7 +85,7 @@ export default function SectionContact() {
       "sunday",
     ];
     const sortedDays = days.sort(
-      (a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b)
+      (a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b),
     );
 
     // Convert to short day names
@@ -103,13 +99,13 @@ export default function SectionContact() {
       for (let i = 0; i < days.length; i++) {
         const currentDay = days[i];
         const currentIndex = dayOrder.indexOf(currentDay);
-        
+
         if (currentRange.length === 0) {
           currentRange.push(currentDay);
         } else {
           const lastDay = currentRange[currentRange.length - 1];
           const lastIndex = dayOrder.indexOf(lastDay);
-          
+
           if (currentIndex === lastIndex + 1) {
             // Consecutive day
             currentRange.push(currentDay);
@@ -120,12 +116,12 @@ export default function SectionContact() {
           }
         }
       }
-      
+
       // Add the last range
       if (currentRange.length > 0) {
         ranges.push(currentRange);
       }
-      
+
       return ranges;
     };
 
@@ -139,17 +135,18 @@ export default function SectionContact() {
     } else {
       // Find consecutive ranges
       const ranges = findConsecutiveRanges(sortedDays);
-      
+
       // Format each range
-      const formattedRanges = ranges.map(range => {
-        const rangeShortDays = range.map(day => dayMap[day] || day);
+      const formattedRanges = ranges.map((range) => {
+        const rangeShortDays = range.map((day) => dayMap[day] || day);
+
         if (range.length === 1) {
           return rangeShortDays[0];
         } else {
           return `${rangeShortDays[0]}-${rangeShortDays[rangeShortDays.length - 1]}`;
         }
       });
-      
+
       return `${start} - ${end} (${formattedRanges.join(", ")})`;
     }
   };
@@ -189,8 +186,8 @@ export default function SectionContact() {
             Book & Pay Immediately
           </h2>
           <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 leading-relaxed transition-colors duration-300 max-w-4xl mx-auto">
-            Book your aesthetic treatment and pay securely online. 
-            Professional aesthetic treatments with instant confirmation.
+            Book your aesthetic treatment and pay securely online. Professional
+            aesthetic treatments with instant confirmation.
           </p>
         </div>
 
@@ -200,7 +197,7 @@ export default function SectionContact() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Regular Contact */}
             <div className="group relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-600">
-              <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 dark:from-green-500/10 dark:to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 dark:from-green-500/10 dark:to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <div className="relative">
                 <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                   <svg
@@ -225,14 +222,14 @@ export default function SectionContact() {
                 </p>
                 {isLoadingSettings ? (
                   <div className="animate-pulse space-y-2">
-                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
-                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-32" />
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-24" />
                   </div>
                 ) : (
                   <>
                     <a
-                      href={`tel:${businessData.businessPhone}`}
                       className="text-green-600 dark:text-green-400 font-bold text-lg hover:text-green-700 dark:hover:text-green-300 transition-colors"
+                      href={`tel:${businessData.businessPhone}`}
                     >
                       {businessData.businessPhone}
                     </a>
@@ -246,7 +243,7 @@ export default function SectionContact() {
 
             {/* Email Contact */}
             <div className="group relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/5 dark:from-blue-500/10 dark:to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/5 dark:from-blue-500/10 dark:to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <div className="relative">
                 <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                   <svg
@@ -271,14 +268,14 @@ export default function SectionContact() {
                 </p>
                 {isLoadingSettings ? (
                   <div className="animate-pulse space-y-2">
-                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-40"></div>
-                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-28"></div>
+                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-40" />
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-28" />
                   </div>
                 ) : (
                   <>
                     <a
-                      href={`mailto:${businessData.businessEmail}`}
                       className="text-blue-600 dark:text-blue-400 font-semibold hover:text-blue-700 dark:hover:text-blue-300 transition-colors text-sm break-all"
+                      href={`mailto:${businessData.businessEmail}`}
                     >
                       {businessData.businessEmail}
                     </a>
@@ -292,7 +289,7 @@ export default function SectionContact() {
 
             {/* Service Areas */}
             <div className="group relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 dark:from-purple-500/10 dark:to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 dark:from-purple-500/10 dark:to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <div className="relative">
                 <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                   <svg
@@ -319,12 +316,16 @@ export default function SectionContact() {
                   Coverage Areas
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
-                  {isLoadingAreas ? "Loading..." : serviceAreas.length > 0 ? `${serviceAreas.length} areas` : "South West London"}
+                  {isLoadingAreas
+                    ? "Loading..."
+                    : serviceAreas.length > 0
+                      ? `${serviceAreas.length} areas`
+                      : "South West London"}
                 </p>
                 {isLoadingAreas ? (
                   <div className="animate-pulse space-y-2">
-                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
-                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16" />
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-20" />
                   </div>
                 ) : serviceAreas.length > 0 ? (
                   <div className="flex flex-wrap gap-1">
@@ -409,22 +410,36 @@ export default function SectionContact() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a
-                  href={`tel:${businessData.businessPhone}`}
                   className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-lg font-semibold rounded-full hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl"
+                  href={`tel:${businessData.businessPhone}`}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
                   </svg>
                   Call to Book Now
                 </a>
                 <a
-                  href={`https://wa.me/${businessData.businessPhone.replace(/\s/g, "").replace(/\+/g, "")}?text=${encodeURIComponent("Hi! I'd like to book a treatment.")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-green-500 text-green-500 dark:text-green-400 text-lg font-semibold rounded-full hover:bg-green-500 hover:text-white transition-all"
+                  href={`https://wa.me/${businessData.businessPhone.replace(/\s/g, "").replace(/\+/g, "")}?text=${encodeURIComponent("Hi! I'd like to book a treatment.")}`}
+                  rel="noopener noreferrer"
+                  target="_blank"
                 >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                   </svg>
                   WhatsApp Booking
                 </a>

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { supabaseAdmin } from "@/lib/supabase";
 import { siteConfig } from "@/config/site";
 
@@ -32,7 +33,9 @@ export async function GET() {
       } as SocialLinks);
     }
 
-    const value = typeof data.value === "string" ? JSON.parse(data.value) : data.value;
+    const value =
+      typeof data.value === "string" ? JSON.parse(data.value) : data.value;
+
     return NextResponse.json({
       instagram: value.instagram ?? siteConfig.social.instagram ?? "",
       facebook: value.facebook ?? siteConfig.social.facebook ?? "",
@@ -43,15 +46,14 @@ export async function GET() {
     } as SocialLinks);
   } catch (e) {
     console.error("social-links GET:", e);
-    return NextResponse.json(
-      {
-        instagram: siteConfig.social.instagram ?? "",
-        facebook: siteConfig.social.facebook ?? "",
-        youtube: siteConfig.social.youtube ?? "",
-        tiktok: siteConfig.social.tiktok ?? "",
-        linkedin: siteConfig.social.linkedin ?? "",
-        twitter: siteConfig.social.twitter ?? "",
-      } as SocialLinks
-    );
+
+    return NextResponse.json({
+      instagram: siteConfig.social.instagram ?? "",
+      facebook: siteConfig.social.facebook ?? "",
+      youtube: siteConfig.social.youtube ?? "",
+      tiktok: siteConfig.social.tiktok ?? "",
+      linkedin: siteConfig.social.linkedin ?? "",
+      twitter: siteConfig.social.twitter ?? "",
+    } as SocialLinks);
   }
 }

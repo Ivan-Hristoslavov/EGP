@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { supabaseAdmin } from "../../../lib/supabase";
-import { createCheckoutSession, createPaymentLink, STRIPE_TO_DB_STATUS, isStripeAvailable } from "../../../lib/stripe";
+import {
+  createPaymentLink,
+  STRIPE_TO_DB_STATUS,
+  isStripeAvailable,
+} from "../../../lib/stripe";
+
 import { requireAdmin } from "@/lib/admin-auth";
 
 // GET - Fetch payments with pagination (admin only)
 export async function GET(request: NextRequest) {
   const denied = await requireAdmin();
+
   if (denied) return denied;
 
   try {
@@ -17,7 +23,9 @@ export async function GET(request: NextRequest) {
     const bookingId = searchParams.get("booking_id") || undefined;
 
     // Use admin client to bypass RLS
-    let countQuery = supabaseAdmin.from("payments").select("*", { count: "exact", head: true });
+    let countQuery = supabaseAdmin
+      .from("payments")
+      .select("*", { count: "exact", head: true });
     let paymentsQuery = supabaseAdmin
       .from("payments")
       .select(
@@ -39,6 +47,7 @@ export async function GET(request: NextRequest) {
 
     if (countError) {
       console.error("Error fetching payment count:", countError);
+
       return NextResponse.json(
         { error: "Failed to fetch payment count" },
         { status: 500 },
@@ -65,17 +74,17 @@ export async function GET(request: NextRequest) {
     // If no customer, try to get customer info from booking
     const transformedPayments = payments?.map((payment: any) => {
       let customerData = null;
-      
+
       // Check if customers is an array (Supabase returns array for joins)
-      const customer = Array.isArray(payment.customers) 
-        ? payment.customers[0] 
+      const customer = Array.isArray(payment.customers)
+        ? payment.customers[0]
         : payment.customers;
-      
+
       // Check if bookings is an array
-      const booking = Array.isArray(payment.bookings) 
-        ? payment.bookings[0] 
+      const booking = Array.isArray(payment.bookings)
+        ? payment.bookings[0]
         : payment.bookings;
-      
+
       if (customer) {
         // Customer exists in customers table
         customerData = {
@@ -92,14 +101,16 @@ export async function GET(request: NextRequest) {
           email: booking.customer_email || null,
         };
       }
-      
+
       return {
         ...payment,
         customers: customerData,
-        bookings: booking ? {
-          ...booking,
-          booking_number: booking.booking_number || null,
-        } : null,
+        bookings: booking
+          ? {
+              ...booking,
+              booking_number: booking.booking_number || null,
+            }
+          : null,
       };
     });
 
@@ -129,6 +140,7 @@ export async function GET(request: NextRequest) {
 // POST - Create new payment or payment intent (admin only)
 export async function POST(request: NextRequest) {
   const denied = await requireAdmin();
+
   if (denied) return denied;
 
   try {
@@ -139,13 +151,22 @@ export async function POST(request: NextRequest) {
       // Check if Stripe is configured
       if (!isStripeAvailable()) {
         return NextResponse.json(
-          { error: "Stripe is not configured. Please contact support for payment options." },
+          {
+            error:
+              "Stripe is not configured. Please contact support for payment options.",
+          },
           { status: 503 },
         );
       }
 
       // Create Stripe payment link
-      const { customer_id, booking_id, amount, description, currency = "gbp" } = paymentData;
+      const {
+        customer_id,
+        booking_id,
+        amount,
+        description,
+        currency = "gbp",
+      } = paymentData;
 
       // Get customer and booking details
       const { data: customer } = await supabaseAdmin
@@ -207,7 +228,9 @@ export async function POST(request: NextRequest) {
       }
 
       // Create Stripe Payment Link using helper function
-      const productName = description || (booking ? `Payment for ${booking.service}` : "Service Payment");
+      const productName =
+        description ||
+        (booking ? `Payment for ${booking.service}` : "Service Payment");
 
       const paymentLink = await createPaymentLink({
         amount,

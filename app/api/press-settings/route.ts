@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { supabaseAdmin } from "@/lib/supabase";
 
 // Public read-only endpoint for press page visibility
@@ -12,6 +13,7 @@ export async function GET() {
 
     if (error && error.code !== "PGRST116") {
       console.error("Error fetching press page setting:", error);
+
       return NextResponse.json(
         { error: "Failed to fetch press page setting" },
         { status: 500 },
@@ -24,6 +26,7 @@ export async function GET() {
     return NextResponse.json({ enabled: isEnabled });
   } catch (error) {
     console.error("Error in GET /api/press-settings:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

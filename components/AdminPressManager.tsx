@@ -1,22 +1,32 @@
 "use client";
 import { useState, useEffect } from "react";
 import NextImage from "next/image";
-import { useToast } from "@/components/Toast";
-import { ConfirmationModal } from "@/components/ConfirmationModal";
-import { Card, CardBody, CardHeader } from "@heroui/card";
+import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Spinner } from "@heroui/spinner";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
-import { Input } from "@heroui/input";
-import { Textarea } from "@heroui/react";
-import { Select, SelectItem } from "@heroui/select";
 import { Tabs, Tab } from "@heroui/tabs";
-import { Upload, X, Edit2, Trash2, Star, Award, FileText, ChevronDown, Plus, AlertCircle, Eye, EyeOff } from "lucide-react";
+import {
+  Upload,
+  X,
+  Edit2,
+  Trash2,
+  Star,
+  Award,
+  FileText,
+  ChevronDown,
+  Plus,
+  AlertCircle,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+
+import { ConfirmationModal } from "@/components/ConfirmationModal";
+import { useToast } from "@/components/Toast";
 
 interface PressItem {
   id: string;
-  type: 'award' | 'press_feature';
+  type: "award" | "press_feature";
   title: string;
   organisation?: string | null;
   publication?: string | null;
@@ -37,34 +47,35 @@ export function AdminPressManager() {
   const [error, setError] = useState<string | null>(null);
   const [isPageEnabled, setIsPageEnabled] = useState(true);
   const [isSavingSetting, setIsSavingSetting] = useState(false);
-  
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<PressItem | null>(null);
   const [processing, setProcessing] = useState(false);
-  
+
   const [formData, setFormData] = useState({
-    type: 'award' as 'award' | 'press_feature',
-    title: '',
-    organisation: '',
-    publication: '',
-    year: '',
-    date: '',
-    description: '',
-    image_url: '',
+    type: "award" as "award" | "press_feature",
+    title: "",
+    organisation: "",
+    publication: "",
+    year: "",
+    date: "",
+    description: "",
+    image_url: "",
     is_featured: false,
-    display_order: 0
+    display_order: 0,
   });
-  
+
   const [uploadingImage, setUploadingImage] = useState(false);
   const [showImageCropper, setShowImageCropper] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const [cropData, setCropData] = useState({ x: 0, y: 0, scale: 1 });
-  const [cropContainerRef, setCropContainerRef] = useState<HTMLDivElement | null>(null);
-  
+  const [cropContainerRef, setCropContainerRef] =
+    useState<HTMLDivElement | null>(null);
+
   // Tab and pagination state
-  const [activeTab, setActiveTab] = useState<'awards' | 'press'>('awards');
+  const [activeTab, setActiveTab] = useState<"awards" | "press">("awards");
   const [awardsPage, setAwardsPage] = useState(1);
   const [pressPage, setPressPage] = useState(1);
   const itemsPerPage = 6;
@@ -73,15 +84,16 @@ export function AdminPressManager() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/press');
+      const response = await fetch("/api/press");
       const data = await response.json();
+
       if (response.ok) {
         setPressItems(data.pressItems || []);
       } else {
-        setError(data.error || 'Failed to load press items');
+        setError(data.error || "Failed to load press items");
       }
     } catch (err) {
-      setError('Failed to load press items');
+      setError("Failed to load press items");
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -90,23 +102,24 @@ export function AdminPressManager() {
 
   const loadPressPageSetting = async () => {
     try {
-      const response = await fetch('/api/admin/press-settings');
+      const response = await fetch("/api/admin/press-settings");
       const data = await response.json();
+
       if (response.ok) {
         setIsPageEnabled(data.enabled !== false); // Default to true
       }
     } catch (err) {
-      console.error('Failed to load press page setting:', err);
+      console.error("Failed to load press page setting:", err);
     }
   };
 
   const handleTogglePageEnabled = async (enabled: boolean) => {
     setIsSavingSetting(true);
     try {
-      const response = await fetch('/api/admin/press-settings', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled })
+      const response = await fetch("/api/admin/press-settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled }),
       });
 
       const data = await response.json();
@@ -114,14 +127,14 @@ export function AdminPressManager() {
       if (response.ok) {
         setIsPageEnabled(enabled);
         showSuccess(
-          'Setting Updated',
-          `Press page is now ${enabled ? 'enabled' : 'disabled'}`
+          "Setting Updated",
+          `Press page is now ${enabled ? "enabled" : "disabled"}`,
         );
       } else {
-        showError('Error', data.error || 'Failed to update setting');
+        showError("Error", data.error || "Failed to update setting");
       }
     } catch (err) {
-      showError('Error', 'Failed to update setting');
+      showError("Error", "Failed to update setting");
       console.error(err);
     } finally {
       setIsSavingSetting(false);
@@ -135,21 +148,22 @@ export function AdminPressManager() {
 
   const handleAddClick = () => {
     // Auto-calculate display_order (max + 1)
-    const maxOrder = pressItems.length > 0 
-      ? Math.max(...pressItems.map(item => item.display_order))
-      : 0;
-    
+    const maxOrder =
+      pressItems.length > 0
+        ? Math.max(...pressItems.map((item) => item.display_order))
+        : 0;
+
     setFormData({
-      type: 'award',
-      title: '',
-      organisation: '',
-      publication: '',
-      year: '',
-      date: '',
-      description: '',
-      image_url: '',
+      type: "award",
+      title: "",
+      organisation: "",
+      publication: "",
+      year: "",
+      date: "",
+      description: "",
+      image_url: "",
       is_featured: false,
-      display_order: maxOrder + 1
+      display_order: maxOrder + 1,
     });
     setShowAddModal(true);
   };
@@ -159,14 +173,14 @@ export function AdminPressManager() {
     setFormData({
       type: item.type,
       title: item.title,
-      organisation: item.organisation || '',
-      publication: item.publication || '',
-      year: item.year || '',
-      date: item.date || '',
-      description: item.description || '',
-      image_url: item.image_url || '',
+      organisation: item.organisation || "",
+      publication: item.publication || "",
+      year: item.year || "",
+      date: item.date || "",
+      description: item.description || "",
+      image_url: item.image_url || "",
       is_featured: item.is_featured,
-      display_order: item.display_order
+      display_order: item.display_order,
     });
     setShowEditModal(true);
   };
@@ -179,8 +193,10 @@ export function AdminPressManager() {
   const handleImageUpload = async (file: File) => {
     // Create preview URL for cropping
     const reader = new FileReader();
+
     reader.onload = (e) => {
       const imageUrl = e.target?.result as string;
+
       setImageToCrop(imageUrl);
       setShowImageCropper(true);
       setCropData({ x: 0, y: 0, scale: 1 });
@@ -201,26 +217,32 @@ export function AdminPressManager() {
     setUploadingImage(true);
     try {
       let imageUrl = imageToCrop;
-      
+
       // If it's a URL (not a data URL), fetch and convert to blob first
-      if (!imageToCrop.startsWith('data:')) {
+      if (!imageToCrop.startsWith("data:")) {
         const response = await fetch(imageToCrop);
+
         if (!response.ok) {
-          throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+          throw new Error(
+            `Failed to fetch image: ${response.status} ${response.statusText}`,
+          );
         }
         const blob = await response.blob();
+
         imageUrl = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
+
           reader.onload = () => resolve(reader.result as string);
           reader.onerror = reject;
           reader.readAsDataURL(blob);
         });
       }
-      
+
       // Create image to get dimensions
       const img = new Image();
-      img.crossOrigin = 'anonymous';
-      
+
+      img.crossOrigin = "anonymous";
+
       await new Promise((resolve, reject) => {
         img.onload = resolve;
         img.onerror = reject;
@@ -230,17 +252,17 @@ export function AdminPressManager() {
       // Get container dimensions
       const containerWidth = cropContainerRef.offsetWidth;
       const containerHeight = cropContainerRef.offsetHeight;
-      
+
       // Calculate how the image is displayed with backgroundSize percentage
       // When backgroundSize is scale * 100%, the image maintains aspect ratio
       // and is scaled by that percentage
       const imageAspectRatio = img.width / img.height;
       const containerAspectRatio = containerWidth / containerHeight;
-      
+
       // Calculate displayed dimensions (scaled image)
       let displayedWidth: number;
       let displayedHeight: number;
-      
+
       if (imageAspectRatio > containerAspectRatio) {
         // Image is wider - height fits container, width extends beyond
         displayedHeight = containerHeight * cropData.scale;
@@ -250,99 +272,134 @@ export function AdminPressManager() {
         displayedWidth = containerWidth * cropData.scale;
         displayedHeight = displayedWidth / imageAspectRatio;
       }
-      
+
       // Calculate the scale factor from original to displayed
       const scaleFactorX = displayedWidth / img.width;
       const scaleFactorY = displayedHeight / img.height;
-      
+
       // Calculate what part of the displayed image is visible in the container
       // backgroundPosition: x px y px means the image is offset by (x, y) from default position
       // Default position would center the image, but we're using pixel values
       // Negative values shift left/up, positive shift right/down
-      
+
       // The visible area in displayed image coordinates
       // Container shows from (0,0) to (containerWidth, containerHeight)
       // Displayed image is positioned at offset (cropData.x, cropData.y)
       const visibleStartX = Math.max(0, -cropData.x);
       const visibleStartY = Math.max(0, -cropData.y);
       const visibleEndX = Math.min(displayedWidth, containerWidth - cropData.x);
-      const visibleEndY = Math.min(displayedHeight, containerHeight - cropData.y);
-      
+      const visibleEndY = Math.min(
+        displayedHeight,
+        containerHeight - cropData.y,
+      );
+
       const visibleWidth = visibleEndX - visibleStartX;
       const visibleHeight = visibleEndY - visibleStartY;
-      
+
       // Convert from displayed coordinates back to original image coordinates
       const sourceX = visibleStartX / scaleFactorX;
       const sourceY = visibleStartY / scaleFactorY;
       const sourceWidth = visibleWidth / scaleFactorX;
       const sourceHeight = visibleHeight / scaleFactorY;
-      
+
       // Clamp to image bounds to ensure we don't go outside
-      const finalSourceX = Math.max(0, Math.min(Math.round(sourceX), img.width));
-      const finalSourceY = Math.max(0, Math.min(Math.round(sourceY), img.height));
-      const finalSourceWidth = Math.min(Math.round(sourceWidth), img.width - finalSourceX);
-      const finalSourceHeight = Math.min(Math.round(sourceHeight), img.height - finalSourceY);
-      
+      const finalSourceX = Math.max(
+        0,
+        Math.min(Math.round(sourceX), img.width),
+      );
+      const finalSourceY = Math.max(
+        0,
+        Math.min(Math.round(sourceY), img.height),
+      );
+      const finalSourceWidth = Math.min(
+        Math.round(sourceWidth),
+        img.width - finalSourceX,
+      );
+      const finalSourceHeight = Math.min(
+        Math.round(sourceHeight),
+        img.height - finalSourceY,
+      );
+
       // Output canvas - maintain container aspect ratio, scale down to max 1200px width
       const maxOutputWidth = 1200;
       const maxOutputHeight = 800;
       const outputAspectRatio = containerWidth / containerHeight;
-      
+
       let outputWidth = maxOutputWidth;
       let outputHeight = Math.round(outputWidth / outputAspectRatio);
-      
+
       // Ensure height doesn't exceed max
       if (outputHeight > maxOutputHeight) {
         outputHeight = maxOutputHeight;
         outputWidth = Math.round(outputHeight * outputAspectRatio);
       }
 
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
+
       canvas.width = outputWidth;
       canvas.height = outputHeight;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
+
       if (!ctx) {
-        throw new Error('Could not get canvas context');
+        throw new Error("Could not get canvas context");
       }
 
       // Draw the cropped portion, scaled to output size
       ctx.drawImage(
         img,
-        finalSourceX, finalSourceY, finalSourceWidth, finalSourceHeight,  // Source rectangle in original image
-        0, 0, outputWidth, outputHeight  // Destination rectangle in canvas
+        finalSourceX,
+        finalSourceY,
+        finalSourceWidth,
+        finalSourceHeight, // Source rectangle in original image
+        0,
+        0,
+        outputWidth,
+        outputHeight, // Destination rectangle in canvas
       );
 
       // Convert to blob and upload
-      canvas.toBlob(async (blob) => {
-        if (!blob) {
-          showError('Crop Failed', 'Failed to process image');
-          setUploadingImage(false);
-          return;
-        }
+      canvas.toBlob(
+        async (blob) => {
+          if (!blob) {
+            showError("Crop Failed", "Failed to process image");
+            setUploadingImage(false);
 
-        const formData = new FormData();
-        formData.append('image', blob, 'cropped-image.jpg');
-        
-        const response = await fetch('/api/press/upload', {
-          method: 'POST',
-          body: formData
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-          setFormData(prev => ({ ...prev, image_url: data.url }));
-          showSuccess('Image Uploaded', 'Image cropped and uploaded successfully');
-          setShowImageCropper(false);
-          setImageToCrop(null);
-          setCropData({ x: 0, y: 0, scale: 1 });
-        } else {
-          showError('Upload Failed', data.error || 'Failed to upload image');
-        }
-        setUploadingImage(false);
-      }, 'image/jpeg', 0.9);
+            return;
+          }
+
+          const formData = new FormData();
+
+          formData.append("image", blob, "cropped-image.jpg");
+
+          const response = await fetch("/api/press/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            setFormData((prev) => ({ ...prev, image_url: data.url }));
+            showSuccess(
+              "Image Uploaded",
+              "Image cropped and uploaded successfully",
+            );
+            setShowImageCropper(false);
+            setImageToCrop(null);
+            setCropData({ x: 0, y: 0, scale: 1 });
+          } else {
+            showError("Upload Failed", data.error || "Failed to upload image");
+          }
+          setUploadingImage(false);
+        },
+        "image/jpeg",
+        0.9,
+      );
     } catch (err) {
-      showError('Crop Failed', err instanceof Error ? err.message : 'Failed to crop image');
+      showError(
+        "Crop Failed",
+        err instanceof Error ? err.message : "Failed to crop image",
+      );
       setUploadingImage(false);
       console.error(err);
     }
@@ -356,28 +413,30 @@ export function AdminPressManager() {
 
   const handleSave = async () => {
     if (!formData.title) {
-      showError('Validation Error', 'Title is required');
+      showError("Validation Error", "Title is required");
+
       return;
     }
 
     setProcessing(true);
     try {
-      const url = showEditModal && selectedItem 
-        ? `/api/press/${selectedItem.id}`
-        : '/api/press';
-      
-      const method = showEditModal ? 'PUT' : 'POST';
-      
+      const url =
+        showEditModal && selectedItem
+          ? `/api/press/${selectedItem.id}`
+          : "/api/press";
+
+      const method = showEditModal ? "PUT" : "POST";
+
       const payload: any = {
         type: formData.type,
         title: formData.title,
         description: formData.description || null,
         image_url: formData.image_url || null,
         is_featured: formData.is_featured,
-        display_order: formData.display_order
+        display_order: formData.display_order,
       };
 
-      if (formData.type === 'award') {
+      if (formData.type === "award") {
         payload.organisation = formData.organisation || null;
         payload.year = formData.year || null;
       } else {
@@ -387,26 +446,28 @@ export function AdminPressManager() {
 
       const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
 
       if (response.ok) {
         showSuccess(
-          showEditModal ? 'Press Item Updated' : 'Press Item Added',
-          showEditModal ? 'The press item has been updated successfully.' : 'The press item has been added successfully.'
+          showEditModal ? "Press Item Updated" : "Press Item Added",
+          showEditModal
+            ? "The press item has been updated successfully."
+            : "The press item has been added successfully.",
         );
         setShowAddModal(false);
         setShowEditModal(false);
         setSelectedItem(null);
         loadPressItems();
       } else {
-        showError('Error', data.error || 'Failed to save press item');
+        showError("Error", data.error || "Failed to save press item");
       }
     } catch (err) {
-      showError('Error', 'Failed to save press item');
+      showError("Error", "Failed to save press item");
       console.error(err);
     } finally {
       setProcessing(false);
@@ -415,39 +476,50 @@ export function AdminPressManager() {
 
   const handleDeleteConfirm = async () => {
     if (!selectedItem) return;
-    
+
     setProcessing(true);
     try {
       const response = await fetch(`/api/press/${selectedItem.id}`, {
-        method: 'DELETE'
+        method: "DELETE",
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        showSuccess('Press Item Deleted', 'The press item has been permanently deleted.');
+        showSuccess(
+          "Press Item Deleted",
+          "The press item has been permanently deleted.",
+        );
         setShowDeleteModal(false);
         setSelectedItem(null);
         loadPressItems();
       } else {
-        showError('Error', data.error || 'Failed to delete press item');
+        showError("Error", data.error || "Failed to delete press item");
       }
     } catch (err) {
-      showError('Error', 'Failed to delete press item');
+      showError("Error", "Failed to delete press item");
       console.error(err);
     } finally {
       setProcessing(false);
     }
   };
 
-  const awards = pressItems.filter(item => item.type === 'award');
-  const pressFeatures = pressItems.filter(item => item.type === 'press_feature');
-  
+  const awards = pressItems.filter((item) => item.type === "award");
+  const pressFeatures = pressItems.filter(
+    (item) => item.type === "press_feature",
+  );
+
   // Pagination calculations
   const awardsTotalPages = Math.ceil(awards.length / itemsPerPage);
   const pressTotalPages = Math.ceil(pressFeatures.length / itemsPerPage);
-  const paginatedAwards = awards.slice((awardsPage - 1) * itemsPerPage, awardsPage * itemsPerPage);
-  const paginatedPress = pressFeatures.slice((pressPage - 1) * itemsPerPage, pressPage * itemsPerPage);
+  const paginatedAwards = awards.slice(
+    (awardsPage - 1) * itemsPerPage,
+    awardsPage * itemsPerPage,
+  );
+  const paginatedPress = pressFeatures.slice(
+    (pressPage - 1) * itemsPerPage,
+    pressPage * itemsPerPage,
+  );
 
   if (isLoading) {
     return (
@@ -464,7 +536,9 @@ export function AdminPressManager() {
         <CardBody className="p-4">
           <div className="flex items-center">
             <AlertCircle className="w-5 h-5 text-danger-500 mr-2" />
-            <span className="text-danger-700 dark:text-danger-300">{error}</span>
+            <span className="text-danger-700 dark:text-danger-300">
+              {error}
+            </span>
           </div>
         </CardBody>
       </Card>
@@ -488,21 +562,21 @@ export function AdminPressManager() {
                   Press Page Visibility
                 </h3>
                 <p className="text-sm text-default-500">
-                  {isPageEnabled 
-                    ? 'Press page is currently visible to visitors' 
-                    : 'Press page is currently hidden from visitors'}
+                  {isPageEnabled
+                    ? "Press page is currently visible to visitors"
+                    : "Press page is currently hidden from visitors"}
                 </p>
               </div>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
-                type="checkbox"
                 checked={isPageEnabled}
-                onChange={(e) => handleTogglePageEnabled(e.target.checked)}
-                disabled={isSavingSetting}
                 className="sr-only peer"
+                disabled={isSavingSetting}
+                type="checkbox"
+                onChange={(e) => handleTogglePageEnabled(e.target.checked)}
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600" />
             </label>
           </div>
         </CardBody>
@@ -560,7 +634,7 @@ export function AdminPressManager() {
               </div>
               <div>
                 <p className="text-2xl font-bold">
-                  {pressItems.filter(item => item.is_featured).length}
+                  {pressItems.filter((item) => item.is_featured).length}
                 </p>
                 <p className="text-sm text-default-500">Featured</p>
               </div>
@@ -574,14 +648,15 @@ export function AdminPressManager() {
         <Card className="border border-divider">
           <CardBody className="p-0">
             <Tabs
+              aria-label="Press items tabs"
               selectedKey={activeTab}
               onSelectionChange={(key) => {
-                const tab = key as 'awards' | 'press';
+                const tab = key as "awards" | "press";
+
                 setActiveTab(tab);
-                if (tab === 'awards') setAwardsPage(1);
+                if (tab === "awards") setAwardsPage(1);
                 else setPressPage(1);
               }}
-              aria-label="Press items tabs"
             >
               <Tab
                 key="awards"
@@ -589,7 +664,9 @@ export function AdminPressManager() {
                   <div className="flex items-center gap-2">
                     <Award className="w-4 h-4" />
                     <span>Awards & Recognition</span>
-                    <Chip size="sm" variant="flat">{awards.length}</Chip>
+                    <Chip size="sm" variant="flat">
+                      {awards.length}
+                    </Chip>
                   </div>
                 }
               >
@@ -597,8 +674,12 @@ export function AdminPressManager() {
                   {awards.length === 0 ? (
                     <div className="text-center py-12">
                       <Award className="w-12 h-12 text-default-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No awards yet</h3>
-                      <p className="text-default-500 mb-4">Add awards to showcase your achievements.</p>
+                      <h3 className="text-lg font-semibold mb-2">
+                        No awards yet
+                      </h3>
+                      <p className="text-default-500 mb-4">
+                        Add awards to showcase your achievements.
+                      </p>
                       <Button
                         color="primary"
                         startContent={<Plus className="w-5 h-5" />}
@@ -613,20 +694,22 @@ export function AdminPressManager() {
                         {paginatedAwards.map((item) => (
                           <PressItemCard
                             key={item.id}
-                            item={item}
-                            onEdit={handleEditClick}
-                            onDelete={handleDeleteClick}
                             isLarge={false}
+                            item={item}
+                            onDelete={handleDeleteClick}
+                            onEdit={handleEditClick}
                           />
                         ))}
                       </div>
                       {awardsTotalPages > 1 && (
                         <div className="flex items-center justify-center gap-2 mt-6">
                           <Button
-                            variant="bordered"
-                            size="sm"
-                            onPress={() => setAwardsPage(prev => Math.max(1, prev - 1))}
                             isDisabled={awardsPage === 1}
+                            size="sm"
+                            variant="bordered"
+                            onPress={() =>
+                              setAwardsPage((prev) => Math.max(1, prev - 1))
+                            }
                           >
                             Previous
                           </Button>
@@ -634,10 +717,14 @@ export function AdminPressManager() {
                             Page {awardsPage} of {awardsTotalPages}
                           </span>
                           <Button
-                            variant="bordered"
-                            size="sm"
-                            onPress={() => setAwardsPage(prev => Math.min(awardsTotalPages, prev + 1))}
                             isDisabled={awardsPage === awardsTotalPages}
+                            size="sm"
+                            variant="bordered"
+                            onPress={() =>
+                              setAwardsPage((prev) =>
+                                Math.min(awardsTotalPages, prev + 1),
+                              )
+                            }
                           >
                             Next
                           </Button>
@@ -653,7 +740,9 @@ export function AdminPressManager() {
                   <div className="flex items-center gap-2">
                     <FileText className="w-4 h-4" />
                     <span>Press Features</span>
-                    <Chip size="sm" variant="flat">{pressFeatures.length}</Chip>
+                    <Chip size="sm" variant="flat">
+                      {pressFeatures.length}
+                    </Chip>
                   </div>
                 }
               >
@@ -661,8 +750,12 @@ export function AdminPressManager() {
                   {pressFeatures.length === 0 ? (
                     <div className="text-center py-12">
                       <FileText className="w-12 h-12 text-default-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No press features yet</h3>
-                      <p className="text-default-500 mb-4">Add press features to showcase your media coverage.</p>
+                      <h3 className="text-lg font-semibold mb-2">
+                        No press features yet
+                      </h3>
+                      <p className="text-default-500 mb-4">
+                        Add press features to showcase your media coverage.
+                      </p>
                       <Button
                         color="primary"
                         startContent={<Plus className="w-5 h-5" />}
@@ -677,20 +770,22 @@ export function AdminPressManager() {
                         {paginatedPress.map((item) => (
                           <PressItemCard
                             key={item.id}
-                            item={item}
-                            onEdit={handleEditClick}
-                            onDelete={handleDeleteClick}
                             isLarge={false}
+                            item={item}
+                            onDelete={handleDeleteClick}
+                            onEdit={handleEditClick}
                           />
                         ))}
                       </div>
                       {pressTotalPages > 1 && (
                         <div className="flex items-center justify-center gap-2 mt-6">
                           <Button
-                            variant="bordered"
-                            size="sm"
-                            onPress={() => setPressPage(prev => Math.max(1, prev - 1))}
                             isDisabled={pressPage === 1}
+                            size="sm"
+                            variant="bordered"
+                            onPress={() =>
+                              setPressPage((prev) => Math.max(1, prev - 1))
+                            }
                           >
                             Previous
                           </Button>
@@ -698,10 +793,14 @@ export function AdminPressManager() {
                             Page {pressPage} of {pressTotalPages}
                           </span>
                           <Button
-                            variant="bordered"
-                            size="sm"
-                            onPress={() => setPressPage(prev => Math.min(pressTotalPages, prev + 1))}
                             isDisabled={pressPage === pressTotalPages}
+                            size="sm"
+                            variant="bordered"
+                            onPress={() =>
+                              setPressPage((prev) =>
+                                Math.min(pressTotalPages, prev + 1),
+                              )
+                            }
                           >
                             Next
                           </Button>
@@ -722,7 +821,9 @@ export function AdminPressManager() {
           <CardBody className="p-12 text-center">
             <Award className="w-12 h-12 text-default-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">No press items yet</h3>
-            <p className="text-default-500 mb-4">Add awards and press features to showcase your achievements.</p>
+            <p className="text-default-500 mb-4">
+              Add awards and press features to showcase your achievements.
+            </p>
             <Button
               color="primary"
               startContent={<Plus className="w-5 h-5" />}
@@ -741,15 +842,15 @@ export function AdminPressManager() {
             <div className="p-6 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                  {showEditModal ? 'Edit Press Item' : 'Add Press Item'}
+                  {showEditModal ? "Edit Press Item" : "Add Press Item"}
                 </h3>
                 <button
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                   onClick={() => {
                     setShowAddModal(false);
                     setShowEditModal(false);
                     setSelectedItem(null);
                   }}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -763,9 +864,14 @@ export function AdminPressManager() {
                   Type *
                 </label>
                 <select
-                  value={formData.type}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value as 'award' | 'press_feature' })}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  value={formData.type}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      type: e.target.value as "award" | "press_feature",
+                    })
+                  }
                 >
                   <option value="award">Award</option>
                   <option value="press_feature">Press Feature</option>
@@ -778,73 +884,83 @@ export function AdminPressManager() {
                   Title *
                 </label>
                 <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="Enter title"
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) =>
+                    setFormData({ ...formData, title: e.target.value })
+                  }
                 />
               </div>
 
               {/* Organisation (for awards) */}
-              {formData.type === 'award' && (
+              {formData.type === "award" && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Organisation
                   </label>
                   <input
-                    type="text"
-                    value={formData.organisation}
-                    onChange={(e) => setFormData({ ...formData, organisation: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="Award organisation"
+                    type="text"
+                    value={formData.organisation}
+                    onChange={(e) =>
+                      setFormData({ ...formData, organisation: e.target.value })
+                    }
                   />
                 </div>
               )}
 
               {/* Publication (for press features) */}
-              {formData.type === 'press_feature' && (
+              {formData.type === "press_feature" && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Publication
                   </label>
                   <input
-                    type="text"
-                    value={formData.publication}
-                    onChange={(e) => setFormData({ ...formData, publication: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="Publication name"
+                    type="text"
+                    value={formData.publication}
+                    onChange={(e) =>
+                      setFormData({ ...formData, publication: e.target.value })
+                    }
                   />
                 </div>
               )}
 
               {/* Year (for awards) */}
-              {formData.type === 'award' && (
+              {formData.type === "award" && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Year
                   </label>
                   <input
-                    type="text"
-                    value={formData.year}
-                    onChange={(e) => setFormData({ ...formData, year: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="2024"
+                    type="text"
+                    value={formData.year}
+                    onChange={(e) =>
+                      setFormData({ ...formData, year: e.target.value })
+                    }
                   />
                 </div>
               )}
 
               {/* Date (for press features) */}
-              {formData.type === 'press_feature' && (
+              {formData.type === "press_feature" && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Date
                   </label>
                   <input
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     type="date"
                     value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    onChange={(e) =>
+                      setFormData({ ...formData, date: e.target.value })
+                    }
                   />
                 </div>
               )}
@@ -855,11 +971,13 @@ export function AdminPressManager() {
                   Description
                 </label>
                 <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={3}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="Enter description"
+                  rows={3}
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
                 />
               </div>
 
@@ -870,49 +988,57 @@ export function AdminPressManager() {
                 </label>
                 {formData.image_url ? (
                   <div className="relative w-full">
-                    <div className="relative w-full" style={{ minHeight: '400px', maxHeight: '600px' }}>
+                    <div
+                      className="relative w-full"
+                      style={{ minHeight: "400px", maxHeight: "600px" }}
+                    >
                       <NextImage
-                        src={formData.image_url}
-                        alt="Press image"
                         fill
+                        alt="Press image"
                         className="object-contain rounded-lg"
                         sizes="(max-width: 768px) 100vw, 800px"
+                        src={formData.image_url}
                       />
                     </div>
                     <div className="absolute top-2 right-2 flex gap-2">
                       <button
+                        className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 shadow-lg"
+                        title="Crop/Edit image"
                         onClick={() => {
                           // Crop/edit existing image
                           if (formData.image_url) {
                             handleEditImage(formData.image_url);
                           }
                         }}
-                        className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 shadow-lg"
-                        title="Crop/Edit image"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
+                        className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 shadow-lg"
+                        title="Upload new image"
                         onClick={() => {
                           // Re-upload new image
-                          const input = document.createElement('input');
-                          input.type = 'file';
-                          input.accept = 'image/*';
+                          const input = document.createElement("input");
+
+                          input.type = "file";
+                          input.accept = "image/*";
                           input.onchange = (e) => {
-                            const file = (e.target as HTMLInputElement).files?.[0];
+                            const file = (e.target as HTMLInputElement)
+                              .files?.[0];
+
                             if (file) handleImageUpload(file);
                           };
                           input.click();
                         }}
-                        className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 shadow-lg"
-                        title="Upload new image"
                       >
                         <Upload className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => setFormData({ ...formData, image_url: '' })}
                         className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 shadow-lg"
                         title="Remove image"
+                        onClick={() =>
+                          setFormData({ ...formData, image_url: "" })
+                        }
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -921,23 +1047,26 @@ export function AdminPressManager() {
                 ) : (
                   <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center">
                     <input
-                      type="file"
                       accept="image/*"
+                      className="hidden"
+                      disabled={uploadingImage}
+                      id="image-upload"
+                      type="file"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
+
                         if (file) handleImageUpload(file);
                       }}
-                      className="hidden"
-                      id="image-upload"
-                      disabled={uploadingImage}
                     />
                     <label
+                      className={`cursor-pointer flex flex-col items-center gap-2 ${uploadingImage ? "opacity-50 cursor-not-allowed" : ""}`}
                       htmlFor="image-upload"
-                      className={`cursor-pointer flex flex-col items-center gap-2 ${uploadingImage ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       <Upload className="w-8 h-8 text-gray-400" />
                       <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {uploadingImage ? 'Uploading...' : 'Click to upload image'}
+                        {uploadingImage
+                          ? "Uploading..."
+                          : "Click to upload image"}
                       </span>
                     </label>
                   </div>
@@ -945,16 +1074,25 @@ export function AdminPressManager() {
               </div>
 
               {/* Featured & Display Order */}
-              <div className={`grid gap-4 ${showEditModal ? 'grid-cols-2' : 'grid-cols-1'}`}>
+              <div
+                className={`grid gap-4 ${showEditModal ? "grid-cols-2" : "grid-cols-1"}`}
+              >
                 <div>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
-                      type="checkbox"
                       checked={formData.is_featured}
-                      onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
                       className="w-4 h-4 text-blue-600 rounded"
+                      type="checkbox"
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          is_featured: e.target.checked,
+                        })
+                      }
                     />
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Featured</span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Featured
+                    </span>
                   </label>
                 </div>
                 {showEditModal && (
@@ -963,10 +1101,15 @@ export function AdminPressManager() {
                       Display Order
                     </label>
                     <input
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       type="number"
                       value={formData.display_order}
-                      onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          display_order: parseInt(e.target.value) || 0,
+                        })
+                      }
                     />
                   </div>
                 )}
@@ -975,22 +1118,22 @@ export function AdminPressManager() {
 
             <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
               <button
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+                disabled={processing}
                 onClick={() => {
                   setShowAddModal(false);
                   setShowEditModal(false);
                   setSelectedItem(null);
                 }}
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
-                disabled={processing}
               >
                 Cancel
               </button>
               <button
-                onClick={handleSave}
-                disabled={processing || !formData.title}
                 className="px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white rounded-lg hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={processing || !formData.title}
+                onClick={handleSave}
               >
-                {processing ? 'Saving...' : showEditModal ? 'Update' : 'Add'}
+                {processing ? "Saving..." : showEditModal ? "Update" : "Add"}
               </button>
             </div>
           </div>
@@ -1000,15 +1143,15 @@ export function AdminPressManager() {
       {/* Delete Confirmation Modal */}
       {showDeleteModal && selectedItem && (
         <ConfirmationModal
-          isOpen={showDeleteModal}
-          onClose={() => setShowDeleteModal(false)}
-          onConfirm={handleDeleteConfirm}
-          title="Delete Press Item"
-          message={`Are you sure you want to permanently delete "${selectedItem.title}"? This action cannot be undone.`}
-          confirmText="Delete"
           cancelText="Cancel"
+          confirmText="Delete"
           isDestructive={true}
           isLoading={processing}
+          isOpen={showDeleteModal}
+          message={`Are you sure you want to permanently delete "${selectedItem.title}"? This action cannot be undone.`}
+          title="Delete Press Item"
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={handleDeleteConfirm}
         />
       )}
 
@@ -1022,8 +1165,8 @@ export function AdminPressManager() {
                   Crop & Position Image
                 </h3>
                 <button
-                  onClick={handleCropCancel}
                   className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  onClick={handleCropCancel}
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -1031,10 +1174,10 @@ export function AdminPressManager() {
             </div>
 
             <div className="p-6">
-              <div 
+              <div
                 ref={setCropContainerRef}
-                className="relative bg-gray-100 dark:bg-gray-900 rounded-lg overflow-hidden mb-4" 
-                style={{ height: '400px', width: '100%' }}
+                className="relative bg-gray-100 dark:bg-gray-900 rounded-lg overflow-hidden mb-4"
+                style={{ height: "400px", width: "100%" }}
               >
                 <div
                   className="absolute inset-0 cursor-move"
@@ -1042,7 +1185,7 @@ export function AdminPressManager() {
                     backgroundImage: `url(${imageToCrop})`,
                     backgroundSize: `${cropData.scale * 100}%`,
                     backgroundPosition: `${cropData.x}px ${cropData.y}px`,
-                    backgroundRepeat: 'no-repeat'
+                    backgroundRepeat: "no-repeat",
                   }}
                   onMouseDown={(e) => {
                     e.preventDefault();
@@ -1051,22 +1194,24 @@ export function AdminPressManager() {
                     const startMouseY = e.clientY;
                     const startImageX = cropData.x;
                     const startImageY = cropData.y;
-                    
+
                     const onMouseMove = (e: MouseEvent) => {
                       const deltaX = e.clientX - startMouseX;
                       const deltaY = e.clientY - startMouseY;
-                      setCropData(prev => ({
+
+                      setCropData((prev) => ({
                         ...prev,
                         x: startImageX + deltaX,
-                        y: startImageY + deltaY
+                        y: startImageY + deltaY,
                       }));
                     };
                     const onMouseUp = () => {
-                      document.removeEventListener('mousemove', onMouseMove);
-                      document.removeEventListener('mouseup', onMouseUp);
+                      document.removeEventListener("mousemove", onMouseMove);
+                      document.removeEventListener("mouseup", onMouseUp);
                     };
-                    document.addEventListener('mousemove', onMouseMove);
-                    document.addEventListener('mouseup', onMouseUp);
+
+                    document.addEventListener("mousemove", onMouseMove);
+                    document.addEventListener("mouseup", onMouseUp);
                   }}
                 />
                 <div className="absolute inset-0 border-4 border-blue-500 pointer-events-none" />
@@ -1078,29 +1223,34 @@ export function AdminPressManager() {
                     Zoom: {Math.round(cropData.scale * 100)}%
                   </label>
                   <input
-                    type="range"
-                    min="0.5"
-                    max="3"
-                    step="0.1"
-                    value={cropData.scale}
-                    onChange={(e) => setCropData(prev => ({ ...prev, scale: parseFloat(e.target.value) }))}
                     className="w-full"
+                    max="3"
+                    min="0.5"
+                    step="0.1"
+                    type="range"
+                    value={cropData.scale}
+                    onChange={(e) =>
+                      setCropData((prev) => ({
+                        ...prev,
+                        scale: parseFloat(e.target.value),
+                      }))
+                    }
                   />
                 </div>
 
                 <div className="flex gap-3">
                   <button
-                    onClick={handleCropCancel}
                     className="flex-1 px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+                    onClick={handleCropCancel}
                   >
                     Cancel
                   </button>
                   <button
-                    onClick={handleCropComplete}
-                    disabled={uploadingImage}
                     className="flex-1 px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white rounded-lg hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={uploadingImage}
+                    onClick={handleCropComplete}
                   >
-                    {uploadingImage ? 'Uploading...' : 'Apply Crop & Upload'}
+                    {uploadingImage ? "Uploading..." : "Apply Crop & Upload"}
                   </button>
                 </div>
               </div>
@@ -1116,7 +1266,7 @@ function PressItemCard({
   item,
   onEdit,
   onDelete,
-  isLarge = false
+  isLarge = false,
 }: {
   item: PressItem;
   onEdit: (item: PressItem) => void;
@@ -1124,22 +1274,24 @@ function PressItemCard({
   isLarge?: boolean;
 }) {
   // Smaller cards for admin panel - consistent size
-  const height = 'h-[280px] sm:h-[320px]';
+  const height = "h-[280px] sm:h-[320px]";
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  
+
   return (
-    <div className={`${height} group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-gray-300 dark:border-gray-600`}>
+    <div
+      className={`${height} group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-gray-300 dark:border-gray-600`}
+    >
       {/* Image Background */}
       {item.image_url ? (
         <>
           <div className="absolute inset-0">
             <div className="relative w-full h-full">
               <NextImage
-                src={item.image_url}
-                alt={item.title}
                 fill
+                alt={item.title}
                 className="object-cover group-hover:scale-110 transition-transform duration-500"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                src={item.image_url}
               />
             </div>
           </div>
@@ -1162,22 +1314,22 @@ function PressItemCard({
       {/* Admin Action Buttons - Bottom Right, Show on Hover */}
       <div className="absolute bottom-3 right-3 z-20 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <button
+          className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg transition-colors"
+          title="Edit"
           onClick={(e) => {
             e.stopPropagation();
             onEdit(item);
           }}
-          className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg transition-colors"
-          title="Edit"
         >
           <Edit2 className="w-4 h-4" />
         </button>
         <button
+          className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-lg transition-colors"
+          title="Delete"
           onClick={(e) => {
             e.stopPropagation();
             onDelete(item);
           }}
-          className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-lg transition-colors"
-          title="Delete"
         >
           <Trash2 className="w-4 h-4" />
         </button>
@@ -1187,13 +1339,13 @@ function PressItemCard({
       <div className="absolute inset-0 z-10 flex flex-col justify-between p-5 sm:p-6">
         <div className="flex flex-col items-start">
           <div className="flex items-center gap-2 mb-2">
-            {item.type === 'award' ? (
+            {item.type === "award" ? (
               <Award className="w-4 h-4 text-white/80" />
             ) : (
               <FileText className="w-4 h-4 text-white/80" />
             )}
             <span className="text-[10px] sm:text-xs text-white/70 uppercase font-semibold tracking-wide">
-              {item.type === 'award' ? 'Award' : 'Press'}
+              {item.type === "award" ? "Award" : "Press"}
             </span>
           </div>
           <h3 className="text-white font-bold text-lg sm:text-xl mb-2 leading-tight line-clamp-2">
@@ -1204,43 +1356,48 @@ function PressItemCard({
         {/* Footer with Expandable Description */}
         <div className="bg-white/10 dark:bg-black/30 backdrop-blur-sm rounded-lg p-3 sm:p-4 border-t border-white/20">
           <button
+            className={`w-full ${item.description ? "cursor-pointer hover:bg-white/5" : ""} transition-colors`}
+            disabled={!item.description}
             onClick={(e) => {
               e.stopPropagation();
               if (item.description) {
                 setIsDescriptionExpanded(!isDescriptionExpanded);
               }
             }}
-            className={`w-full ${item.description ? 'cursor-pointer hover:bg-white/5' : ''} transition-colors`}
-            disabled={!item.description}
           >
             <div className="flex items-center justify-between gap-2">
               <div className="flex flex-col flex-1">
                 <p className="text-white/90 font-semibold text-sm">
-                  {item.type === 'award' 
-                    ? item.organisation || 'Award Recognition'
-                    : item.publication || 'Media Feature'}
+                  {item.type === "award"
+                    ? item.organisation || "Award Recognition"
+                    : item.publication || "Media Feature"}
                 </p>
                 <p className="text-white/70 text-xs">
-                  {item.type === 'award' 
-                    ? item.year || new Date(item.date || '').getFullYear() || ''
-                    : item.date ? new Date(item.date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long' }) : ''}
+                  {item.type === "award"
+                    ? item.year || new Date(item.date || "").getFullYear() || ""
+                    : item.date
+                      ? new Date(item.date).toLocaleDateString("en-GB", {
+                          year: "numeric",
+                          month: "long",
+                        })
+                      : ""}
                 </p>
               </div>
               {item.description && (
-                <ChevronDown 
+                <ChevronDown
                   className={`w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/80 transition-transform duration-300 flex-shrink-0 ${
-                    isDescriptionExpanded ? 'rotate-180' : ''
+                    isDescriptionExpanded ? "rotate-180" : ""
                   }`}
                 />
               )}
             </div>
           </button>
           {item.description && (
-            <div 
+            <div
               className={`transition-all duration-300 ease-in-out description-scroll ${
-                isDescriptionExpanded 
-                  ? 'max-h-32 sm:max-h-40 opacity-100 mt-2 overflow-y-auto' 
-                  : 'max-h-0 opacity-0 overflow-hidden'
+                isDescriptionExpanded
+                  ? "max-h-32 sm:max-h-40 opacity-100 mt-2 overflow-y-auto"
+                  : "max-h-0 opacity-0 overflow-hidden"
               }`}
             >
               <div className="text-white/95 text-xs sm:text-sm leading-relaxed pt-2 border-t border-white/10 pr-2 pb-2">
@@ -1253,5 +1410,3 @@ function PressItemCard({
     </div>
   );
 }
-
-

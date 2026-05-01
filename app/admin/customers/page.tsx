@@ -1,18 +1,43 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { EditCustomerModal } from "@/components/EditCustomerModal";
-import { DeleteCustomerModal } from "@/components/DeleteCustomerModal";
-import Pagination from "@/components/Pagination";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Input } from "@heroui/input";
-import { inputClassNames, formLayout } from "@/config/design-system";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "@heroui/modal";
 import { Spinner } from "@heroui/spinner";
-import { Users, Plus, Eye, Edit, Trash2, Mail, Phone, MapPin, Table2, Grid3x3, Tag, Ticket, Send, CheckCircle, XCircle, Clock, Search } from "lucide-react";
+import {
+  Users,
+  Plus,
+  Eye,
+  Edit,
+  Trash2,
+  Mail,
+  Phone,
+  MapPin,
+  Table2,
+  Grid3x3,
+  Tag,
+  Ticket,
+  Send,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Search,
+} from "lucide-react";
 import { Select, SelectItem } from "@heroui/select";
+
+import { inputClassNames, formLayout } from "@/config/design-system";
+import Pagination from "@/components/Pagination";
+import { DeleteCustomerModal } from "@/components/DeleteCustomerModal";
+import { EditCustomerModal } from "@/components/EditCustomerModal";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useToast } from "@/components/Toast";
 
@@ -60,13 +85,16 @@ const DUMMY_CUSTOMERS: Customer[] = [];
 export default function CustomersPage() {
   const { showError } = useToast();
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
-    null
+    null,
   );
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null);
-  const [discountCodeToDelete, setDiscountCodeToDelete] = useState<DiscountCode | null>(null);
+  const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(
+    null,
+  );
+  const [discountCodeToDelete, setDiscountCodeToDelete] =
+    useState<DiscountCode | null>(null);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [viewMode, setViewMode] = useState<"table" | "cards">("cards");
   const isMdOrLarger = useMediaQuery();
@@ -79,7 +107,7 @@ export default function CustomersPage() {
   const [formError, setFormError] = useState("");
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -94,12 +122,14 @@ export default function CustomersPage() {
   // Filter customers locally by name, email, or phone (no API call)
   const filteredCustomers = useMemo(() => {
     const term = search.trim().toLowerCase();
+
     if (!term) return customers;
+
     return customers.filter(
       (c) =>
         (c.name && c.name.toLowerCase().includes(term)) ||
         (c.email && c.email.toLowerCase().includes(term)) ||
-        (c.phone && c.phone.toLowerCase().includes(term))
+        (c.phone && c.phone.toLowerCase().includes(term)),
     );
   }, [customers, search]);
 
@@ -112,7 +142,11 @@ export default function CustomersPage() {
   useEffect(() => {
     if (selectedCustomer) {
       const updated = customers.find((c) => c.id === selectedCustomer.id);
-      if (updated && JSON.stringify(updated) !== JSON.stringify(selectedCustomer)) {
+
+      if (
+        updated &&
+        JSON.stringify(updated) !== JSON.stringify(selectedCustomer)
+      ) {
         setSelectedCustomer(updated);
       }
     }
@@ -122,10 +156,12 @@ export default function CustomersPage() {
     try {
       setLoading(true);
       const params = new URLSearchParams();
+
       params.set("page", String(page));
       params.set("limit", String(limit));
       if (sort && sort !== "newest") params.set("sort", sort);
-      if (hasDiscountCode && hasDiscountCode !== "all") params.set("has_discount_code", hasDiscountCode);
+      if (hasDiscountCode && hasDiscountCode !== "all")
+        params.set("has_discount_code", hasDiscountCode);
       const response = await fetch(`/api/customers?${params.toString()}`);
 
       console.log("Response status:", response.status);
@@ -135,23 +171,25 @@ export default function CustomersPage() {
 
         console.log("Loaded customers:", data);
         const fetchedCustomers = data.customers || [];
-        
+
         // Transform API response to match Customer type (combine first_name + last_name into name)
         const transformedCustomers = fetchedCustomers.map((customer: any) => ({
           id: customer.id,
-          name: `${customer.first_name || ''} ${customer.last_name || ''}`.trim() || 'Unnamed Customer',
-          email: customer.email || '',
-          phone: customer.phone || '',
-          address: customer.address || '',
-          postcode: customer.postcode || '',
-          city: customer.city || '',
-          notes: customer.notes || '',
+          name:
+            `${customer.first_name || ""} ${customer.last_name || ""}`.trim() ||
+            "Unnamed Customer",
+          email: customer.email || "",
+          phone: customer.phone || "",
+          address: customer.address || "",
+          postcode: customer.postcode || "",
+          city: customer.city || "",
+          notes: customer.notes || "",
           marketing_emails: customer.marketing_emails ?? false,
           discount_codes: customer.discount_codes || [],
-          created_at: customer.created_at || '',
-          updated_at: customer.updated_at || '',
+          created_at: customer.created_at || "",
+          updated_at: customer.updated_at || "",
         }));
-        
+
         // Use dummy data if no real customers exist
         if (transformedCustomers.length === 0) {
           console.log("No customers found, using dummy data");
@@ -167,6 +205,7 @@ export default function CustomersPage() {
         }
       } else {
         const errorText = await response.text();
+
         console.error("Failed to load customers:", response.status, errorText);
         // Use dummy data on error
         console.log("API error, using dummy data");
@@ -192,7 +231,6 @@ export default function CustomersPage() {
     await loadCustomers(page);
   };
 
-
   const handleViewModeChange = (mode: "table" | "cards") => {
     setViewMode(mode);
   };
@@ -208,6 +246,7 @@ export default function CustomersPage() {
         !newCustomer.address
       ) {
         setFormError("Please fill in all required fields.");
+
         return;
       }
 
@@ -240,6 +279,7 @@ export default function CustomersPage() {
         });
       } else {
         const error = await response.json();
+
         setFormError(error.error || "Failed to create customer");
       }
     } catch (error) {
@@ -264,8 +304,10 @@ export default function CustomersPage() {
         setEditingCustomer(null);
       } else {
         let message = "Failed to update customer";
+
         try {
           const errBody = await response.json();
+
           if (errBody && typeof errBody.error === "string" && errBody.error) {
             message = errBody.error;
           }
@@ -292,6 +334,7 @@ export default function CustomersPage() {
         setCustomerToDelete(null);
       } else {
         const error = await response.json();
+
         throw new Error(error.error || "Failed to delete customer");
       }
     } catch (error) {
@@ -308,26 +351,36 @@ export default function CustomersPage() {
   // --- Discount code helpers ---
   const [generatingCode, setGeneratingCode] = useState(false);
 
-  const getDiscountStatus = (code: DiscountCode): { label: string; color: "success" | "warning" | "danger" | "default" } => {
+  const getDiscountStatus = (
+    code: DiscountCode,
+  ): { label: string; color: "success" | "warning" | "danger" | "default" } => {
     if (code.used_at) return { label: "Used", color: "success" };
     if (!code.is_active) return { label: "Inactive", color: "default" };
-    if (new Date(code.valid_until) < new Date()) return { label: "Expired", color: "danger" };
+    if (new Date(code.valid_until) < new Date())
+      return { label: "Expired", color: "danger" };
+
     return { label: "Active", color: "warning" };
   };
 
   const getActiveDiscount = (customer: Customer): DiscountCode | null => {
-    if (!customer.discount_codes || customer.discount_codes.length === 0) return null;
+    if (!customer.discount_codes || customer.discount_codes.length === 0)
+      return null;
     // Return the most recent active, unused, non-expired code
     const now = new Date();
     const active = customer.discount_codes.find(
-      (c) => c.is_active && !c.used_at && new Date(c.valid_until) > now
+      (c) => c.is_active && !c.used_at && new Date(c.valid_until) > now,
     );
+
     if (active) return active;
+
     // Else return the most recent code overall (they're ordered by created_at desc from API)
     return customer.discount_codes[0];
   };
 
-  const handleGenerateDiscountCode = async (customerId: string, sendEmail: boolean = false) => {
+  const handleGenerateDiscountCode = async (
+    customerId: string,
+    sendEmail: boolean = false,
+  ) => {
     try {
       setGeneratingCode(true);
       const response = await fetch("/api/admin/discount-codes", {
@@ -341,6 +394,7 @@ export default function CustomersPage() {
 
       if (!response.ok) {
         const err = await response.json();
+
         throw new Error(err.error || "Failed to generate code");
       }
 
@@ -350,19 +404,28 @@ export default function CustomersPage() {
       // If we have a selected customer, refresh their data
       if (selectedCustomer && selectedCustomer.id === customerId) {
         const updatedCustomer = customers.find((c) => c.id === customerId);
+
         if (updatedCustomer) setSelectedCustomer(updatedCustomer);
       }
     } catch (error) {
       console.error("Error generating discount code:", error);
-      alert(error instanceof Error ? error.message : "Failed to generate discount code");
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to generate discount code",
+      );
     } finally {
       setGeneratingCode(false);
     }
   };
 
-  const handleToggleDiscountCode = async (codeId: string, action: "activate" | "deactivate" | "mark_used" | "mark_unused") => {
+  const handleToggleDiscountCode = async (
+    codeId: string,
+    action: "activate" | "deactivate" | "mark_used" | "mark_unused",
+  ) => {
     try {
       const body: Record<string, any> = {};
+
       if (action === "activate") body.is_active = true;
       if (action === "deactivate") body.is_active = false;
       if (action === "mark_used") body.mark_as_used = true;
@@ -376,13 +439,18 @@ export default function CustomersPage() {
 
       if (!response.ok) {
         const err = await response.json();
+
         throw new Error(err.error || "Failed to update discount code");
       }
 
       await loadCustomers(currentPage);
     } catch (error) {
       console.error("Error updating discount code:", error);
-      alert(error instanceof Error ? error.message : "Failed to update discount code");
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to update discount code",
+      );
     }
   };
 
@@ -394,6 +462,7 @@ export default function CustomersPage() {
 
       if (!response.ok) {
         const err = await response.json();
+
         throw new Error(err.error || "Failed to delete discount code");
       }
 
@@ -401,7 +470,11 @@ export default function CustomersPage() {
       await loadCustomers(currentPage);
     } catch (error) {
       console.error("Error deleting discount code:", error);
-      alert(error instanceof Error ? error.message : "Failed to delete discount code");
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to delete discount code",
+      );
     }
   };
 
@@ -409,42 +482,42 @@ export default function CustomersPage() {
     <div className="w-full space-y-6">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-              <div className="flex items-center gap-3">
-                {/* View Toggle - desktop only */}
+        <div className="flex items-center gap-3">
+          {/* View Toggle - desktop only */}
           <div className="hidden md:flex bg-default-100 rounded-lg p-1">
             <Button
-              size="sm"
-              variant={viewMode === "table" ? "solid" : "light"}
-              color={viewMode === "table" ? "primary" : "default"}
-              startContent={<Table2 className="w-4 h-4" />}
-              onPress={() => handleViewModeChange("table")}
               className="min-w-0"
+              color={viewMode === "table" ? "primary" : "default"}
+              size="sm"
+              startContent={<Table2 className="w-4 h-4" />}
+              variant={viewMode === "table" ? "solid" : "light"}
+              onPress={() => handleViewModeChange("table")}
             >
-                    Table
+              Table
             </Button>
             <Button
-              size="sm"
-              variant={viewMode === "cards" ? "solid" : "light"}
-              color={viewMode === "cards" ? "primary" : "default"}
-              startContent={<Grid3x3 className="w-4 h-4" />}
-              onPress={() => handleViewModeChange("cards")}
               className="min-w-0"
+              color={viewMode === "cards" ? "primary" : "default"}
+              size="sm"
+              startContent={<Grid3x3 className="w-4 h-4" />}
+              variant={viewMode === "cards" ? "solid" : "light"}
+              onPress={() => handleViewModeChange("cards")}
             >
-                    Cards
+              Cards
             </Button>
-                </div>
+          </div>
           <Button
             color="primary"
             startContent={<Plus className="w-4 h-4" />}
             onPress={() => setShowAddModal(true)}
-                >
-                  Add Customer
+          >
+            Add Customer
           </Button>
-          </div>
         </div>
+      </div>
 
-        {/* Loading state */}
-        {loading ? (
+      {/* Loading state */}
+      {loading ? (
         <Card className="border border-divider">
           <CardBody className="p-12">
             <div className="flex flex-col items-center">
@@ -453,80 +526,89 @@ export default function CustomersPage() {
             </div>
           </CardBody>
         </Card>
-        ) : (
-          <>
-            {/* Combined: Total Customers + Search & filters (close to table) */}
-            <Card className="border border-divider">
-              <CardBody className="p-4">
-                <div className="flex flex-row flex-wrap items-center gap-3">
-                  <div className="flex items-center gap-4 flex-shrink-0">
-                    <div className="p-3 bg-primary-100 dark:bg-primary-900/20 rounded-lg">
-                      <Users className="w-6 h-6 text-primary-600 dark:text-primary-400" />
-                    </div>
-                    <div>
-                      <p className="text-2xl sm:text-3xl font-bold">{totalCount}</p>
-                      <p className="text-sm text-default-500">Total Customers</p>
-                    </div>
+      ) : (
+        <>
+          {/* Combined: Total Customers + Search & filters (close to table) */}
+          <Card className="border border-divider">
+            <CardBody className="p-4">
+              <div className="flex flex-row flex-wrap items-center gap-3">
+                <div className="flex items-center gap-4 flex-shrink-0">
+                  <div className="p-3 bg-primary-100 dark:bg-primary-900/20 rounded-lg">
+                    <Users className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                   </div>
-                  <div className="flex flex-1 min-w-0 items-center gap-2 flex-wrap">
-                    <Input
-                      placeholder="Search by name, email, or phone..."
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      startContent={<Search className="w-4 h-4 text-default-400" />}
-                      isClearable
-                      onClear={() => setSearch("")}
-                      classNames={{ input: "text-sm" }}
-                      size="sm"
-                      className="w-full sm:min-w-[180px] sm:max-w-[280px]"
-                    />
-                    <Select
-                      label="Sort"
-                      placeholder="Sort by"
-                      selectedKeys={sort ? [sort] : ["newest"]}
-                      onSelectionChange={(keys) => {
-                        const v = Array.from(keys)[0] as string;
-                        if (v) setSort(v);
-                      }}
-                      className="max-w-[140px] flex-shrink-0"
-                      size="sm"
-                      aria-label="Sort customers"
-                    >
-                      <SelectItem key="newest">Newest first</SelectItem>
-                      <SelectItem key="oldest">Oldest first</SelectItem>
-                      <SelectItem key="name_asc">Name A–Z</SelectItem>
-                      <SelectItem key="name_desc">Name Z–A</SelectItem>
-                    </Select>
-                    <Select
-                      label="Discount code"
-                      placeholder="Filter"
-                      selectedKeys={hasDiscountCode ? [hasDiscountCode] : ["all"]}
-                      onSelectionChange={(keys) => {
-                        const v = Array.from(keys)[0] as string;
-                        if (v) setHasDiscountCode(v);
-                      }}
-                      className="max-w-[160px] flex-shrink-0"
-                      size="sm"
-                      aria-label="Filter by discount code"
-                    >
-                      <SelectItem key="all">All customers</SelectItem>
-                      <SelectItem key="yes">With discount code</SelectItem>
-                    </Select>
+                  <div>
+                    <p className="text-2xl sm:text-3xl font-bold">
+                      {totalCount}
+                    </p>
+                    <p className="text-sm text-default-500">Total Customers</p>
                   </div>
                 </div>
-              </CardBody>
-            </Card>
+                <div className="flex flex-1 min-w-0 items-center gap-2 flex-wrap">
+                  <Input
+                    isClearable
+                    className="w-full sm:min-w-[180px] sm:max-w-[280px]"
+                    classNames={{ input: "text-sm" }}
+                    placeholder="Search by name, email, or phone..."
+                    size="sm"
+                    startContent={
+                      <Search className="w-4 h-4 text-default-400" />
+                    }
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    onClear={() => setSearch("")}
+                  />
+                  <Select
+                    aria-label="Sort customers"
+                    className="max-w-[140px] flex-shrink-0"
+                    label="Sort"
+                    placeholder="Sort by"
+                    selectedKeys={sort ? [sort] : ["newest"]}
+                    size="sm"
+                    onSelectionChange={(keys) => {
+                      const v = Array.from(keys)[0] as string;
 
-            {/* Empty state: no data from API */}
-            {customers.length === 0 ? (
+                      if (v) setSort(v);
+                    }}
+                  >
+                    <SelectItem key="newest">Newest first</SelectItem>
+                    <SelectItem key="oldest">Oldest first</SelectItem>
+                    <SelectItem key="name_asc">Name A–Z</SelectItem>
+                    <SelectItem key="name_desc">Name Z–A</SelectItem>
+                  </Select>
+                  <Select
+                    aria-label="Filter by discount code"
+                    className="max-w-[160px] flex-shrink-0"
+                    label="Discount code"
+                    placeholder="Filter"
+                    selectedKeys={hasDiscountCode ? [hasDiscountCode] : ["all"]}
+                    size="sm"
+                    onSelectionChange={(keys) => {
+                      const v = Array.from(keys)[0] as string;
+
+                      if (v) setHasDiscountCode(v);
+                    }}
+                  >
+                    <SelectItem key="all">All customers</SelectItem>
+                    <SelectItem key="yes">With discount code</SelectItem>
+                  </Select>
+                </div>
+              </div>
+            </CardBody>
+          </Card>
+
+          {/* Empty state: no data from API */}
+          {customers.length === 0 ? (
             <Card className="border border-divider">
               <CardBody className="p-12 text-center">
                 <div className="w-20 h-20 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Users className="w-10 h-10 text-primary-600 dark:text-primary-400" />
                 </div>
-                <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-2">No Customers Yet</h3>
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-2">
+                  No Customers Yet
+                </h3>
                 <p className="text-default-500 mb-6">
-                  Add your first customer using the button above or try different filters.
+                  Add your first customer using the button above or try
+                  different filters.
                 </p>
                 <Button
                   color="primary"
@@ -537,284 +619,319 @@ export default function CustomersPage() {
                 </Button>
               </CardBody>
             </Card>
-            ) : filteredCustomers.length === 0 ? (
+          ) : filteredCustomers.length === 0 ? (
             <Card className="border border-divider">
               <CardBody className="p-8 text-center">
-                <p className="text-default-500">No customers match your search. Try a different name, email, or phone.</p>
+                <p className="text-default-500">
+                  No customers match your search. Try a different name, email,
+                  or phone.
+                </p>
               </CardBody>
             </Card>
-            ) : (
-          <>
-            {/* Table View - desktop only when table selected */}
-            {isMdOrLarger && viewMode === "table" && (
-            <Card className="border border-divider">
-              <CardBody className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="min-w-full">
-                    <thead>
-                      <tr className="bg-default-100 border-b border-divider">
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
-                          <div className="flex items-center gap-2">
-                            <Users className="w-4 h-4" />
-                            Customer
-                          </div>
-                        </th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
-                          <div className="flex items-center gap-2">
-                            <Mail className="w-4 h-4" />
-                            Email
-                          </div>
-                        </th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
-                          <div className="flex items-center gap-2">
-                            <Phone className="w-4 h-4" />
-                            Phone
-                          </div>
-                        </th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
-                          <div className="flex items-center gap-2">
-                            <MapPin className="w-4 h-4" />
-                            Address
-                          </div>
-                        </th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
-                          <div className="flex items-center gap-2">
-                            <Ticket className="w-4 h-4" />
-                            Discount
-                          </div>
-                        </th>
-                        <th className="px-6 py-4 text-right text-xs font-semibold text-default-600 uppercase tracking-wider">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-divider">
-                      {filteredCustomers.map((customer) => (
-                        <tr 
-                          key={customer.id} 
-                          className="hover:bg-default-50 transition-colors"
-                        >
-                          <td className="px-6 py-5">
-                            <div className="flex items-center gap-3">
-                              <div className="relative">
-                                <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center shadow-md">
-                                  <span className="text-white font-bold">
+          ) : (
+            <>
+              {/* Table View - desktop only when table selected */}
+              {isMdOrLarger && viewMode === "table" && (
+                <Card className="border border-divider">
+                  <CardBody className="p-0">
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full">
+                        <thead>
+                          <tr className="bg-default-100 border-b border-divider">
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
+                              <div className="flex items-center gap-2">
+                                <Users className="w-4 h-4" />
+                                Customer
+                              </div>
+                            </th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
+                              <div className="flex items-center gap-2">
+                                <Mail className="w-4 h-4" />
+                                Email
+                              </div>
+                            </th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
+                              <div className="flex items-center gap-2">
+                                <Phone className="w-4 h-4" />
+                                Phone
+                              </div>
+                            </th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
+                              <div className="flex items-center gap-2">
+                                <MapPin className="w-4 h-4" />
+                                Address
+                              </div>
+                            </th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
+                              <div className="flex items-center gap-2">
+                                <Ticket className="w-4 h-4" />
+                                Discount
+                              </div>
+                            </th>
+                            <th className="px-6 py-4 text-right text-xs font-semibold text-default-600 uppercase tracking-wider">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-divider">
+                          {filteredCustomers.map((customer) => (
+                            <tr
+                              key={customer.id}
+                              className="hover:bg-default-50 transition-colors"
+                            >
+                              <td className="px-6 py-5">
+                                <div className="flex items-center gap-3">
+                                  <div className="relative">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center shadow-md">
+                                      <span className="text-white font-bold">
+                                        {customer.name.charAt(0).toUpperCase()}
+                                      </span>
+                                    </div>
+                                    <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-success-500 rounded-full border-2 border-background" />
+                                  </div>
+                                  <div>
+                                    <div className="font-semibold text-foreground">
+                                      {customer.name}
+                                    </div>
+                                    {customer.notes && (
+                                      <div className="text-xs text-default-500 mt-0.5 max-w-xs truncate">
+                                        {customer.notes}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-5">
+                                <div className="text-sm font-medium text-foreground truncate max-w-xs">
+                                  {customer.email}
+                                </div>
+                              </td>
+                              <td className="px-6 py-5">
+                                <div className="text-sm text-default-600">
+                                  {customer.phone}
+                                </div>
+                              </td>
+                              <td className="px-6 py-5">
+                                <div className="text-sm text-default-600 max-w-xs line-clamp-2">
+                                  {customer.address}
+                                </div>
+                              </td>
+                              <td className="px-6 py-5">
+                                {(() => {
+                                  const dc = getActiveDiscount(customer);
+
+                                  if (!dc)
+                                    return (
+                                      <span className="text-xs text-default-400">
+                                        --
+                                      </span>
+                                    );
+                                  const st = getDiscountStatus(dc);
+
+                                  return (
+                                    <div className="flex flex-col gap-1">
+                                      <code className="text-xs font-mono font-semibold text-foreground">
+                                        {dc.code}
+                                      </code>
+                                      <Chip
+                                        className="w-fit"
+                                        color={st.color}
+                                        size="sm"
+                                        variant="flat"
+                                      >
+                                        {st.label} &middot;{" "}
+                                        {dc.discount_percentage}%
+                                      </Chip>
+                                    </div>
+                                  );
+                                })()}
+                              </td>
+                              <td className="px-6 py-5 text-right">
+                                <div className="flex justify-end gap-2">
+                                  <Button
+                                    isIconOnly
+                                    size="sm"
+                                    title="View Details"
+                                    variant="light"
+                                    onPress={() =>
+                                      setSelectedCustomer(customer)
+                                    }
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    isIconOnly
+                                    color="primary"
+                                    size="sm"
+                                    title="Edit Customer"
+                                    variant="light"
+                                    onPress={() => {
+                                      setEditingCustomer(customer);
+                                      setShowEditModal(true);
+                                    }}
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    isIconOnly
+                                    color="danger"
+                                    size="sm"
+                                    title="Delete Customer"
+                                    variant="light"
+                                    onPress={() => handleDeleteClick(customer)}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </CardBody>
+                </Card>
+              )}
+
+              {/* Cards View - always on mobile, or when cards selected on desktop */}
+              {(!isMdOrLarger || viewMode === "cards") && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 items-stretch">
+                  {filteredCustomers.map((customer) => (
+                    <Card
+                      key={customer.id}
+                      className="border border-divider hover:shadow-lg transition-shadow h-full flex flex-col min-h-0"
+                    >
+                      <CardBody className="p-3 sm:p-4 flex flex-col flex-1 min-h-0 gap-0">
+                        <div className="flex flex-col flex-1 min-h-0 justify-between gap-2">
+                          <div className="min-h-0 space-y-2">
+                            <div className="flex items-start gap-2.5">
+                              <div className="relative shrink-0">
+                                <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center shadow-md">
+                                  <span className="text-white font-bold text-sm">
                                     {customer.name.charAt(0).toUpperCase()}
                                   </span>
                                 </div>
-                                <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-success-500 rounded-full border-2 border-background"></div>
+                                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-success-500 rounded-full border-2 border-background" />
                               </div>
-                              <div>
-                                <div className="font-semibold text-foreground">
+                              <div className="min-w-0 flex-1 pt-0.5">
+                                <h3 className="text-sm sm:text-base font-semibold leading-tight truncate">
                                   {customer.name}
-                                </div>
-                                {customer.notes && (
-                                  <div className="text-xs text-default-500 mt-0.5 max-w-xs truncate">
-                                    {customer.notes}
-                                  </div>
-                                )}
+                                </h3>
                               </div>
                             </div>
-                          </td>
-                          <td className="px-6 py-5">
-                            <div className="text-sm font-medium text-foreground truncate max-w-xs">
-                              {customer.email}
+
+                            <div className="space-y-1.5">
+                              <div className="flex items-center text-xs text-default-600">
+                                <Mail className="w-3.5 h-3.5 mr-2 text-default-400 shrink-0" />
+                                <span className="truncate font-medium">
+                                  {customer.email}
+                                </span>
+                              </div>
+                              <div className="flex items-center text-xs text-default-600">
+                                <Phone className="w-3.5 h-3.5 mr-2 text-default-400 shrink-0" />
+                                <span className="font-medium truncate">
+                                  {customer.phone}
+                                </span>
+                              </div>
+                              <div className="flex items-start text-xs text-default-600">
+                                <MapPin className="w-3.5 h-3.5 mr-2 mt-0.5 text-default-400 flex-shrink-0" />
+                                <span className="break-words line-clamp-3">
+                                  {customer.address}
+                                </span>
+                              </div>
                             </div>
-                          </td>
-                          <td className="px-6 py-5">
-                            <div className="text-sm text-default-600">
-                              {customer.phone}
-                            </div>
-                          </td>
-                          <td className="px-6 py-5">
-                            <div className="text-sm text-default-600 max-w-xs line-clamp-2">
-                              {customer.address}
-                            </div>
-                          </td>
-                          <td className="px-6 py-5">
+
                             {(() => {
                               const dc = getActiveDiscount(customer);
-                              if (!dc) return <span className="text-xs text-default-400">--</span>;
+
+                              if (!dc) return null;
                               const st = getDiscountStatus(dc);
+
                               return (
-                                <div className="flex flex-col gap-1">
-                                  <code className="text-xs font-mono font-semibold text-foreground">{dc.code}</code>
-                                  <Chip size="sm" variant="flat" color={st.color} className="w-fit">
-                                    {st.label} &middot; {dc.discount_percentage}%
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                  <Ticket className="w-3 h-3 text-default-400 shrink-0" />
+                                  <code className="text-[11px] font-mono font-semibold truncate max-w-[min(100%,9rem)]">
+                                    {dc.code}
+                                  </code>
+                                  <Chip
+                                    className="h-5 text-[10px]"
+                                    color={st.color}
+                                    size="sm"
+                                    variant="flat"
+                                  >
+                                    {st.label}
                                   </Chip>
                                 </div>
                               );
                             })()}
-                          </td>
-                          <td className="px-6 py-5 text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                isIconOnly
-                                variant="light"
-                                size="sm"
-                                onPress={() => setSelectedCustomer(customer)}
-                                title="View Details"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                isIconOnly
-                                color="primary"
-                                variant="light"
-                                size="sm"
-                                onPress={() => {
-                                  setEditingCustomer(customer);
-                                  setShowEditModal(true);
-                                }}
-                                title="Edit Customer"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                isIconOnly
-                                color="danger"
-                                variant="light"
-                                size="sm"
-                                onPress={() => handleDeleteClick(customer)}
-                                title="Delete Customer"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                          </div>
+
+                          <div className="flex gap-1.5 pt-2.5 border-t border-divider shrink-0">
+                            <Button
+                              className="flex-1"
+                              size="sm"
+                              startContent={<Eye className="w-4 h-4" />}
+                              variant="flat"
+                              onPress={() => setSelectedCustomer(customer)}
+                            >
+                              View
+                            </Button>
+                            <Button
+                              className="flex-1"
+                              color="primary"
+                              size="sm"
+                              startContent={<Edit className="w-4 h-4" />}
+                              variant="flat"
+                              onPress={() => {
+                                setEditingCustomer(customer);
+                                setShowEditModal(true);
+                              }}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              isIconOnly
+                              color="danger"
+                              size="sm"
+                              title="Delete Customer"
+                              variant="light"
+                              onPress={() => handleDeleteClick(customer)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardBody>
+                    </Card>
+                  ))}
                 </div>
-              </CardBody>
-            </Card>
-            )}
+              )}
 
-            {/* Cards View - always on mobile, or when cards selected on desktop */}
-            {(!isMdOrLarger || viewMode === "cards") && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 items-stretch">
-                {filteredCustomers.map((customer) => (
-                <Card
-                  key={customer.id}
-                  className="border border-divider hover:shadow-lg transition-shadow h-full flex flex-col min-h-0"
-                >
-                  <CardBody className="p-3 sm:p-4 flex flex-col flex-1 min-h-0 gap-0">
-                    <div className="flex flex-col flex-1 min-h-0 justify-between gap-2">
-                      <div className="min-h-0 space-y-2">
-                        <div className="flex items-start gap-2.5">
-                          <div className="relative shrink-0">
-                            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center shadow-md">
-                              <span className="text-white font-bold text-sm">
-                                {customer.name.charAt(0).toUpperCase()}
-                              </span>
-                            </div>
-                            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-success-500 rounded-full border-2 border-background" />
-                          </div>
-                          <div className="min-w-0 flex-1 pt-0.5">
-                            <h3 className="text-sm sm:text-base font-semibold leading-tight truncate">{customer.name}</h3>
-                          </div>
-                        </div>
-
-                        <div className="space-y-1.5">
-                          <div className="flex items-center text-xs text-default-600">
-                            <Mail className="w-3.5 h-3.5 mr-2 text-default-400 shrink-0" />
-                            <span className="truncate font-medium">{customer.email}</span>
-                          </div>
-                          <div className="flex items-center text-xs text-default-600">
-                            <Phone className="w-3.5 h-3.5 mr-2 text-default-400 shrink-0" />
-                            <span className="font-medium truncate">{customer.phone}</span>
-                          </div>
-                          <div className="flex items-start text-xs text-default-600">
-                            <MapPin className="w-3.5 h-3.5 mr-2 mt-0.5 text-default-400 flex-shrink-0" />
-                            <span className="break-words line-clamp-3">{customer.address}</span>
-                          </div>
-                        </div>
-
-                        {(() => {
-                          const dc = getActiveDiscount(customer);
-                          if (!dc) return null;
-                          const st = getDiscountStatus(dc);
-                          return (
-                            <div className="flex flex-wrap items-center gap-1.5">
-                              <Ticket className="w-3 h-3 text-default-400 shrink-0" />
-                              <code className="text-[11px] font-mono font-semibold truncate max-w-[min(100%,9rem)]">
-                                {dc.code}
-                              </code>
-                              <Chip size="sm" variant="flat" color={st.color} className="h-5 text-[10px]">
-                                {st.label}
-                              </Chip>
-                            </div>
-                          );
-                        })()}
-                      </div>
-
-                      <div className="flex gap-1.5 pt-2.5 border-t border-divider shrink-0">
-                      <Button
-                        variant="flat"
-                        size="sm"
-                        startContent={<Eye className="w-4 h-4" />}
-                        onPress={() => setSelectedCustomer(customer)}
-                        className="flex-1"
-                      >
-                        View
-                      </Button>
-                      <Button
-                        color="primary"
-                        variant="flat"
-                        size="sm"
-                        startContent={<Edit className="w-4 h-4" />}
-                        onPress={() => {
-                            setEditingCustomer(customer);
-                            setShowEditModal(true);
-                          }}
-                        className="flex-1"
-                      >
-                          Edit
-                      </Button>
-                      <Button
-                        isIconOnly
-                        color="danger"
-                        variant="light"
-                        size="sm"
-                        onPress={() => handleDeleteClick(customer)}
-                          title="Delete Customer"
-                        >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                      </div>
-                    </div>
-                  </CardBody>
-                </Card>
-                ))}
-              </div>
-            )}
-
-            {/* Pagination */}
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalCount={totalCount}
-              limit={limit}
-              onPageChange={handlePageChange}
-              className="mt-8"
-            />
-          </>
-            )}
+              {/* Pagination */}
+              <Pagination
+                className="mt-8"
+                currentPage={currentPage}
+                limit={limit}
+                totalCount={totalCount}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </>
+          )}
         </>
       )}
 
       {/* Add Customer Modal */}
       <Modal
+        classNames={{ base: "max-w-[95vw] sm:max-w-2xl mx-2" }}
         isOpen={showAddModal}
+        scrollBehavior="inside"
+        size="2xl"
         onClose={() => {
           setShowAddModal(false);
           setFormError("");
           setNewCustomer({ name: "", email: "", phone: "", address: "" });
         }}
-        size="2xl"
-        scrollBehavior="inside"
-        classNames={{ base: "max-w-[95vw] sm:max-w-2xl mx-2" }}
       >
         <ModalContent>
           {(onClose) => (
@@ -824,58 +941,79 @@ export default function CustomersPage() {
               </ModalHeader>
               <ModalBody className={formLayout.modalBody}>
                 <div className={formLayout.sectionGap}>
-              {formError && (
-                    <Chip color="danger" variant="flat" className="w-full justify-center">
+                  {formError && (
+                    <Chip
+                      className="w-full justify-center"
+                      color="danger"
+                      variant="flat"
+                    >
                       {formError}
                     </Chip>
                   )}
                   <div className={formLayout.gridFields}>
                     <Input
+                      isClearable
+                      isRequired
+                      classNames={inputClassNames}
                       label="Name"
+                      labelPlacement="outside"
                       placeholder="Enter customer name"
                       value={newCustomer.name}
-                      onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
-                      isRequired
-                      isClearable
                       variant="bordered"
-                      labelPlacement="outside"
-                      classNames={inputClassNames}
+                      onChange={(e) =>
+                        setNewCustomer({ ...newCustomer, name: e.target.value })
+                      }
                     />
                     <Input
-                      type="email"
+                      isClearable
+                      isRequired
+                      classNames={inputClassNames}
                       label="Email"
-                      placeholder="customer@email.com"
-                      value={newCustomer.email}
-                      onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
-                      isRequired
-                      isClearable
-                      variant="bordered"
                       labelPlacement="outside"
-                      classNames={inputClassNames}
+                      placeholder="customer@email.com"
+                      type="email"
+                      value={newCustomer.email}
+                      variant="bordered"
+                      onChange={(e) =>
+                        setNewCustomer({
+                          ...newCustomer,
+                          email: e.target.value,
+                        })
+                      }
                     />
                     <Input
-                      type="tel"
-                      label="Phone"
-                      placeholder="07944 24 20 79"
-                      value={newCustomer.phone}
-                      onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
-                      isRequired
                       isClearable
-                      variant="bordered"
-                      labelPlacement="outside"
+                      isRequired
                       classNames={inputClassNames}
+                      label="Phone"
+                      labelPlacement="outside"
+                      placeholder="07944 24 20 79"
+                      type="tel"
+                      value={newCustomer.phone}
+                      variant="bordered"
+                      onChange={(e) =>
+                        setNewCustomer({
+                          ...newCustomer,
+                          phone: e.target.value,
+                        })
+                      }
                     />
                     <div className={formLayout.fullWidth}>
                       <Input
+                        isClearable
+                        isRequired
+                        classNames={inputClassNames}
                         label="Address"
+                        labelPlacement="outside"
                         placeholder="Enter customer address"
                         value={newCustomer.address}
-                        onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
-                        isRequired
-                        isClearable
                         variant="bordered"
-                        labelPlacement="outside"
-                        classNames={inputClassNames}
+                        onChange={(e) =>
+                          setNewCustomer({
+                            ...newCustomer,
+                            address: e.target.value,
+                          })
+                        }
                       />
                     </div>
                   </div>
@@ -885,10 +1023,7 @@ export default function CustomersPage() {
                 <Button variant="light" onPress={onClose}>
                   Cancel
                 </Button>
-                <Button
-                  color="primary"
-                  onPress={handleAddCustomer}
-                >
+                <Button color="primary" onPress={handleAddCustomer}>
                   Add Customer
                 </Button>
               </ModalFooter>
@@ -899,25 +1034,25 @@ export default function CustomersPage() {
 
       {/* Edit Customer Modal */}
       <EditCustomerModal
+        customer={editingCustomer}
         isOpen={showEditModal}
         onClose={() => {
           setShowEditModal(false);
           setEditingCustomer(null);
         }}
         onSubmit={handleEditCustomer}
-        customer={editingCustomer}
       />
 
       {/* View Customer Modal */}
       <Modal
-        isOpen={!!selectedCustomer}
-        onClose={() => setSelectedCustomer(null)}
-        size="2xl"
-        scrollBehavior="inside"
         classNames={{
           base: "max-h-[95vh] mx-2 sm:mx-4",
           wrapper: "items-start sm:items-center pt-4 sm:pt-0",
         }}
+        isOpen={!!selectedCustomer}
+        scrollBehavior="inside"
+        size="2xl"
+        onClose={() => setSelectedCustomer(null)}
       >
         <ModalContent>
           {(onClose) => (
@@ -932,57 +1067,76 @@ export default function CustomersPage() {
                     <Card className="border border-divider">
                       <CardBody className="p-6">
                         <div className="flex items-center gap-4">
-                <div className="relative">
+                          <div className="relative">
                             <div className="w-20 h-20 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-2xl flex items-center justify-center shadow-lg">
                               <span className="text-white font-bold text-lg sm:text-xl md:text-2xl">
                                 {selectedCustomer.name.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-success-500 rounded-full border-2 border-background"></div>
-                </div>
+                              </span>
+                            </div>
+                            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-success-500 rounded-full border-2 border-background" />
+                          </div>
                           <div>
-                            <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-1">{selectedCustomer.name}</h3>
+                            <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-1">
+                              {selectedCustomer.name}
+                            </h3>
                             <p className="text-sm text-default-500">
-                              Customer since {new Date(selectedCustomer.created_at).toLocaleDateString('en-GB', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
+                              Customer since{" "}
+                              {new Date(
+                                selectedCustomer.created_at,
+                              ).toLocaleDateString("en-GB", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
                               })}
-                    </p>
-                </div>
-              </div>
+                            </p>
+                          </div>
+                        </div>
                       </CardBody>
                     </Card>
 
-              {/* Contact Information */}
+                    {/* Contact Information */}
                     <Card className="border border-divider">
                       <CardHeader>
-                        <h4 className="text-lg font-semibold">Contact Information</h4>
+                        <h4 className="text-lg font-semibold">
+                          Contact Information
+                        </h4>
                       </CardHeader>
                       <CardBody>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                            <label className="text-sm font-medium text-default-500 mb-1 block">Email</label>
+                          <div>
+                            <label className="text-sm font-medium text-default-500 mb-1 block">
+                              Email
+                            </label>
                             <div className="flex items-center gap-2">
                               <Mail className="w-4 h-4 text-default-400" />
-                              <p className="text-base">{selectedCustomer.email}</p>
-                    </div>
-                    </div>
-                    <div>
-                            <label className="text-sm font-medium text-default-500 mb-1 block">Phone</label>
+                              <p className="text-base">
+                                {selectedCustomer.email}
+                              </p>
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-default-500 mb-1 block">
+                              Phone
+                            </label>
                             <div className="flex items-center gap-2">
                               <Phone className="w-4 h-4 text-default-400" />
-                              <p className="text-base">{selectedCustomer.phone}</p>
-                    </div>
-                  </div>
+                              <p className="text-base">
+                                {selectedCustomer.phone}
+                              </p>
+                            </div>
+                          </div>
                           <div className="md:col-span-2">
-                            <label className="text-sm font-medium text-default-500 mb-1 block">Address</label>
+                            <label className="text-sm font-medium text-default-500 mb-1 block">
+                              Address
+                            </label>
                             <div className="flex items-start gap-2">
                               <MapPin className="w-4 h-4 text-default-400 mt-1 flex-shrink-0" />
-                              <p className="text-base break-words">{selectedCustomer.address}</p>
-                    </div>
-                    </div>
-                  </div>
+                              <p className="text-base break-words">
+                                {selectedCustomer.address}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       </CardBody>
                     </Card>
 
@@ -993,7 +1147,9 @@ export default function CustomersPage() {
                           <h4 className="text-lg font-semibold">Notes</h4>
                         </CardHeader>
                         <CardBody>
-                          <p className="text-base text-default-700 whitespace-pre-wrap">{selectedCustomer.notes}</p>
+                          <p className="text-base text-default-700 whitespace-pre-wrap">
+                            {selectedCustomer.notes}
+                          </p>
                         </CardBody>
                       </Card>
                     )}
@@ -1003,27 +1159,39 @@ export default function CustomersPage() {
                       <CardHeader className="flex flex-row items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Ticket className="w-5 h-5 text-primary" />
-                          <h4 className="text-lg font-semibold">Discount Codes</h4>
+                          <h4 className="text-lg font-semibold">
+                            Discount Codes
+                          </h4>
                         </div>
                         <div className="flex gap-2">
                           <Button
-                            size="sm"
                             color="primary"
-                            variant="flat"
-                            startContent={<Tag className="w-3 h-3" />}
                             isLoading={generatingCode}
-                            onPress={() => handleGenerateDiscountCode(selectedCustomer.id, false)}
+                            size="sm"
+                            startContent={<Tag className="w-3 h-3" />}
+                            variant="flat"
+                            onPress={() =>
+                              handleGenerateDiscountCode(
+                                selectedCustomer.id,
+                                false,
+                              )
+                            }
                           >
                             Generate Code
                           </Button>
                           {selectedCustomer.email && (
                             <Button
-                              size="sm"
                               color="success"
-                              variant="flat"
-                              startContent={<Send className="w-3 h-3" />}
                               isLoading={generatingCode}
-                              onPress={() => handleGenerateDiscountCode(selectedCustomer.id, true)}
+                              size="sm"
+                              startContent={<Send className="w-3 h-3" />}
+                              variant="flat"
+                              onPress={() =>
+                                handleGenerateDiscountCode(
+                                  selectedCustomer.id,
+                                  true,
+                                )
+                              }
                             >
                               Generate & Email
                             </Button>
@@ -1031,7 +1199,8 @@ export default function CustomersPage() {
                         </div>
                       </CardHeader>
                       <CardBody>
-                        {(!selectedCustomer.discount_codes || selectedCustomer.discount_codes.length === 0) ? (
+                        {!selectedCustomer.discount_codes ||
+                        selectedCustomer.discount_codes.length === 0 ? (
                           <div className="text-center py-4 text-default-500">
                             <Ticket className="w-8 h-8 mx-auto mb-2 opacity-40" />
                             <p className="text-sm">No discount codes yet</p>
@@ -1040,6 +1209,7 @@ export default function CustomersPage() {
                           <div className="space-y-3">
                             {selectedCustomer.discount_codes.map((dc) => {
                               const st = getDiscountStatus(dc);
+
                               return (
                                 <div
                                   key={dc.id}
@@ -1047,14 +1217,40 @@ export default function CustomersPage() {
                                 >
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1">
-                                      <code className="text-sm font-mono font-bold tracking-wider text-foreground">{dc.code}</code>
-                                      <Chip size="sm" variant="flat" color={st.color}>{st.label}</Chip>
+                                      <code className="text-sm font-mono font-bold tracking-wider text-foreground">
+                                        {dc.code}
+                                      </code>
+                                      <Chip
+                                        color={st.color}
+                                        size="sm"
+                                        variant="flat"
+                                      >
+                                        {st.label}
+                                      </Chip>
                                     </div>
                                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-default-500">
                                       <span>{dc.discount_percentage}% off</span>
-                                      <span>Valid until {new Date(dc.valid_until).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
+                                      <span>
+                                        Valid until{" "}
+                                        {new Date(
+                                          dc.valid_until,
+                                        ).toLocaleDateString("en-GB", {
+                                          day: "numeric",
+                                          month: "short",
+                                          year: "numeric",
+                                        })}
+                                      </span>
                                       {dc.used_at && (
-                                        <span className="text-success-600">Used {new Date(dc.used_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
+                                        <span className="text-success-600">
+                                          Used{" "}
+                                          {new Date(
+                                            dc.used_at,
+                                          ).toLocaleDateString("en-GB", {
+                                            day: "numeric",
+                                            month: "short",
+                                            year: "numeric",
+                                          })}
+                                        </span>
                                       )}
                                     </div>
                                   </div>
@@ -1063,21 +1259,31 @@ export default function CustomersPage() {
                                       <>
                                         <Button
                                           isIconOnly
-                                          size="sm"
-                                          variant="light"
                                           color="success"
+                                          size="sm"
                                           title="Mark as Used"
-                                          onPress={() => handleToggleDiscountCode(dc.id, "mark_used")}
+                                          variant="light"
+                                          onPress={() =>
+                                            handleToggleDiscountCode(
+                                              dc.id,
+                                              "mark_used",
+                                            )
+                                          }
                                         >
                                           <CheckCircle className="w-4 h-4" />
                                         </Button>
                                         <Button
                                           isIconOnly
-                                          size="sm"
-                                          variant="light"
                                           color="warning"
+                                          size="sm"
                                           title="Deactivate"
-                                          onPress={() => handleToggleDiscountCode(dc.id, "deactivate")}
+                                          variant="light"
+                                          onPress={() =>
+                                            handleToggleDiscountCode(
+                                              dc.id,
+                                              "deactivate",
+                                            )
+                                          }
                                         >
                                           <XCircle className="w-4 h-4" />
                                         </Button>
@@ -1085,33 +1291,45 @@ export default function CustomersPage() {
                                     ) : dc.used_at ? (
                                       <Button
                                         isIconOnly
-                                        size="sm"
-                                        variant="light"
                                         color="primary"
+                                        size="sm"
                                         title="Mark as Unused"
-                                        onPress={() => handleToggleDiscountCode(dc.id, "mark_unused")}
+                                        variant="light"
+                                        onPress={() =>
+                                          handleToggleDiscountCode(
+                                            dc.id,
+                                            "mark_unused",
+                                          )
+                                        }
                                       >
                                         <Clock className="w-4 h-4" />
                                       </Button>
                                     ) : (
                                       <Button
                                         isIconOnly
-                                        size="sm"
-                                        variant="light"
                                         color="success"
+                                        size="sm"
                                         title="Activate"
-                                        onPress={() => handleToggleDiscountCode(dc.id, "activate")}
+                                        variant="light"
+                                        onPress={() =>
+                                          handleToggleDiscountCode(
+                                            dc.id,
+                                            "activate",
+                                          )
+                                        }
                                       >
                                         <CheckCircle className="w-4 h-4" />
                                       </Button>
                                     )}
                                     <Button
                                       isIconOnly
-                                      size="sm"
-                                      variant="light"
                                       color="danger"
+                                      size="sm"
                                       title="Delete Code"
-                                      onPress={() => setDiscountCodeToDelete(dc)}
+                                      variant="light"
+                                      onPress={() =>
+                                        setDiscountCodeToDelete(dc)
+                                      }
                                     >
                                       <Trash2 className="w-3.5 h-3.5" />
                                     </Button>
@@ -1127,41 +1345,53 @@ export default function CustomersPage() {
                     {/* Additional Info */}
                     <Card className="border border-divider">
                       <CardHeader>
-                        <h4 className="text-lg font-semibold">Additional Information</h4>
+                        <h4 className="text-lg font-semibold">
+                          Additional Information
+                        </h4>
                       </CardHeader>
                       <CardBody>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                            <label className="text-sm font-medium text-default-500 mb-1 block">Created</label>
+                          <div>
+                            <label className="text-sm font-medium text-default-500 mb-1 block">
+                              Created
+                            </label>
                             <p className="text-base">
-                              {new Date(selectedCustomer.created_at).toLocaleDateString('en-GB', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
+                              {new Date(
+                                selectedCustomer.created_at,
+                              ).toLocaleDateString("en-GB", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
                               })}
                             </p>
+                          </div>
+                          {selectedCustomer.updated_at &&
+                            selectedCustomer.updated_at !==
+                              selectedCustomer.created_at && (
+                              <div>
+                                <label className="text-sm font-medium text-default-500 mb-1 block">
+                                  Last Updated
+                                </label>
+                                <p className="text-base">
+                                  {new Date(
+                                    selectedCustomer.updated_at,
+                                  ).toLocaleDateString("en-GB", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </p>
+                              </div>
+                            )}
                         </div>
-                          {selectedCustomer.updated_at && selectedCustomer.updated_at !== selectedCustomer.created_at && (
-                            <div>
-                              <label className="text-sm font-medium text-default-500 mb-1 block">Last Updated</label>
-                              <p className="text-base">
-                                {new Date(selectedCustomer.updated_at).toLocaleDateString('en-GB', {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
-                              </p>
-                      </div>
-                          )}
-                  </div>
                       </CardBody>
                     </Card>
-                </div>
-              )}
+                  </div>
+                )}
               </ModalBody>
               <ModalFooter>
                 <Button variant="light" onPress={onClose}>
@@ -1179,15 +1409,15 @@ export default function CustomersPage() {
                 </Button>
               </ModalFooter>
             </>
-      )}
+          )}
         </ModalContent>
       </Modal>
 
       {/* Delete Discount Code Modal */}
       <Modal
         isOpen={!!discountCodeToDelete}
-        onClose={() => setDiscountCodeToDelete(null)}
         size="md"
+        onClose={() => setDiscountCodeToDelete(null)}
       >
         <ModalContent>
           {() => (
@@ -1197,16 +1427,26 @@ export default function CustomersPage() {
               </ModalHeader>
               <ModalBody>
                 <p className="text-default-600">
-                  Are you sure you want to delete the code <strong className="font-mono">{discountCodeToDelete?.code}</strong>? This cannot be undone.
+                  Are you sure you want to delete the code{" "}
+                  <strong className="font-mono">
+                    {discountCodeToDelete?.code}
+                  </strong>
+                  ? This cannot be undone.
                 </p>
               </ModalBody>
               <ModalFooter>
-                <Button variant="light" onPress={() => setDiscountCodeToDelete(null)}>
+                <Button
+                  variant="light"
+                  onPress={() => setDiscountCodeToDelete(null)}
+                >
                   Cancel
                 </Button>
                 <Button
                   color="danger"
-                  onPress={() => discountCodeToDelete && handleDeleteDiscountCode(discountCodeToDelete.id)}
+                  onPress={() =>
+                    discountCodeToDelete &&
+                    handleDeleteDiscountCode(discountCodeToDelete.id)
+                  }
                 >
                   Delete
                 </Button>
@@ -1218,13 +1458,13 @@ export default function CustomersPage() {
 
       {/* Delete Customer Modal */}
       <DeleteCustomerModal
+        customer={customerToDelete}
         isOpen={showDeleteModal}
         onClose={() => {
           setShowDeleteModal(false);
           setCustomerToDelete(null);
         }}
         onConfirm={handleDeleteCustomer}
-        customer={customerToDelete}
       />
     </div>
   );

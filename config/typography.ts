@@ -29,8 +29,7 @@ export const typography = {
 /** Container max-width and horizontal padding - use on section wrappers */
 export const layout = {
   /** Outer wrapper: max-width + horizontal padding */
-  container:
-    "w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8",
+  container: "w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8",
   /** Narrow content (forms, single column) */
   containerNarrow: "w-full max-w-2xl mx-auto px-4 sm:px-6 lg:px-8",
   /** Wide (hero, full-width sections that need inner constraint) */

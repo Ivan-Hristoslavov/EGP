@@ -16,14 +16,15 @@ export function useVATSettings() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await fetch("/api/admin/settings/vat");
-      
+
       if (!response.ok) {
         throw new Error("Failed to fetch VAT settings");
       }
-      
+
       const data = await response.json();
+
       setSettings(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -37,7 +38,7 @@ export function useVATSettings() {
 
     try {
       const updatedSettings = { ...settings, ...updates };
-      
+
       const response = await fetch("/api/admin/settings/vat", {
         method: "PUT",
         headers: {
@@ -51,7 +52,9 @@ export function useVATSettings() {
       }
 
       const data = await response.json();
+
       setSettings(data);
+
       return data;
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -70,4 +73,4 @@ export function useVATSettings() {
     fetchVATSettings,
     updateVATSettings,
   };
-} 
+}

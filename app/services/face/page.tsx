@@ -2,7 +2,8 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { Calendar, Clock, ArrowRight } from "lucide-react";
+import { Clock, ArrowRight } from "lucide-react";
+
 import ButtonBookNow from "@/components/ButtonBookNow";
 import { PriceWithDiscount } from "@/components/PriceWithDiscount";
 import { useServices } from "@/hooks/useServices";
@@ -12,7 +13,7 @@ export default function FaceTreatmentsPage() {
 
   // Filter services for Face category
   const faceServices = useMemo(() => {
-    return services.filter(service => service.category.name === 'FACE');
+    return services.filter((service) => service.category.name === "FACE");
   }, [services]);
 
   // Show loading state while services are being fetched
@@ -20,7 +21,7 @@ export default function FaceTreatmentsPage() {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4" />
           <p className="text-gray-600">Loading face treatments...</p>
         </div>
       </div>
@@ -62,7 +63,7 @@ export default function FaceTreatmentsPage() {
                   )}
                 </div>
 
-                <Link href={`/services/${service.slug}`} className="flex-1">
+                <Link className="flex-1" href={`/services/${service.slug}`}>
                   {/* Service Name */}
                   <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-egp-green transition-colors">
                     {service.name}
@@ -80,21 +81,25 @@ export default function FaceTreatmentsPage() {
                 {/* Price & CTA */}
                 <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-egp-green-dark mt-auto">
                   <div>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">From</span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                      From
+                    </span>
                     <div className="text-lg w-full flex justify-center">
                       <PriceWithDiscount
-                        price={service.discounted_price ?? service.price}
-                        originalPrice={service.discount_percentage ? service.price : null}
-                        discountPercentage={service.discount_percentage}
-                        size="md"
-                        layout="stack"
                         align="center"
+                        discountPercentage={service.discount_percentage}
+                        layout="stack"
+                        originalPrice={
+                          service.discount_percentage ? service.price : null
+                        }
+                        price={service.discounted_price ?? service.price}
+                        size="md"
                       />
                     </div>
                   </div>
                   <Link
-                    href={`/book?serviceId=${service.id}`}
                     className="flex items-center gap-2 text-egp-green dark:text-white font-semibold hover:text-egp-green-dark hover:gap-3 transition-all"
+                    href={`/book?serviceId=${service.id}`}
                   >
                     <span>Book</span>
                     <ArrowRight className="w-4 h-4" />
@@ -113,7 +118,8 @@ export default function FaceTreatmentsPage() {
             Not Sure Which Treatment is Right for You?
           </h2>
           <p className="text-base sm:text-lg md:text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Book your treatment now and our experts will create a personalised treatment plan
+            Book your treatment now and our experts will create a personalised
+            treatment plan
           </p>
           <ButtonBookNow size="lg" variant="secondary" />
         </div>
@@ -121,4 +127,3 @@ export default function FaceTreatmentsPage() {
     </div>
   );
 }
-

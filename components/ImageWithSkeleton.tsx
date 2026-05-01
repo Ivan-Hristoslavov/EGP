@@ -25,6 +25,7 @@ export default function ImageWithSkeleton({
 
   useEffect(() => {
     isMountedRef.current = true;
+
     return () => {
       isMountedRef.current = false;
     };
@@ -57,14 +58,14 @@ export default function ImageWithSkeleton({
           />
           <Image
             {...props}
-            fill={fill}
-            width={fill ? undefined : (width || 800)}
-            height={fill ? undefined : (height || 600)}
             className={`transition-opacity duration-700 ease-out ${
               isLoaded ? "opacity-100" : "opacity-0"
             } ${className}`}
-            onLoad={handleLoad}
+            fill={fill}
+            height={fill ? undefined : height || 600}
+            width={fill ? undefined : width || 800}
             onError={handleError}
+            onLoad={handleLoad}
           />
         </>
       )}
@@ -76,4 +77,3 @@ export default function ImageWithSkeleton({
     </div>
   );
 }
-

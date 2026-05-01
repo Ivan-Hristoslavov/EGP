@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle, Calendar, Gift, Star, ArrowRight } from "lucide-react";
+
 import { siteConfig } from "@/config/site";
 
 function MembershipSuccessContent() {
@@ -51,8 +52,10 @@ function MembershipSuccessContent() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-pink-50/50 to-purple-50/50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Verifying your membership...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-400">
+            Verifying your membership...
+          </p>
         </div>
       </div>
     );
@@ -65,8 +68,8 @@ function MembershipSuccessContent() {
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
             <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
             <Link
-              href="/membership"
               className="inline-flex items-center px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors"
+              href="/membership"
             >
               Back to Membership
             </Link>
@@ -88,72 +91,98 @@ function MembershipSuccessContent() {
             Welcome to {membership?.plan_name}!
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-400">
-            Your membership has been successfully activated. You can now enjoy all the exclusive benefits.
+            Your membership has been successfully activated. You can now enjoy
+            all the exclusive benefits.
           </p>
         </div>
 
         {/* Membership Details */}
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Your Membership Details</h2>
-          
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            Your Membership Details
+          </h2>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Plan Information</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Plan Information
+              </h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Plan:</span>
-                  <span className="font-medium text-gray-900 dark:text-white">{membership?.plan_name}</span>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Plan:
+                  </span>
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    {membership?.plan_name}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Status:</span>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Status:
+                  </span>
                   <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 rounded-full text-sm font-medium">
                     Active
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Started:</span>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Started:
+                  </span>
                   <span className="font-medium text-gray-900 dark:text-white">
                     {new Date(membership?.start_date).toLocaleDateString()}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Next Billing:</span>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Next Billing:
+                  </span>
                   <span className="font-medium text-gray-900 dark:text-white">
-                    {new Date(membership?.next_billing_date).toLocaleDateString()}
+                    {new Date(
+                      membership?.next_billing_date,
+                    ).toLocaleDateString()}
                   </span>
                 </div>
               </div>
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Your Benefits</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Your Benefits
+              </h3>
               <div className="space-y-3">
                 {membership?.discount_percentage > 0 && (
                   <div className="flex items-center">
                     <Gift className="w-5 h-5 text-rose-500 mr-3" />
                     <span className="text-gray-700 dark:text-gray-300">
-                      {membership.discount_percentage}% discount on all treatments
+                      {membership.discount_percentage}% discount on all
+                      treatments
                     </span>
                   </div>
                 )}
                 {membership?.priority_booking && (
                   <div className="flex items-center">
                     <Calendar className="w-5 h-5 text-rose-500 mr-3" />
-                    <span className="text-gray-700 dark:text-gray-300">Priority booking access</span>
+                    <span className="text-gray-700 dark:text-gray-300">
+                      Priority booking access
+                    </span>
                   </div>
                 )}
                 {membership?.free_treatments_per_month > 0 && (
                   <div className="flex items-center">
                     <Star className="w-5 h-5 text-rose-500 mr-3" />
                     <span className="text-gray-700 dark:text-gray-300">
-                      {membership.free_treatments_per_month} free treatment{membership.free_treatments_per_month > 1 ? 's' : ''} per month
+                      {membership.free_treatments_per_month} free treatment
+                      {membership.free_treatments_per_month > 1 ? "s" : ""} per
+                      month
                     </span>
                   </div>
                 )}
                 {membership?.exclusive_access && (
                   <div className="flex items-center">
                     <Star className="w-5 h-5 text-rose-500 mr-3" />
-                    <span className="text-gray-700 dark:text-gray-300">Exclusive member access</span>
+                    <span className="text-gray-700 dark:text-gray-300">
+                      Exclusive member access
+                    </span>
                   </div>
                 )}
               </div>
@@ -163,20 +192,25 @@ function MembershipSuccessContent() {
 
         {/* Next Steps */}
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">What's Next?</h2>
-          
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            What's Next?
+          </h2>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-12 h-12 bg-rose-100 dark:bg-rose-900/30 rounded-full mb-4">
                 <Calendar className="w-6 h-6 text-rose-600 dark:text-rose-400" />
               </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Book Your First Treatment</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                Book Your First Treatment
+              </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Use your new membership benefits to book your next treatment with priority access.
+                Use your new membership benefits to book your next treatment
+                with priority access.
               </p>
               <Link
-                href="/book"
                 className="inline-flex items-center text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 font-medium"
+                href="/book"
               >
                 Book Now <ArrowRight className="w-4 h-4 ml-1" />
               </Link>
@@ -186,13 +220,16 @@ function MembershipSuccessContent() {
               <div className="inline-flex items-center justify-center w-12 h-12 bg-rose-100 dark:bg-rose-900/30 rounded-full mb-4">
                 <Star className="w-6 h-6 text-rose-600 dark:text-rose-400" />
               </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Explore Your Dashboard</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                Explore Your Dashboard
+              </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Manage your membership, view benefits, and track your treatment history.
+                Manage your membership, view benefits, and track your treatment
+                history.
               </p>
               <Link
-                href="/customer/dashboard"
                 className="inline-flex items-center text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 font-medium"
+                href="/customer/dashboard"
               >
                 View Dashboard <ArrowRight className="w-4 h-4 ml-1" />
               </Link>
@@ -202,13 +239,16 @@ function MembershipSuccessContent() {
               <div className="inline-flex items-center justify-center w-12 h-12 bg-rose-100 dark:bg-rose-900/30 rounded-full mb-4">
                 <Gift className="w-6 h-6 text-rose-600 dark:text-rose-400" />
               </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Share the Benefits</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                Share the Benefits
+              </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Refer friends and family to enjoy exclusive member benefits together.
+                Refer friends and family to enjoy exclusive member benefits
+                together.
               </p>
               <Link
-                href="/customer/dashboard"
                 className="inline-flex items-center text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 font-medium"
+                href="/customer/dashboard"
               >
                 Refer Friends <ArrowRight className="w-4 h-4 ml-1" />
               </Link>
@@ -223,14 +263,14 @@ function MembershipSuccessContent() {
           </p>
           <div className="flex justify-center space-x-6">
             <a
-              href={`tel:${siteConfig.contact.phone.replace(/\s/g, "")}`}
               className="text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 font-medium"
+              href={`tel:${siteConfig.contact.phone.replace(/\s/g, "")}`}
             >
               {siteConfig.contact.phone}
             </a>
             <a
-              href={`mailto:${siteConfig.contact.email}`}
               className="text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 font-medium"
+              href={`mailto:${siteConfig.contact.email}`}
             >
               {siteConfig.contact.email}
             </a>
@@ -243,14 +283,16 @@ function MembershipSuccessContent() {
 
 export default function MembershipSuccessPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-pink-50/50 to-purple-50/50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-pink-50/50 to-purple-50/50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4" />
+            <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <MembershipSuccessContent />
     </Suspense>
   );

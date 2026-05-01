@@ -1,12 +1,23 @@
-import type { Metadata } from 'next';
-import { siteConfig } from "@/config/site";
+import type { Metadata } from "next";
+
 import Link from "next/link";
-import { Calendar, Clock, CheckCircle, Star, ArrowRight, Phone, Shield } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  CheckCircle,
+  Star,
+  ArrowRight,
+  Phone,
+  Shield,
+} from "lucide-react";
+
+import { siteConfig } from "@/config/site";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `Baby Botox Treatment | ${siteConfig.name}`,
-    description: "Baby Botox treatment in London - subtle anti-wrinkle injections for natural-looking results. Expert practitioners, proven results.",
+    description:
+      "Baby Botox treatment in London - subtle anti-wrinkle injections for natural-looking results. Expert practitioners, proven results.",
     alternates: {
       canonical: `${siteConfig.url}/services/baby-botox`,
     },
@@ -16,34 +27,34 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function BabyBotoxPage() {
   const treatmentDetails = [
     "Subtle, natural-looking results",
-    "Preventive anti-ageing approach", 
+    "Preventive anti-ageing approach",
     "Minimal downtime",
     "Quick 15-20 minute procedure",
     "Results last 3-4 months",
-    "Suitable for first-time patients"
+    "Suitable for first-time patients",
   ];
 
   const procedureSteps = [
     {
       step: "1",
       title: "Consultation",
-      description: "Assessment of your skin and discussion of desired results"
+      description: "Assessment of your skin and discussion of desired results",
     },
     {
       step: "2",
-      title: "Treatment Planning", 
-      description: "Customised injection plan for natural-looking results"
+      title: "Treatment Planning",
+      description: "Customised injection plan for natural-looking results",
     },
     {
       step: "3",
       title: "Injection Process",
-      description: "Quick and virtually painless injections"
+      description: "Quick and virtually painless injections",
     },
     {
       step: "4",
       title: "Aftercare",
-      description: "Post-treatment care instructions and follow-up"
-    }
+      description: "Post-treatment care instructions and follow-up",
+    },
   ];
 
   return (
@@ -60,19 +71,20 @@ export default function BabyBotoxPage() {
               Baby Botox Treatment
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8">
-              Subtle, natural-looking anti-wrinkle injections for a refreshed appearance
+              Subtle, natural-looking anti-wrinkle injections for a refreshed
+              appearance
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/book-consultation"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-egp-green to-egp-green-dark text-white text-lg font-semibold rounded-full hover:from-egp-green-dark hover:to-egp-green-darker transition-all shadow-lg hover:shadow-xl"
+                href="/book-consultation"
               >
                 <Calendar className="w-5 h-5" />
                 Book Consultation - £199
               </Link>
               <Link
-                href={`tel:${siteConfig.contact.phone}`}
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-egp-green text-egp-green dark:text-white text-lg font-semibold rounded-full hover:bg-egp-green hover:text-white transition-all"
+                href={`tel:${siteConfig.contact.phone}`}
               >
                 <Phone className="w-5 h-5" />
                 Call Us
@@ -93,21 +105,32 @@ export default function BabyBotoxPage() {
                   About Baby Botox
                 </h2>
                 <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
-                  Baby Botox is a preventive approach to anti-ageing that uses smaller doses of botulinum toxin to create subtle, natural-looking results. Perfect for younger patients or those seeking minimal intervention.
+                  Baby Botox is a preventive approach to anti-ageing that uses
+                  smaller doses of botulinum toxin to create subtle,
+                  natural-looking results. Perfect for younger patients or those
+                  seeking minimal intervention.
                 </p>
                 <div className="grid grid-cols-2 gap-6 mb-8">
                   <div className="flex items-center gap-3">
                     <Clock className="w-6 h-6 text-egp-green" />
                     <div>
-                      <div className="font-semibold text-gray-900 dark:text-white">Duration</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-300">15-20 minutes</div>
+                      <div className="font-semibold text-gray-900 dark:text-white">
+                        Duration
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-300">
+                        15-20 minutes
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <Shield className="w-6 h-6 text-egp-green" />
                     <div>
-                      <div className="font-semibold text-gray-900 dark:text-white">Results</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-300">3-4 months</div>
+                      <div className="font-semibold text-gray-900 dark:text-white">
+                        Results
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-300">
+                        3-4 months
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -122,7 +145,9 @@ export default function BabyBotoxPage() {
                   {treatmentDetails.map((benefit, index) => (
                     <li key={index} className="flex items-start">
                       <CheckCircle className="w-6 h-6 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-600 dark:text-gray-300">{benefit}</span>
+                      <span className="text-gray-600 dark:text-gray-300">
+                        {benefit}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -146,7 +171,9 @@ export default function BabyBotoxPage() {
                   className="bg-white dark:bg-egp-green rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all"
                 >
                   <div className="w-12 h-12 bg-gradient-to-br from-egp-green to-egp-green-dark rounded-full flex items-center justify-center mb-4">
-                    <span className="text-white font-bold text-lg">{step.step}</span>
+                    <span className="text-white font-bold text-lg">
+                      {step.step}
+                    </span>
                   </div>
                   <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3">
                     {step.title}
@@ -177,15 +204,15 @@ export default function BabyBotoxPage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
-                  href="/book-consultation"
                   className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#9d9585] hover:bg-[#857d68] text-white text-lg font-semibold rounded-full transition-all shadow-lg hover:shadow-xl"
+                  href="/book-consultation"
                 >
                   <Calendar className="w-5 h-5" />
                   Book Now
                 </Link>
                 <Link
-                  href="/services"
                   className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-egp-green hover:bg-egp-green-dark text-white text-lg font-semibold rounded-full transition-all shadow-lg hover:shadow-xl"
+                  href="/services"
                 >
                   <ArrowRight className="w-5 h-5" />
                   View All Services

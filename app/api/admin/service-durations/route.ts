@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { supabaseAdmin } from "../../../../lib/supabase";
 
 // GET - Fetch service durations
@@ -11,18 +12,20 @@ export async function GET() {
 
     if (error) {
       console.error("Error fetching service durations:", error);
+
       return NextResponse.json(
         { error: "Failed to fetch service durations" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     return NextResponse.json({ services });
   } catch (error) {
     console.error("Unexpected error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -36,14 +39,14 @@ export async function POST(request: NextRequest) {
     if (!service_name || !duration_minutes) {
       return NextResponse.json(
         { error: "Service name and duration are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (duration_minutes <= 0) {
       return NextResponse.json(
         { error: "Duration must be positive" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -52,29 +55,31 @@ export async function POST(request: NextRequest) {
       .insert({
         service_name,
         duration_minutes,
-        buffer_minutes: buffer_minutes || 15
+        buffer_minutes: buffer_minutes || 15,
       })
       .select()
       .single();
 
     if (error) {
       console.error("Error creating service duration:", error);
+
       return NextResponse.json(
         { error: "Failed to create service duration" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     return NextResponse.json({
       success: true,
       service,
-      message: "Service duration created successfully"
+      message: "Service duration created successfully",
     });
   } catch (error) {
     console.error("Unexpected error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -88,12 +93,12 @@ export async function PUT(request: NextRequest) {
     if (!id) {
       return NextResponse.json(
         { error: "Service ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const updateData: any = {
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     };
 
     if (service_name) updateData.service_name = service_name;
@@ -101,12 +106,13 @@ export async function PUT(request: NextRequest) {
       if (duration_minutes <= 0) {
         return NextResponse.json(
           { error: "Duration must be positive" },
-          { status: 400 }
+          { status: 400 },
         );
       }
       updateData.duration_minutes = duration_minutes;
     }
-    if (buffer_minutes !== undefined) updateData.buffer_minutes = buffer_minutes;
+    if (buffer_minutes !== undefined)
+      updateData.buffer_minutes = buffer_minutes;
 
     const { data: service, error } = await supabaseAdmin
       .from("service_durations")
@@ -117,22 +123,24 @@ export async function PUT(request: NextRequest) {
 
     if (error) {
       console.error("Error updating service duration:", error);
+
       return NextResponse.json(
         { error: "Failed to update service duration" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     return NextResponse.json({
       success: true,
       service,
-      message: "Service duration updated successfully"
+      message: "Service duration updated successfully",
     });
   } catch (error) {
     console.error("Unexpected error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -146,7 +154,7 @@ export async function DELETE(request: NextRequest) {
     if (!id) {
       return NextResponse.json(
         { error: "Service ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -157,21 +165,23 @@ export async function DELETE(request: NextRequest) {
 
     if (error) {
       console.error("Error deleting service duration:", error);
+
       return NextResponse.json(
         { error: "Failed to delete service duration" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     return NextResponse.json({
       success: true,
-      message: "Service duration deleted successfully"
+      message: "Service duration deleted successfully",
     });
   } catch (error) {
     console.error("Unexpected error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

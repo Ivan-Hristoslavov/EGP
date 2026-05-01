@@ -1,17 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getStripeServer } from '@/lib/stripe';
-import { supabaseAdmin } from '@/lib/supabase';
-import { sendEmail } from '@/lib/sendgrid-smtp';
-import { getAdminContactInfo } from '@/lib/admin-profile';
-import { getEmailHead, EMAIL } from '@/lib/email-theme';
+import { NextRequest, NextResponse } from "next/server";
+
+import { getStripeServer } from "@/lib/stripe";
+import { supabaseAdmin } from "@/lib/supabase";
+import { sendEmail } from "@/lib/sendgrid-smtp";
+import { getAdminContactInfo } from "@/lib/admin-profile";
+import { getEmailHead, EMAIL } from "@/lib/email-theme";
 
 export async function POST(request: NextRequest) {
   try {
     const stripe = getStripeServer();
+
     if (!stripe) {
       return NextResponse.json(
-        { error: 'Payment service is not configured' },
-        { status: 503 }
+        { error: "Payment service is not configured" },
+        { status: 503 },
       );
     }
 
@@ -20,110 +22,157 @@ export async function POST(request: NextRequest) {
 
     if (!paymentIntentId) {
       return NextResponse.json(
-        { error: 'Payment intent ID is required' },
-        { status: 400 }
+        { error: "Payment intent ID is required" },
+        { status: 400 },
       );
     }
 
     // Retrieve payment intent to check status
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
-    if (paymentIntent.status === 'succeeded') {
+    if (paymentIntent.status === "succeeded") {
       // Payment successful - create booking record from metadata
       const metadata = paymentIntent.metadata || {};
-      
-      console.log('=== Payment Confirmed - Processing Booking ===');
-      console.log('PaymentIntent ID:', paymentIntentId);
-      console.log('Metadata received:', JSON.stringify(metadata, null, 2));
-      
+
+      console.log("=== Payment Confirmed - Processing Booking ===");
+      console.log("PaymentIntent ID:", paymentIntentId);
+      console.log("Metadata received:", JSON.stringify(metadata, null, 2));
+
       const services = metadata.services ? JSON.parse(metadata.services) : [];
       const selectedDate = metadata.selectedDate;
       const selectedTime = metadata.selectedTime;
       const teamMemberId = metadata.teamMemberId || null;
-      const serviceDurationMinutes = metadata.serviceDurationMinutes ? parseInt(metadata.serviceDurationMinutes) : null;
+      const serviceDurationMinutes = metadata.serviceDurationMinutes
+        ? parseInt(metadata.serviceDurationMinutes)
+        : null;
 
-      if (!selectedDate || !selectedTime || !services || services.length === 0) {
-        console.error('Missing booking information:', { selectedDate, selectedTime, servicesCount: services.length });
-        return NextResponse.json({
-          success: false,
-          error: 'Missing booking information in payment metadata',
-        }, { status: 400 });
+      if (
+        !selectedDate ||
+        !selectedTime ||
+        !services ||
+        services.length === 0
+      ) {
+        console.error("Missing booking information:", {
+          selectedDate,
+          selectedTime,
+          servicesCount: services.length,
+        });
+
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Missing booking information in payment metadata",
+          },
+          { status: 400 },
+        );
       }
 
       // Total amount: from metadata when deposit (full booking total), else from services
-      const isDeposit = metadata.isDeposit === 'true';
-      const totalAmountFromMeta = metadata.totalAmount != null ? parseFloat(String(metadata.totalAmount)) : NaN;
-      const totalAmount = (isDeposit && !Number.isNaN(totalAmountFromMeta)) ? totalAmountFromMeta : services.reduce((sum: number, s: any) => sum + (s.price * s.quantity), 0);
+      const isDeposit = metadata.isDeposit === "true";
+      const totalAmountFromMeta =
+        metadata.totalAmount != null
+          ? parseFloat(String(metadata.totalAmount))
+          : NaN;
+      const totalAmount =
+        isDeposit && !Number.isNaN(totalAmountFromMeta)
+          ? totalAmountFromMeta
+          : services.reduce(
+              (sum: number, s: any) => sum + s.price * s.quantity,
+              0,
+            );
       const amountPaidPence = paymentIntent.amount;
       const amountPaid = amountPaidPence / 100;
-      const remainingAmount = isDeposit && metadata.remainingAmount != null ? parseFloat(String(metadata.remainingAmount)) : 0;
-      const paymentType = isDeposit && amountPaid < totalAmount ? 'deposit' : 'full';
-      const serviceNames = services.map((s: any) => `${s.name}${s.quantity > 1 ? ` (x${s.quantity})` : ''}`).join(', ');
+      const remainingAmount =
+        isDeposit && metadata.remainingAmount != null
+          ? parseFloat(String(metadata.remainingAmount))
+          : 0;
+      const paymentType =
+        isDeposit && amountPaid < totalAmount ? "deposit" : "full";
+      const serviceNames = services
+        .map(
+          (s: any) => `${s.name}${s.quantity > 1 ? ` (x${s.quantity})` : ""}`,
+        )
+        .join(", ");
 
       // Get customer data from metadata - use defaults if not provided
-      const customerName = metadata.customerName && metadata.customerName.trim() !== '' 
-        ? metadata.customerName.trim() 
-        : 'Guest Customer';
-      const customerEmail = metadata.customerEmail && metadata.customerEmail.trim() !== '' 
-        ? metadata.customerEmail.trim().toLowerCase() 
-        : null;
-      const customerPhone = metadata.customerPhone && metadata.customerPhone.trim() !== '' 
-        ? metadata.customerPhone.trim() 
-        : null;
+      const customerName =
+        metadata.customerName && metadata.customerName.trim() !== ""
+          ? metadata.customerName.trim()
+          : "Guest Customer";
+      const customerEmail =
+        metadata.customerEmail && metadata.customerEmail.trim() !== ""
+          ? metadata.customerEmail.trim().toLowerCase()
+          : null;
+      const customerPhone =
+        metadata.customerPhone && metadata.customerPhone.trim() !== ""
+          ? metadata.customerPhone.trim()
+          : null;
 
-      console.log('Customer data from metadata:', { customerName, customerEmail, customerPhone });
+      console.log("Customer data from metadata:", {
+        customerName,
+        customerEmail,
+        customerPhone,
+      });
 
       // Try to get email from Stripe customer if not in metadata
       let finalCustomerEmail = customerEmail;
+
       if (!finalCustomerEmail && paymentIntent.customer) {
         try {
-          const stripeCustomer = await stripe.customers.retrieve(paymentIntent.customer as string);
-          if (stripeCustomer && !stripeCustomer.deleted && stripeCustomer.email) {
+          const stripeCustomer = await stripe.customers.retrieve(
+            paymentIntent.customer as string,
+          );
+
+          if (
+            stripeCustomer &&
+            !stripeCustomer.deleted &&
+            stripeCustomer.email
+          ) {
             finalCustomerEmail = stripeCustomer.email.toLowerCase();
-            console.log('Got email from Stripe customer:', finalCustomerEmail);
+            console.log("Got email from Stripe customer:", finalCustomerEmail);
           }
         } catch (error) {
-          console.warn('Could not retrieve customer email from Stripe:', error);
+          console.warn("Could not retrieve customer email from Stripe:", error);
         }
       }
 
       // Parse name into first_name and last_name
-      const nameParts = customerName.trim().split(' ');
-      const firstName = nameParts[0] || 'Guest';
-      const lastName = nameParts.slice(1).join(' ') || 'Customer';
+      const nameParts = customerName.trim().split(" ");
+      const firstName = nameParts[0] || "Guest";
+      const lastName = nameParts.slice(1).join(" ") || "Customer";
 
       // === STEP 1: Create or Find Customer ===
       let customerId: string | null = null;
-      
+
       if (finalCustomerEmail) {
         // Try to find existing customer by email
         const { data: existingCustomer, error: findError } = await supabaseAdmin
-          .from('customers')
-          .select('id, first_name, last_name, email, phone')
-          .eq('email', finalCustomerEmail)
+          .from("customers")
+          .select("id, first_name, last_name, email, phone")
+          .eq("email", finalCustomerEmail)
           .single();
 
         if (existingCustomer && !findError) {
           // Update existing customer with latest info
           customerId = existingCustomer.id;
           const { error: updateError } = await supabaseAdmin
-            .from('customers')
+            .from("customers")
             .update({
               first_name: firstName,
               last_name: lastName,
               phone: customerPhone || existingCustomer.phone,
             })
-            .eq('id', customerId);
-          
+            .eq("id", customerId);
+
           if (updateError) {
-            console.warn('Could not update existing customer:', updateError);
+            console.warn("Could not update existing customer:", updateError);
           } else {
-            console.log('Updated existing customer:', customerId);
+            console.log("Updated existing customer:", customerId);
           }
         } else {
           // Create new customer with email
           const { data: newCustomer, error: createError } = await supabaseAdmin
-            .from('customers')
+            .from("customers")
             .insert({
               first_name: firstName,
               last_name: lastName,
@@ -132,40 +181,47 @@ export async function POST(request: NextRequest) {
               // password_hash is required in some setups - provide a placeholder for Stripe customers
               password_hash: `stripe_customer_${Date.now()}`,
             })
-            .select('id')
+            .select("id")
             .single();
 
           if (createError) {
-            console.error('Error creating customer:', createError);
+            console.error("Error creating customer:", createError);
             // Try without password_hash in case column is nullable
-            const { data: newCustomer2, error: createError2 } = await supabaseAdmin
-              .from('customers')
-              .insert({
-                first_name: firstName,
-                last_name: lastName,
-                email: finalCustomerEmail,
-                phone: customerPhone,
-              })
-              .select('id')
-              .single();
-            
+            const { data: newCustomer2, error: createError2 } =
+              await supabaseAdmin
+                .from("customers")
+                .insert({
+                  first_name: firstName,
+                  last_name: lastName,
+                  email: finalCustomerEmail,
+                  phone: customerPhone,
+                })
+                .select("id")
+                .single();
+
             if (!createError2 && newCustomer2) {
               customerId = newCustomer2.id;
-              console.log('Created customer (without password_hash):', customerId);
+              console.log(
+                "Created customer (without password_hash):",
+                customerId,
+              );
             } else {
-              console.error('Failed to create customer even without password_hash:', createError2);
+              console.error(
+                "Failed to create customer even without password_hash:",
+                createError2,
+              );
             }
           } else if (newCustomer) {
             customerId = newCustomer.id;
-            console.log('Created new customer:', customerId);
+            console.log("Created new customer:", customerId);
           }
         }
       } else {
         // No email - create customer with temporary email
         const tempEmail = `booking_${paymentIntentId.slice(-10)}@stripe.guest`;
-        
+
         const { data: newCustomer, error: createError } = await supabaseAdmin
-          .from('customers')
+          .from("customers")
           .insert({
             first_name: firstName,
             last_name: lastName,
@@ -173,34 +229,38 @@ export async function POST(request: NextRequest) {
             phone: customerPhone,
             password_hash: `stripe_guest_${Date.now()}`,
           })
-          .select('id')
+          .select("id")
           .single();
 
         if (createError) {
-          console.error('Error creating guest customer:', createError);
+          console.error("Error creating guest customer:", createError);
           // Try without password_hash
-          const { data: newCustomer2, error: createError2 } = await supabaseAdmin
-            .from('customers')
-            .insert({
-              first_name: firstName,
-              last_name: lastName,
-              email: tempEmail,
-              phone: customerPhone,
-            })
-            .select('id')
-            .single();
-          
+          const { data: newCustomer2, error: createError2 } =
+            await supabaseAdmin
+              .from("customers")
+              .insert({
+                first_name: firstName,
+                last_name: lastName,
+                email: tempEmail,
+                phone: customerPhone,
+              })
+              .select("id")
+              .single();
+
           if (!createError2 && newCustomer2) {
             customerId = newCustomer2.id;
-            console.log('Created guest customer (without password_hash):', customerId);
+            console.log(
+              "Created guest customer (without password_hash):",
+              customerId,
+            );
           }
         } else if (newCustomer) {
           customerId = newCustomer.id;
-          console.log('Created guest customer:', customerId);
+          console.log("Created guest customer:", customerId);
         }
       }
 
-      console.log('Final customer ID:', customerId);
+      console.log("Final customer ID:", customerId);
 
       // === STEP 2: Create Booking ===
       const bookingInsert: Record<string, unknown> = {
@@ -215,37 +275,47 @@ export async function POST(request: NextRequest) {
         total_amount: totalAmount,
         amount_paid: amountPaid,
         payment_type: paymentType,
-        remaining_amount: paymentType === 'deposit' ? remainingAmount : 0,
+        remaining_amount: paymentType === "deposit" ? remainingAmount : 0,
         team_member_id: teamMemberId || null,
         service_duration_minutes: serviceDurationMinutes || null,
-        status: 'confirmed',
-        payment_status: 'paid',
+        status: "confirmed",
+        payment_status: "paid",
         notes: `Payment via Stripe - Payment Intent: ${paymentIntentId}`,
       };
       const { data: booking, error: bookingError } = await supabaseAdmin
-        .from('bookings')
+        .from("bookings")
         .insert(bookingInsert)
         .select()
         .single();
-      
+
       if (bookingError) {
-        console.error('Error creating booking:', bookingError);
-        return NextResponse.json({
-          success: false,
-          error: 'Failed to create booking',
-          details: bookingError.message,
-        }, { status: 500 });
+        console.error("Error creating booking:", bookingError);
+
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Failed to create booking",
+            details: bookingError.message,
+          },
+          { status: 500 },
+        );
       }
 
-      console.log('Booking created:', booking.id, 'Number:', booking.booking_number);
+      console.log(
+        "Booking created:",
+        booking.id,
+        "Number:",
+        booking.booking_number,
+      );
 
       // If booking was created but booking_number wasn't returned, fetch it again
       if (booking && !booking.booking_number) {
         const { data: updatedBooking } = await supabaseAdmin
-          .from('bookings')
-          .select('*')
-          .eq('id', booking.id)
+          .from("bookings")
+          .select("*")
+          .eq("id", booking.id)
           .single();
+
         if (updatedBooking) {
           Object.assign(booking, updatedBooking);
         }
@@ -253,56 +323,64 @@ export async function POST(request: NextRequest) {
 
       // === STEP 3: Create Payment Record ===
       const { data: payment, error: paymentError } = await supabaseAdmin
-        .from('payments')
+        .from("payments")
         .insert({
           booking_id: booking.id,
           customer_id: customerId, // May be null
           amount: amountPaid,
           payment_type: paymentType,
-          payment_method: 'card',
-          payment_status: 'paid',
-          payment_date: new Date().toISOString().split('T')[0],
+          payment_method: "card",
+          payment_status: "paid",
+          payment_date: new Date().toISOString().split("T")[0],
           reference: paymentIntentId,
-          notes: paymentType === 'deposit' ? `Deposit (Stripe) for ${serviceNames} - £${remainingAmount.toFixed(2)} due on arrival` : `Stripe Payment for ${serviceNames}`,
+          notes:
+            paymentType === "deposit"
+              ? `Deposit (Stripe) for ${serviceNames} - £${remainingAmount.toFixed(2)} due on arrival`
+              : `Stripe Payment for ${serviceNames}`,
         })
         .select()
         .single();
 
       if (paymentError) {
-        console.error('Error creating payment record:', paymentError);
+        console.error("Error creating payment record:", paymentError);
         // Don't fail the whole process - booking is already created
       } else {
-        console.log('Payment record created:', payment.id);
+        console.log("Payment record created:", payment.id);
       }
 
       // === STEP 4: Send Confirmation Email ===
       // Get team member details if available
       let teamMemberName = null;
+
       if (teamMemberId) {
         const { data: teamMember } = await supabaseAdmin
-          .from('team')
-          .select('name, role')
-          .eq('id', teamMemberId)
+          .from("team")
+          .select("name, role")
+          .eq("id", teamMemberId)
           .single();
+
         if (teamMember) {
           teamMemberName = `${teamMember.name} (${teamMember.role})`;
         }
       }
 
       // Send booking confirmation email to customer
-      if (finalCustomerEmail && !finalCustomerEmail.includes('@stripe.guest')) {
+      if (finalCustomerEmail && !finalCustomerEmail.includes("@stripe.guest")) {
         try {
           const contactInfo = await getAdminContactInfo();
-          const bookingDate = new Date(selectedDate).toLocaleDateString('en-GB', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          });
+          const bookingDate = new Date(selectedDate).toLocaleDateString(
+            "en-GB",
+            {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            },
+          );
 
-          const durationText = serviceDurationMinutes 
+          const durationText = serviceDurationMinutes
             ? `${Math.floor(serviceDurationMinutes / 60)}h ${serviceDurationMinutes % 60}m`
-            : 'N/A';
+            : "N/A";
 
           const emailSubject = `Payment Confirmed - Booking for ${serviceNames}`;
           const emailHtml = generatePaymentConfirmationEmail({
@@ -313,9 +391,9 @@ export async function POST(request: NextRequest) {
             duration: durationText,
             totalAmount: totalAmount,
             amountPaid: amountPaid,
-            remainingAmount: paymentType === 'deposit' ? remainingAmount : 0,
+            remainingAmount: paymentType === "deposit" ? remainingAmount : 0,
             paymentType: paymentType,
-            paymentMethod: 'Card (Stripe)',
+            paymentMethod: "Card (Stripe)",
             paymentIntentId: paymentIntentId,
             bookingId: booking.id,
             bookingNumber: booking.booking_number || booking.id,
@@ -332,9 +410,9 @@ export async function POST(request: NextRequest) {
             duration: durationText,
             totalAmount: totalAmount,
             amountPaid: amountPaid,
-            remainingAmount: paymentType === 'deposit' ? remainingAmount : 0,
+            remainingAmount: paymentType === "deposit" ? remainingAmount : 0,
             paymentType: paymentType,
-            paymentMethod: 'Card (Stripe)',
+            paymentMethod: "Card (Stripe)",
             paymentIntentId: paymentIntentId,
             bookingId: booking.id,
             bookingNumber: booking.booking_number || booking.id,
@@ -350,24 +428,34 @@ export async function POST(request: NextRequest) {
             html: emailHtml,
           });
 
-          console.log('Payment confirmation email sent to:', finalCustomerEmail);
+          console.log(
+            "Payment confirmation email sent to:",
+            finalCustomerEmail,
+          );
         } catch (emailError) {
-          console.error('Error sending payment confirmation email:', emailError);
+          console.error(
+            "Error sending payment confirmation email:",
+            emailError,
+          );
           // Don't fail the booking if email fails
         }
       }
 
       // === STEP 5: Send Admin Notification Email ===
       const adminEmail = process.env.ADMIN_EMAIL;
+
       if (adminEmail) {
         try {
-          const bookingDateFormatted = new Date(selectedDate).toLocaleDateString('en-GB');
+          const bookingDateFormatted = new Date(
+            selectedDate,
+          ).toLocaleDateString("en-GB");
           const adminSubject = `New Paid Booking - ${customerName}`;
           const L = EMAIL.light;
-          const adminDepositRows = paymentType === 'deposit' && amountPaid > 0 && remainingAmount > 0
-            ? `<div style="padding:10px 0;border-bottom:1px solid #e7e4df"><span style="color:${L.muted};font-size:13px">Paid (deposit)</span> · <span style="color:${L.text};font-weight:600">£${amountPaid.toFixed(2)}</span></div>
+          const adminDepositRows =
+            paymentType === "deposit" && amountPaid > 0 && remainingAmount > 0
+              ? `<div style="padding:10px 0;border-bottom:1px solid #e7e4df"><span style="color:${L.muted};font-size:13px">Paid (deposit)</span> · <span style="color:${L.text};font-weight:600">£${amountPaid.toFixed(2)}</span></div>
 <div style="padding:10px 0"><span style="color:${L.muted};font-size:13px">Due on arrival</span> · <span style="color:${L.text};font-weight:500">£${remainingAmount.toFixed(2)}</span></div>`
-            : '';
+              : "";
           const adminHtml = `
 <!DOCTYPE html>
 <html lang="en">
@@ -386,8 +474,8 @@ ${getEmailHead()}
 <div class="email-card" style="background:${L.cardBg};border:1px solid ${L.cardBorder};margin:0 0 20px;padding:20px;border-radius:8px">
 <div class="email-card-title" style="font-size:11px;letter-spacing:.1em;color:${L.green};margin-bottom:12px;font-weight:600">CUSTOMER</div>
 <div style="padding:8px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted}">Name</span> · ${customerName}</div>
-<div style="padding:8px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted}">Email</span> · ${finalCustomerEmail || '—'}</div>
-<div style="padding:8px 0;color:${L.text}"><span style="color:${L.muted}">Phone</span> · ${customerPhone || '—'}</div>
+<div style="padding:8px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted}">Email</span> · ${finalCustomerEmail || "—"}</div>
+<div style="padding:8px 0;color:${L.text}"><span style="color:${L.muted}">Phone</span> · ${customerPhone || "—"}</div>
 </div>
 <div class="email-card" style="background:${L.cardBg};border:1px solid ${L.cardBorder};margin:0 0 20px;padding:20px;border-radius:8px">
 <div class="email-card-title" style="font-size:11px;letter-spacing:.1em;color:${L.green};margin-bottom:12px;font-weight:600">BOOKING</div>
@@ -403,15 +491,16 @@ ${adminDepositRows}
 </div>
 </body>
 </html>`.trim();
-          const adminDepositText = paymentType === 'deposit' && amountPaid > 0 && remainingAmount > 0
-            ? `Paid (deposit): £${amountPaid.toFixed(2)}\nDue on arrival: £${remainingAmount.toFixed(2)}\n\n`
-            : '';
+          const adminDepositText =
+            paymentType === "deposit" && amountPaid > 0 && remainingAmount > 0
+              ? `Paid (deposit): £${amountPaid.toFixed(2)}\nDue on arrival: £${remainingAmount.toFixed(2)}\n\n`
+              : "";
           const adminText = `
 New Paid Booking - EGP Aesthetics
 
 Customer: ${customerName}
-Email: ${finalCustomerEmail || 'Not provided'}
-Phone: ${customerPhone || 'Not provided'}
+Email: ${finalCustomerEmail || "Not provided"}
+Phone: ${customerPhone || "Not provided"}
 
 Service: ${serviceNames}
 Date: ${bookingDateFormatted}
@@ -429,17 +518,20 @@ Payment via Stripe - ${paymentIntentId}
             html: adminHtml,
           });
 
-          console.log('Admin notification email sent to:', adminEmail);
+          console.log("Admin notification email sent to:", adminEmail);
         } catch (adminEmailError) {
-          console.error('Error sending admin notification email:', adminEmailError);
+          console.error(
+            "Error sending admin notification email:",
+            adminEmailError,
+          );
         }
       }
 
-      console.log('=== Booking Process Completed Successfully ===');
-      console.log('Booking ID:', booking.id);
-      console.log('Customer ID:', customerId);
-      console.log('Payment ID:', payment?.id || 'Not created');
-      
+      console.log("=== Booking Process Completed Successfully ===");
+      console.log("Booking ID:", booking.id);
+      console.log("Customer ID:", customerId);
+      console.log("Payment ID:", payment?.id || "Not created");
+
       return NextResponse.json({
         success: true,
         paymentIntent,
@@ -451,14 +543,15 @@ Payment via Stripe - ${paymentIntentId}
       return NextResponse.json({
         success: false,
         status: paymentIntent.status,
-        error: 'Payment not completed',
+        error: "Payment not completed",
       });
     }
   } catch (error) {
-    console.error('Error confirming payment:', error);
+    console.error("Error confirming payment:", error);
+
     return NextResponse.json(
-      { error: 'Failed to confirm payment' },
-      { status: 500 }
+      { error: "Failed to confirm payment" },
+      { status: 500 },
     );
   }
 }
@@ -482,17 +575,23 @@ function generatePaymentConfirmationEmail(data: {
   contactEmail: string;
 }): string {
   const L = EMAIL.light;
-  const servicesList = data.services.map(s =>
-    `<tr><td style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text};font-size:15px">${s.name}${s.quantity > 1 ? ` (x${s.quantity})` : ''}</td><td style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text};font-weight:500;text-align:right">£${(s.price * s.quantity).toFixed(2)}</td></tr>`
-  ).join('');
-  const isDeposit = data.paymentType === 'deposit' && (data.amountPaid ?? 0) > 0 && (data.remainingAmount ?? 0) > 0;
+  const servicesList = data.services
+    .map(
+      (s) =>
+        `<tr><td style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text};font-size:15px">${s.name}${s.quantity > 1 ? ` (x${s.quantity})` : ""}</td><td style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text};font-weight:500;text-align:right">£${(s.price * s.quantity).toFixed(2)}</td></tr>`,
+    )
+    .join("");
+  const isDeposit =
+    data.paymentType === "deposit" &&
+    (data.amountPaid ?? 0) > 0 &&
+    (data.remainingAmount ?? 0) > 0;
   const paymentBreakdown = isDeposit
     ? `
 <tr><td colspan="2" style="padding:12px 0;border-top:2px solid #e7e4df"></td></tr>
 <tr><td style="padding:8px 0;color:${L.green};font-size:13px">Paid now (deposit)</td><td style="padding:8px 0;color:${L.deposit};font-weight:600;text-align:right;font-size:15px">£${(data.amountPaid ?? 0).toFixed(2)}</td></tr>
 <tr><td style="padding:8px 0;color:${L.green};font-size:13px">Due on arrival</td><td style="padding:8px 0;color:${L.text};font-weight:500;text-align:right;font-size:15px">£${(data.remainingAmount ?? 0).toFixed(2)}</td></tr>
 `
-    : '';
+    : "";
 
   return `
 <!DOCTYPE html>
@@ -521,7 +620,7 @@ ${servicesList}
 ${paymentBreakdown}
 </table>
 </div>
-${isDeposit ? `<p style="margin:0 0 24px;padding:14px;background:#e8f5e9;border:1px solid ${L.accent};border-radius:6px;font-size:14px;color:${L.text}">You have paid <strong>£${(data.amountPaid ?? 0).toFixed(2)}</strong> deposit. The remaining <strong>£${(data.remainingAmount ?? 0).toFixed(2)}</strong> is due when you attend.</p>` : ''}
+${isDeposit ? `<p style="margin:0 0 24px;padding:14px;background:#e8f5e9;border:1px solid ${L.accent};border-radius:6px;font-size:14px;color:${L.text}">You have paid <strong>£${(data.amountPaid ?? 0).toFixed(2)}</strong> deposit. The remaining <strong>£${(data.remainingAmount ?? 0).toFixed(2)}</strong> is due when you attend.</p>` : ""}
 
 <div class="email-card" style="background:${L.cardBg};border:1px solid ${L.cardBorder};margin:24px 0;padding:20px;border-radius:8px">
 <div class="email-card-title" style="font-size:11px;letter-spacing:.12em;color:${L.green};margin-bottom:12px;font-weight:600">APPOINTMENT</div>
@@ -529,7 +628,7 @@ ${isDeposit ? `<p style="margin:0 0 24px;padding:14px;background:#e8f5e9;border:
 <div style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted};font-size:13px">Date</span> · ${data.bookingDate}</div>
 <div style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted};font-size:13px">Time</span> · ${data.bookingTime}</div>
 <div style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted};font-size:13px">Duration</span> · ${data.duration}</div>
-${data.teamMember ? `<div style="padding:10px 0;color:${L.text}"><span style="color:${L.muted};font-size:13px">Practitioner</span> · ${data.teamMember}</div>` : ''}
+${data.teamMember ? `<div style="padding:10px 0;color:${L.text}"><span style="color:${L.muted};font-size:13px">Practitioner</span> · ${data.teamMember}</div>` : ""}
 </div>
 
 <div class="email-notice" style="background:#fef7ed;border-left:4px solid ${L.noticeBorder};padding:20px;margin:24px 0;border-radius:0 6px 6px 0">
@@ -544,7 +643,7 @@ ${data.teamMember ? `<div style="padding:10px 0;color:${L.text}"><span style="co
 
 <div class="email-card" style="background:${L.cardBg};border:1px solid ${L.cardBorder};margin:24px 0;padding:20px;border-radius:8px">
 <div class="email-card-title" style="font-size:11px;letter-spacing:.12em;color:${L.green};margin-bottom:12px;font-weight:600">CONTACT US</div>
-<div style="padding:10px 0;color:${L.text}"><a href="tel:${data.contactPhone.replace(/\s/g,'')}" class="email-link" style="color:${L.link};text-decoration:none;font-weight:500">${data.contactPhone}</a></div>
+<div style="padding:10px 0;color:${L.text}"><a href="tel:${data.contactPhone.replace(/\s/g, "")}" class="email-link" style="color:${L.link};text-decoration:none;font-weight:500">${data.contactPhone}</a></div>
 <div style="padding:10px 0;color:${L.text}"><a href="mailto:${data.contactEmail}" class="email-link" style="color:${L.link};text-decoration:none;font-weight:500">${data.contactEmail}</a></div>
 </div>
 
@@ -578,10 +677,16 @@ function generatePaymentConfirmationEmailText(data: {
   contactPhone: string;
   contactEmail: string;
 }): string {
-  const servicesList = data.services.map(s =>
-    `- ${s.name}${s.quantity > 1 ? ` (x${s.quantity})` : ''} - £${(s.price * s.quantity).toFixed(2)}`
-  ).join('\n');
-  const isDeposit = data.paymentType === 'deposit' && (data.amountPaid ?? 0) > 0 && (data.remainingAmount ?? 0) > 0;
+  const servicesList = data.services
+    .map(
+      (s) =>
+        `- ${s.name}${s.quantity > 1 ? ` (x${s.quantity})` : ""} - £${(s.price * s.quantity).toFixed(2)}`,
+    )
+    .join("\n");
+  const isDeposit =
+    data.paymentType === "deposit" &&
+    (data.amountPaid ?? 0) > 0 &&
+    (data.remainingAmount ?? 0) > 0;
   const paymentSection = isDeposit
     ? `
 Payment breakdown:
@@ -617,7 +722,7 @@ Booking Details:
 - Booked Day: ${data.bookingDate}
 - Time: ${data.bookingTime}
 - Duration: ${data.duration}
-${data.teamMember ? `- Practitioner: ${data.teamMember}` : ''}
+${data.teamMember ? `- Practitioner: ${data.teamMember}` : ""}
 
 Important Information:
 - Please arrive 10 minutes before your appointment

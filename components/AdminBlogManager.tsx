@@ -1,14 +1,29 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  Input,
+  Textarea,
+  Select,
+  SelectItem,
+  Checkbox,
+  Card,
+  CardBody,
+  Spinner,
+} from "@heroui/react";
+
 import { useBlog, BlogPost } from "@/hooks/useBlog";
 import { useToast } from "@/components/Toast";
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { ConfirmationModal } from "@/components/ConfirmationModal";
 import { MarkdownEditor } from "@/components/MarkdownEditor";
 import Pagination from "@/components/Pagination";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Select, SelectItem, Checkbox, Card, CardBody, Spinner } from "@heroui/react";
-import { X } from "lucide-react";
 import { typography } from "@/config/typography";
 
 // Modal Component
@@ -37,171 +52,237 @@ function BlogModal({
   ];
 
   return (
-    <Modal 
-      isOpen={isOpen} 
-      onClose={onClose}
-      size="4xl"
-      scrollBehavior="inside"
+    <Modal
       backdrop="blur"
       classNames={{
         base: "max-h-[95vh] sm:max-h-[90vh] mx-2 sm:mx-4",
         wrapper: "items-start sm:items-center pt-4 sm:pt-0",
       }}
+      isOpen={isOpen}
+      scrollBehavior="inside"
+      size="4xl"
+      onClose={onClose}
     >
       <ModalContent>
         {(onClose) => (
           <>
             <ModalHeader className="flex flex-col gap-1 shrink-0">
               <h2 className={typography.headingCard}>
-            {editingPost ? "Edit Blog Post" : "Add New Blog Post"}
+                {editingPost ? "Edit Blog Post" : "Add New Blog Post"}
               </h2>
               <p className="text-sm text-default-500 font-normal">
-                {editingPost ? "Update your blog post details" : "Create a new blog post for your website"}
+                {editingPost
+                  ? "Update your blog post details"
+                  : "Create a new blog post for your website"}
               </p>
             </ModalHeader>
             <ModalBody className="overflow-y-auto max-h-[min(70vh,600px)] sm:max-h-[min(75vh,700px)]">
               <div className="space-y-6">
                 <Input
+                  isRequired
                   label="Title"
                   placeholder="Enter blog post title"
-                value={formData.title}
-                onChange={(e) => setFormData((prev: any) => ({ ...prev, title: e.target.value }))}
-                  isRequired
                   size="lg"
+                  value={formData.title}
+                  onChange={(e) =>
+                    setFormData((prev: any) => ({
+                      ...prev,
+                      title: e.target.value,
+                    }))
+                  }
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
-                    label="Slug"
-                    placeholder="url-friendly-slug"
-                value={formData.slug}
-                onChange={(e) => setFormData((prev: any) => ({ ...prev, slug: e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') }))}
                     isRequired
                     description="URL-friendly version of the title"
-              />
+                    label="Slug"
+                    placeholder="url-friendly-slug"
+                    value={formData.slug}
+                    onChange={(e) =>
+                      setFormData((prev: any) => ({
+                        ...prev,
+                        slug: e.target.value
+                          .toLowerCase()
+                          .replace(/\s+/g, "-")
+                          .replace(/[^a-z0-9-]/g, ""),
+                      }))
+                    }
+                  />
 
                   <Select
+                    isRequired
                     label="Category"
                     selectedKeys={[formData.category]}
                     onSelectionChange={(keys) => {
                       const selected = Array.from(keys)[0] as string;
-                      setFormData((prev: any) => ({ ...prev, category: selected || "General" }));
+
+                      setFormData((prev: any) => ({
+                        ...prev,
+                        category: selected || "General",
+                      }));
                     }}
-                    isRequired
-              >
-                {categories.map((cat) => (
+                  >
+                    {categories.map((cat) => (
                       <SelectItem key={cat}>{cat}</SelectItem>
-                ))}
+                    ))}
                   </Select>
-          </div>
+                </div>
 
                 <Textarea
                   label="Excerpt"
                   placeholder="Brief description of the blog post"
-              value={formData.excerpt || ''}
-              onChange={(e) => setFormData((prev: any) => ({ ...prev, excerpt: e.target.value }))}
-              rows={3}
-            />
+                  rows={3}
+                  value={formData.excerpt || ""}
+                  onChange={(e) =>
+                    setFormData((prev: any) => ({
+                      ...prev,
+                      excerpt: e.target.value,
+                    }))
+                  }
+                />
 
                 <Card>
                   <CardBody>
                     <label className="block text-sm font-medium text-foreground mb-2">
-              Content * (Markdown supported)
-            </label>
-            <MarkdownEditor
-              value={formData.content || ''}
-              onChange={(value) => setFormData((prev: any) => ({ ...prev, content: value }))}
-              placeholder="Write your blog post content here..."
-            />
+                      Content * (Markdown supported)
+                    </label>
+                    <MarkdownEditor
+                      placeholder="Write your blog post content here..."
+                      value={formData.content || ""}
+                      onChange={(value) =>
+                        setFormData((prev: any) => ({
+                          ...prev,
+                          content: value,
+                        }))
+                      }
+                    />
                   </CardBody>
                 </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
                     label="Featured Image URL"
                     placeholder="https://example.com/image.jpg"
-                value={formData.featured_image_url || ''}
-                onChange={(e) => setFormData((prev: any) => ({ ...prev, featured_image_url: e.target.value }))}
                     type="url"
+                    value={formData.featured_image_url || ""}
+                    onChange={(e) =>
+                      setFormData((prev: any) => ({
+                        ...prev,
+                        featured_image_url: e.target.value,
+                      }))
+                    }
                   />
 
                   <Input
                     label="Author Name"
                     placeholder="EGP Aesthetics Team"
-                value={formData.author_name || 'EGP Aesthetics Team'}
-                onChange={(e) => setFormData((prev: any) => ({ ...prev, author_name: e.target.value }))}
-              />
-          </div>
+                    value={formData.author_name || "EGP Aesthetics Team"}
+                    onChange={(e) =>
+                      setFormData((prev: any) => ({
+                        ...prev,
+                        author_name: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Input
                     label="Read Time (minutes)"
-                type="number"
-                    value={formData.read_time_minutes?.toString() || '5'}
-                onChange={(e) => setFormData((prev: any) => ({ ...prev, read_time_minutes: parseInt(e.target.value) || 5 }))}
-                min="1"
-              />
+                    min="1"
+                    type="number"
+                    value={formData.read_time_minutes?.toString() || "5"}
+                    onChange={(e) =>
+                      setFormData((prev: any) => ({
+                        ...prev,
+                        read_time_minutes: parseInt(e.target.value) || 5,
+                      }))
+                    }
+                  />
 
                   <Input
                     label="Display Order"
-                type="number"
-                    value={formData.display_order?.toString() || '0'}
-                onChange={(e) => setFormData((prev: any) => ({ ...prev, display_order: parseInt(e.target.value) || 0 }))}
+                    type="number"
+                    value={formData.display_order?.toString() || "0"}
+                    onChange={(e) =>
+                      setFormData((prev: any) => ({
+                        ...prev,
+                        display_order: parseInt(e.target.value) || 0,
+                      }))
+                    }
                   />
 
                   <Select
                     label="Status"
-                    selectedKeys={[formData.is_published ? "published" : "draft"]}
+                    selectedKeys={[
+                      formData.is_published ? "published" : "draft",
+                    ]}
                     onSelectionChange={(keys) => {
                       const selected = Array.from(keys)[0] as string;
-                      setFormData((prev: any) => ({ 
-                        ...prev, 
+
+                      setFormData((prev: any) => ({
+                        ...prev,
                         is_published: selected === "published",
-                        published_at: selected === "published" && !prev.published_at ? new Date().toISOString() : prev.published_at
+                        published_at:
+                          selected === "published" && !prev.published_at
+                            ? new Date().toISOString()
+                            : prev.published_at,
                       }));
                     }}
                   >
                     <SelectItem key="draft">Draft (Not visible)</SelectItem>
-                    <SelectItem key="published">Published (Visible to public)</SelectItem>
+                    <SelectItem key="published">
+                      Published (Visible to public)
+                    </SelectItem>
                   </Select>
-          </div>
+                </div>
 
                 <Checkbox
                   isSelected={formData.featured || false}
-                  onValueChange={(checked) => setFormData((prev: any) => ({ ...prev, featured: checked }))}
+                  onValueChange={(checked) =>
+                    setFormData((prev: any) => ({ ...prev, featured: checked }))
+                  }
                 >
                   Featured Post
                 </Checkbox>
 
                 <div className="space-y-4">
                   <Input
+                    description="Optional: Custom title for search engines"
                     label="SEO Title"
                     placeholder="SEO optimized title"
-              value={formData.seo_title || ''}
-              onChange={(e) => setFormData((prev: any) => ({ ...prev, seo_title: e.target.value }))}
-                    description="Optional: Custom title for search engines"
+                    value={formData.seo_title || ""}
+                    onChange={(e) =>
+                      setFormData((prev: any) => ({
+                        ...prev,
+                        seo_title: e.target.value,
+                      }))
+                    }
                   />
 
                   <Textarea
+                    description="Optional: Meta description for search engines"
                     label="SEO Description"
                     placeholder="SEO meta description"
-              value={formData.seo_description || ''}
-              onChange={(e) => setFormData((prev: any) => ({ ...prev, seo_description: e.target.value }))}
-              rows={2}
-                    description="Optional: Meta description for search engines"
-            />
-          </div>
-        </div>
+                    rows={2}
+                    value={formData.seo_description || ""}
+                    onChange={(e) =>
+                      setFormData((prev: any) => ({
+                        ...prev,
+                        seo_description: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              </div>
             </ModalBody>
             <ModalFooter>
               <Button variant="light" onPress={onClose}>
-            Cancel
+                Cancel
               </Button>
-              <Button 
-                color="primary" 
-                onPress={onSubmit}
-          >
-            {editingPost ? "Update Post" : "Create Post"}
+              <Button color="primary" onPress={onSubmit}>
+                {editingPost ? "Update Post" : "Create Post"}
               </Button>
             </ModalFooter>
           </>
@@ -212,7 +293,8 @@ function BlogModal({
 }
 
 export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
-  const { posts, isLoading, error, addPost, updatePost, deletePost } = useBlog(true);
+  const { posts, isLoading, error, addPost, updatePost, deletePost } =
+    useBlog(true);
   const { showSuccess, showError } = useToast();
   const { confirm, modalProps } = useConfirmation();
 
@@ -221,7 +303,7 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 10;
 
-  const defaultPost: Omit<BlogPost, 'id' | 'created_at' | 'updated_at'> = {
+  const defaultPost: Omit<BlogPost, "id" | "created_at" | "updated_at"> = {
     title: "",
     slug: "",
     excerpt: null,
@@ -238,7 +320,8 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
     display_order: 0,
   };
 
-  const [formData, setFormData] = useState<Omit<BlogPost, 'id' | 'created_at' | 'updated_at'>>(defaultPost);
+  const [formData, setFormData] =
+    useState<Omit<BlogPost, "id" | "created_at" | "updated_at">>(defaultPost);
 
   useEffect(() => {
     if (triggerModal) {
@@ -275,7 +358,11 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
 
   const handleSubmit = async () => {
     if (!formData.title || !formData.slug || !formData.content) {
-      showError("Validation Error", "Please fill in all required fields (Title, Slug, Content)");
+      showError(
+        "Validation Error",
+        "Please fill in all required fields (Title, Slug, Content)",
+      );
+
       return;
     }
 
@@ -291,7 +378,10 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
       setEditingPost(null);
       setFormData(defaultPost);
     } catch (err) {
-      showError("Error", err instanceof Error ? err.message : "Failed to save blog post");
+      showError(
+        "Error",
+        err instanceof Error ? err.message : "Failed to save blog post",
+      );
     }
   };
 
@@ -307,15 +397,18 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
           await deletePost(post.id);
           showSuccess("Success", "Blog post deleted successfully!");
         } catch (err) {
-          showError("Error", err instanceof Error ? err.message : "Failed to delete blog post");
+          showError(
+            "Error",
+            err instanceof Error ? err.message : "Failed to delete blog post",
+          );
         }
-      }
+      },
     );
   };
 
   const paginatedPosts = posts.slice(
     (currentPage - 1) * postsPerPage,
-    currentPage * postsPerPage
+    currentPage * postsPerPage,
   );
 
   const totalPages = Math.ceil(posts.length / postsPerPage);
@@ -341,11 +434,21 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h2 className={typography.headingSection}>Blog Posts</h2>
         <button
-          onClick={handleAddNew}
           className="min-h-[44px] w-full sm:w-auto px-4 sm:px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg hover:from-rose-600 hover:to-pink-600 transition-colors font-medium flex items-center justify-center gap-2"
+          onClick={handleAddNew}
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 4v16m8-8H4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+            />
           </svg>
           Add New Post
         </button>
@@ -353,10 +456,12 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
 
       {posts.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-          <p className="text-gray-600 dark:text-gray-400 mb-4">No blog posts yet.</p>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            No blog posts yet.
+          </p>
           <button
-            onClick={handleAddNew}
             className="px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg hover:from-rose-600 hover:to-pink-600 transition-colors font-medium"
+            onClick={handleAddNew}
           >
             Create Your First Post
           </button>
@@ -367,19 +472,27 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
           <div className="md:hidden divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
             {paginatedPosts.map((post) => (
               <div key={post.id} className="p-4 sm:p-5 space-y-3">
-                <h4 className={`font-semibold text-gray-900 dark:text-white ${typography.headingSmall}`}>{post.title}</h4>
+                <h4
+                  className={`font-semibold text-gray-900 dark:text-white ${typography.headingSmall}`}
+                >
+                  {post.title}
+                </h4>
                 {post.excerpt && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{post.excerpt}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
+                    {post.excerpt}
+                  </p>
                 )}
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="px-2 py-1 text-xs font-medium bg-rose-100 dark:bg-rose-900/30 text-rose-800 dark:text-rose-400 rounded-full">
                     {post.category}
                   </span>
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                    post.is_published
-                      ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400"
-                      : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-400"
-                  }`}>
+                  <span
+                    className={`px-2 py-1 text-xs font-medium rounded-full ${
+                      post.is_published
+                        ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400"
+                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-400"
+                    }`}
+                  >
                     {post.is_published ? "Published" : "Draft"}
                   </span>
                   {post.featured && (
@@ -395,14 +508,14 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
                 </p>
                 <div className="flex gap-2 pt-2">
                   <button
-                    onClick={() => handleEdit(post)}
                     className="min-h-[44px] flex-1 px-4 py-2.5 text-sm font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-900/30 transition-colors"
+                    onClick={() => handleEdit(post)}
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDelete(post)}
                     className="min-h-[44px] flex-1 px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                    onClick={() => handleDelete(post)}
                   >
                     Delete
                   </button>
@@ -416,21 +529,40 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Title</th>
-                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Category</th>
-                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Featured</th>
-                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
-                  <th className="px-4 lg:px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Title
+                  </th>
+                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Category
+                  </th>
+                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Featured
+                  </th>
+                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-4 lg:px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {paginatedPosts.map((post) => (
-                  <tr key={post.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                  <tr
+                    key={post.id}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                  >
                     <td className="px-4 lg:px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">{post.title}</div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">
+                        {post.title}
+                      </div>
                       {post.excerpt && (
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate max-w-xs">{post.excerpt}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate max-w-xs">
+                          {post.excerpt}
+                        </div>
                       )}
                     </td>
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
@@ -439,11 +571,13 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
                       </span>
                     </td>
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        post.is_published
-                          ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400"
-                          : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-400"
-                      }`}>
+                      <span
+                        className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          post.is_published
+                            ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400"
+                            : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-400"
+                        }`}
+                      >
                         {post.is_published ? "Published" : "Draft"}
                       </span>
                     </td>
@@ -462,14 +596,14 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end gap-2">
                         <button
-                          onClick={() => handleEdit(post)}
                           className="text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-rose-300 transition-colors"
+                          onClick={() => handleEdit(post)}
                         >
                           Edit
                         </button>
                         <button
-                          onClick={() => handleDelete(post)}
                           className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors"
+                          onClick={() => handleDelete(post)}
                         >
                           Delete
                         </button>
@@ -485,9 +619,9 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
             <div className="mt-6">
               <Pagination
                 currentPage={currentPage}
-                totalPages={totalPages}
-                totalCount={posts.length}
                 limit={postsPerPage}
+                totalCount={posts.length}
+                totalPages={totalPages}
                 onPageChange={setCurrentPage}
               />
             </div>
@@ -496,20 +630,19 @@ export function AdminBlogManager({ triggerModal }: { triggerModal?: boolean }) {
       )}
 
       <BlogModal
+        editingPost={editingPost}
+        formData={formData}
         isOpen={showModal}
+        setFormData={setFormData}
         onClose={() => {
           setShowModal(false);
           setEditingPost(null);
           setFormData(defaultPost);
         }}
         onSubmit={handleSubmit}
-        editingPost={editingPost}
-        formData={formData}
-        setFormData={setFormData}
       />
 
       <ConfirmationModal {...modalProps} />
     </div>
   );
 }
-

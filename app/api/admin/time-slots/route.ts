@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { supabaseAdmin } from "../../../../lib/supabase";
 
 interface WorkingHour {
@@ -15,7 +16,9 @@ const SLOT_INTERVAL_MINUTES = 30;
 function toDate(date: string, time: string) {
   const [hour, minute] = time.split(":").map(Number);
   const base = new Date(`${date}T00:00:00`);
+
   base.setHours(hour, minute, 0, 0);
+
   return base;
 }
 
@@ -28,7 +31,9 @@ function toTimeString(date: Date) {
 
 function addMinutes(date: Date, minutes: number) {
   const next = new Date(date);
+
   next.setMinutes(next.getMinutes() + minutes);
+
   return next;
 }
 
@@ -66,7 +71,8 @@ function isSlotBooked(bookings: any[], date: string, time: string) {
     if (!booking || !booking.time || !booking.date) return false;
 
     const matchesDate = booking.date === date;
-    const normalizedTime = booking.time.length > 5 ? booking.time.slice(0, 5) : booking.time;
+    const normalizedTime =
+      booking.time.length > 5 ? booking.time.slice(0, 5) : booking.time;
     const matchesTime = normalizedTime === time;
     const isCancelled = booking.status === "cancelled";
 
@@ -74,7 +80,10 @@ function isSlotBooked(bookings: any[], date: string, time: string) {
   });
 }
 
-async function buildSlotsForDate(date: string, workingHour: WorkingHour | null) {
+async function buildSlotsForDate(
+  date: string,
+  workingHour: WorkingHour | null,
+) {
   if (!workingHour || !workingHour.is_working_day) {
     return { date, slots: [], bookedSlots: [], status: "closed" as const };
   }
@@ -87,7 +96,11 @@ async function buildSlotsForDate(date: string, workingHour: WorkingHour | null) 
   }
 
   const bookings = await getBookingsBetween(date, date);
-  const slots: Array<{ start_time: string; end_time: string; is_available: boolean }> = [];
+  const slots: Array<{
+    start_time: string;
+    end_time: string;
+    is_available: boolean;
+  }> = [];
   const bookedSlots: string[] = [];
 
   let cursor = new Date(start);
@@ -114,10 +127,15 @@ async function buildSlotsForDate(date: string, workingHour: WorkingHour | null) 
       bookedSlots.push(slotStartStr);
     }
 
-    cursor = addMinutes(slotStart, SLOT_INTERVAL_MINUTES + (workingHour.buffer_minutes ?? 0));
+    cursor = addMinutes(
+      slotStart,
+      SLOT_INTERVAL_MINUTES + (workingHour.buffer_minutes ?? 0),
+    );
   }
 
-  const status: "available" | "full" = slots.some((slot) => slot.is_available) ? "available" : "full";
+  const status: "available" | "full" = slots.some((slot) => slot.is_available)
+    ? "available"
+    : "full";
 
   return { date, slots, bookedSlots, status };
 }
@@ -131,15 +149,16 @@ export async function GET(request: NextRequest) {
     if (!date) {
       return NextResponse.json(
         { error: "Date parameter is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const dateObj = new Date(date);
+
     if (Number.isNaN(dateObj.getTime())) {
       return NextResponse.json(
         { error: "Invalid date format" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -156,9 +175,10 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Unexpected error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -172,7 +192,7 @@ export async function POST(request: NextRequest) {
     if (!startDate || !endDate) {
       return NextResponse.json(
         { error: "Start date and end date are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -182,22 +202,24 @@ export async function POST(request: NextRequest) {
     if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
       return NextResponse.json(
         { error: "Invalid date format" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (start > end) {
       return NextResponse.json(
         { error: "Start date must be before end date" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const dayCount = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    const dayCount =
+      Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
     const summaries = [];
 
     for (let i = 0; i < dayCount; i++) {
       const current = new Date(start);
+
       current.setDate(start.getDate() + i);
       const currentDate = current.toISOString().split("T")[0];
       const workingHour = await getWorkingHourForDate(current);
@@ -209,10 +231,7 @@ export async function POST(request: NextRequest) {
 
       const payload = await buildSlotsForDate(currentDate, workingHour);
 
-      await supabaseAdmin
-        .from("time_slots")
-        .delete()
-        .eq("date", currentDate);
+      await supabaseAdmin.from("time_slots").delete().eq("date", currentDate);
 
       if (payload.slots.length > 0) {
         const rows = payload.slots.map((slot) => ({
@@ -228,7 +247,11 @@ export async function POST(request: NextRequest) {
           console.error(`Failed inserting slots for ${currentDate}:`, error);
         }
 
-        summaries.push({ date: currentDate, generated: rows.length, skipped: false });
+        summaries.push({
+          date: currentDate,
+          generated: rows.length,
+          skipped: false,
+        });
       } else {
         summaries.push({ date: currentDate, generated: 0, skipped: false });
       }
@@ -241,9 +264,10 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Unexpected error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -257,14 +281,11 @@ export async function DELETE(request: NextRequest) {
     if (!date) {
       return NextResponse.json(
         { error: "Date parameter is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    await supabaseAdmin
-      .from("time_slots")
-      .delete()
-      .eq("date", date);
+    await supabaseAdmin.from("time_slots").delete().eq("date", date);
 
     return NextResponse.json({
       success: true,
@@ -272,9 +293,10 @@ export async function DELETE(request: NextRequest) {
     });
   } catch (error) {
     console.error("Unexpected error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

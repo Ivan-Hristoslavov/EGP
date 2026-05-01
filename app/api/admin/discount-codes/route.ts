@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { supabaseAdmin } from "@/lib/supabase";
 import { sendEmail } from "@/lib/sendgrid-smtp";
 import { siteConfig } from "@/config/site";
@@ -16,7 +17,9 @@ export async function GET(request: NextRequest) {
 
     let query = supabaseAdmin
       .from("discount_codes")
-      .select("*, customers:customer_id(id, first_name, last_name, email)", { count: "exact" });
+      .select("*, customers:customer_id(id, first_name, last_name, email)", {
+        count: "exact",
+      });
 
     // Filter by customer
     if (customerId) {
@@ -25,11 +28,16 @@ export async function GET(request: NextRequest) {
 
     // Filter by status
     if (status === "active") {
-      query = query.eq("is_active", true).is("used_at", null).gte("valid_until", new Date().toISOString());
+      query = query
+        .eq("is_active", true)
+        .is("used_at", null)
+        .gte("valid_until", new Date().toISOString());
     } else if (status === "used") {
       query = query.not("used_at", "is", null);
     } else if (status === "expired") {
-      query = query.lt("valid_until", new Date().toISOString()).is("used_at", null);
+      query = query
+        .lt("valid_until", new Date().toISOString())
+        .is("used_at", null);
     }
 
     // Search by code
@@ -45,7 +53,11 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error("Error fetching discount codes:", error);
-      return NextResponse.json({ error: "Failed to fetch discount codes" }, { status: 500 });
+
+      return NextResponse.json(
+        { error: "Failed to fetch discount codes" },
+        { status: 500 },
+      );
     }
 
     const totalCount = count || 0;
@@ -64,7 +76,11 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Unexpected error fetching discount codes:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
@@ -75,7 +91,10 @@ export async function POST(request: NextRequest) {
     const { customer_id, discount_percentage, valid_days, send_email } = body;
 
     if (!customer_id) {
-      return NextResponse.json({ error: "Customer ID is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Customer ID is required" },
+        { status: 400 },
+      );
     }
 
     // Get customer info
@@ -86,7 +105,10 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (customerError || !customer) {
-      return NextResponse.json({ error: "Customer not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Customer not found" },
+        { status: 404 },
+      );
     }
 
     // Generate unique code
@@ -94,31 +116,39 @@ export async function POST(request: NextRequest) {
     const randomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
     const discountCode = `${codePrefix}-${randomCode}`;
 
-    const percentage = discount_percentage || siteConfig.newsletter.welcomeDiscountPercent || 10;
+    const percentage =
+      discount_percentage || siteConfig.newsletter.welcomeDiscountPercent || 10;
     const days = valid_days || siteConfig.newsletter.discountValidDays || 30;
 
     const validUntil = new Date();
+
     validUntil.setDate(validUntil.getDate() + days);
 
     // Save to database
     const { data: savedCode, error: codeError } = await supabaseAdmin
       .from("discount_codes")
-      .insert([{
-        customer_id,
-        code: discountCode,
-        discount_percentage: percentage,
-        valid_from: new Date().toISOString(),
-        valid_until: validUntil.toISOString(),
-        is_active: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }])
+      .insert([
+        {
+          customer_id,
+          code: discountCode,
+          discount_percentage: percentage,
+          valid_from: new Date().toISOString(),
+          valid_until: validUntil.toISOString(),
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      ])
       .select("*, customers:customer_id(id, first_name, last_name, email)")
       .single();
 
     if (codeError) {
       console.error("Error creating discount code:", codeError);
-      return NextResponse.json({ error: "Failed to create discount code" }, { status: 500 });
+
+      return NextResponse.json(
+        { error: "Failed to create discount code" },
+        { status: 500 },
+      );
     }
 
     // Optionally send email
@@ -192,6 +222,10 @@ ${discountCode}
     return NextResponse.json({ discountCode: savedCode }, { status: 201 });
   } catch (error) {
     console.error("Unexpected error creating discount code:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

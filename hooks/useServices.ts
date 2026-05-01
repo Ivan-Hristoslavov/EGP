@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from "react";
 
 export interface ServiceCategory {
   id: string;
@@ -61,41 +61,48 @@ export function useServices() {
     if (servicesCache) {
       setServices(servicesCache);
       setIsLoading(false);
+
       return;
     }
 
     // If there's already a request in progress, wait for it
     if (cachePromise) {
-      cachePromise.then(data => {
-        setServices(data);
-        setIsLoading(false);
-      }).catch(err => {
-        setError(err instanceof Error ? err.message : 'Unknown error');
-        setIsLoading(false);
-      });
+      cachePromise
+        .then((data) => {
+          setServices(data);
+          setIsLoading(false);
+        })
+        .catch((err) => {
+          setError(err instanceof Error ? err.message : "Unknown error");
+          setIsLoading(false);
+        });
+
       return;
     }
 
     // Make the API call
-    cachePromise = fetch('/api/services')
-      .then(response => {
+    cachePromise = fetch("/api/services")
+      .then((response) => {
         if (!response.ok) {
-          throw new Error('Failed to fetch services');
+          throw new Error("Failed to fetch services");
         }
+
         return response.json();
       })
-      .then(data => {
+      .then((data) => {
         if (!data.services) {
           throw new Error("Failed to fetch services");
         }
         const svcs = data.services || [];
+
         servicesCache = svcs;
         setServices(svcs);
         setIsLoading(false);
+
         return svcs;
       })
-      .catch(err => {
-        setError(err instanceof Error ? err.message : 'Unknown error');
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : "Unknown error");
         setIsLoading(false);
         cachePromise = null;
         throw err;
@@ -110,18 +117,21 @@ export function useServices() {
     setError(null);
 
     try {
-      const response = await fetch('/api/services');
+      const response = await fetch("/api/services");
+
       if (!response.ok) {
-        throw new Error('Failed to fetch services');
+        throw new Error("Failed to fetch services");
       }
       const data = await response.json();
       const svcs = data.services || [];
+
       servicesCache = svcs;
       setServices(svcs);
       setIsLoading(false);
+
       return svcs;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : "Unknown error");
       setIsLoading(false);
       throw err;
     }
@@ -137,7 +147,8 @@ export function useServicesByCategory(categorySlug: string) {
 
   useEffect(() => {
     if (!categorySlug) return;
-    const filtered = services.filter(s => s.category.slug === categorySlug);
+    const filtered = services.filter((s) => s.category.slug === categorySlug);
+
     setFilteredServices(filtered);
   }, [services, categorySlug]);
 
@@ -151,10 +162,10 @@ export function useServicesByMainTab(mainTabSlug: string) {
 
   useEffect(() => {
     if (!mainTabSlug) return;
-    const filtered = services.filter(s => s.main_tab.slug === mainTabSlug);
+    const filtered = services.filter((s) => s.main_tab.slug === mainTabSlug);
+
     setFilteredServices(filtered);
   }, [services, mainTabSlug]);
 
   return { services: filteredServices, isLoading, error, refetch };
 }
-

@@ -1,10 +1,10 @@
 "use client";
 
-import { siteConfig } from "@/config/site";
 import Link from "next/link";
 import { Calendar, Clock, Star, CheckCircle, ArrowRight } from "lucide-react";
 import { Card, CardBody, CardHeader, Button, Chip } from "@heroui/react";
-import { aestheticsColors } from "@/config/colors";
+
+import { siteConfig } from "@/config/site";
 import ButtonPrimary from "@/components/ButtonPrimary";
 
 export default function BookConsultationPage() {
@@ -18,7 +18,7 @@ export default function BookConsultationPage() {
         "Skin analysis",
         "Treatment recommendations",
         "Personalised plan",
-        "Price transparency"
+        "Price transparency",
       ],
       popular: true,
     },
@@ -31,7 +31,7 @@ export default function BookConsultationPage() {
         "Full skin analysis",
         "Digital imaging",
         "Detailed treatment plan",
-        "Aftercare guidance"
+        "Aftercare guidance",
       ],
       popular: false,
     },
@@ -45,7 +45,7 @@ export default function BookConsultationPage() {
         "Baby Botox - £199",
         "Lip Enhancement - £290",
         "Profhilo - £390",
-        "5-Point Facelift - £950"
+        "5-Point Facelift - £950",
       ],
       href: "/services/face",
     },
@@ -56,7 +56,7 @@ export default function BookConsultationPage() {
         "Eye Wrinkles - £179",
         "Forehead Lines - £179",
         "Brow Lift - £279",
-        "Neck Lift - £329"
+        "Neck Lift - £329",
       ],
       href: "/services/anti-wrinkle",
     },
@@ -67,7 +67,7 @@ export default function BookConsultationPage() {
         "Cheek Filler - £390",
         "Jawline Filler - £550",
         "Tear Trough - £390",
-        "Chin Filler - £290"
+        "Chin Filler - £290",
       ],
       href: "/services/fillers",
     },
@@ -78,7 +78,7 @@ export default function BookConsultationPage() {
         "Fat Freezing - £200",
         "Radiofrequency - £250",
         "Mesotherapy - £170",
-        "Combined Treatment - £350"
+        "Combined Treatment - £350",
       ],
       href: "/services/body",
     },
@@ -99,20 +99,20 @@ export default function BookConsultationPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 as={Link}
+                className="bg-gradient-to-r from-egp-green via-egp-green-light to-egp-green text-white"
                 href="/book"
                 size="lg"
-                className="bg-gradient-to-r from-egp-green via-egp-green-light to-egp-green text-white"
                 startContent={<Calendar className="w-5 h-5" />}
               >
                 Book Now
               </Button>
               <Button
                 as={Link}
-                href={`tel:${siteConfig.contact.phone}`}
-                variant="bordered"
-                size="lg"
                 className="border-egp-green text-egp-green dark:text-white dark:border-egp-green"
+                href={`tel:${siteConfig.contact.phone}`}
+                size="lg"
                 startContent={<Clock className="w-5 h-5" />}
+                variant="bordered"
               >
                 Call Now
               </Button>
@@ -132,15 +132,12 @@ export default function BookConsultationPage() {
               {consultationTypes.map((consultation, index) => (
                 <Card
                   key={index}
-                  className={`relative ${consultation.popular ? 'ring-2 ring-egp-green' : ''}`}
+                  className={`relative ${consultation.popular ? "ring-2 ring-egp-green" : ""}`}
                   shadow="lg"
                 >
                   {consultation.popular && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-                      <Chip
-                        className="bg-egp-green text-white"
-                        size="sm"
-                      >
+                      <Chip className="bg-egp-green text-white" size="sm">
                         Most Popular
                       </Chip>
                     </div>
@@ -159,24 +156,26 @@ export default function BookConsultationPage() {
                     <p className="text-gray-600 dark:text-gray-300 mb-6">
                       {consultation.description}
                     </p>
-                    
+
                     <ul className="space-y-3 mb-8">
                       {consultation.features.map((feature, featureIndex) => (
                         <li key={featureIndex} className="flex items-start">
                           <CheckCircle className="w-5 h-5 text-success mr-3 mt-0.5 flex-shrink-0" />
-                          <span className="text-gray-600 dark:text-gray-300">{feature}</span>
+                          <span className="text-gray-600 dark:text-gray-300">
+                            {feature}
+                          </span>
                         </li>
                       ))}
                     </ul>
-                    
+
                     <Button
                       as={Link}
-                      href="/book"
                       className={`w-full ${
                         consultation.popular
-                          ? 'bg-gradient-to-r from-egp-green via-egp-green-light to-egp-green text-white'
-                          : 'bg-egp-beige-light dark:bg-egp-green-dark text-gray-900 dark:text-white'
+                          ? "bg-gradient-to-r from-egp-green via-egp-green-light to-egp-green text-white"
+                          : "bg-egp-beige-light dark:bg-egp-green-dark text-gray-900 dark:text-white"
                       }`}
+                      href="/book"
                       size="lg"
                     >
                       Book This Consultation
@@ -200,11 +199,11 @@ export default function BookConsultationPage() {
               {treatmentCategories.map((category, index) => (
                 <Card
                   key={index}
-                  shadow="lg"
                   isPressable
                   as={Link}
-                  href={category.href}
                   className="h-full"
+                  href={category.href}
+                  shadow="lg"
                 >
                   <CardHeader className="pb-2">
                     <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
@@ -215,20 +214,23 @@ export default function BookConsultationPage() {
                     <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
                       {category.description}
                     </p>
-                    
+
                     <ul className="space-y-2 mb-6">
                       {category.treatments.map((treatment, treatmentIndex) => (
-                        <li key={treatmentIndex} className="text-sm text-gray-600 dark:text-gray-400">
+                        <li
+                          key={treatmentIndex}
+                          className="text-sm text-gray-600 dark:text-gray-400"
+                        >
                           {treatment}
                         </li>
                       ))}
                     </ul>
-                    
+
                     <ButtonPrimary
                       as={Link}
+                      endContent={<ArrowRight className="w-4 h-4" />}
                       href={category.href}
                       variant="primary"
-                      endContent={<ArrowRight className="w-4 h-4" />}
                     >
                       Learn More
                     </ButtonPrimary>
@@ -248,7 +250,7 @@ export default function BookConsultationPage() {
               Why Choose EGP Aesthetics?
             </h2>
             <div className="grid md:grid-cols-3 gap-8">
-              <Card shadow="sm" className="bg-white dark:bg-egp-green-dark">
+              <Card className="bg-white dark:bg-egp-green-dark" shadow="sm">
                 <CardBody className="flex flex-col items-center text-center">
                   <div className="w-16 h-16 bg-gradient-to-br from-egp-beige-darkest to-egp-beige-dark rounded-full flex items-center justify-center mb-4">
                     <Star className="w-8 h-8 text-white" />
@@ -261,7 +263,7 @@ export default function BookConsultationPage() {
                   </p>
                 </CardBody>
               </Card>
-              <Card shadow="sm" className="bg-white dark:bg-egp-green-dark">
+              <Card className="bg-white dark:bg-egp-green-dark" shadow="sm">
                 <CardBody className="flex flex-col items-center text-center">
                   <div className="w-16 h-16 bg-gradient-to-br from-egp-green to-egp-green-light rounded-full flex items-center justify-center mb-4">
                     <CheckCircle className="w-8 h-8 text-white" />
@@ -274,7 +276,7 @@ export default function BookConsultationPage() {
                   </p>
                 </CardBody>
               </Card>
-              <Card shadow="sm" className="bg-white dark:bg-egp-green-dark">
+              <Card className="bg-white dark:bg-egp-green-dark" shadow="sm">
                 <CardBody className="flex flex-col items-center text-center">
                   <div className="w-16 h-16 bg-gradient-to-br from-egp-green-dark to-egp-green rounded-full flex items-center justify-center mb-4">
                     <Calendar className="w-8 h-8 text-white" />

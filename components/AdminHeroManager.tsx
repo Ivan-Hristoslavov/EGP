@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useToast } from "@/components/Toast";
-import { getSupportedFormatsText, processImageFile, getImageDimensions, compressImage } from "@/lib/image-utils";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
@@ -10,12 +8,29 @@ import { Textarea } from "@heroui/react";
 import { Select, SelectItem } from "@heroui/select";
 import { Spinner } from "@heroui/spinner";
 import { Chip } from "@heroui/chip";
-import { 
-  X, Upload, Save, Image as ImageIcon, Settings, Trash2, 
-  Type, MousePointerClick, Phone, Zap, 
-  AlertCircle, Loader2, CheckCircle2
+import {
+  X,
+  Upload,
+  Save,
+  Image as ImageIcon,
+  Settings,
+  Type,
+  MousePointerClick,
+  Phone,
+  Zap,
+  Loader2,
+  CheckCircle2,
 } from "lucide-react";
+
 import { IconPicker } from "./IconPicker";
+
+import {
+  getSupportedFormatsText,
+  processImageFile,
+  getImageDimensions,
+  compressImage,
+} from "@/lib/image-utils";
+import { useToast } from "@/components/Toast";
 import { siteConfig } from "@/config/site";
 
 type HeroSection = {
@@ -51,7 +66,7 @@ type HeroSection = {
   animation_duration_ms: number;
 };
 
-const defaultHeroSection: Omit<HeroSection, 'id'> = {
+const defaultHeroSection: Omit<HeroSection, "id"> = {
   image_1_url: null,
   image_2_url: null,
   image_3_url: null,
@@ -98,11 +113,20 @@ export function AdminHeroManager() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [heroSection, setHeroSection] = useState<HeroSection | null>(null);
-  const [formData, setFormData] = useState<Omit<HeroSection, 'id'>>(defaultHeroSection);
+  const [formData, setFormData] =
+    useState<Omit<HeroSection, "id">>(defaultHeroSection);
 
   // Image states for each of the 3 images
-  const [imageFiles, setImageFiles] = useState<(File | null)[]>([null, null, null]);
-  const [imagePreviews, setImagePreviews] = useState<(string | null)[]>([null, null, null]);
+  const [imageFiles, setImageFiles] = useState<(File | null)[]>([
+    null,
+    null,
+    null,
+  ]);
+  const [imagePreviews, setImagePreviews] = useState<(string | null)[]>([
+    null,
+    null,
+    null,
+  ]);
   const [imageSettings, setImageSettings] = useState<ImageSettings[]>([
     {
       quality: 0.85,
@@ -132,7 +156,11 @@ export function AdminHeroManager() {
       compressedDimensions: { width: 0, height: 0 },
     },
   ]);
-  const [uploadingImages, setUploadingImages] = useState<boolean[]>([false, false, false]);
+  const [uploadingImages, setUploadingImages] = useState<boolean[]>([
+    false,
+    false,
+    false,
+  ]);
 
   useEffect(() => {
     loadHeroSection();
@@ -150,32 +178,65 @@ export function AdminHeroManager() {
           image_1_url: data.heroSection.image_1_url,
           image_2_url: data.heroSection.image_2_url,
           image_3_url: data.heroSection.image_3_url,
-          image_1_position: data.heroSection.image_1_position || defaultHeroSection.image_1_position,
-          image_2_position: data.heroSection.image_2_position || defaultHeroSection.image_2_position,
-          image_3_position: data.heroSection.image_3_position || defaultHeroSection.image_3_position,
-          badge_text: data.heroSection.badge_text || defaultHeroSection.badge_text,
-          badge_icon: data.heroSection.badge_icon || defaultHeroSection.badge_icon,
-          main_headline: data.heroSection.main_headline || defaultHeroSection.main_headline,
-          sub_headline: data.heroSection.sub_headline || defaultHeroSection.sub_headline,
-          feature_1_text: data.heroSection.feature_1_text || defaultHeroSection.feature_1_text,
-          feature_2_text: data.heroSection.feature_2_text || defaultHeroSection.feature_2_text,
-          feature_3_text: data.heroSection.feature_3_text || defaultHeroSection.feature_3_text,
-          button_1_text: data.heroSection.button_1_text || defaultHeroSection.button_1_text,
-          button_1_icon: data.heroSection.button_1_icon || defaultHeroSection.button_1_icon,
-          button_1_link: data.heroSection.button_1_link || defaultHeroSection.button_1_link,
-          button_1_type: data.heroSection.button_1_type || defaultHeroSection.button_1_type,
-          button_2_text: data.heroSection.button_2_text || defaultHeroSection.button_2_text,
-          button_2_icon: data.heroSection.button_2_icon || defaultHeroSection.button_2_icon,
-          button_2_link: data.heroSection.button_2_link || defaultHeroSection.button_2_link,
-          button_2_type: data.heroSection.button_2_type || defaultHeroSection.button_2_type,
-          contact_label: data.heroSection.contact_label || defaultHeroSection.contact_label,
-          phone_number: data.heroSection.phone_number || defaultHeroSection.phone_number,
+          image_1_position:
+            data.heroSection.image_1_position ||
+            defaultHeroSection.image_1_position,
+          image_2_position:
+            data.heroSection.image_2_position ||
+            defaultHeroSection.image_2_position,
+          image_3_position:
+            data.heroSection.image_3_position ||
+            defaultHeroSection.image_3_position,
+          badge_text:
+            data.heroSection.badge_text || defaultHeroSection.badge_text,
+          badge_icon:
+            data.heroSection.badge_icon || defaultHeroSection.badge_icon,
+          main_headline:
+            data.heroSection.main_headline || defaultHeroSection.main_headline,
+          sub_headline:
+            data.heroSection.sub_headline || defaultHeroSection.sub_headline,
+          feature_1_text:
+            data.heroSection.feature_1_text ||
+            defaultHeroSection.feature_1_text,
+          feature_2_text:
+            data.heroSection.feature_2_text ||
+            defaultHeroSection.feature_2_text,
+          feature_3_text:
+            data.heroSection.feature_3_text ||
+            defaultHeroSection.feature_3_text,
+          button_1_text:
+            data.heroSection.button_1_text || defaultHeroSection.button_1_text,
+          button_1_icon:
+            data.heroSection.button_1_icon || defaultHeroSection.button_1_icon,
+          button_1_link:
+            data.heroSection.button_1_link || defaultHeroSection.button_1_link,
+          button_1_type:
+            data.heroSection.button_1_type || defaultHeroSection.button_1_type,
+          button_2_text:
+            data.heroSection.button_2_text || defaultHeroSection.button_2_text,
+          button_2_icon:
+            data.heroSection.button_2_icon || defaultHeroSection.button_2_icon,
+          button_2_link:
+            data.heroSection.button_2_link || defaultHeroSection.button_2_link,
+          button_2_type:
+            data.heroSection.button_2_type || defaultHeroSection.button_2_type,
+          contact_label:
+            data.heroSection.contact_label || defaultHeroSection.contact_label,
+          phone_number:
+            data.heroSection.phone_number || defaultHeroSection.phone_number,
           image_resize_enabled: data.heroSection.image_resize_enabled !== false,
-          image_max_width: data.heroSection.image_max_width || defaultHeroSection.image_max_width,
-          image_max_height: data.heroSection.image_max_height || defaultHeroSection.image_max_height,
-          image_quality: data.heroSection.image_quality || defaultHeroSection.image_quality,
+          image_max_width:
+            data.heroSection.image_max_width ||
+            defaultHeroSection.image_max_width,
+          image_max_height:
+            data.heroSection.image_max_height ||
+            defaultHeroSection.image_max_height,
+          image_quality:
+            data.heroSection.image_quality || defaultHeroSection.image_quality,
           is_active: data.heroSection.is_active !== false,
-          animation_duration_ms: data.heroSection.animation_duration_ms || defaultHeroSection.animation_duration_ms,
+          animation_duration_ms:
+            data.heroSection.animation_duration_ms ||
+            defaultHeroSection.animation_duration_ms,
         });
 
         // Set previews for existing images
@@ -203,6 +264,7 @@ export function AdminHeroManager() {
 
       // Update image settings
       const newSettings = [...imageSettings];
+
       newSettings[index] = {
         quality: formData.image_quality,
         originalFile: file,
@@ -215,26 +277,34 @@ export function AdminHeroManager() {
       setImageSettings(newSettings);
 
       // Revoke previous object URL if it exists
-      if (imagePreviews[index] && imagePreviews[index]?.startsWith('blob:')) {
+      if (imagePreviews[index] && imagePreviews[index]?.startsWith("blob:")) {
         URL.revokeObjectURL(imagePreviews[index]!);
       }
 
       // Update file and preview
       const newFiles = [...imageFiles];
+
       newFiles[index] = file;
       setImageFiles(newFiles);
 
       const newPreviews = [...imagePreviews];
+
       newPreviews[index] = URL.createObjectURL(file);
       setImagePreviews(newPreviews);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to process image";
-      showError("Image Upload Error", `Failed to process image ${index + 1}: ${errorMessage}`);
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to process image";
+
+      showError(
+        "Image Upload Error",
+        `Failed to process image ${index + 1}: ${errorMessage}`,
+      );
     }
   };
 
   const handleQualityChange = async (quality: number, index: number) => {
     const settings = imageSettings[index];
+
     if (!settings.originalFile) return;
 
     try {
@@ -243,11 +313,12 @@ export function AdminHeroManager() {
         settings.originalFile,
         formData.image_max_width,
         formData.image_max_height,
-        quality
+        quality,
       );
       const dimensions = await getImageDimensions(compressedFile);
 
       const newSettings = [...imageSettings];
+
       newSettings[index] = {
         ...settings,
         quality,
@@ -258,36 +329,41 @@ export function AdminHeroManager() {
       setImageSettings(newSettings);
 
       // Update preview
-      if (imagePreviews[index] && imagePreviews[index]?.startsWith('blob:')) {
+      if (imagePreviews[index] && imagePreviews[index]?.startsWith("blob:")) {
         URL.revokeObjectURL(imagePreviews[index]!);
       }
       const newFiles = [...imageFiles];
+
       newFiles[index] = compressedFile;
       setImageFiles(newFiles);
 
       const newPreviews = [...imagePreviews];
+
       newPreviews[index] = URL.createObjectURL(compressedFile);
       setImagePreviews(newPreviews);
     } catch (error) {
-      console.error('Error compressing image:', error);
+      console.error("Error compressing image:", error);
     }
   };
 
   const clearImage = (index: number) => {
     // Revoke the object URL to free memory
-    if (imagePreviews[index] && imagePreviews[index]?.startsWith('blob:')) {
+    if (imagePreviews[index] && imagePreviews[index]?.startsWith("blob:")) {
       URL.revokeObjectURL(imagePreviews[index]!);
     }
 
     const newFiles = [...imageFiles];
+
     newFiles[index] = null;
     setImageFiles(newFiles);
 
     const newPreviews = [...imagePreviews];
+
     newPreviews[index] = null;
     setImagePreviews(newPreviews);
 
     const newSettings = [...imageSettings];
+
     newSettings[index] = {
       quality: formData.image_quality,
       originalFile: null,
@@ -301,34 +377,43 @@ export function AdminHeroManager() {
 
     // Clear URL in form data
     const urlKey = `image_${index + 1}_url` as keyof typeof formData;
+
     setFormData((prev) => ({ ...prev, [urlKey]: null }));
   };
 
   const uploadImage = async (index: number): Promise<string | null> => {
     const file = imageFiles[index];
+
     if (!file) {
       // If no new file, return existing URL
       const urlKey = `image_${index + 1}_url` as keyof typeof formData;
+
       return formData[urlKey] as string | null;
     }
 
     setUploadingImages((prev) => {
       const newState = [...prev];
+
       newState[index] = true;
+
       return newState;
     });
 
     try {
       const formDataUpload = new FormData();
-      
+
       // Use compressed file if resize is enabled, otherwise use original
-      const fileToUpload = formData.image_resize_enabled && imageSettings[index].compressedFile
-        ? imageSettings[index].compressedFile
-        : file;
+      const fileToUpload =
+        formData.image_resize_enabled && imageSettings[index].compressedFile
+          ? imageSettings[index].compressedFile
+          : file;
 
       formDataUpload.append("file", fileToUpload);
       formDataUpload.append("imageIndex", (index + 1).toString());
-      formDataUpload.append("resizeEnabled", formData.image_resize_enabled.toString());
+      formDataUpload.append(
+        "resizeEnabled",
+        formData.image_resize_enabled.toString(),
+      );
       formDataUpload.append("maxWidth", formData.image_max_width.toString());
       formDataUpload.append("maxHeight", formData.image_max_height.toString());
       formDataUpload.append("quality", formData.image_quality.toString());
@@ -339,20 +424,34 @@ export function AdminHeroManager() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
-        throw new Error(errorData.error || `Upload failed with status ${response.status}`);
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: "Unknown error" }));
+
+        throw new Error(
+          errorData.error || `Upload failed with status ${response.status}`,
+        );
       }
 
       const result = await response.json();
+
       return result.url;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to upload image";
-      showError("Upload Error", `Failed to upload image ${index + 1}: ${errorMessage}`);
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to upload image";
+
+      showError(
+        "Upload Error",
+        `Failed to upload image ${index + 1}: ${errorMessage}`,
+      );
+
       return null;
     } finally {
       setUploadingImages((prev) => {
         const newState = [...prev];
+
         newState[index] = false;
+
         return newState;
       });
     }
@@ -361,6 +460,7 @@ export function AdminHeroManager() {
   const handleSave = async () => {
     if (!formData.main_headline.trim()) {
       showError("Validation Error", "Main headline is required");
+
       return;
     }
 
@@ -421,14 +521,16 @@ export function AdminHeroManager() {
       if (response.ok) {
         showSuccess(
           "Hero Section Saved",
-          "The hero section has been saved successfully."
+          "The hero section has been saved successfully.",
         );
         await loadHeroSection();
       } else {
         throw new Error(data.error || "Failed to save hero section");
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to save hero section";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to save hero section";
+
       showError("Save Error", errorMessage);
     } finally {
       setSaving(false);
@@ -444,10 +546,16 @@ export function AdminHeroManager() {
     );
   }
 
-  const hasImages = imagePreviews.some(preview => preview !== null) || 
-    formData.image_1_url || formData.image_2_url || formData.image_3_url;
-  const imagesCount = [formData.image_1_url, formData.image_2_url, formData.image_3_url]
-    .filter(url => url !== null).length;
+  const hasImages =
+    imagePreviews.some((preview) => preview !== null) ||
+    formData.image_1_url ||
+    formData.image_2_url ||
+    formData.image_3_url;
+  const imagesCount = [
+    formData.image_1_url,
+    formData.image_2_url,
+    formData.image_3_url,
+  ].filter((url) => url !== null).length;
 
   return (
     <div className="w-full space-y-4 sm:space-y-6 p-3 sm:p-0">
@@ -457,8 +565,12 @@ export function AdminHeroManager() {
           <CardBody className="p-3 sm:p-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="min-w-0">
-                <p className="text-lg sm:text-2xl font-bold text-primary truncate">{imagesCount}/3</p>
-                <p className="text-[10px] sm:text-xs font-medium text-default-500 truncate">Images</p>
+                <p className="text-lg sm:text-2xl font-bold text-primary truncate">
+                  {imagesCount}/3
+                </p>
+                <p className="text-[10px] sm:text-xs font-medium text-default-500 truncate">
+                  Images
+                </p>
               </div>
               <div className="p-2 sm:p-2.5 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex-shrink-0 self-start">
                 <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600 dark:text-primary-400" />
@@ -476,8 +588,12 @@ export function AdminHeroManager() {
           <CardBody className="p-3 sm:p-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="min-w-0">
-                <p className="text-lg sm:text-2xl font-bold text-secondary truncate">{formData.animation_duration_ms / 1000}s</p>
-                <p className="text-[10px] sm:text-xs font-medium text-default-500 truncate">Speed</p>
+                <p className="text-lg sm:text-2xl font-bold text-secondary truncate">
+                  {formData.animation_duration_ms / 1000}s
+                </p>
+                <p className="text-[10px] sm:text-xs font-medium text-default-500 truncate">
+                  Speed
+                </p>
               </div>
               <div className="p-2 sm:p-2.5 bg-secondary-100 dark:bg-secondary-900/30 rounded-lg flex-shrink-0 self-start">
                 <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-secondary-600 dark:text-secondary-400" />
@@ -490,19 +606,29 @@ export function AdminHeroManager() {
           <CardBody className="p-3 sm:p-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="min-w-0">
-                <p className={`text-lg sm:text-2xl font-bold truncate ${formData.image_resize_enabled ? "text-success" : "text-warning"}`}>
+                <p
+                  className={`text-lg sm:text-2xl font-bold truncate ${formData.image_resize_enabled ? "text-success" : "text-warning"}`}
+                >
                   {formData.image_resize_enabled ? "On" : "Off"}
                 </p>
-                <p className="text-[10px] sm:text-xs font-medium text-default-500 truncate">Compress</p>
+                <p className="text-[10px] sm:text-xs font-medium text-default-500 truncate">
+                  Compress
+                </p>
               </div>
-              <div className={`p-2 sm:p-2.5 rounded-lg flex-shrink-0 self-start ${
-                formData.image_resize_enabled 
-                  ? "bg-success-100 dark:bg-success-900/30" 
-                  : "bg-warning-100 dark:bg-warning-900/30"
-              }`}>
-                <Settings className={`w-4 h-4 sm:w-5 sm:h-5 ${
-                  formData.image_resize_enabled ? "text-success-600 dark:text-success-400" : "text-warning-600 dark:text-warning-400"
-                }`} />
+              <div
+                className={`p-2 sm:p-2.5 rounded-lg flex-shrink-0 self-start ${
+                  formData.image_resize_enabled
+                    ? "bg-success-100 dark:bg-success-900/30"
+                    : "bg-warning-100 dark:bg-warning-900/30"
+                }`}
+              >
+                <Settings
+                  className={`w-4 h-4 sm:w-5 sm:h-5 ${
+                    formData.image_resize_enabled
+                      ? "text-success-600 dark:text-success-400"
+                      : "text-warning-600 dark:text-warning-400"
+                  }`}
+                />
               </div>
             </div>
           </CardBody>
@@ -517,10 +643,19 @@ export function AdminHeroManager() {
               <ImageIcon className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600 dark:text-primary-400" />
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="text-base sm:text-lg font-bold text-foreground">Hero Images</h2>
-              <p className="text-[10px] sm:text-xs text-default-500 mt-0.5 truncate">{getSupportedFormatsText()}</p>
+              <h2 className="text-base sm:text-lg font-bold text-foreground">
+                Hero Images
+              </h2>
+              <p className="text-[10px] sm:text-xs text-default-500 mt-0.5 truncate">
+                {getSupportedFormatsText()}
+              </p>
             </div>
-            <Chip size="sm" variant="flat" color="primary" className="flex-shrink-0">
+            <Chip
+              className="flex-shrink-0"
+              color="primary"
+              size="sm"
+              variant="flat"
+            >
               {imagesCount}/3
             </Chip>
           </div>
@@ -543,29 +678,33 @@ export function AdminHeroManager() {
                     {/* Right side: Uploaded chip */}
                     {imagePreviews[index] && (
                       <Chip
-                        size="sm"
-                        color="success"
-                        variant="solid"
                         className="font-semibold px-2 py-0.5 ml-2 text-white"
-                        startContent={<CheckCircle2 className="w-3 h-3 text-white" />}
+                        color="success"
+                        size="sm"
+                        startContent={
+                          <CheckCircle2 className="w-3 h-3 text-white" />
+                        }
+                        variant="solid"
                       >
                         Uploaded
                       </Chip>
                     )}
                   </div>
                 </div>
-                
+
                 <div className="relative">
                   {imagePreviews[index] ? (
                     <div className="relative group rounded-2xl overflow-hidden border-2 border-divider shadow-lg hover:shadow-2xl transition-all duration-300">
                       <img
-                        src={imagePreviews[index]!}
                         alt={`Hero image ${index + 1}`}
                         className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
+                        src={imagePreviews[index]!}
                         style={{
                           objectPosition: (() => {
-                            const posKey = `image_${index + 1}_position` as keyof typeof formData;
-                            const pos = (formData[posKey] as string) || "object-center";
+                            const posKey =
+                              `image_${index + 1}_position` as keyof typeof formData;
+                            const pos =
+                              (formData[posKey] as string) || "object-center";
                             const positionMap: { [key: string]: string } = {
                               "object-center": "center",
                               "object-top": "top",
@@ -577,6 +716,7 @@ export function AdminHeroManager() {
                               "object-right-top": "right top",
                               "object-right-bottom": "right bottom",
                             };
+
                             return positionMap[pos] || "center";
                           })(),
                         }}
@@ -584,23 +724,29 @@ export function AdminHeroManager() {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       <Button
                         isIconOnly
+                        className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg backdrop-blur-sm"
                         color="danger"
                         size="sm"
-                        className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg backdrop-blur-sm"
                         onPress={() => clearImage(index)}
                       >
                         <X className="w-4 h-4" />
                       </Button>
-                      
+
                       {/* Image Info Overlay */}
                       {imageSettings[index].originalFile && (
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent text-white p-3 text-xs backdrop-blur-sm">
                           <div className="flex justify-between items-center">
                             <span className="font-medium">
-                              {imageSettings[index].originalDimensions.width} × {imageSettings[index].originalDimensions.height}
+                              {imageSettings[index].originalDimensions.width} ×{" "}
+                              {imageSettings[index].originalDimensions.height}
                             </span>
                             <span className="font-semibold bg-white/20 px-2 py-1 rounded">
-                              {(imageSettings[index].originalSize / 1024 / 1024).toFixed(2)} MB
+                              {(
+                                imageSettings[index].originalSize /
+                                1024 /
+                                1024
+                              ).toFixed(2)}{" "}
+                              MB
                             </span>
                           </div>
                         </div>
@@ -618,11 +764,12 @@ export function AdminHeroManager() {
                         Image {index + 1}
                       </span>
                       <input
-                        type="file"
                         accept="image/*"
                         className="hidden"
+                        type="file"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
+
                           if (file) handleImageUpload(file, index);
                         }}
                       />
@@ -634,46 +781,37 @@ export function AdminHeroManager() {
                 {imagePreviews[index] && (
                   <div className="mt-3">
                     <Select
+                      classNames={{
+                        trigger: "min-h-unit-10",
+                      }}
                       label="Image Position"
                       placeholder="Select position"
-                      selectedKeys={[formData[`image_${index + 1}_position` as keyof typeof formData] as string || "object-center"]}
+                      selectedKeys={[
+                        (formData[
+                          `image_${index + 1}_position` as keyof typeof formData
+                        ] as string) || "object-center",
+                      ]}
+                      size="sm"
+                      variant="bordered"
                       onSelectionChange={(keys) => {
                         const value = Array.from(keys)[0] as string;
+
                         setFormData((prev) => ({
                           ...prev,
                           [`image_${index + 1}_position`]: value,
                         }));
                       }}
-                      variant="bordered"
-                      size="sm"
-                      classNames={{
-                        trigger: "min-h-unit-10",
-                      }}
                     >
-                      <SelectItem key="object-center">
-                        Center
-                      </SelectItem>
-                      <SelectItem key="object-top">
-                        Top
-                      </SelectItem>
-                      <SelectItem key="object-bottom">
-                        Bottom
-                      </SelectItem>
-                      <SelectItem key="object-left">
-                        Left
-                      </SelectItem>
-                      <SelectItem key="object-right">
-                        Right
-                      </SelectItem>
-                      <SelectItem key="object-left-top">
-                        Top Left
-                      </SelectItem>
+                      <SelectItem key="object-center">Center</SelectItem>
+                      <SelectItem key="object-top">Top</SelectItem>
+                      <SelectItem key="object-bottom">Bottom</SelectItem>
+                      <SelectItem key="object-left">Left</SelectItem>
+                      <SelectItem key="object-right">Right</SelectItem>
+                      <SelectItem key="object-left-top">Top Left</SelectItem>
                       <SelectItem key="object-left-bottom">
                         Bottom Left
                       </SelectItem>
-                      <SelectItem key="object-right-top">
-                        Top Right
-                      </SelectItem>
+                      <SelectItem key="object-right-top">Top Right</SelectItem>
                       <SelectItem key="object-right-bottom">
                         Bottom Right
                       </SelectItem>
@@ -682,43 +820,71 @@ export function AdminHeroManager() {
                 )}
 
                 {/* Image Settings (only show if image is uploaded and resize is enabled) */}
-                {imageFiles[index] && formData.image_resize_enabled && imageSettings[index].originalFile && (
-                  <Card className="bg-gradient-to-br from-default-50 to-default-100 dark:from-default-900/50 dark:to-default-800/50 border border-divider shadow-md">
-                    <CardBody className="p-4 space-y-4">
-                      <div className="flex items-center justify-between text-xs pb-2 border-b border-divider">
-                        <span className="text-default-600 dark:text-default-400 font-medium">Original Size</span>
-                        <span className="font-bold text-default-700 dark:text-default-300">
-                          {(imageSettings[index].originalSize / 1024 / 1024).toFixed(2)} MB
-                        </span>
-                      </div>
-                      {imageSettings[index].compressedSize > 0 && (
+                {imageFiles[index] &&
+                  formData.image_resize_enabled &&
+                  imageSettings[index].originalFile && (
+                    <Card className="bg-gradient-to-br from-default-50 to-default-100 dark:from-default-900/50 dark:to-default-800/50 border border-divider shadow-md">
+                      <CardBody className="p-4 space-y-4">
                         <div className="flex items-center justify-between text-xs pb-2 border-b border-divider">
-                          <span className="text-default-600 dark:text-default-400 font-medium">Compressed Size</span>
-                          <span className="font-bold text-success-600 dark:text-success-400">
-                            {(imageSettings[index].compressedSize / 1024 / 1024).toFixed(2)} MB
+                          <span className="text-default-600 dark:text-default-400 font-medium">
+                            Original Size
+                          </span>
+                          <span className="font-bold text-default-700 dark:text-default-300">
+                            {(
+                              imageSettings[index].originalSize /
+                              1024 /
+                              1024
+                            ).toFixed(2)}{" "}
+                            MB
                           </span>
                         </div>
-                      )}
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-default-600 dark:text-default-400 font-medium">Quality</span>
-                          <Chip size="sm" variant="flat" color="primary" className="font-bold">
-                            {Math.round(imageSettings[index].quality * 100)}%
-                          </Chip>
+                        {imageSettings[index].compressedSize > 0 && (
+                          <div className="flex items-center justify-between text-xs pb-2 border-b border-divider">
+                            <span className="text-default-600 dark:text-default-400 font-medium">
+                              Compressed Size
+                            </span>
+                            <span className="font-bold text-success-600 dark:text-success-400">
+                              {(
+                                imageSettings[index].compressedSize /
+                                1024 /
+                                1024
+                              ).toFixed(2)}{" "}
+                              MB
+                            </span>
+                          </div>
+                        )}
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-default-600 dark:text-default-400 font-medium">
+                              Quality
+                            </span>
+                            <Chip
+                              className="font-bold"
+                              color="primary"
+                              size="sm"
+                              variant="flat"
+                            >
+                              {Math.round(imageSettings[index].quality * 100)}%
+                            </Chip>
+                          </div>
+                          <input
+                            className="w-full h-2 bg-default-200 dark:bg-default-700 rounded-lg appearance-none cursor-pointer accent-primary-600 hover:accent-primary-500 transition-colors"
+                            max="1"
+                            min="0.1"
+                            step="0.05"
+                            type="range"
+                            value={imageSettings[index].quality}
+                            onChange={(e) =>
+                              handleQualityChange(
+                                parseFloat(e.target.value),
+                                index,
+                              )
+                            }
+                          />
                         </div>
-                        <input
-                          type="range"
-                          min="0.1"
-                          max="1"
-                          step="0.05"
-                          value={imageSettings[index].quality}
-                          onChange={(e) => handleQualityChange(parseFloat(e.target.value), index)}
-                          className="w-full h-2 bg-default-200 dark:bg-default-700 rounded-lg appearance-none cursor-pointer accent-primary-600 hover:accent-primary-500 transition-colors"
-                        />
-                      </div>
-                    </CardBody>
-                  </Card>
-                )}
+                      </CardBody>
+                    </Card>
+                  )}
 
                 {uploadingImages[index] && (
                   <div className="flex items-center gap-2 text-sm text-primary-600 dark:text-primary-400">
@@ -740,8 +906,12 @@ export function AdminHeroManager() {
               <Type className="w-6 h-6 text-secondary-600 dark:text-secondary-400" />
             </div>
             <div className="flex-1">
-              <h2 className="text-xl font-bold text-foreground">Content & Messaging</h2>
-              <p className="text-sm text-default-500 mt-1">Main headlines, badge, and feature text</p>
+              <h2 className="text-xl font-bold text-foreground">
+                Content & Messaging
+              </h2>
+              <p className="text-sm text-default-500 mt-1">
+                Main headlines, badge, and feature text
+              </p>
             </div>
           </div>
         </CardHeader>
@@ -752,58 +922,75 @@ export function AdminHeroManager() {
               label="Badge Text"
               placeholder="Award-Winning Clinic"
               value={formData.badge_text}
-              onChange={(e) => setFormData((prev) => ({ ...prev, badge_text: e.target.value }))}
               variant="bordered"
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, badge_text: e.target.value }))
+              }
             />
             <IconPicker
+              category="badge"
               label="Badge Icon"
               value={formData.badge_icon}
-              onChange={(value) => setFormData((prev) => ({ ...prev, badge_icon: value }))}
-              category="badge"
+              onChange={(value) =>
+                setFormData((prev) => ({ ...prev, badge_icon: value }))
+              }
             />
           </div>
 
           {/* Headlines */}
           <Input
+            isRequired
+            classNames={{
+              input: "text-lg font-semibold",
+            }}
             label="Main Headline"
             placeholder="Your Journey to Confidence"
             value={formData.main_headline}
-            onChange={(e) => setFormData((prev) => ({ ...prev, main_headline: e.target.value }))}
             variant="bordered"
-            isRequired
-            classNames={{
-              input: "text-lg font-semibold"
-            }}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                main_headline: e.target.value,
+              }))
+            }
           />
 
           <Textarea
             label="Sub Headline"
+            minRows={2}
             placeholder="Personalised treatments tailored to your unique goals"
             value={formData.sub_headline}
-            onChange={(e) => setFormData((prev) => ({ ...prev, sub_headline: e.target.value }))}
             variant="bordered"
-            minRows={2}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, sub_headline: e.target.value }))
+            }
           />
 
           {/* Features */}
           <div>
-            <label className="text-sm font-semibold text-foreground mb-3 block">Features</label>
+            <label className="text-sm font-semibold text-foreground mb-3 block">
+              Features
+            </label>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[1, 2, 3].map((num) => (
                 <Input
                   key={num}
                   label={`Feature ${num}`}
                   placeholder={`Feature ${num} text`}
-                  value={formData[`feature_${num}_text` as keyof typeof formData] as string}
+                  startContent={
+                    <CheckCircle2 className="w-4 h-4 text-success-500" />
+                  }
+                  value={
+                    formData[
+                      `feature_${num}_text` as keyof typeof formData
+                    ] as string
+                  }
+                  variant="bordered"
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
                       [`feature_${num}_text`]: e.target.value,
                     }))
-                  }
-                  variant="bordered"
-                  startContent={
-                    <CheckCircle2 className="w-4 h-4 text-success-500" />
                   }
                 />
               ))}
@@ -820,21 +1007,39 @@ export function AdminHeroManager() {
               <MousePointerClick className="w-6 h-6 text-warning-600 dark:text-warning-400" />
             </div>
             <div className="flex-1">
-              <h2 className="text-xl font-bold text-foreground">Call-to-Action Buttons</h2>
-              <p className="text-sm text-default-500 mt-1">Configure your primary and secondary CTA buttons</p>
+              <h2 className="text-xl font-bold text-foreground">
+                Call-to-Action Buttons
+              </h2>
+              <p className="text-sm text-default-500 mt-1">
+                Configure your primary and secondary CTA buttons
+              </p>
             </div>
           </div>
         </CardHeader>
         <CardBody className="p-6 space-y-6">
           {[1, 2].map((num) => (
-            <Card key={num} className="bg-gradient-to-br from-default-50 to-default-100 dark:from-default-900/50 dark:to-default-800/50 border border-divider shadow-md">
+            <Card
+              key={num}
+              className="bg-gradient-to-br from-default-50 to-default-100 dark:from-default-900/50 dark:to-default-800/50 border border-divider shadow-md"
+            >
               <CardHeader className="pb-3 border-b border-divider">
                 <div className="flex items-center gap-2">
-                  <Chip size="sm" variant="flat" color={num === 1 ? "primary" : "secondary"} className="font-bold">
+                  <Chip
+                    className="font-bold"
+                    color={num === 1 ? "primary" : "secondary"}
+                    size="sm"
+                    variant="flat"
+                  >
                     Button {num} {num === 1 ? "(Primary)" : "(Secondary)"}
                   </Chip>
-                  {formData[`button_${num}_type` as keyof typeof formData] === "external" && (
-                    <Chip size="sm" variant="flat" color="warning" className="font-semibold">
+                  {formData[`button_${num}_type` as keyof typeof formData] ===
+                    "external" && (
+                    <Chip
+                      className="font-semibold"
+                      color="warning"
+                      size="sm"
+                      variant="flat"
+                    >
                       External Link
                     </Chip>
                   )}
@@ -845,58 +1050,71 @@ export function AdminHeroManager() {
                   <Input
                     label="Button Text"
                     placeholder={`Button ${num} text`}
-                    value={formData[`button_${num}_text` as keyof typeof formData] as string}
+                    value={
+                      formData[
+                        `button_${num}_text` as keyof typeof formData
+                      ] as string
+                    }
+                    variant="bordered"
                     onChange={(e) =>
                       setFormData((prev) => ({
                         ...prev,
                         [`button_${num}_text`]: e.target.value,
                       }))
                     }
-                    variant="bordered"
                   />
                   <IconPicker
+                    category="button"
                     label={`Button ${num} Icon`}
-                    value={formData[`button_${num}_icon` as keyof typeof formData] as string}
+                    value={
+                      formData[
+                        `button_${num}_icon` as keyof typeof formData
+                      ] as string
+                    }
                     onChange={(value) =>
                       setFormData((prev) => ({
                         ...prev,
                         [`button_${num}_icon`]: value,
                       }))
                     }
-                    category="button"
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
                     label="Link URL"
                     placeholder="#contact or https://..."
-                    value={(formData[`button_${num}_link` as keyof typeof formData] as string) || ""}
+                    value={
+                      (formData[
+                        `button_${num}_link` as keyof typeof formData
+                      ] as string) || ""
+                    }
+                    variant="bordered"
                     onChange={(e) =>
                       setFormData((prev) => ({
                         ...prev,
                         [`button_${num}_link`]: e.target.value || null,
                       }))
                     }
-                    variant="bordered"
                   />
                   <Select
                     label="Link Type"
-                    selectedKeys={[formData[`button_${num}_type` as keyof typeof formData] as string]}
+                    selectedKeys={[
+                      formData[
+                        `button_${num}_type` as keyof typeof formData
+                      ] as string,
+                    ]}
+                    variant="bordered"
                     onSelectionChange={(keys) => {
                       const value = Array.from(keys)[0] as string;
+
                       setFormData((prev) => ({
                         ...prev,
                         [`button_${num}_type`]: value,
                       }));
                     }}
-                    variant="bordered"
                   >
-                    <SelectItem key="internal">
-                      Internal (Same Page)
-                    </SelectItem>
-                    <SelectItem key="external">
-                      External (New Tab)
-                    </SelectItem>
+                    <SelectItem key="internal">Internal (Same Page)</SelectItem>
+                    <SelectItem key="external">External (New Tab)</SelectItem>
                   </Select>
                 </div>
               </CardBody>
@@ -913,8 +1131,12 @@ export function AdminHeroManager() {
               <Phone className="w-6 h-6 text-success-600 dark:text-success-400" />
             </div>
             <div className="flex-1">
-              <h2 className="text-xl font-bold text-foreground">Contact Information</h2>
-              <p className="text-sm text-default-500 mt-1">Display contact details in hero section</p>
+              <h2 className="text-xl font-bold text-foreground">
+                Contact Information
+              </h2>
+              <p className="text-sm text-default-500 mt-1">
+                Display contact details in hero section
+              </p>
             </div>
           </div>
         </CardHeader>
@@ -924,16 +1146,26 @@ export function AdminHeroManager() {
               label="Contact Label"
               placeholder="Or call us now:"
               value={formData.contact_label}
-              onChange={(e) => setFormData((prev) => ({ ...prev, contact_label: e.target.value }))}
               variant="bordered"
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  contact_label: e.target.value,
+                }))
+              }
             />
             <Input
               label="Phone Number"
               placeholder={siteConfig.contact.phone}
-              value={formData.phone_number || ""}
-              onChange={(e) => setFormData((prev) => ({ ...prev, phone_number: e.target.value || null }))}
-              variant="bordered"
               type="tel"
+              value={formData.phone_number || ""}
+              variant="bordered"
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  phone_number: e.target.value || null,
+                }))
+              }
             />
           </div>
         </CardBody>
@@ -949,32 +1181,44 @@ export function AdminHeroManager() {
                 <Settings className="w-6 h-6 text-warning-600 dark:text-warning-400" />
               </div>
               <div className="flex-1">
-                <h2 className="text-xl font-bold text-foreground">Image Settings</h2>
-                <p className="text-sm text-default-500 mt-1">Compression and quality optimization</p>
+                <h2 className="text-xl font-bold text-foreground">
+                  Image Settings
+                </h2>
+                <p className="text-sm text-default-500 mt-1">
+                  Compression and quality optimization
+                </p>
               </div>
             </div>
           </CardHeader>
           <CardBody className="p-6 space-y-4">
             <div className="flex items-center justify-between p-4 bg-default-50 dark:bg-default-100 rounded-lg border border-divider">
               <div className="flex-1">
-                <label htmlFor="resizeEnabled" className="text-sm font-semibold text-foreground block mb-1">
+                <label
+                  className="text-sm font-semibold text-foreground block mb-1"
+                  htmlFor="resizeEnabled"
+                >
                   Enable Image Compression
                 </label>
                 <p className="text-xs text-default-500">
-                  {formData.image_resize_enabled 
-                    ? "Images will be compressed for faster loading" 
+                  {formData.image_resize_enabled
+                    ? "Images will be compressed for faster loading"
                     : "Images will be uploaded at original quality"}
                 </p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
-                  type="checkbox"
-                  id="resizeEnabled"
                   checked={formData.image_resize_enabled}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, image_resize_enabled: e.target.checked }))}
                   className="sr-only peer"
+                  id="resizeEnabled"
+                  type="checkbox"
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      image_resize_enabled: e.target.checked,
+                    }))
+                  }
                 />
-                <div className="w-11 h-6 bg-default-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-default-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-default-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-default-600 peer-checked:bg-primary-600"></div>
+                <div className="w-11 h-6 bg-default-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-default-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-default-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-default-600 peer-checked:bg-primary-600" />
               </label>
             </div>
 
@@ -984,26 +1228,41 @@ export function AdminHeroManager() {
                   label="Max Width (px)"
                   type="number"
                   value={formData.image_max_width.toString()}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, image_max_width: parseInt(e.target.value) || 1920 }))}
                   variant="bordered"
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      image_max_width: parseInt(e.target.value) || 1920,
+                    }))
+                  }
                 />
                 <Input
                   label="Max Height (px)"
                   type="number"
                   value={formData.image_max_height.toString()}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, image_max_height: parseInt(e.target.value) || 1080 }))}
                   variant="bordered"
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      image_max_height: parseInt(e.target.value) || 1080,
+                    }))
+                  }
                 />
                 <Input
-                  label="Quality"
-                  type="number"
-                  min="0.1"
-                  max="1"
-                  step="0.05"
-                  value={formData.image_quality.toString()}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, image_quality: parseFloat(e.target.value) || 0.85 }))}
-                  variant="bordered"
                   description="0.1 - 1.0"
+                  label="Quality"
+                  max="1"
+                  min="0.1"
+                  step="0.05"
+                  type="number"
+                  value={formData.image_quality.toString()}
+                  variant="bordered"
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      image_quality: parseFloat(e.target.value) || 0.85,
+                    }))
+                  }
                 />
               </div>
             )}
@@ -1018,46 +1277,61 @@ export function AdminHeroManager() {
                 <Zap className="w-6 h-6 text-secondary-600 dark:text-secondary-400" />
               </div>
               <div className="flex-1">
-                <h2 className="text-xl font-bold text-foreground">Animation Settings</h2>
-                <p className="text-sm text-default-500 mt-1">Image transition and display timing</p>
+                <h2 className="text-xl font-bold text-foreground">
+                  Animation Settings
+                </h2>
+                <p className="text-sm text-default-500 mt-1">
+                  Image transition and display timing
+                </p>
               </div>
             </div>
           </CardHeader>
           <CardBody className="p-6 space-y-4">
             <Input
+              description="Time between image transitions"
+              endContent={<span className="text-default-400 text-sm">ms</span>}
               label="Animation Duration"
-              type="number"
-              value={formData.animation_duration_ms.toString()}
-              onChange={(e) => setFormData((prev) => ({ ...prev, animation_duration_ms: parseInt(e.target.value) || 6000 }))}
-              variant="bordered"
               min="1000"
               step="1000"
-              endContent={
-                <span className="text-default-400 text-sm">ms</span>
+              type="number"
+              value={formData.animation_duration_ms.toString()}
+              variant="bordered"
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  animation_duration_ms: parseInt(e.target.value) || 6000,
+                }))
               }
-              description="Time between image transitions"
             />
 
             <div className="flex items-center justify-between p-4 bg-default-50 dark:bg-default-100 rounded-lg border border-divider">
               <div className="flex-1">
-                <label htmlFor="isActive" className="text-sm font-semibold text-foreground block mb-1">
+                <label
+                  className="text-sm font-semibold text-foreground block mb-1"
+                  htmlFor="isActive"
+                >
                   Active Status
                 </label>
                 <p className="text-xs text-default-500">
-                  {formData.is_active 
-                    ? "This hero section is currently displayed" 
+                  {formData.is_active
+                    ? "This hero section is currently displayed"
                     : "This hero section is hidden"}
                 </p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
-                  type="checkbox"
-                  id="isActive"
                   checked={formData.is_active}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, is_active: e.target.checked }))}
                   className="sr-only peer"
+                  id="isActive"
+                  type="checkbox"
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      is_active: e.target.checked,
+                    }))
+                  }
                 />
-                <div className="w-11 h-6 bg-default-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-success-300 dark:peer-focus:ring-success-800 rounded-full peer dark:bg-default-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-default-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-default-600 peer-checked:bg-success-600"></div>
+                <div className="w-11 h-6 bg-default-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-success-300 dark:peer-focus:ring-success-800 rounded-full peer dark:bg-default-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-default-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-default-600 peer-checked:bg-success-600" />
               </label>
             </div>
           </CardBody>
@@ -1069,27 +1343,36 @@ export function AdminHeroManager() {
         <CardBody className="p-6">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <div className="flex-1">
-              <h3 className="text-lg font-bold text-foreground mb-1">Ready to save your changes?</h3>
+              <h3 className="text-lg font-bold text-foreground mb-1">
+                Ready to save your changes?
+              </h3>
               <p className="text-sm text-default-500">
-                All changes will be applied to your hero section immediately after saving.
+                All changes will be applied to your hero section immediately
+                after saving.
               </p>
             </div>
             <div className="flex gap-3">
               <Button
+                className="font-semibold"
+                isDisabled={saving}
                 variant="light"
                 onPress={() => loadHeroSection()}
-                isDisabled={saving}
-                className="font-semibold"
               >
                 Cancel
               </Button>
               <Button
-                color="primary"
-                size="lg"
-                startContent={saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-                onPress={handleSave}
-                isDisabled={saving || !formData.main_headline.trim()}
                 className="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                color="primary"
+                isDisabled={saving || !formData.main_headline.trim()}
+                size="lg"
+                startContent={
+                  saving ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Save className="w-5 h-5" />
+                  )
+                }
+                onPress={handleSave}
               >
                 {saving ? "Saving..." : "Save Hero Section"}
               </Button>
@@ -1100,5 +1383,3 @@ export function AdminHeroManager() {
     </div>
   );
 }
-
-

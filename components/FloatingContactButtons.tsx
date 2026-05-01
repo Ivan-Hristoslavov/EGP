@@ -1,8 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Phone, Play, Calendar, MessageCircle, X, Menu, Instagram } from "lucide-react";
+import {
+  Phone,
+  Play,
+  Calendar,
+  MessageCircle,
+  X,
+  Menu,
+  Instagram,
+} from "lucide-react";
 import Link from "next/link";
+
 import { useAdminProfile } from "@/components/AdminProfileContext";
 import { useSocialLinks } from "@/hooks/useSocialLinks";
 
@@ -24,7 +33,9 @@ export default function FloatingContactButtons() {
   const { socialLinks } = useSocialLinks();
 
   const contactPhone = adminProfile?.phone || "";
-  const whatsappNumber = (adminProfile?.whatsapp || adminProfile?.phone || "").replace(/\s/g, "").replace(/\+/g, "");
+  const whatsappNumber = (adminProfile?.whatsapp || adminProfile?.phone || "")
+    .replace(/\s/g, "")
+    .replace(/\+/g, "");
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hi! I'd like to book a treatment.")}`;
 
   const quickActions: QuickAction[] = [
@@ -37,39 +48,61 @@ export default function FloatingContactButtons() {
       style: "book",
     },
     ...(contactPhone
-      ? [{
-          id: "call",
-          labelDesktop: "Call Now",
-          labelMobile: "Call",
-          href: `tel:${contactPhone}`,
-          icon: Phone,
-          style: "call" as const,
-        }]
+      ? [
+          {
+            id: "call",
+            labelDesktop: "Call Now",
+            labelMobile: "Call",
+            href: `tel:${contactPhone}`,
+            icon: Phone,
+            style: "call" as const,
+          },
+        ]
       : []),
     ...(whatsappNumber
-      ? [{
-          id: "whatsapp",
-          labelDesktop: "WhatsApp",
-          labelMobile: "WhatsApp",
-          href: whatsappUrl,
-          icon: MessageCircle,
-          external: true,
-          style: "whatsapp" as const,
-        }]
+      ? [
+          {
+            id: "whatsapp",
+            labelDesktop: "WhatsApp",
+            labelMobile: "WhatsApp",
+            href: whatsappUrl,
+            icon: MessageCircle,
+            external: true,
+            style: "whatsapp" as const,
+          },
+        ]
       : []),
     ...(socialLinks.youtube
-      ? [{ id: "videos", labelDesktop: "Videos", labelMobile: "Videos", href: socialLinks.youtube, icon: Play, external: true, style: "videos" as const }]
+      ? [
+          {
+            id: "videos",
+            labelDesktop: "Videos",
+            labelMobile: "Videos",
+            href: socialLinks.youtube,
+            icon: Play,
+            external: true,
+            style: "videos" as const,
+          },
+        ]
       : []),
     ...(socialLinks.instagram
-      ? [{ id: "instagram", labelDesktop: "Instagram", labelMobile: "Instagram", href: socialLinks.instagram, icon: Instagram, external: true, style: "instagram" as const }]
+      ? [
+          {
+            id: "instagram",
+            labelDesktop: "Instagram",
+            labelMobile: "Instagram",
+            href: socialLinks.instagram,
+            icon: Instagram,
+            external: true,
+            style: "instagram" as const,
+          },
+        ]
       : []),
   ];
 
   const styleClasses: Record<QuickAction["style"], string> = {
-    book:
-      "bg-slate-700 hover:bg-slate-800 text-white border border-slate-600/50 dark:bg-slate-600 dark:hover:bg-slate-500 dark:border-slate-500/50",
-    call:
-      "bg-rose-600/90 hover:bg-rose-600 text-white border border-rose-500/50 dark:bg-rose-700 dark:hover:bg-rose-600 dark:border-rose-600/50",
+    book: "bg-slate-700 hover:bg-slate-800 text-white border border-slate-600/50 dark:bg-slate-600 dark:hover:bg-slate-500 dark:border-slate-500/50",
+    call: "bg-rose-600/90 hover:bg-rose-600 text-white border border-rose-500/50 dark:bg-rose-700 dark:hover:bg-rose-600 dark:border-rose-600/50",
     whatsapp:
       "bg-emerald-600/90 hover:bg-emerald-600 text-white border border-emerald-500/50 dark:bg-emerald-700 dark:hover:bg-emerald-600 dark:border-emerald-600/50",
     videos:
@@ -80,7 +113,9 @@ export default function FloatingContactButtons() {
 
   const renderAction = (action: QuickAction) => {
     const Icon = action.icon;
-    const commonAnchorProps = action.external ? { target: "_blank", rel: "noopener noreferrer" } : undefined;
+    const commonAnchorProps = action.external
+      ? { target: "_blank", rel: "noopener noreferrer" }
+      : undefined;
     const btnClass = [
       "flex items-center gap-3 w-full min-w-[140px] sm:min-w-[160px] rounded-xl py-2.5 px-3 sm:px-4",
       "text-[13px] sm:text-sm font-medium transition-all duration-200",
@@ -99,27 +134,47 @@ export default function FloatingContactButtons() {
           <span className="hidden sm:inline">{action.labelDesktop}</span>
         </span>
         {action.id === "whatsapp" && (
-          <span className="h-2 w-2 shrink-0 rounded-full bg-white/80 animate-pulse" aria-hidden />
+          <span
+            aria-hidden
+            className="h-2 w-2 shrink-0 rounded-full bg-white/80 animate-pulse"
+          />
         )}
       </>
     );
 
     if (action.href.startsWith("tel:")) {
       return (
-        <a key={action.id} href={action.href} className={btnClass} onClick={() => setIsExpanded(false)}>
+        <a
+          key={action.id}
+          className={btnClass}
+          href={action.href}
+          onClick={() => setIsExpanded(false)}
+        >
           {content}
         </a>
       );
     }
     if (action.external) {
       return (
-        <a key={action.id} href={action.href} {...commonAnchorProps} className={btnClass} onClick={() => setIsExpanded(false)}>
+        <a
+          key={action.id}
+          href={action.href}
+          {...commonAnchorProps}
+          className={btnClass}
+          onClick={() => setIsExpanded(false)}
+        >
           {content}
         </a>
       );
     }
+
     return (
-      <Link key={action.id} href={action.href} className={btnClass} onClick={() => setIsExpanded(false)}>
+      <Link
+        key={action.id}
+        className={btnClass}
+        href={action.href}
+        onClick={() => setIsExpanded(false)}
+      >
         {content}
       </Link>
     );
@@ -145,16 +200,20 @@ export default function FloatingContactButtons() {
         </div>
 
         <button
-          type="button"
-          onClick={() => setIsExpanded(!isExpanded)}
+          aria-label={isExpanded ? "Close menu" : "Open contact menu"}
           className={`flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
             isExpanded
               ? "bg-gray-600 hover:bg-gray-700 dark:bg-gray-500 dark:hover:bg-gray-600 text-white"
               : "bg-[#9d9585] hover:bg-[#8a8272] dark:bg-[#b5ad9d] dark:hover:bg-[#9d9585] text-white shadow-lg hover:shadow-xl hover:scale-105"
           }`}
-          aria-label={isExpanded ? "Close menu" : "Open contact menu"}
+          type="button"
+          onClick={() => setIsExpanded(!isExpanded)}
         >
-          {isExpanded ? <X className="h-5 w-5 sm:h-6 sm:w-6" /> : <Menu className="h-5 w-5 sm:h-6 sm:w-6" />}
+          {isExpanded ? (
+            <X className="h-5 w-5 sm:h-6 sm:w-6" />
+          ) : (
+            <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
+          )}
         </button>
       </div>
     </div>

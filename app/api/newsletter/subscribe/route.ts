@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { supabaseAdmin } from "@/lib/supabase";
 import { sendEmail } from "@/lib/sendgrid-smtp";
 import { siteConfig } from "@/config/site";
@@ -11,10 +12,7 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!email) {
-      return NextResponse.json(
-        { error: "Email is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
     // Check if customer already exists by email
@@ -29,7 +27,7 @@ export async function POST(request: NextRequest) {
     if (existingCustomer) {
       // Update existing customer
       customerId = existingCustomer.id;
-      
+
       const updateData: any = {
         marketing_emails: true,
         updated_at: new Date().toISOString(),
@@ -72,9 +70,10 @@ export async function POST(request: NextRequest) {
 
       if (createError) {
         console.error("Error creating customer:", createError);
+
         return NextResponse.json(
           { error: "Failed to create customer record" },
-          { status: 500 }
+          { status: 500 },
         );
       }
 
@@ -88,7 +87,10 @@ export async function POST(request: NextRequest) {
 
     // Calculate valid until date (30 days from now)
     const validUntil = new Date();
-    validUntil.setDate(validUntil.getDate() + (siteConfig.newsletter.discountValidDays || 30));
+
+    validUntil.setDate(
+      validUntil.getDate() + (siteConfig.newsletter.discountValidDays || 30),
+    );
 
     // Save discount code to database
     const { data: savedCode, error: codeError } = await supabaseAdmin
@@ -97,7 +99,8 @@ export async function POST(request: NextRequest) {
         {
           customer_id: customerId,
           code: discountCode,
-          discount_percentage: siteConfig.newsletter.welcomeDiscountPercent || 10,
+          discount_percentage:
+            siteConfig.newsletter.welcomeDiscountPercent || 10,
           valid_from: new Date().toISOString(),
           valid_until: validUntil.toISOString(),
           is_active: true,
@@ -191,14 +194,15 @@ The EGP Aesthetics Team
     return NextResponse.json({
       success: true,
       discountCode,
-      message: "Subscription successful! Check your email for your discount code.",
+      message:
+        "Subscription successful! Check your email for your discount code.",
     });
   } catch (error) {
     console.error("Newsletter subscription error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

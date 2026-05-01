@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Spinner } from "@heroui/react";
 
 export default function BookNewPage() {
@@ -9,13 +9,13 @@ export default function BookNewPage() {
 
   useEffect(() => {
     // Redirect to /book (which is the main booking page)
-    router.replace('/book');
+    router.replace("/book");
   }, [router]);
 
   return (
     <div className="min-h-screen bg-default-50 flex items-center justify-center">
       <div className="text-center">
-        <Spinner size="lg" color="primary" className="mb-4" />
+        <Spinner className="mb-4" color="primary" size="lg" />
         <p className="text-default-600">Redirecting...</p>
       </div>
     </div>

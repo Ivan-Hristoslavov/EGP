@@ -1,15 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { supabaseAdmin } from "../../../../lib/supabase";
 
-const DAY_KEYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"] as const;
+const DAY_KEYS = [
+  "sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+] as const;
 
-type NormalizedHours = Record<(typeof DAY_KEYS)[number], {
-  isOpen: boolean;
-  open: string | null;
-  close: string | null;
-  bufferMinutes: number;
-  maxAppointments: number;
-}>;
+type NormalizedHours = Record<
+  (typeof DAY_KEYS)[number],
+  {
+    isOpen: boolean;
+    open: string | null;
+    close: string | null;
+    bufferMinutes: number;
+    maxAppointments: number;
+  }
+>;
 
 function normalizeWorkingHours(rows: any[]): NormalizedHours {
   const fallback: NormalizedHours = DAY_KEYS.reduce((acc, day) => {
@@ -20,11 +32,13 @@ function normalizeWorkingHours(rows: any[]): NormalizedHours {
       bufferMinutes: 15,
       maxAppointments: 10,
     };
+
     return acc;
   }, {} as NormalizedHours);
 
   rows.forEach((row) => {
     const dayKey = DAY_KEYS[row.day_of_week] ?? null;
+
     if (!dayKey) return;
 
     fallback[dayKey] = {
@@ -46,7 +60,9 @@ async function persistNormalizedHours(hours: NormalizedHours) {
     updated_at: new Date().toISOString(),
   };
 
-  await supabaseAdmin.from("admin_settings").upsert(payload, { onConflict: "key" });
+  await supabaseAdmin
+    .from("admin_settings")
+    .upsert(payload, { onConflict: "key" });
 }
 
 // GET - Fetch working hours
@@ -59,9 +75,10 @@ export async function GET() {
 
     if (error) {
       console.error("Error fetching working hours:", error);
+
       return NextResponse.json(
         { error: "Failed to fetch working hours" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -70,9 +87,10 @@ export async function GET() {
     return NextResponse.json({ workingHours: workingHours ?? [], normalized });
   } catch (error) {
     console.error("Unexpected error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -86,7 +104,7 @@ export async function PUT(request: NextRequest) {
     if (!workingHours || !Array.isArray(workingHours)) {
       return NextResponse.json(
         { error: "Working hours array is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -101,7 +119,7 @@ export async function PUT(request: NextRequest) {
       ) {
         return NextResponse.json(
           { error: "Invalid working hour data" },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
@@ -128,9 +146,12 @@ export async function PUT(request: NextRequest) {
 
       if (error) {
         console.error("Error updating working hour:", error);
+
         return NextResponse.json(
-          { error: `Failed to update working hour for day ${hour.day_of_week}` },
-          { status: 500 }
+          {
+            error: `Failed to update working hour for day ${hour.day_of_week}`,
+          },
+          { status: 500 },
         );
       }
 
@@ -138,6 +159,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const normalized = normalizeWorkingHours(updates);
+
     await persistNormalizedHours(normalized);
 
     return NextResponse.json({
@@ -148,9 +170,10 @@ export async function PUT(request: NextRequest) {
     });
   } catch (error) {
     console.error("Unexpected error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+
 import { siteConfig } from "@/config/site";
 
 export type SocialLinks = {
@@ -27,6 +28,7 @@ export function useSocialLinks() {
 
   useEffect(() => {
     let cancelled = false;
+
     setLoading(true);
     fetch("/api/social-links")
       .then((res) => (res.ok ? res.json() : defaults))
@@ -47,6 +49,7 @@ export function useSocialLinks() {
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
+
     return () => {
       cancelled = true;
     };

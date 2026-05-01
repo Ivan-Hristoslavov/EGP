@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+
 import { useFAQ } from "@/hooks/useFAQ";
 import { FAQItem } from "@/types";
 import { useToast, ToastMessages } from "@/components/Toast";
@@ -8,13 +9,13 @@ import { useConfirmation } from "@/hooks/useConfirmation";
 import { ConfirmationModal } from "@/components/ConfirmationModal";
 
 // Modal Component
-function FAQModal({ 
-  isOpen, 
-  onClose, 
-  onSubmit, 
-  editingItem, 
-  formData, 
-  setFormData 
+function FAQModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  editingItem,
+  formData,
+  setFormData,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -34,11 +35,21 @@ function FAQModal({
             {editingItem ? "Edit FAQ Item" : "Add New FAQ Item"}
           </h3>
           <button
-            onClick={onClose}
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            onClick={onClose}
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M6 18L18 6M6 6l12 12"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+              />
             </svg>
           </button>
         </div>
@@ -50,11 +61,16 @@ function FAQModal({
               Question *
             </label>
             <input
-              type="text"
-              value={formData.question}
-              onChange={(e) => setFormData((prev: any) => ({ ...prev, question: e.target.value }))}
               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               placeholder="Enter the FAQ question"
+              type="text"
+              value={formData.question}
+              onChange={(e) =>
+                setFormData((prev: any) => ({
+                  ...prev,
+                  question: e.target.value,
+                }))
+              }
             />
           </div>
 
@@ -63,11 +79,16 @@ function FAQModal({
               Answer *
             </label>
             <textarea
-              value={formData.answer}
-              onChange={(e) => setFormData((prev: any) => ({ ...prev, answer: e.target.value }))}
-              rows={6}
               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
               placeholder="Enter the FAQ answer"
+              rows={6}
+              value={formData.answer}
+              onChange={(e) =>
+                setFormData((prev: any) => ({
+                  ...prev,
+                  answer: e.target.value,
+                }))
+              }
             />
           </div>
 
@@ -77,11 +98,16 @@ function FAQModal({
                 Display Order
               </label>
               <input
-                type="number"
-                value={formData.order}
-                onChange={(e) => setFormData((prev: any) => ({ ...prev, order: parseInt(e.target.value) || 0 }))}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 placeholder="0"
+                type="number"
+                value={formData.order}
+                onChange={(e) =>
+                  setFormData((prev: any) => ({
+                    ...prev,
+                    order: parseInt(e.target.value) || 0,
+                  }))
+                }
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Lower numbers appear first
@@ -93,12 +119,19 @@ function FAQModal({
                 Status
               </label>
               <select
-                value={formData.is_active ? "active" : "inactive"}
-                onChange={(e) => setFormData((prev: any) => ({ ...prev, is_active: e.target.value === "active" }))}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                value={formData.is_active ? "active" : "inactive"}
+                onChange={(e) =>
+                  setFormData((prev: any) => ({
+                    ...prev,
+                    is_active: e.target.value === "active",
+                  }))
+                }
               >
                 <option value="active">Active (Visible to customers)</option>
-                <option value="inactive">Inactive (Hidden from customers)</option>
+                <option value="inactive">
+                  Inactive (Hidden from customers)
+                </option>
               </select>
             </div>
           </div>
@@ -107,14 +140,14 @@ function FAQModal({
         {/* Modal Footer */}
         <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-700">
           <button
-            onClick={onClose}
             className="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-medium"
+            onClick={onClose}
           >
             Cancel
           </button>
           <button
-            onClick={onSubmit}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            onClick={onSubmit}
           >
             {editingItem ? "Update FAQ" : "Add FAQ"}
           </button>
@@ -125,10 +158,17 @@ function FAQModal({
 }
 
 export function AdminFAQManager({ triggerModal }: { triggerModal?: boolean }) {
-  const { faqItems, isLoading, error, addFAQItem, updateFAQItem, deleteFAQItem } = useFAQ(true);
+  const {
+    faqItems,
+    isLoading,
+    error,
+    addFAQItem,
+    updateFAQItem,
+    deleteFAQItem,
+  } = useFAQ(true);
   const { showSuccess, showError } = useToast();
   const { confirm, modalProps } = useConfirmation();
-  
+
   const [editingItem, setEditingItem] = useState<FAQItem | null>(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -152,12 +192,18 @@ export function AdminFAQManager({ triggerModal }: { triggerModal?: boolean }) {
     try {
       if (editingItem && editingItem.id) {
         await updateFAQItem(editingItem.id, formData);
-        showSuccess(ToastMessages.faq.itemUpdated.title, ToastMessages.faq.itemUpdated.message);
+        showSuccess(
+          ToastMessages.faq.itemUpdated.title,
+          ToastMessages.faq.itemUpdated.message,
+        );
         setEditingItem(null);
         setShowModal(false);
       } else {
         await addFAQItem(formData);
-        showSuccess(ToastMessages.faq.itemAdded.title, ToastMessages.faq.itemAdded.message);
+        showSuccess(
+          ToastMessages.faq.itemAdded.title,
+          ToastMessages.faq.itemAdded.message,
+        );
         setShowModal(false);
       }
       setFormData({ ...defaultItem });
@@ -188,18 +234,22 @@ export function AdminFAQManager({ triggerModal }: { triggerModal?: boolean }) {
       await confirm(
         {
           title: "Delete FAQ Item",
-          message: "Are you sure you want to delete this FAQ item? This action cannot be undone.",
+          message:
+            "Are you sure you want to delete this FAQ item? This action cannot be undone.",
           confirmText: "Delete",
           cancelText: "Cancel",
-          isDestructive: true
+          isDestructive: true,
         },
         async () => {
-        await deleteFAQItem(id);
-        showSuccess(ToastMessages.faq.itemDeleted.title, ToastMessages.faq.itemDeleted.message);
-        }
+          await deleteFAQItem(id);
+          showSuccess(
+            ToastMessages.faq.itemDeleted.title,
+            ToastMessages.faq.itemDeleted.message,
+          );
+        },
       );
-      } catch (err) {
-        showError(ToastMessages.faq.error.title, ToastMessages.faq.error.message);
+    } catch (err) {
+      showError(ToastMessages.faq.error.title, ToastMessages.faq.error.message);
     }
   };
 
@@ -207,10 +257,10 @@ export function AdminFAQManager({ triggerModal }: { triggerModal?: boolean }) {
     try {
       await updateFAQItem(item.id, { is_active: !item.is_active });
       showSuccess(
-        item.is_active ? "FAQ Item Disabled" : "FAQ Item Enabled", 
-        item.is_active 
-          ? "FAQ item has been disabled and is no longer visible to customers." 
-          : "FAQ item has been enabled and is now visible to customers."
+        item.is_active ? "FAQ Item Disabled" : "FAQ Item Enabled",
+        item.is_active
+          ? "FAQ item has been disabled and is no longer visible to customers."
+          : "FAQ item has been enabled and is now visible to customers.",
       );
     } catch (err) {
       showError(ToastMessages.faq.error.title, ToastMessages.faq.error.message);
@@ -221,8 +271,10 @@ export function AdminFAQManager({ triggerModal }: { triggerModal?: boolean }) {
     return (
       <div className="space-y-6">
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading FAQ items...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mx-auto" />
+          <p className="mt-4 text-gray-600 dark:text-gray-400">
+            Loading FAQ items...
+          </p>
         </div>
       </div>
     );
@@ -233,7 +285,10 @@ export function AdminFAQManager({ triggerModal }: { triggerModal?: boolean }) {
       {/* FAQ Items Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {faqItems.map((item) => (
-          <div key={item.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-all duration-300">
+          <div
+            key={item.id}
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-all duration-300"
+          >
             {/* Card Header */}
             <div className="p-6 border-b border-gray-100 dark:border-gray-700">
               <div className="flex items-start justify-between mb-3">
@@ -242,12 +297,14 @@ export function AdminFAQManager({ triggerModal }: { triggerModal?: boolean }) {
                     {item.question}
                   </h4>
                   <div className="flex items-center gap-2">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      item.is_active 
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' 
-                        : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300'
-                    }`}>
-                      {item.is_active ? 'Active' : 'Inactive'}
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        item.is_active
+                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                          : "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300"
+                      }`}
+                    >
+                      {item.is_active ? "Active" : "Inactive"}
                     </span>
                     <span className="text-xs text-gray-500 dark:text-gray-400">
                       Order: {item.order}
@@ -278,14 +335,34 @@ export function AdminFAQManager({ triggerModal }: { triggerModal?: boolean }) {
               {/* Quick Stats */}
               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                 <div className="flex items-center gap-1">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
                   </svg>
                   {item.question.length} chars
                 </div>
                 <div className="flex items-center gap-1">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
                   </svg>
                   {item.answer.length} chars
                 </div>
@@ -296,25 +373,25 @@ export function AdminFAQManager({ triggerModal }: { triggerModal?: boolean }) {
             <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-100 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <button
-                  onClick={() => handleToggleActive(item)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                     item.is_active
-                      ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300'
-                      : 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300'
+                      ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300"
+                      : "bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300"
                   }`}
+                  onClick={() => handleToggleActive(item)}
                 >
-                  {item.is_active ? 'Disable' : 'Enable'}
+                  {item.is_active ? "Disable" : "Enable"}
                 </button>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => handleEdit(item)}
                     className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-xs font-medium dark:bg-blue-900/30 dark:text-blue-300"
+                    onClick={() => handleEdit(item)}
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDelete(item.id)}
                     className="px-3 py-1.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-xs font-medium dark:bg-red-900/30 dark:text-red-300"
+                    onClick={() => handleDelete(item.id)}
                   >
                     Delete
                   </button>
@@ -329,19 +406,30 @@ export function AdminFAQManager({ triggerModal }: { triggerModal?: boolean }) {
       {faqItems.length === 0 && (
         <div className="text-center py-12">
           <div className="mx-auto w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
-            <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="w-12 h-12 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+              />
             </svg>
           </div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
             No FAQ items yet
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Create your first FAQ item to help customers find answers to common questions.
+            Create your first FAQ item to help customers find answers to common
+            questions.
           </p>
           <button
-            onClick={handleAddNew}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            onClick={handleAddNew}
           >
             Create First FAQ
           </button>
@@ -350,20 +438,20 @@ export function AdminFAQManager({ triggerModal }: { triggerModal?: boolean }) {
 
       {/* Modal */}
       <FAQModal
+        editingItem={editingItem}
+        formData={formData}
         isOpen={showModal}
+        setFormData={setFormData}
         onClose={() => {
           setShowModal(false);
           setEditingItem(null);
           setFormData(defaultItem);
         }}
         onSubmit={handleSave}
-        editingItem={editingItem}
-        formData={formData}
-        setFormData={setFormData}
       />
 
       {/* Confirmation Modal */}
       <ConfirmationModal {...modalProps} />
     </div>
   );
-} 
+}

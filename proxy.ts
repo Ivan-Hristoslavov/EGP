@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+
 import { NextResponse } from "next/server";
 
 export function proxy(request: NextRequest) {
@@ -11,6 +12,7 @@ export function proxy(request: NextRequest) {
     }
 
     const adminAuth = request.cookies.get("adminAuth");
+
     if (!adminAuth?.value) {
       return NextResponse.redirect(new URL("/admin/login", request.url));
     }
@@ -23,6 +25,7 @@ export function proxy(request: NextRequest) {
     }
 
     const adminAuth = request.cookies.get("adminAuth");
+
     if (!adminAuth?.value) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

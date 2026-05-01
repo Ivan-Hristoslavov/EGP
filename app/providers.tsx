@@ -1,18 +1,20 @@
 "use client";
 
 import type { ThemeProviderProps } from "next-themes";
+import type { AdminProfile } from "@/lib/admin-profile";
 
 import * as React from "react";
 import { HeroUIProvider } from "@heroui/system";
 import { useRouter } from "next/navigation";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+
 import { AdminProfileProvider } from "@/components/AdminProfileContext";
 import { SiteDataProvider } from "@/contexts/SiteDataContext";
 
 export interface ProvidersProps {
   children: React.ReactNode;
   themeProps?: ThemeProviderProps;
-  initialAdminProfile?: any;
+  initialAdminProfile?: AdminProfile | null;
 }
 
 declare module "@react-types/shared" {
@@ -23,11 +25,15 @@ declare module "@react-types/shared" {
   }
 }
 
-export function Providers({ children, themeProps, initialAdminProfile = null }: ProvidersProps) {
+export function Providers({
+  children,
+  themeProps,
+  initialAdminProfile = null,
+}: ProvidersProps) {
   const router = useRouter();
 
   return (
-    <NextThemesProvider 
+    <NextThemesProvider
       attribute="class"
       defaultTheme="light"
       enableSystem={true}
@@ -36,8 +42,8 @@ export function Providers({ children, themeProps, initialAdminProfile = null }: 
     >
       <HeroUIProvider navigate={router.push}>
         <AdminProfileProvider initialProfile={initialAdminProfile}>
-          <SiteDataProvider>
-          {children}
+          <SiteDataProvider initialProfile={initialAdminProfile}>
+            {children}
           </SiteDataProvider>
         </AdminProfileProvider>
       </HeroUIProvider>

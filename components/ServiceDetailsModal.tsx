@@ -1,8 +1,15 @@
 "use client";
 
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "@heroui/modal";
 import Link from "next/link";
 import { X, Info, CheckCircle, Clock, Calendar, Shield } from "lucide-react";
+
 import { typography, textColors } from "@/config/typography";
 import { PriceWithDiscount } from "@/components/PriceWithDiscount";
 import ButtonPrimary from "@/components/ButtonPrimary";
@@ -43,14 +50,17 @@ interface ServiceDetailsModalProps {
 
 function normalizeService(s: ServiceDetailsData): ServiceDetailsData {
   const discountPct = s.discount_percentage ?? s.discountPercentage ?? null;
+
   return {
     ...s,
     price: s.price ?? 0,
     category: s.category ?? "",
     duration: s.duration ?? 0,
-    requires_consultation: s.requires_consultation ?? s.requiresConsultation ?? false,
+    requires_consultation:
+      s.requires_consultation ?? s.requiresConsultation ?? false,
     downtime_days: s.downtime_days ?? s.downtimeDays ?? 0,
-    results_duration_weeks: s.results_duration_weeks ?? s.resultsDurationWeeks ?? null,
+    results_duration_weeks:
+      s.results_duration_weeks ?? s.resultsDurationWeeks ?? null,
     originalPrice: s.originalPrice ?? null,
     discount_percentage: discountPct,
     discountPercentage: discountPct,
@@ -67,19 +77,20 @@ export function ServiceDetailsModal({
 
   const s = normalizeService(service);
   const displayPrice = s.price;
-  const hasDiscount = (s.originalPrice != null && s.originalPrice > s.price) ||
+  const hasDiscount =
+    (s.originalPrice != null && s.originalPrice > s.price) ||
     (s.discount_percentage != null && s.discount_percentage > 0);
 
   return (
     <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      size="3xl"
-      scrollBehavior="inside"
       classNames={{
         backdrop: "bg-black/60 backdrop-blur-sm",
         base: "bg-white dark:bg-gray-900 border border-[#e4d9c8] dark:border-gray-700",
       }}
+      isOpen={isOpen}
+      scrollBehavior="inside"
+      size="3xl"
+      onClose={onClose}
     >
       <ModalContent>
         {(onCloseModal) => (
@@ -88,7 +99,9 @@ export function ServiceDetailsModal({
             <ModalHeader className="bg-[#464C45] dark:bg-gray-800 text-white rounded-t-2xl [&>button]:hidden py-5 sm:py-6">
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 w-full pr-10">
                 <div className="flex-1 min-w-0">
-                  <h2 className={`${typography.headingCard} text-white font-montserrat`}>
+                  <h2
+                    className={`${typography.headingCard} text-white font-montserrat`}
+                  >
                     {s.name}
                   </h2>
                   <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2 text-white/90 text-sm">
@@ -99,15 +112,19 @@ export function ServiceDetailsModal({
                     <span className="flex items-center bg-white/15 rounded-lg px-2.5 py-1">
                       {hasDiscount ? (
                         <PriceWithDiscount
-                          price={displayPrice}
-                          originalPrice={s.originalPrice ?? undefined}
-                          discountPercentage={s.discount_percentage ?? undefined}
-                          size="sm"
-                          layout="inline"
                           className="text-white [&_.line-through]:text-white/70 [&_.font-bold]:text-white"
+                          discountPercentage={
+                            s.discount_percentage ?? undefined
+                          }
+                          layout="inline"
+                          originalPrice={s.originalPrice ?? undefined}
+                          price={displayPrice}
+                          size="sm"
                         />
                       ) : (
-                        <span className="font-bold">£{displayPrice.toFixed(0)}</span>
+                        <span className="font-bold">
+                          £{displayPrice.toFixed(0)}
+                        </span>
                       )}
                     </span>
                     <span className="bg-white/15 rounded-lg px-2.5 py-1 font-medium">
@@ -118,17 +135,17 @@ export function ServiceDetailsModal({
                 {s.image_url || s.imageUrl ? (
                   <div className="hidden sm:block w-16 h-16 rounded-xl overflow-hidden border border-white/30 flex-shrink-0">
                     <img
-                      src={s.image_url || s.imageUrl || ""}
                       alt={s.name}
                       className="w-full h-full object-cover"
+                      src={s.image_url || s.imageUrl || ""}
                     />
                   </div>
                 ) : null}
               </div>
               <button
-                onClick={onCloseModal}
-                className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-full transition-colors"
                 aria-label="Close"
+                className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-full transition-colors"
+                onClick={onCloseModal}
               >
                 <X className="w-5 h-5 text-white" />
               </button>
@@ -144,20 +161,32 @@ export function ServiceDetailsModal({
                       Downtime
                     </div>
                     <p className="text-gray-800 dark:text-gray-200 font-medium">
-                      {(s.downtime_days ?? 0)} day{(s.downtime_days ?? 0) !== 1 ? "s" : ""}
+                      {s.downtime_days ?? 0} day
+                      {(s.downtime_days ?? 0) !== 1 ? "s" : ""}
                     </p>
                   </div>
                 )}
                 {(s.results_duration_weeks ?? 0) > 0 && (
                   <div className="bg-[#f5f1e9] dark:bg-gray-800/60 border border-[#e4d9c8] dark:border-gray-700 rounded-lg p-4">
                     <div className="flex items-center gap-2 text-[#6b5f4b] dark:text-egp-beige font-semibold text-sm mb-1">
-                      <svg className="w-4 h-4 text-egp-green dark:text-egp-beige" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      <svg
+                        className="w-4 h-4 text-egp-green dark:text-egp-beige"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                        />
                       </svg>
                       Results Duration
                     </div>
                     <p className="text-gray-800 dark:text-gray-200 font-medium">
-                      {(s.results_duration_weeks ?? 0)} week{(s.results_duration_weeks ?? 0) !== 1 ? "s" : ""}
+                      {s.results_duration_weeks ?? 0} week
+                      {(s.results_duration_weeks ?? 0) !== 1 ? "s" : ""}
                     </p>
                   </div>
                 )}
@@ -177,7 +206,9 @@ export function ServiceDetailsModal({
               {/* Overview */}
               {s.description && (
                 <div>
-                  <h3 className={`${typography.headingSmall} ${textColors.heading} mb-2 flex items-center gap-2`}>
+                  <h3
+                    className={`${typography.headingSmall} ${textColors.heading} mb-2 flex items-center gap-2`}
+                  >
                     <Info className="w-5 h-5 text-egp-green dark:text-egp-beige" />
                     Overview
                   </h3>
@@ -190,7 +221,9 @@ export function ServiceDetailsModal({
               {/* Treatment Details */}
               {s.details && (
                 <div className="bg-white/80 dark:bg-gray-900/50 rounded-xl border border-[#e4d9c8] dark:border-gray-700 p-5">
-                  <h3 className={`${typography.headingSmall} ${textColors.heading} mb-2`}>
+                  <h3
+                    className={`${typography.headingSmall} ${textColors.heading} mb-2`}
+                  >
                     Treatment experience
                   </h3>
                   <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -202,7 +235,9 @@ export function ServiceDetailsModal({
               {/* Benefits */}
               {s.benefits && s.benefits.length > 0 && (
                 <div>
-                  <h3 className={`${typography.headingSmall} ${textColors.heading} mb-2 flex items-center gap-2`}>
+                  <h3
+                    className={`${typography.headingSmall} ${textColors.heading} mb-2 flex items-center gap-2`}
+                  >
                     <CheckCircle className="w-5 h-5 text-green-500 dark:text-green-400" />
                     Key benefits
                   </h3>
@@ -243,21 +278,21 @@ export function ServiceDetailsModal({
 
             <ModalFooter className="border-t border-[#e4d9c8] dark:border-gray-700 gap-2 flex-row justify-end">
               <button
+                className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                 type="button"
                 onClick={onCloseModal}
-                className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
               >
                 Close
               </button>
               {showBookButton && (s.id || s.slug) && (
                 <ButtonPrimary
                   as={Link}
-                  href={s.id ? `/book?pendingServiceId=${s.id}` : "/book"}
-                  variant="primary"
-                  size="md"
                   className="bg-[#464C45] dark:bg-gray-700 hover:bg-[#3a4039] dark:hover:bg-gray-600 text-white"
-                  onClick={onCloseModal}
+                  href={s.id ? `/book?pendingServiceId=${s.id}` : "/book"}
+                  size="md"
                   startContent={<Calendar className="w-4 h-4" />}
+                  variant="primary"
+                  onClick={onCloseModal}
                 >
                   Book This Treatment - £{displayPrice.toFixed(0)}
                 </ButtonPrimary>

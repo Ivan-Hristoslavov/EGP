@@ -27,37 +27,44 @@ export function useConfirmation() {
     cancelText: "Cancel",
     isDestructive: false,
     onConfirm: () => {},
-    onCancel: () => {}
+    onCancel: () => {},
   });
 
-  const confirm = useCallback((
-    options: ConfirmationOptions,
-    onConfirm: (() => void) | (() => Promise<void>)
-  ): Promise<boolean> => {
-    return new Promise((resolve) => {
-      setState({
-        ...options,
-        isOpen: true,
-        isLoading: false,
-        onConfirm: async () => {
-          try {
-            setState(prev => ({ ...prev, isLoading: true }));
-            await onConfirm();
-            setState(prev => ({ ...prev, isOpen: false, isLoading: false }));
-            resolve(true);
-          } catch (error) {
-            setState(prev => ({ ...prev, isLoading: false }));
-            console.error("Confirmation action failed:", error);
-            throw error;
-          }
-        },
-        onCancel: () => {
-          setState(prev => ({ ...prev, isOpen: false }));
-          resolve(false);
-        }
+  const confirm = useCallback(
+    (
+      options: ConfirmationOptions,
+      onConfirm: (() => void) | (() => Promise<void>),
+    ): Promise<boolean> => {
+      return new Promise((resolve) => {
+        setState({
+          ...options,
+          isOpen: true,
+          isLoading: false,
+          onConfirm: async () => {
+            try {
+              setState((prev) => ({ ...prev, isLoading: true }));
+              await onConfirm();
+              setState((prev) => ({
+                ...prev,
+                isOpen: false,
+                isLoading: false,
+              }));
+              resolve(true);
+            } catch (error) {
+              setState((prev) => ({ ...prev, isLoading: false }));
+              console.error("Confirmation action failed:", error);
+              throw error;
+            }
+          },
+          onCancel: () => {
+            setState((prev) => ({ ...prev, isOpen: false }));
+            resolve(false);
+          },
+        });
       });
-    });
-  }, []);
+    },
+    [],
+  );
 
   const handleClose = useCallback(() => {
     if (state.isLoading) return;
@@ -80,7 +87,7 @@ export function useConfirmation() {
       confirmText: state.confirmText,
       cancelText: state.cancelText,
       isDestructive: state.isDestructive,
-      isLoading: state.isLoading
-    }
+      isLoading: state.isLoading,
+    },
   };
-} 
+}

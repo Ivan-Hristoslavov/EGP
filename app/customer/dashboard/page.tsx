@@ -3,14 +3,13 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { siteConfig } from "@/config/site";
-import { 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Settings, 
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  Phone,
+  Mail,
+  Settings,
   LogOut,
   Plus,
   Eye,
@@ -18,10 +17,11 @@ import {
   X,
   CheckCircle,
   AlertCircle,
-  Star,
   TrendingUp,
-  Award
+  Award,
 } from "lucide-react";
+
+import { siteConfig } from "@/config/site";
 
 interface Booking {
   id: string;
@@ -48,14 +48,18 @@ export default function CustomerDashboardPage() {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "bookings" | "profile">("overview");
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "bookings" | "profile"
+  >("overview");
   const [viewingBooking, setViewingBooking] = useState<Booking | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     const token = localStorage.getItem("customer_token");
+
     if (!token) {
       router.push("/customer/login");
+
       return;
     }
 
@@ -73,6 +77,7 @@ export default function CustomerDashboardPage() {
 
       if (response.ok) {
         const data = await response.json();
+
         setCustomer(data.customer);
         setBookings(data.bookings);
       } else {
@@ -128,8 +133,10 @@ export default function CustomerDashboardPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-pink-50/50 to-purple-50/50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading your dashboard...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-400">
+            Loading your dashboard...
+          </p>
         </div>
       </div>
     );
@@ -139,10 +146,12 @@ export default function CustomerDashboardPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-pink-50/50 to-purple-50/50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600 dark:text-gray-400">Unable to load customer data</p>
-          <button 
-            onClick={() => router.push("/customer/login")}
+          <p className="text-gray-600 dark:text-gray-400">
+            Unable to load customer data
+          </p>
+          <button
             className="mt-4 text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300"
+            onClick={() => router.push("/customer/login")}
           >
             Back to Login
           </button>
@@ -167,15 +176,15 @@ export default function CustomerDashboardPage() {
             </div>
             <div className="flex items-center gap-3 sm:gap-4">
               <Link
-                href="/book"
                 className="inline-flex items-center justify-center min-h-[44px] px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-semibold rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl"
+                href="/book"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Book Treatment
               </Link>
               <button
-                onClick={handleLogout}
                 className="inline-flex items-center gap-2 min-h-[44px] px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 bg-white/60 dark:bg-gray-700/60 hover:bg-red-50 dark:hover:bg-red-900/20 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors"
+                onClick={handleLogout}
               >
                 <LogOut className="w-4 h-4" />
                 <span>Log out</span>
@@ -194,12 +203,12 @@ export default function CustomerDashboardPage() {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
                   activeTab === tab.id
                     ? "bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-lg"
                     : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 }`}
+                onClick={() => setActiveTab(tab.id as any)}
               >
                 <tab.icon className="w-4 h-4" />
                 <span>{tab.label}</span>
@@ -220,8 +229,12 @@ export default function CustomerDashboardPage() {
                       <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{customer.totalBookings}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Total Bookings</p>
+                      <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
+                        {customer.totalBookings}
+                      </p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Total Bookings
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -233,9 +246,14 @@ export default function CustomerDashboardPage() {
                     </div>
                     <div>
                       <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
-                        {bookings.filter(b => b.status === "completed").length}
+                        {
+                          bookings.filter((b) => b.status === "completed")
+                            .length
+                        }
                       </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Completed</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Completed
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -249,7 +267,9 @@ export default function CustomerDashboardPage() {
                       <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
                         {customer.membershipTier || "Standard"}
                       </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Membership</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Membership
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -257,31 +277,48 @@ export default function CustomerDashboardPage() {
 
               {/* Upcoming Bookings */}
               <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 p-4 sm:p-6">
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-4">Upcoming Bookings</h3>
-                {bookings.filter(b => b.status === "confirmed" || b.status === "pending").length > 0 ? (
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                  Upcoming Bookings
+                </h3>
+                {bookings.filter(
+                  (b) => b.status === "confirmed" || b.status === "pending",
+                ).length > 0 ? (
                   <div className="space-y-3 sm:space-y-4">
                     {bookings
-                      .filter(b => b.status === "confirmed" || b.status === "pending")
+                      .filter(
+                        (b) =>
+                          b.status === "confirmed" || b.status === "pending",
+                      )
                       .slice(0, 3)
                       .map((booking) => (
-                        <div key={booking.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <div
+                          key={booking.id}
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
+                        >
                           <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
-                            <div className={`p-2 rounded-lg flex-shrink-0 ${getStatusColor(booking.status)}`}>
+                            <div
+                              className={`p-2 rounded-lg flex-shrink-0 ${getStatusColor(booking.status)}`}
+                            >
                               {getStatusIcon(booking.status)}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="font-medium text-gray-900 dark:text-white truncate">{booking.service}</p>
+                              <p className="font-medium text-gray-900 dark:text-white truncate">
+                                {booking.service}
+                              </p>
                               <p className="text-sm text-gray-600 dark:text-gray-400">
-                                {new Date(booking.date).toLocaleDateString()} at {booking.time}
+                                {new Date(booking.date).toLocaleDateString()} at{" "}
+                                {booking.time}
                               </p>
                             </div>
                           </div>
                           <div className="flex items-center justify-between sm:justify-end gap-2 flex-shrink-0">
-                            <span className="text-sm font-medium text-gray-900 dark:text-white">£{booking.amount}</span>
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">
+                              £{booking.amount}
+                            </span>
                             <button
-                              onClick={() => setViewingBooking(booking)}
-                              className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                               aria-label="View booking details"
+                              className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                              onClick={() => setViewingBooking(booking)}
                             >
                               <Eye className="w-4 h-4" />
                             </button>
@@ -290,7 +327,9 @@ export default function CustomerDashboardPage() {
                       ))}
                   </div>
                 ) : (
-                  <p className="text-gray-600 dark:text-gray-400 text-center py-8">No upcoming bookings</p>
+                  <p className="text-gray-600 dark:text-gray-400 text-center py-8">
+                    No upcoming bookings
+                  </p>
                 )}
               </div>
             </div>
@@ -298,47 +337,69 @@ export default function CustomerDashboardPage() {
             {/* Quick Actions */}
             <div className="space-y-6">
               <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                  Quick Actions
+                </h3>
                 <div className="space-y-3">
                   <Link
-                    href="/book"
                     className="flex items-center space-x-3 p-3 bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 rounded-lg hover:from-rose-100 hover:to-pink-100 dark:hover:from-rose-900/30 dark:hover:to-pink-900/30 transition-all"
+                    href="/book"
                   >
                     <Plus className="w-5 h-5 text-rose-600 dark:text-rose-400" />
-                    <span className="text-gray-900 dark:text-white">Book New Treatment</span>
+                    <span className="text-gray-900 dark:text-white">
+                      Book New Treatment
+                    </span>
                   </Link>
                   <Link
-                    href="/customer/profile"
                     className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                    href="/customer/profile"
                   >
                     <Settings className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                    <span className="text-gray-900 dark:text-white">Update Profile</span>
+                    <span className="text-gray-900 dark:text-white">
+                      Update Profile
+                    </span>
                   </Link>
                   <Link
-                    href="/membership"
                     className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                    href="/membership"
                   >
                     <Award className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                    <span className="text-gray-900 dark:text-white">View Membership</span>
+                    <span className="text-gray-900 dark:text-white">
+                      View Membership
+                    </span>
                   </Link>
                 </div>
               </div>
 
               {/* Contact Info */}
               <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Need Help?</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                  Need Help?
+                </h3>
                 <div className="space-y-3">
-                  <a href={`tel:${siteConfig.contact.phone}`} className="flex items-center space-x-3">
+                  <a
+                    className="flex items-center space-x-3"
+                    href={`tel:${siteConfig.contact.phone}`}
+                  >
                     <Phone className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">{siteConfig.contact.phone}</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      {siteConfig.contact.phone}
+                    </span>
                   </a>
-                  <a href={`mailto:${siteConfig.contact.email}`} className="flex items-center space-x-3">
+                  <a
+                    className="flex items-center space-x-3"
+                    href={`mailto:${siteConfig.contact.email}`}
+                  >
                     <Mail className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">{siteConfig.contact.email}</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      {siteConfig.contact.email}
+                    </span>
                   </a>
                   <div className="flex items-center space-x-3">
                     <MapPin className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">{siteConfig.contact.address.full}</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      {siteConfig.contact.address.full}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -348,20 +409,30 @@ export default function CustomerDashboardPage() {
 
         {activeTab === "bookings" && (
           <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 p-4 sm:p-6 flex flex-col min-h-0">
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-4 sm:mb-6 shrink-0">All Bookings</h3>
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-4 sm:mb-6 shrink-0">
+              All Bookings
+            </h3>
             {bookings.length > 0 ? (
               <div className="space-y-3 sm:space-y-4 overflow-y-auto min-h-0 flex-1 -mx-1 px-1">
                 {bookings.map((booking) => (
-                  <div key={booking.id} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div
+                    key={booking.id}
+                    className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
+                  >
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
-                        <div className={`p-2 rounded-lg flex-shrink-0 ${getStatusColor(booking.status)}`}>
+                        <div
+                          className={`p-2 rounded-lg flex-shrink-0 ${getStatusColor(booking.status)}`}
+                        >
                           {getStatusIcon(booking.status)}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="font-medium text-gray-900 dark:text-white truncate">{booking.service}</p>
+                          <p className="font-medium text-gray-900 dark:text-white truncate">
+                            {booking.service}
+                          </p>
                           <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {new Date(booking.date).toLocaleDateString()} at {booking.time}
+                            {new Date(booking.date).toLocaleDateString()} at{" "}
+                            {booking.time}
                           </p>
                           {booking.practitioner && (
                             <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -371,20 +442,23 @@ export default function CustomerDashboardPage() {
                         </div>
                       </div>
                       <div className="flex items-center justify-between sm:justify-end gap-2 flex-shrink-0">
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">£{booking.amount}</span>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">
+                          £{booking.amount}
+                        </span>
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => setViewingBooking(booking)}
-                            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                             aria-label="View booking details"
+                            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                            onClick={() => setViewingBooking(booking)}
                           >
                             <Eye className="w-4 h-4" />
                           </button>
-                          {(booking.status === "confirmed" || booking.status === "pending") && (
+                          {(booking.status === "confirmed" ||
+                            booking.status === "pending") && (
                             <button
-                              onClick={() => setViewingBooking(booking)}
-                              className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                               aria-label="View booking details"
+                              className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                              onClick={() => setViewingBooking(booking)}
                             >
                               <Edit className="w-4 h-4" />
                             </button>
@@ -398,10 +472,12 @@ export default function CustomerDashboardPage() {
             ) : (
               <div className="text-center py-12">
                 <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 dark:text-gray-400 mb-4">No bookings yet</p>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  No bookings yet
+                </p>
                 <Link
-                  href="/book"
                   className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-semibold rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all"
+                  href="/book"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Book Your First Treatment
@@ -413,60 +489,74 @@ export default function CustomerDashboardPage() {
 
         {activeTab === "profile" && (
           <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-rose-100/50 dark:border-gray-700/50 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Profile Information</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+              Profile Information
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">First Name</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  First Name
+                </label>
                 <input
+                  readOnly
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   type="text"
                   value={customer.firstName}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  readOnly
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Last Name</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Last Name
+                </label>
                 <input
+                  readOnly
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   type="text"
                   value={customer.lastName}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  readOnly
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Email
+                </label>
                 <input
+                  readOnly
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   type="email"
                   value={customer.email}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  readOnly
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Phone
+                </label>
                 <input
+                  readOnly
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   type="tel"
                   value={customer.phone}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  readOnly
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Member Since</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Member Since
+                </label>
                 <input
+                  readOnly
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   type="text"
                   value={new Date(customer.memberSince).toLocaleDateString()}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  readOnly
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Membership Tier</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Membership Tier
+                </label>
                 <input
+                  readOnly
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   type="text"
                   value={customer.membershipTier || "Standard"}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  readOnly
                 />
               </div>
             </div>
@@ -490,47 +580,74 @@ export default function CustomerDashboardPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Booking Details</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Booking Details
+              </h3>
               <button
-                onClick={() => setViewingBooking(null)}
-                className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 aria-label="Close"
+                className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                onClick={() => setViewingBooking(null)}
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="space-y-4">
               <div>
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Service</p>
-                <p className="text-gray-900 dark:text-white font-medium">{viewingBooking.service}</p>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+                  Service
+                </p>
+                <p className="text-gray-900 dark:text-white font-medium">
+                  {viewingBooking.service}
+                </p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Date</p>
-                  <p className="text-gray-900 dark:text-white">{new Date(viewingBooking.date).toLocaleDateString()}</p>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+                    Date
+                  </p>
+                  <p className="text-gray-900 dark:text-white">
+                    {new Date(viewingBooking.date).toLocaleDateString()}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Time</p>
-                  <p className="text-gray-900 dark:text-white">{viewingBooking.time}</p>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+                    Time
+                  </p>
+                  <p className="text-gray-900 dark:text-white">
+                    {viewingBooking.time}
+                  </p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Status</p>
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(viewingBooking.status)}`}>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+                    Status
+                  </p>
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(viewingBooking.status)}`}
+                  >
                     {getStatusIcon(viewingBooking.status)}
-                    {viewingBooking.status.charAt(0).toUpperCase() + viewingBooking.status.slice(1)}
+                    {viewingBooking.status.charAt(0).toUpperCase() +
+                      viewingBooking.status.slice(1)}
                   </span>
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Amount</p>
-                  <p className="text-gray-900 dark:text-white font-medium">£{viewingBooking.amount}</p>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+                    Amount
+                  </p>
+                  <p className="text-gray-900 dark:text-white font-medium">
+                    £{viewingBooking.amount}
+                  </p>
                 </div>
               </div>
               {viewingBooking.practitioner && (
                 <div>
-                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Practitioner</p>
-                  <p className="text-gray-900 dark:text-white">{viewingBooking.practitioner}</p>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+                    Practitioner
+                  </p>
+                  <p className="text-gray-900 dark:text-white">
+                    {viewingBooking.practitioner}
+                  </p>
                 </div>
               )}
             </div>

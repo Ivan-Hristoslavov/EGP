@@ -5,12 +5,11 @@ import clsx from "clsx";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { Providers } from "./providers";
+
 import { ToastProvider } from "@/components/Toast";
 import HashNavigation from "@/components/HashNavigation";
-import { AdminProfileProvider } from "@/components/AdminProfileContext";
 import { FirstVisitDiscountFormWrapper } from "@/components/FirstVisitDiscountFormWrapper";
 import CookieConsentModal from "@/components/CookieConsentModal";
-
 import LayoutMain from "@/components/LayoutMain";
 import { getAdminProfile } from "@/lib/admin-profile";
 import { createClient } from "@/lib/supabase/server";
@@ -24,13 +23,15 @@ export async function generateMetadata(): Promise<Metadata> {
   const companyName = profile?.company_name || siteConfig.name;
   const description = siteConfig.seo.defaultDescription;
   const ogImages = defaultOgImages(`${companyName} — London aesthetic clinic`);
-  const twitterHandle = process.env.NEXT_PUBLIC_TWITTER_HANDLE?.replace(/^@/, "") || "egpaesthetics";
+  const twitterHandle =
+    process.env.NEXT_PUBLIC_TWITTER_HANDLE?.replace(/^@/, "") ||
+    "egpaesthetics";
 
   return {
     metadataBase: new URL(siteConfig.url),
     title: {
       default: siteConfig.seo.defaultTitle,
-      template: `%s | ${companyName}`
+      template: `%s | ${companyName}`,
     },
     description,
     keywords: siteConfig.seo.keywords,
@@ -83,10 +84,11 @@ export async function generateMetadata(): Promise<Metadata> {
       "geo.region": "GB-LND",
       "geo.placename": "London",
       "geo.position": "51.4708;-0.1389",
-      "ICBM": "51.4708, -0.1389",
+      ICBM: "51.4708, -0.1389",
       "DC.title": siteConfig.seo.defaultTitle,
       "DC.description": description,
-      "DC.subject": "Aesthetic Clinic London, Aesthetic Treatments, Facial Aesthetics",
+      "DC.subject":
+        "Aesthetic Clinic London, Aesthetic Treatments, Facial Aesthetics",
       "DC.creator": companyName,
       "DC.publisher": companyName,
       "DC.contributor": companyName,
@@ -118,21 +120,22 @@ export default async function RootLayout({
 }) {
   // Fetch admin profile data once at the layout level
   const adminProfile = await getAdminProfile();
-  
+
   // Fetch pricing cards and admin settings data for structured data (areas table not used)
   const supabase = createClient();
   const { data: pricingCards } = await supabase
-    .from('pricing_cards')
-    .select('*')
-    .eq('is_enabled', true)
-    .order('order', { ascending: true });
-    
+    .from("pricing_cards")
+    .select("*")
+    .eq("is_enabled", true)
+    .order("order", { ascending: true });
+
   const { data: adminSettings } = await supabase
-    .from('admin_settings')
-    .select('*');
-    
+    .from("admin_settings")
+    .select("*");
+
   // Convert admin settings to object
   const settingsMap: { [key: string]: any } = {};
+
   adminSettings?.forEach((setting) => {
     try {
       settingsMap[setting.key] = JSON.parse(setting.value);
@@ -140,74 +143,77 @@ export default async function RootLayout({
       settingsMap[setting.key] = setting.value;
     }
   });
-  
+
   // Create structured data for the business
   const structuredData = {
     "@context": "https://schema.org",
     "@type": ["LocalBusiness", "MedicalBusiness", "HealthAndBeautyBusiness"],
     "@id": `${siteConfig.url}#business`,
-    "name": adminProfile?.company_name || "EGP",
-    "description": siteConfig.description,
-    "url": siteConfig.url,
-    "telephone": adminProfile?.phone || "123456789",
-    "email": adminProfile?.business_email || "",
-    "founder": {
+    name: adminProfile?.company_name || "EGP",
+    description: siteConfig.description,
+    url: siteConfig.url,
+    telephone: adminProfile?.phone || "123456789",
+    email: adminProfile?.business_email || "",
+    founder: {
       "@type": "Person",
-      "name": adminProfile?.name || "Admin User"
+      name: adminProfile?.name || "Admin User",
     },
-    "address": {
+    address: {
       "@type": "PostalAddress",
-      "streetAddress": adminProfile?.company_address?.split(',')[0]?.trim() || "809 Wandsworth Road",
-      "addressLocality": settingsMap.businessCity || "London",
-      "addressRegion": "South West London",
-      "postalCode": settingsMap.businessPostcode || "SW8 3JH",
-      "addressCountry": "GB"
+      streetAddress:
+        adminProfile?.company_address?.split(",")[0]?.trim() ||
+        "809 Wandsworth Road",
+      addressLocality: settingsMap.businessCity || "London",
+      addressRegion: "South West London",
+      postalCode: settingsMap.businessPostcode || "SW8 3JH",
+      addressCountry: "GB",
     },
-    "geo": {
+    geo: {
       "@type": "GeoCoordinates",
-      "latitude": 51.4708,
-      "longitude": -0.1389
+      latitude: 51.4708,
+      longitude: -0.1389,
     },
-    "areaServed": [],
-    "serviceType": pricingCards?.map(card => card.title) || [],
-    "openingHoursSpecification": settingsMap.workingDays?.map((day: string) => ({
+    areaServed: [],
+    serviceType: pricingCards?.map((card) => card.title) || [],
+    openingHoursSpecification: settingsMap.workingDays?.map((day: string) => ({
       "@type": "OpeningHoursSpecification",
-      "dayOfWeek": day.charAt(0).toUpperCase() + day.slice(1),
-      "opens": settingsMap.workingHoursStart || "08:00",
-      "closes": settingsMap.workingHoursEnd || "18:00"
+      dayOfWeek: day.charAt(0).toUpperCase() + day.slice(1),
+      opens: settingsMap.workingHoursStart || "08:00",
+      closes: settingsMap.workingHoursEnd || "18:00",
     })) || [
       {
         "@type": "OpeningHoursSpecification",
-        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-        "opens": "08:00",
-        "closes": "18:00"
+        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        opens: "08:00",
+        closes: "18:00",
       },
       {
-        "@type": "OpeningHoursSpecification", 
-        "dayOfWeek": "Saturday",
-        "opens": "09:00",
-        "closes": "17:00"
-      }
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: "Saturday",
+        opens: "09:00",
+        closes: "17:00",
+      },
     ],
-    "priceRange": "££",
-    "paymentAccepted": ["Cash", "Credit Card", "Bank Transfer"],
-    "currenciesAccepted": "GBP",
-    "vatNumber": settingsMap.vatNumber || "",
-    "registrationNumber": settingsMap.registrationNumber || "",
-    "mcsNumber": settingsMap.mcsNumber || "",
-    "hasOfferCatalog": {
+    priceRange: "££",
+    paymentAccepted: ["Cash", "Credit Card", "Bank Transfer"],
+    currenciesAccepted: "GBP",
+    vatNumber: settingsMap.vatNumber || "",
+    registrationNumber: settingsMap.registrationNumber || "",
+    mcsNumber: settingsMap.mcsNumber || "",
+    hasOfferCatalog: {
       "@type": "OfferCatalog",
-      "name": "Aesthetic Treatments",
-      "itemListElement": pricingCards?.map(card => ({
-        "@type": "Offer",
-        "itemOffered": {
-          "@type": "Service",
-          "name": card.title,
-          "description": card.subtitle || "Professional aesthetic treatment"
-        }
-      })) || []
+      name: "Aesthetic Treatments",
+      itemListElement:
+        pricingCards?.map((card) => ({
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: card.title,
+            description: card.subtitle || "Professional aesthetic treatment",
+          },
+        })) || [],
     },
-    "sameAs": sameAsFromSiteConfig()
+    sameAs: sameAsFromSiteConfig(),
   };
 
   const websiteSchema = {
@@ -224,32 +230,40 @@ export default async function RootLayout({
   return (
     <html suppressHydrationWarning lang="en-GB">
       <head>
-        <link rel="icon" type="image/png" href="/fav/LOGO.png" />
-        <link rel="shortcut icon" href="/fav/LOGO.png" />
-        <link rel="apple-touch-icon" href="/fav/LOGO.png" />
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="msapplication-TileColor" content="#ffffff" />
-        <meta name="application-name" content="EGP" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="EGP" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#E6DDD1" />
-        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1f2937" />
-        <meta name="msapplication-config" content="/browserconfig.xml" />
+        <link href="/fav/LOGO.png" rel="icon" type="image/png" />
+        <link href="/fav/LOGO.png" rel="shortcut icon" />
+        <link href="/fav/LOGO.png" rel="apple-touch-icon" />
+        <link href="/manifest.json" rel="manifest" />
+        <meta content="#ffffff" name="msapplication-TileColor" />
+        <meta content="EGP" name="application-name" />
+        <meta content="yes" name="apple-mobile-web-app-capable" />
+        <meta content="default" name="apple-mobile-web-app-status-bar-style" />
+        <meta content="EGP" name="apple-mobile-web-app-title" />
+        <meta content="yes" name="mobile-web-app-capable" />
+        <meta
+          content="#E6DDD1"
+          media="(prefers-color-scheme: light)"
+          name="theme-color"
+        />
+        <meta
+          content="#1f2937"
+          media="(prefers-color-scheme: dark)"
+          name="theme-color"
+        />
+        <meta content="/browserconfig.xml" name="msapplication-config" />
         <script
-          type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(structuredData),
           }}
+          type="application/ld+json"
         />
         <script
-          type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(websiteSchema),
           }}
+          type="application/ld+json"
         />
-        
+
         {/* Google tag (gtag.js) */}
         {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID && (
           <>
@@ -271,10 +285,10 @@ export default async function RootLayout({
         )}
       </head>
       <body
-        className={clsx(
-          "min-h-screen text-foreground bg-background font-sans antialiased"
-        )}
         suppressHydrationWarning
+        className={clsx(
+          "min-h-screen text-foreground bg-background font-sans antialiased",
+        )}
       >
         <ToastProvider>
           <Providers initialAdminProfile={adminProfile}>

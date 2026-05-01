@@ -1,29 +1,32 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { NextRequest, NextResponse } from "next/server";
+
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ slug: string }> },
 ) {
   try {
     const supabase = createClient();
     const { slug } = await params;
 
     const { data: service, error } = await supabase
-      .from('services')
-      .select(`
+      .from("services")
+      .select(
+        `
         *,
         category:service_categories!inner(
           *,
           main_tab:main_tabs!inner(*)
         )
-      `)
-      .eq('slug', slug)
-      .eq('is_active', true)
+      `,
+      )
+      .eq("slug", slug)
+      .eq("is_active", true)
       .single();
 
     if (error || !service) {
-      return NextResponse.json({ error: 'Service not found' }, { status: 404 });
+      return NextResponse.json({ error: "Service not found" }, { status: 404 });
     }
 
     // Transform the data to flatten the structure
@@ -51,23 +54,22 @@ export async function GET(
         name: service.category.name,
         slug: service.category.slug,
         main_tab_id: service.category.main_tab_id,
-        display_order: service.category.display_order || 0
+        display_order: service.category.display_order || 0,
       },
       main_tab: {
         id: service.category.main_tab.id,
         name: service.category.main_tab.name,
-        slug: service.category.main_tab.slug
-      }
+        slug: service.category.main_tab.slug,
+      },
     };
 
     return NextResponse.json({ service: transformedService });
   } catch (error) {
-    console.error('Error in service GET by slug:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("Error in service GET by slug:", error);
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
-
-
-
-
-

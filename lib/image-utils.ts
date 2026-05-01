@@ -15,15 +15,15 @@ export interface ImageValidationResult {
  */
 export function isImageFile(file: File): boolean {
   // Standard image types
-  if (file.type.startsWith('image/')) {
+  if (file.type.startsWith("image/")) {
     return true;
   }
-  
+
   // Check file extension for HEIC/HEIF
   const fileName = file.name.toLowerCase();
-  const heicExtensions = ['.heic', '.heif', '.heics', '.heifs'];
-  
-  return heicExtensions.some(ext => fileName.endsWith(ext));
+  const heicExtensions = [".heic", ".heif", ".heics", ".heifs"];
+
+  return heicExtensions.some((ext) => fileName.endsWith(ext));
 }
 
 /**
@@ -31,55 +31,63 @@ export function isImageFile(file: File): boolean {
  */
 export function getImageType(file: File): string {
   // If browser recognizes the type
-  if (file.type.startsWith('image/')) {
+  if (file.type.startsWith("image/")) {
     return file.type;
   }
-  
+
   // Check file extension for HEIC/HEIF
   const fileName = file.name.toLowerCase();
-  
-  if (fileName.endsWith('.heic') || fileName.endsWith('.heics')) {
-    return 'image/heic';
+
+  if (fileName.endsWith(".heic") || fileName.endsWith(".heics")) {
+    return "image/heic";
   }
-  
-  if (fileName.endsWith('.heif') || fileName.endsWith('.heifs')) {
-    return 'image/heif';
+
+  if (fileName.endsWith(".heif") || fileName.endsWith(".heifs")) {
+    return "image/heif";
   }
-  
+
   // Unknown type
-  return file.type || 'application/octet-stream';
+  return file.type || "application/octet-stream";
 }
 
 /**
  * Validate image file with HEIC support
  */
-export function validateImageFile(file: File, maxSizeMB: number = 10): ImageValidationResult {
+export function validateImageFile(
+  file: File,
+  maxSizeMB: number = 10,
+): ImageValidationResult {
   const result: ImageValidationResult = {
     isValid: false,
     originalType: file.type,
-    detectedType: getImageType(file)
+    detectedType: getImageType(file),
   };
-  
+
   // Check if it's an image file
   if (!isImageFile(file)) {
     result.error = `File "${file.name}" is not a supported image format. Supported formats: JPEG, PNG, WebP, GIF, HEIC, HEIF`;
+
     return result;
   }
-  
+
   // Check file size
   const maxSizeBytes = maxSizeMB * 1024 * 1024;
+
   if (file.size > maxSizeBytes) {
     result.error = `File "${file.name}" is too large. Maximum size: ${maxSizeMB}MB`;
+
     return result;
   }
-  
+
   // Check for empty file
   if (file.size === 0) {
     result.error = `File "${file.name}" is empty`;
+
     return result;
   }
-  
+
   result.isValid = true;
+
   return result;
 }
 
@@ -88,37 +96,58 @@ export function validateImageFile(file: File, maxSizeMB: number = 10): ImageVali
  * Uses heic-to first (lightweight, modern), then heic2any as fallback.
  */
 export async function convertHeicToJpeg(file: File): Promise<File | null> {
-  if (typeof window === 'undefined') {
-    console.warn('HEIC conversion requires browser environment');
+  if (typeof window === "undefined") {
+    console.warn("HEIC conversion requires browser environment");
+
     return null;
   }
 
-  const baseName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
+  const baseName = file.name.replace(/\.(heic|heif)$/i, ".jpg");
 
   try {
-    const { heicTo } = await import('heic-to');
+    const { heicTo } = await import("heic-to");
     const convertedBlob = await heicTo({
       blob: file,
-      type: 'image/jpeg',
+      type: "image/jpeg",
       quality: 0.8,
     });
-    const convertedFile = new File([convertedBlob], baseName, { type: 'image/jpeg' });
-    console.log('HEIC conversion successful (heic-to):', file.name, '→', convertedFile.name);
+    const convertedFile = new File([convertedBlob], baseName, {
+      type: "image/jpeg",
+    });
+
+    console.log(
+      "HEIC conversion successful (heic-to):",
+      file.name,
+      "→",
+      convertedFile.name,
+    );
+
     return convertedFile;
   } catch (e1) {
     try {
-      const heic2any = (await import('heic2any')).default;
-      const convertedBlob = await heic2any({
+      const heic2any = (await import("heic2any")).default;
+      const convertedBlob = (await heic2any({
         blob: file,
-        toType: 'image/jpeg',
+        toType: "image/jpeg",
         quality: 0.8,
-      }) as Blob;
-      const convertedFile = new File([convertedBlob], baseName, { type: 'image/jpeg' });
-      console.log('HEIC conversion successful (heic2any):', file.name, '→', convertedFile.name);
+      })) as Blob;
+      const convertedFile = new File([convertedBlob], baseName, {
+        type: "image/jpeg",
+      });
+
+      console.log(
+        "HEIC conversion successful (heic2any):",
+        file.name,
+        "→",
+        convertedFile.name,
+      );
+
       return convertedFile;
     } catch (e2) {
       const msg = e1 instanceof Error ? e1.message : String(e1);
-      console.warn('HEIC conversion failed (heic-to and heic2any):', msg);
+
+      console.warn("HEIC conversion failed (heic-to and heic2any):", msg);
+
       return null;
     }
   }
@@ -128,51 +157,53 @@ export async function convertHeicToJpeg(file: File): Promise<File | null> {
  * Compress image using Canvas API
  */
 export async function compressImage(
-  file: File, 
-  maxWidth: number = 1920, 
-  maxHeight: number = 1080, 
-  quality: number = 0.85
+  file: File,
+  maxWidth: number = 1920,
+  maxHeight: number = 1080,
+  quality: number = 0.85,
 ): Promise<File> {
   return new Promise((resolve, reject) => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
     const img = new Image();
-    
+
     img.onload = () => {
       // Calculate new dimensions
       let { width, height } = img;
-      
+
       if (width > maxWidth || height > maxHeight) {
         const ratio = Math.min(maxWidth / width, maxHeight / height);
+
         width = Math.round(width * ratio);
         height = Math.round(height * ratio);
       }
-      
+
       // Set canvas dimensions
       canvas.width = width;
       canvas.height = height;
-      
+
       // Draw and compress
       ctx?.drawImage(img, 0, 0, width, height);
-      
+
       canvas.toBlob(
         (blob) => {
           if (blob) {
             const compressedFile = new File([blob], file.name, {
-              type: 'image/jpeg',
-              lastModified: Date.now()
+              type: "image/jpeg",
+              lastModified: Date.now(),
             });
+
             resolve(compressedFile);
           } else {
-            reject(new Error('Failed to compress image'));
+            reject(new Error("Failed to compress image"));
           }
         },
-        'image/jpeg',
-        quality
+        "image/jpeg",
+        quality,
       );
     };
-    
-    img.onerror = () => reject(new Error('Failed to load image'));
+
+    img.onerror = () => reject(new Error("Failed to load image"));
     img.src = URL.createObjectURL(file);
   });
 }
@@ -181,12 +212,12 @@ export async function compressImage(
  * Process image file (convert HEIC if needed and compress)
  */
 export async function processImageFile(
-  file: File, 
+  file: File,
   maxSizeMB: number = 10,
   compress: boolean = true,
   maxWidth: number = 1920,
   maxHeight: number = 1080,
-  quality: number = 0.85
+  quality: number = 0.85,
 ): Promise<{
   file: File;
   wasConverted: boolean;
@@ -199,56 +230,65 @@ export async function processImageFile(
   finalDimensions?: { width: number; height: number };
 }> {
   const validation = validateImageFile(file, maxSizeMB);
-  
+
   if (!validation.isValid) {
     throw new Error(validation.error);
   }
-  
+
   let processedFile = file;
   let wasConverted = false;
   let wasCompressed = false;
   let originalDimensions: { width: number; height: number } | undefined;
   let finalDimensions: { width: number; height: number } | undefined;
-  
+
   // Get original dimensions
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     originalDimensions = await getImageDimensions(file);
   }
-  
+
   // Check if it's a HEIC file that needs conversion
   const fileName = file.name.toLowerCase();
-  const isHeic = fileName.endsWith('.heic') || fileName.endsWith('.heif');
-  
+  const isHeic = fileName.endsWith(".heic") || fileName.endsWith(".heif");
+
   if (isHeic) {
-    console.log('Detected HEIC file, attempting conversion:', file.name);
+    console.log("Detected HEIC file, attempting conversion:", file.name);
     const convertedFile = await convertHeicToJpeg(file);
+
     if (convertedFile) {
       processedFile = convertedFile;
       wasConverted = true;
     } else {
       throw new Error(
-        'HEIC conversion failed in this browser. Please use Chrome or Firefox, or convert the image to JPEG/PNG before uploading.'
+        "HEIC conversion failed in this browser. Please use Chrome or Firefox, or convert the image to JPEG/PNG before uploading.",
       );
     }
   }
-  
+
   // Compress image if requested and in browser environment
-  if (compress && typeof window !== 'undefined') {
+  if (compress && typeof window !== "undefined") {
     try {
-      const compressedFile = await compressImage(processedFile, maxWidth, maxHeight, quality);
+      const compressedFile = await compressImage(
+        processedFile,
+        maxWidth,
+        maxHeight,
+        quality,
+      );
+
       finalDimensions = await getImageDimensions(compressedFile);
       processedFile = compressedFile;
       wasCompressed = true;
-      console.log('Image compressed:', {
+      console.log("Image compressed:", {
         originalSize: file.size,
         compressedSize: compressedFile.size,
-        compressionRatio: ((file.size - compressedFile.size) / file.size * 100).toFixed(1) + '%'
+        compressionRatio:
+          (((file.size - compressedFile.size) / file.size) * 100).toFixed(1) +
+          "%",
       });
     } catch (error) {
-      console.warn('Image compression failed, using original:', error);
+      console.warn("Image compression failed, using original:", error);
     }
   }
-  
+
   return {
     file: processedFile,
     wasConverted,
@@ -258,21 +298,24 @@ export async function processImageFile(
     originalSize: file.size,
     finalSize: processedFile.size,
     originalDimensions,
-    finalDimensions
+    finalDimensions,
   };
 }
 
 /**
  * Get image dimensions
  */
-export async function getImageDimensions(file: File): Promise<{ width: number; height: number }> {
+export async function getImageDimensions(
+  file: File,
+): Promise<{ width: number; height: number }> {
   return new Promise((resolve, reject) => {
     const img = new Image();
+
     img.onload = () => {
       resolve({ width: img.naturalWidth, height: img.naturalHeight });
       URL.revokeObjectURL(img.src);
     };
-    img.onerror = () => reject(new Error('Failed to load image'));
+    img.onerror = () => reject(new Error("Failed to load image"));
     img.src = URL.createObjectURL(file);
   });
 }
@@ -281,12 +324,12 @@ export async function getImageDimensions(file: File): Promise<{ width: number; h
  * Get supported image formats for file input
  */
 export function getSupportedImageFormats(): string {
-  return 'image/jpeg,image/jpg,image/png,image/webp,image/gif,.heic,.heif';
+  return "image/jpeg,image/jpg,image/png,image/webp,image/gif,.heic,.heif";
 }
 
 /**
  * Get human-readable list of supported formats
  */
 export function getSupportedFormatsText(): string {
-  return 'JPEG, PNG, WebP, GIF, HEIC, HEIF up to 10MB';
-} 
+  return "JPEG, PNG, WebP, GIF, HEIC, HEIF up to 10MB";
+}

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { createClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase";
 
@@ -14,13 +15,21 @@ export async function GET() {
 
     if (error) {
       console.error("Error fetching team:", error);
-      return NextResponse.json({ error: "Failed to fetch team" }, { status: 500 });
+
+      return NextResponse.json(
+        { error: "Failed to fetch team" },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json({ team: team || [] });
   } catch (error) {
     console.error("Error in team GET:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
@@ -29,36 +38,40 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = createClient();
     const body = await request.json();
-    
-    const { 
+
+    const {
       admin_profile_id,
-      name, 
-      email, 
-      phone, 
-      role, 
-      specializations, 
-      experience_years, 
+      name,
+      email,
+      phone,
+      role,
+      specializations,
+      experience_years,
       certifications,
       image_url,
       service_ids,
-      is_active 
+      is_active,
     } = body;
 
     if (!name || !email || !role) {
-      return NextResponse.json({ 
-        error: "Missing required fields: name, email, role" 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: "Missing required fields: name, email, role",
+        },
+        { status: 400 },
+      );
     }
 
     // If admin_profile_id is not provided, try to get it from admin_profile
     let profileId = admin_profile_id;
+
     if (!profileId) {
       const { data: profiles } = await supabase
         .from("admin_profile")
         .select("id")
         .limit(1)
         .single();
-      
+
       if (profiles) {
         profileId = profiles.id;
       }
@@ -76,21 +89,29 @@ export async function POST(request: NextRequest) {
         experience_years: experience_years || null,
         certifications: certifications || null,
         image_url: image_url || null,
-        service_ids: service_ids && Array.isArray(service_ids) ? service_ids : [],
-        is_active: is_active !== undefined ? is_active : true
+        service_ids:
+          service_ids && Array.isArray(service_ids) ? service_ids : [],
+        is_active: is_active !== undefined ? is_active : true,
       })
       .select()
       .single();
 
     if (error) {
       console.error("Error creating team member:", error);
-      return NextResponse.json({ error: "Failed to create team member" }, { status: 500 });
+
+      return NextResponse.json(
+        { error: "Failed to create team member" },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json({ teamMember });
   } catch (error) {
     console.error("Error in team POST:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
-

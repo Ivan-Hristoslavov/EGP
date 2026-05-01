@@ -1,5 +1,5 @@
-import { createClient } from '@/lib/supabase/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { siteConfig } from "@/config/site";
+import { supabaseAdmin } from "@/lib/supabase";
 
 export interface AdminProfile {
   id: string;
@@ -27,18 +27,21 @@ export async function getAdminProfile(): Promise<AdminProfile | null> {
     // Use service-role for stable server-side reads on public pages as well.
     // Also avoid `.single()` so we don't fail if historical duplicate rows exist.
     const { data: profiles, error } = await supabaseAdmin
-      .from('admin_profile')
-      .select('*')
-      .order('updated_at', { ascending: false })
+      .from("admin_profile")
+      .select("*")
+      .order("updated_at", { ascending: false })
       .limit(1);
 
     if (error) {
-      console.error('Error fetching admin profile:', error);
+      console.error("Error fetching admin profile:", error);
+
       return null;
     }
+
     return (profiles?.[0] as AdminProfile) || null;
   } catch (error) {
-    console.error('Error in getAdminProfile:', error);
+    console.error("Error in getAdminProfile:", error);
+
     return null;
   }
 }
@@ -55,29 +58,30 @@ export interface AdminContactInfo {
 export async function getAdminContactInfo(): Promise<AdminContactInfo> {
   try {
     const { data: profile } = await supabaseAdmin
-      .from('admin_profile')
-      .select('phone, business_email')
+      .from("admin_profile")
+      .select("phone, business_email")
       .single();
 
     return {
       phone:
         profile?.phone ||
         process.env.NEXT_PUBLIC_PHONE_NUMBER ||
-        '07944 24 20 79',
+        siteConfig.contact.phone,
       email:
         profile?.business_email ||
         process.env.ADMIN_EMAIL ||
         process.env.NEXT_PUBLIC_BUSINESS_EMAIL ||
-        'info@egpaesthetics.co.uk',
+        siteConfig.contact.email,
     };
   } catch (error) {
-    console.warn('Error fetching admin contact info:', error);
+    console.warn("Error fetching admin contact info:", error);
+
     return {
-      phone: process.env.NEXT_PUBLIC_PHONE_NUMBER || '07944 24 20 79',
+      phone: process.env.NEXT_PUBLIC_PHONE_NUMBER || siteConfig.contact.phone,
       email:
         process.env.ADMIN_EMAIL ||
         process.env.NEXT_PUBLIC_BUSINESS_EMAIL ||
-        'info@egpaesthetics.co.uk',
+        siteConfig.contact.email,
     };
   }
-} 
+}

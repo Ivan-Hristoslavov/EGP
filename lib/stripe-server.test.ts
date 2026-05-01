@@ -23,6 +23,7 @@ describe("lib/stripe server helpers (isolated module load)", () => {
   it("getStripeServer returns null when STRIPE_SECRET_KEY is missing", async () => {
     delete process.env.STRIPE_SECRET_KEY;
     const { getStripeServer } = await import("./stripe");
+
     expect(getStripeServer()).toBeNull();
   });
 
@@ -30,14 +31,17 @@ describe("lib/stripe server helpers (isolated module load)", () => {
     process.env.STRIPE_SECRET_KEY = "sk_test_01234567890123456789012345678901";
     const { getStripeServer } = await import("./stripe");
     const client = getStripeServer();
+
     expect(client).not.toBeNull();
     expect(client?.products).toBeDefined();
   });
 
   it("getStripe logs and returns null when publishable key is missing", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
     delete process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
     const { getStripe } = await import("./stripe");
+
     expect(getStripe()).toBeNull();
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();
@@ -47,8 +51,9 @@ describe("lib/stripe server helpers (isolated module load)", () => {
     delete process.env.STRIPE_SECRET_KEY;
     delete process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
     const { createPaymentLink } = await import("./stripe");
+
     await expect(
-      createPaymentLink({ amount: 25, description: "Test" })
+      createPaymentLink({ amount: 25, description: "Test" }),
     ).rejects.toThrow("Stripe is not configured");
   });
 
@@ -56,13 +61,14 @@ describe("lib/stripe server helpers (isolated module load)", () => {
     delete process.env.STRIPE_SECRET_KEY;
     delete process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
     const { createCheckoutSession } = await import("./stripe");
+
     await expect(
       createCheckoutSession({
         amount: 25,
         description: "Test",
         successUrl: "https://example.com/ok",
         cancelUrl: "https://example.com/cancel",
-      })
+      }),
     ).rejects.toThrow("Stripe is not configured");
   });
 });

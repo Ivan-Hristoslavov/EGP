@@ -1,6 +1,18 @@
 "use client";
 
-import { createContext, useContext, ReactNode, useState, useEffect, useCallback } from "react";
+import type { AdminProfile } from "@/lib/admin-profile";
+
+import {
+  createContext,
+  useContext,
+  ReactNode,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
+
+import { siteConfig } from "@/config/site";
 
 interface ContactInfo {
   address: string;
@@ -39,22 +51,26 @@ interface FindUsData {
 }
 
 interface SiteDataContextType {
-  contactInfo: ContactInfo | null;
+  contactInfo: ContactInfo;
   openingHours: OpeningHours;
-  findUsData: FindUsData | null;
+  findUsData: FindUsData;
   loading: boolean;
   error: string | null;
   refresh: () => void;
 }
 
-const SiteDataContext = createContext<SiteDataContextType | undefined>(undefined);
+const SiteDataContext = createContext<SiteDataContextType | undefined>(
+  undefined,
+);
 
 const defaultContactInfo: ContactInfo = {
-  address: process.env.NEXT_PUBLIC_ADDRESS_FULL || "London, UK",
-  phone: process.env.NEXT_PUBLIC_PHONE_NUMBER || "07944 24 20 79",
-  email: process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "info@egpaesthetics.co.uk",
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || process.env.NEXT_PUBLIC_PHONE_NUMBER || "07944 24 20 79",
-  googleMapsAddress: process.env.NEXT_PUBLIC_GOOGLE_MAPS_ADDRESS || process.env.NEXT_PUBLIC_ADDRESS_FULL || "London, UK"
+  address: siteConfig.contact.address.full,
+  phone: siteConfig.contact.phone,
+  email: siteConfig.contact.email,
+  whatsapp: siteConfig.contact.whatsapp,
+  googleMapsAddress:
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_ADDRESS ||
+    siteConfig.contact.address.full,
 };
 
 const defaultOpeningHours: OpeningHours = {
@@ -64,16 +80,17 @@ const defaultOpeningHours: OpeningHours = {
   thursday: { day: "Thursday", hours: "9:00 AM - 8:00 PM", isOpen: true },
   friday: { day: "Friday", hours: "9:00 AM - 7:00 PM", isOpen: true },
   saturday: { day: "Saturday", hours: "10:00 AM - 5:00 PM", isOpen: true },
-  sunday: { day: "Sunday", hours: "Closed", isOpen: false }
+  sunday: { day: "Sunday", hours: "Closed", isOpen: false },
 };
 
 function formatTime(time: string | null): string {
   if (!time) return "Closed";
   try {
-    const [hours, minutes] = time.split(':');
-    const hour = parseInt(hours);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const [hours, minutes] = time.split(":");
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? "PM" : "AM";
     const displayHour = hour % 12 || 12;
+
     return `${displayHour}:${minutes} ${ampm}`;
   } catch {
     return time;
@@ -81,91 +98,109 @@ function formatTime(time: string | null): string {
 }
 
 const defaultFindUsData: FindUsData = {
-  howToFindUs: "Our clinic is located in the heart of London's medical district, easily accessible by public transport and car.",
-  howToReachUs: "We are conveniently located near major transport links and landmarks.",
+  howToFindUs:
+    "Our clinic is located in the heart of London's medical district, easily accessible by public transport and car.",
+  howToReachUs:
+    "We are conveniently located near major transport links and landmarks.",
   transportOptions: {},
-  nearbyLandmarks: []
+  nearbyLandmarks: [],
 };
 
-export function SiteDataProvider({ children }: { children: ReactNode }) {
-  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
-  const [openingHours, setOpeningHours] = useState<OpeningHours>(defaultOpeningHours);
-  const [findUsData, setFindUsData] = useState<FindUsData | null>(null);
+function buildSiteDataFromProfile(profile: AdminProfile | null): {
+  contactInfo: ContactInfo;
+  findUsData: FindUsData;
+} {
+  if (!profile) {
+    return {
+      contactInfo: defaultContactInfo,
+      findUsData: defaultFindUsData,
+    };
+  }
+
+  let transportOptions: TransportOptions = defaultFindUsData.transportOptions;
+  let nearbyLandmarks: NearbyLandmark[] = defaultFindUsData.nearbyLandmarks;
+
+  try {
+    if (profile.transport_options) {
+      let parsed: unknown = profile.transport_options;
+
+      while (typeof parsed === "string") {
+        parsed = JSON.parse(parsed);
+      }
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        transportOptions = parsed as TransportOptions;
+      }
+    }
+  } catch (e) {
+    console.error("Error parsing transport_options:", e);
+  }
+
+  try {
+    if (profile.nearby_landmarks) {
+      let parsed: unknown = profile.nearby_landmarks;
+
+      while (typeof parsed === "string") {
+        parsed = JSON.parse(parsed);
+      }
+      if (Array.isArray(parsed)) {
+        nearbyLandmarks = parsed as NearbyLandmark[];
+      }
+    }
+  } catch (e) {
+    console.error("Error parsing nearby_landmarks:", e);
+  }
+
+  return {
+    contactInfo: {
+      address: profile.company_address || defaultContactInfo.address,
+      phone: profile.phone || defaultContactInfo.phone,
+      email:
+        profile.business_email || profile.email || defaultContactInfo.email,
+      whatsapp:
+        profile.whatsapp || profile.phone || defaultContactInfo.whatsapp,
+      googleMapsAddress:
+        profile.google_maps_address ||
+        profile.company_address ||
+        defaultContactInfo.googleMapsAddress,
+    },
+    findUsData: {
+      howToFindUs: profile.how_to_find_us || defaultFindUsData.howToFindUs,
+      howToReachUs: profile.how_to_reach_us || defaultFindUsData.howToReachUs,
+      transportOptions,
+      nearbyLandmarks,
+    },
+  };
+}
+
+export function SiteDataProvider({
+  children,
+  initialProfile = null,
+}: {
+  children: ReactNode;
+  initialProfile?: AdminProfile | null;
+}) {
+  const { contactInfo, findUsData } = useMemo(
+    () => buildSiteDataFromProfile(initialProfile),
+    [initialProfile],
+  );
+
+  const [openingHours, setOpeningHours] =
+    useState<OpeningHours>(defaultOpeningHours);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const fetchData = useCallback(async () => {
+  const fetchWorkingHours = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Fetch contact info and opening hours in parallel
-      const [profileResponse, hoursResponse] = await Promise.all([
-        fetch('/api/admin/profile'),
-        fetch('/api/working-hours')
-      ]);
+      const hoursResponse = await fetch("/api/working-hours");
 
-      // Fetch contact info and find-us data
-      if (profileResponse.ok) {
-        const profile = await profileResponse.json();
-        setContactInfo({
-          address: profile.company_address || defaultContactInfo.address,
-          phone: profile.phone || defaultContactInfo.phone,
-          email: profile.business_email || profile.email || defaultContactInfo.email,
-          whatsapp: profile.whatsapp || profile.phone || defaultContactInfo.whatsapp,
-          googleMapsAddress: profile.google_maps_address || profile.company_address || defaultContactInfo.googleMapsAddress
-        });
-        
-        let transportOptions = defaultFindUsData.transportOptions;
-        let nearbyLandmarks: NearbyLandmark[] = defaultFindUsData.nearbyLandmarks;
-        
-        try {
-          if (profile.transport_options) {
-            let parsed = profile.transport_options;
-            // Unwrap any number of JSON-string wrappings
-            while (typeof parsed === 'string') {
-              parsed = JSON.parse(parsed);
-            }
-            if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-              transportOptions = parsed;
-            }
-          }
-        } catch (e) {
-          console.error('Error parsing transport_options:', e);
-        }
-        
-        try {
-          if (profile.nearby_landmarks) {
-            let parsed = profile.nearby_landmarks;
-            while (typeof parsed === 'string') {
-              parsed = JSON.parse(parsed);
-            }
-            if (Array.isArray(parsed)) {
-              nearbyLandmarks = parsed;
-            }
-          }
-        } catch (e) {
-          console.error('Error parsing nearby_landmarks:', e);
-        }
-        
-        // Set find-us data
-        setFindUsData({
-          howToFindUs: profile.how_to_find_us || defaultFindUsData.howToFindUs,
-          howToReachUs: profile.how_to_reach_us || defaultFindUsData.howToReachUs,
-          transportOptions: transportOptions,
-          nearbyLandmarks: nearbyLandmarks
-        });
-      } else {
-        setContactInfo(defaultContactInfo);
-        setFindUsData(defaultFindUsData);
-      }
-
-      // Fetch opening hours
       if (hoursResponse.ok) {
         const data = await hoursResponse.json();
         const normalized = data.normalized || {};
-        
+
         const dayNames: { [key: string]: string } = {
           monday: "Monday",
           tuesday: "Tuesday",
@@ -173,27 +208,29 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
           thursday: "Thursday",
           friday: "Friday",
           saturday: "Saturday",
-          sunday: "Sunday"
+          sunday: "Sunday",
         };
 
         const formattedHours: OpeningHours = {};
-        
+
         Object.keys(dayNames).forEach((dayKey) => {
           const dayData = normalized[dayKey];
+
           if (dayData) {
             const isOpen = dayData.isOpen && dayData.open && dayData.close;
+
             formattedHours[dayKey] = {
               day: dayNames[dayKey],
-              hours: isOpen 
+              hours: isOpen
                 ? `${formatTime(dayData.open)} - ${formatTime(dayData.close)}`
                 : "Closed",
-              isOpen: isOpen
+              isOpen,
             };
           } else {
             formattedHours[dayKey] = {
               day: dayNames[dayKey],
               hours: "Closed",
-              isOpen: false
+              isOpen: false,
             };
           }
         });
@@ -202,34 +239,33 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
       } else {
         setOpeningHours(defaultOpeningHours);
       }
-
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-      setContactInfo(defaultContactInfo);
+      setError(err instanceof Error ? err.message : "Unknown error");
       setOpeningHours(defaultOpeningHours);
-      setFindUsData(defaultFindUsData);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData, refreshTrigger]);
+    fetchWorkingHours();
+  }, [fetchWorkingHours, refreshTrigger]);
 
   const refresh = useCallback(() => {
-    setRefreshTrigger(prev => prev + 1);
+    setRefreshTrigger((prev) => prev + 1);
   }, []);
 
   return (
-    <SiteDataContext.Provider value={{ 
-      contactInfo, 
-      openingHours,
-      findUsData,
-      loading, 
-      error, 
-      refresh 
-    }}>
+    <SiteDataContext.Provider
+      value={{
+        contactInfo,
+        openingHours,
+        findUsData,
+        loading,
+        error,
+        refresh,
+      }}
+    >
       {children}
     </SiteDataContext.Provider>
   );
@@ -237,9 +273,10 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
 
 export function useSiteData() {
   const context = useContext(SiteDataContext);
+
   if (context === undefined) {
-    throw new Error('useSiteData must be used within a SiteDataProvider');
+    throw new Error("useSiteData must be used within a SiteDataProvider");
   }
+
   return context;
 }
-

@@ -142,4 +142,3 @@ export interface SiteConfig {
   };
   areas: any[];
 }
-

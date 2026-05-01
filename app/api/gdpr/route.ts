@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { supabaseAdmin } from "@/lib/supabase";
 
 const defaultGdprContent = `# GDPR & Data Protection
@@ -82,10 +83,15 @@ export async function GET() {
       return NextResponse.json({ content: defaultGdprContent });
     }
 
-    const content = typeof data.value === "string" ? data.value : (data.value as { content?: string })?.content ?? defaultGdprContent;
+    const content =
+      typeof data.value === "string"
+        ? data.value
+        : ((data.value as { content?: string })?.content ?? defaultGdprContent);
+
     return NextResponse.json({ content });
   } catch (e) {
     console.error("gdpr GET:", e);
+
     return NextResponse.json({ content: defaultGdprContent });
   }
 }

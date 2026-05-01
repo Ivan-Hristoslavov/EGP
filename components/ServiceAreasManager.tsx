@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+
 import { useToast, ToastMessages } from "@/components/Toast";
 
 interface Area {
@@ -14,7 +15,11 @@ interface Area {
   order: number;
 }
 
-export function ServiceAreasManager({ triggerModal }: { triggerModal?: boolean }) {
+export function ServiceAreasManager({
+  triggerModal,
+}: {
+  triggerModal?: boolean;
+}) {
   const { showSuccess, showError } = useToast();
   const [areas, setAreas] = useState<Area[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,16 +52,19 @@ export function ServiceAreasManager({ triggerModal }: { triggerModal?: boolean }
   // Calculate next order number when areas change
   useEffect(() => {
     if (!editingArea && areas.length > 0) {
-      const maxOrder = Math.max(...areas.map(area => area.order));
-      setFormData(prev => ({ ...prev, order: maxOrder + 1 }));
+      const maxOrder = Math.max(...areas.map((area) => area.order));
+
+      setFormData((prev) => ({ ...prev, order: maxOrder + 1 }));
     }
   }, [areas, editingArea]);
 
   const loadAreas = async () => {
     try {
       const response = await fetch("/api/admin/areas");
+
       if (response.ok) {
         const data = await response.json();
+
         setAreas(data);
       }
     } catch (error) {
@@ -71,17 +79,17 @@ export function ServiceAreasManager({ triggerModal }: { triggerModal?: boolean }
     try {
       const url = "/api/admin/areas";
       const method = editingArea ? "PUT" : "POST";
-      
+
       let body;
-      
+
       if (editingArea) {
         // Editing existing area
         body = { ...formData, id: editingArea.id };
       } else {
         // Creating new area - shift existing orders if needed
         const newOrder = formData.order;
-        const conflictingAreas = areas.filter(area => area.order >= newOrder);
-        
+        const conflictingAreas = areas.filter((area) => area.order >= newOrder);
+
         if (conflictingAreas.length > 0) {
           // Shift existing orders up
           for (const area of conflictingAreas) {
@@ -92,7 +100,7 @@ export function ServiceAreasManager({ triggerModal }: { triggerModal?: boolean }
             });
           }
         }
-        
+
         body = formData;
       }
 
@@ -107,18 +115,30 @@ export function ServiceAreasManager({ triggerModal }: { triggerModal?: boolean }
         setEditingArea(null);
         resetForm();
         loadAreas();
-        
+
         if (editingArea) {
-          showSuccess(ToastMessages.areas.areaUpdated.title, ToastMessages.areas.areaUpdated.message);
+          showSuccess(
+            ToastMessages.areas.areaUpdated.title,
+            ToastMessages.areas.areaUpdated.message,
+          );
         } else {
-          showSuccess(ToastMessages.areas.areaAdded.title, ToastMessages.areas.areaAdded.message);
+          showSuccess(
+            ToastMessages.areas.areaAdded.title,
+            ToastMessages.areas.areaAdded.message,
+          );
         }
       } else {
-        showError(ToastMessages.areas.error.title, ToastMessages.areas.error.message);
+        showError(
+          ToastMessages.areas.error.title,
+          ToastMessages.areas.error.message,
+        );
       }
     } catch (error) {
       console.error("Error saving area:", error);
-      showError(ToastMessages.areas.error.title, ToastMessages.areas.error.message);
+      showError(
+        ToastMessages.areas.error.title,
+        ToastMessages.areas.error.message,
+      );
     }
   };
 
@@ -148,27 +168,38 @@ export function ServiceAreasManager({ triggerModal }: { triggerModal?: boolean }
 
       if (response.ok) {
         loadAreas();
-        showSuccess(ToastMessages.areas.areaDeleted.title, ToastMessages.areas.areaDeleted.message);
+        showSuccess(
+          ToastMessages.areas.areaDeleted.title,
+          ToastMessages.areas.areaDeleted.message,
+        );
       } else {
-        showError(ToastMessages.areas.error.title, ToastMessages.areas.error.message);
+        showError(
+          ToastMessages.areas.error.title,
+          ToastMessages.areas.error.message,
+        );
       }
     } catch (error) {
       console.error("Error deleting area:", error);
-      showError(ToastMessages.areas.error.title, ToastMessages.areas.error.message);
+      showError(
+        ToastMessages.areas.error.title,
+        ToastMessages.areas.error.message,
+      );
     }
   };
 
-  const moveArea = async (areaId: number, direction: 'up' | 'down') => {
-    const currentArea = areas.find(area => area.id === areaId);
+  const moveArea = async (areaId: number, direction: "up" | "down") => {
+    const currentArea = areas.find((area) => area.id === areaId);
+
     if (!currentArea) return;
 
-    const currentIndex = areas.findIndex(area => area.id === areaId);
-    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    const currentIndex = areas.findIndex((area) => area.id === areaId);
+    const targetIndex =
+      direction === "up" ? currentIndex - 1 : currentIndex + 1;
 
     if (targetIndex < 0 || targetIndex >= areas.length) return;
 
     const targetArea = areas[targetIndex];
-    
+
     try {
       // Swap orders
       await fetch("/api/admin/areas", {
@@ -184,15 +215,23 @@ export function ServiceAreasManager({ triggerModal }: { triggerModal?: boolean }
       });
 
       loadAreas();
-      showSuccess(ToastMessages.areas.areaUpdated.title, "Area order updated successfully!");
+      showSuccess(
+        ToastMessages.areas.areaUpdated.title,
+        "Area order updated successfully!",
+      );
     } catch (error) {
       console.error("Error moving area:", error);
-      showError(ToastMessages.areas.error.title, ToastMessages.areas.error.message);
+      showError(
+        ToastMessages.areas.error.title,
+        ToastMessages.areas.error.message,
+      );
     }
   };
 
   const resetForm = () => {
-    const defaultOrder = areas.length > 0 ? Math.max(...areas.map(area => area.order)) + 1 : 1;
+    const defaultOrder =
+      areas.length > 0 ? Math.max(...areas.map((area) => area.order)) + 1 : 1;
+
     setFormData({
       name: "",
       slug: "",
@@ -213,7 +252,7 @@ export function ServiceAreasManager({ triggerModal }: { triggerModal?: boolean }
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
       </div>
     );
   }
@@ -257,7 +296,10 @@ export function ServiceAreasManager({ triggerModal }: { triggerModal?: boolean }
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {areas.map((area) => (
-                <tr key={area.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-300">
+                <tr
+                  key={area.id}
+                  className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-300"
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm font-medium text-gray-900 dark:text-white">
@@ -291,34 +333,59 @@ export function ServiceAreasManager({ triggerModal }: { triggerModal?: boolean }
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end space-x-2">
                       <button
-                        onClick={() => moveArea(area.id, 'up')}
-                        disabled={areas.findIndex(a => a.id === area.id) === 0}
                         className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-300"
+                        disabled={
+                          areas.findIndex((a) => a.id === area.id) === 0
+                        }
                         title="Move Up"
+                        onClick={() => moveArea(area.id, "up")}
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            d="M5 15l7-7 7 7"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                          />
                         </svg>
                       </button>
                       <button
-                        onClick={() => moveArea(area.id, 'down')}
-                        disabled={areas.findIndex(a => a.id === area.id) === areas.length - 1}
                         className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-300"
+                        disabled={
+                          areas.findIndex((a) => a.id === area.id) ===
+                          areas.length - 1
+                        }
                         title="Move Down"
+                        onClick={() => moveArea(area.id, "down")}
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            d="M19 9l-7 7-7-7"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                          />
                         </svg>
                       </button>
                       <button
-                        onClick={() => handleEdit(area)}
                         className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors duration-300"
+                        onClick={() => handleEdit(area)}
                       >
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDelete(area.id)}
                         className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors duration-300"
+                        onClick={() => handleDelete(area.id)}
                       >
                         Delete
                       </button>
@@ -338,17 +405,19 @@ export function ServiceAreasManager({ triggerModal }: { triggerModal?: boolean }
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               {editingArea ? "Edit Area" : "Add New Area"}
             </h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Area Name
                 </label>
                 <input
-                  type="text"
                   required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                 />
               </div>
               <div>
@@ -356,11 +425,13 @@ export function ServiceAreasManager({ triggerModal }: { triggerModal?: boolean }
                   Slug (URL)
                 </label>
                 <input
-                  type="text"
                   required
-                  value={formData.slug}
-                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  type="text"
+                  value={formData.slug}
+                  onChange={(e) =>
+                    setFormData({ ...formData, slug: e.target.value })
+                  }
                 />
               </div>
               <div>
@@ -368,10 +439,12 @@ export function ServiceAreasManager({ triggerModal }: { triggerModal?: boolean }
                   Postcode
                 </label>
                 <input
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   type="text"
                   value={formData.postcode}
-                  onChange={(e) => setFormData({ ...formData, postcode: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  onChange={(e) =>
+                    setFormData({ ...formData, postcode: e.target.value })
+                  }
                 />
               </div>
               <div>
@@ -379,10 +452,12 @@ export function ServiceAreasManager({ triggerModal }: { triggerModal?: boolean }
                   Description
                 </label>
                 <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={3}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  rows={3}
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
                 />
               </div>
               <div>
@@ -390,11 +465,13 @@ export function ServiceAreasManager({ triggerModal }: { triggerModal?: boolean }
                   Response Time
                 </label>
                 <input
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="e.g., 45 minutes"
                   type="text"
                   value={formData.response_time}
-                  onChange={(e) => setFormData({ ...formData, response_time: e.target.value })}
-                  placeholder="e.g., 45 minutes"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  onChange={(e) =>
+                    setFormData({ ...formData, response_time: e.target.value })
+                  }
                 />
               </div>
               <div>
@@ -402,35 +479,45 @@ export function ServiceAreasManager({ triggerModal }: { triggerModal?: boolean }
                   Order
                 </label>
                 <input
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   type="number"
                   value={formData.order}
-                  onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      order: parseInt(e.target.value) || 0,
+                    })
+                  }
                 />
               </div>
               <div className="flex items-center">
                 <input
-                  type="checkbox"
-                  id="is_active"
                   checked={formData.is_active}
-                  onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  id="is_active"
+                  type="checkbox"
+                  onChange={(e) =>
+                    setFormData({ ...formData, is_active: e.target.checked })
+                  }
                 />
-                <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900 dark:text-white">
+                <label
+                  className="ml-2 block text-sm text-gray-900 dark:text-white"
+                  htmlFor="is_active"
+                >
                   Active
                 </label>
               </div>
               <div className="flex justify-end space-x-3 pt-4">
                 <button
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-300"
                   type="button"
                   onClick={handleCancel}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-300"
                 >
                   Cancel
                 </button>
                 <button
-                  type="submit"
                   className="px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors duration-300"
+                  type="submit"
                 >
                   {editingArea ? "Update" : "Create"}
                 </button>
@@ -441,4 +528,4 @@ export function ServiceAreasManager({ triggerModal }: { triggerModal?: boolean }
       )}
     </div>
   );
-} 
+}

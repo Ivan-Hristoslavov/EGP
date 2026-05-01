@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
@@ -11,23 +12,32 @@ export async function GET(request: NextRequest) {
     // Check for OAuth errors
     if (error) {
       console.error("OAuth error:", error);
+
       return NextResponse.redirect(
-        new URL("/admin/settings?tab=connections&error=oauth_error", request.url)
+        new URL(
+          "/admin/settings?tab=connections&error=oauth_error",
+          request.url,
+        ),
       );
     }
 
     // Validate state parameter
     if (state !== "calendar_integration") {
       console.error("Invalid state parameter");
+
       return NextResponse.redirect(
-        new URL("/admin/settings?tab=connections&error=invalid_state", request.url)
+        new URL(
+          "/admin/settings?tab=connections&error=invalid_state",
+          request.url,
+        ),
       );
     }
 
     if (!code) {
       console.error("No authorization code received");
+
       return NextResponse.redirect(
-        new URL("/admin/settings?tab=connections&error=no_code", request.url)
+        new URL("/admin/settings?tab=connections&error=no_code", request.url),
       );
     }
 
@@ -38,8 +48,12 @@ export async function GET(request: NextRequest) {
 
     if (!clientId || !clientSecret) {
       console.error("Missing Google OAuth credentials");
+
       return NextResponse.redirect(
-        new URL("/admin/settings?tab=connections&error=config_error", request.url)
+        new URL(
+          "/admin/settings?tab=connections&error=config_error",
+          request.url,
+        ),
       );
     }
 
@@ -59,9 +73,14 @@ export async function GET(request: NextRequest) {
 
     if (!tokenResponse.ok) {
       const errorData = await tokenResponse.text();
+
       console.error("Token exchange failed:", errorData);
+
       return NextResponse.redirect(
-        new URL("/admin/settings?tab=connections&error=token_exchange_failed", request.url)
+        new URL(
+          "/admin/settings?tab=connections&error=token_exchange_failed",
+          request.url,
+        ),
       );
     }
 
@@ -74,13 +93,17 @@ export async function GET(request: NextRequest) {
         headers: {
           Authorization: `Bearer ${tokens.access_token}`,
         },
-      }
+      },
     );
 
     if (!userInfoResponse.ok) {
       console.error("Failed to get user info");
+
       return NextResponse.redirect(
-        new URL("/admin/settings?tab=connections&error=user_info_failed", request.url)
+        new URL(
+          "/admin/settings?tab=connections&error=user_info_failed",
+          request.url,
+        ),
       );
     }
 
@@ -93,12 +116,14 @@ export async function GET(request: NextRequest) {
         headers: {
           Authorization: `Bearer ${tokens.access_token}`,
         },
-      }
+      },
     );
 
     let calendarId = "primary";
+
     if (calendarResponse.ok) {
       const calendarData = await calendarResponse.json();
+
       calendarId = calendarData.id || "primary";
     }
 
@@ -120,24 +145,29 @@ export async function GET(request: NextRequest) {
       },
       {
         onConflict: "key",
-      }
+      },
     );
 
     if (saveError) {
       console.error("Error saving connection:", saveError);
+
       return NextResponse.redirect(
-        new URL("/admin/settings?tab=connections&error=save_failed", request.url)
+        new URL(
+          "/admin/settings?tab=connections&error=save_failed",
+          request.url,
+        ),
       );
     }
 
     // Redirect back to settings with success
     return NextResponse.redirect(
-      new URL("/admin/settings?tab=connections&success=connected", request.url)
+      new URL("/admin/settings?tab=connections&success=connected", request.url),
     );
   } catch (error) {
     console.error("OAuth callback error:", error);
+
     return NextResponse.redirect(
-      new URL("/admin/settings?tab=connections&error=unknown", request.url)
+      new URL("/admin/settings?tab=connections&error=unknown", request.url),
     );
   }
-} 
+}

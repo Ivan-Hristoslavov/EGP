@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+
 import {
   getImageDimensions,
   compressImage,
@@ -7,8 +8,9 @@ import {
 } from "./image-utils";
 
 vi.mock("heic-to", () => ({
-  heicTo: vi.fn(async () =>
-    new Blob([new Uint8Array([0xff, 0xd8, 0xff])], { type: "image/jpeg" })
+  heicTo: vi.fn(
+    async () =>
+      new Blob([new Uint8Array([0xff, 0xd8, 0xff])], { type: "image/jpeg" }),
   ),
 }));
 
@@ -48,13 +50,15 @@ describe("lib/image-utils (browser paths)", () => {
           toBlob: (
             cb: (blob: Blob | null) => void,
             _type?: string,
-            _quality?: number
+            _quality?: number,
           ) => {
             cb(new Blob(["jpeg-bytes"], { type: "image/jpeg" }));
           },
         };
+
         return canvas as unknown as HTMLCanvasElement;
       }
+
       return origCreateElement(tag);
     });
   });
@@ -70,11 +74,13 @@ describe("lib/image-utils (browser paths)", () => {
 
   it("getImageDimensions resolves natural size after load", async () => {
     const dims = await getImageDimensions(jpegFile());
+
     expect(dims).toEqual({ width: 400, height: 300 });
   });
 
   it("compressImage returns a JPEG File", async () => {
     const out = await compressImage(jpegFile("keep.jpg"), 1920, 1080, 0.85);
+
     expect(out).toBeInstanceOf(File);
     expect(out.type).toBe("image/jpeg");
     expect(out.name).toBe("keep.jpg");
@@ -85,6 +91,7 @@ describe("lib/image-utils (browser paths)", () => {
       type: "application/octet-stream",
     });
     const out = await convertHeicToJpeg(file);
+
     expect(out).not.toBeNull();
     expect(out?.name).toBe("shot.jpg");
     expect(out?.type).toBe("image/jpeg");
@@ -92,12 +99,14 @@ describe("lib/image-utils (browser paths)", () => {
 
   it("convertHeicToJpeg falls back to heic2any when heic-to fails", async () => {
     const { heicTo } = await import("heic-to");
+
     vi.mocked(heicTo).mockRejectedValueOnce(new Error("heic-to unavailable"));
     heic2anyFail.mockResolvedValueOnce(
-      new Blob(["fallback"], { type: "image/jpeg" })
+      new Blob(["fallback"], { type: "image/jpeg" }),
     );
     const file = new File([new Uint8Array([1])], "x.heic", { type: "" });
     const out = await convertHeicToJpeg(file);
+
     expect(out?.name).toBe("x.jpg");
     expect(heic2anyFail).toHaveBeenCalled();
   });
@@ -105,6 +114,7 @@ describe("lib/image-utils (browser paths)", () => {
   it("processImageFile compresses a JPEG and reports dimensions", async () => {
     const file = jpegFile("upload.jpg");
     const result = await processImageFile(file, 10, true, 1920, 1080, 0.85);
+
     expect(result.wasCompressed).toBe(true);
     expect(result.wasConverted).toBe(false);
     expect(result.originalDimensions).toEqual({ width: 400, height: 300 });
@@ -117,6 +127,7 @@ describe("lib/image-utils (browser paths)", () => {
       type: "application/octet-stream",
     });
     const result = await processImageFile(file, 10, true);
+
     expect(result.wasConverted).toBe(true);
     expect(result.wasCompressed).toBe(true);
   });
@@ -132,13 +143,16 @@ describe("lib/image-utils (browser paths)", () => {
             cb(null);
           },
         };
+
         return canvas as unknown as HTMLCanvasElement;
       }
+
       return origCreateElement(tag);
     });
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const file = jpegFile("nocompress.jpg");
     const result = await processImageFile(file, 10, true);
+
     expect(result.wasCompressed).toBe(false);
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();
