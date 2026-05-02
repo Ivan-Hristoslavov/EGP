@@ -3,7 +3,14 @@
 import type { Condition } from "@/hooks/useConditions";
 import type { Service } from "@/hooks/useServices";
 
-import { useState, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import {
+  useCallback,
+  useState,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+} from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
@@ -56,8 +63,13 @@ export default function HeaderAesthetics() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
-  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
+  const megaMenuHoverLeaveRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const scrollLockYRef = useRef(0);
   const [isMounted, setIsMounted] = useState(false);
+  /** Do not portal the desktop mega menu on small viewports (WebKit hit-testing). */
+  const [isLgViewport, setIsLgViewport] = useState(false);
   /** `null` until settings load — no flash of Awards/Press when disabled in admin. */
   const [isPressPageEnabled, setIsPressPageEnabled] = useState<boolean | null>(
     null,
@@ -68,6 +80,16 @@ export default function HeaderAesthetics() {
   // Ensure component is mounted before rendering portal
   useEffect(() => {
     setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const syncViewport = () => setIsLgViewport(mq.matches);
+
+    syncViewport();
+    mq.addEventListener("change", syncViewport);
+
+    return () => mq.removeEventListener("change", syncViewport);
   }, []);
 
   // Fetch press page enabled setting
@@ -260,35 +282,46 @@ export default function HeaderAesthetics() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const closeMobileMenu = useCallback(() => {
+    if (megaMenuHoverLeaveRef.current) {
+      clearTimeout(megaMenuHoverLeaveRef.current);
+      megaMenuHoverLeaveRef.current = null;
+    }
+
+    setActiveMenu(null);
+    setMobileMenuOpen(false);
+  }, []);
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setMobileMenuOpen(false);
-        setActiveMenu(null);
+        closeMobileMenu();
       }
     };
 
     document.addEventListener("keydown", handleEscape);
 
     return () => document.removeEventListener("keydown", handleEscape);
-  }, []);
+  }, [closeMobileMenu]);
 
-  // Prevent body scroll when mobile menu is open
+  /** iOS Safari: preserve scroll offset when locking body to avoid tap misalignment. */
   useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = "hidden";
-      document.body.style.position = "fixed";
-      document.body.style.width = "100%";
-    } else {
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.width = "";
-    }
+    if (!mobileMenuOpen) return;
+
+    scrollLockYRef.current = window.scrollY;
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollLockYRef.current}px`;
+    document.body.style.width = "100%";
+    document.body.style.touchAction = "none";
 
     return () => {
       document.body.style.overflow = "";
       document.body.style.position = "";
+      document.body.style.top = "";
       document.body.style.width = "";
+      document.body.style.touchAction = "";
+      window.scrollTo(0, scrollLockYRef.current);
     };
   }, [mobileMenuOpen]);
 
@@ -302,14 +335,25 @@ export default function HeaderAesthetics() {
   }
 
   useLayoutEffect(() => {
-    if (activeMenu === "treatments" || activeMenu === "conditions") {
-      updateMegaMenuTop();
+    if (
+      !isLgViewport ||
+      (activeMenu !== "treatments" && activeMenu !== "conditions")
+    ) {
+      return;
     }
-  }, [activeMenu]);
+
+    updateMegaMenuTop();
+  }, [activeMenu, isLgViewport]);
 
   // Keep dropdown flush under header when user scrolls or resizes (header height can change)
   useEffect(() => {
-    if (activeMenu !== "treatments" && activeMenu !== "conditions") return;
+    if (
+      !isLgViewport ||
+      (activeMenu !== "treatments" && activeMenu !== "conditions")
+    ) {
+      return;
+    }
+
     updateMegaMenuTop();
     window.addEventListener("scroll", updateMegaMenuTop, true);
     window.addEventListener("resize", updateMegaMenuTop);
@@ -318,24 +362,24 @@ export default function HeaderAesthetics() {
       window.removeEventListener("scroll", updateMegaMenuTop, true);
       window.removeEventListener("resize", updateMegaMenuTop);
     };
-  }, [activeMenu]);
+  }, [activeMenu, isLgViewport]);
 
   // Handle menu hover with delay
-  const handleMenuEnter = (menuType: string) => {
-    if (hoverTimeout) {
-      clearTimeout(hoverTimeout);
-      setHoverTimeout(null);
+  function handleMenuEnter(menuType: string) {
+    if (megaMenuHoverLeaveRef.current) {
+      clearTimeout(megaMenuHoverLeaveRef.current);
+      megaMenuHoverLeaveRef.current = null;
     }
+
     setActiveMenu(menuType);
-  };
+  }
 
-  const handleMenuLeave = () => {
-    const timeout = setTimeout(() => {
+  function handleMenuLeave() {
+    megaMenuHoverLeaveRef.current = setTimeout(() => {
       setActiveMenu(null);
-    }, 200); // 200ms delay before closing
-
-    setHoverTimeout(timeout);
-  };
+      megaMenuHoverLeaveRef.current = null;
+    }, 200);
+  }
 
   return (
     <>
@@ -860,7 +904,9 @@ export default function HeaderAesthetics() {
                   aria-expanded={mobileMenuOpen}
                   aria-label="Toggle menu"
                   className="lg:hidden shrink-0 p-3 rounded-full transition-all duration-500 hover:scale-110 transform hover:-translate-y-1 text-gray-700 dark:text-gray-300 hover:text-gray-900 hover:bg-[#D4C9BC] dark:hover:bg-[#CFC4B6] shadow-lg hover:shadow-xl"
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  onClick={() =>
+                    mobileMenuOpen ? closeMobileMenu() : setMobileMenuOpen(true)
+                  }
                 >
                   <svg
                     className="h-6 w-6 transition-transform duration-300"
@@ -899,11 +945,12 @@ export default function HeaderAesthetics() {
       </header>
       {/* Portal: desktop mega menu (outside header so backdrop-filter blurs page) */}
       {isMounted &&
+        isLgViewport &&
         (activeMenu === "treatments" || activeMenu === "conditions") &&
         typeof document !== "undefined" &&
         createPortal(
           <div
-            className="hidden lg:block fixed left-0 right-0 shadow-2xl overflow-hidden"
+            className="fixed left-0 right-0 shadow-2xl overflow-hidden"
             style={{
               zIndex: 9999,
               top: megaMenuTop,
@@ -1234,7 +1281,7 @@ export default function HeaderAesthetics() {
             <div
               className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm animate-fadeIn"
               style={{ pointerEvents: "auto" }}
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={closeMobileMenu}
             />
 
             {/* Slide-in Menu */}
@@ -1247,7 +1294,7 @@ export default function HeaderAesthetics() {
                 <button
                   aria-label="Close menu"
                   className="p-2 -mr-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-[#D4C9BC] dark:hover:bg-gray-800 transition-colors touch-manipulation"
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={closeMobileMenu}
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -1260,7 +1307,7 @@ export default function HeaderAesthetics() {
                     <Link
                       className="group relative flex px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#D4C9BC] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 font-montserrat uppercase tracking-widest items-center pb-1"
                       href="/about"
-                      onClick={() => setMobileMenuOpen(false)}
+                      onClick={closeMobileMenu}
                     >
                       <span className="relative z-10">About Us</span>
                       <span className="absolute left-4 right-4 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] transition-transform duration-300 ease-out group-hover:scale-x-100" />
@@ -1297,10 +1344,7 @@ export default function HeaderAesthetics() {
                                 <Link
                                   className="text-xs text-[#9d9585] dark:text-[#c9c1b0] hover:text-gray-900 dark:hover:text-white transition-colors font-medium"
                                   href={`/services?category=${encodeURIComponent(category.name)}`}
-                                  onClick={() => {
-                                    setMobileMenuOpen(false);
-                                    setActiveMenu(null);
-                                  }}
+                                  onClick={closeMobileMenu}
                                 >
                                   View All →
                                 </Link>
@@ -1326,8 +1370,7 @@ export default function HeaderAesthetics() {
                                               item.id,
                                             );
                                           }
-                                          setMobileMenuOpen(false);
-                                          setActiveMenu(null);
+                                          closeMobileMenu();
                                         }}
                                       >
                                         {hasDiscount &&
@@ -1398,10 +1441,7 @@ export default function HeaderAesthetics() {
                             <Link
                               className="text-xs text-[#9d9585] dark:text-[#c9c1b0] hover:text-gray-900 dark:hover:text-white transition-colors font-medium"
                               href="/conditions"
-                              onClick={() => {
-                                setMobileMenuOpen(false);
-                                setActiveMenu(null);
-                              }}
+                              onClick={closeMobileMenu}
                             >
                               View All →
                             </Link>
@@ -1416,10 +1456,7 @@ export default function HeaderAesthetics() {
                                     className="group relative flex items-center justify-between gap-2 px-2 py-2 min-h-[40px] text-xs sm:text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md transition-all duration-200 active:scale-95 touch-manipulation font-montserrat min-w-0"
                                     href={`/conditions/${condition.slug}`}
                                     title={condition.title}
-                                    onClick={() => {
-                                      setMobileMenuOpen(false);
-                                      setActiveMenu(null);
-                                    }}
+                                    onClick={closeMobileMenu}
                                   >
                                     <span className="relative z-10 min-w-0 truncate">
                                       {condition.title}
@@ -1447,10 +1484,7 @@ export default function HeaderAesthetics() {
                             <Link
                               className="text-xs text-[#9d9585] dark:text-[#c9c1b0] hover:text-gray-900 dark:hover:text-white transition-colors font-medium"
                               href="/conditions?category=Body"
-                              onClick={() => {
-                                setMobileMenuOpen(false);
-                                setActiveMenu(null);
-                              }}
+                              onClick={closeMobileMenu}
                             >
                               View All →
                             </Link>
@@ -1465,10 +1499,7 @@ export default function HeaderAesthetics() {
                                     className="group relative flex items-center justify-between gap-2 px-2 py-2 min-h-[40px] text-xs sm:text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md transition-all duration-200 active:scale-95 touch-manipulation font-montserrat min-w-0"
                                     href={`/conditions/${condition.slug}`}
                                     title={condition.title}
-                                    onClick={() => {
-                                      setMobileMenuOpen(false);
-                                      setActiveMenu(null);
-                                    }}
+                                    onClick={closeMobileMenu}
                                   >
                                     <span className="relative z-10 min-w-0 truncate">
                                       {condition.title}
@@ -1495,7 +1526,7 @@ export default function HeaderAesthetics() {
                     <Link
                       className="group relative flex px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#D4C9BC] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 font-montserrat uppercase tracking-widest items-center pb-1"
                       href="/blog"
-                      onClick={() => setMobileMenuOpen(false)}
+                      onClick={closeMobileMenu}
                     >
                       <span className="relative z-10">Blog</span>
                       <span className="absolute left-4 right-4 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] transition-transform duration-300 ease-out group-hover:scale-x-100" />
@@ -1506,7 +1537,7 @@ export default function HeaderAesthetics() {
                       <Link
                         className="group relative flex px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#D4C9BC] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 font-montserrat uppercase tracking-widest items-center pb-1"
                         href="/press"
-                        onClick={() => setMobileMenuOpen(false)}
+                        onClick={closeMobileMenu}
                       >
                         <span className="relative z-10">
                           Awards &amp; Press
@@ -1519,7 +1550,7 @@ export default function HeaderAesthetics() {
                     <Link
                       className="group relative flex px-4 py-3.5 min-h-[44px] text-base text-gray-700 dark:text-gray-300 hover:bg-[#D4C9BC] dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg font-light transition-all duration-200 active:scale-95 font-montserrat uppercase tracking-widest items-center pb-1"
                       href="/find-us"
-                      onClick={() => setMobileMenuOpen(false)}
+                      onClick={closeMobileMenu}
                     >
                       <span className="relative z-10">Find Us</span>
                       <span className="absolute left-4 right-4 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] transition-transform duration-300 ease-out group-hover:scale-x-100" />

@@ -1,8 +1,9 @@
 "use client";
 import { useState, useRef } from "react";
 
-import { DayOffBanner } from './DayOffBanner';
-import { useDayOffPeriods, DayOffPeriod } from '@/hooks/useDayOffPeriods';
+import { DayOffBanner } from "./DayOffBanner";
+
+import { useDayOffPeriods, DayOffPeriod } from "@/hooks/useDayOffPeriods";
 
 type RecurrenceOption = {
   value: string | "null";
@@ -201,10 +202,10 @@ export function AdminDayOffManager() {
               viewBox="0 0 24 24"
             >
               <path
+                d="M12 4v16m8-8H4"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M12 4v16m8-8H4"
               />
             </svg>
           </span>
@@ -256,17 +257,17 @@ export function AdminDayOffManager() {
                   <td className="px-6 py-12 text-center" colSpan={6}>
                     <div className="flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
                       <svg
-                        xmlns="http://www.w3.org/2000/svg"
                         className="h-12 w-12 mb-4"
                         fill="none"
-                        viewBox="0 0 24 24"
                         stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           strokeWidth={2}
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                         />
                       </svg>
                       <p className="text-lg font-medium">
@@ -347,10 +348,10 @@ export function AdminDayOffManager() {
                           viewBox="0 0 24 24"
                         >
                           <path
+                            d="M16.862 5.487a2.25 2.25 0 113.182 3.182L8.25 20.463 4 21.75l1.287-4.25 11.575-11.575z"
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             strokeWidth={2}
-                            d="M16.862 5.487a2.25 2.25 0 113.182 3.182L8.25 20.463 4 21.75l1.287-4.25 11.575-11.575z"
                           />
                         </svg>
                       </button>
@@ -358,7 +359,10 @@ export function AdminDayOffManager() {
                         aria-label="Delete"
                         className="rounded-full p-2 hover:bg-red-100 dark:hover:bg-red-900 group transition-colors"
                         title="Delete"
-                        onClick={() => { setDeleteId(p.id || null); setDeleteConfirm(true); }}
+                        onClick={() => {
+                          setDeleteId(p.id || null);
+                          setDeleteConfirm(true);
+                        }}
                       >
                         <svg
                           className="w-5 h-5 text-red-600 group-hover:text-red-800 dark:text-red-400 dark:group-hover:text-red-200"
@@ -367,10 +371,10 @@ export function AdminDayOffManager() {
                           viewBox="0 0 24 24"
                         >
                           <path
+                            d="M6 18L18 6M6 6l12 12"
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
                           />
                         </svg>
                       </button>
@@ -399,10 +403,10 @@ export function AdminDayOffManager() {
                       viewBox="0 0 24 24"
                     >
                       <path
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                       />
                     </svg>
                   </div>
@@ -431,10 +435,10 @@ export function AdminDayOffManager() {
                     viewBox="0 0 24 24"
                   >
                     <path
+                      d="M6 18L18 6M6 6l12 12"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
                     />
                   </svg>
                 </button>
@@ -451,9 +455,9 @@ export function AdminDayOffManager() {
                       Title <span className="text-red-500">*</span>
                     </label>
                     <input
-                      type="text"
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm"
                       placeholder="e.g., Christmas Holiday"
+                      type="text"
                       value={form.title}
                       onChange={(e) =>
                         setForm((f) => ({ ...f, title: e.target.value }))
@@ -468,8 +472,10 @@ export function AdminDayOffManager() {
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm"
                       placeholder="Optional description"
                       type="text"
-                    value={form.description}
-                    onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                      value={form.description}
+                      onChange={(e) =>
+                        setForm((f) => ({ ...f, description: e.target.value }))
+                      }
                     />
                   </div>
                 </div>
@@ -481,10 +487,12 @@ export function AdminDayOffManager() {
                     </label>
                     <input
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm"
-                      min={new Date().toISOString().split('T')[0]}
+                      min={new Date().toISOString().split("T")[0]}
                       type="date"
                       value={form.start_date}
-                      onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))}
+                      onChange={(e) =>
+                        setForm((f) => ({ ...f, start_date: e.target.value }))
+                      }
                     />
                   </div>
                   <div>
@@ -493,10 +501,15 @@ export function AdminDayOffManager() {
                     </label>
                     <input
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm"
-                      min={form.start_date || new Date().toISOString().split('T')[0]}
+                      min={
+                        form.start_date ||
+                        new Date().toISOString().split("T")[0]
+                      }
                       type="date"
                       value={form.end_date}
-                      onChange={e => setForm(f => ({ ...f, end_date: e.target.value }))}
+                      onChange={(e) =>
+                        setForm((f) => ({ ...f, end_date: e.target.value }))
+                      }
                     />
                   </div>
                 </div>
@@ -512,10 +525,10 @@ export function AdminDayOffManager() {
                         viewBox="0 0 24 24"
                       >
                         <path
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           strokeWidth={2}
-                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                       </svg>
                       <div className="text-xs text-blue-700 dark:text-blue-300">
@@ -550,10 +563,10 @@ export function AdminDayOffManager() {
                             viewBox="0 0 24 24"
                           >
                             <path
+                              d="M15 17h5l-5 5v-5z"
                               strokeLinecap="round"
                               strokeLinejoin="round"
                               strokeWidth={2}
-                              d="M15 17h5l-5 5v-5z"
                             />
                           </svg>
                         </div>
@@ -567,9 +580,9 @@ export function AdminDayOffManager() {
                         </div>
                       </div>
                       <input
-                        type="checkbox"
-                        className="checkbox checkbox-primary checkbox-sm"
                         checked={form.show_banner}
+                        className="checkbox checkbox-primary checkbox-sm"
+                        type="checkbox"
                         onChange={(e) =>
                           setForm((f) => ({
                             ...f,
@@ -589,10 +602,10 @@ export function AdminDayOffManager() {
                             viewBox="0 0 24 24"
                           >
                             <path
+                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                               strokeLinecap="round"
                               strokeLinejoin="round"
                               strokeWidth={2}
-                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                             />
                           </svg>
                         </div>
@@ -607,9 +620,14 @@ export function AdminDayOffManager() {
                       </div>
                       <input
                         checked={form.is_recurring}
-                      className="checkbox checkbox-primary checkbox-sm"
-                      type="checkbox"
-                      onChange={e => setForm(f => ({ ...f, is_recurring: e.target.checked }))}
+                        className="checkbox checkbox-primary checkbox-sm"
+                        type="checkbox"
+                        onChange={(e) =>
+                          setForm((f) => ({
+                            ...f,
+                            is_recurring: e.target.checked,
+                          }))
+                        }
                       />
                     </div>
                   </div>
@@ -685,10 +703,10 @@ export function AdminDayOffManager() {
                       viewBox="0 0 24 24"
                     >
                       <path
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                       />
                     </svg>
                     <span className="text-xs">{formError}</span>
@@ -714,9 +732,9 @@ export function AdminDayOffManager() {
                     <span className="flex items-center gap-1">
                       <svg
                         className="animate-spin h-4 w-4"
-                        xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
                       >
                         <circle
                           className="opacity-25"
@@ -725,12 +743,12 @@ export function AdminDayOffManager() {
                           r="10"
                           stroke="currentColor"
                           strokeWidth="4"
-                        ></circle>
+                        />
                         <path
                           className="opacity-75"
-                          fill="currentColor"
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
+                          fill="currentColor"
+                        />
                       </svg>
                       Saving...
                     </span>
@@ -743,10 +761,10 @@ export function AdminDayOffManager() {
                         viewBox="0 0 24 24"
                       >
                         <path
+                          d="M5 13l4 4L19 7"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           strokeWidth={2}
-                          d="M5 13l4 4L19 7"
                         />
                       </svg>
                       {editingId ? "Update Period" : "Create Period"}
@@ -773,10 +791,10 @@ export function AdminDayOffManager() {
                     viewBox="0 0 24 24"
                   >
                     <path
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth="2"
-                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                     />
                   </svg>
                 </div>
@@ -794,7 +812,10 @@ export function AdminDayOffManager() {
                 <button
                   className="btn btn-ghost"
                   disabled={saving}
-                  onClick={() => { setDeleteConfirm(false); setDeleteId(null); }}
+                  onClick={() => {
+                    setDeleteConfirm(false);
+                    setDeleteId(null);
+                  }}
                 >
                   Cancel
                 </button>
@@ -807,9 +828,9 @@ export function AdminDayOffManager() {
                     <span className="flex items-center">
                       <svg
                         className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
                       >
                         <circle
                           className="opacity-25"
@@ -818,12 +839,12 @@ export function AdminDayOffManager() {
                           r="10"
                           stroke="currentColor"
                           strokeWidth="4"
-                        ></circle>
+                        />
                         <path
                           className="opacity-75"
-                          fill="currentColor"
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
+                          fill="currentColor"
+                        />
                       </svg>
                       Deleting...
                     </span>

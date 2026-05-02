@@ -2094,15 +2094,15 @@ function BookingPageContent() {
 
         <div className="relative z-20 flex flex-col gap-3 pt-4 sm:flex-row sm:gap-3">
           <button
-            type="button"
             className={`flex-1 border-2 border-[#e4d9c8] bg-white text-gray-900 shadow-sm active:opacity-90 dark:border-gray-600 dark:bg-gray-800 dark:text-white ${bookingBtn}`}
+            type="button"
             onClick={() => setCurrentStep("date")}
           >
             Back
           </button>
           <button
-            type="button"
             className={`flex-1 bg-egp-green text-white shadow-md hover:bg-egp-green-dark active:opacity-90 ${bookingBtn}`}
+            type="button"
             onClick={() => {
               if (validateCustomerData()) {
                 setCurrentStep("preview");
@@ -2491,9 +2491,9 @@ function BookingPageContent() {
       <div className="space-y-6">
         <div className="flex items-center gap-4 mb-6">
           <button
+            aria-label="Back to review"
             className={`shrink-0 border border-[#e4d9c8] bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 ${bookingBtn} !p-0 min-w-14 max-w-14`}
             type="button"
-            aria-label="Back to review"
             onClick={() => setCurrentStep("preview")}
           >
             <ArrowLeft className="h-5 w-5" />

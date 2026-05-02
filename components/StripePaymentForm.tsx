@@ -11,6 +11,7 @@ import {
 import { CheckCircle, AlertCircle } from "lucide-react";
 
 import ButtonPrimary from "./ButtonPrimary";
+
 import { bookingCtaButtonClassName } from "@/config/design-system";
 
 const stripePayButtonClass = `w-full max-w-md ${bookingCtaButtonClassName}`;
