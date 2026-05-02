@@ -3,11 +3,12 @@ import type { Metadata } from "next";
 import GdprPageClient from "./gdpr-client";
 
 import { getAdminProfile } from "@/lib/admin-profile";
+import { canonicalUrl } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getAdminProfile();
   const companyName = profile?.company_name || "EGP Aesthetics";
-  const canonical = `${process.env.NEXT_PUBLIC_SITE_URL || ""}/gdpr`;
+  const canonical = canonicalUrl("/gdpr");
 
   return {
     title: `GDPR & Data Protection | ${companyName}`,

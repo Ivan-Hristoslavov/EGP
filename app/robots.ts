@@ -1,7 +1,9 @@
 import { MetadataRoute } from "next";
 
+import { siteConfig } from "@/config/site";
+
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://egp.com";
+  const baseUrl = siteConfig.url.replace(/\/$/, "");
 
   return {
     rules: [

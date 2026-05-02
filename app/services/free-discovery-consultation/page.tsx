@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
+import { canonicalUrl } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -18,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description:
       "Book your treatment now at EGP Aesthetics London. Expert assessment and personalised treatment planning.",
     alternates: {
-      canonical: `${siteConfig.url}/services/book-treatment-now`,
+      canonical: canonicalUrl("/services/free-discovery-consultation"),
     },
   };
 }

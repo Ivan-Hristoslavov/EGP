@@ -4,11 +4,15 @@ import Link from "next/link";
 import { Clock, ArrowRight } from "lucide-react";
 
 import ButtonBookNow from "@/components/ButtonBookNow";
+import { canonicalUrl } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Dermal Fillers in London | Lip, Cheek & Jawline Enhancement",
   description:
     "Expert dermal filler treatments in London. Lip enhancement, cheek fillers, jawline contouring, tear trough treatment. Natural results from £150.",
+  alternates: {
+    canonical: canonicalUrl("/services/fillers"),
+  },
 };
 
 const fillerServices = [
