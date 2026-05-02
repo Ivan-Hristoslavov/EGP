@@ -183,21 +183,15 @@ export default function FloatingContactButtons() {
   return (
     <div className="fixed bottom-3 right-3 sm:bottom-6 sm:right-6 z-50">
       <div className="relative flex flex-col items-end gap-3">
-        {/* Popup card - shown by default on every load */}
-        <div
-          className={`transition-all duration-300 ease-out ${
-            isExpanded
-              ? "opacity-100 translate-y-0 pointer-events-auto"
-              : "opacity-0 translate-y-3 pointer-events-none"
-          }`}
-        >
-          <div className="rounded-2xl border border-white/30 dark:border-white/10 bg-white/55 dark:bg-gray-900/55 backdrop-blur-xl shadow-xl p-2.5 sm:p-3 flex flex-col gap-1.5 sm:gap-2">
+        {/* Unmount when collapsed so WebKit does not keep a hit-testing layer */}
+        {isExpanded ? (
+          <div className="rounded-2xl border border-white/30 dark:border-white/10 bg-white/55 dark:bg-gray-900/55 backdrop-blur-xl shadow-xl p-2.5 sm:p-3 flex flex-col gap-1.5 sm:gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 px-2 pb-0.5">
               Quick actions
             </p>
             {quickActions.map((action) => renderAction(action))}
           </div>
-        </div>
+        ) : null}
 
         <button
           aria-label={isExpanded ? "Close menu" : "Open contact menu"}
