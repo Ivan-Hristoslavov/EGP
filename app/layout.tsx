@@ -293,7 +293,7 @@ export default async function RootLayout({
         <ToastProvider>
           <Providers initialAdminProfile={adminProfile}>
             <HashNavigation />
-            <LayoutMain adminProfile={adminProfile}>{children}</LayoutMain>
+            <LayoutMain>{children}</LayoutMain>
             {/* First-visit discount popup (client) */}
             <FirstVisitDiscountFormWrapper />
             {/* GDPR & Cookies Consent Modal */}

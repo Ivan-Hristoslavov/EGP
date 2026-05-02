@@ -7,14 +7,10 @@ import HeaderAesthetics from "./HeaderAesthetics";
 import FloatingContactButtons from "./FloatingContactButtons";
 import FooterAesthetics from "./FooterAesthetics";
 
-import { AdminProfile } from "@/lib/admin-profile";
-
 export default function LayoutMain({
   children,
-  adminProfile,
 }: {
   children: React.ReactNode;
-  adminProfile: AdminProfile | null;
 }) {
   const [isMounted, setIsMounted] = useState(false);
   const [showFreeConsultationPopup, setShowFreeConsultationPopup] =
@@ -71,10 +67,21 @@ export default function LayoutMain({
 
   return (
     <div className="min-h-screen flex flex-col">
+      <a
+        className="absolute left-4 top-4 z-[99999] -translate-y-[200%] rounded-lg bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-xl outline-none transition-transform focus:translate-y-0 focus:ring-2 focus:ring-egp-green"
+        href="#main-content"
+      >
+        Skip to main content
+      </a>
       {/* Free Discovery Consultation popup */}
       {showFreeConsultationPopup && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-[2px] sm:backdrop-blur-sm px-4">
-          <div className="max-w-lg w-full bg-[#f5efe2]/95 dark:bg-gray-900/95 rounded-3xl shadow-2xl border border-[#e4d9c8] dark:border-gray-700 p-5 sm:p-6 relative overflow-hidden">
+          <div
+            aria-labelledby="egp-free-consult-heading"
+            aria-modal="true"
+            className="max-w-lg w-full bg-[#f5efe2]/95 dark:bg-gray-900/95 rounded-3xl shadow-2xl border border-[#e4d9c8] dark:border-gray-700 p-5 sm:p-6 relative overflow-hidden"
+            role="dialog"
+          >
             <div className="pointer-events-none absolute -top-20 -left-16 h-48 w-48 rounded-full bg-[#c9c1b0]/25 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-20 -right-16 h-56 w-56 rounded-full bg-egp-green/15 blur-3xl" />
             <button
@@ -87,7 +94,10 @@ export default function LayoutMain({
             <p className="text-xs font-semibold tracking-[0.22em] uppercase text-[#9d9585] dark:text-[#c9c1b0] mb-2 text-center">
               Welcome Offer
             </p>
-            <h2 className="text-[28px] sm:text-[34px] leading-tight font-semibold text-gray-900 dark:text-white text-center mb-2">
+            <h2
+              className="mb-2 text-center text-[28px] font-semibold leading-tight text-gray-900 sm:text-[34px] dark:text-white"
+              id="egp-free-consult-heading"
+            >
               Free Discovery Consultation
             </h2>
             <p className="text-sm text-gray-700 dark:text-gray-300 text-center mb-4 max-w-[34ch] mx-auto leading-relaxed">
@@ -126,6 +136,7 @@ export default function LayoutMain({
       <main
         suppressHydrationWarning
         className={`flex-grow transition-all duration-300 ${paddingClass}`}
+        id="main-content"
         style={{
           position: "relative",
           zIndex: 1,
