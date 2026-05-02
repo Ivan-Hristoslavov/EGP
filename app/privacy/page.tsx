@@ -3,11 +3,12 @@ import type { Metadata } from "next";
 import PrivacyPageClient from "./privacy-client";
 
 import { getAdminProfile } from "@/lib/admin-profile";
+import { canonicalUrl } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getAdminProfile();
   const companyName = profile?.company_name || "Company";
-  const canonical = `${process.env.NEXT_PUBLIC_SITE_URL}/privacy`;
+  const canonical = canonicalUrl("/privacy");
 
   return {
     title: `Privacy Policy | ${companyName} - Aesthetic Clinic London`,

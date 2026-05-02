@@ -3,11 +3,12 @@ import type { Metadata } from "next";
 import TermsPageClient from "./terms-client";
 
 import { getAdminProfile } from "@/lib/admin-profile";
+import { canonicalUrl } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getAdminProfile();
   const companyName = profile?.company_name || "Company";
-  const canonical = `${process.env.NEXT_PUBLIC_SITE_URL}/terms`;
+  const canonical = canonicalUrl("/terms");
 
   return {
     title: `Terms & Conditions | ${companyName} - Aesthetic Clinic London`,

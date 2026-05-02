@@ -5,11 +5,15 @@ import { Clock, ArrowRight } from "lucide-react";
 
 import ButtonBookNow from "@/components/ButtonBookNow";
 import { typography, layout } from "@/config/typography";
+import { canonicalUrl } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Body Contouring & Sculpting Treatments in London",
   description:
     "Professional body treatments including fat freezing, mesotherapy, RF skin tightening, and cellulite reduction. Transform your body from £170.",
+  alternates: {
+    canonical: canonicalUrl("/services/body"),
+  },
 };
 
 const bodyServices = [

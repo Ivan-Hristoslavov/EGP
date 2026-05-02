@@ -14,30 +14,28 @@ function entry(
   },
 ): MetadataRoute.Sitemap[0] {
   const p = path.startsWith("/") ? path : `/${path}`;
-
-  return {
+  const item: MetadataRoute.Sitemap[0] = {
     url: `${baseUrl()}${p}`,
-    lastModified: opts.lastModified ?? new Date(),
     changeFrequency: opts.changeFrequency,
     priority: opts.priority,
   };
+
+  if (opts.lastModified !== undefined) item.lastModified = opts.lastModified;
+
+  return item;
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const now = new Date();
-
   const staticEntries: MetadataRoute.Sitemap = [
-    entry("/", { changeFrequency: "weekly", priority: 1, lastModified: now }),
+    entry("/", { changeFrequency: "weekly", priority: 1 }),
     entry("/about", { changeFrequency: "monthly", priority: 0.85 }),
     entry("/services", { changeFrequency: "weekly", priority: 0.95 }),
     entry("/blog", { changeFrequency: "weekly", priority: 0.75 }),
     entry("/press", { changeFrequency: "monthly", priority: 0.6 }),
     entry("/find-us", { changeFrequency: "monthly", priority: 0.7 }),
     entry("/membership/signup", { changeFrequency: "monthly", priority: 0.65 }),
-    entry("/membership/success", { changeFrequency: "yearly", priority: 0.2 }),
     entry("/book", { changeFrequency: "weekly", priority: 0.95 }),
     entry("/book/new", { changeFrequency: "weekly", priority: 0.85 }),
-    entry("/book/success", { changeFrequency: "yearly", priority: 0.25 }),
     entry("/book-consultation", { changeFrequency: "monthly", priority: 0.8 }),
     entry("/conditions", { changeFrequency: "weekly", priority: 0.85 }),
     entry("/gdpr", { changeFrequency: "yearly", priority: 0.25 }),
@@ -124,7 +122,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         entry(`/blog/${post.slug}`, {
           changeFrequency: "monthly",
           priority: 0.65,
-          lastModified: last ? new Date(last) : now,
+          ...(last ? { lastModified: new Date(last) } : {}),
         }),
       );
     }
@@ -142,7 +140,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         entry(`/services/${s.slug}`, {
           changeFrequency: "weekly",
           priority: 0.85,
-          lastModified: last ? new Date(last) : now,
+          ...(last ? { lastModified: new Date(last) } : {}),
         }),
       );
     }
@@ -162,7 +160,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         entry(`/conditions/${c.slug}`, {
           changeFrequency: "monthly",
           priority: 0.68,
-          lastModified: last ? new Date(last) : now,
+          ...(last ? { lastModified: new Date(last) } : {}),
         }),
       );
     }
