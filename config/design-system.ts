@@ -61,6 +61,14 @@ export const formLayout = {
   fieldGap: "gap-4",
 };
 
+/** Booking flow primary CTAs — ~56px min height, matches `Input size="lg"` */
+export const bookingCtaButtonClassName =
+  "min-h-14 inline-flex items-center justify-center touch-manipulation text-base font-semibold rounded-xl px-5 [-webkit-tap-highlight-color:transparent]";
+
+/** Secondary pill controls (filters, clear selection) */
+export const bookingCtaCompactClassName =
+  "min-h-11 touch-manipulation rounded-full px-4 text-sm font-semibold [-webkit-tap-highlight-color:transparent]";
+
 // Input component - label outside, no blue ring, single green border on focus
 export const inputClassNames = {
   base: "input-egp",

@@ -414,94 +414,94 @@ function ConditionsPageContent() {
           </div>
         ) : (
           <div className="grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
-            {paginatedConditions.map((condition) => (
-              <Card key={condition.id} className="h-full" shadow="sm">
-                <CardHeader className="bg-egp-beige-lighter dark:bg-egp-green-dark px-2 sm:px-2.5 py-2 sm:py-2.5 border-b border-egp-beige-dark/60 dark:border-egp-green flex flex-col items-center text-center">
-                  {/* Category Badge - Centered */}
-                  <div className="flex justify-center mb-1.5">
-                    <Chip
-                      className="bg-egp-green text-white text-[8px] h-5"
-                      size="sm"
-                      variant="flat"
-                    >
-                      {getCategoryDisplayName(condition.category)}
-                    </Chip>
-                  </div>
+            {paginatedConditions.map((condition) => {
+              const bookMatch = services.find((s) => s.slug === condition.slug);
+              const bookHref = bookMatch?.id
+                ? `/book?pendingServiceId=${bookMatch.id}`
+                : "/book";
 
-                  {/* Title and Price - Centered */}
-                  <div className="w-full">
-                    <h3 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white leading-tight line-clamp-2 mb-0.5">
-                      {condition.title}
-                    </h3>
-                    {(() => {
-                      const priceInfo = getConditionPrice(condition, services);
+              return (
+                <Card key={condition.id} className="h-full" shadow="sm">
+                  <CardHeader className="bg-egp-beige-lighter dark:bg-egp-green-dark px-2 sm:px-2.5 py-2 sm:py-2.5 border-b border-egp-beige-dark/60 dark:border-egp-green flex flex-col items-center text-center">
+                    {/* Category Badge - Centered */}
+                    <div className="flex justify-center mb-1.5">
+                      <Chip
+                        className="bg-egp-green text-white text-[8px] h-5"
+                        size="sm"
+                        variant="flat"
+                      >
+                        {getCategoryDisplayName(condition.category)}
+                      </Chip>
+                    </div>
 
-                      if (!priceInfo) return null;
-
-                      return (
-                        <div className="flex justify-center">
-                          <PriceWithDiscount
-                            align="center"
-                            discountPercentage={priceInfo.discountPercentage}
-                            layout="stack"
-                            originalPrice={priceInfo.originalPrice}
-                            price={priceInfo.price}
-                            size="sm"
-                          />
-                        </div>
-                      );
-                    })()}
-                  </div>
-                </CardHeader>
-
-                <CardBody
-                  className="p-2 sm:p-2.5 flex flex-col flex-1 cursor-pointer min-h-0 items-center text-center"
-                  onClick={() => setSelectedCondition(condition.slug)}
-                >
-                  {/* Description */}
-                  {condition.description && (
-                    <p className="text-[11px] text-gray-600 dark:text-gray-400 mb-2 leading-snug line-clamp-2 w-full">
-                      {condition.description}
-                    </p>
-                  )}
-
-                  {/* Buttons */}
-                  <div
-                    className="flex gap-1 mt-auto pt-1 justify-center w-full"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Button
-                      className="flex-1 min-w-0 border-egp-green text-egp-green dark:text-white dark:border-egp-green text-xs h-8"
-                      size="sm"
-                      startContent={<Info className="w-2.5 h-2.5" />}
-                      variant="bordered"
-                      onPress={() => setSelectedCondition(condition.slug)}
-                    >
-                      Details
-                    </Button>
-                    <Link
-                      href={(() => {
-                        const match = services.find(
-                          (s) => s.slug === condition.slug,
+                    {/* Title and Price - Centered */}
+                    <div className="w-full">
+                      <h3 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white leading-tight line-clamp-2 mb-0.5">
+                        {condition.title}
+                      </h3>
+                      {(() => {
+                        const priceInfo = getConditionPrice(
+                          condition,
+                          services,
                         );
 
-                        return match?.id
-                          ? `/book?pendingServiceId=${match.id}`
-                          : "/book";
+                        if (!priceInfo) return null;
+
+                        return (
+                          <div className="flex justify-center">
+                            <PriceWithDiscount
+                              align="center"
+                              discountPercentage={priceInfo.discountPercentage}
+                              layout="stack"
+                              originalPrice={priceInfo.originalPrice}
+                              price={priceInfo.price}
+                              size="sm"
+                            />
+                          </div>
+                        );
                       })()}
+                    </div>
+                  </CardHeader>
+
+                  <CardBody
+                    className="p-2 sm:p-2.5 flex flex-col flex-1 cursor-pointer min-h-0 items-center text-center"
+                    onClick={() => setSelectedCondition(condition.slug)}
+                  >
+                    {/* Description */}
+                    {condition.description && (
+                      <p className="text-[11px] text-gray-600 dark:text-gray-400 mb-2 leading-snug line-clamp-2 w-full">
+                        {condition.description}
+                      </p>
+                    )}
+
+                    {/* Buttons */}
+                    <div
+                      className="flex gap-1 mt-auto pt-1 justify-center w-full"
+                      onClick={(e) => e.stopPropagation()}
                     >
                       <Button
-                        className="flex-1 w-full min-w-0 bg-egp-green text-white text-xs h-8"
+                        className="flex-1 min-w-0 border-egp-green text-egp-green dark:text-white dark:border-egp-green text-xs min-h-[44px] h-auto sm:min-h-0 sm:h-8 touch-manipulation"
+                        size="sm"
+                        startContent={<Info className="w-2.5 h-2.5" />}
+                        variant="bordered"
+                        onPress={() => setSelectedCondition(condition.slug)}
+                      >
+                        Details
+                      </Button>
+                      <Button
+                        as={Link}
+                        className="flex-1 min-w-0 w-full bg-egp-green text-white text-xs min-h-[44px] h-auto sm:min-h-0 sm:h-8 touch-manipulation"
+                        href={bookHref}
                         size="sm"
                         startContent={<Plus className="w-2.5 h-2.5" />}
                       >
                         Book
                       </Button>
-                    </Link>
-                  </div>
-                </CardBody>
-              </Card>
-            ))}
+                    </div>
+                  </CardBody>
+                </Card>
+              );
+            })}
           </div>
         )}
 

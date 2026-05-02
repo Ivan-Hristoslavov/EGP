@@ -572,11 +572,11 @@ export default function CustomerDashboardPage() {
       {/* Booking Detail Modal */}
       {viewingBooking && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-[10020] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           onClick={() => setViewingBooking(null)}
         >
           <div
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-rose-100/50 dark:border-gray-700/50 w-full max-w-md p-6"
+            className="relative z-[10021] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-rose-100/50 dark:border-gray-700/50 w-full max-w-md p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-5">

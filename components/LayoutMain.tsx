@@ -75,18 +75,19 @@ export default function LayoutMain({
       </a>
       {/* Free Discovery Consultation popup */}
       {showFreeConsultationPopup && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-[2px] sm:backdrop-blur-sm px-4">
+        <div className="fixed inset-0 z-[10020] flex items-center justify-center bg-black/40 backdrop-blur-[2px] sm:backdrop-blur-sm px-4">
           <div
             aria-labelledby="egp-free-consult-heading"
             aria-modal="true"
-            className="max-w-lg w-full bg-[#f5efe2]/95 dark:bg-gray-900/95 rounded-3xl shadow-2xl border border-[#e4d9c8] dark:border-gray-700 p-5 sm:p-6 relative overflow-hidden"
+            className="relative z-[10021] max-w-lg w-full bg-[#f5efe2]/95 dark:bg-gray-900/95 rounded-3xl shadow-2xl border border-[#e4d9c8] dark:border-gray-700 pt-5 px-5 sm:pt-6 sm:px-6 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] sm:pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] overflow-hidden"
             role="dialog"
           >
             <div className="pointer-events-none absolute -top-20 -left-16 h-48 w-48 rounded-full bg-[#c9c1b0]/25 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-20 -right-16 h-56 w-56 rounded-full bg-egp-green/15 blur-3xl" />
             <button
               aria-label="Close free consultation offer"
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 text-sm"
+              className="absolute top-3 right-3 z-[1] min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 text-sm touch-manipulation"
+              type="button"
               onClick={dismissFreeConsultPopup}
             >
               ✕
@@ -106,7 +107,8 @@ export default function LayoutMain({
             </p>
             <div className="flex flex-col sm:flex-row gap-3 mt-1.5">
               <button
-                className="flex-1 inline-flex items-center justify-center rounded-full bg-egp-green hover:bg-egp-green-dark text-white text-sm font-semibold py-3 px-4 transition-colors shadow-lg"
+                className="flex-1 inline-flex items-center justify-center min-h-[44px] rounded-full bg-egp-green hover:bg-egp-green-dark text-white text-sm font-semibold py-3 px-4 transition-colors shadow-lg touch-manipulation"
+                type="button"
                 onClick={() => {
                   dismissFreeConsultPopup();
                   window.location.href =
@@ -116,7 +118,8 @@ export default function LayoutMain({
                 Book Free Consultation
               </button>
               <button
-                className="flex-1 inline-flex items-center justify-center rounded-full border border-[#b5ad9d] dark:border-gray-500 text-gray-800 dark:text-gray-100 text-sm font-medium py-3 px-4 bg-white/70 dark:bg-gray-800/70 hover:bg-white dark:hover:bg-gray-800 transition-colors"
+                className="flex-1 inline-flex items-center justify-center min-h-[44px] rounded-full border border-[#b5ad9d] dark:border-gray-500 text-gray-800 dark:text-gray-100 text-sm font-medium py-3 px-4 bg-white/70 dark:bg-gray-800/70 hover:bg-white dark:hover:bg-gray-800 transition-colors touch-manipulation"
+                type="button"
                 onClick={dismissFreeConsultPopup}
               >
                 Maybe Later

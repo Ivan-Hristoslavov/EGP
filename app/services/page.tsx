@@ -504,7 +504,7 @@ function ServicesPageContent() {
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Button
-                      className="flex-1 min-w-0 border-egp-green text-egp-green dark:text-white dark:border-egp-green text-xs h-8"
+                      className="flex-1 min-w-0 border-egp-green text-egp-green dark:text-white dark:border-egp-green text-xs min-h-[44px] h-auto sm:min-h-0 sm:h-8 touch-manipulation"
                       size="sm"
                       startContent={<Info className="w-2.5 h-2.5" />}
                       variant="bordered"
@@ -512,21 +512,19 @@ function ServicesPageContent() {
                     >
                       Details
                     </Button>
-                    <Link
+                    <Button
+                      as={Link}
+                      className="flex-1 min-w-0 w-full bg-egp-green text-white text-xs min-h-[44px] h-auto sm:min-h-0 sm:h-8 touch-manipulation"
                       href={
                         service?.id
                           ? `/book?pendingServiceId=${service.id}`
                           : "/book"
                       }
+                      size="sm"
+                      startContent={<Plus className="w-2.5 h-2.5" />}
                     >
-                      <Button
-                        className="flex-1 w-full min-w-0 bg-egp-green text-white text-xs h-8"
-                        size="sm"
-                        startContent={<Plus className="w-2.5 h-2.5" />}
-                      >
-                        Book
-                      </Button>
-                    </Link>
+                      Book
+                    </Button>
                   </div>
                 </CardBody>
               </Card>

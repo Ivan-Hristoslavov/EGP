@@ -8,9 +8,12 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
-import { CreditCard, CheckCircle, AlertCircle } from "lucide-react";
+import { CheckCircle, AlertCircle } from "lucide-react";
 
 import ButtonPrimary from "./ButtonPrimary";
+import { bookingCtaButtonClassName } from "@/config/design-system";
+
+const stripePayButtonClass = `w-full max-w-md ${bookingCtaButtonClassName}`;
 
 // Initialize Stripe
 const stripePromise = loadStripe(
@@ -198,12 +201,10 @@ function FreeBookingConfirmation({
 
       <div className="flex justify-center">
         <ButtonPrimary
+          className={stripePayButtonClass}
           isDisabled={isLoading}
           isLoading={isLoading}
           size="lg"
-          startContent={
-            !isLoading ? <CheckCircle className="w-5 h-5" /> : undefined
-          }
           type="button"
           variant="primary"
           onPress={handleConfirm}
@@ -519,12 +520,10 @@ function PaymentForm({
 
         <div className="flex justify-center">
           <ButtonPrimary
+            className={stripePayButtonClass}
             isDisabled={isLoading}
             isLoading={isLoading}
             size="lg"
-            startContent={
-              !isLoading ? <CheckCircle className="w-5 h-5" /> : undefined
-            }
             type="button"
             variant="primary"
             onClick={(e) => {
@@ -564,12 +563,10 @@ function PaymentForm({
         {/* Submit Button */}
         <div className="flex justify-center">
           <ButtonPrimary
+            className={stripePayButtonClass}
             isDisabled={!stripe || !elements || isLoading || isTestBooking}
             isLoading={isLoading}
             size="lg"
-            startContent={
-              !isLoading ? <CreditCard className="w-5 h-5" /> : undefined
-            }
             type="submit"
             variant="primary"
           >
@@ -889,12 +886,10 @@ export default function StripePaymentForm(props: StripePaymentFormProps) {
         {/* Initialize Payment Button */}
         <div className="flex justify-center">
           <ButtonPrimary
+            className={stripePayButtonClass}
             isDisabled={isInitializing || isTestBooking}
             isLoading={isInitializing}
             size="lg"
-            startContent={
-              !isInitializing ? <CreditCard className="w-5 h-5" /> : undefined
-            }
             variant="primary"
             onPress={handleInitializePayment}
           >
