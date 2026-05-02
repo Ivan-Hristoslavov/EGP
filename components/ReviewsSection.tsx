@@ -292,12 +292,12 @@ export function ReviewsSection() {
         )}
       </div>
       {expandedReview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 sm:px-6">
+        <div className="fixed inset-0 z-[10020] flex items-center justify-center px-4 sm:px-6">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 z-[10020] bg-black/60 backdrop-blur-sm"
             onClick={() => setExpandedReview(null)}
           />
-          <div className="relative w-full max-w-2xl bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-[#e4d9c8] dark:border-gray-700 overflow-hidden">
+          <div className="relative z-[10021] w-full max-w-2xl bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-[#e4d9c8] dark:border-gray-700 overflow-hidden">
             <div className="flex items-start justify-between gap-6 px-6 sm:px-8 pt-8">
               <div>
                 <div className="flex items-center gap-3 mb-3">

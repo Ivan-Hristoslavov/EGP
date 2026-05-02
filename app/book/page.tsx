@@ -14,14 +14,12 @@ import {
   Clock,
   CreditCard,
   CheckCircle,
-  Plus,
   X,
   ArrowLeft,
   Info,
   Shield,
   ChevronDown,
   Lock,
-  Trash2,
   Loader2,
 } from "lucide-react";
 import { Button } from "@heroui/button";
@@ -34,7 +32,11 @@ import { useServices } from "@/hooks/useServices";
 import { ServiceDetailsModal } from "@/components/ServiceDetailsModal";
 import { typography, textColors } from "@/config/typography";
 import StripePaymentForm from "@/components/StripePaymentForm";
-import { inputClassNames } from "@/config/design-system";
+import {
+  bookingCtaButtonClassName,
+  bookingCtaCompactClassName,
+  inputClassNames,
+} from "@/config/design-system";
 import { useToast } from "@/components/Toast";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import { PriceWithDiscount } from "@/components/PriceWithDiscount";
@@ -112,6 +114,9 @@ function BookingPageContent() {
   const [serviceSelectorDiscountedOnly, setServiceSelectorDiscountedOnly] =
     useState(false);
   const [serviceInfoModal, setServiceInfoModal] = useState<string | null>(null);
+
+  const bookingBtn = bookingCtaButtonClassName;
+  const bookingBtnCompact = bookingCtaCompactClassName;
 
   // Deposit settings (from admin); used when deposit is enabled
   type DepositConfig = {
@@ -913,12 +918,12 @@ function BookingPageContent() {
             always adjust later.
           </p>
           <ButtonPrimary
-            size="md"
-            startContent={<Plus className="w-4 h-4" />}
+            className={`mx-auto w-full max-w-sm ${bookingBtn}`}
+            size="lg"
             variant="primary"
             onPress={() => setShowServiceSelector(true)}
           >
-            Browse
+            Browse treatments
           </ButtonPrimary>
         </div>
       ) : (
@@ -942,7 +947,6 @@ function BookingPageContent() {
                         <Chip
                           className="flex-shrink-0 bg-egp-green/10 text-egp-green dark:bg-egp-green-dark/20 dark:text-white"
                           size="sm"
-                          startContent={<Clock className="w-3 h-3" />}
                           variant="flat"
                         >
                           {item.duration} min
@@ -963,26 +967,24 @@ function BookingPageContent() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 mt-auto">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-auto">
                       <Button
-                        className="flex-1 border-egp-green text-egp-green dark:border-egp-green dark:text-white hover:bg-egp-green/10"
-                        size="sm"
-                        startContent={<Info className="w-4 h-4" />}
+                        className={`flex-1 ${bookingBtn} border-egp-green text-egp-green dark:border-egp-green dark:text-white hover:bg-egp-green/10`}
+                        size="lg"
                         variant="bordered"
                         onPress={() => setServiceInfoModal(item.serviceId)}
                       >
                         Details
                       </Button>
                       <Button
-                        isIconOnly
                         aria-label="Remove service"
-                        className="hover:bg-danger-50 dark:hover:bg-danger-900/20"
+                        className={`shrink-0 ${bookingBtn} border border-danger-200 text-danger dark:border-danger-800`}
                         color="danger"
-                        size="sm"
-                        variant="light"
+                        size="lg"
+                        variant="bordered"
                         onPress={() => removeService(item.serviceId)}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        Remove
                       </Button>
                     </div>
                   </CardBody>
@@ -991,33 +993,25 @@ function BookingPageContent() {
             })}
           </div>
 
-          <div className="border-t border-divider pt-4 mt-5 flex flex-row items-center justify-between gap-2 sm:gap-3">
+          <div className="border-t border-divider pt-4 mt-5 flex flex-col sm:flex-row items-stretch justify-between gap-3 sm:gap-3">
             <ButtonPrimary
-              className="flex-1 min-w-0 border-2 border-egp-beige-dark bg-egp-beige hover:bg-egp-beige-dark text-gray-900 dark:bg-egp-beige-darkest dark:text-white dark:border-egp-beige-darker dark:hover:bg-egp-beige-darker text-sm"
-              size="md"
-              startContent={<Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+              className={`flex-1 min-w-0 border-2 border-egp-beige-dark bg-egp-beige text-gray-900 hover:bg-egp-beige-dark dark:bg-egp-beige-darkest dark:text-white dark:border-egp-beige-darker dark:hover:bg-egp-beige-darker ${bookingBtn}`}
+              size="lg"
               variant="secondary"
               onPress={() => setShowServiceSelector(true)}
             >
-              Add
+              Add service
             </ButtonPrimary>
             <ButtonPrimary
-              className={`flex-1 min-w-0 text-sm ${selectedServices.length === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
-              endContent={
-                selectedServices.length === 0 ? (
-                  <Lock className="w-3.5 h-3.5" />
-                ) : (
-                  <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
-                )
-              }
+              className={`flex-1 min-w-0 ${bookingBtn} ${selectedServices.length === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
               isDisabled={selectedServices.length === 0}
-              size="md"
+              size="lg"
               variant="primary"
               onPress={() => setCurrentStep("team")}
             >
               {selectedServices.length === 0
-                ? "Add service first"
-                : "Practitioner"}
+                ? "Add a service first"
+                : "Choose practitioner"}
             </ButtonPrimary>
           </div>
         </>
@@ -1049,133 +1043,148 @@ function BookingPageContent() {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {teamMembers.map((member) => (
-              <Card
-                key={member.id}
-                isPressable
-                className={`group relative transition-all duration-200 ${
-                  selectedTeamMember === member.id
-                    ? "border-2 border-[#9d9585] dark:border-[#c9c1b0] bg-[#f5f1e9] dark:bg-gray-800/50 shadow-lg scale-[1.02]"
-                    : ""
-                }`}
-                shadow={selectedTeamMember === member.id ? "lg" : "sm"}
-                onPress={() => setSelectedTeamMember(member.id)}
-              >
-                {/* Selected Indicator */}
-                {selectedTeamMember === member.id && (
-                  <div className="absolute top-3 right-3 z-10">
-                    <Chip
-                      className="bg-[#9d9585] dark:bg-[#c9c1b0]"
-                      color="primary"
-                      size="sm"
-                    >
-                      <CheckCircle className="w-4 h-4 text-white" />
-                    </Chip>
-                  </div>
-                )}
+            {teamMembers.map((member, index) => {
+              const inputId = `booking-practitioner-${member.id}`;
+              const isSelected = selectedTeamMember === member.id;
 
-                <CardBody className="p-5 sm:p-6">
-                  {/* Avatar/Image */}
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="relative flex-shrink-0">
-                      {member.image_url ? (
-                        <img
-                          alt={member.name}
-                          className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-[#e4d9c8] dark:border-gray-700"
-                          src={member.image_url}
-                        />
-                      ) : (
-                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-[#D4C9BC] to-[#E6DDD1] flex items-center justify-center border-2 border-[#e4d9c8] dark:border-gray-700">
-                          <span className="text-2xl sm:text-3xl font-bold text-white">
-                            {member.name.charAt(0).toUpperCase()}
-                          </span>
+              return (
+                <div
+                  key={member.id}
+                  className="relative isolate rounded-2xl focus-within:ring-2 focus-within:ring-[#9d9585] focus-within:ring-offset-2 dark:focus-within:ring-offset-gray-900"
+                  style={{ zIndex: index + 1 }}
+                >
+                  {/* Radio + label: entire card is one hit target on iOS (avoids stacking bugs with Card/button under selected row) */}
+                  <input
+                    checked={isSelected}
+                    className="sr-only"
+                    id={inputId}
+                    name="booking-practitioner-selection"
+                    type="radio"
+                    value={member.id}
+                    onChange={(e) => setSelectedTeamMember(e.target.value)}
+                  />
+                  <label
+                    className={`relative block min-h-[120px] w-full cursor-pointer touch-manipulation rounded-2xl text-left transition-all duration-200 [-webkit-tap-highlight-color:transparent] ${
+                      isSelected
+                        ? "border-2 border-[#9d9585] bg-[#f5f1e9] shadow-lg dark:border-[#c9c1b0] dark:bg-gray-800/50"
+                        : "border border-[#e4d9c8] bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900/40"
+                    } `}
+                    htmlFor={inputId}
+                  >
+                    {isSelected ? (
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-[#9d9585] text-white dark:bg-[#c9c1b0]"
+                      >
+                        <CheckCircle className="h-4 w-4 text-white" />
+                      </span>
+                    ) : null}
+
+                    <div className="p-5 sm:p-6">
+                      <div className="mb-4 flex items-center gap-4">
+                        <div className="relative flex-shrink-0">
+                          {member.image_url ? (
+                            <img
+                              alt=""
+                              className="h-16 w-16 select-none rounded-full border-2 border-[#e4d9c8] object-cover dark:border-gray-700 sm:h-20 sm:w-20"
+                              decoding="async"
+                              draggable={false}
+                              src={member.image_url}
+                            />
+                          ) : (
+                            <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-[#e4d9c8] bg-gradient-to-br from-[#D4C9BC] to-[#E6DDD1] dark:border-gray-700 sm:h-20 sm:w-20">
+                              <span className="text-2xl font-bold text-white sm:text-3xl">
+                                {member.name.charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                          )}
                         </div>
-                      )}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="truncate text-lg font-bold text-gray-900 dark:text-white sm:text-xl">
+                              {member.name}
+                            </span>
+                            {member.dayOffPeriods &&
+                              member.dayOffPeriods.length > 0 &&
+                              (() => {
+                                const today = new Date();
+
+                                today.setHours(0, 0, 0, 0);
+                                const isOnDayOff = member.dayOffPeriods.some(
+                                  (period) => {
+                                    const start = new Date(period.start_date);
+                                    const end = new Date(period.end_date);
+
+                                    return today >= start && today <= end;
+                                  },
+                                );
+                                const nextAvailable = member.dayOffPeriods
+                                  .map((period) => new Date(period.end_date))
+                                  .sort((a, b) => a.getTime() - b.getTime())
+                                  .find((date) => date > today);
+
+                                if (isOnDayOff) {
+                                  return (
+                                    <span className="inline-flex items-center gap-1 rounded-full border border-orange-300 bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-700 dark:border-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
+                                      <Calendar className="h-3 w-3" />
+                                      {nextAvailable
+                                        ? `Day Off - Available ${nextAvailable.toLocaleDateString()}`
+                                        : "Day Off"}
+                                    </span>
+                                  );
+                                }
+
+                                return null;
+                              })()}
+                          </div>
+                          <p className="mt-0.5 text-sm font-medium text-[#9d9585] dark:text-[#c9c1b0]">
+                            {member.role}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        {member.experience_years ? (
+                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                            <Clock className="h-4 w-4 flex-shrink-0 text-[#9d9585] dark:text-[#c9c1b0]" />
+                            <span>
+                              {member.experience_years} years experience
+                            </span>
+                          </div>
+                        ) : null}
+
+                        {member.specializations ? (
+                          <div className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
+                            <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#9d9585] dark:text-[#c9c1b0]" />
+                            <span className="line-clamp-2">
+                              {member.specializations}
+                            </span>
+                          </div>
+                        ) : null}
+
+                        {member.certifications ? (
+                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                            <Shield className="h-4 w-4 flex-shrink-0 text-[#9d9585] dark:text-[#c9c1b0]" />
+                            <span>{member.certifications} certifications</span>
+                          </div>
+                        ) : null}
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h4 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">
-                          {member.name}
-                        </h4>
-                        {member.dayOffPeriods &&
-                          member.dayOffPeriods.length > 0 &&
-                          (() => {
-                            const today = new Date();
-
-                            today.setHours(0, 0, 0, 0);
-                            const isOnDayOff = member.dayOffPeriods.some(
-                              (period) => {
-                                const start = new Date(period.start_date);
-                                const end = new Date(period.end_date);
-
-                                return today >= start && today <= end;
-                              },
-                            );
-                            const nextAvailable = member.dayOffPeriods
-                              .map((period) => new Date(period.end_date))
-                              .sort((a, b) => a.getTime() - b.getTime())
-                              .find((date) => date > today);
-
-                            if (isOnDayOff) {
-                              return (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 text-xs font-semibold border border-orange-300 dark:border-orange-700">
-                                  <Calendar className="w-3 h-3" />
-                                  {nextAvailable
-                                    ? `Day Off - Available ${nextAvailable.toLocaleDateString()}`
-                                    : "Day Off"}
-                                </span>
-                              );
-                            }
-
-                            return null;
-                          })()}
-                      </div>
-                      <p className="text-sm text-[#9d9585] dark:text-[#c9c1b0] font-medium mt-0.5">
-                        {member.role}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Information */}
-                  <div className="space-y-3">
-                    {member.experience_years && (
-                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                        <Clock className="w-4 h-4 text-[#9d9585] dark:text-[#c9c1b0]" />
-                        <span>{member.experience_years} years experience</span>
-                      </div>
-                    )}
-
-                    {member.specializations && (
-                      <div className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
-                        <Info className="w-4 h-4 text-[#9d9585] dark:text-[#c9c1b0] mt-0.5 flex-shrink-0" />
-                        <span className="line-clamp-2">
-                          {member.specializations}
-                        </span>
-                      </div>
-                    )}
-
-                    {member.certifications && (
-                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                        <Shield className="w-4 h-4 text-[#9d9585] dark:text-[#c9c1b0]" />
-                        <span>{member.certifications} certifications</span>
-                      </div>
-                    )}
-                  </div>
-                </CardBody>
-              </Card>
-            ))}
+                  </label>
+                </div>
+              );
+            })}
           </div>
 
           {selectedTeamMember && (
             <div className="border-t border-divider pt-4 mt-5 flex justify-center">
               <ButtonPrimary
-                className="w-full sm:w-auto min-w-[140px]"
-                endContent={<ArrowLeft className="w-3.5 h-3.5 rotate-180" />}
-                size="md"
+                className={`w-full sm:w-auto sm:min-w-[200px] ${bookingBtn}`}
+                size="lg"
                 variant="primary"
                 onPress={() => setCurrentStep("date")}
               >
-                Date & Time
+                Continue to date &amp; time
               </ButtonPrimary>
             </div>
           )}
@@ -1217,7 +1226,7 @@ function BookingPageContent() {
             </h2>
             <button
               aria-label="Close"
-              className="p-2 hover:bg-gray-700 rounded-full transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center relative z-[10003]"
+              className="p-0 hover:bg-gray-700 rounded-full transition-colors touch-manipulation min-h-14 min-w-14 inline-flex items-center justify-center relative z-[10003] [-webkit-tap-highlight-color:transparent]"
               onClick={(e) => {
                 e.stopPropagation();
                 setShowServiceSelector(false);
@@ -1234,10 +1243,10 @@ function BookingPageContent() {
                 Filter:
               </span>
               <button
-                className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors ${
+                className={`${bookingBtnCompact} transition-colors ${
                   !serviceSelectorDiscountedOnly
                     ? "bg-egp-green text-white"
-                    : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                 }`}
                 type="button"
                 onClick={() => setServiceSelectorDiscountedOnly(false)}
@@ -1245,10 +1254,10 @@ function BookingPageContent() {
                 All
               </button>
               <button
-                className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors ${
+                className={`${bookingBtnCompact} transition-colors ${
                   serviceSelectorDiscountedOnly
                     ? "bg-egp-green text-white"
-                    : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                 }`}
                 type="button"
                 onClick={() => setServiceSelectorDiscountedOnly(true)}
@@ -1345,20 +1354,18 @@ function BookingPageContent() {
                               )}
 
                               {/* Action Buttons - Stacked */}
-                              <div className="flex flex-col gap-1.5 sm:gap-2 pt-3 sm:pt-4 mt-auto border-t border-gray-200 dark:border-gray-700">
+                              <div className="flex flex-col gap-2 pt-3 sm:pt-4 mt-auto border-t border-gray-200 dark:border-gray-700">
                                 <Button
-                                  className="w-full border-gray-400 text-gray-700 dark:border-gray-600 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                                  size="sm"
-                                  startContent={<Info className="w-4 h-4" />}
+                                  className={`w-full ${bookingBtn} border-gray-400 text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:hover:bg-gray-700`}
+                                  size="lg"
                                   variant="bordered"
                                   onPress={() => setServiceInfoModal(serviceId)}
                                 >
                                   Details
                                 </Button>
                                 <ButtonPrimary
-                                  className="w-full bg-egp-green hover:bg-egp-green-dark dark:bg-gray-700 dark:hover:bg-gray-600 text-white"
-                                  size="sm"
-                                  startContent={<Plus className="w-4 h-4" />}
+                                  className={`w-full ${bookingBtn} bg-egp-green text-white hover:bg-egp-green-dark dark:bg-gray-700 dark:hover:bg-gray-600`}
+                                  size="lg"
                                   variant="primary"
                                   onPress={() => {
                                     const success = addService(serviceId);
@@ -1419,7 +1426,12 @@ function BookingPageContent() {
             <p className="text-sm sm:text-base text-[#7f2b27] dark:text-red-200">
               {availabilityError}
             </p>
-            <ButtonPrimary variant="primary" onPress={loadAvailability}>
+            <ButtonPrimary
+              className={bookingBtn}
+              size="lg"
+              variant="primary"
+              onPress={loadAvailability}
+            >
               Retry loading availability
             </ButtonPrimary>
           </div>
@@ -1441,7 +1453,8 @@ function BookingPageContent() {
             </p>
             {selectedTeamMember && (
               <ButtonPrimary
-                className="mx-auto"
+                className={`mx-auto ${bookingBtn}`}
+                size="lg"
                 variant="primary"
                 onPress={loadAvailability}
               >
@@ -1600,7 +1613,7 @@ function BookingPageContent() {
                       <button
                         key={dateInfo.date}
                         className={`
-                        aspect-square rounded-md text-sm sm:text-base font-medium transition-all touch-manipulation min-h-[24px] sm:min-h-[28px]
+                        aspect-square min-h-10 rounded-md text-sm font-medium transition-all touch-manipulation sm:min-h-11 sm:text-base
                     ${statusClasses}
                     ${isToday ? "border-2 border-green-500 dark:border-green-400" : ""}
                   `}
@@ -1632,7 +1645,8 @@ function BookingPageContent() {
                       </p>
                       {selectedTimeSlots.length > 0 && (
                         <button
-                          className="mt-2 px-3 py-1.5 text-xs sm:text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg border border-red-300 dark:border-red-700 transition-colors"
+                          className={`mt-2 border border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20 ${bookingBtnCompact}`}
+                          type="button"
                           onClick={() => {
                             setSelectedTime("");
                             setSelectedTimeSlots([]);
@@ -1891,7 +1905,7 @@ function BookingPageContent() {
                                     return (
                                       <div
                                         key={time}
-                                        className="px-2 py-1.5 min-h-[36px] rounded-md text-xs sm:text-sm font-medium border-2 border-red-400 dark:border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 cursor-not-allowed opacity-60 flex items-center justify-center"
+                                        className="flex min-h-11 cursor-not-allowed items-center justify-center rounded-md border-2 border-red-400 bg-red-50 px-2 py-2 text-xs font-medium text-red-700 opacity-60 dark:border-red-500 dark:bg-red-900/20 dark:text-red-400 sm:min-h-12 sm:text-sm"
                                       >
                                         {time}
                                       </div>
@@ -1902,7 +1916,7 @@ function BookingPageContent() {
                                   return (
                                     <button
                                       key={time}
-                                      className={`px-2 py-1.5 min-h-[36px] rounded-md text-xs sm:text-sm font-medium transition-all touch-manipulation active:scale-95 border-2 flex items-center justify-center
+                                      className={`flex min-h-11 items-center justify-center rounded-md border-2 px-2 py-2 text-xs font-medium transition-all touch-manipulation active:scale-95 sm:min-h-12 sm:text-sm
                               ${
                                 isStartTime
                                   ? "bg-egp-green hover:bg-egp-green-dark text-white shadow-md border-egp-green font-bold"
@@ -1936,11 +1950,8 @@ function BookingPageContent() {
                               {selectedTime && (
                                 <div className="mt-4 flex justify-center">
                                   <ButtonPrimary
-                                    className="w-full sm:w-auto min-w-[140px]"
-                                    endContent={
-                                      <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
-                                    }
-                                    size="md"
+                                    className={`w-full sm:w-auto sm:min-w-[200px] ${bookingBtn}`}
+                                    size="lg"
                                     variant="primary"
                                     onPress={() => setCurrentStep("customer")}
                                   >
@@ -2081,29 +2092,25 @@ function BookingPageContent() {
           />
         </div>
 
-        <div className="flex gap-2 sm:gap-3 pt-4">
-          <Button
-            className="flex-1 min-w-0 text-sm"
-            size="md"
-            startContent={<ArrowLeft className="w-3.5 h-3.5" />}
-            variant="bordered"
-            onPress={() => setCurrentStep("date")}
+        <div className="relative z-20 flex flex-col gap-3 pt-4 sm:flex-row sm:gap-3">
+          <button
+            type="button"
+            className={`flex-1 border-2 border-[#e4d9c8] bg-white text-gray-900 shadow-sm active:opacity-90 dark:border-gray-600 dark:bg-gray-800 dark:text-white ${bookingBtn}`}
+            onClick={() => setCurrentStep("date")}
           >
             Back
-          </Button>
-          <ButtonPrimary
-            className="flex-1 min-w-0 text-sm"
-            endContent={<ArrowLeft className="w-3.5 h-3.5 rotate-180" />}
-            size="md"
-            variant="primary"
-            onPress={() => {
+          </button>
+          <button
+            type="button"
+            className={`flex-1 bg-egp-green text-white shadow-md hover:bg-egp-green-dark active:opacity-90 ${bookingBtn}`}
+            onClick={() => {
               if (validateCustomerData()) {
                 setCurrentStep("preview");
               }
             }}
           >
             Review
-          </ButtonPrimary>
+          </button>
         </div>
       </div>
     );
@@ -2354,15 +2361,8 @@ function BookingPageContent() {
                 )}
                 {!showPaymentForm ? (
                   <ButtonPrimary
-                    className="w-full mt-2"
-                    size="md"
-                    startContent={
-                      isFreeDiscoveryOnly ? (
-                        <Calendar className="w-4 h-4" />
-                      ) : (
-                        <CreditCard className="w-4 h-4" />
-                      )
-                    }
+                    className={`mt-2 w-full ${bookingBtn}`}
+                    size="lg"
                     variant="primary"
                     onPress={proceedToPayment}
                   >
@@ -2491,10 +2491,12 @@ function BookingPageContent() {
       <div className="space-y-6">
         <div className="flex items-center gap-4 mb-6">
           <button
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            className={`shrink-0 border border-[#e4d9c8] bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 ${bookingBtn} !p-0 min-w-14 max-w-14`}
+            type="button"
+            aria-label="Back to review"
             onClick={() => setCurrentStep("preview")}
           >
-            <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            <ArrowLeft className="h-5 w-5" />
           </button>
           <h3 className="text-xl font-bold text-gray-900 dark:text-white">
             Secure Payment
@@ -2707,7 +2709,13 @@ function BookingPageContent() {
                     </div>
                   </button>
                   <div
-                    className={`${isOpen ? "block" : "hidden"} border-t border-[#e4d9c8] dark:border-gray-800 px-4 sm:px-5 ${step.key === "preview" ? "pb-24 sm:pb-5 min-h-[75vh] sm:min-h-0" : "pb-5"}`}
+                    className={`${isOpen ? "block" : "hidden"} border-t border-[#e4d9c8] dark:border-gray-800 px-4 sm:px-5 ${
+                      step.key === "preview"
+                        ? "min-h-[75vh] pb-24 sm:min-h-0 sm:pb-5"
+                        : step.key === "customer"
+                          ? "pb-28 sm:pb-5"
+                          : "pb-5"
+                    }`}
                   >
                     <div className="pt-5">{renderStepContent(step.key)}</div>
                   </div>

@@ -152,9 +152,17 @@ export default function CustomDatePicker({
         </div>
       </div>
 
+      {/* Transparent backdrop below panel — above FAB/header for tap capture */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-[10021] bg-transparent"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
       {/* Calendar dropdown */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 w-80 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-50">
+        <div className="absolute top-full left-0 mt-1 w-80 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-[10022]">
           {/* Header */}
           <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700">
             <button
@@ -246,11 +254,6 @@ export default function CustomDatePicker({
             </div>
           )}
         </div>
-      )}
-
-      {/* Backdrop */}
-      {isOpen && (
-        <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
       )}
     </div>
   );

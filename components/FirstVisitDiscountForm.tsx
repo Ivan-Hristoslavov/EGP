@@ -104,8 +104,8 @@ export function FirstVisitDiscountForm() {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/70 backdrop-blur-sm pt-20 sm:pt-16">
-      <div className="relative w-full max-w-2xl mx-4 animate-fade-in-up max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-[10020] flex items-center justify-center bg-black/50 dark:bg-black/70 backdrop-blur-sm pt-20 sm:pt-16">
+      <div className="relative z-[10021] w-full max-w-2xl mx-4 animate-fade-in-up max-h-[90vh] overflow-y-auto">
         {/* Main card with improved colors and dark theme */}
         <div
           className="relative rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden"
