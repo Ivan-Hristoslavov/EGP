@@ -13,6 +13,7 @@ import {
   Calendar,
   Clock,
   CreditCard,
+  ClipboardList,
   CheckCircle,
   X,
   ArrowLeft,
@@ -66,7 +67,13 @@ type CalendarDay = {
   };
 };
 
-type BookingStepKey = "services" | "team" | "date" | "customer" | "preview";
+type BookingStepKey =
+  | "services"
+  | "team"
+  | "date"
+  | "customer"
+  | "preview"
+  | "pay";
 
 type TeamMember = {
   id: string;
@@ -108,7 +115,6 @@ function BookingPageContent() {
     null,
   );
   const [currentStep, setCurrentStep] = useState<BookingStepKey>("services");
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   const [showServiceSelector, setShowServiceSelector] = useState(false);
   const [serviceSelectorDiscountedOnly, setServiceSelectorDiscountedOnly] =
@@ -154,7 +160,8 @@ function BookingPageContent() {
         { key: "team", label: "Practitioner", icon: Shield },
         { key: "date", label: "Date & Time", icon: Calendar },
         { key: "customer", label: "Your Details", icon: Info },
-        { key: "preview", label: "Review", icon: CreditCard },
+        { key: "preview", label: "Review", icon: ClipboardList },
+        { key: "pay", label: "Payment", icon: CreditCard },
       ] as const,
     [],
   );
@@ -170,7 +177,9 @@ function BookingPageContent() {
     services: "Select treatments and tailor your session",
     date: "Choose the perfect date and time",
     customer: "Enter your contact information",
-    preview: "Review your booking details and complete payment",
+    preview:
+      "Check your appointment, contact details and treatments before paying",
+    pay: "Pay securely with Stripe (or confirm a free consultation)",
   };
 
   const isStepUnlocked = (stepKey: BookingStepKey) => {
@@ -199,6 +208,17 @@ function BookingPageContent() {
           Boolean(customerData.email) &&
           Boolean(customerData.phone)
         );
+      case "pay":
+        return (
+          selectedServices.length > 0 &&
+          Boolean(selectedTeamMember) &&
+          Boolean(selectedDate) &&
+          Boolean(selectedTime) &&
+          Boolean(customerData.firstName) &&
+          Boolean(customerData.lastName) &&
+          Boolean(customerData.email) &&
+          Boolean(customerData.phone)
+        );
       default:
         return false;
     }
@@ -213,10 +233,6 @@ function BookingPageContent() {
       return;
     }
     setCurrentStep(stepKey);
-    // Reset payment form when navigating away from preview
-    if (stepKey !== "preview") {
-      setShowPaymentForm(false);
-    }
   };
 
   // Create a lookup map from services for easy access (using ID as key). Use discounted price when available.
@@ -408,9 +424,9 @@ function BookingPageContent() {
     fetchDepositConfig();
   }, [fetchDepositConfig]);
 
-  // Refetch deposit config when entering Review step (fixes mobile late/slow load)
+  // Refetch deposit config when entering Payment step (fixes mobile late/slow load)
   useEffect(() => {
-    if (currentStep === "preview") {
+    if (currentStep === "pay") {
       fetchDepositConfig();
     }
   }, [currentStep, fetchDepositConfig]);
@@ -872,13 +888,7 @@ function BookingPageContent() {
     // Don't automatically navigate - user must click the button to proceed
   };
 
-  const proceedToPayment = () => {
-    setShowPaymentForm(true);
-  };
-
   const handlePaymentSuccess = (bookingId: string) => {
-    // Reset payment form state
-    setShowPaymentForm(false);
     // Redirect to success page or show success message
     window.location.href = `/book/success?booking=${bookingId}`;
   };
@@ -886,6 +896,210 @@ function BookingPageContent() {
   const handlePaymentError = (error: string) => {
     console.error("Payment error:", error);
     // You could show a toast notification here
+  };
+
+  const bookingReviewFormat = useMemo(() => {
+    const formattedAppointmentDate = selectedDate
+      ? new Date(selectedDate).toLocaleDateString("en-GB", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })
+      : "Select a date";
+
+    let timeRange = selectedTime || "Select a time";
+
+    if (selectedTime && totalServiceDuration > 0) {
+      const [startHour, startMin] = selectedTime.split(":").map(Number);
+      const durationHours = Math.floor(totalServiceDuration / 60);
+      const durationMinutes = totalServiceDuration % 60;
+
+      let endHour = startHour + durationHours;
+      let endMin = startMin + durationMinutes;
+
+      if (endMin >= 60) {
+        endHour += Math.floor(endMin / 60);
+        endMin = endMin % 60;
+      }
+
+      if (endHour >= 24) {
+        endHour = endHour % 24;
+      }
+
+      const endTime = `${String(endHour).padStart(2, "0")}:${String(endMin).padStart(2, "0")}`;
+
+      timeRange = `${selectedTime} to ${endTime}`;
+    }
+
+    const selectedTeamMemberData = selectedTeamMember
+      ? teamMembers.find((m) => m.id === selectedTeamMember)
+      : null;
+
+    return {
+      formattedAppointmentDate,
+      timeRange,
+      selectedTeamMemberData,
+    };
+  }, [
+    selectedDate,
+    selectedTime,
+    totalServiceDuration,
+    selectedTeamMember,
+    teamMembers,
+  ]);
+
+  const renderBookingSummaryColumn = () => {
+    const { formattedAppointmentDate, timeRange, selectedTeamMemberData } =
+      bookingReviewFormat;
+
+    return (
+      <>
+        <Card className="border border-[#e4d9c8] dark:border-gray-700 shadow-sm overflow-hidden">
+          <CardHeader className="pb-3 border-b border-[#e4d9c8] dark:border-gray-700 bg-[#faf7f1] dark:bg-gray-800/50">
+            <h4 className="text-base font-semibold text-gray-900 dark:text-white">
+              Appointment
+            </h4>
+          </CardHeader>
+          <CardBody className="p-5 space-y-5">
+            {selectedTeamMemberData && (
+              <div className="flex items-center gap-4">
+                {selectedTeamMemberData.image_url ? (
+                  <img
+                    alt=""
+                    className="w-14 h-14 rounded-full object-cover border-2 border-[#e4d9c8] dark:border-gray-600 flex-shrink-0"
+                    src={selectedTeamMemberData.image_url}
+                  />
+                ) : (
+                  <div className="w-14 h-14 rounded-full bg-egp-green/10 dark:bg-egp-green/20 flex items-center justify-center flex-shrink-0">
+                    <Shield className="w-7 h-7 text-egp-green dark:text-egp-beige" />
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Practitioner
+                  </p>
+                  <p className="text-base font-semibold text-gray-900 dark:text-white truncate">
+                    {selectedTeamMemberData.name}
+                  </p>
+                  {selectedTeamMemberData.role && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {selectedTeamMemberData.role}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-egp-green/10 dark:bg-egp-green/20 flex-shrink-0">
+                  <Calendar className="w-4 h-4 text-egp-green dark:text-egp-beige" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Date
+                  </p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white leading-snug">
+                    {formattedAppointmentDate}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-egp-green/10 dark:bg-egp-green/20 flex-shrink-0">
+                  <Clock className="w-4 h-4 text-egp-green dark:text-egp-beige" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Time
+                  </p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white leading-snug">
+                    {timeRange}
+                  </p>
+                  {selectedTimeSlots.length > 0 && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-mono mt-0.5">
+                      {selectedTimeSlots.join(" → ")}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </CardBody>
+        </Card>
+
+        <Card className="border border-[#e4d9c8] dark:border-gray-700 shadow-sm overflow-hidden">
+          <CardHeader className="pb-3 border-b border-[#e4d9c8] dark:border-gray-700 bg-[#faf7f1] dark:bg-gray-800/50">
+            <h4 className="text-base font-semibold text-gray-900 dark:text-white">
+              Your details
+            </h4>
+          </CardHeader>
+          <CardBody className="p-5 pt-5 pb-6 sm:pb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6">
+              <div>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                  Name
+                </p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                  {customerData.firstName} {customerData.lastName}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                  Email
+                </p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white break-all">
+                  {customerData.email}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                  Phone
+                </p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                  {customerData.phone}
+                </p>
+              </div>
+            </div>
+          </CardBody>
+        </Card>
+
+        <Card className="border border-[#e4d9c8] dark:border-gray-700 shadow-sm overflow-hidden">
+          <CardHeader className="pb-3 border-b border-[#e4d9c8] dark:border-gray-700 bg-[#faf7f1] dark:bg-gray-800/50">
+            <h4 className="text-base font-semibold text-gray-900 dark:text-white">
+              Treatments
+            </h4>
+          </CardHeader>
+          <CardBody className="p-0">
+            <ul className="divide-y divide-[#e4d9c8] dark:divide-gray-700">
+              {selectedServices.map((item) => (
+                <li
+                  key={item.serviceId}
+                  className="px-5 py-4 flex items-center justify-between gap-3"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2">
+                      {item.name}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      {item.duration} min
+                      {item.quantity > 1 ? ` × ${item.quantity}` : ""}
+                    </p>
+                  </div>
+                  <div className="flex-shrink-0 text-right">
+                    <PriceWithDiscount
+                      discountPercentage={item.discountPercentage}
+                      originalPrice={item.originalPrice}
+                      price={item.price}
+                      quantity={item.quantity}
+                      size="sm"
+                    />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </CardBody>
+        </Card>
+      </>
+    );
   };
 
   const renderStepContent = (stepKey: BookingStepKey) => {
@@ -900,6 +1114,8 @@ function BookingPageContent() {
         return renderCustomerDetails();
       case "preview":
         return renderOrderPreview();
+      case "pay":
+        return renderPayStep();
       default:
         return null;
     }
@@ -2117,485 +2333,198 @@ function BookingPageContent() {
   };
 
   const renderOrderPreview = () => {
-    const formattedAppointmentDate = selectedDate
-      ? new Date(selectedDate).toLocaleDateString("en-GB", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })
-      : "Select a date";
-
-    const formattedAppointmentTime = selectedTime || "Select a time";
-
-    // Calculate end time based on start time and total duration
-    let timeRange = formattedAppointmentTime;
-
-    if (selectedTime && totalServiceDuration > 0) {
-      const [startHour, startMin] = selectedTime.split(":").map(Number);
-      const durationHours = Math.floor(totalServiceDuration / 60);
-      const durationMinutes = totalServiceDuration % 60;
-
-      let endHour = startHour + durationHours;
-      let endMin = startMin + durationMinutes;
-
-      if (endMin >= 60) {
-        endHour += Math.floor(endMin / 60);
-        endMin = endMin % 60;
-      }
-
-      if (endHour >= 24) {
-        endHour = endHour % 24;
-      }
-
-      const endTime = `${String(endHour).padStart(2, "0")}:${String(endMin).padStart(2, "0")}`;
-
-      timeRange = `${selectedTime} to ${endTime}`;
-    }
-
-    const selectedTeamMemberData = selectedTeamMember
-      ? teamMembers.find((m) => m.id === selectedTeamMember)
-      : null;
-
     return (
       <div className="space-y-6 sm:space-y-8 w-full max-w-6xl mx-auto">
-        {/* On mobile: Payment (with deposit) first for visibility; desktop: left column */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 sm:gap-8 lg:gap-10">
-          {/* Left: Appointment + Your details (on desktop); Payment first on mobile */}
-          <div className="lg:col-span-3 flex flex-col gap-6 sm:gap-8 order-2 lg:order-1">
-            {/* Appointment card */}
-            <Card className="border border-[#e4d9c8] dark:border-gray-700 shadow-sm overflow-hidden">
-              <CardHeader className="pb-3 border-b border-[#e4d9c8] dark:border-gray-700 bg-[#faf7f1] dark:bg-gray-800/50">
-                <h4 className="text-base font-semibold text-gray-900 dark:text-white">
-                  Appointment
-                </h4>
-              </CardHeader>
-              <CardBody className="p-5 space-y-5">
-                {selectedTeamMemberData && (
-                  <div className="flex items-center gap-4">
-                    {selectedTeamMemberData.image_url ? (
-                      <img
-                        alt=""
-                        className="w-14 h-14 rounded-full object-cover border-2 border-[#e4d9c8] dark:border-gray-600 flex-shrink-0"
-                        src={selectedTeamMemberData.image_url}
-                      />
-                    ) : (
-                      <div className="w-14 h-14 rounded-full bg-egp-green/10 dark:bg-egp-green/20 flex items-center justify-center flex-shrink-0">
-                        <Shield className="w-7 h-7 text-egp-green dark:text-egp-beige" />
-                      </div>
-                    )}
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Practitioner
-                      </p>
-                      <p className="text-base font-semibold text-gray-900 dark:text-white truncate">
-                        {selectedTeamMemberData.name}
-                      </p>
-                      {selectedTeamMemberData.role && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {selectedTeamMemberData.role}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-lg bg-egp-green/10 dark:bg-egp-green/20 flex-shrink-0">
-                      <Calendar className="w-4 h-4 text-egp-green dark:text-egp-beige" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Date
-                      </p>
-                      <p className="text-sm font-semibold text-gray-900 dark:text-white leading-snug">
-                        {formattedAppointmentDate}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-lg bg-egp-green/10 dark:bg-egp-green/20 flex-shrink-0">
-                      <Clock className="w-4 h-4 text-egp-green dark:text-egp-beige" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Time
-                      </p>
-                      <p className="text-sm font-semibold text-gray-900 dark:text-white leading-snug">
-                        {timeRange}
-                      </p>
-                      {selectedTimeSlots.length > 0 && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400 font-mono mt-0.5">
-                          {selectedTimeSlots.join(" → ")}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
+        <div className="flex flex-col gap-6 sm:gap-8">
+          {renderBookingSummaryColumn()}
+        </div>
+        <div className="relative z-20 flex flex-col gap-3 pt-2 sm:flex-row sm:gap-3">
+          <button
+            className={`flex-1 border-2 border-[#e4d9c8] bg-white text-gray-900 shadow-sm active:opacity-90 dark:border-gray-600 dark:bg-gray-800 dark:text-white ${bookingBtn}`}
+            type="button"
+            onClick={() => setCurrentStep("customer")}
+          >
+            Back
+          </button>
+          <button
+            className={`flex-1 bg-egp-green text-white shadow-md hover:bg-egp-green-dark active:opacity-90 ${bookingBtn}`}
+            type="button"
+            onClick={() => setCurrentStep("pay")}
+          >
+            Continue to payment
+          </button>
+        </div>
+      </div>
+    );
+  };
 
-            {/* Your details */}
-            <Card className="border border-[#e4d9c8] dark:border-gray-700 shadow-sm overflow-hidden">
-              <CardHeader className="pb-3 border-b border-[#e4d9c8] dark:border-gray-700 bg-[#faf7f1] dark:bg-gray-800/50">
-                <h4 className="text-base font-semibold text-gray-900 dark:text-white">
-                  Your details
-                </h4>
-              </CardHeader>
-              <CardBody className="p-5 pt-5 pb-6 sm:pb-8">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6">
-                  <div>
-                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                      Name
-                    </p>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                      {customerData.firstName} {customerData.lastName}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                      Email
-                    </p>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white break-all">
-                      {customerData.email}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                      Phone
-                    </p>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                      {customerData.phone}
-                    </p>
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
-          </div>
-
-          {/* Right: Payment first on mobile (deposit visible); Treatments first on desktop */}
-          <div className="lg:col-span-2 flex flex-col gap-6 sm:gap-8 lg:gap-10 order-1 lg:order-2">
-            {/* Treatments list - second on mobile */}
-            <Card className="border border-[#e4d9c8] dark:border-gray-700 shadow-sm overflow-hidden order-2 lg:order-1">
-              <CardHeader className="pb-3 border-b border-[#e4d9c8] dark:border-gray-700 bg-[#faf7f1] dark:bg-gray-800/50">
-                <h4 className="text-base font-semibold text-gray-900 dark:text-white">
-                  Treatments
-                </h4>
-              </CardHeader>
-              <CardBody className="p-0">
-                <ul className="divide-y divide-[#e4d9c8] dark:divide-gray-700">
-                  {selectedServices.map((item, i) => (
-                    <li
-                      key={item.serviceId}
-                      className="px-5 py-4 flex items-center justify-between gap-3"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2">
-                          {item.name}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                          {item.duration} min
-                          {item.quantity > 1 ? ` × ${item.quantity}` : ""}
-                        </p>
-                      </div>
-                      <div className="flex-shrink-0 text-right">
-                        <PriceWithDiscount
-                          discountPercentage={item.discountPercentage}
-                          originalPrice={item.originalPrice}
-                          price={item.price}
-                          quantity={item.quantity}
-                          size="sm"
-                        />
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </CardBody>
-            </Card>
-
-            {/* Payment summary + CTA - first on mobile for deposit visibility */}
-            <Card className="border-2 border-egp-green dark:border-egp-beige bg-gradient-to-b from-[#f5f1e9] to-white dark:from-gray-800 dark:to-gray-900 shadow-lg overflow-visible order-1 lg:order-2">
-              <CardBody className="p-4 sm:p-5 space-y-3 sm:space-y-4">
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                    Total
-                  </span>
-                  <span className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                    £{totalAmount.toFixed(2)}
-                  </span>
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {totalDuration} min total
-                </p>
-                {depositConfig.enabled && totalAmount > 0 && (
-                  <div
-                    className="rounded-lg border-2 border-egp-green/30 dark:border-egp-beige/30 bg-white/60 dark:bg-gray-800/40 p-3 sm:p-4 space-y-2 sm:space-y-3 scroll-mt-24"
-                    id="deposit-option"
-                  >
-                    <label className="flex items-start gap-3 cursor-pointer group">
-                      <input
-                        checked={payDepositOnly}
-                        className="mt-0.5 rounded border-gray-300 text-egp-green focus:ring-egp-green shrink-0 w-4 h-4 min-w-[16px]"
-                        type="checkbox"
-                        onChange={(e) => setPayDepositOnly(e.target.checked)}
-                      />
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white">
-                        Pay deposit only (rest on arrival)
-                      </span>
-                    </label>
-                    {payDepositOnly && (
-                      <div className="pl-6 space-y-0.5">
-                        <p className="text-sm font-semibold text-egp-green dark:text-white">
-                          Pay now: £{depositAmount.toFixed(2)}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          £{remainingAmount.toFixed(2)} due on arrival
-                        </p>
-                      </div>
-                    )}
-                    <p className="text-xs text-amber-700 dark:text-amber-300/90">
-                      Cancel or request a refund up to 24 hours before your
-                      appointment.
-                    </p>
-                  </div>
-                )}
-                {!showPaymentForm ? (
-                  <ButtonPrimary
-                    className={`mt-2 w-full ${bookingBtn}`}
-                    size="lg"
-                    variant="primary"
-                    onPress={proceedToPayment}
-                  >
-                    {isFreeDiscoveryOnly ? "Book" : "Pay"}
-                  </ButtonPrimary>
-                ) : null}
-              </CardBody>
-            </Card>
-          </div>
+  const renderPayStep = () => {
+    return (
+      <div className="space-y-6 sm:space-y-8 w-full max-w-6xl mx-auto">
+        <div className="flex flex-col gap-6 sm:gap-8">
+          {renderBookingSummaryColumn()}
         </div>
 
-        {showPaymentForm && (
-          <Card className="border border-[#e4d9c8] dark:border-gray-700 shadow-sm overflow-hidden relative">
+        {/* Payment summary + Stripe (after Your details + treatments) */}
+        <Card className="border-2 border-egp-green dark:border-egp-beige bg-gradient-to-b from-[#f5f1e9] to-white dark:from-gray-800 dark:to-gray-900 shadow-lg overflow-visible relative">
+          <CardBody className="relative p-4 sm:p-5 space-y-4">
             {isPaymentProcessing && (
-              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg">
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl">
                 <Loader2 className="w-10 h-10 text-egp-green dark:text-egp-beige animate-spin" />
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Processing payment...
                 </p>
               </div>
             )}
-            <CardBody className="p-6 space-y-5">
-              {!isFreeDiscoveryOnly && (
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-                  <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/40">
-                    <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-green-800 dark:text-green-200">
-                      Secure payment by Stripe
-                    </p>
-                    <p className="text-sm text-green-700 dark:text-green-300/80">
-                      Your payment information is encrypted and secure.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Stripe Payment Form */}
-              {(() => {
-                // Validate customer data before rendering payment form
-                const hasValidCustomerData =
-                  customerData.firstName?.trim() && customerData.email?.trim();
-
-                if (!hasValidCustomerData) {
-                  return (
-                    <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                      <p className="text-yellow-800 dark:text-yellow-200 text-sm">
-                        Please complete the "Your Details" step before
-                        proceeding to payment.
-                      </p>
-                    </div>
-                  );
-                }
-
-                return (
-                  <StripePaymentForm
-                    amount={totalAmount}
-                    amountToCharge={amountToCharge}
-                    customerData={{
-                      firstName: customerData.firstName.trim(),
-                      lastName: customerData.lastName?.trim() || "",
-                      email: customerData.email.trim(),
-                      phone: customerData.phone.trim(),
-                    }}
-                    depositMetadata={
-                      isDepositPayment
-                        ? {
-                            isDeposit: true,
-                            totalAmount,
-                            depositAmount,
-                            remainingAmount,
-                          }
-                        : undefined
-                    }
-                    selectedDate={selectedDate}
-                    selectedTime={selectedTime}
-                    serviceDurationMinutes={totalServiceDuration || undefined}
-                    services={selectedServices.map((item) => ({
-                      name: item.name,
-                      price: item.price,
-                      quantity: item.quantity,
-                      duration: item.duration,
-                    }))}
-                    teamMemberEmail={
-                      selectedTeamMember
-                        ? teamMembers.find((m) => m.id === selectedTeamMember)
-                            ?.email
-                        : undefined
-                    }
-                    teamMemberId={selectedTeamMember || undefined}
-                    teamMemberName={
-                      selectedTeamMember
-                        ? teamMembers.find((m) => m.id === selectedTeamMember)
-                            ?.name
-                        : undefined
-                    }
-                    teamMemberPhone={
-                      selectedTeamMember
-                        ? teamMembers.find((m) => m.id === selectedTeamMember)
-                            ?.phone
-                        : undefined
-                    }
-                    teamMemberRole={
-                      selectedTeamMember
-                        ? teamMembers.find((m) => m.id === selectedTeamMember)
-                            ?.role
-                        : undefined
-                    }
-                    onPaymentError={handlePaymentError}
-                    onPaymentSuccess={handlePaymentSuccess}
-                    onProcessingChange={setIsPaymentProcessing}
-                    onTestBooking={handlePaymentSuccess}
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                Total
+              </span>
+              <span className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                £{totalAmount.toFixed(2)}
+              </span>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {totalDuration} min total
+            </p>
+            {depositConfig.enabled && totalAmount > 0 && (
+              <div
+                className="rounded-lg border-2 border-egp-green/30 dark:border-egp-beige/30 bg-white/60 dark:bg-gray-800/40 p-3 sm:p-4 space-y-2 sm:space-y-3 scroll-mt-24"
+                id="deposit-option"
+              >
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <input
+                    checked={payDepositOnly}
+                    className="mt-0.5 rounded border-gray-300 text-egp-green focus:ring-egp-green shrink-0 w-4 h-4 min-w-[16px]"
+                    type="checkbox"
+                    onChange={(e) => setPayDepositOnly(e.target.checked)}
                   />
-                );
-              })()}
-            </CardBody>
-          </Card>
-        )}
-      </div>
-    );
-  };
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white">
+                    Pay deposit only (rest on arrival)
+                  </span>
+                </label>
+                {payDepositOnly && (
+                  <div className="pl-6 space-y-0.5">
+                    <p className="text-sm font-semibold text-egp-green dark:text-white">
+                      Pay now: £{depositAmount.toFixed(2)}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      £{remainingAmount.toFixed(2)} due on arrival
+                    </p>
+                  </div>
+                )}
+                <p className="text-xs text-amber-700 dark:text-amber-300/90">
+                  Cancel or request a refund up to 24 hours before your
+                  appointment.
+                </p>
+              </div>
+            )}
+            {!isFreeDiscoveryOnly && (
+              <div className="flex items-center gap-3 p-3 sm:p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/40 flex-shrink-0">
+                  <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-semibold text-green-800 dark:text-green-200">
+                    Secure payment by Stripe
+                  </p>
+                  <p className="text-sm text-green-700 dark:text-green-300/80">
+                    Your payment information is encrypted and secure.
+                  </p>
+                </div>
+              </div>
+            )}
 
-  const renderStripePayment = () => {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-4 mb-6">
+            {(() => {
+              const hasValidCustomerData =
+                customerData.firstName?.trim() &&
+                customerData.email?.trim();
+
+              if (!hasValidCustomerData) {
+                return (
+                  <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                    <p className="text-yellow-800 dark:text-yellow-200 text-sm">
+                      Please complete the &quot;Your Details&quot; step before
+                      proceeding to payment.
+                    </p>
+                  </div>
+                );
+              }
+
+              return (
+                <StripePaymentForm
+                  amount={totalAmount}
+                  amountToCharge={amountToCharge}
+                  customerData={{
+                    firstName: customerData.firstName.trim(),
+                    lastName: customerData.lastName?.trim() || "",
+                    email: customerData.email.trim(),
+                    phone: customerData.phone?.trim() || undefined,
+                  }}
+                  depositMetadata={
+                    isDepositPayment
+                      ? {
+                          isDeposit: true,
+                          totalAmount,
+                          depositAmount,
+                          remainingAmount,
+                        }
+                      : undefined
+                  }
+                  selectedDate={selectedDate}
+                  selectedTime={selectedTime}
+                  serviceDurationMinutes={totalServiceDuration || undefined}
+                  services={selectedServices.map((item) => ({
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity,
+                    duration: item.duration,
+                  }))}
+                  teamMemberEmail={
+                    selectedTeamMember
+                      ? teamMembers.find((m) => m.id === selectedTeamMember)
+                          ?.email
+                      : undefined
+                  }
+                  teamMemberId={selectedTeamMember || undefined}
+                  teamMemberName={
+                    selectedTeamMember
+                      ? teamMembers.find((m) => m.id === selectedTeamMember)
+                          ?.name
+                      : undefined
+                  }
+                  teamMemberPhone={
+                    selectedTeamMember
+                      ? teamMembers.find((m) => m.id === selectedTeamMember)
+                          ?.phone
+                      : undefined
+                  }
+                  teamMemberRole={
+                    selectedTeamMember
+                      ? teamMembers.find((m) => m.id === selectedTeamMember)
+                          ?.role
+                      : undefined
+                  }
+                  onPaymentError={handlePaymentError}
+                  onPaymentSuccess={handlePaymentSuccess}
+                  onProcessingChange={setIsPaymentProcessing}
+                  onTestBooking={handlePaymentSuccess}
+                />
+              );
+            })()}
+          </CardBody>
+        </Card>
+
+        <div className="relative z-20 flex flex-col gap-3 pt-2 sm:flex-row sm:gap-3">
           <button
             aria-label="Back to review"
-            className={`shrink-0 border border-[#e4d9c8] bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 ${bookingBtn} !p-0 min-w-14 max-w-14`}
+            className={`flex-1 border-2 border-[#e4d9c8] bg-white text-gray-900 shadow-sm active:opacity-90 dark:border-gray-600 dark:bg-gray-800 dark:text-white ${bookingBtn}`}
             type="button"
             onClick={() => setCurrentStep("preview")}
           >
-            <ArrowLeft className="h-5 w-5" />
+            Back to review
           </button>
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-            Secure Payment
-          </h3>
         </div>
-
-        <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg">
-          <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
-            <CheckCircle className="w-5 h-5" />
-            <span className="font-semibold">Secure Payment by Stripe</span>
-          </div>
-          <p className="text-sm text-green-600 dark:text-green-500 mt-1">
-            Your payment information is encrypted and secure
-          </p>
-        </div>
-
-        {/* Real Stripe Payment Form */}
-        {(() => {
-          // Validate customer data before rendering payment form
-          const hasValidCustomerData =
-            customerData.firstName?.trim() && customerData.email?.trim();
-
-          if (!hasValidCustomerData) {
-            console.warn(
-              "Cannot render payment form - invalid customer data:",
-              {
-                firstName: customerData.firstName,
-                lastName: customerData.lastName,
-                email: customerData.email,
-                phone: customerData.phone,
-              },
-            );
-
-            return (
-              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                <p className="text-yellow-800 dark:text-yellow-200 text-sm">
-                  Please complete the "Your Details" step before proceeding to
-                  payment.
-                </p>
-              </div>
-            );
-          }
-
-          return (
-            <StripePaymentForm
-              amount={totalAmount}
-              amountToCharge={amountToCharge}
-              customerData={{
-                firstName: customerData.firstName.trim(),
-                lastName: customerData.lastName?.trim() || "",
-                email: customerData.email.trim(),
-                phone: customerData.phone?.trim() || undefined,
-              }}
-              depositMetadata={
-                isDepositPayment
-                  ? {
-                      isDeposit: true,
-                      totalAmount,
-                      depositAmount,
-                      remainingAmount,
-                    }
-                  : undefined
-              }
-              selectedDate={selectedDate}
-              selectedTime={selectedTime}
-              serviceDurationMinutes={totalServiceDuration || undefined}
-              services={selectedServices.map((item) => ({
-                name: item.name,
-                price: item.price,
-                quantity: item.quantity,
-                duration: item.duration,
-              }))}
-              teamMemberEmail={
-                selectedTeamMember
-                  ? teamMembers.find((m) => m.id === selectedTeamMember)?.email
-                  : undefined
-              }
-              teamMemberId={selectedTeamMember || undefined}
-              teamMemberName={
-                selectedTeamMember
-                  ? teamMembers.find((m) => m.id === selectedTeamMember)?.name
-                  : undefined
-              }
-              teamMemberPhone={
-                selectedTeamMember
-                  ? teamMembers.find((m) => m.id === selectedTeamMember)?.phone
-                  : undefined
-              }
-              teamMemberRole={
-                selectedTeamMember
-                  ? teamMembers.find((m) => m.id === selectedTeamMember)?.role
-                  : undefined
-              }
-              onPaymentError={handlePaymentError}
-              onPaymentSuccess={handlePaymentSuccess}
-              onTestBooking={handlePaymentSuccess} // Use same success handler for test bookings
-            />
-          );
-        })()}
       </div>
     );
   };
@@ -2710,7 +2639,7 @@ function BookingPageContent() {
                   </button>
                   <div
                     className={`${isOpen ? "block" : "hidden"} border-t border-[#e4d9c8] dark:border-gray-800 px-4 sm:px-5 ${
-                      step.key === "preview"
+                      step.key === "preview" || step.key === "pay"
                         ? "min-h-[75vh] pb-24 sm:min-h-0 sm:pb-5"
                         : step.key === "customer"
                           ? "pb-28 sm:pb-5"
