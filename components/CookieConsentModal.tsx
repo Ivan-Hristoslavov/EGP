@@ -98,10 +98,12 @@ export default function CookieConsentModal() {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-end justify-center z-[9999] p-4 sm:p-6">
+    <div className="fixed inset-0 z-[9999] flex items-end justify-center bg-black/70 p-4 backdrop-blur-md sm:p-6">
       <div
-        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative z-[10000]"
-        onClick={(e) => e.stopPropagation()}
+        aria-labelledby="cookie-consent-title"
+        aria-modal="true"
+        className="relative z-[10000] max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white shadow-2xl dark:bg-gray-800"
+        role="dialog"
       >
         {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-[#464C45] to-[#3a4039] text-white px-6 py-4 flex items-center justify-between rounded-t-2xl z-[10001]">
@@ -109,7 +111,9 @@ export default function CookieConsentModal() {
             <div className="p-2 bg-white/20 rounded-lg">
               <Cookie className="w-6 h-6" />
             </div>
-            <h2 className="text-2xl font-bold">Cookie & Privacy Preferences</h2>
+            <h2 className="text-2xl font-bold" id="cookie-consent-title">
+              Cookie & Privacy Preferences
+            </h2>
           </div>
           <button
             aria-label="Close"
@@ -127,8 +131,12 @@ export default function CookieConsentModal() {
             <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed">
               We use cookies and similar technologies to enhance your browsing
               experience, analyze site traffic, and personalize content. By
-              clicking "Accept All", you consent to our use of cookies. You can
-              also customize your preferences or reject non-essential cookies.
+              clicking{" "}
+              <span className="whitespace-nowrap">
+                &ldquo;Accept All&rdquo;
+              </span>
+              , you consent to our use of cookies. You can also customize your
+              preferences or reject non-essential cookies.
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               For more information, please read our{" "}
@@ -180,11 +188,14 @@ export default function CookieConsentModal() {
                       </p>
                     </div>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
+                  <label className="relative inline-flex cursor-pointer items-center">
                     <input
                       disabled
+                      aria-disabled="true"
+                      aria-label="Necessary cookies always active"
                       checked={preferences.necessary}
                       className="sr-only peer"
+                      role="switch"
                       type="checkbox"
                     />
                     <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#464C45] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#464C45] opacity-60 cursor-not-allowed" />
@@ -213,8 +224,10 @@ export default function CookieConsentModal() {
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
+                      aria-label="Allow analytics cookies"
                       checked={preferences.analytics}
                       className="sr-only peer"
+                      role="switch"
                       type="checkbox"
                       onChange={() => handleTogglePreference("analytics")}
                     />
@@ -244,8 +257,10 @@ export default function CookieConsentModal() {
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
+                      aria-label="Allow marketing cookies"
                       checked={preferences.marketing}
                       className="sr-only peer"
+                      role="switch"
                       type="checkbox"
                       onChange={() => handleTogglePreference("marketing")}
                     />
