@@ -2,6 +2,7 @@ import "@/styles/globals.css";
 import { Metadata, Viewport } from "next";
 import clsx from "clsx";
 // Removed Inter - using our custom fonts
+import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { Providers } from "./providers";
@@ -300,6 +301,7 @@ export default async function RootLayout({
             <CookieConsentModal />
           </Providers>
         </ToastProvider>
+        <Analytics />
         <SpeedInsights />
       </body>
     </html>
