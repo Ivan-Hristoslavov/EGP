@@ -442,7 +442,7 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // === STEP 5: Staff notification (team member or clinic inbox from DB) ===
+      // === STEP 5: Staff notification (clinic inbox from admin_profile) ===
       try {
         let notesForStaff = String(booking.notes || "");
 

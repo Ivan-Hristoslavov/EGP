@@ -20,47 +20,33 @@ export type StaffBookingNotificationInput = {
   payment_status?: string | null;
 };
 
-export type StaffNotificationRecipient =
-  | { to: string; recipientLabel: "team"; teamMemberName: string }
-  | { to: string; recipientLabel: "business" };
+/** Clinic inbox from admin_profile; optional practitioner label for the email body only. */
+export type StaffNotificationRecipient = {
+  to: string;
+  assignedPractitionerLabel?: string | null;
+};
+
+function formatAssignedPractitionerLabel(
+  name: string | null | undefined,
+  role: string | null | undefined,
+): string | null {
+  const n = name?.trim();
+  const r = role?.trim();
+
+  if (!n) return null;
+  if (r) return `${n} (${r})`;
+
+  return n;
+}
 
 /**
- * Resolve who receives the new-booking staff email: assigned team member, else clinic inbox from admin_profile only (no env).
+ * Resolve the new-booking staff email recipient: always clinic inbox from admin_profile
+ * (business_email, then email). When a team member is assigned, their name/role are loaded
+ * for the message body only — not used as the To address.
  */
 export async function getStaffBookingNotificationTarget(
   booking: StaffBookingNotificationInput,
 ): Promise<StaffNotificationRecipient | null> {
-  if (booking.team_member_id) {
-    const { data: member, error } = await supabaseAdmin
-      .from("team")
-      .select("email, name")
-      .eq("id", booking.team_member_id)
-      .maybeSingle();
-
-    if (error) {
-      console.warn("Staff booking notification: team lookup failed:", error);
-
-      return null;
-    }
-
-    const to = member?.email?.trim();
-
-    if (!to) {
-      console.warn(
-        "Staff booking notification: team member has no email, id:",
-        booking.team_member_id,
-      );
-
-      return null;
-    }
-
-    return {
-      to,
-      recipientLabel: "team",
-      teamMemberName: member?.name?.trim() || "Team",
-    };
-  }
-
   const profile = await getAdminProfile();
   const to =
     profile?.business_email?.trim() || profile?.email?.trim() || null;
@@ -73,7 +59,33 @@ export async function getStaffBookingNotificationTarget(
     return null;
   }
 
-  return { to, recipientLabel: "business" };
+  let assignedPractitionerLabel: string | null = null;
+
+  if (booking.team_member_id) {
+    const { data: member, error } = await supabaseAdmin
+      .from("team")
+      .select("name, role")
+      .eq("id", booking.team_member_id)
+      .maybeSingle();
+
+    if (error) {
+      console.warn("Staff booking notification: team lookup failed:", error);
+    } else {
+      assignedPractitionerLabel = formatAssignedPractitionerLabel(
+        member?.name,
+        member?.role,
+      );
+
+      if (!assignedPractitionerLabel) {
+        console.warn(
+          "Staff booking notification: team member has no display name, id:",
+          booking.team_member_id,
+        );
+      }
+    }
+  }
+
+  return { to, assignedPractitionerLabel };
 }
 
 function staffNotificationAmount(booking: StaffBookingNotificationInput): number {
@@ -100,20 +112,38 @@ function staffBadge(booking: StaffBookingNotificationInput): string {
   return "PENDING";
 }
 
+function assignedPractitionerBlockText(
+  label: string | null | undefined,
+): string {
+  if (!label?.trim()) return "";
+
+  return `
+Assigned practitioner:
+${label}
+`.trim();
+}
+
+function assignedPractitionerBlockHtml(
+  label: string | null | undefined,
+): string {
+  if (!label?.trim()) return "";
+
+  return `<div class="sect"><div class="sect-title">ASSIGNED PRACTITIONER</div><div class="row">${escapeHtml(label)}</div></div>`;
+}
+
 export function generateStaffBookingNotificationText(
   booking: StaffBookingNotificationInput,
   target: StaffNotificationRecipient,
 ): string {
   const bookingDate = new Date(booking.date).toLocaleDateString("en-GB");
   const amount = staffNotificationAmount(booking);
-  const greeting =
-    target.recipientLabel === "team"
-      ? `Hi ${target.teamMemberName},`
-      : "New booking request";
+  const practitioner = assignedPractitionerBlockText(
+    target.assignedPractitionerLabel,
+  );
 
   return `
-${greeting}
-
+New booking request
+${practitioner ? `${practitioner}\n\n` : ""}
 Customer:
 - Name: ${booking.customer_name}
 - Email: ${booking.customer_email || "Not provided"}
@@ -140,14 +170,11 @@ export function generateStaffBookingNotificationHtml(
   const bookingDate = new Date(booking.date).toLocaleDateString("en-GB");
   const amount = staffNotificationAmount(booking);
   const badge = staffBadge(booking);
-  const title =
-    target.recipientLabel === "team"
-      ? `New booking — ${booking.customer_name}`
-      : "New Booking Request";
-  const subtitle =
-    target.recipientLabel === "team"
-      ? `Assigned to you · ${booking.service}`
-      : "EGP Aesthetics";
+  const title = `New booking — ${escapeHtml(booking.customer_name)}`;
+  const subtitle = escapeHtml(booking.service);
+  const practitionerHtml = assignedPractitionerBlockHtml(
+    target.assignedPractitionerLabel,
+  );
 
   return `
 <!DOCTYPE html>
@@ -181,17 +208,13 @@ body{margin:0;padding:0;font-family:Georgia,serif;background:#f5f3ef;color:#1c19
 <span class="badge">${badge}</span>
 </div>
 <div class="main">
-${
-  target.recipientLabel === "team"
-    ? `<p style="margin:0 0 16px">Hi ${escapeHtml(target.teamMemberName)}, you have a new booking.</p>`
-    : ""
-}
 <div class="sect">
 <div class="sect-title">CUSTOMER</div>
 <div class="row">${escapeHtml(booking.customer_name)}</div>
 <div class="row">${escapeHtml(booking.customer_email || "—")}</div>
 <div class="row">${escapeHtml(booking.customer_phone || "—")}</div>
 </div>
+${practitionerHtml}
 <div class="sect">
 <div class="sect-title">APPOINTMENT</div>
 <div class="row">${escapeHtml(booking.service)}</div>
@@ -218,7 +241,7 @@ function escapeHtml(s: string): string {
 }
 
 /**
- * Sends one staff-facing new booking email (team member or clinic inbox from DB only).
+ * Sends one staff-facing new booking email to the clinic inbox (admin_profile only).
  */
 export async function sendStaffNewBookingNotification(
   booking: StaffBookingNotificationInput,
@@ -229,10 +252,7 @@ export async function sendStaffNewBookingNotification(
     return;
   }
 
-  const subject =
-    target.recipientLabel === "team"
-      ? `New booking for you — ${booking.customer_name}`
-      : `New Booking Request — ${booking.customer_name}`;
+  const subject = `New booking — ${booking.customer_name}`;
 
   await sendEmail({
     to: target.to,
