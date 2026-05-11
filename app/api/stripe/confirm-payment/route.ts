@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getStripeServer } from "@/lib/stripe";
 import { supabaseAdmin } from "@/lib/supabase";
 import { sendEmail } from "@/lib/sendgrid-smtp";
+import { sendStaffNewBookingNotification } from "@/lib/booking-staff-notification";
 import { getAdminContactInfo } from "@/lib/admin-profile";
 import { getEmailHead, EMAIL } from "@/lib/email-theme";
 
@@ -441,90 +442,39 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // === STEP 5: Send Admin Notification Email ===
-      const adminEmail = process.env.ADMIN_EMAIL;
+      // === STEP 5: Staff notification (team member or clinic inbox from DB) ===
+      try {
+        let notesForStaff = String(booking.notes || "");
 
-      if (adminEmail) {
-        try {
-          const bookingDateFormatted = new Date(
-            selectedDate,
-          ).toLocaleDateString("en-GB");
-          const adminSubject = `New Paid Booking - ${customerName}`;
-          const L = EMAIL.light;
-          const adminDepositRows =
-            paymentType === "deposit" && amountPaid > 0 && remainingAmount > 0
-              ? `<div style="padding:10px 0;border-bottom:1px solid #e7e4df"><span style="color:${L.muted};font-size:13px">Paid (deposit)</span> · <span style="color:${L.text};font-weight:600">£${amountPaid.toFixed(2)}</span></div>
-<div style="padding:10px 0"><span style="color:${L.muted};font-size:13px">Due on arrival</span> · <span style="color:${L.text};font-weight:500">£${remainingAmount.toFixed(2)}</span></div>`
-              : "";
-          const adminHtml = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-${getEmailHead()}
-<title>New Paid Booking</title>
-</head>
-<body class="email-body" style="margin:0;padding:0;font-family:${EMAIL.font};background:${L.bg};color:${L.text}">
-<div class="email-wrap" style="max-width:560px;margin:0 auto;background:${L.wrap};color:${L.text}">
-<div class="email-header" style="background:${L.green};color:#fff;padding:32px 28px;text-align:center">
-<h1 style="margin:0;font-size:22px;font-weight:600;color:#fff">New Paid Booking</h1>
-<div class="email-accent-bar" style="width:40px;height:2px;background:${L.accent};margin:12px auto 0"></div>
-<span class="email-badge" style="display:inline-block;background:${L.deposit};color:#fff;padding:6px 16px;font-size:10px;letter-spacing:.12em;margin-top:10px;border-radius:4px">PAID</span>
-</div>
-<div style="padding:28px;font-size:14px;line-height:1.65;color:${L.text}">
-<div class="email-card" style="background:${L.cardBg};border:1px solid ${L.cardBorder};margin:0 0 20px;padding:20px;border-radius:8px">
-<div class="email-card-title" style="font-size:11px;letter-spacing:.1em;color:${L.green};margin-bottom:12px;font-weight:600">CUSTOMER</div>
-<div style="padding:8px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted}">Name</span> · ${customerName}</div>
-<div style="padding:8px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted}">Email</span> · ${finalCustomerEmail || "—"}</div>
-<div style="padding:8px 0;color:${L.text}"><span style="color:${L.muted}">Phone</span> · ${customerPhone || "—"}</div>
-</div>
-<div class="email-card" style="background:${L.cardBg};border:1px solid ${L.cardBorder};margin:0 0 20px;padding:20px;border-radius:8px">
-<div class="email-card-title" style="font-size:11px;letter-spacing:.1em;color:${L.green};margin-bottom:12px;font-weight:600">BOOKING</div>
-<div style="padding:8px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted}">Service</span> · ${serviceNames}</div>
-<div style="padding:8px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted}">Date</span> · ${bookingDateFormatted}</div>
-<div style="padding:8px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted}">Time</span> · ${selectedTime}</div>
-<div style="padding:8px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted}">Total</span> · <span style="font-weight:600;color:${L.text}">£${totalAmount.toFixed(2)}</span></div>
-${adminDepositRows}
-<div style="padding:8px 0;color:${L.text}"><span style="color:${L.muted}">Ref</span> · ${booking.booking_number || booking.id}</div>
-</div>
-<p style="margin:0;color:${L.muted};font-size:13px">Payment via Stripe. Review in admin panel.</p>
-</div>
-</div>
-</body>
-</html>`.trim();
-          const adminDepositText =
-            paymentType === "deposit" && amountPaid > 0 && remainingAmount > 0
-              ? `Paid (deposit): £${amountPaid.toFixed(2)}\nDue on arrival: £${remainingAmount.toFixed(2)}\n\n`
-              : "";
-          const adminText = `
-New Paid Booking - EGP Aesthetics
-
-Customer: ${customerName}
-Email: ${finalCustomerEmail || "Not provided"}
-Phone: ${customerPhone || "Not provided"}
-
-Service: ${serviceNames}
-Date: ${bookingDateFormatted}
-Time: ${selectedTime}
-Total: £${totalAmount.toFixed(2)}
-${adminDepositText}Ref: ${booking.booking_number || booking.id}
-
-Payment via Stripe - ${paymentIntentId}
-          `.trim();
-
-          await sendEmail({
-            to: adminEmail,
-            subject: adminSubject,
-            text: adminText,
-            html: adminHtml,
-          });
-
-          console.log("Admin notification email sent to:", adminEmail);
-        } catch (adminEmailError) {
-          console.error(
-            "Error sending admin notification email:",
-            adminEmailError,
-          );
+        if (
+          paymentType === "deposit" &&
+          amountPaid > 0 &&
+          remainingAmount > 0
+        ) {
+          notesForStaff = `${notesForStaff}\nPaid (deposit): £${amountPaid.toFixed(2)} · Due on arrival: £${remainingAmount.toFixed(2)}`.trim();
         }
+
+        await sendStaffNewBookingNotification({
+          id: booking.id,
+          customer_name: customerName,
+          customer_email: finalCustomerEmail,
+          customer_phone: customerPhone,
+          service: serviceNames,
+          date: selectedDate,
+          time: selectedTime,
+          amount: totalAmount,
+          total_amount: totalAmount,
+          notes: notesForStaff || null,
+          team_member_id: teamMemberId,
+          created_at: booking.created_at,
+          payment_status: booking.payment_status,
+        });
+        console.log("Staff new-booking notification sent (Stripe flow)");
+      } catch (staffEmailError) {
+        console.error(
+          "Error sending staff new-booking notification:",
+          staffEmailError,
+        );
       }
 
       console.log("=== Booking Process Completed Successfully ===");

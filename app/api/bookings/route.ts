@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "../../../lib/supabase";
 
 import { sendEmail } from "@/lib/sendgrid-smtp";
+import { sendStaffNewBookingNotification } from "@/lib/booking-staff-notification";
 import { getAdminContactInfo } from "@/lib/admin-profile";
 import { requireAdmin } from "@/lib/admin-auth";
 import { getEmailHead, EMAIL } from "@/lib/email-theme";
@@ -366,12 +367,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Send email notification to admin
     try {
-      await sendBookingNotificationEmail(booking);
-      console.log("Booking notification email sent successfully");
+      await sendStaffNewBookingNotification(booking);
+      console.log("Staff booking notification email sent successfully");
     } catch (emailError) {
-      console.error("Error sending booking notification email:", emailError);
+      console.error("Error sending staff booking notification email:", emailError);
       // Don't fail the booking creation if email fails
     }
 
@@ -404,126 +404,16 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Function to send booking notification email to admin
-async function sendBookingNotificationEmail(booking: any) {
-  try {
-    // Prefer ADMIN_EMAIL from env (e.g. info@egpaesthetics.co.uk), fallback to admin_profile
-    let adminEmail = process.env.ADMIN_EMAIL;
-
-    if (!adminEmail) {
-      const { data: adminProfile } = await supabaseAdmin
-        .from("admin_profile")
-        .select("email")
-        .single();
-
-      adminEmail = adminProfile?.email;
-    }
-
-    if (!adminEmail) {
-      console.warn(
-        "No admin email found for booking notification. Set ADMIN_EMAIL in .env",
-      );
-
-      return;
-    }
-
-    const emailSubject = `New Booking Request - ${booking.customer_name}`;
-    const emailBody = generateBookingNotificationEmail(booking);
-
-    await sendEmail({
-      to: adminEmail,
-      subject: emailSubject,
-      text: emailBody,
-      html: generateBookingNotificationEmailHtml(booking),
-    });
-  } catch (error) {
-    console.error("Error in sendBookingNotificationEmail:", error);
-    throw error;
+function getBookingTotalForCustomerEmail(booking: any): number {
+  if (booking.total_amount != null && !Number.isNaN(parseFloat(booking.total_amount))) {
+    return parseFloat(booking.total_amount);
   }
+
+  return Number(booking.amount) || 0;
 }
 
-function generateBookingNotificationEmail(booking: any): string {
-  const bookingDate = new Date(booking.date).toLocaleDateString("en-GB");
-
-  return `
-New Booking Request Received
-
-Customer Details:
-- Name: ${booking.customer_name}
-- Email: ${booking.customer_email || "Not provided"}
-- Phone: ${booking.customer_phone || "Not provided"}
-
-Service Details:
-- Service: ${booking.service}
-- Date: ${bookingDate}
-- Time: ${booking.time}
-- Amount: £${booking.amount.toFixed(2)}
-
-${booking.address ? `Address: ${booking.address}` : ""}
-${booking.notes ? `Notes: ${booking.notes}` : ""}
-
-Booking ID: ${booking.id}
-Created: ${new Date(booking.created_at).toLocaleString("en-GB")}
-
-Please review and update the booking status in your admin panel.
-  `.trim();
-}
-
-function generateBookingNotificationEmailHtml(booking: any): string {
-  const bookingDate = new Date(booking.date).toLocaleDateString("en-GB");
-
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>New Booking Request</title>
-<style>
-body{margin:0;padding:0;font-family:Georgia,serif;background:#f5f3ef;color:#1c1917}
-.wrap{max-width:560px;margin:0 auto;background:#fff}
-.head{background:#1c1917;color:#faf8f5;padding:36px 28px;text-align:center}
-.head h1{margin:0;font-size:22px;font-weight:400;letter-spacing:.1em}
-.line{width:40px;height:2px;background:#b76e79;margin:14px auto 0}
-.badge{display:inline-block;background:#78716c;color:#fff;padding:6px 16px;font-size:10px;letter-spacing:.15em;margin-top:12px}
-.main{padding:32px 28px;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:1.65}
-.sect{background:#faf8f5;border:1px solid #e7e4df;margin:20px 0;padding:20px}
-.sect-title{font-size:11px;letter-spacing:.12em;color:#78716c;margin-bottom:12px}
-.row{padding:10px 0;border-bottom:1px solid #e7e4df}
-.row:last-child{border-bottom:none}
-.amt{font-size:22px;font-weight:400;color:#1c1917}
-.ft{padding:24px;text-align:center;font-size:12px;color:#a8a29e;border-top:1px solid #e7e4df}
-</style>
-</head>
-<body>
-<div class="wrap">
-<div class="head">
-<h1>New Booking Request</h1>
-<div class="line"></div>
-<span class="badge">PENDING</span>
-</div>
-<div class="main">
-<div class="sect">
-<div class="sect-title">CUSTOMER</div>
-<div class="row">${booking.customer_name}</div>
-<div class="row">${booking.customer_email || "—"}</div>
-<div class="row">${booking.customer_phone || "—"}</div>
-</div>
-<div class="sect">
-<div class="sect-title">APPOINTMENT</div>
-<div class="row">${booking.service}</div>
-<div class="row">${bookingDate} · ${booking.time}</div>
-<div class="row"><span class="amt">£${booking.amount.toFixed(2)}</span></div>
-</div>
-${booking.address ? `<div class="sect"><div class="sect-title">ADDRESS</div><div class="row">${booking.address}</div></div>` : ""}
-${booking.notes ? `<div class="sect"><div class="sect-title">NOTES</div><div class="row">${booking.notes}</div></div>` : ""}
-<p style="color:#78716c;font-size:13px;">Ref: ${booking.id} · ${new Date(booking.created_at).toLocaleString("en-GB")}</p>
-</div>
-<div class="ft">Booking system · EGP Aesthetics</div>
-</div>
-</body>
-</html>
-  `.trim();
+function isNoPaymentCustomerBooking(booking: any): boolean {
+  return getBookingTotalForCustomerEmail(booking) <= 0;
 }
 
 // Function to send booking confirmation email to customer with payment link
@@ -536,8 +426,26 @@ async function sendCustomerBookingConfirmationEmail(booking: any) {
     }
 
     const contactInfo = await getAdminContactInfo();
+    const bookingDateStr = new Date(booking.date).toLocaleDateString("en-GB");
+
+    if (isNoPaymentCustomerBooking(booking)) {
+      const emailSubject = `Booking confirmed — ${booking.service} on ${bookingDateStr}`;
+
+      await sendEmail({
+        to: booking.customer_email,
+        subject: emailSubject,
+        text: generateCustomerFreeBookingConfirmationEmail(booking, contactInfo),
+        html: generateCustomerFreeBookingConfirmationEmailHtml(
+          booking,
+          contactInfo,
+        ),
+      });
+
+      return;
+    }
+
     const paymentLink = await generateStripePaymentLink(booking);
-    const emailSubject = `Booking Confirmation - ${booking.service} on ${new Date(booking.date).toLocaleDateString("en-GB")}`;
+    const emailSubject = `Booking Confirmation - ${booking.service} on ${bookingDateStr}`;
     const emailBody = generateCustomerBookingConfirmationEmail(
       booking,
       paymentLink,
@@ -558,6 +466,103 @@ async function sendCustomerBookingConfirmationEmail(booking: any) {
     console.error("Error in sendCustomerBookingConfirmationEmail:", error);
     throw error;
   }
+}
+
+function generateCustomerFreeBookingConfirmationEmail(
+  booking: any,
+  contactInfo: { phone: string; email: string },
+): string {
+  const bookingDate = new Date(booking.date).toLocaleDateString("en-GB");
+
+  return `
+Booking confirmed — EGP Aesthetics
+
+Dear ${booking.customer_name},
+
+Your appointment is confirmed. No payment is required for this booking.
+
+Booking details:
+- Service: ${booking.service}
+- Date: ${bookingDate}
+- Time: ${booking.time}
+
+${booking.address ? `Address: ${booking.address}\n` : ""}${booking.notes ? `Notes: ${booking.notes}\n` : ""}
+Before your visit:
+- Please arrive 10 minutes before your appointment
+- Bring a valid ID
+- If you need to reschedule, please contact us at least 24 hours in advance
+
+Contact:
+Phone: ${contactInfo.phone}
+Email: ${contactInfo.email}
+
+We look forward to seeing you.
+
+EGP Aesthetics Team
+
+Ref: ${booking.id}
+  `.trim();
+}
+
+function generateCustomerFreeBookingConfirmationEmailHtml(
+  booking: any,
+  contactInfo: { phone: string; email: string },
+): string {
+  const L = EMAIL.light;
+  const bookingDate = new Date(booking.date).toLocaleDateString("en-GB");
+
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+${getEmailHead()}
+<title>Booking confirmed</title>
+</head>
+<body class="email-body" style="margin:0;padding:0;font-family:${EMAIL.font};background:${L.bg};color:${L.text}">
+<div class="email-wrap" style="max-width:560px;margin:0 auto;background:${L.wrap};color:${L.text}">
+<div class="email-header" style="background:${L.green};color:#fff;padding:36px 28px;text-align:center">
+<h1 style="margin:0;font-size:24px;font-weight:600;color:#fff">Booking confirmed</h1>
+<p style="margin:8px 0 0;font-size:14px;color:#e7e4df">No payment required</p>
+<div class="email-accent-bar" style="width:48px;height:3px;background:${L.accent};margin:16px auto 0"></div>
+<span class="email-badge" style="display:inline-block;background:${L.greenDark};color:#fff;padding:8px 20px;font-size:11px;letter-spacing:.12em;margin-top:12px;border-radius:4px">Confirmed</span>
+</div>
+<div style="padding:32px 28px;font-size:15px;line-height:1.65;color:${L.text}">
+<p style="margin:0 0 16px;color:${L.text}">Dear ${booking.customer_name},</p>
+<p style="margin:0 0 24px;color:${L.textMuted}">Thank you for choosing EGP Aesthetics. Your appointment is confirmed. There is nothing to pay for this booking.</p>
+
+<div class="email-card" style="background:${L.cardBg};border:1px solid ${L.cardBorder};margin:24px 0;padding:20px;border-radius:8px">
+<div class="email-card-title" style="font-size:11px;letter-spacing:.12em;color:${L.green};margin-bottom:12px;font-weight:600">APPOINTMENT</div>
+<div style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text}">${booking.service}</div>
+<div style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text}">${bookingDate} · ${booking.time}</div>
+${booking.address ? `<div style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text}">${booking.address}</div>` : ""}
+${booking.notes ? `<div style="padding:10px 0;color:${L.text}">${booking.notes}</div>` : ""}
+</div>
+
+<div class="email-notice" style="background:#f0ede7;border-left:4px solid ${L.noticeBorder};padding:20px;margin:24px 0;border-radius:0 6px 6px 0">
+<div style="font-weight:600;color:${L.text};margin-bottom:8px">Before your visit</div>
+<ul style="margin:0;padding-left:20px;color:${L.textMuted}">
+<li>Arrive 10 minutes early</li>
+<li>Bring a valid ID</li>
+<li>Reschedule at least 24 hours in advance if needed</li>
+</ul>
+</div>
+
+<div class="email-card" style="background:${L.cardBg};border:1px solid ${L.cardBorder};margin:24px 0;padding:20px;border-radius:8px">
+<div class="email-card-title" style="font-size:11px;letter-spacing:.12em;color:${L.green};margin-bottom:12px;font-weight:600">QUESTIONS?</div>
+<div style="padding:8px 0;color:${L.text}"><a href="tel:${contactInfo.phone.replace(/\s/g, "")}" class="email-link" style="color:${L.link};text-decoration:none;font-weight:500">${contactInfo.phone}</a></div>
+<div style="padding:8px 0;color:${L.text}"><a href="mailto:${contactInfo.email}" class="email-link" style="color:${L.link};text-decoration:none;font-weight:500">${contactInfo.email}</a></div>
+</div>
+
+<p style="margin-top:28px;color:${L.text}">We look forward to welcoming you.</p>
+<p style="color:${L.green};font-weight:600">EGP Aesthetics</p>
+</div>
+<div class="email-footer" style="padding:24px 28px;text-align:center;font-size:12px;color:${L.muted};border-top:1px solid #e7e4df;background:${L.wrap}">
+<p style="margin:0">Ref: ${booking.id} · EGP Aesthetics London</p>
+</div>
+</div>
+</body>
+</html>
+  `.trim();
 }
 
 // Function to generate Stripe payment link
