@@ -4,6 +4,12 @@ import { supabaseAdmin } from "../../../lib/supabase";
 
 import { sendEmail } from "@/lib/sendgrid-smtp";
 import { sendStaffNewBookingNotification } from "@/lib/booking-staff-notification";
+import {
+  fetchBookingPractitionerForCustomerEmail,
+  practitionerEmailCardHtml,
+  practitionerPlainTextSection,
+  type BookingPractitionerForCustomerEmail,
+} from "@/lib/booking-practitioner-for-customer-email";
 import { getAdminContactInfo } from "@/lib/admin-profile";
 import { requireAdmin } from "@/lib/admin-auth";
 import { getEmailHead, EMAIL } from "@/lib/email-theme";
@@ -426,6 +432,8 @@ async function sendCustomerBookingConfirmationEmail(booking: any) {
     }
 
     const contactInfo = await getAdminContactInfo();
+    const practitioner =
+      await fetchBookingPractitionerForCustomerEmail(booking.team_member_id);
     const bookingDateStr = new Date(booking.date).toLocaleDateString("en-GB");
 
     if (isNoPaymentCustomerBooking(booking)) {
@@ -434,10 +442,15 @@ async function sendCustomerBookingConfirmationEmail(booking: any) {
       await sendEmail({
         to: booking.customer_email,
         subject: emailSubject,
-        text: generateCustomerFreeBookingConfirmationEmail(booking, contactInfo),
+        text: generateCustomerFreeBookingConfirmationEmail(
+          booking,
+          contactInfo,
+          practitioner,
+        ),
         html: generateCustomerFreeBookingConfirmationEmailHtml(
           booking,
           contactInfo,
+          practitioner,
         ),
       });
 
@@ -450,6 +463,7 @@ async function sendCustomerBookingConfirmationEmail(booking: any) {
       booking,
       paymentLink,
       contactInfo,
+      practitioner,
     );
 
     await sendEmail({
@@ -460,6 +474,7 @@ async function sendCustomerBookingConfirmationEmail(booking: any) {
         booking,
         paymentLink,
         contactInfo,
+        practitioner,
       ),
     });
   } catch (error) {
@@ -471,8 +486,10 @@ async function sendCustomerBookingConfirmationEmail(booking: any) {
 function generateCustomerFreeBookingConfirmationEmail(
   booking: any,
   contactInfo: { phone: string; email: string },
+  practitioner: BookingPractitionerForCustomerEmail | null,
 ): string {
   const bookingDate = new Date(booking.date).toLocaleDateString("en-GB");
+  const practitionerText = practitionerPlainTextSection(practitioner);
 
   return `
 Booking confirmed — EGP Aesthetics
@@ -486,7 +503,7 @@ Booking details:
 - Date: ${bookingDate}
 - Time: ${booking.time}
 
-${booking.address ? `Address: ${booking.address}\n` : ""}${booking.notes ? `Notes: ${booking.notes}\n` : ""}
+${booking.address ? `Address: ${booking.address}\n` : ""}${booking.notes ? `Notes: ${booking.notes}\n` : ""}${practitionerText}
 Before your visit:
 - Please arrive 10 minutes before your appointment
 - Bring a valid ID
@@ -507,9 +524,17 @@ Ref: ${booking.id}
 function generateCustomerFreeBookingConfirmationEmailHtml(
   booking: any,
   contactInfo: { phone: string; email: string },
+  practitioner: BookingPractitionerForCustomerEmail | null,
 ): string {
   const L = EMAIL.light;
   const bookingDate = new Date(booking.date).toLocaleDateString("en-GB");
+  const practitionerCard = practitionerEmailCardHtml(practitioner, {
+    cardBg: L.cardBg,
+    cardBorder: L.cardBorder,
+    titleColor: L.green,
+    textColor: L.text,
+    mutedColor: L.muted,
+  });
 
   return `
 <!DOCTYPE html>
@@ -537,6 +562,7 @@ ${getEmailHead()}
 ${booking.address ? `<div style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text}">${booking.address}</div>` : ""}
 ${booking.notes ? `<div style="padding:10px 0;color:${L.text}">${booking.notes}</div>` : ""}
 </div>
+${practitionerCard}
 
 <div class="email-notice" style="background:#f0ede7;border-left:4px solid ${L.noticeBorder};padding:20px;margin:24px 0;border-radius:0 6px 6px 0">
 <div style="font-weight:600;color:${L.text};margin-bottom:8px">Before your visit</div>
@@ -587,6 +613,7 @@ function generateCustomerBookingConfirmationEmail(
   booking: any,
   paymentLink: string,
   contactInfo: { phone: string; email: string },
+  practitioner: BookingPractitionerForCustomerEmail | null,
 ): string {
   const bookingDate = new Date(booking.date).toLocaleDateString("en-GB");
   const isDeposit =
@@ -596,6 +623,7 @@ function generateCustomerBookingConfirmationEmail(
   const depositBlurb = isDeposit
     ? `\nYou have paid £${Number(booking.amount_paid).toFixed(2)} deposit. The remaining £${Number(booking.remaining_amount).toFixed(2)} is due when you attend.\n`
     : "";
+  const practitionerText = practitionerPlainTextSection(practitioner);
 
   return `
 Booking Confirmation - EGP Aesthetics
@@ -615,7 +643,7 @@ ${depositBlurb}
 
 ${booking.address ? `Address: ${booking.address}` : ""}
 ${booking.notes ? `Notes: ${booking.notes}` : ""}
-
+${practitionerText}
 Payment:
 To secure your booking, please complete your payment using the link below:
 ${paymentLink}
@@ -643,6 +671,7 @@ function generateCustomerBookingConfirmationEmailHtml(
   booking: any,
   paymentLink: string,
   contactInfo: { phone: string; email: string },
+  practitioner: BookingPractitionerForCustomerEmail | null,
 ): string {
   const L = EMAIL.light;
   const bookingDate = new Date(booking.date).toLocaleDateString("en-GB");
@@ -654,6 +683,13 @@ function generateCustomerBookingConfirmationEmailHtml(
   const remainingAmount = Number(booking.remaining_amount ?? 0);
   const isDeposit =
     booking.payment_type === "deposit" && amountPaid > 0 && remainingAmount > 0;
+  const practitionerCard = practitionerEmailCardHtml(practitioner, {
+    cardBg: L.cardBg,
+    cardBorder: L.cardBorder,
+    titleColor: L.green,
+    textColor: L.text,
+    mutedColor: L.muted,
+  });
 
   return `
 <!DOCTYPE html>
@@ -683,6 +719,7 @@ ${isDeposit ? `<div style="padding:10px 0;border-bottom:1px solid #e7e4df;color:
 ${booking.address ? `<div style="padding:10px 0;color:${L.text}">${booking.address}</div>` : ""}
 ${booking.notes ? `<div style="padding:10px 0;color:${L.text}">${booking.notes}</div>` : ""}
 </div>
+${practitionerCard}
 ${isDeposit ? `<div style="background:#e8f5e9;border:1px solid ${L.accent};padding:14px;margin:16px 0;font-size:14px;color:${L.text};border-radius:6px">You have paid <strong>£${amountPaid.toFixed(2)}</strong> deposit. The remaining <strong>£${remainingAmount.toFixed(2)}</strong> is due when you attend.</div>` : ""}
 
 <div style="text-align:center;margin:28px 0">

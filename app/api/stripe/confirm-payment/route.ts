@@ -4,6 +4,12 @@ import { getStripeServer } from "@/lib/stripe";
 import { supabaseAdmin } from "@/lib/supabase";
 import { sendEmail } from "@/lib/sendgrid-smtp";
 import { sendStaffNewBookingNotification } from "@/lib/booking-staff-notification";
+import {
+  fetchBookingPractitionerForCustomerEmail,
+  practitionerEmailCardHtml,
+  practitionerPlainTextSection,
+  type BookingPractitionerForCustomerEmail,
+} from "@/lib/booking-practitioner-for-customer-email";
 import { getAdminContactInfo } from "@/lib/admin-profile";
 import { getEmailHead, EMAIL } from "@/lib/email-theme";
 
@@ -350,20 +356,8 @@ export async function POST(request: NextRequest) {
       }
 
       // === STEP 4: Send Confirmation Email ===
-      // Get team member details if available
-      let teamMemberName = null;
-
-      if (teamMemberId) {
-        const { data: teamMember } = await supabaseAdmin
-          .from("team")
-          .select("name, role")
-          .eq("id", teamMemberId)
-          .single();
-
-        if (teamMember) {
-          teamMemberName = `${teamMember.name} (${teamMember.role})`;
-        }
-      }
+      const practitioner =
+        await fetchBookingPractitionerForCustomerEmail(teamMemberId);
 
       // Send booking confirmation email to customer
       if (finalCustomerEmail && !finalCustomerEmail.includes("@stripe.guest")) {
@@ -398,7 +392,7 @@ export async function POST(request: NextRequest) {
             paymentIntentId: paymentIntentId,
             bookingId: booking.id,
             bookingNumber: booking.booking_number || booking.id,
-            teamMember: teamMemberName,
+            practitioner,
             contactPhone: contactInfo.phone,
             contactEmail: contactInfo.email,
           });
@@ -417,7 +411,7 @@ export async function POST(request: NextRequest) {
             paymentIntentId: paymentIntentId,
             bookingId: booking.id,
             bookingNumber: booking.booking_number || booking.id,
-            teamMember: teamMemberName,
+            practitioner,
             contactPhone: contactInfo.phone,
             contactEmail: contactInfo.email,
           });
@@ -442,7 +436,7 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // === STEP 5: Staff notification (team member or clinic inbox from DB) ===
+      // === STEP 5: Staff notification (clinic inbox from admin_profile) ===
       try {
         let notesForStaff = String(booking.notes || "");
 
@@ -520,11 +514,18 @@ function generatePaymentConfirmationEmail(data: {
   paymentIntentId: string;
   bookingId: string;
   bookingNumber: string;
-  teamMember: string | null;
+  practitioner: BookingPractitionerForCustomerEmail | null;
   contactPhone: string;
   contactEmail: string;
 }): string {
   const L = EMAIL.light;
+  const practitionerCard = practitionerEmailCardHtml(data.practitioner, {
+    cardBg: L.cardBg,
+    cardBorder: L.cardBorder,
+    titleColor: L.green,
+    textColor: L.text,
+    mutedColor: L.muted,
+  });
   const servicesList = data.services
     .map(
       (s) =>
@@ -578,8 +579,8 @@ ${isDeposit ? `<p style="margin:0 0 24px;padding:14px;background:#e8f5e9;border:
 <div style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted};font-size:13px">Date</span> · ${data.bookingDate}</div>
 <div style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted};font-size:13px">Time</span> · ${data.bookingTime}</div>
 <div style="padding:10px 0;border-bottom:1px solid #e7e4df;color:${L.text}"><span style="color:${L.muted};font-size:13px">Duration</span> · ${data.duration}</div>
-${data.teamMember ? `<div style="padding:10px 0;color:${L.text}"><span style="color:${L.muted};font-size:13px">Practitioner</span> · ${data.teamMember}</div>` : ""}
 </div>
+${practitionerCard}
 
 <div class="email-notice" style="background:#fef7ed;border-left:4px solid ${L.noticeBorder};padding:20px;margin:24px 0;border-radius:0 6px 6px 0">
 <div style="font-weight:600;color:${L.text};margin-bottom:8px">Before your visit</div>
@@ -623,7 +624,7 @@ function generatePaymentConfirmationEmailText(data: {
   paymentIntentId: string;
   bookingId: string;
   bookingNumber: string;
-  teamMember: string | null;
+  practitioner: BookingPractitionerForCustomerEmail | null;
   contactPhone: string;
   contactEmail: string;
 }): string {
@@ -671,9 +672,7 @@ Booking Details:
 - Booking Number: ${data.bookingNumber}
 - Booked Day: ${data.bookingDate}
 - Time: ${data.bookingTime}
-- Duration: ${data.duration}
-${data.teamMember ? `- Practitioner: ${data.teamMember}` : ""}
-
+- Duration: ${data.duration}${practitionerPlainTextSection(data.practitioner)}
 Important Information:
 - Please arrive 10 minutes before your appointment
 - Bring a valid ID
