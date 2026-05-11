@@ -61,13 +61,13 @@ export const formLayout = {
   fieldGap: "gap-4",
 };
 
-/** Booking flow primary CTAs — ~56px min height, matches `Input size="lg"` */
+/** Booking flow CTAs — compact on mobile (~44px), full size from `sm` */
 export const bookingCtaButtonClassName =
-  "min-h-14 inline-flex items-center justify-center touch-manipulation text-base font-semibold rounded-xl px-5 [-webkit-tap-highlight-color:transparent]";
+  "min-h-11 inline-flex items-center justify-center touch-manipulation text-sm font-semibold rounded-lg px-4 py-2 [-webkit-tap-highlight-color:transparent] sm:min-h-14 sm:text-base sm:rounded-xl sm:px-5";
 
 /** Secondary pill controls (filters, clear selection) */
 export const bookingCtaCompactClassName =
-  "min-h-11 touch-manipulation rounded-full px-4 text-sm font-semibold [-webkit-tap-highlight-color:transparent]";
+  "min-h-10 touch-manipulation rounded-full px-3.5 text-xs font-semibold [-webkit-tap-highlight-color:transparent] sm:min-h-11 sm:px-4 sm:text-sm";
 
 // Input component - label outside, no blue ring, single green border on focus
 export const inputClassNames = {

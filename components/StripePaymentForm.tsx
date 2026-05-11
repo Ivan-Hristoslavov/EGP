@@ -205,7 +205,7 @@ function FreeBookingConfirmation({
           className={stripePayButtonClass}
           isDisabled={isLoading}
           isLoading={isLoading}
-          size="lg"
+          size="md"
           type="button"
           variant="primary"
           onPress={handleConfirm}
@@ -524,7 +524,7 @@ function PaymentForm({
             className={stripePayButtonClass}
             isDisabled={isLoading}
             isLoading={isLoading}
-            size="lg"
+            size="md"
             type="button"
             variant="primary"
             onClick={(e) => {
@@ -567,7 +567,7 @@ function PaymentForm({
             className={stripePayButtonClass}
             isDisabled={!stripe || !elements || isLoading || isTestBooking}
             isLoading={isLoading}
-            size="lg"
+            size="md"
             type="submit"
             variant="primary"
           >
@@ -890,7 +890,7 @@ export default function StripePaymentForm(props: StripePaymentFormProps) {
             className={stripePayButtonClass}
             isDisabled={isInitializing || isTestBooking}
             isLoading={isInitializing}
-            size="lg"
+            size="md"
             variant="primary"
             onPress={handleInitializePayment}
           >
@@ -915,7 +915,7 @@ export default function StripePaymentForm(props: StripePaymentFormProps) {
     appearance: {
       theme: "stripe" as const,
       variables: {
-        colorPrimary: "#e11d48", // rose-600
+        colorPrimary: "#464C45", // egp-green DEFAULT — tabs/focus, not danger red
         colorBackground: "#ffffff",
         colorText: "#1f2937",
         colorDanger: "#ef4444",

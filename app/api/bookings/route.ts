@@ -377,7 +377,10 @@ export async function POST(request: NextRequest) {
       await sendStaffNewBookingNotification(booking);
       console.log("Staff booking notification email sent successfully");
     } catch (emailError) {
-      console.error("Error sending staff booking notification email:", emailError);
+      console.error(
+        "Error sending staff booking notification email:",
+        emailError,
+      );
       // Don't fail the booking creation if email fails
     }
 
@@ -411,7 +414,10 @@ export async function POST(request: NextRequest) {
 }
 
 function getBookingTotalForCustomerEmail(booking: any): number {
-  if (booking.total_amount != null && !Number.isNaN(parseFloat(booking.total_amount))) {
+  if (
+    booking.total_amount != null &&
+    !Number.isNaN(parseFloat(booking.total_amount))
+  ) {
     return parseFloat(booking.total_amount);
   }
 
@@ -432,8 +438,9 @@ async function sendCustomerBookingConfirmationEmail(booking: any) {
     }
 
     const contactInfo = await getAdminContactInfo();
-    const practitioner =
-      await fetchBookingPractitionerForCustomerEmail(booking.team_member_id);
+    const practitioner = await fetchBookingPractitionerForCustomerEmail(
+      booking.team_member_id,
+    );
     const bookingDateStr = new Date(booking.date).toLocaleDateString("en-GB");
 
     if (isNoPaymentCustomerBooking(booking)) {

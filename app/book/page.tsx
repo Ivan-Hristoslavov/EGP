@@ -8,6 +8,7 @@ import {
   useCallback,
   useRef,
 } from "react";
+import { createPortal } from "react-dom";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   Calendar,
@@ -16,12 +17,12 @@ import {
   ClipboardList,
   CheckCircle,
   X,
-  ArrowLeft,
   Info,
   Shield,
   ChevronDown,
   Lock,
   Loader2,
+  Search,
 } from "lucide-react";
 import { Button } from "@heroui/button";
 import { Card, CardBody, CardHeader } from "@heroui/react";
@@ -41,6 +42,7 @@ import {
 import { useToast } from "@/components/Toast";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import { PriceWithDiscount } from "@/components/PriceWithDiscount";
+import { mapStripePaymentErrorMessage } from "@/lib/map-stripe-payment-error-message";
 
 type OrderItem = {
   serviceId: string; // This will now be the service ID (UUID), not slug
@@ -120,6 +122,10 @@ function BookingPageContent() {
   const [serviceSelectorDiscountedOnly, setServiceSelectorDiscountedOnly] =
     useState(false);
   const [serviceInfoModal, setServiceInfoModal] = useState<string | null>(null);
+  const [serviceSelectorPortalMounted, setServiceSelectorPortalMounted] =
+    useState(false);
+  const [serviceSelectorSearchQuery, setServiceSelectorSearchQuery] =
+    useState("");
 
   const bookingBtn = bookingCtaButtonClassName;
   const bookingBtnCompact = bookingCtaCompactClassName;
@@ -296,14 +302,27 @@ function BookingPageContent() {
     [],
   );
 
-  // Service selector: optionally filter to discounted only
+  // Service selector: optionally filter to discounted only + search by name/category/description
   const servicesByCategoryForSelector = useMemo(() => {
     const list = serviceSelectorDiscountedOnly
       ? services.filter(hasDiscount)
       : services;
+    const q = serviceSelectorSearchQuery.trim().toLowerCase();
+    const searched =
+      q.length === 0
+        ? list
+        : list.filter((service) => {
+            const name = (service.name ?? "").toLowerCase();
+            const cat = (service.category?.name ?? "").toLowerCase();
+            const desc = (service.description ?? "").toLowerCase();
+
+            return (
+              name.includes(q) || cat.includes(q) || desc.includes(q)
+            );
+          });
     const grouped: Record<string, Array<[string, any]>> = {};
 
-    list.forEach((service) => {
+    searched.forEach((service) => {
       const categoryName = service.category.name;
 
       if (!grouped[categoryName]) {
@@ -313,7 +332,23 @@ function BookingPageContent() {
     });
 
     return grouped;
-  }, [services, servicesDataMap, serviceSelectorDiscountedOnly, hasDiscount]);
+  }, [
+    services,
+    servicesDataMap,
+    serviceSelectorDiscountedOnly,
+    serviceSelectorSearchQuery,
+    hasDiscount,
+  ]);
+
+  useEffect(() => {
+    setServiceSelectorPortalMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!showServiceSelector) {
+      setServiceSelectorSearchQuery("");
+    }
+  }, [showServiceSelector]);
 
   // Load team members and filter by selected services
   useEffect(() => {
@@ -894,8 +929,13 @@ function BookingPageContent() {
   };
 
   const handlePaymentError = (error: string) => {
-    console.error("Payment error:", error);
-    // You could show a toast notification here
+    if (process.env.NODE_ENV === "development") {
+      console.error("Payment error:", error);
+    }
+
+    const { title, message } = mapStripePaymentErrorMessage(error);
+
+    showError(title, message);
   };
 
   const bookingReviewFormat = useMemo(() => {
@@ -1135,7 +1175,7 @@ function BookingPageContent() {
           </p>
           <ButtonPrimary
             className={`mx-auto w-full max-w-sm ${bookingBtn}`}
-            size="lg"
+            size="md"
             variant="primary"
             onPress={() => setShowServiceSelector(true)}
           >
@@ -1186,7 +1226,7 @@ function BookingPageContent() {
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-auto">
                       <Button
                         className={`flex-1 ${bookingBtn} border-egp-green text-egp-green dark:border-egp-green dark:text-white hover:bg-egp-green/10`}
-                        size="lg"
+                        size="md"
                         variant="bordered"
                         onPress={() => setServiceInfoModal(item.serviceId)}
                       >
@@ -1196,7 +1236,7 @@ function BookingPageContent() {
                         aria-label="Remove service"
                         className={`shrink-0 ${bookingBtn} border border-danger-200 text-danger dark:border-danger-800`}
                         color="danger"
-                        size="lg"
+                        size="md"
                         variant="bordered"
                         onPress={() => removeService(item.serviceId)}
                       >
@@ -1212,7 +1252,7 @@ function BookingPageContent() {
           <div className="border-t border-divider pt-4 mt-5 flex flex-col sm:flex-row items-stretch justify-between gap-3 sm:gap-3">
             <ButtonPrimary
               className={`flex-1 min-w-0 border-2 border-egp-beige-dark bg-egp-beige text-gray-900 hover:bg-egp-beige-dark dark:bg-egp-beige-darkest dark:text-white dark:border-egp-beige-darker dark:hover:bg-egp-beige-darker ${bookingBtn}`}
-              size="lg"
+              size="md"
               variant="secondary"
               onPress={() => setShowServiceSelector(true)}
             >
@@ -1221,7 +1261,7 @@ function BookingPageContent() {
             <ButtonPrimary
               className={`flex-1 min-w-0 ${bookingBtn} ${selectedServices.length === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
               isDisabled={selectedServices.length === 0}
-              size="lg"
+              size="md"
               variant="primary"
               onPress={() => setCurrentStep("team")}
             >
@@ -1396,7 +1436,7 @@ function BookingPageContent() {
             <div className="border-t border-divider pt-4 mt-5 flex justify-center">
               <ButtonPrimary
                 className={`w-full sm:w-auto sm:min-w-[200px] ${bookingBtn}`}
-                size="lg"
+                size="md"
                 variant="primary"
                 onPress={() => setCurrentStep("date")}
               >
@@ -1423,7 +1463,7 @@ function BookingPageContent() {
   const renderServiceSelector = () => {
     return (
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-start justify-center p-2 sm:p-4 pt-20 sm:pt-28 z-[10000] overflow-y-auto"
+        className="fixed inset-0 z-[100000] flex min-h-dvh items-center justify-center overflow-y-auto bg-black/60 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:p-4"
         onClick={(e) => {
           // Close modal when clicking on backdrop
           if (e.target === e.currentTarget) {
@@ -1432,29 +1472,29 @@ function BookingPageContent() {
         }}
       >
         <div
-          className="bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] sm:max-h-[85vh] flex flex-col relative z-[10001] mx-2 sm:mx-4"
+          className="relative mx-1 flex min-h-0 w-full max-h-[min(90dvh,90vh)] max-w-7xl flex-col rounded-xl bg-white shadow-2xl dark:bg-gray-900 sm:mx-4 sm:max-h-[85vh] sm:rounded-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header - visible on both light and dark */}
-          <div className="bg-[#3a3428] dark:bg-gray-950 text-white px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between rounded-t-xl sm:rounded-t-2xl flex-shrink-0 border-b border-[#4a4438] dark:border-gray-700 relative z-[10002]">
+          <div className="flex flex-shrink-0 items-center justify-between rounded-t-xl border-b border-[#4a4438] bg-[#3a3428] px-3 py-2.5 text-white dark:border-gray-700 dark:bg-gray-950 sm:rounded-t-2xl sm:px-6 sm:py-4">
             <h2 className={`${typography.headingCard} text-white`}>
               Select Services
             </h2>
             <button
               aria-label="Close"
-              className="p-0 hover:bg-gray-700 rounded-full transition-colors touch-manipulation min-h-14 min-w-14 inline-flex items-center justify-center relative z-[10003] [-webkit-tap-highlight-color:transparent]"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full p-0 [-webkit-tap-highlight-color:transparent] transition-colors hover:bg-gray-700 touch-manipulation sm:min-h-14 sm:min-w-14"
               onClick={(e) => {
                 e.stopPropagation();
                 setShowServiceSelector(false);
               }}
             >
-              <X className="w-6 h-6 text-white" />
+              <X className="h-5 w-5 text-white sm:h-6 sm:w-6" />
             </button>
           </div>
 
           {/* Discount filter - only show if any service has discount */}
           {services.some(hasDiscount) && (
-            <div className="px-4 sm:px-6 py-2 sm:py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex flex-wrap items-center gap-2">
+            <div className="flex flex-shrink-0 flex-wrap items-center gap-2 border-b border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-700 dark:bg-gray-900/50 sm:px-6 sm:py-3">
               <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                 Filter:
               </span>
@@ -1483,43 +1523,90 @@ function BookingPageContent() {
             </div>
           )}
 
-          {/* Content - light bg for white theme, dark for dark theme */}
-          <div className="p-4 sm:p-6 overflow-y-auto flex-1 bg-white dark:bg-gray-900">
-            {Object.entries(servicesByCategoryForSelector).map(
-              ([category, servicesList]) => {
-                // Filter out services that are already selected
-                const availableServices = servicesList.filter(
-                  ([serviceId, service]) =>
-                    service &&
-                    !selectedServices.some(
-                      (item) => item.serviceId === serviceId,
-                    ),
-                );
+          {/* Search — fixed below filters, above scroll list */}
+          <div className="flex-shrink-0 border-b border-gray-200 bg-white px-3 py-2 dark:border-gray-700 dark:bg-gray-900 sm:px-6 sm:py-3">
+            <Input
+              aria-label="Search treatments by name"
+              classNames={inputClassNames}
+              placeholder="Search by treatment name…"
+              size="md"
+              startContent={
+                <Search
+                  aria-hidden
+                  className="h-4 w-4 flex-shrink-0 text-gray-400 dark:text-gray-500"
+                />
+              }
+              type="search"
+              value={serviceSelectorSearchQuery}
+              variant="bordered"
+              onValueChange={setServiceSelectorSearchQuery}
+            />
+          </div>
 
-                if (availableServices.length === 0) return null;
+          {/* Content - light bg for white theme, dark for dark theme */}
+          <div className="min-h-0 flex-1 overflow-y-auto bg-white p-3 dark:bg-gray-900 sm:p-6">
+            {(() => {
+              const visibleCategories = Object.entries(
+                servicesByCategoryForSelector,
+              )
+                .map(([category, servicesList]) => {
+                  const availableServices = servicesList.filter(
+                    ([serviceId, service]) =>
+                      service &&
+                      !selectedServices.some(
+                        (item) => item.serviceId === serviceId,
+                      ),
+                  );
+
+                  return { category, availableServices };
+                })
+                .filter((row) => row.availableServices.length > 0);
+
+              if (visibleCategories.length === 0) {
+                const q = serviceSelectorSearchQuery.trim();
 
                 return (
-                  <div key={category} className="mb-4 sm:mb-8">
+                  <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
+                    <p className="max-w-sm text-sm text-gray-600 dark:text-gray-400">
+                      {q ? (
+                        <>
+                          No treatments match{" "}
+                          <span className="font-semibold text-gray-800 dark:text-gray-200">
+                            &quot;{q}&quot;
+                          </span>
+                          . Try another name or clear the search.
+                        </>
+                      ) : (
+                        <>Nothing left to add here — all listed items may already be in your booking.</>
+                      )}
+                    </p>
+                  </div>
+                );
+              }
+
+              return visibleCategories.map(
+                ({ category, availableServices }) => (
+                  <div key={category} className="mb-3 sm:mb-8">
                     <h3
-                      className={`${typography.headingSmall} text-gray-900 dark:text-white mb-3 sm:mb-5`}
+                      className={`${typography.headingSmall} mb-2 text-gray-900 dark:text-white sm:mb-5`}
                     >
                       {category}
                     </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
                       {availableServices.map(([serviceId, service]) => {
                         if (!service) return null;
 
                         return (
                           <Card
                             key={serviceId}
-                            className="h-full flex flex-col bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-egp-green transition-all"
+                            className="flex h-full flex-col border border-gray-200 bg-gray-50 transition-all hover:border-egp-green dark:border-gray-700 dark:bg-gray-800"
                             shadow="lg"
                           >
-                            <CardHeader className="bg-gray-50 dark:bg-gray-800 px-3 sm:px-5 py-3 sm:py-4 relative min-h-[120px] sm:min-h-[140px]">
+                            <CardHeader className="relative bg-gray-50 px-2.5 py-2 dark:bg-gray-800 sm:min-h-[140px] sm:px-5 sm:py-4">
                               {/* Category Badge - Top Left */}
-                              <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
+                              <div className="absolute left-1.5 top-1.5 sm:left-3 sm:top-3">
                                 <Chip
-                                  className="bg-gray-600 dark:bg-gray-700 text-white text-[10px] sm:text-xs font-semibold"
+                                  className="bg-gray-600 text-[10px] font-semibold text-white dark:bg-gray-700 sm:text-xs"
                                   size="sm"
                                   variant="flat"
                                 >
@@ -1528,12 +1615,12 @@ function BookingPageContent() {
                               </div>
 
                               {/* Duration Badge - Top Right */}
-                              <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
+                              <div className="absolute right-1.5 top-1.5 sm:right-3 sm:top-3">
                                 <Chip
-                                  className="bg-gray-600 dark:bg-gray-700 text-white text-[10px] sm:text-xs"
+                                  className="bg-gray-600 text-[10px] text-white dark:bg-gray-700 sm:text-xs"
                                   size="sm"
                                   startContent={
-                                    <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                                    <Clock className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                                   }
                                   variant="flat"
                                 >
@@ -1542,11 +1629,11 @@ function BookingPageContent() {
                               </div>
 
                               {/* Service Name and Price - Centered */}
-                              <div className="text-center pt-6 sm:pt-8 pb-2 sm:pb-3 w-full">
-                                <h4 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-tight line-clamp-2 mb-2 sm:mb-3">
+                              <div className="w-full pb-1 pt-4 text-center sm:pb-3 sm:pt-8">
+                                <h4 className="mb-1 line-clamp-2 text-sm font-bold leading-tight text-gray-900 dark:text-white sm:mb-3 sm:text-lg">
                                   {service.name}
                                 </h4>
-                                <div className="flex flex-col items-center gap-1 w-full [&_.line-through]:text-gray-500 [&_.font-bold]:text-gray-900 dark:[&_.font-bold]:text-white">
+                                <div className="flex w-full flex-col items-center gap-1 [&_.line-through]:text-gray-500 [&_.font-bold]:text-gray-900 dark:[&_.font-bold]:text-white">
                                   <PriceWithDiscount
                                     align="center"
                                     discountPercentage={
@@ -1555,33 +1642,35 @@ function BookingPageContent() {
                                     layout="stack"
                                     originalPrice={service.originalPrice}
                                     price={service.price}
-                                    size="lg"
+                                    size="md"
                                   />
                                 </div>
                               </div>
                             </CardHeader>
 
-                            <CardBody className="p-3 sm:p-5 flex flex-col flex-1 bg-gray-50 dark:bg-gray-800">
+                            <CardBody className="flex flex-1 flex-col bg-gray-50 p-2.5 dark:bg-gray-800 sm:p-5">
                               {/* Description */}
                               {service.description && (
-                                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-2 sm:mb-4 leading-relaxed line-clamp-3">
+                                <p className="mb-2 line-clamp-2 text-xs leading-relaxed text-gray-600 dark:text-gray-300 sm:mb-4 sm:line-clamp-3 sm:text-sm">
                                   {service.description}
                                 </p>
                               )}
 
-                              {/* Action Buttons - Stacked */}
-                              <div className="flex flex-col gap-2 pt-3 sm:pt-4 mt-auto border-t border-gray-200 dark:border-gray-700">
+                              {/* Actions: row on mobile, stacked from sm */}
+                              <div className="mt-auto flex flex-row gap-1.5 border-t border-gray-200 pt-1.5 dark:border-gray-700 sm:flex-col sm:gap-2 sm:pt-4">
                                 <Button
-                                  className={`w-full ${bookingBtn} border-gray-400 text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:hover:bg-gray-700`}
-                                  size="lg"
+                                  className={`flex-1 ${bookingBtn} border-gray-400 text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:hover:bg-gray-700 sm:w-full`}
+                                  size="md"
                                   variant="bordered"
-                                  onPress={() => setServiceInfoModal(serviceId)}
+                                  onPress={() =>
+                                    setServiceInfoModal(serviceId)
+                                  }
                                 >
                                   Details
                                 </Button>
                                 <ButtonPrimary
-                                  className={`w-full ${bookingBtn} bg-egp-green text-white hover:bg-egp-green-dark dark:bg-gray-700 dark:hover:bg-gray-600`}
-                                  size="lg"
+                                  className={`flex-1 ${bookingBtn} bg-egp-green text-white hover:bg-egp-green-dark dark:bg-gray-700 dark:hover:bg-gray-600 sm:w-full`}
+                                  size="md"
                                   variant="primary"
                                   onPress={() => {
                                     const success = addService(serviceId);
@@ -1600,9 +1689,9 @@ function BookingPageContent() {
                       })}
                     </div>
                   </div>
-                );
-              },
-            )}
+                ),
+              );
+            })()}
           </div>
         </div>
       </div>
@@ -1644,7 +1733,7 @@ function BookingPageContent() {
             </p>
             <ButtonPrimary
               className={bookingBtn}
-              size="lg"
+              size="md"
               variant="primary"
               onPress={loadAvailability}
             >
@@ -1670,7 +1759,7 @@ function BookingPageContent() {
             {selectedTeamMember && (
               <ButtonPrimary
                 className={`mx-auto ${bookingBtn}`}
-                size="lg"
+                size="md"
                 variant="primary"
                 onPress={loadAvailability}
               >
@@ -1848,10 +1937,24 @@ function BookingPageContent() {
                 {selectedDate ? (
                   <div>
                     <div className="mb-3 sm:mb-4">
-                      <h4 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
-                        Available Times
-                      </h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      <div className="flex items-center justify-between gap-3">
+                        <h4 className="min-w-0 text-base font-semibold text-gray-900 dark:text-white sm:text-lg">
+                          Available Times
+                        </h4>
+                        {selectedTimeSlots.length > 0 ? (
+                          <button
+                            className="shrink-0 inline-flex min-h-10 touch-manipulation items-center justify-center rounded-lg border border-red-300 px-3 py-2 text-xs font-semibold text-red-600 [-webkit-tap-highlight-color:transparent] hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20 sm:min-h-11 sm:rounded-xl sm:px-4 sm:text-sm"
+                            type="button"
+                            onClick={() => {
+                              setSelectedTime("");
+                              setSelectedTimeSlots([]);
+                            }}
+                          >
+                            Clear Selection
+                          </button>
+                        ) : null}
+                      </div>
+                      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                         {new Date(selectedDate).toLocaleDateString("en-GB", {
                           weekday: "long",
                           day: "numeric",
@@ -1859,18 +1962,6 @@ function BookingPageContent() {
                           year: "numeric",
                         })}
                       </p>
-                      {selectedTimeSlots.length > 0 && (
-                        <button
-                          className={`mt-2 border border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20 ${bookingBtnCompact}`}
-                          type="button"
-                          onClick={() => {
-                            setSelectedTime("");
-                            setSelectedTimeSlots([]);
-                          }}
-                        >
-                          Clear Selection
-                        </button>
-                      )}
                     </div>
 
                     {/* Hours section - filtered from cached data, no loading needed */}
@@ -2121,7 +2212,7 @@ function BookingPageContent() {
                                     return (
                                       <div
                                         key={time}
-                                        className="flex min-h-11 cursor-not-allowed items-center justify-center rounded-md border-2 border-red-400 bg-red-50 px-2 py-2 text-xs font-medium text-red-700 opacity-60 dark:border-red-500 dark:bg-red-900/20 dark:text-red-400 sm:min-h-12 sm:text-sm"
+                                        className="flex min-h-10 cursor-not-allowed items-center justify-center rounded-md border-2 border-red-400 bg-red-50 px-2 py-1.5 text-xs font-medium text-red-700 opacity-60 dark:border-red-500 dark:bg-red-900/20 dark:text-red-400 sm:min-h-12 sm:py-2 sm:text-sm"
                                       >
                                         {time}
                                       </div>
@@ -2132,7 +2223,7 @@ function BookingPageContent() {
                                   return (
                                     <button
                                       key={time}
-                                      className={`flex min-h-11 items-center justify-center rounded-md border-2 px-2 py-2 text-xs font-medium transition-all touch-manipulation active:scale-95 sm:min-h-12 sm:text-sm
+                                      className={`flex min-h-10 items-center justify-center rounded-md border-2 px-2 py-1.5 text-xs font-medium transition-all touch-manipulation active:scale-95 sm:min-h-12 sm:py-2 sm:text-sm
                               ${
                                 isStartTime
                                   ? "bg-egp-green hover:bg-egp-green-dark text-white shadow-md border-egp-green font-bold"
@@ -2167,7 +2258,7 @@ function BookingPageContent() {
                                 <div className="mt-4 flex justify-center">
                                   <ButtonPrimary
                                     className={`w-full sm:w-auto sm:min-w-[200px] ${bookingBtn}`}
-                                    size="lg"
+                                    size="md"
                                     variant="primary"
                                     onPress={() => setCurrentStep("customer")}
                                   >
@@ -2249,7 +2340,7 @@ function BookingPageContent() {
             label="First Name"
             labelPlacement="outside"
             placeholder="Enter your first name"
-            size="lg"
+            size="md"
             value={customerData.firstName}
             variant="bordered"
             onValueChange={(value) =>
@@ -2264,7 +2355,7 @@ function BookingPageContent() {
             label="Last Name"
             labelPlacement="outside"
             placeholder="Enter your last name"
-            size="lg"
+            size="md"
             value={customerData.lastName}
             variant="bordered"
             onValueChange={(value) =>
@@ -2282,7 +2373,7 @@ function BookingPageContent() {
             label="Email"
             labelPlacement="outside"
             placeholder="your.email@example.com"
-            size="lg"
+            size="md"
             type="email"
             value={customerData.email}
             variant="bordered"
@@ -2298,7 +2389,7 @@ function BookingPageContent() {
             label="Phone"
             labelPlacement="outside"
             placeholder="+44 7XXX XXXXXX"
-            size="lg"
+            size="md"
             type="tel"
             value={customerData.phone}
             variant="bordered"
@@ -2308,7 +2399,7 @@ function BookingPageContent() {
           />
         </div>
 
-        <div className="relative z-20 flex flex-col gap-3 pt-4 sm:flex-row sm:gap-3">
+        <div className="relative z-20 flex flex-col gap-2 pt-3 sm:flex-row sm:gap-3 sm:pt-4">
           <button
             className={`flex-1 border-2 border-[#e4d9c8] bg-white text-gray-900 shadow-sm active:opacity-90 dark:border-gray-600 dark:bg-gray-800 dark:text-white ${bookingBtn}`}
             type="button"
@@ -2338,7 +2429,7 @@ function BookingPageContent() {
         <div className="flex flex-col gap-6 sm:gap-8">
           {renderBookingSummaryColumn()}
         </div>
-        <div className="relative z-20 flex flex-col gap-3 pt-2 sm:flex-row sm:gap-3">
+        <div className="relative z-20 flex flex-col gap-2 pt-2 sm:flex-row sm:gap-3">
           <button
             className={`flex-1 border-2 border-[#e4d9c8] bg-white text-gray-900 shadow-sm active:opacity-90 dark:border-gray-600 dark:bg-gray-800 dark:text-white ${bookingBtn}`}
             type="button"
@@ -2437,8 +2528,7 @@ function BookingPageContent() {
 
             {(() => {
               const hasValidCustomerData =
-                customerData.firstName?.trim() &&
-                customerData.email?.trim();
+                customerData.firstName?.trim() && customerData.email?.trim();
 
               if (!hasValidCustomerData) {
                 return (
@@ -2515,7 +2605,7 @@ function BookingPageContent() {
           </CardBody>
         </Card>
 
-        <div className="relative z-20 flex flex-col gap-3 pt-2 sm:flex-row sm:gap-3">
+        <div className="relative z-20 flex flex-col gap-2 pt-2 sm:flex-row sm:gap-3">
           <button
             aria-label="Back to review"
             className={`flex-1 border-2 border-[#e4d9c8] bg-white text-gray-900 shadow-sm active:opacity-90 dark:border-gray-600 dark:bg-gray-800 dark:text-white ${bookingBtn}`}
@@ -2595,7 +2685,7 @@ function BookingPageContent() {
                   className="rounded-2xl sm:rounded-3xl border border-[#e4d9c8] dark:border-gray-800 bg-white/60 dark:bg-gray-900/50 backdrop-blur-sm shadow-md"
                 >
                   <button
-                    className={`w-full flex items-center justify-between gap-3 px-4 sm:px-5 py-4 sm:py-5 text-left rounded-2xl sm:rounded-3xl transition-colors ${
+                    className={`w-full flex items-center justify-between gap-2 sm:gap-3 px-3 sm:px-5 py-3 sm:py-5 text-left rounded-2xl sm:rounded-3xl transition-colors ${
                       canInteract
                         ? "hover:bg-white/80 dark:hover:bg-gray-900/70"
                         : "opacity-70 cursor-not-allowed"
@@ -2604,11 +2694,11 @@ function BookingPageContent() {
                     type="button"
                     onClick={() => handleStepToggle(step.key)}
                   >
-                    <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="flex items-center gap-2.5 sm:gap-4">
                       <span
-                        className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl border border-[#e4d9c8]/70 dark:border-gray-700 transition-all flex-shrink-0 ${iconWrapperClasses}`}
+                        className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-[#e4d9c8]/70 transition-all dark:border-gray-700 sm:h-12 sm:w-12 ${iconWrapperClasses}`}
                       >
-                        <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <Icon className="h-[18px] w-[18px] sm:h-6 sm:w-6" />
                       </span>
                       <div className="flex flex-col gap-0.5 min-w-0">
                         <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white whitespace-nowrap truncate">
@@ -2642,7 +2732,7 @@ function BookingPageContent() {
                       step.key === "preview" || step.key === "pay"
                         ? "min-h-[75vh] pb-24 sm:min-h-0 sm:pb-5"
                         : step.key === "customer"
-                          ? "pb-28 sm:pb-5"
+                          ? "pb-20 sm:pb-5"
                           : "pb-5"
                     }`}
                   >
@@ -2655,8 +2745,10 @@ function BookingPageContent() {
         </div>
       </div>
 
-      {/* Service Selector Modal */}
-      {showServiceSelector && renderServiceSelector()}
+      {/* Service Selector Modal — portaled above fixed header (main z-index trap) */}
+      {serviceSelectorPortalMounted &&
+        showServiceSelector &&
+        createPortal(renderServiceSelector(), document.body)}
 
       {/* Service Info Modal */}
       {renderServiceInfoModal()}

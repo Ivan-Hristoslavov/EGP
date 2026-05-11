@@ -48,8 +48,7 @@ export async function getStaffBookingNotificationTarget(
   booking: StaffBookingNotificationInput,
 ): Promise<StaffNotificationRecipient | null> {
   const profile = await getAdminProfile();
-  const to =
-    profile?.business_email?.trim() || profile?.email?.trim() || null;
+  const to = profile?.business_email?.trim() || profile?.email?.trim() || null;
 
   if (!to) {
     console.warn(
@@ -88,15 +87,22 @@ export async function getStaffBookingNotificationTarget(
   return { to, assignedPractitionerLabel };
 }
 
-function staffNotificationAmount(booking: StaffBookingNotificationInput): number {
-  if (booking.total_amount != null && !Number.isNaN(Number(booking.total_amount))) {
+function staffNotificationAmount(
+  booking: StaffBookingNotificationInput,
+): number {
+  if (
+    booking.total_amount != null &&
+    !Number.isNaN(Number(booking.total_amount))
+  ) {
     return Number(booking.total_amount);
   }
 
   return Number(booking.amount) || 0;
 }
 
-function staffNotificationCreatedAt(booking: StaffBookingNotificationInput): string {
+function staffNotificationCreatedAt(
+  booking: StaffBookingNotificationInput,
+): string {
   if (booking.created_at) {
     return new Date(booking.created_at).toLocaleString("en-GB");
   }
