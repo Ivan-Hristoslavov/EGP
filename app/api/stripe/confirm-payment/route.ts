@@ -445,7 +445,8 @@ export async function POST(request: NextRequest) {
           amountPaid > 0 &&
           remainingAmount > 0
         ) {
-          notesForStaff = `${notesForStaff}\nPaid (deposit): £${amountPaid.toFixed(2)} · Due on arrival: £${remainingAmount.toFixed(2)}`.trim();
+          notesForStaff =
+            `${notesForStaff}\nPaid (deposit): £${amountPaid.toFixed(2)} · Due on arrival: £${remainingAmount.toFixed(2)}`.trim();
         }
 
         await sendStaffNewBookingNotification({
