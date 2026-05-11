@@ -178,8 +178,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     >
       {children}
 
-      {/* Toast Container */}
-      <div className="fixed top-4 right-4 z-50 space-y-3 max-w-sm w-full">
+      {/* Toast Container — z above HeaderAesthetics (9998) and desktop mega menu portal (9999); below mobile menu (99999) and book checkout (100000). */}
+      <div className="fixed top-[max(1rem,env(safe-area-inset-top))] right-[max(1rem,env(safe-area-inset-right))] z-[10050] space-y-3 max-w-sm w-full">
         {toasts.map((toast) => (
           <div
             key={toast.id}
