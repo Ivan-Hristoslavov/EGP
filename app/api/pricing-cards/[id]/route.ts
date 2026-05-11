@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
+import { revalidateLayoutJsonLd } from "@/lib/revalidate-public-cache";
 
 export async function PUT(
   request: NextRequest,
@@ -46,6 +47,8 @@ export async function PUT(
       );
     }
 
+    revalidateLayoutJsonLd();
+
     return NextResponse.json({ pricingCard });
   } catch (error) {
     console.error("Error in pricing card PUT:", error);
@@ -78,6 +81,8 @@ export async function DELETE(
         { status: 500 },
       );
     }
+
+    revalidateLayoutJsonLd();
 
     return NextResponse.json({ success: true });
   } catch (error) {

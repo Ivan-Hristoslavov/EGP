@@ -1,5 +1,8 @@
 "use client";
+
 import { useState, useRef } from "react";
+import { Button } from "@heroui/button";
+import { Spinner } from "@heroui/spinner";
 
 import { DayOffBanner } from "./DayOffBanner";
 
@@ -189,35 +192,38 @@ export function AdminDayOffManager() {
             Manage your business's non-working days and holiday periods
           </p>
         </div>
-        <button
+        <Button
           aria-label="Add Day Off"
-          className="flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg shadow-lg hover:from-blue-700 hover:to-purple-700 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
-          onClick={openAdd}
+          className="rounded-full px-6 py-6 h-auto bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg shadow-lg hover:from-blue-700 hover:to-purple-700 hover:scale-105 data-[hover=true]:opacity-100 transition-all duration-200"
+          variant="solid"
+          onPress={openAdd}
         >
-          <span className="flex items-center justify-center w-9 h-9 rounded-full bg-white/20">
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M12 4v16m8-8H4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-              />
-            </svg>
+          <span className="flex items-center gap-3">
+            <span className="flex items-center justify-center w-9 h-9 rounded-full bg-white/20">
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M12 4v16m8-8H4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                />
+              </svg>
+            </span>
+            Add Day Off
           </span>
-          Add Day Off
-        </button>
+        </Button>
       </div>
 
       {/* Main Content */}
       <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
         {loading && (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+            <Spinner color="primary" size="lg" />
           </div>
         )}
 
@@ -335,14 +341,16 @@ export function AdminDayOffManager() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button
+                      <Button
+                        isIconOnly
                         aria-label="Edit"
-                        className="rounded-full p-2 hover:bg-blue-100 dark:hover:bg-blue-900 group transition-colors"
+                        className="text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900 dark:text-blue-400"
                         title="Edit"
-                        onClick={() => openEdit(p)}
+                        variant="light"
+                        onPress={() => openEdit(p)}
                       >
                         <svg
-                          className="w-5 h-5 text-blue-600 group-hover:text-blue-800 dark:text-blue-400 dark:group-hover:text-blue-200"
+                          className="w-5 h-5"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -354,18 +362,20 @@ export function AdminDayOffManager() {
                             strokeWidth={2}
                           />
                         </svg>
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        isIconOnly
                         aria-label="Delete"
-                        className="rounded-full p-2 hover:bg-red-100 dark:hover:bg-red-900 group transition-colors"
+                        className="text-red-600 hover:bg-red-100 dark:hover:bg-red-900 dark:text-red-400"
                         title="Delete"
-                        onClick={() => {
+                        variant="light"
+                        onPress={() => {
                           setDeleteId(p.id || null);
                           setDeleteConfirm(true);
                         }}
                       >
                         <svg
-                          className="w-5 h-5 text-red-600 group-hover:text-red-800 dark:text-red-400 dark:group-hover:text-red-200"
+                          className="w-5 h-5"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -377,7 +387,7 @@ export function AdminDayOffManager() {
                             strokeWidth={2}
                           />
                         </svg>
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -423,10 +433,12 @@ export function AdminDayOffManager() {
                     </p>
                   </div>
                 </div>
-                <button
+                <Button
+                  isIconOnly
                   aria-label="Close"
-                  className="w-8 h-8 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center transition-all duration-200"
-                  onClick={() => setShowModal(false)}
+                  className="min-w-8 w-8 h-8 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
+                  variant="flat"
+                  onPress={() => setShowModal(false)}
                 >
                   <svg
                     className="w-4 h-4"
@@ -441,7 +453,7 @@ export function AdminDayOffManager() {
                       strokeWidth={2}
                     />
                   </svg>
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -716,40 +728,23 @@ export function AdminDayOffManager() {
 
               {/* Action Buttons */}
               <div className="lg:col-span-2 flex justify-end gap-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                <button
-                  className="px-5 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg font-medium transition-all duration-200 text-sm"
-                  disabled={saving}
-                  onClick={() => setShowModal(false)}
+                <Button
+                  className="text-sm font-medium"
+                  isDisabled={saving}
+                  variant="flat"
+                  onPress={() => setShowModal(false)}
                 >
                   Cancel
-                </button>
-                <button
-                  className="px-5 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 text-sm min-w-[140px]"
-                  disabled={saving}
-                  onClick={handleSave}
+                </Button>
+                <Button
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-semibold shadow-lg hover:from-blue-700 hover:to-purple-700 min-w-[140px] data-[hover=true]:opacity-100"
+                  isDisabled={saving}
+                  variant="solid"
+                  onPress={handleSave}
                 >
                   {saving ? (
                     <span className="flex items-center gap-1">
-                      <svg
-                        className="animate-spin h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        />
-                        <path
-                          className="opacity-75"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          fill="currentColor"
-                        />
-                      </svg>
+                      <Spinner color="white" size="sm" />
                       Saving...
                     </span>
                   ) : (
@@ -770,7 +765,7 @@ export function AdminDayOffManager() {
                       {editingId ? "Update Period" : "Create Period"}
                     </span>
                   )}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -809,49 +804,32 @@ export function AdminDayOffManager() {
               </p>
 
               <div className="flex justify-end gap-3">
-                <button
-                  className="btn btn-ghost"
-                  disabled={saving}
-                  onClick={() => {
+                <Button
+                  isDisabled={saving}
+                  variant="flat"
+                  onPress={() => {
                     setDeleteConfirm(false);
                     setDeleteId(null);
                   }}
                 >
                   Cancel
-                </button>
-                <button
-                  className="btn btn-error min-w-[100px]"
-                  disabled={saving}
-                  onClick={handleDelete}
+                </Button>
+                <Button
+                  className="min-w-[100px]"
+                  color="danger"
+                  isDisabled={saving}
+                  variant="solid"
+                  onPress={handleDelete}
                 >
                   {saving ? (
-                    <span className="flex items-center">
-                      <svg
-                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        />
-                        <path
-                          className="opacity-75"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          fill="currentColor"
-                        />
-                      </svg>
+                    <span className="flex items-center gap-2">
+                      <Spinner color="white" size="sm" />
                       Deleting...
                     </span>
                   ) : (
                     "Delete"
                   )}
-                </button>
+                </Button>
               </div>
             </div>
           </div>

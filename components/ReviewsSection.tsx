@@ -3,9 +3,12 @@
 import type { Review } from "@/types";
 
 import { useState, useEffect } from "react";
+import { Button } from "@heroui/button";
+import { Spinner } from "@heroui/spinner";
 
 import { useReviews } from "@/hooks/useReviews";
 import { badgeBackgroundClass } from "@/config/badge-styles";
+import { layout, typography, textColors } from "@/config/typography";
 
 export function ReviewsSection() {
   const { reviews, isLoading, error } = useReviews();
@@ -30,10 +33,10 @@ export function ReviewsSection() {
   if (isLoading) {
     return (
       <section className="py-8 sm:py-10 bg-egp-beige-lighter dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className={layout.containerWide}>
           <div className="text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#b5ad9d]" />
-            <p className="mt-4 text-gray-600 dark:text-gray-400">
+            <Spinner color="primary" size="lg" />
+            <p className={`mt-4 ${typography.body} ${textColors.muted}`}>
               Loading reviews...
             </p>
           </div>
@@ -45,7 +48,7 @@ export function ReviewsSection() {
   if (error) {
     return (
       <section className="py-8 sm:py-10 bg-egp-beige-lighter dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className={layout.containerWide}>
           <div className="text-center py-8 text-red-600">{error}</div>
         </div>
       </section>
@@ -63,7 +66,7 @@ export function ReviewsSection() {
       className="py-6 sm:py-8 md:py-10 bg-egp-beige-lighter dark:bg-gray-900"
       id="reviews"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className={layout.containerWide}>
         {/* Header - compact */}
         <div className="text-center mb-4 sm:mb-6 md:mb-8">
           <div
@@ -80,10 +83,12 @@ export function ReviewsSection() {
               Client Impressions
             </span>
           </div>
-          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3">
+          <h2
+            className={`${typography.headingSection} ${textColors.heading} mb-2 sm:mb-3`}
+          >
             What Our Clients Say
           </h2>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <p className={`${typography.lead} max-w-2xl mx-auto`}>
             Real experiences from valued customers who trust our services
           </p>
         </div>
@@ -113,31 +118,32 @@ export function ReviewsSection() {
                 Be the first to share your experience and help others make
                 informed decisions
               </p>
-              <a
-                className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] text-[#3f3a31] rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
-                href="#leave-review"
-                onClick={(e) => {
-                  e.preventDefault();
+              <Button
+                className="bg-gradient-to-r from-[#CFC4B6] via-[#E6DDD1] to-[#F4EFE8] text-[#3f3a31] font-semibold data-[hover=true]:opacity-100"
+                startContent={
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
+                  </svg>
+                }
+                variant="solid"
+                onPress={() =>
                   document
                     .getElementById("leave-review")
-                    ?.scrollIntoView({ behavior: "smooth" });
-                }}
+                    ?.scrollIntoView({ behavior: "smooth" })
+                }
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                  />
-                </svg>
                 Write the First Review
-              </a>
+              </Button>
             </div>
           </div>
         ) : (
@@ -223,25 +229,28 @@ export function ReviewsSection() {
                     </div>
 
                     {isLongComment && (
-                      <button
-                        className="mt-5 inline-flex items-center gap-2 text-[#8c846f] dark:text-[#c9c1b0] text-sm font-semibold hover:text-[#6b5f4b] dark:hover:text-[#ddd5c3] transition-colors"
-                        onClick={() => setExpandedReview(review)}
+                      <Button
+                        className="mt-5 text-[#8c846f] dark:text-[#c9c1b0] font-semibold"
+                        endContent={
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              d="M9 5l7 7-7 7"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                            />
+                          </svg>
+                        }
+                        variant="light"
+                        onPress={() => setExpandedReview(review)}
                       >
                         Read full review
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            d="M9 5l7 7-7 7"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                          />
-                        </svg>
-                      </button>
+                      </Button>
                     )}
                   </div>
                 );
@@ -251,13 +260,14 @@ export function ReviewsSection() {
             {/* Pagination - Previous, up to 3 page numbers, Next (left to right) */}
             {totalPages > 1 && (
               <div className="flex justify-center items-center gap-2 flex-wrap">
-                <button
-                  className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all border border-gray-300 dark:border-gray-700 text-sm font-medium shadow-sm hover:shadow"
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(currentPage - 1)}
+                <Button
+                  className="font-medium"
+                  isDisabled={currentPage === 1}
+                  variant="bordered"
+                  onPress={() => setCurrentPage(currentPage - 1)}
                 >
                   Previous
-                </button>
+                </Button>
                 {(() => {
                   const pagesToShow: number[] = [];
 
@@ -266,26 +276,24 @@ export function ReviewsSection() {
                   }
 
                   return pagesToShow.map((page) => (
-                    <button
+                    <Button
                       key={page}
-                      className={`px-4 py-2 rounded-xl transition-all text-sm font-medium shadow-sm ${
-                        page === currentPage
-                          ? "bg-gray-700 dark:bg-gray-600 text-white shadow-md scale-105"
-                          : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-700 hover:shadow"
-                      }`}
-                      onClick={() => setCurrentPage(page)}
+                      className="min-w-11 font-medium"
+                      variant={page === currentPage ? "solid" : "bordered"}
+                      onPress={() => setCurrentPage(page)}
                     >
                       {page}
-                    </button>
+                    </Button>
                   ));
                 })()}
-                <button
-                  className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all border border-gray-300 dark:border-gray-700 text-sm font-medium shadow-sm hover:shadow"
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage(currentPage + 1)}
+                <Button
+                  className="font-medium"
+                  isDisabled={currentPage === totalPages}
+                  variant="bordered"
+                  onPress={() => setCurrentPage(currentPage + 1)}
                 >
                   Next
-                </button>
+                </Button>
               </div>
             )}
           </div>
@@ -293,8 +301,10 @@ export function ReviewsSection() {
       </div>
       {expandedReview && (
         <div className="fixed inset-0 z-[10020] flex items-center justify-center px-4 sm:px-6">
-          <div
-            className="absolute inset-0 z-[10020] bg-black/60 backdrop-blur-sm"
+          <button
+            aria-label="Close review overlay"
+            className="absolute inset-0 z-[10020] m-0 border-0 bg-black/60 p-0 backdrop-blur-sm cursor-default"
+            type="button"
             onClick={() => setExpandedReview(null)}
           />
           <div className="relative z-[10021] w-full max-w-2xl bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-[#e4d9c8] dark:border-gray-700 overflow-hidden">
@@ -351,10 +361,12 @@ export function ReviewsSection() {
                   )}
                 </p>
               </div>
-              <button
+              <Button
+                isIconOnly
                 aria-label="Close review"
-                className="p-2 -mr-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-                onClick={() => setExpandedReview(null)}
+                className="-mr-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                variant="light"
+                onPress={() => setExpandedReview(null)}
               >
                 <svg
                   className="w-6 h-6"
@@ -369,7 +381,7 @@ export function ReviewsSection() {
                     strokeWidth={2}
                   />
                 </svg>
-              </button>
+              </Button>
             </div>
             <div className="px-6 sm:px-8 pb-8 mt-6">
               <p className="text-base leading-relaxed text-gray-700 dark:text-gray-300 whitespace-pre-line">

@@ -12,8 +12,11 @@ import {
   Youtube,
   Heart,
 } from "lucide-react";
+import { Button } from "@heroui/button";
+import { Spinner } from "@heroui/spinner";
 
 import { siteConfig } from "@/config/site";
+import { layout } from "@/config/typography";
 import {
   useAdminProfile,
   useAdminProfileContext,
@@ -261,7 +264,7 @@ export default function FooterAesthetics() {
     <footer className="relative bg-[#E6DDD1] dark:bg-gray-900 text-gray-900 dark:text-gray-300 border-t border-gray-200 dark:border-gray-700">
       <div className="relative">
         {/* Main Footer Content - 6 sections: EGP, Contact Us, Opening Hours, Quick Links, Follow Us, Legal */}
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className={`${layout.containerWide} py-8 sm:py-12`}>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-6">
             {/* 1. EGP (site name, tagline, description from config) - first in order */}
             <div className="space-y-3 order-1 pb-6 border-b border-gray-300 dark:border-gray-600 sm:border-b-0 sm:pb-0">
@@ -274,6 +277,16 @@ export default function FooterAesthetics() {
               <p className="text-xs text-gray-700 dark:text-gray-400 leading-relaxed text-left">
                 {siteConfig.description}
               </p>
+              <div className="flex flex-col items-center gap-2 pt-2">
+                <Button
+                  as={Link}
+                  className="w-full max-w-xs bg-[#9d9585] text-white font-semibold data-[hover=true]:opacity-95"
+                  href="/book"
+                  variant="solid"
+                >
+                  Book appointment
+                </Button>
+              </div>
               <div className="grid grid-cols-2 gap-2 pt-1">
                 <div className="flex items-center gap-1.5 px-2 py-1.5 bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-700">
                   <div className="w-3 h-3 bg-green-500 rounded-full shrink-0" />
@@ -391,7 +404,10 @@ export default function FooterAesthetics() {
               </h3>
               <ul className="space-y-1 text-left text-xs text-gray-700 dark:text-gray-400">
                 {loadingHours ? (
-                  <li>Loading hours...</li>
+                  <li className="flex items-center gap-2 py-1">
+                    <Spinner size="sm" />
+                    <span>Loading hours...</span>
+                  </li>
                 ) : groupedHours.length === 0 ? (
                   <li>No hours available</li>
                 ) : (

@@ -15,6 +15,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
 import { Phone, Mail, MapPin, X, ChevronDown } from "lucide-react";
+import { Button } from "@heroui/button";
 
 import ThemeToggleButton from "./ThemeToggleButton";
 
@@ -900,11 +901,13 @@ export default function HeaderAesthetics() {
               </Link> */}
                 </nav>
 
-                <button
+                <Button
+                  isIconOnly
                   aria-expanded={mobileMenuOpen}
                   aria-label="Toggle menu"
-                  className="lg:hidden shrink-0 p-3 rounded-full transition-all duration-500 hover:scale-110 transform hover:-translate-y-1 text-gray-700 dark:text-gray-300 hover:text-gray-900 hover:bg-[#D4C9BC] dark:hover:bg-[#CFC4B6] shadow-lg hover:shadow-xl"
-                  onClick={() =>
+                  className="lg:hidden shrink-0 min-w-12 h-12 w-12 p-0 rounded-full transition-all duration-500 data-[hover=true]:scale-110 hover:-translate-y-1 text-gray-700 dark:text-gray-300 hover:text-gray-900 hover:bg-[#D4C9BC] dark:hover:bg-[#CFC4B6] shadow-lg hover:shadow-xl [-webkit-tap-highlight-color:transparent]"
+                  variant="light"
+                  onPress={() =>
                     mobileMenuOpen ? closeMobileMenu() : setMobileMenuOpen(true)
                   }
                 >
@@ -935,7 +938,7 @@ export default function HeaderAesthetics() {
                       />
                     )}
                   </svg>
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -1278,9 +1281,11 @@ export default function HeaderAesthetics() {
             }}
           >
             {/* Backdrop */}
-            <div
-              className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm animate-fadeIn"
+            <button
+              aria-label="Close menu"
+              className="lg:hidden fixed inset-0 z-0 m-0 animate-fadeIn cursor-default border-0 bg-black/50 p-0 backdrop-blur-sm"
               style={{ pointerEvents: "auto" }}
+              type="button"
               onClick={closeMobileMenu}
             />
 
@@ -1291,13 +1296,15 @@ export default function HeaderAesthetics() {
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white font-montserrat">
                   Menu
                 </h2>
-                <button
+                <Button
+                  isIconOnly
                   aria-label="Close menu"
-                  className="p-2 -mr-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-[#D4C9BC] dark:hover:bg-gray-800 transition-colors touch-manipulation"
-                  onClick={closeMobileMenu}
+                  className="-mr-2 text-gray-700 dark:text-gray-300 hover:bg-[#D4C9BC] dark:hover:bg-gray-800 touch-manipulation"
+                  variant="light"
+                  onPress={closeMobileMenu}
                 >
                   <X className="w-6 h-6" />
-                </button>
+                </Button>
               </div>
 
               <nav className="px-4 sm:px-6 py-4">

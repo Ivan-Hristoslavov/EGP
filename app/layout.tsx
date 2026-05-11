@@ -11,16 +11,20 @@ import { ToastProvider } from "@/components/Toast";
 import HashNavigation from "@/components/HashNavigation";
 import { FirstVisitDiscountFormWrapper } from "@/components/FirstVisitDiscountFormWrapper";
 import CookieConsentModal from "@/components/CookieConsentModal";
+import GoogleAnalyticsLoader from "@/components/GoogleAnalyticsLoader";
 import LayoutMain from "@/components/LayoutMain";
-import { getAdminProfile } from "@/lib/admin-profile";
-import { createClient } from "@/lib/supabase/server";
+import {
+  getCachedAdminProfile,
+  getCachedAdminSettingsRowsForSchema,
+  getCachedPricingCardsForSchema,
+} from "@/lib/cached-layout-data";
 import { siteConfig } from "@/config/site";
 import { canonicalUrl, defaultOgImages, sameAsFromSiteConfig } from "@/lib/seo";
 
 // Using Montserrat font loaded via CSS @font-face
 
 export async function generateMetadata(): Promise<Metadata> {
-  const profile = await getAdminProfile();
+  const profile = await getCachedAdminProfile();
   const companyName = profile?.company_name || siteConfig.name;
   const description = siteConfig.seo.defaultDescription;
   const ogImages = defaultOgImages(`${companyName} — London aesthetic clinic`);
@@ -111,35 +115,25 @@ export const viewport: Viewport = {
   ],
 };
 
-/** Supabase-backed shell (profile, pricing cards, admin_settings) must not freeze at build time. */
-export const dynamic = "force-dynamic";
+/** ISR for public shell — paired with `unstable_cache` + `revalidateTag` on admin/hero mutations. */
+export const revalidate = 120;
 
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Fetch admin profile data once at the layout level
-  const adminProfile = await getAdminProfile();
+  const adminProfile = await getCachedAdminProfile();
+  const pricingCards = await getCachedPricingCardsForSchema();
+  const adminSettingRows = await getCachedAdminSettingsRowsForSchema();
 
-  // Fetch pricing cards and admin settings data for structured data (areas table not used)
-  const supabase = createClient();
-  const { data: pricingCards } = await supabase
-    .from("pricing_cards")
-    .select("*")
-    .eq("is_enabled", true)
-    .order("order", { ascending: true });
+  const settingsMap: { [key: string]: unknown } = {};
 
-  const { data: adminSettings } = await supabase
-    .from("admin_settings")
-    .select("*");
-
-  // Convert admin settings to object
-  const settingsMap: { [key: string]: any } = {};
-
-  adminSettings?.forEach((setting) => {
+  adminSettingRows.forEach((setting) => {
     try {
-      settingsMap[setting.key] = JSON.parse(setting.value);
+      const v = setting.value;
+
+      settingsMap[setting.key] = typeof v === "string" ? JSON.parse(v) : v;
     } catch {
       settingsMap[setting.key] = setting.value;
     }
@@ -176,7 +170,9 @@ export default async function RootLayout({
     },
     areaServed: [],
     serviceType: pricingCards?.map((card) => card.title) || [],
-    openingHoursSpecification: settingsMap.workingDays?.map((day: string) => ({
+    openingHoursSpecification: (
+      settingsMap.workingDays as string[] | undefined
+    )?.map((day: string) => ({
       "@type": "OpeningHoursSpecification",
       dayOfWeek: day.charAt(0).toUpperCase() + day.slice(1),
       opens: settingsMap.workingHoursStart || "08:00",
@@ -264,26 +260,6 @@ export default async function RootLayout({
           }}
           type="application/ld+json"
         />
-
-        {/* Google tag (gtag.js) */}
-        {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID && (
-          <>
-            <script
-              async
-              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID}`}
-            />
-            <script
-              dangerouslySetInnerHTML={{
-                __html: `
-                  window.dataLayer = window.dataLayer || [];
-                  function gtag(){dataLayer.push(arguments);}
-                  gtag('js', new Date());
-                  gtag('config', '${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID}');
-                `,
-              }}
-            />
-          </>
-        )}
       </head>
       <body
         suppressHydrationWarning
@@ -299,6 +275,7 @@ export default async function RootLayout({
             <FirstVisitDiscountFormWrapper />
             {/* GDPR & Cookies Consent Modal */}
             <CookieConsentModal />
+            <GoogleAnalyticsLoader />
           </Providers>
         </ToastProvider>
         <Analytics />

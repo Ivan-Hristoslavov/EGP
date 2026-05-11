@@ -39,15 +39,34 @@ export interface HeroSection {
 let heroSectionCache: HeroSection | null = null;
 let cachePromise: Promise<HeroSection | null> | null = null;
 
-export function useHeroSection() {
-  const [heroSection, setHeroSection] = useState<HeroSection | null>(
-    heroSectionCache,
-  );
-  const [isLoading, setIsLoading] = useState(!heroSectionCache);
+/**
+ * @param initialFromServer When set (including `null`), skips client fetch — use for SSR hero data on the home page.
+ */
+export function useHeroSection(initialFromServer?: HeroSection | null) {
+  const serverSupplies = initialFromServer !== undefined;
+  const [heroSection, setHeroSection] = useState<HeroSection | null>(() => {
+    if (serverSupplies) return initialFromServer ?? null;
+
+    return heroSectionCache;
+  });
+  const [isLoading, setIsLoading] = useState(() => {
+    if (serverSupplies) return false;
+
+    return !heroSectionCache;
+  });
   const [error, setError] = useState<string | null>(null);
   const hasInitialized = useRef(false);
 
   useEffect(() => {
+    if (serverSupplies) {
+      hasInitialized.current = true;
+      heroSectionCache = initialFromServer ?? null;
+      setHeroSection(initialFromServer ?? null);
+      setIsLoading(false);
+
+      return;
+    }
+
     if (hasInitialized.current) return;
     hasInitialized.current = true;
 
@@ -98,7 +117,7 @@ export function useHeroSection() {
         cachePromise = null;
         throw err;
       });
-  }, []);
+  }, [serverSupplies, initialFromServer]);
 
   const refetch = async () => {
     hasInitialized.current = false;

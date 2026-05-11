@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { revalidateLayoutJsonLd } from "@/lib/revalidate-public-cache";
 import { supabaseAdmin } from "@/lib/supabase";
 
 // GET - Fetch admin settings (service role bypasses RLS)
@@ -109,6 +110,8 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    revalidateLayoutJsonLd();
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Unexpected error:", error);
@@ -140,6 +143,8 @@ export async function POST(request: NextRequest) {
         { status: 500 },
       );
     }
+
+    revalidateLayoutJsonLd();
 
     return NextResponse.json({ setting });
   } catch (error) {

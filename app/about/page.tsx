@@ -166,7 +166,6 @@ export default async function AboutPage() {
               <ImageWithSkeleton
                 fill
                 priority
-                unoptimized
                 alt={heroSection.heading || "About EGP Aesthetics"}
                 className="object-cover"
                 containerClassName="absolute inset-0 w-full h-full"

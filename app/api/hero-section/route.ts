@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 
+import { CACHE_TAG_HERO_SECTION } from "@/lib/cache-tags";
 import { createClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase";
 
@@ -214,6 +216,8 @@ export async function PUT(request: NextRequest) {
         );
       }
 
+      revalidateTag(CACHE_TAG_HERO_SECTION, "max");
+
       return NextResponse.json({ heroSection });
     } else {
       // Create new record (only if none exists)
@@ -262,6 +266,8 @@ export async function PUT(request: NextRequest) {
         );
       }
 
+      revalidateTag(CACHE_TAG_HERO_SECTION, "max");
+
       return NextResponse.json({ heroSection });
     }
   } catch (error) {
@@ -309,6 +315,8 @@ export async function DELETE(request: NextRequest) {
         { status: 500 },
       );
     }
+
+    revalidateTag(CACHE_TAG_HERO_SECTION, "max");
 
     return NextResponse.json({ success: true });
   } catch (error) {

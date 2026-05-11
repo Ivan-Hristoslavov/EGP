@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Mail, Gift, Copy, Check, Sparkles } from "lucide-react";
-import { Input, Button } from "@heroui/react";
+import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
 
 import { siteConfig } from "@/config/site";
 import { aestheticsColors } from "@/config/colors";

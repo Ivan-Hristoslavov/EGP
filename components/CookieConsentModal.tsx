@@ -6,7 +6,10 @@ import Link from "next/link";
 
 import ButtonPrimary from "./ButtonPrimary";
 
-const COOKIE_CONSENT_KEY = "egp_cookie_consent";
+import {
+  ANALYTICS_CONSENT_GRANTED_EVENT,
+  COOKIE_CONSENT_STORAGE_KEY,
+} from "@/lib/cookie-consent";
 
 interface CookiePreferences {
   necessary: boolean;
@@ -25,7 +28,7 @@ export default function CookieConsentModal() {
 
   useEffect(() => {
     // Check if user has already given consent
-    const consent = localStorage.getItem(COOKIE_CONSENT_KEY);
+    const consent = localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY);
 
     if (!consent) {
       // Show modal after a short delay for better UX
@@ -45,15 +48,13 @@ export default function CookieConsentModal() {
       timestamp: new Date().toISOString(),
     };
 
-    localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify(consentData));
+    localStorage.setItem(
+      COOKIE_CONSENT_STORAGE_KEY,
+      JSON.stringify(consentData),
+    );
     setIsOpen(false);
-    // Initialize analytics if accepted
-    if (
-      consentData.analytics &&
-      typeof window !== "undefined" &&
-      (window as any).gtag
-    ) {
-      // Analytics already initialized in layout.tsx
+    if (consentData.analytics && typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent(ANALYTICS_CONSENT_GRANTED_EVENT));
     }
   };
 
@@ -65,7 +66,10 @@ export default function CookieConsentModal() {
       timestamp: new Date().toISOString(),
     };
 
-    localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify(consentData));
+    localStorage.setItem(
+      COOKIE_CONSENT_STORAGE_KEY,
+      JSON.stringify(consentData),
+    );
     setIsOpen(false);
   };
 
@@ -75,15 +79,13 @@ export default function CookieConsentModal() {
       timestamp: new Date().toISOString(),
     };
 
-    localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify(consentData));
+    localStorage.setItem(
+      COOKIE_CONSENT_STORAGE_KEY,
+      JSON.stringify(consentData),
+    );
     setIsOpen(false);
-    // Initialize analytics if accepted
-    if (
-      consentData.analytics &&
-      typeof window !== "undefined" &&
-      (window as any).gtag
-    ) {
-      // Analytics already initialized in layout.tsx
+    if (consentData.analytics && typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent(ANALYTICS_CONSENT_GRANTED_EVENT));
     }
   };
 

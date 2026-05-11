@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { Calendar, Clock, Star, CheckCircle, ArrowRight } from "lucide-react";
-import { Card, CardBody, CardHeader, Button, Chip } from "@heroui/react";
+import { Button } from "@heroui/button";
+import { Card, CardBody, CardHeader } from "@heroui/card";
+import { Chip } from "@heroui/chip";
 
 import { siteConfig } from "@/config/site";
 import ButtonPrimary from "@/components/ButtonPrimary";

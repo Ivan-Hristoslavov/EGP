@@ -5,7 +5,7 @@ import { Award, Shield, Heart, Sparkles, Clock, Star } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { aestheticsColors } from "@/config/colors";
 import { badgeBackgroundClass } from "@/config/badge-styles";
-import { textColors, layout } from "@/config/typography";
+import { textColors, layout, typography } from "@/config/typography";
 
 const reasons = [
   {
@@ -63,10 +63,14 @@ export default function SectionWhyChooseUs() {
             <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             <span>Why Choose Us</span>
           </div>
-          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold leading-tight text-gray-900 dark:text-white mb-1.5 sm:mb-3 px-2 sm:px-4">
+          <h2
+            className={`${typography.headingSection} ${textColors.heading} mb-1.5 sm:mb-3 px-2 sm:px-4`}
+          >
             Why Choose EGP Aesthetics?
           </h2>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-2 sm:px-4 leading-relaxed">
+          <p
+            className={`${typography.body} ${textColors.body} max-w-2xl mx-auto px-2 sm:px-4 leading-relaxed`}
+          >
             Combining medical expertise with artistic vision to deliver
             exceptional results
           </p>
@@ -88,10 +92,14 @@ export default function SectionWhyChooseUs() {
                 >
                   <Icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
                 </div>
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-1 sm:mb-2">
+                <h3
+                  className={`${typography.headingSmall} ${textColors.heading} mb-1 sm:mb-2`}
+                >
                   {reason.title}
                 </h3>
-                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                <p
+                  className={`${typography.small} ${textColors.body} leading-relaxed`}
+                >
                   {reason.description}
                 </p>
               </div>

@@ -1,7 +1,6 @@
 "use client";
 
-import { Spinner } from "@heroui/react";
-import { Card, CardBody } from "@heroui/react";
+import { Card, CardBody } from "@heroui/card";
 
 import BeforeAfterSlideLine from "./BeforeAfterSlideLine";
 
@@ -39,8 +38,25 @@ export default function SectionBeforeAfter() {
     return (
       <section className="py-8 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className={layout.container}>
-          <div className="text-center">
-            <Spinner color="primary" size="lg" />
+          <div className="text-center mb-4 sm:mb-5 md:mb-6 space-y-2 sm:space-y-3">
+            <div className="inline-block h-5 w-24 rounded-full bg-white/40 dark:bg-gray-700/50 animate-pulse mx-auto" />
+            <div className="h-6 sm:h-7 max-w-md mx-auto rounded-lg bg-white/40 dark:bg-gray-700/50 animate-pulse" />
+            <div className="h-4 max-w-xl mx-auto rounded bg-white/30 dark:bg-gray-700/40 animate-pulse" />
+          </div>
+          <div className="max-w-2xl sm:max-w-3xl mx-auto mb-4">
+            <div className="relative bg-white/50 dark:bg-gray-800/50 rounded-xl shadow-lg overflow-hidden">
+              <div className="relative w-full h-[45vh] min-h-[280px] bg-gradient-to-br from-gray-200/80 via-gray-300/60 to-gray-200/80 dark:from-gray-700/50 dark:via-gray-600/40 dark:to-gray-700/50 animate-pulse" />
+            </div>
+          </div>
+          <div className="max-w-4xl lg:max-w-5xl xl:max-w-6xl mx-auto">
+            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8 gap-1.5 sm:gap-2">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="aspect-square rounded-md bg-white/40 dark:bg-gray-700/40 animate-pulse"
+                />
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -63,7 +79,7 @@ export default function SectionBeforeAfter() {
               Before & After Gallery
             </h2>
             <p className={`${typography.lead} max-w-2xl mx-auto px-4 mb-6`}>
-              See the natural, beautiful transformations we've achieved for our
+              See natural, beautiful transformations we have achieved for our
               clients
             </p>
             <Card className="max-w-2xl mx-auto" shadow="lg">
@@ -75,7 +91,7 @@ export default function SectionBeforeAfter() {
                   Gallery Coming Soon
                 </h3>
                 <p className={`${typography.body} ${textColors.body}`}>
-                  We're currently updating our before and after gallery. Check
+                  We are currently updating our before and after gallery. Check
                   back soon to see our amazing results!
                 </p>
               </CardBody>

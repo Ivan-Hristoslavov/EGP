@@ -54,4 +54,7 @@ tmp/
 temp/
 
 # Vercel
-.vercel 
+.vercel
+
+# Lighthouse / perf reports (generated locally)
+reports/

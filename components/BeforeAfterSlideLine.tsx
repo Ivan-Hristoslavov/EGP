@@ -1,10 +1,18 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight, Move } from "lucide-react";
 
 import { badgeBackgroundClass } from "@/config/badge-styles";
 import { textColors, layout } from "@/config/typography";
+
+/** Matches max-w-2xl / max-w-3xl comparison card — responsive src for `next/image`. */
+const beforeSlideSizes =
+  "(max-width: 640px) 100vw, (max-width: 1024px) min(90vw, 42rem), 48rem";
+
+const thumbSizes =
+  "(max-width: 640px) 24vw, (max-width: 1024px) 14vw, (max-width: 1280px) 12vw, 120px";
 
 interface BeforeAfterItem {
   id: string;
@@ -252,10 +260,14 @@ export default function BeforeAfterSlideLine({
             >
               {/* After Image (Background) */}
               <div className="absolute inset-0">
-                <img
+                <Image
                   alt={`${current.title} - After`}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="object-cover"
+                  decoding="async"
                   draggable={false}
+                  fill
+                  fetchPriority="low"
+                  sizes={beforeSlideSizes}
                   src={current.after_image_url}
                 />
                 <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-green-500 text-white px-2 py-0.5 rounded-full text-xs font-medium shadow-lg">
@@ -271,10 +283,14 @@ export default function BeforeAfterSlideLine({
                   transition: isDragging ? "none" : "clip-path 0.3s ease",
                 }}
               >
-                <img
+                <Image
                   alt={`${current.title} - Before`}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="object-cover"
+                  decoding="async"
                   draggable={false}
+                  fill
+                  fetchPriority="low"
+                  sizes={beforeSlideSizes}
                   src={current.before_image_url}
                 />
                 <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-medium shadow-lg">
@@ -445,9 +461,11 @@ export default function BeforeAfterSlideLine({
                 }}
               >
                 <div className="relative w-full h-full">
-                  <img
+                  <Image
                     alt={`${item.title} - Before`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    fill
+                    sizes={thumbSizes}
                     src={item.before_image_url}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent group-hover:from-black/70 transition-colors" />

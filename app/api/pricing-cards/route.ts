@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
+import { revalidateLayoutJsonLd } from "@/lib/revalidate-public-cache";
 
 export async function GET(request: NextRequest) {
   try {
@@ -93,6 +94,8 @@ export async function POST(request: NextRequest) {
         { status: 500 },
       );
     }
+
+    revalidateLayoutJsonLd();
 
     return NextResponse.json({ pricingCard });
   } catch (error) {

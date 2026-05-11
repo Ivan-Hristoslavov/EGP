@@ -20,6 +20,7 @@ import {
   TrendingUp,
   Award,
 } from "lucide-react";
+import { Button } from "@heroui/button";
 
 import { siteConfig } from "@/config/site";
 
@@ -561,9 +562,13 @@ export default function CustomerDashboardPage() {
               </div>
             </div>
             <div className="mt-6">
-              <button className="px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-semibold rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all">
+              <Button
+                as={Link}
+                className="bg-gradient-to-r from-rose-500 to-pink-500 text-white font-semibold hover:from-rose-600 hover:to-pink-600 data-[hover=true]:opacity-100"
+                href="/customer/profile"
+              >
                 Edit Profile
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -583,13 +588,15 @@ export default function CustomerDashboardPage() {
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Booking Details
               </h3>
-              <button
+              <Button
+                isIconOnly
                 aria-label="Close"
-                className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                onClick={() => setViewingBooking(null)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                variant="light"
+                onPress={() => setViewingBooking(null)}
               >
                 <X className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
             <div className="space-y-4">
               <div>

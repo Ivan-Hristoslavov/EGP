@@ -11,6 +11,7 @@ import {
   Instagram,
 } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@heroui/button";
 
 import { useAdminProfile } from "@/components/AdminProfileContext";
 import { useSocialLinks } from "@/hooks/useSocialLinks";
@@ -193,22 +194,24 @@ export default function FloatingContactButtons() {
           </div>
         ) : null}
 
-        <button
+        <Button
+          isIconOnly
           aria-label={isExpanded ? "Close menu" : "Open contact menu"}
-          className={`flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
+          className={`h-12 w-12 min-w-12 shrink-0 sm:h-14 sm:w-14 sm:min-w-14 transition-all duration-300 [-webkit-tap-highlight-color:transparent] ${
             isExpanded
               ? "bg-gray-600 hover:bg-gray-700 dark:bg-gray-500 dark:hover:bg-gray-600 text-white"
-              : "bg-[#9d9585] hover:bg-[#8a8272] dark:bg-[#b5ad9d] dark:hover:bg-[#9d9585] text-white shadow-lg hover:shadow-xl hover:scale-105"
+              : "bg-[#9d9585] hover:bg-[#8a8272] dark:bg-[#b5ad9d] dark:hover:bg-[#9d9585] text-white shadow-lg hover:shadow-xl hover:scale-105 data-[hover=true]:opacity-100"
           }`}
-          type="button"
-          onClick={() => setIsExpanded(!isExpanded)}
+          radius="full"
+          variant="solid"
+          onPress={() => setIsExpanded(!isExpanded)}
         >
           {isExpanded ? (
             <X className="h-5 w-5 sm:h-6 sm:w-6" />
           ) : (
             <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
           )}
-        </button>
+        </Button>
       </div>
     </div>
   );

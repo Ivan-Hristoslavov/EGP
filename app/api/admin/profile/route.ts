@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/admin-auth";
+import { revalidateLayoutJsonLd } from "@/lib/revalidate-public-cache";
 
 // GET - Fetch admin profile
 export async function GET() {
@@ -173,6 +174,8 @@ export async function PUT(request: NextRequest) {
         { status: 500 },
       );
     }
+
+    revalidateLayoutJsonLd();
 
     return NextResponse.json({ profile: data });
   } catch (error) {

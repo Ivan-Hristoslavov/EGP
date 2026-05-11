@@ -34,7 +34,7 @@ import {
   useAdminProfile,
   useAdminProfileContext,
 } from "@/components/AdminProfileContext";
-import { useHeroSection } from "@/hooks/useHeroSection";
+import { useHeroSection, type HeroSection } from "@/hooks/useHeroSection";
 
 /** Base wash + left-weighted gradient so the photo reads clearly darker (overlay above image via z-index). */
 const heroOverlayBaseClass =
@@ -42,10 +42,15 @@ const heroOverlayBaseClass =
 const heroOverlayGradientClass =
   "pointer-events-none absolute inset-0 z-[3] bg-[linear-gradient(180deg,rgba(0,0,0,0.62)_0%,rgba(0,0,0,0.52)_38%,rgba(0,0,0,0.46)_100%)] sm:bg-[linear-gradient(90deg,rgba(0,0,0,0.58)_0%,rgba(0,0,0,0.52)_22%,rgba(0,0,0,0.34)_48%,rgba(0,0,0,0.14)_100%)]";
 
-export default function SectionHeroAesthetics() {
+export default function SectionHeroAesthetics({
+  initialHeroSection,
+}: {
+  initialHeroSection?: HeroSection | null;
+} = {}) {
   const adminProfile = useAdminProfile();
   const { loading: profileLoading } = useAdminProfileContext();
-  const { heroSection, isLoading: heroLoading } = useHeroSection();
+  const { heroSection, isLoading: heroLoading } =
+    useHeroSection(initialHeroSection);
   const contactPhone = heroSection?.phone_number || adminProfile?.phone || "";
   const [currentSlide, setCurrentSlide] = useState(0);
   const [imagesLoaded, setImagesLoaded] = useState<boolean[]>([]);
@@ -160,7 +165,7 @@ export default function SectionHeroAesthetics() {
           }`}
         >
           {/* Skeleton Loader */}
-          {!imagesLoaded[index] && (
+          {!imagesLoaded[index] && index !== 0 && (
             <div className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 dark:from-gray-800 dark:via-gray-700 dark:to-gray-900 animate-pulse">
               <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-transparent" />
             </div>
@@ -170,11 +175,13 @@ export default function SectionHeroAesthetics() {
           <Image
             fill
             alt="Hero background"
-            className={`z-0 object-cover transition-opacity duration-500 ${
-              imagesLoaded[index] ? "opacity-100" : "opacity-0"
+            className={`z-0 object-cover ${
+              index === 0 || imagesLoaded[index]
+                ? "opacity-100"
+                : "opacity-0 transition-opacity duration-500"
             }`}
             priority={index === 0}
-            sizes="100vw 100vh"
+            sizes="100vw"
             src={slide.image}
             style={{
               objectPosition: (() => {

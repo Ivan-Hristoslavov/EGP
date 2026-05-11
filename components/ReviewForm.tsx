@@ -1,11 +1,12 @@
 "use client";
 import { useState } from "react";
-import { Input, Textarea } from "@heroui/react";
+import { Input, Textarea } from "@heroui/input";
 
 import ButtonPrimary from "./ButtonPrimary";
 
 import { useReviews } from "@/hooks/useReviews";
 import { useToast, ToastMessages } from "@/components/Toast";
+import { layout, typography, textColors } from "@/config/typography";
 
 // Helpers
 function isValidEmail(value: string) {
@@ -191,7 +192,7 @@ export function ReviewForm() {
       className="py-6 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gray-900"
       id="leave-review"
     >
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className={layout.containerNarrow}>
         {/* Header */}
         <div className="text-center mb-4 sm:mb-6">
           <div className="flex items-center justify-center gap-1 sm:gap-1.5 mb-2 sm:mb-3">
@@ -206,10 +207,12 @@ export function ReviewForm() {
               </svg>
             ))}
           </div>
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-1.5 sm:mb-2">
+          <h2
+            className={`${typography.headingSection} ${textColors.heading} mb-1.5 sm:mb-2`}
+          >
             Share Your Experience
           </h2>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+          <p className={`${typography.body} ${textColors.muted}`}>
             Help us improve by sharing your feedback
           </p>
         </div>
