@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getTemplate, type TemplateId } from "./templates";
 
+import { getAdminProfile } from "@/lib/admin-profile";
 import { testSendGridConnection, sendEmail } from "@/lib/sendgrid-smtp";
 
 const TEMPLATE_IDS: TemplateId[] = [
@@ -30,12 +31,18 @@ export async function GET(request: NextRequest) {
     }
 
     const isConfigured = await testSendGridConnection();
+    const profile = await getAdminProfile();
+    const defaultRecipient =
+      profile?.business_email?.trim() || profile?.email?.trim() || null;
 
     return NextResponse.json({
       success: true,
       configured: isConfigured,
+      defaultRecipientConfigured: Boolean(defaultRecipient),
+      defaultRecipientHint:
+        "POST without a `to` field sends to admin_profile.business_email, or admin_profile.email if business_email is empty.",
       message: isConfigured
-        ? "SMTP (Gmail) is properly configured"
+        ? "SMTP is properly configured"
         : "SMTP is not configured. Please check SMTP_SERVER, SMTP_PORT, SMTP_USERNAME, and SMTP_PASSWORD environment variables.",
     });
   } catch (error) {
@@ -63,11 +70,25 @@ export async function POST(request: NextRequest) {
       template?: TemplateId;
     };
 
-    const toAddress =
-      to ||
-      process.env.SMTP_TO_ADDRESS ||
-      process.env.ADMIN_EMAIL ||
-      "hristoslavov.ivanov@gmail.com";
+    let toAddress = to?.trim() || null;
+
+    if (!toAddress) {
+      const profile = await getAdminProfile();
+
+      toAddress =
+        profile?.business_email?.trim() || profile?.email?.trim() || null;
+    }
+
+    if (!toAddress) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "No recipient: pass `to` in the JSON body or set business_email or email on admin_profile.",
+        },
+        { status: 400 },
+      );
+    }
 
     if (template && TEMPLATE_IDS.includes(template)) {
       const t = getTemplate(template);
