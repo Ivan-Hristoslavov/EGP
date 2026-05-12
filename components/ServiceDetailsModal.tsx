@@ -14,6 +14,9 @@ import { typography, textColors } from "@/config/typography";
 import { PriceWithDiscount } from "@/components/PriceWithDiscount";
 import ButtonPrimary from "@/components/ButtonPrimary";
 
+/** Above `HeaderAesthetics` (9998) and cookie modal (10000); below `Toast` (10050). */
+const MODAL_STACK_Z = "!z-[10040]";
+
 /** Normalized service shape - accepts various API/map formats */
 export interface ServiceDetailsData {
   id?: string;
@@ -84,8 +87,9 @@ export function ServiceDetailsModal({
   return (
     <Modal
       classNames={{
-        backdrop: "bg-black/60 backdrop-blur-sm",
-        base: "bg-white dark:bg-gray-900 border border-[#e4d9c8] dark:border-gray-700",
+        wrapper: MODAL_STACK_Z,
+        backdrop: `${MODAL_STACK_Z} bg-black/60 backdrop-blur-sm`,
+        base: `${MODAL_STACK_Z} bg-white dark:bg-gray-900 border border-[#e4d9c8] dark:border-gray-700`,
       }}
       isOpen={isOpen}
       scrollBehavior="inside"

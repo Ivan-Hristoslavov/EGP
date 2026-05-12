@@ -96,6 +96,9 @@ type TeamMember = {
   }>;
 };
 
+/** When /book is opened with no `service` / `pendingServiceId`, pre-select this treatment. */
+const DEFAULT_BOOKING_SERVICE_SLUG = "exosomes-face";
+
 function BookingPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -691,6 +694,28 @@ function BookingPageContent() {
         }
         if (typeof window !== "undefined")
           sessionStorage.removeItem("pendingServiceId");
+      }
+    } else {
+      const defaultSvc = services.find(
+        (s) => s.slug === DEFAULT_BOOKING_SERVICE_SLUG,
+      );
+
+      if (defaultSvc && servicesDataMap[defaultSvc.id]) {
+        const service = servicesDataMap[defaultSvc.id];
+
+        pendingProcessedRef.current = true;
+        setSelectedServices([
+          {
+            serviceId: defaultSvc.id,
+            name: service.name,
+            price: service.price,
+            originalPrice: service.originalPrice ?? undefined,
+            discountPercentage: service.discount_percentage ?? undefined,
+            duration: service.duration,
+            category: service.category,
+            quantity: 1,
+          },
+        ]);
       }
     }
   }, [
