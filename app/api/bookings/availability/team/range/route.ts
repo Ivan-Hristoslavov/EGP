@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { fetchBookingClosedWeekdaysFromDb } from "@/lib/booking-closed-weekdays-db";
 import { supabaseAdmin } from "@/lib/supabase";
 
 // GET - Get available booking hours for a team member for a date range
@@ -123,6 +124,9 @@ export async function GET(request: NextRequest) {
       }
     > = {};
 
+    const bookingClosedOnline = await fetchBookingClosedWeekdaysFromDb();
+    const bookingClosedSet = new Set(bookingClosedOnline);
+
     const start = new Date(startDate);
     const end = new Date(endDate);
     const currentDate = new Date(start);
@@ -162,6 +166,16 @@ export async function GET(request: NextRequest) {
         "saturday",
       ];
       const currentDayKey = dayKeys[dayOfWeek];
+
+      if (bookingClosedSet.has(dayOfWeek)) {
+        results[dateStr] = {
+          availableSlots: [],
+          bookedSlots: [],
+          status: "closed",
+        };
+        currentDate.setDate(currentDate.getDate() + 1);
+        continue;
+      }
 
       // Get working hours for this day
       let isWorkingDay = false;

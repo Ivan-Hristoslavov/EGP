@@ -1,3 +1,4 @@
+import { Button } from "@heroui/react";
 import type { Metadata } from "next";
 
 import Link from "next/link";
@@ -11,7 +12,6 @@ import {
   Shield,
 } from "lucide-react";
 import { notFound } from "next/navigation";
-import { Button } from "@heroui/button";
 
 import { typography, layout, textColors } from "@/config/typography";
 import { canonicalUrl, defaultOgImages, toMetaDescription } from "@/lib/seo";

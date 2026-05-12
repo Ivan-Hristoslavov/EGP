@@ -9,6 +9,8 @@ import {
   Package,
   Users,
   Calendar,
+  CalendarDays,
+  CalendarOff,
   CreditCard,
   Image as ImageIcon,
   FileEdit,
@@ -18,9 +20,15 @@ import {
   Info,
   UsersRound,
   User,
+  Share2,
+  Images,
+  FileText,
+  Percent,
+  BookOpen,
 } from "lucide-react";
 
 import ThemeToggleButton from "../../components/ThemeToggleButton";
+import { layout, textColors, typography } from "@/config/typography";
 
 // Navigation definition
 const navigation = [
@@ -32,26 +40,17 @@ const navigation = [
   {
     name: "Bookings",
     href: "/admin/bookings",
-    icon: (
-      <svg
-        className="w-5 h-5"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-        />
-      </svg>
-    ),
+    icon: <CalendarDays className="w-5 h-5" />,
   },
   {
     name: "Calendar",
     href: "/admin/calendar",
     icon: <Calendar className="w-5 h-5" />,
+  },
+  {
+    name: "Day off",
+    href: "/admin/day-off",
+    icon: <CalendarOff className="w-5 h-5" />,
   },
   {
     name: "Customers",
@@ -72,6 +71,16 @@ const navigation = [
     name: "Payments",
     href: "/admin/payments",
     icon: <CreditCard className="w-5 h-5" />,
+  },
+  {
+    name: "Invoices",
+    href: "/admin/invoices",
+    icon: <FileText className="w-5 h-5" />,
+  },
+  {
+    name: "VAT",
+    href: "/admin/settings/vat",
+    icon: <Percent className="w-5 h-5" />,
   },
   {
     name: "Gallery",
@@ -99,23 +108,14 @@ const navigation = [
     icon: <Info className="w-5 h-5" />,
   },
   {
+    name: "Site guidance",
+    href: "/admin/site-guidance",
+    icon: <BookOpen className="w-5 h-5" />,
+  },
+  {
     name: "Social Media",
     href: "/admin/social",
-    icon: (
-      <svg
-        className="w-5 h-5"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-        />
-      </svg>
-    ),
+    icon: <Share2 className="w-5 h-5" />,
   },
   {
     name: "Profile",
@@ -125,21 +125,7 @@ const navigation = [
   {
     name: "Hero Section",
     href: "/admin/hero-section",
-    icon: (
-      <svg
-        className="w-5 h-5"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-        />
-      </svg>
-    ),
+    icon: <Images className="w-5 h-5" />,
   },
   {
     name: "Test Email",
@@ -167,17 +153,45 @@ export default function AdminLayout({
 
   useEffect(() => {
     if (pathname === "/admin/login") {
+      setIsAuthenticated(false);
       setIsLoading(false);
 
       return;
     }
-    const timer = setTimeout(() => {
-      setIsAuthenticated(true);
-      setIsLoading(false);
-    }, 300);
 
-    return () => clearTimeout(timer);
-  }, [pathname]);
+    let cancelled = false;
+
+    async function verifySession() {
+      setIsLoading(true);
+      try {
+        const res = await fetch("/api/admin/auth", {
+          method: "GET",
+          credentials: "same-origin",
+          cache: "no-store",
+        });
+        if (cancelled) return;
+        if (res.ok) {
+          setIsAuthenticated(true);
+          setIsLoading(false);
+        } else {
+          setIsAuthenticated(false);
+          setIsLoading(false);
+          router.replace("/admin/login");
+        }
+      } catch {
+        if (cancelled) return;
+        setIsAuthenticated(false);
+        setIsLoading(false);
+        router.replace("/admin/login");
+      }
+    }
+
+    void verifySession();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname, router]);
 
   if (!hasMounted) {
     // Ensure nothing is rendered until after mount, for hydration safety
@@ -205,11 +219,10 @@ export default function AdminLayout({
       >
         {/* Skeleton sidebar */}
         <div className="hidden lg:flex w-64 flex-col flex-shrink-0 bg-white dark:bg-gray-800 shadow-xl animate-pulse">
-          <div className="h-16 px-6 bg-gradient-to-r from-rose-600/80 to-purple-600/80 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/20" />
-            <div className="flex-1 space-y-1">
-              <div className="h-4 w-24 bg-white/30 rounded" />
-              <div className="h-3 w-16 bg-white/20 rounded" />
+          <div className="flex min-h-[4.5rem] items-center gap-3 border-b border-white/10 bg-gradient-to-r from-rose-600/80 to-purple-600/80 px-4 py-3 sm:px-5">
+            <div className="h-9 w-9 shrink-0 rounded-lg bg-white/20 sm:h-10 sm:w-10 sm:rounded-xl" />
+            <div className="min-w-0 flex-1">
+              <div className="h-4 w-32 max-w-full rounded bg-white/30" />
             </div>
           </div>
           <nav className="flex-1 px-4 py-6 space-y-2">
@@ -284,21 +297,23 @@ export default function AdminLayout({
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
-        <div className="flex items-center justify-between h-16 px-6 bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 flex-shrink-0">
-          <Link className="flex items-center space-x-3" href="/admin/dashboard">
-            <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30">
-              <Shield className="w-6 h-6 text-white" />
+        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-white/10 bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 px-4 py-3 sm:px-5">
+          <Link
+            className="flex min-w-0 flex-1 items-center gap-2.5 sm:gap-3"
+            href="/admin/dashboard"
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/30 bg-white/20 backdrop-blur-sm sm:h-10 sm:w-10 sm:rounded-xl">
+              <Shield className="h-5 w-5 text-white sm:h-6 sm:w-6" />
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-white bg-gradient-to-r from-white to-white/90 bg-clip-text text-transparent font-montserrat">
-                EGP Aesthetics
+            <div className="min-w-0 flex-1">
+              <h1 className="font-montserrat text-base font-bold leading-snug text-white sm:text-lg sm:leading-tight">
+                Admin Panel
               </h1>
-              <p className="text-xs text-white/80 font-medium">Admin Panel</p>
             </div>
           </Link>
           <button
             aria-label="Close menu"
-            className="lg:hidden min-h-[44px] min-w-[44px] flex items-center justify-center text-white hover:text-gray-200 transition-colors -mr-2"
+            className="flex h-10 w-10 shrink-0 items-center justify-center text-white transition-colors hover:text-white/90 lg:hidden"
             onClick={() => setSidebarOpen(false)}
           >
             <svg
@@ -411,7 +426,9 @@ export default function AdminLayout({
                 </svg>
               </button>
               <div className="ml-4 lg:ml-0">
-                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h1
+                  className={`${typography.headingSmall} ${textColors.heading}`}
+                >
                   {navigation.find((item) => item.href === pathname)?.name ||
                     "Admin Panel"}
                 </h1>
@@ -427,7 +444,9 @@ export default function AdminLayout({
           suppressHydrationWarning
           className="min-h-screen bg-gradient-to-br from-rose-50/30 via-pink-50/30 to-purple-50/30 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800 transition-colors duration-300"
         >
-          <div className="p-3 sm:p-4 lg:p-6 xl:p-8 min-w-0 max-w-full overflow-x-hidden">
+          <div
+            className={`${layout.containerWide} py-3 sm:py-4 lg:py-6 xl:py-8 min-w-0 overflow-x-hidden`}
+          >
             {children}
           </div>
         </main>

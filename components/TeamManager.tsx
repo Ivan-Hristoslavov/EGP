@@ -17,24 +17,21 @@ import {
   Power,
   Calendar,
 } from "lucide-react";
+import { RangeCalendar } from "@heroui/react";
 import {
-  RangeCalendar,
   Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Button,
-  Textarea,
-  Card,
-  CardBody,
-  Input,
-  Select,
-  SelectItem,
-  Checkbox,
-  Chip,
-  Avatar,
-} from "@heroui/react";
+} from "@heroui/modal";
+import { Button } from "@heroui/button";
+import { Input, Textarea } from "@heroui/input";
+import { Select, SelectItem } from "@heroui/select";
+import { Checkbox } from "@heroui/checkbox";
+import { Card, CardBody } from "@heroui/card";
+import { Chip } from "@heroui/chip";
+import { Avatar } from "@heroui/avatar";
 import {
   today,
   getLocalTimeZone,

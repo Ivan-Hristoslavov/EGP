@@ -7,16 +7,13 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Button,
-  Input,
-  Textarea,
-  Select,
-  SelectItem,
-  Checkbox,
-  Card,
-  CardBody,
-  Spinner,
-} from "@heroui/react";
+} from "@heroui/modal";
+import { Button } from "@heroui/button";
+import { Input, Textarea } from "@heroui/input";
+import { Select, SelectItem } from "@heroui/select";
+import { Checkbox } from "@heroui/checkbox";
+import { Card, CardBody } from "@heroui/card";
+import { Spinner } from "@heroui/spinner";
 
 import { useBlog, BlogPost } from "@/hooks/useBlog";
 import { useToast } from "@/components/Toast";

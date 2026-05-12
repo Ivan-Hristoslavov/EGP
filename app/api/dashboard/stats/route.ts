@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 
+import {
+  aggregateServices,
+  buildDailyBookingSeries,
+} from "../../../../lib/dashboard-analytics";
 import { supabaseAdmin } from "../../../../lib/supabase";
 
 // Helper function to map activity types to status values
@@ -34,12 +38,11 @@ export async function GET(request: Request) {
 
     // Get start of current month
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const startOfMonthStr = startOfMonth.toISOString().split("T")[0];
     const startOfMonthISO = startOfMonth.toISOString();
 
     // Use admin client to bypass RLS
     // 1. Today's Bookings count
-    const { count: todayBookingsCount, error: todayBookingsError } =
+    const { count: todayBookingsCount } =
       await supabaseAdmin
         .from("bookings")
         .select("*", { count: "exact", head: true })
@@ -78,7 +81,7 @@ export async function GET(request: Request) {
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
     const ninetyDaysAgoStr = ninetyDaysAgo.toISOString().split("T")[0];
 
-    const { data: activeCustomers, error: activeCustomersError } =
+    const { data: activeCustomers } =
       await supabaseAdmin
         .from("customers")
         .select("id", { count: "exact", head: false })
@@ -125,19 +128,123 @@ export async function GET(request: Request) {
       .select("rating")
       .eq("is_approved", true);
 
-    const avgRating =
-      reviews && reviews.length > 0
-        ? (
-            reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-          ).toFixed(1)
-        : "0.0";
+    let avgRating = 0;
+    let avgRatingCount = 0;
+
+    if (reviewsError) {
+      console.error("Error fetching reviews for dashboard stats:", reviewsError);
+    } else if (reviews && reviews.length > 0) {
+      const numericRatings = reviews
+        .map((r) => Number(r.rating))
+        .filter((n) => !Number.isNaN(n) && n >= 0);
+
+      avgRatingCount = numericRatings.length;
+
+      if (numericRatings.length > 0) {
+        const sum = numericRatings.reduce((a, b) => a + b, 0);
+
+        avgRating = sum / numericRatings.length;
+      }
+    }
 
     // Build stats object
     const stats = {
       today_bookings: todayBookingsCount || 0,
       monthly_revenue: monthlyRevenue,
       active_clients: activeClientsCount,
-      avg_rating: parseFloat(avgRating),
+      avg_rating: Number(avgRating.toFixed(1)),
+      avg_rating_count: avgRatingCount,
+    };
+
+    // --- Dashboard analytics (read-only aggregates, last 30 days) ---
+    const start30 = new Date(today);
+
+    start30.setDate(start30.getDate() - 29);
+    const start30Str = start30.toISOString().split("T")[0];
+
+    const { data: bookingRows30 } = await supabaseAdmin
+      .from("bookings")
+      .select("date, status, service")
+      .gte("date", start30Str)
+      .lte("date", todayStr);
+
+    const rows30 =
+      (bookingRows30 as {
+        date: string;
+        status: string | null;
+        service: string | null;
+      }[]) || [];
+
+    const booking_series_7d = buildDailyBookingSeries(rows30, today, 7);
+    const booking_series_30d = buildDailyBookingSeries(rows30, today, 30);
+    const service_distribution = aggregateServices(rows30, 8);
+
+    const weekStart = new Date(today);
+
+    weekStart.setDate(today.getDate() - today.getDay());
+    const weekEnd = new Date(weekStart);
+
+    weekEnd.setDate(weekStart.getDate() + 6);
+    const weekStartStr = weekStart.toISOString().split("T")[0];
+    const weekEndStr = weekEnd.toISOString().split("T")[0];
+
+    let weekBooked = 0;
+
+    for (const r of rows30) {
+      if (r.date < weekStartStr || r.date > weekEndStr) continue;
+      if (r.status === "cancelled") continue;
+      weekBooked += 1;
+    }
+
+    /** Soft weekly capacity for gauge (not clinical slot math). */
+    const weekly_capacity_proxy = 48;
+    const utilization_percent = Math.min(
+      100,
+      Math.round((weekBooked / Math.max(1, weekly_capacity_proxy)) * 100),
+    );
+
+    const priorMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const priorMonthEnd = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      0,
+      23,
+      59,
+      59,
+      999,
+    );
+
+    const { data: priorMonthPayments } = await supabaseAdmin
+      .from("payments")
+      .select("amount")
+      .eq("payment_status", "paid")
+      .gte("created_at", priorMonthStart.toISOString())
+      .lte("created_at", priorMonthEnd.toISOString());
+
+    const revenue_prior_month =
+      priorMonthPayments?.reduce((sum: number, p: any) => {
+        const amount =
+          typeof p.amount === "string" ? parseFloat(p.amount) : p.amount || 0;
+
+        return sum + (Number.isNaN(amount) ? 0 : amount);
+      }, 0) || 0;
+
+    const revenue_mom_ratio =
+      revenue_prior_month > 0
+        ? (monthlyRevenue - revenue_prior_month) / revenue_prior_month
+        : null;
+
+    const analytics = {
+      booking_series_7d,
+      booking_series_30d,
+      service_distribution,
+      utilization: {
+        week_booked: weekBooked,
+        capacity_proxy: weekly_capacity_proxy,
+        percent: utilization_percent,
+      },
+      revenue_prior_month,
+      revenue_mom_ratio,
     };
 
     // Get activity - either recent or all based on parameter
@@ -193,13 +300,14 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       stats,
+      analytics,
       recentActivity: getAllActivity
         ? transformedActivity
         : transformedActivity,
       allActivity: getAllActivity ? transformedActivity : null,
       upcomingBookings,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

@@ -17,20 +17,18 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Button,
-  Input,
-  Textarea,
-  Switch,
-  Chip,
-  Card,
-  CardBody,
-  Spinner,
-  Select,
-  SelectItem,
-} from "@heroui/react";
+} from "@heroui/modal";
+import { Button } from "@heroui/button";
+import { Input, Textarea } from "@heroui/input";
+import { Switch } from "@heroui/switch";
+import { Chip } from "@heroui/chip";
+import { Card, CardBody } from "@heroui/card";
+import { Spinner } from "@heroui/spinner";
+import { Select, SelectItem } from "@heroui/select";
 
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { ConfirmationModal } from "@/components/ConfirmationModal";
+import { formLayout, inputClassNames } from "@/config/design-system";
 
 interface AboutSection {
   id: string;
@@ -537,8 +535,8 @@ export default function AdminAboutPage() {
                   {editingSection ? "Edit Section" : "Add New Section"}
                 </h2>
               </ModalHeader>
-              <ModalBody className="py-6">
-                <div className="space-y-6">
+              <ModalBody className={formLayout.modalBody}>
+                <div className={formLayout.sectionGap}>
                   {/* Section Type */}
                   <Select
                     isRequired
@@ -565,6 +563,7 @@ export default function AdminAboutPage() {
 
                   {/* Heading */}
                   <Input
+                    classNames={inputClassNames}
                     label="Heading"
                     placeholder="Section heading"
                     size="lg"
@@ -578,7 +577,10 @@ export default function AdminAboutPage() {
                   {/* Content */}
                   <Textarea
                     isRequired
-                    classNames={{ input: "min-h-[180px]" }}
+                    classNames={{
+                      ...inputClassNames,
+                      input: `${inputClassNames.input} min-h-[180px]`,
+                    }}
                     description="Long text is shown in readable paragraphs. Add empty lines between paragraphs for better layout."
                     label="Content"
                     minRows={8}
@@ -597,6 +599,7 @@ export default function AdminAboutPage() {
                     </label>
                     <div className="flex gap-2 mb-2">
                       <Input
+                        classNames={inputClassNames}
                         className="flex-1"
                         placeholder="Enter bullet point"
                         size="lg"
@@ -709,6 +712,7 @@ export default function AdminAboutPage() {
                   {/* Order & Active */}
                   <div className="grid grid-cols-2 gap-4">
                     <Input
+                      classNames={inputClassNames}
                       label="Display Order"
                       placeholder="0"
                       size="lg"

@@ -480,11 +480,11 @@ export default function CustomersPage() {
 
   return (
     <div className="w-full space-y-6">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div className="flex items-center gap-3">
+      {/* Header: view toggle left, primary CTA right */}
+      <div className="flex w-full flex-wrap items-center justify-between gap-3">
+        <div className="flex min-h-10 items-center gap-3">
           {/* View Toggle - desktop only */}
-          <div className="hidden md:flex bg-default-100 rounded-lg p-1">
+          <div className="hidden md:flex rounded-lg bg-default-100 p-1">
             <Button
               className="min-w-0"
               color={viewMode === "table" ? "primary" : "default"}
@@ -506,14 +506,15 @@ export default function CustomersPage() {
               Cards
             </Button>
           </div>
-          <Button
-            color="primary"
-            startContent={<Plus className="w-4 h-4" />}
-            onPress={() => setShowAddModal(true)}
-          >
-            Add Customer
-          </Button>
         </div>
+        <Button
+          className="shrink-0"
+          color="primary"
+          startContent={<Plus className="w-4 h-4" />}
+          onPress={() => setShowAddModal(true)}
+        >
+          Add Customer
+        </Button>
       </div>
 
       {/* Loading state */}

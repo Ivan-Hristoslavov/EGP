@@ -9,7 +9,10 @@ import {
   Linkedin,
   Twitter,
 } from "lucide-react";
-import { Button, Input, Card, CardBody, Spinner } from "@heroui/react";
+import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
+import { Card, CardBody } from "@heroui/card";
+import { Spinner } from "@heroui/spinner";
 
 import { useToast } from "@/components/Toast";
 import { siteConfig } from "@/config/site";

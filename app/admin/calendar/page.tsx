@@ -11,7 +11,6 @@ import {
   Phone,
   Mail,
   MapPin,
-  Search,
   Edit,
   CheckCircle,
   XCircle,
@@ -37,6 +36,17 @@ import { Spinner } from "@heroui/spinner";
 import { Textarea } from "@heroui/react";
 
 import { useToast } from "@/components/Toast";
+import WorkingHoursManager from "@/components/admin/WorkingHoursManager";
+import { CalendarDayPanel } from "@/components/admin/calendar/calendar-day-panel";
+import { CalendarMonthGrid } from "@/components/admin/calendar/calendar-month-grid";
+import { CalendarMoveBookingModal } from "@/components/admin/calendar/calendar-move-booking-modal";
+import { CalendarPageSkeleton } from "@/components/admin/calendar/calendar-page-skeleton";
+import { CalendarStatsChips } from "@/components/admin/calendar/calendar-stats-chips";
+import type { CalendarStatsStrip } from "@/components/admin/calendar/calendar-types";
+import { CalendarViewHeader } from "@/components/admin/calendar/calendar-view-header";
+import { CalendarWeekGrid } from "@/components/admin/calendar/calendar-week-grid";
+
+import { CalendarToolbar } from "./calendar-toolbar";
 
 interface Booking {
   id: string;
@@ -151,6 +161,20 @@ const isToday = (date: Date) => {
   );
 };
 
+function statsFromBookingsForStrip(bookings: Booking[]): CalendarStatsStrip {
+  return {
+    total: bookings.length,
+    completed: bookings.filter((b) => b.status === "completed").length,
+    scheduled: bookings.filter(
+      (b) => b.status === "scheduled" || b.status === "confirmed",
+    ).length,
+    pending: bookings.filter((b) => b.status === "pending").length,
+    cancelled: bookings.filter((b) => b.status === "cancelled").length,
+    paid: bookings.filter((b) => b.payment_status === "paid").length,
+    totalAmount: bookings.reduce((sum, b) => sum + (b.amount || 0), 0),
+  };
+}
+
 export default function CalendarPage() {
   const { showSuccess, showError } = useToast();
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -160,6 +184,7 @@ export default function CalendarPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [showHoursSettingsModal, setShowHoursSettingsModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -1155,20 +1180,25 @@ export default function CalendarPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-      </div>
-    );
+    return <CalendarPageSkeleton />;
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="mt-6 flex justify-end items-center">
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
         <Button
+          startContent={<Clock className="h-4 w-4" />}
+          variant="bordered"
+          onPress={() => setShowHoursSettingsModal(true)}
+        >
+          Clinic hours &amp; blackouts
+        </Button>
+        <Button
+          className="h-10 shrink-0 font-semibold sm:h-11 sm:min-w-[10.5rem]"
           color="primary"
-          startContent={<Plus className="w-4 h-4" />}
+          size="sm"
+          startContent={<Plus className="h-4 w-4" />}
+          variant="flat"
           onPress={() => {
             setShowAddModal(true);
             setNewBookingForm((prev) => ({ ...prev, date: selectedDate }));
@@ -1177,867 +1207,167 @@ export default function CalendarPage() {
             }
           }}
         >
-          New Booking
+          New booking
         </Button>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
-            <input
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-              placeholder="Search bookings..."
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          <select
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="scheduled">Scheduled</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
-
-          <input
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            type="date"
-            value={selectedDate}
-            onChange={(e) => {
-              setSelectedDate(e.target.value);
-              // Switch to day view when date filter changes
-              if (view !== "day") {
-                setView("day");
-              }
-            }}
-          />
-
-          <div className="flex gap-2 flex-wrap">
-            <button
-              className={`min-h-[44px] flex-1 min-w-[70px] px-4 py-2 rounded-lg font-medium ${
-                view === "month"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-              }`}
-              onClick={() => setView("month")}
-            >
-              Month
-            </button>
-            <button
-              className={`min-h-[44px] flex-1 min-w-[70px] px-4 py-2 rounded-lg font-medium ${
-                view === "week"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-              }`}
-              onClick={() => setView("week")}
-            >
-              Week
-            </button>
-            <button
-              className={`min-h-[44px] flex-1 min-w-[70px] px-4 py-2 rounded-lg font-medium ${
-                view === "day"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-              }`}
-              onClick={() => setView("day")}
-            >
-              Day
-            </button>
-          </div>
-        </div>
-      </div>
+      <CalendarToolbar
+        searchTerm={searchTerm}
+        onSearchTermChange={setSearchTerm}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
+        selectedDate={selectedDate}
+        onSelectedDateChange={(value) => {
+          setSelectedDate(value);
+          if (view !== "day") {
+            setView("day");
+          }
+        }}
+        view={view}
+        onViewChange={setView}
+      />
 
       {/* Calendar View */}
       {view === "month" && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 overflow-hidden">
-          {/* Calendar Header */}
-          <div className="p-4 border-b dark:border-gray-700">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {currentDate.toLocaleDateString("en-US", {
-                  month: "long",
-                  year: "numeric",
-                })}
-              </h2>
-              <div className="flex items-center gap-2">
-                <button
-                  className="min-h-[44px] min-w-[44px] p-2 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300"
-                  onClick={() => navigateDate("prev")}
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <button
-                  className="min-h-[44px] px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                  onClick={() => setCurrentDate(new Date())}
-                >
-                  Today
-                </button>
-                <button
-                  className="min-h-[44px] min-w-[44px] p-2 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300"
-                  onClick={() => navigateDate("next")}
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-            {/* Booking Statistics */}
-            {monthStats.total > 0 && (
-              <div className="flex items-center gap-4 flex-wrap pt-3 border-t dark:border-gray-700">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      {monthStats.total}
-                    </span>{" "}
-                    Total
-                  </span>
-                </div>
-                {monthStats.completed > 0 && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">
-                        {monthStats.completed}
-                      </span>{" "}
-                      Completed
-                    </span>
-                  </div>
-                )}
-                {monthStats.scheduled > 0 && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">
-                        {monthStats.scheduled}
-                      </span>{" "}
-                      Scheduled
-                    </span>
-                  </div>
-                )}
-                {monthStats.pending > 0 && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">
-                        {monthStats.pending}
-                      </span>{" "}
-                      Pending
-                    </span>
-                  </div>
-                )}
-                {monthStats.cancelled > 0 && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-red-500 rounded-full" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">
-                        {monthStats.cancelled}
-                      </span>{" "}
-                      Cancelled
-                    </span>
-                  </div>
-                )}
-                {monthStats.paid > 0 && (
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">
-                        {monthStats.paid}
-                      </span>{" "}
-                      Paid
-                    </span>
-                  </div>
-                )}
-                {monthStats.totalAmount > 0 && (
-                  <div className="flex items-center gap-2 ml-auto">
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                      Total: £{monthStats.totalAmount.toFixed(2)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Calendar Grid - scroll horizontally on mobile */}
-          <div className="overflow-x-auto">
-            <div className="grid grid-cols-7 min-w-[320px]">
-              {/* Day headers */}
-              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-                <div
-                  key={day}
-                  className="p-3 text-center text-sm font-medium text-gray-500 dark:text-gray-400 border-b dark:border-gray-700"
-                >
-                  {day}
-                </div>
-              ))}
-
-              {/* Calendar days */}
-              {getDaysInMonth(currentDate).map((day, index) => {
-                const dayBookings = day
-                  ? getBookingsForDate(
-                      day,
-                      currentDate.getMonth(),
-                      currentDate.getFullYear(),
-                    )
-                  : [];
-                const isToday =
-                  day &&
-                  new Date().getDate() === day &&
-                  new Date().getMonth() === currentDate.getMonth() &&
-                  new Date().getFullYear() === currentDate.getFullYear();
-
-                return (
-                  <div
-                    key={index}
-                    className={`min-h-[120px] p-2 border-b border-r dark:border-gray-700 transition-colors relative ${
-                      isToday
-                        ? "bg-blue-50 dark:bg-blue-900/20"
-                        : "bg-white dark:bg-gray-800"
-                    } hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer`}
-                    onClick={() => day && handleDayClick(day)}
-                    onDragOver={handleDragOver}
-                    onDrop={(e) => day && handleDrop(e, day)}
-                  >
-                    {day && (
-                      <>
-                        <div
-                          className={`text-sm font-medium mb-1 ${
-                            isToday
-                              ? "text-blue-600 dark:text-blue-400"
-                              : "text-gray-900 dark:text-white"
-                          }`}
-                        >
-                          {day}
-                        </div>
-                        <div className="space-y-1">
-                          {dayBookings.slice(0, 3).map((booking) => (
-                            <div
-                              key={booking.id}
-                              draggable
-                              className={`text-xs p-1 rounded truncate cursor-move transition-all duration-200 hover:scale-105 ${
-                                booking.status === "completed"
-                                  ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
-                                  : booking.status === "scheduled"
-                                    ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300"
-                                    : booking.status === "pending"
-                                      ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300"
-                                      : "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
-                              } ${draggedBooking?.id === booking.id ? "opacity-50" : ""}`}
-                              title={`${formatTime(booking.time)} - ${booking.customer_name} (${booking.service}) - £${booking.amount} - Drag to move`}
-                              onClick={(e) => {
-                                e.stopPropagation(); // Prevent day click from firing
-                                handleBookingClick(booking);
-                              }}
-                              onDragEnd={handleDragEnd}
-                              onDragStart={(e) => handleDragStart(e, booking)}
-                            >
-                              <div className="flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                {formatTime(booking.time)}
-                              </div>
-                              <div className="truncate font-medium">
-                                {booking.customer_name}
-                              </div>
-                              <div className="truncate text-xs opacity-75">
-                                {booking.service}
-                              </div>
-                            </div>
-                          ))}
-                          {dayBookings.length > 3 && (
-                            <div
-                              className="text-xs text-blue-600 dark:text-blue-400 font-medium cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors duration-200 py-1 text-center"
-                              title={`Click to see all ${dayBookings.length} bookings for this day`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleExpandDay(
-                                  day,
-                                  currentDate.getMonth(),
-                                  currentDate.getFullYear(),
-                                );
-                              }}
-                            >
-                              +{dayBookings.length - 3} more
-                            </div>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+        <div className="overflow-hidden rounded-xl border border-default-200/90 bg-content1 shadow-sm shadow-black/5 ring-1 ring-black/5 dark:border-default-100/20 dark:shadow-black/20 dark:ring-white/10">
+          <CalendarViewHeader
+            nextAriaLabel="Next month"
+            prevAriaLabel="Previous month"
+            statsSlot={<CalendarStatsChips stats={monthStats} />}
+            title={currentDate.toLocaleDateString("en-US", {
+              month: "long",
+              year: "numeric",
+            })}
+            todayLabel="Today"
+            onNext={() => navigateDate("next")}
+            onPrev={() => navigateDate("prev")}
+            onToday={() => setCurrentDate(new Date())}
+          />
+          <CalendarMonthGrid
+            currentDate={currentDate}
+            days={getDaysInMonth(currentDate)}
+            draggedBookingId={draggedBooking?.id ?? null}
+            formatTime={formatTime}
+            getBookingsForDate={getBookingsForDate}
+            selectedDate={selectedDate}
+            onBookingClick={(b) => handleBookingClick(b as Booking)}
+            onDayClick={handleDayClick}
+            onDragEnd={handleDragEnd}
+            onDragOver={handleDragOver}
+            onDragStart={(e, b) => handleDragStart(e, b as Booking)}
+            onDrop={handleDrop}
+            onExpandDay={handleExpandDay}
+          />
         </div>
       )}
 
       {/* Week View */}
       {view === "week" && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 overflow-hidden">
-          {/* Week Header */}
-          <div className="p-4 border-b dark:border-gray-700">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {getWeekRange(currentDate)}
-              </h2>
-              <div className="flex items-center gap-2">
-                <button
-                  className="min-h-[44px] min-w-[44px] p-2 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300"
-                  onClick={() => navigateWeek("prev")}
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <button
-                  className="min-h-[44px] px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                  onClick={() => setCurrentDate(new Date())}
-                >
-                  This Week
-                </button>
-                <button
-                  className="min-h-[44px] min-w-[44px] p-2 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300"
-                  onClick={() => navigateWeek("next")}
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-            {/* Booking Statistics */}
-            {weekStats.total > 0 && (
-              <div className="flex items-center gap-4 flex-wrap pt-3 border-t dark:border-gray-700">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      {weekStats.total}
-                    </span>{" "}
-                    Total
-                  </span>
-                </div>
-                {weekStats.completed > 0 && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">
-                        {weekStats.completed}
-                      </span>{" "}
-                      Completed
-                    </span>
-                  </div>
-                )}
-                {weekStats.scheduled > 0 && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">
-                        {weekStats.scheduled}
-                      </span>{" "}
-                      Scheduled
-                    </span>
-                  </div>
-                )}
-                {weekStats.pending > 0 && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">
-                        {weekStats.pending}
-                      </span>{" "}
-                      Pending
-                    </span>
-                  </div>
-                )}
-                {weekStats.cancelled > 0 && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-red-500 rounded-full" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">
-                        {weekStats.cancelled}
-                      </span>{" "}
-                      Cancelled
-                    </span>
-                  </div>
-                )}
-                {weekStats.paid > 0 && (
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-semibold text-gray-900 dark:text-white">
-                        {weekStats.paid}
-                      </span>{" "}
-                      Paid
-                    </span>
-                  </div>
-                )}
-                {weekStats.totalAmount > 0 && (
-                  <div className="flex items-center gap-2 ml-auto">
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                      Total: £{weekStats.totalAmount.toFixed(2)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Week Grid - scroll horizontally on mobile */}
-          <div className="overflow-x-auto">
-            <div className="grid grid-cols-8 min-w-[560px]">
-              {/* Time column header */}
-              <div className="p-3 text-center text-sm font-medium text-gray-500 dark:text-gray-400 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
-                Time
-              </div>
-
-              {/* Day headers */}
-              {getWeekDays(currentDate).map((day) => {
-                const dayDateStr = day.toISOString().split("T")[0];
-                const isSelected = selectedDate === dayDateStr;
-
-                return (
-                  <div
-                    key={day.toISOString()}
-                    className={`p-3 text-center text-sm font-medium border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 cursor-pointer transition-colors ${
-                      isSelected
-                        ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
-                        : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600"
-                    }`}
-                    onClick={() => {
-                      setSelectedDate(dayDateStr);
-                      setView("day");
-                    }}
-                  >
-                    <div className="font-semibold">
-                      {day.toLocaleDateString("en-US", { weekday: "short" })}
-                    </div>
-                    <div
-                      className={`text-xs mt-1 ${
-                        isToday(day)
-                          ? "text-blue-600 dark:text-blue-400 font-bold"
-                          : isSelected
-                            ? "text-blue-700 dark:text-blue-300"
-                            : "text-gray-500 dark:text-gray-400"
-                      }`}
-                    >
-                      {day.getDate()}
-                    </div>
-                  </div>
-                );
-              })}
-
-              {/* Time slots grouped by hours */}
-              {Array.from({ length: 12 }, (_, hourIndex) => {
-                const hour = 8 + hourIndex; // Start from 8 AM
-                const hourSlots = [
-                  `${hour.toString().padStart(2, "0")}:00`,
-                  `${hour.toString().padStart(2, "0")}:30`,
-                ];
-
-                return (
-                  <React.Fragment key={hour}>
-                    {/* Hour header row */}
-                    <div className="col-span-8 p-2 text-sm font-semibold text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 bg-gray-100 dark:bg-gray-800">
-                      {hour}:00 - {hour + 1}:00
-                    </div>
-
-                    {/* 30-minute slots for this hour */}
-                    {hourSlots.map((timeSlot) => (
-                      <React.Fragment key={timeSlot}>
-                        {/* Time label */}
-                        <div className="p-2 text-xs font-medium text-gray-600 dark:text-gray-400 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-center">
-                          {timeSlot}
-                        </div>
-
-                        {/* Day columns */}
-                        {getWeekDays(currentDate).map((day) => {
-                          const dayDateStr = day.toISOString().split("T")[0];
-                          const dayBookings = getBookingsForDate(
-                            day.getDate(),
-                            day.getMonth(),
-                            day.getFullYear(),
-                          ).filter((booking) => {
-                            // Normalize booking time for comparison
-                            const bookingTime = booking.time
-                              ? booking.time.split(":").slice(0, 2).join(":")
-                              : "";
-
-                            return bookingTime === timeSlot;
-                          });
-
-                          return (
-                            <div
-                              key={`${day.toISOString()}-${timeSlot}`}
-                              className={`min-h-[60px] p-1 border-b border-r dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors relative ${
-                                selectedDate === dayDateStr
-                                  ? "bg-blue-50 dark:bg-blue-900/20"
-                                  : ""
-                              }`}
-                              onClick={() => {
-                                setSelectedDate(dayDateStr);
-                                handleTimeSlotClick(day, timeSlot);
-                              }}
-                            >
-                              {dayBookings.map((booking) => {
-                                // Determine colors based on booking status
-                                const getStatusClasses = () => {
-                                  switch (booking.status) {
-                                    case "completed":
-                                      return {
-                                        bg: "bg-green-100 dark:bg-green-900/30",
-                                        border:
-                                          "border-green-200 dark:border-green-800",
-                                        hover:
-                                          "hover:bg-green-200 dark:hover:bg-green-900/50",
-                                        text: "text-green-900 dark:text-green-100",
-                                        textSecondary:
-                                          "text-green-700 dark:text-green-300",
-                                      };
-                                    case "cancelled":
-                                      return {
-                                        bg: "bg-red-100 dark:bg-red-900/30",
-                                        border:
-                                          "border-red-200 dark:border-red-800",
-                                        hover:
-                                          "hover:bg-red-200 dark:hover:bg-red-900/50",
-                                        text: "text-red-900 dark:text-red-100",
-                                        textSecondary:
-                                          "text-red-700 dark:text-red-300",
-                                      };
-                                    case "pending":
-                                      return {
-                                        bg: "bg-yellow-100 dark:bg-yellow-900/30",
-                                        border:
-                                          "border-yellow-200 dark:border-yellow-800",
-                                        hover:
-                                          "hover:bg-yellow-200 dark:hover:bg-yellow-900/50",
-                                        text: "text-yellow-900 dark:text-yellow-100",
-                                        textSecondary:
-                                          "text-yellow-700 dark:text-yellow-300",
-                                      };
-                                    case "scheduled":
-                                    case "confirmed":
-                                      return {
-                                        bg: "bg-blue-100 dark:bg-blue-900/30",
-                                        border:
-                                          "border-blue-200 dark:border-blue-800",
-                                        hover:
-                                          "hover:bg-blue-200 dark:hover:bg-blue-900/50",
-                                        text: "text-blue-900 dark:text-blue-100",
-                                        textSecondary:
-                                          "text-blue-700 dark:text-blue-300",
-                                      };
-                                    default:
-                                      return {
-                                        bg: "bg-gray-100 dark:bg-gray-900/30",
-                                        border:
-                                          "border-gray-200 dark:border-gray-800",
-                                        hover:
-                                          "hover:bg-gray-200 dark:hover:bg-gray-900/50",
-                                        text: "text-gray-900 dark:text-gray-100",
-                                        textSecondary:
-                                          "text-gray-700 dark:text-gray-300",
-                                      };
-                                  }
-                                };
-
-                                const statusClasses = getStatusClasses();
-
-                                return (
-                                  <div
-                                    key={booking.id}
-                                    className={`${statusClasses.bg} border ${statusClasses.border} rounded p-1 mb-1 cursor-pointer ${statusClasses.hover} transition-colors`}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleBookingClick(booking);
-                                    }}
-                                  >
-                                    <div
-                                      className={`text-xs font-medium ${statusClasses.text} truncate`}
-                                    >
-                                      {booking.customer_name}
-                                    </div>
-                                    <div
-                                      className={`text-xs ${statusClasses.textSecondary} truncate`}
-                                    >
-                                      {booking.service}
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          );
-                        })}
-                      </React.Fragment>
-                    ))}
-                  </React.Fragment>
-                );
-              })}
-            </div>
-          </div>
+        <div className="overflow-hidden rounded-xl border border-default-200/90 bg-content1 shadow-sm shadow-black/5 ring-1 ring-black/5 dark:border-default-100/20 dark:shadow-black/20 dark:ring-white/10">
+          <CalendarViewHeader
+            nextAriaLabel="Next week"
+            prevAriaLabel="Previous week"
+            statsSlot={<CalendarStatsChips stats={weekStats} />}
+            title={getWeekRange(currentDate)}
+            todayLabel="This week"
+            onNext={() => navigateWeek("next")}
+            onPrev={() => navigateWeek("prev")}
+            onToday={() => setCurrentDate(new Date())}
+          />
+          <CalendarWeekGrid
+            formatTime={formatTime}
+            getBookingsForDate={getBookingsForDate}
+            selectedDate={selectedDate}
+            weekDays={getWeekDays(currentDate)}
+            onBookingClick={(b) => handleBookingClick(b as Booking)}
+            onSelectDayGoToDayView={(dayDateStr) => {
+              setSelectedDate(dayDateStr);
+              setView("day");
+            }}
+            onTimeSlotActivate={(day, timeSlot) => {
+              handleTimeSlotClick(day, timeSlot);
+            }}
+          />
         </div>
       )}
 
       {/* Day View */}
       {view === "day" && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700">
-          <div className="p-4 border-b dark:border-gray-700">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {new Date(selectedDate).toLocaleDateString("en-US", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </h2>
-              <div className="flex items-center gap-2">
-                <button
-                  className="min-h-[44px] min-w-[44px] p-2 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300 transition-colors"
-                  title="Previous Day"
-                  onClick={() => {
-                    const current = new Date(selectedDate);
+        <div className="overflow-hidden rounded-xl border border-default-200/90 bg-content1 shadow-sm shadow-black/5 ring-1 ring-black/5 dark:border-default-100/20 dark:shadow-black/20 dark:ring-white/10">
+          <CalendarViewHeader
+            nextAriaLabel="Next day"
+            prevAriaLabel="Previous day"
+            statsSlot={
+              filteredBookings.length > 0 ? (
+                <CalendarStatsChips
+                  stats={statsFromBookingsForStrip(filteredBookings)}
+                />
+              ) : null
+            }
+            title={new Date(selectedDate).toLocaleDateString("en-US", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+            todayLabel="Today"
+            onNext={() => {
+              const current = new Date(selectedDate);
 
-                    current.setDate(current.getDate() - 1);
-                    setSelectedDate(current.toISOString().split("T")[0]);
-                  }}
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <button
-                  className="min-h-[44px] px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  title="Today"
-                  onClick={() => {
-                    setSelectedDate(getCurrentToday());
-                  }}
-                >
-                  Today
-                </button>
-                <button
-                  className="min-h-[44px] min-w-[44px] p-2 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300 transition-colors"
-                  title="Next Day"
-                  onClick={() => {
-                    const current = new Date(selectedDate);
+              current.setDate(current.getDate() + 1);
+              setSelectedDate(current.toISOString().split("T")[0]);
+            }}
+            onPrev={() => {
+              const current = new Date(selectedDate);
 
-                    current.setDate(current.getDate() + 1);
-                    setSelectedDate(current.toISOString().split("T")[0]);
-                  }}
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-            {/* Booking Statistics */}
-            {filteredBookings.length > 0 &&
-              (() => {
-                const stats = {
-                  total: filteredBookings.length,
-                  completed: filteredBookings.filter(
-                    (b) => b.status === "completed",
-                  ).length,
-                  scheduled: filteredBookings.filter(
-                    (b) => b.status === "scheduled" || b.status === "confirmed",
-                  ).length,
-                  pending: filteredBookings.filter(
-                    (b) => b.status === "pending",
-                  ).length,
-                  cancelled: filteredBookings.filter(
-                    (b) => b.status === "cancelled",
-                  ).length,
-                  paid: filteredBookings.filter(
-                    (b) => b.payment_status === "paid",
-                  ).length,
-                  totalAmount: filteredBookings.reduce(
-                    (sum, b) => sum + (b.amount || 0),
-                    0,
-                  ),
-                };
-
-                return (
-                  <div className="flex items-center gap-4 flex-wrap mt-3 pt-3 border-t dark:border-gray-700">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        <span className="font-semibold text-gray-900 dark:text-white">
-                          {stats.total}
-                        </span>{" "}
-                        Total
-                      </span>
-                    </div>
-                    {stats.completed > 0 && (
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full" />
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          <span className="font-semibold text-gray-900 dark:text-white">
-                            {stats.completed}
-                          </span>{" "}
-                          Completed
-                        </span>
-                      </div>
-                    )}
-                    {stats.scheduled > 0 && (
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          <span className="font-semibold text-gray-900 dark:text-white">
-                            {stats.scheduled}
-                          </span>{" "}
-                          Scheduled
-                        </span>
-                      </div>
-                    )}
-                    {stats.pending > 0 && (
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-yellow-500 rounded-full" />
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          <span className="font-semibold text-gray-900 dark:text-white">
-                            {stats.pending}
-                          </span>{" "}
-                          Pending
-                        </span>
-                      </div>
-                    )}
-                    {stats.cancelled > 0 && (
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-red-500 rounded-full" />
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          <span className="font-semibold text-gray-900 dark:text-white">
-                            {stats.cancelled}
-                          </span>{" "}
-                          Cancelled
-                        </span>
-                      </div>
-                    )}
-                    {stats.paid > 0 && (
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-green-500" />
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          <span className="font-semibold text-gray-900 dark:text-white">
-                            {stats.paid}
-                          </span>{" "}
-                          Paid
-                        </span>
-                      </div>
-                    )}
-                    {stats.totalAmount > 0 && (
-                      <div className="flex items-center gap-2 ml-auto">
-                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                          Total: £{stats.totalAmount.toFixed(2)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
-          </div>
-
-          {filteredBookings.length === 0 ? (
-            <div className="text-center py-12">
-              <CalendarIcon className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                No bookings for this date
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-4">
-                Create a new booking to get started.
-              </p>
-              <button
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                onClick={() => setShowAddModal(true)}
-              >
-                Create Booking
-              </button>
-            </div>
-          ) : (
-            <div className="p-4 space-y-4">
-              {filteredBookings.map((booking) => {
-                // Determine border color based on status
-                const getStatusBorderColor = () => {
-                  switch (booking.status) {
-                    case "completed":
-                      return "border-l-4 border-l-green-500";
-                    case "cancelled":
-                      return "border-l-4 border-l-red-500";
-                    case "pending":
-                      return "border-l-4 border-l-yellow-500";
-                    case "scheduled":
-                    case "confirmed":
-                      return "border-l-4 border-l-blue-500";
-                    default:
-                      return "border-l-4 border-l-gray-400";
-                  }
-                };
-
-                // Determine background color based on status
-                const getStatusBgColor = () => {
-                  switch (booking.status) {
-                    case "completed":
-                      return "bg-green-50 dark:bg-green-900/10";
-                    case "cancelled":
-                      return "bg-red-50 dark:bg-red-900/10";
-                    case "pending":
-                      return "bg-yellow-50 dark:bg-yellow-900/10";
-                    case "scheduled":
-                    case "confirmed":
-                      return "bg-blue-50 dark:bg-blue-900/10";
-                    default:
-                      return "bg-white dark:bg-gray-800";
-                  }
-                };
-
-                return (
-                  <div
-                    key={booking.id}
-                    className={`border dark:border-gray-700 rounded-lg p-4 transition-colors cursor-pointer ${getStatusBorderColor()} ${getStatusBgColor()} hover:shadow-md`}
-                    onClick={() => handleBookingClick(booking)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="text-lg font-medium text-gray-900 dark:text-white">
-                          {formatTime(booking.time)}
-                        </div>
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">
-                            {booking.customer_name}
-                          </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-300">
-                            {booking.service}
-                          </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                            <Phone className="w-3 h-3" />
-                            {booking.customer_phone || "N/A"}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}
-                        >
-                          {getStatusIcon(booking.status)}
-                          {booking.status}
-                        </span>
-                        <div className="text-right">
-                          <div className="font-medium text-gray-900 dark:text-white">
-                            £{booking.amount}
-                          </div>
-                          {booking.duration && (
-                            <div className="text-sm text-gray-500 dark:text-gray-400">
-                              {booking.duration}min
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+              current.setDate(current.getDate() - 1);
+              setSelectedDate(current.toISOString().split("T")[0]);
+            }}
+            onToday={() => setSelectedDate(getCurrentToday())}
+          />
+          <CalendarDayPanel
+            filteredBookings={filteredBookings}
+            formatTime={formatTime}
+            onBookingClick={(b) => handleBookingClick(b as Booking)}
+            onCreateBooking={() => {
+              setShowAddModal(true);
+              setNewBookingForm((prev) => ({ ...prev, date: selectedDate }));
+              if (selectedDate) {
+                fetchNewBookingTimeSlots(selectedDate);
+              }
+            }}
+          />
         </div>
       )}
+
+      <Modal
+        isOpen={showHoursSettingsModal}
+        scrollBehavior="inside"
+        size="5xl"
+        onClose={() => setShowHoursSettingsModal(false)}
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1 border-b border-divider">
+                <h2 className="text-xl font-bold">Clinic hours &amp; booking blackouts</h2>
+                <p className="text-sm font-normal text-default-500">
+                  Weekly schedule, online booking closed weekdays, and slot generation live
+                  here — use Save and Generate slots inside the form.
+                </p>
+              </ModalHeader>
+              <ModalBody className="gap-0 py-4">
+                <WorkingHoursManager />
+              </ModalBody>
+              <ModalFooter>
+                <Button variant="light" onPress={onClose}>
+                  Close
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
 
       {/* New Booking Modal */}
       <Modal
@@ -3103,186 +2433,22 @@ export default function CalendarPage() {
         </div>
       )}
 
-      {/* Move Booking Modal */}
-      <Modal
+      <CalendarMoveBookingModal
+        booking={bookingToMove}
+        customTime={customTime}
+        formatTime={formatTime}
         isOpen={showMoveModal}
-        size="2xl"
+        loadingSlots={loadingSlots}
+        minSelectableDate={getCurrentToday()}
+        moveAvailableSlots={moveAvailableSlots}
+        moveTargetDate={moveTargetDate}
+        useCustomTime={useCustomTime}
         onClose={() => setShowMoveModal(false)}
-      >
-        <ModalContent>
-          <ModalHeader className="flex flex-col gap-1">
-            <div className="flex items-center gap-2">
-              <CalendarIcon className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-              <span>Move Booking</span>
-            </div>
-            {bookingToMove && (
-              <p className="text-sm font-normal text-gray-600 dark:text-gray-400">
-                Moving: {bookingToMove.customer_name} - {bookingToMove.service}
-              </p>
-            )}
-          </ModalHeader>
-          <ModalBody>
-            {bookingToMove && (
-              <div className="space-y-6">
-                {/* Current booking info */}
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
-                    Current Booking
-                  </h4>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div>
-                      <span className="text-gray-600 dark:text-gray-400">
-                        Date:
-                      </span>
-                      <span className="ml-2 font-medium">
-                        {new Date(bookingToMove.date).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-gray-600 dark:text-gray-400">
-                        Time:
-                      </span>
-                      <span className="ml-2 font-medium">
-                        {formatTime(bookingToMove.time)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Date picker */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Select New Date
-                  </label>
-                  <input
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    min={getCurrentToday()}
-                    type="date"
-                    value={moveTargetDate}
-                    onChange={(e) => setMoveTargetDate(e.target.value)}
-                  />
-                </div>
-
-                {/* Time Selection */}
-                {moveTargetDate && (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-4 mb-4">
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Select New Time
-                      </label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          checked={useCustomTime}
-                          className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                          id="useCustomTime"
-                          type="checkbox"
-                          onChange={(e) => setUseCustomTime(e.target.checked)}
-                        />
-                        <label
-                          className="text-sm text-gray-600 dark:text-gray-400"
-                          htmlFor="useCustomTime"
-                        >
-                          Use custom time
-                        </label>
-                      </div>
-                    </div>
-
-                    {useCustomTime ? (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Custom Time
-                        </label>
-                        <div className="flex gap-2">
-                          <input
-                            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
-                            type="time"
-                            value={customTime}
-                            onChange={(e) => setCustomTime(e.target.value)}
-                          />
-                          <button
-                            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
-                            disabled={!customTime}
-                            onClick={() => handleMoveBooking()}
-                          >
-                            Move
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div>
-                        {loadingSlots ? (
-                          <div className="space-y-3">
-                            <div className="text-sm text-gray-600 dark:text-gray-400">
-                              Available time slots for{" "}
-                              {new Date(moveTargetDate).toLocaleDateString()}:
-                            </div>
-                            <div className="grid grid-cols-4 gap-2 max-h-64 overflow-y-auto p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border">
-                              {/* Skeleton loaders */}
-                              {Array.from({ length: 8 }).map((_, idx) => (
-                                <div
-                                  key={idx}
-                                  className="px-3 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"
-                                >
-                                  <div className="h-4 w-12 bg-gray-300 dark:bg-gray-600 rounded" />
-                                </div>
-                              ))}
-                            </div>
-                            <div className="flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-purple-600" />
-                              <span>Loading available slots...</span>
-                            </div>
-                          </div>
-                        ) : moveAvailableSlots.length > 0 ? (
-                          <div className="space-y-3">
-                            <div className="text-sm text-gray-600 dark:text-gray-400">
-                              Available time slots for{" "}
-                              {new Date(moveTargetDate).toLocaleDateString()}:
-                            </div>
-                            <div className="grid grid-cols-4 gap-2 max-h-64 overflow-y-auto p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border">
-                              {moveAvailableSlots.map((timeSlot) => (
-                                <button
-                                  key={timeSlot}
-                                  className="px-3 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-800/50 transition-colors font-medium text-sm border border-green-200 dark:border-green-800"
-                                  onClick={() => handleMoveBooking(timeSlot)}
-                                >
-                                  {formatTime(timeSlot)}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="text-center py-8 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/50 rounded-lg border">
-                            <div className="text-lg mb-2">📅</div>
-                            <div className="font-medium">
-                              No available time slots
-                            </div>
-                            <div className="text-sm">
-                              for{" "}
-                              {new Date(moveTargetDate).toLocaleDateString()}
-                            </div>
-                            <div className="text-xs mt-2 text-gray-400">
-                              Try selecting a different date or use custom time
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              color="default"
-              variant="light"
-              onPress={() => setShowMoveModal(false)}
-            >
-              Cancel
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+        onCustomTimeChange={setCustomTime}
+        onMove={handleMoveBooking}
+        onMoveTargetDateChange={setMoveTargetDate}
+        onUseCustomTimeChange={setUseCustomTime}
+      />
 
       {/* Edit Booking Modal */}
       <Modal

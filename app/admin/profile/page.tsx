@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import {
   User,
@@ -23,7 +24,10 @@ import { siteConfig } from "@/config/site";
 import { useAdminProfile } from "@/hooks/useAdminProfile";
 import { useToast } from "@/components/Toast";
 import { AdminFAQManager } from "@/components/AdminFAQManager";
-import WorkingHoursManager from "@/components/admin/WorkingHoursManager";
+import { Input } from "@heroui/input";
+import { Spinner } from "@heroui/spinner";
+import { Tab, Tabs } from "@heroui/tabs";
+import { inputClassNames } from "@/config/design-system";
 
 type ProfileData = {
   firstName: string;
@@ -337,16 +341,9 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-pink-50/50 to-purple-50/50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 mx-auto mb-4 relative">
-            <div className="absolute inset-0 rounded-full border-2 border-rose-200 dark:border-rose-800" />
-            <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-rose-500 dark:border-t-rose-400 animate-spin" />
-          </div>
-          <p className="text-gray-600 dark:text-gray-300 text-sm">
-            Loading profile...
-          </p>
-        </div>
+      <div className="flex min-h-[320px] flex-col items-center justify-center gap-4 bg-gradient-to-br from-rose-50/50 via-pink-50/50 to-purple-50/50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800">
+        <Spinner color="danger" size="lg" />
+        <p className="text-sm text-default-600">Loading profile…</p>
       </div>
     );
   }
@@ -401,28 +398,36 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Tabs Navigation - compact for mobile */}
-      <div className="mb-4 sm:mb-6 border-b border-gray-200 dark:border-gray-700 -mx-1">
-        <nav className="flex space-x-0 overflow-x-auto scrollbar-hide px-1">
+      <div className="-mx-1 mb-4 border-b border-gray-200 dark:border-gray-700 sm:mb-6">
+        <Tabs
+          aria-label="Profile sections"
+          classNames={{
+            tabList: "w-full overflow-x-auto scrollbar-hide gap-0 px-1",
+            cursor: "bg-rose-500",
+          }}
+          color="danger"
+          selectedKey={activeTab}
+          variant="underlined"
+          onSelectionChange={(key) =>
+            setActiveTab(key as "company" | "business" | "faq" | "security")
+          }
+        >
           {tabs.map((tab) => {
             const Icon = tab.icon;
 
             return (
-              <button
+              <Tab
                 key={tab.id}
-                className={`flex items-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-3 sm:px-4 border-b-2 font-medium text-xs sm:text-sm transition-all whitespace-nowrap min-h-[44px] ${
-                  activeTab === tab.id
-                    ? "border-rose-500 text-rose-600 dark:text-rose-400 bg-gray-50 dark:bg-gray-800"
-                    : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                }`}
-                onClick={() => setActiveTab(tab.id as any)}
-              >
-                <Icon className="w-4 h-4" />
-                <span>{tab.label}</span>
-              </button>
+                title={
+                  <span className="flex min-h-[44px] items-center gap-1.5 whitespace-nowrap text-xs font-medium sm:gap-2 sm:text-sm">
+                    <Icon className="h-4 w-4 shrink-0" />
+                    {tab.label}
+                  </span>
+                }
+              />
             );
           })}
-        </nav>
+        </Tabs>
       </div>
 
       {/* Tab Content */}
@@ -434,78 +439,64 @@ export default function ProfilePage() {
               <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">
                 Business Information
               </h3>
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Business Email
-                  </label>
-                  <input
-                    className="w-full min-h-[44px] px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                    placeholder="Enter business email"
-                    type="email"
-                    value={profileData.businessEmail}
-                    onChange={(e) =>
-                      setProfileData((prev) => ({
-                        ...prev,
-                        businessEmail: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
+              <div className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-2">
+                <Input
+                  classNames={inputClassNames}
+                  label="Business Email"
+                  placeholder="Enter business email"
+                  type="email"
+                  value={profileData.businessEmail}
+                  variant="bordered"
+                  onValueChange={(value) =>
+                    setProfileData((prev) => ({
+                      ...prev,
+                      businessEmail: value,
+                    }))
+                  }
+                />
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Phone Number
-                  </label>
-                  <input
-                    className="w-full min-h-[44px] px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                    placeholder="Enter your phone number"
-                    type="tel"
-                    value={profileData.phone}
-                    onChange={(e) =>
-                      setProfileData((prev) => ({
-                        ...prev,
-                        phone: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
+                <Input
+                  classNames={inputClassNames}
+                  label="Phone Number"
+                  placeholder="Enter your phone number"
+                  type="tel"
+                  value={profileData.phone}
+                  variant="bordered"
+                  onValueChange={(value) =>
+                    setProfileData((prev) => ({ ...prev, phone: value }))
+                  }
+                />
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Company Name *
-                  </label>
-                  <input
-                    className="w-full min-h-[44px] px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                    placeholder="Enter company name"
-                    type="text"
-                    value={profileData.companyName}
-                    onChange={(e) =>
-                      setProfileData((prev) => ({
-                        ...prev,
-                        companyName: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
+                <Input
+                  classNames={inputClassNames}
+                  isRequired
+                  label="Company Name"
+                  placeholder="Enter company name"
+                  type="text"
+                  value={profileData.companyName}
+                  variant="bordered"
+                  onValueChange={(value) =>
+                    setProfileData((prev) => ({
+                      ...prev,
+                      companyName: value,
+                    }))
+                  }
+                />
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    WhatsApp Number
-                  </label>
-                  <input
-                    className="w-full min-h-[44px] px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                    placeholder="07944 24 20 79"
-                    type="text"
-                    value={profileData.whatsapp}
-                    onChange={(e) =>
-                      setProfileData((prev) => ({
-                        ...prev,
-                        whatsapp: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
+                <Input
+                  classNames={inputClassNames}
+                  label="WhatsApp Number"
+                  placeholder="07944 24 20 79"
+                  type="text"
+                  value={profileData.whatsapp}
+                  variant="bordered"
+                  onValueChange={(value) =>
+                    setProfileData((prev) => ({
+                      ...prev,
+                      whatsapp: value,
+                    }))
+                  }
+                />
               </div>
 
               <div>
@@ -1344,8 +1335,24 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="border-t border-gray-200 dark:border-gray-700 pt-8">
-              <WorkingHoursManager />
+            <div className="border-t border-gray-200 pt-8 dark:border-gray-700">
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 sm:p-6 dark:border-gray-700 dark:bg-gray-800/40">
+                <h3 className="mb-2 text-base font-semibold text-gray-900 dark:text-white">
+                  Weekly hours &amp; online booking
+                </h3>
+                <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+                  Opening hours, closed days, and blocking weekdays on the
+                  public /book page are managed on the Calendar page so they sit
+                  next to bookings and availability.
+                </p>
+                <Link
+                  className="inline-flex items-center gap-2 text-sm font-medium text-rose-600 hover:underline dark:text-rose-400"
+                  href="/admin/calendar"
+                >
+                  Open Calendar
+                  <span aria-hidden="true">→</span>
+                </Link>
+              </div>
             </div>
           </div>
         )}

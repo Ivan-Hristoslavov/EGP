@@ -240,7 +240,7 @@ export const forms = {
   labelRequired:
     "block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 after:content-['*'] after:ml-1 after:text-red-500",
 
-  // Textarea
+  // TextArea
   textarea:
     "px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-[#464C45] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-[#464C45] transition-all resize-none",
 

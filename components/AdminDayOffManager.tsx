@@ -1,5 +1,10 @@
 "use client";
 import { useState, useRef } from "react";
+import { Plus } from "lucide-react";
+
+import { Button } from "@heroui/button";
+import { Card } from "@heroui/card";
+import { Spinner } from "@heroui/spinner";
 
 import { DayOffBanner } from "./DayOffBanner";
 
@@ -189,43 +194,34 @@ export function AdminDayOffManager() {
             Manage your business's non-working days and holiday periods
           </p>
         </div>
-        <button
+        <Button
           aria-label="Add Day Off"
-          className="flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg shadow-lg hover:from-blue-700 hover:to-purple-700 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
-          onClick={openAdd}
+          className="bg-white/20 font-bold text-white shadow-lg backdrop-blur-sm"
+          color="default"
+          radius="full"
+          size="lg"
+          startContent={<Plus className="h-6 w-6" />}
+          variant="flat"
+          onPress={openAdd}
         >
-          <span className="flex items-center justify-center w-9 h-9 rounded-full bg-white/20">
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M12 4v16m8-8H4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-              />
-            </svg>
-          </span>
           Add Day Off
-        </button>
+        </Button>
       </div>
 
       {/* Main Content */}
-      <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
-        {loading && (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+      <Card className="overflow-hidden border border-gray-100 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center gap-4 py-16">
+            <Spinner color="primary" size="lg" />
+            <p className="text-sm text-default-500">Loading periods…</p>
           </div>
-        )}
-
-        {error && (
-          <div className="p-4 bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500 text-red-700 dark:text-red-300">
-            <p>{error}</p>
-          </div>
-        )}
+        ) : (
+          <>
+            {error ? (
+            <div className="border-l-4 border-danger bg-danger-50 p-4 text-danger-700 dark:bg-danger-900/30 dark:text-danger-300">
+              <p>{error}</p>
+            </div>
+            ) : null}
 
         <div className="overflow-x-auto">
           <table className="table w-full">
@@ -385,9 +381,9 @@ export function AdminDayOffManager() {
             </tbody>
           </table>
         </div>
-      </div>
-
-      {/* Add/Edit Modal */}
+          </>
+        )}
+      </Card>
       {showModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-start lg:items-center justify-center z-50 animate-fade-in p-2 sm:p-4 md:p-6 lg:p-8 overflow-y-auto">
           <div className=" w-full max-w-3xl xl:max-w-4xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl transform transition-all animate-fade-in-up overflow-hidden max-h-[90vh] sm:max-h-[85vh] lg:max-h-none lg:overflow-visible flex flex-col mt-6 lg:mt-0">

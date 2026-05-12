@@ -3,7 +3,17 @@ import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+import { requireAdmin } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase";
+
+/** Session probe for admin shell (cookie + JWT). */
+export async function GET() {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
+  return NextResponse.json({ authenticated: true });
+}
 
 // Rate limiting: keyed by IP address
 const loginAttempts = new Map<

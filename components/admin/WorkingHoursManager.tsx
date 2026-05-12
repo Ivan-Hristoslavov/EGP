@@ -5,6 +5,7 @@ import { Clock, Save, RefreshCw, Calendar } from "lucide-react";
 import { Button } from "@heroui/react";
 
 import { useToast } from "@/components/Toast";
+import { parseBookingClosedWeekdays } from "@/lib/booking-closed-weekdays";
 
 interface WorkingHour {
   id?: string;
@@ -56,6 +57,9 @@ const mergeWithDefaults = (hours: WorkingHour[]) =>
 export default function WorkingHoursManager() {
   const { showSuccess, showError } = useToast();
   const [workingHours, setWorkingHours] = useState<WorkingHour[]>([]);
+  const [bookingClosedWeekdays, setBookingClosedWeekdays] = useState<number[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [generatingSlots, setGeneratingSlots] = useState(false);
@@ -92,6 +96,9 @@ export default function WorkingHoursManager() {
         : mergeWithDefaults([]);
 
       setWorkingHours(normalizedHours);
+      setBookingClosedWeekdays(
+        parseBookingClosedWeekdays(hoursData.bookingClosedWeekdays),
+      );
       succeeded = true;
     } catch (error) {
       console.error("Error loading data:", error);
@@ -154,6 +161,16 @@ export default function WorkingHoursManager() {
     );
   };
 
+  const toggleBookingClosedWeekday = (dayValue: number) => {
+    setBookingClosedWeekdays((prev) => {
+      if (prev.includes(dayValue)) {
+        return prev.filter((d) => d !== dayValue);
+      }
+
+      return [...prev, dayValue].sort((a, b) => a - b);
+    });
+  };
+
   const saveWorkingHours = async () => {
     try {
       setSaving(true);
@@ -163,7 +180,7 @@ export default function WorkingHoursManager() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ workingHours }),
+        body: JSON.stringify({ workingHours, bookingClosedWeekdays }),
       });
 
       const result = await response.json();
@@ -176,9 +193,15 @@ export default function WorkingHoursManager() {
         setWorkingHours(mergeWithDefaults(result.workingHours));
       }
 
+      if (result.bookingClosedWeekdays !== undefined) {
+        setBookingClosedWeekdays(
+          parseBookingClosedWeekdays(result.bookingClosedWeekdays),
+        );
+      }
+
       showSuccess(
         "Working hours saved",
-        "Your weekly schedule has been updated.",
+        "Your weekly schedule and booking blackout weekdays are updated.",
       );
     } catch (error) {
       console.error("Error saving working hours:", error);
@@ -289,6 +312,35 @@ export default function WorkingHoursManager() {
           >
             Save Changes
           </Button>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border-2 border-[#e4d9c8] bg-white px-5 py-5 dark:border-gray-700 dark:bg-gray-800/50 sm:px-6 sm:py-6">
+        <h3 className="mb-1 text-lg font-bold text-gray-900 dark:text-white">
+          Online booking — closed weekdays
+        </h3>
+        <p className="mb-4 max-w-3xl text-sm text-gray-600 dark:text-gray-400">
+          Toggle weekdays that should stay closed for public booking and slot
+          generation, in addition to marking a day non-working in the schedule
+          below. Regenerate slots after changes.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {DAYS.map((day) => {
+            const isClosed = bookingClosedWeekdays.includes(day.value);
+
+            return (
+              <Button
+                key={day.value}
+                color={isClosed ? "danger" : "default"}
+                size="sm"
+                variant={isClosed ? "solid" : "bordered"}
+                onPress={() => toggleBookingClosedWeekday(day.value)}
+              >
+                {day.label}
+                {isClosed ? " (closed)" : ""}
+              </Button>
+            );
+          })}
         </div>
       </div>
 

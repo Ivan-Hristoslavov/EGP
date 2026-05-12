@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 
 import { supabase } from "@/lib/supabase";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
+import { Card, CardBody } from "@heroui/card";
+import { Spinner } from "@heroui/spinner";
 
 type SiteGuidanceItem = {
   id: number;
@@ -59,7 +61,9 @@ export function AdminSiteGuidance() {
   // Get unique categories
   const categories = [
     "all",
-    ...Array.from(new Set(guidanceItems.map((item) => item.category))),
+    ...Array.from(
+      new Set(guidanceItems.map((item) => item.category)),
+    ),
   ];
 
   // Filter items based on search and category
@@ -75,9 +79,12 @@ export function AdminSiteGuidance() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent" />
-      </div>
+      <Card className="border border-divider shadow-sm">
+        <CardBody className="flex min-h-[400px] flex-col items-center justify-center gap-4 py-16">
+          <Spinner color="primary" size="lg" />
+          <p className="text-sm text-default-500">Loading site guidance…</p>
+        </CardBody>
+      </Card>
     );
   }
 

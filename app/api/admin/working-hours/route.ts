@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import {
+  BOOKING_CLOSED_WEEKDAYS_KEY,
+  parseBookingClosedWeekdays,
+} from "@/lib/booking-closed-weekdays";
 import { supabaseAdmin } from "../../../../lib/supabase";
 
 const DAY_KEYS = [
@@ -84,7 +88,21 @@ export async function GET() {
 
     const normalized = normalizeWorkingHours(workingHours ?? []);
 
-    return NextResponse.json({ workingHours: workingHours ?? [], normalized });
+    const { data: closedRow } = await supabaseAdmin
+      .from("admin_settings")
+      .select("value")
+      .eq("key", BOOKING_CLOSED_WEEKDAYS_KEY)
+      .maybeSingle();
+
+    const bookingClosedWeekdays = parseBookingClosedWeekdays(
+      closedRow?.value,
+    );
+
+    return NextResponse.json({
+      workingHours: workingHours ?? [],
+      normalized,
+      bookingClosedWeekdays,
+    });
   } catch (error) {
     console.error("Unexpected error:", error);
 
@@ -99,7 +117,7 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { workingHours } = body;
+    const { workingHours, bookingClosedWeekdays } = body;
 
     if (!workingHours || !Array.isArray(workingHours)) {
       return NextResponse.json(
@@ -162,10 +180,48 @@ export async function PUT(request: NextRequest) {
 
     await persistNormalizedHours(normalized);
 
+    if (bookingClosedWeekdays !== undefined) {
+      if (!Array.isArray(bookingClosedWeekdays)) {
+        return NextResponse.json(
+          { error: "bookingClosedWeekdays must be an array of weekday numbers" },
+          { status: 400 },
+        );
+      }
+
+      const cleaned = parseBookingClosedWeekdays(bookingClosedWeekdays);
+
+      const { error: closedError } = await supabaseAdmin
+        .from("admin_settings")
+        .upsert(
+          {
+            key: BOOKING_CLOSED_WEEKDAYS_KEY,
+            value: cleaned,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "key" },
+        );
+
+      if (closedError) {
+        console.error("Error saving booking_closed_weekdays:", closedError);
+
+        return NextResponse.json(
+          { error: "Failed to save online booking blackout weekdays" },
+          { status: 500 },
+        );
+      }
+    }
+
+    const { data: closedAfter } = await supabaseAdmin
+      .from("admin_settings")
+      .select("value")
+      .eq("key", BOOKING_CLOSED_WEEKDAYS_KEY)
+      .maybeSingle();
+
     return NextResponse.json({
       success: true,
       workingHours: updates,
       normalized,
+      bookingClosedWeekdays: parseBookingClosedWeekdays(closedAfter?.value),
       message: "Working hours updated successfully",
     });
   } catch (error) {

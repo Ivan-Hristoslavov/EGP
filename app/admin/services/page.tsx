@@ -32,6 +32,7 @@ import { useConfirmation } from "@/hooks/useConfirmation";
 import { useServices } from "@/hooks/useServices";
 import { useToast } from "@/components/Toast";
 import Pagination from "@/components/Pagination";
+import { formLayout, inputClassNames } from "@/config/design-system";
 
 const SERVICES_PAGE_SIZE = 6;
 
@@ -877,8 +878,9 @@ export default function AdminServicesPage() {
                 <div className="min-w-0 flex-1 sm:max-w-xs lg:max-w-md">
                   <Input
                     classNames={{
-                      input: "text-sm",
-                      inputWrapper: "h-9 min-h-9",
+                      ...inputClassNames,
+                      input: `${inputClassNames.input} text-sm`,
+                      inputWrapper: `${inputClassNames.inputWrapper} h-9 min-h-9`,
                     }}
                     placeholder="Search services..."
                     size="sm"
@@ -1370,8 +1372,8 @@ export default function AdminServicesPage() {
                       : "Create a new service"}
                   </p>
                 </ModalHeader>
-                <ModalBody className="py-6">
-                  <div className="space-y-4 sm:space-y-6">
+                <ModalBody className={formLayout.modalBody}>
+                  <div className={formLayout.sectionGap}>
                     {/* Category & Name */}
                     <Select
                       isRequired
@@ -1395,6 +1397,7 @@ export default function AdminServicesPage() {
                       </>
                     </Select>
                     <Input
+                      classNames={inputClassNames}
                       isRequired
                       label="Service Name"
                       placeholder="Enter service name"
@@ -1437,6 +1440,7 @@ export default function AdminServicesPage() {
                     </Select>
                     <div className="grid grid-cols-2 gap-3 sm:gap-4">
                       <Input
+                        classNames={inputClassNames}
                         isRequired
                         label="Price (£)"
                         placeholder="0.00"
@@ -1452,6 +1456,7 @@ export default function AdminServicesPage() {
                         }
                       />
                       <Input
+                        classNames={inputClassNames}
                         isRequired
                         label="Duration (min)"
                         placeholder="30"
@@ -1469,6 +1474,7 @@ export default function AdminServicesPage() {
                     </div>
                     {/* Description & Details */}
                     <Textarea
+                      classNames={inputClassNames}
                       label="Description"
                       minRows={3}
                       placeholder="Brief description"
@@ -1479,6 +1485,7 @@ export default function AdminServicesPage() {
                       }
                     />
                     <Textarea
+                      classNames={inputClassNames}
                       label="Details"
                       minRows={4}
                       placeholder="Detailed information"
@@ -1495,6 +1502,7 @@ export default function AdminServicesPage() {
                       </label>
                       <div className="flex gap-2 mb-2">
                         <Input
+                          classNames={inputClassNames}
                           className="flex-1"
                           placeholder="Enter benefit"
                           size="lg"
@@ -1533,6 +1541,7 @@ export default function AdminServicesPage() {
                     </div>
                     {/* Preparation & Aftercare */}
                     <Textarea
+                      classNames={inputClassNames}
                       label="Preparation"
                       minRows={3}
                       placeholder="Pre-treatment instructions"
@@ -1543,6 +1552,7 @@ export default function AdminServicesPage() {
                       }
                     />
                     <Textarea
+                      classNames={inputClassNames}
                       label="Aftercare"
                       minRows={3}
                       placeholder="Post-treatment instructions"
@@ -1554,6 +1564,7 @@ export default function AdminServicesPage() {
                     />
                     <div className="grid grid-cols-2 gap-3 sm:gap-4">
                       <Input
+                        classNames={inputClassNames}
                         label="Downtime (days)"
                         placeholder="0"
                         size="lg"
@@ -1568,6 +1579,7 @@ export default function AdminServicesPage() {
                         }
                       />
                       <Input
+                        classNames={inputClassNames}
                         label="Results (weeks)"
                         placeholder="12"
                         size="lg"
@@ -1658,9 +1670,10 @@ export default function AdminServicesPage() {
                       : "Create a new category"}
                   </p>
                 </ModalHeader>
-                <ModalBody className="py-6">
-                  <div className="space-y-4">
+                <ModalBody className={formLayout.modalBody}>
+                  <div className={formLayout.sectionGap}>
                     <Input
+                      classNames={inputClassNames}
                       isRequired
                       label="Category Name"
                       placeholder="Enter category name"
@@ -1675,6 +1688,7 @@ export default function AdminServicesPage() {
                       }
                     />
                     <Textarea
+                      classNames={inputClassNames}
                       label="Description"
                       minRows={3}
                       placeholder="Enter category description"
@@ -1729,8 +1743,9 @@ export default function AdminServicesPage() {
                       : "Add discount group"}
                   </h2>
                 </ModalHeader>
-                <ModalBody className="py-6 space-y-4">
+                <ModalBody className={`${formLayout.modalBody} ${formLayout.sectionGap}`}>
                   <Input
+                    classNames={inputClassNames}
                     label="Group name"
                     placeholder="e.g. Winter promo"
                     size="lg"
@@ -1741,6 +1756,7 @@ export default function AdminServicesPage() {
                     }
                   />
                   <Input
+                    classNames={inputClassNames}
                     label="Discount (%)"
                     max={100}
                     min={1}
@@ -1809,6 +1825,7 @@ export default function AdminServicesPage() {
                     )}
                     <div className="flex flex-col sm:flex-row gap-2 mb-3">
                       <Input
+                        classNames={inputClassNames}
                         className="flex-1"
                         placeholder="Search services..."
                         size="sm"
