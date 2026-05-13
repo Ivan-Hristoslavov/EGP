@@ -59,7 +59,7 @@ export const aestheticsColors = {
     accent: "#D8CEC3",
   },
 
-  // Category Colors (для различните услуги)
+  // Category colours (one palette per service group)
   categories: {
     face: {
       gradient: "from-[#D4C9BC] via-[#E6DDD1] to-[#F4EFE8]",

@@ -152,7 +152,7 @@ export function AdminDayOffManager({
     setFormError("");
     try {
       if (!form.title || !form.start_date || !form.end_date) {
-        setFormError("Title, Start Date и End Date са задължителни.");
+        setFormError("Title, Start Date and End Date are required.");
         setSaving(false);
 
         return;
@@ -171,7 +171,7 @@ export function AdminDayOffManager({
       }
       setShowModal(false);
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Грешка при запис.");
+      setFormError(err instanceof Error ? err.message : "Could not save changes.");
     } finally {
       setSaving(false);
     }

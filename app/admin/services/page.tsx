@@ -220,9 +220,9 @@ export default function AdminServicesPage() {
     async (absoluteUrl: string) => {
       try {
         await navigator.clipboard.writeText(absoluteUrl);
-        showSuccess("Копирано", "Линкът е копиран в клипборда");
+        showSuccess("Copied", "The link has been copied to your clipboard.");
       } catch {
-        showError("Грешка", "Копирането не бе успешно. Опитайте отново.");
+        showError("Copy failed", "Could not copy the link. Please try again.");
       }
     },
     [showError, showSuccess],
@@ -1170,7 +1170,7 @@ export default function AdminServicesPage() {
                           </div>
                           <div className="mt-2 space-y-1.5 rounded-lg border border-dashed border-gray-200 bg-gray-50/90 p-2 dark:border-gray-600 dark:bg-gray-900/40">
                             <p className="text-[10px] leading-snug text-gray-500 dark:text-gray-400">
-                              Линкът работи само ако услугата е активна.
+                              The link only works while the service is active.
                             </p>
                             <div className="flex gap-1.5">
                               <Button
@@ -1179,13 +1179,13 @@ export default function AdminServicesPage() {
                                 startContent={
                                   <Copy className="h-3.5 w-3.5 shrink-0" />
                                 }
-                                title="Копирай линк към страницата на процедурата"
+                                title="Copy link to the treatment page"
                                 variant="bordered"
                                 onPress={() =>
                                   copyServiceProcedureLink(service.slug)
                                 }
                               >
-                                <span className="truncate">Страница</span>
+                                <span className="truncate">Page</span>
                               </Button>
                               <Button
                                 className="min-w-0 flex-1 text-[10px] sm:text-xs"
@@ -1193,13 +1193,13 @@ export default function AdminServicesPage() {
                                 startContent={
                                   <Copy className="h-3.5 w-3.5 shrink-0" />
                                 }
-                                title="Копирай линк за директна резервация"
+                                title="Copy direct booking link"
                                 variant="bordered"
                                 onPress={() =>
                                   copyServiceBookingLink(service.slug)
                                 }
                               >
-                                <span className="truncate">Резервация</span>
+                                <span className="truncate">Booking</span>
                               </Button>
                             </div>
                           </div>
@@ -1475,32 +1475,32 @@ export default function AdminServicesPage() {
                     {editingService && formData.slug.trim() ? (
                       <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50/90 p-3 dark:border-gray-600 dark:bg-gray-900/40">
                         <p className="mb-2 text-xs text-gray-600 dark:text-gray-400">
-                          Линкът работи само ако услугата е активна.
+                          The link only works while the service is active.
                         </p>
                         <div className="flex flex-col gap-2 sm:flex-row">
                           <Button
                             className="flex-1"
                             size="sm"
                             startContent={<Copy className="h-4 w-4" />}
-                            title="Копирай линк към страницата на процедурата"
+                            title="Copy link to the treatment page"
                             variant="bordered"
                             onPress={() =>
                               copyServiceProcedureLink(formData.slug)
                             }
                           >
-                            Копирай линк към страницата на процедурата
+                            Copy link to treatment page
                           </Button>
                           <Button
                             className="flex-1"
                             size="sm"
                             startContent={<Copy className="h-4 w-4" />}
-                            title="Копирай линк за директна резервация"
+                            title="Copy direct booking link"
                             variant="bordered"
                             onPress={() =>
                               copyServiceBookingLink(formData.slug)
                             }
                           >
-                            Копирай линк за директна резервация
+                            Copy direct booking link
                           </Button>
                         </div>
                       </div>

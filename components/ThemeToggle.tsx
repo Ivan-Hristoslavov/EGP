@@ -12,7 +12,7 @@ export function ThemeToggle({ size = "md", className = "" }: ThemeToggleProps) {
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme, resolvedTheme } = useTheme();
 
-  // Размери за различните размери
+  // Sizes for each variant
   const sizes = {
     sm: "w-8 h-8",
     md: "w-10 h-10",
@@ -75,7 +75,7 @@ export function ThemeToggle({ size = "md", className = "" }: ThemeToggleProps) {
       title={`Switch to ${isDark ? "light" : "dark"} mode`}
       onClick={toggleTheme}
     >
-      {/* Слънце иконка - показва се когато темата е светла (за да покаже, че можеш да смениш на тъмна) */}
+      {/* Sun icon — shown when the theme is light (indicates clicking switches to dark) */}
       <div
         className={`
         absolute 
@@ -99,7 +99,7 @@ export function ThemeToggle({ size = "md", className = "" }: ThemeToggleProps) {
         </svg>
       </div>
 
-      {/* Луна иконка - показва се когато темата е тъмна (за да покаже, че можеш да смениш на светла) */}
+      {/* Moon icon — shown when the theme is dark (indicates clicking switches to light) */}
       <div
         className={`
         absolute 
@@ -127,10 +127,10 @@ export function ThemeToggle({ size = "md", className = "" }: ThemeToggleProps) {
         </svg>
       </div>
 
-      {/* Блестящ ефект при hover */}
+      {/* Shine effect on hover */}
       <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
 
-      {/* Кръгов пулс ефект */}
+      {/* Circular pulse effect */}
       <div className="absolute inset-0 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 dark:from-blue-600 dark:to-purple-700 opacity-75 group-hover:animate-ping" />
     </button>
   );
