@@ -1,13 +1,11 @@
 "use client";
+import { Button, Card, Spinner } from "@heroui/react";
 import { useState, useRef } from "react";
 import { Plus } from "lucide-react";
 
-import { Button } from "@heroui/button";
-import { Card } from "@heroui/card";
-import { Spinner } from "@heroui/spinner";
-
 import { DayOffBanner } from "./DayOffBanner";
 
+import { isDayOffFeatureEnabled } from "@/config/feature-flags";
 import { useDayOffPeriods, DayOffPeriod } from "@/hooks/useDayOffPeriods";
 
 type RecurrenceOption = {
@@ -33,7 +31,13 @@ const defaultForm: DayOffPeriod = {
   recurrence_type: null,
 };
 
-export function AdminDayOffManager() {
+type AdminDayOffManagerProps = {
+  embedded?: boolean;
+};
+
+export function AdminDayOffManager({
+  embedded = false,
+}: AdminDayOffManagerProps) {
   // Horizontal drag-to-scroll helper for preview
   function DraggableScroll({ children }: { children: React.ReactNode }) {
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -121,6 +125,10 @@ export function AdminDayOffManager() {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [formError, setFormError] = useState("");
 
+  if (!isDayOffFeatureEnabled) {
+    return null;
+  }
+
   const openAdd = () => {
     // Set start date to today when creating a new day-off period
     const today = new Date().toISOString().split("T")[0];
@@ -183,33 +191,68 @@ export function AdminDayOffManager() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
-      {/* Header Section */}
-      <div className="mt-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-8 text-white shadow-xl">
-        <div>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight mb-2">
-            Day Off Periods
-          </h2>
-          <p className="text-blue-100">
-            Manage your business's non-working days and holiday periods
-          </p>
+    <div
+      className={
+        embedded
+          ? "mx-0 max-w-none space-y-4 p-0"
+          : "mx-auto max-w-7xl space-y-8 p-4 md:p-8"
+      }
+    >
+      {embedded ? (
+        <div className="flex flex-col gap-3 rounded-xl border border-default-200 bg-content1/80 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between dark:border-default-100/20">
+          <div>
+            <h2 className="text-base font-semibold text-foreground sm:text-lg">
+              Day off periods
+            </h2>
+            <p className="mt-0.5 text-sm text-default-500">
+              Non-working days and holiday ranges for booking blackouts.
+            </p>
+          </div>
+          <Button
+            aria-label="Add day off"
+            color="primary"
+            radius="lg"
+            size="md"
+            startContent={<Plus className="h-5 w-5" />}
+            variant="flat"
+            onPress={openAdd}
+          >
+            Add day off
+          </Button>
         </div>
-        <Button
-          aria-label="Add Day Off"
-          className="bg-white/20 font-bold text-white shadow-lg backdrop-blur-sm"
-          color="default"
-          radius="full"
-          size="lg"
-          startContent={<Plus className="h-6 w-6" />}
-          variant="flat"
-          onPress={openAdd}
-        >
-          Add Day Off
-        </Button>
-      </div>
+      ) : (
+        <div className="mt-6 flex flex-col items-start justify-between gap-4 rounded-3xl bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white shadow-xl md:flex-row md:items-center">
+          <div>
+            <h2 className="mb-2 text-2xl font-extrabold tracking-tight sm:text-3xl md:text-4xl">
+              Day Off Periods
+            </h2>
+            <p className="text-blue-100">
+              Manage your business&apos;s non-working days and holiday periods
+            </p>
+          </div>
+          <Button
+            aria-label="Add Day Off"
+            className="bg-white/20 font-bold text-white shadow-lg backdrop-blur-sm"
+            color="default"
+            radius="full"
+            size="lg"
+            startContent={<Plus className="h-6 w-6" />}
+            variant="flat"
+            onPress={openAdd}
+          >
+            Add Day Off
+          </Button>
+        </div>
+      )}
 
       {/* Main Content */}
-      <Card className="overflow-hidden border border-gray-100 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
+      <Card
+        className={
+          embedded
+            ? "overflow-hidden border border-default-200 bg-content1 shadow-sm dark:border-default-100/20"
+            : "overflow-hidden border border-gray-100 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800"
+        }
+      >
         {loading ? (
           <div className="flex flex-col items-center justify-center gap-4 py-16">
             <Spinner color="primary" size="lg" />
@@ -218,169 +261,169 @@ export function AdminDayOffManager() {
         ) : (
           <>
             {error ? (
-            <div className="border-l-4 border-danger bg-danger-50 p-4 text-danger-700 dark:bg-danger-900/30 dark:text-danger-300">
-              <p>{error}</p>
-            </div>
+              <div className="border-l-4 border-danger bg-danger-50 p-4 text-danger-700 dark:bg-danger-900/30 dark:text-danger-300">
+                <p>{error}</p>
+              </div>
             ) : null}
 
-        <div className="overflow-x-auto">
-          <table className="table w-full">
-            <thead>
-              <tr className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700">
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
-                  Title
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
-                  Period
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
-                  Status
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
-                  Message
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
-                  Recurring
-                </th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-600 dark:text-gray-300">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {periods.length === 0 && !loading && (
-                <tr>
-                  <td className="px-6 py-12 text-center" colSpan={6}>
-                    <div className="flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
-                      <svg
-                        className="h-12 w-12 mb-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                        />
-                      </svg>
-                      <p className="text-lg font-medium">
-                        No day off periods found
-                      </p>
-                      <p className="text-sm">
-                        Click the "Add Day Off" button to create one
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-              {periods.map((p: DayOffPeriod) => (
-                <tr
-                  key={p.id}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                >
-                  <td className="px-6 py-4">
-                    <div className="font-medium text-gray-900 dark:text-white">
-                      {p.title}
-                    </div>
-                    {p.description && (
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {p.description}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm">
-                      <span className="text-gray-700 dark:text-gray-300">
-                        {p.start_date}
-                      </span>
-                      <span className="mx-2 text-gray-400">→</span>
-                      <span className="text-gray-700 dark:text-gray-300">
-                        {p.end_date}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    {p.show_banner ? (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
-                        Active Banner
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                        Hidden
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="max-w-xs truncate text-sm text-gray-500 dark:text-gray-400">
-                      {p.banner_message || "-"}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    {p.is_recurring ? (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                        {p.recurrence_type}
-                      </span>
-                    ) : (
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        -
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        aria-label="Edit"
-                        className="rounded-full p-2 hover:bg-blue-100 dark:hover:bg-blue-900 group transition-colors"
-                        title="Edit"
-                        onClick={() => openEdit(p)}
-                      >
-                        <svg
-                          className="w-5 h-5 text-blue-600 group-hover:text-blue-800 dark:text-blue-400 dark:group-hover:text-blue-200"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            d="M16.862 5.487a2.25 2.25 0 113.182 3.182L8.25 20.463 4 21.75l1.287-4.25 11.575-11.575z"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                          />
-                        </svg>
-                      </button>
-                      <button
-                        aria-label="Delete"
-                        className="rounded-full p-2 hover:bg-red-100 dark:hover:bg-red-900 group transition-colors"
-                        title="Delete"
-                        onClick={() => {
-                          setDeleteId(p.id || null);
-                          setDeleteConfirm(true);
-                        }}
-                      >
-                        <svg
-                          className="w-5 h-5 text-red-600 group-hover:text-red-800 dark:text-red-400 dark:group-hover:text-red-200"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            d="M6 18L18 6M6 6l12 12"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            <div className="overflow-x-auto">
+              <table className="table w-full">
+                <thead>
+                  <tr className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700">
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
+                      Title
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
+                      Period
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
+                      Status
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
+                      Message
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
+                      Recurring
+                    </th>
+                    <th className="px-6 py-4 text-right text-sm font-semibold text-gray-600 dark:text-gray-300">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                  {periods.length === 0 && !loading && (
+                    <tr>
+                      <td className="px-6 py-12 text-center" colSpan={6}>
+                        <div className="flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
+                          <svg
+                            className="h-12 w-12 mb-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                            />
+                          </svg>
+                          <p className="text-lg font-medium">
+                            No day off periods found
+                          </p>
+                          <p className="text-sm">
+                            Click the "Add Day Off" button to create one
+                          </p>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                  {periods.map((p: DayOffPeriod) => (
+                    <tr
+                      key={p.id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                    >
+                      <td className="px-6 py-4">
+                        <div className="font-medium text-gray-900 dark:text-white">
+                          {p.title}
+                        </div>
+                        {p.description && (
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                            {p.description}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm">
+                          <span className="text-gray-700 dark:text-gray-300">
+                            {p.start_date}
+                          </span>
+                          <span className="mx-2 text-gray-400">→</span>
+                          <span className="text-gray-700 dark:text-gray-300">
+                            {p.end_date}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        {p.show_banner ? (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                            Active Banner
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                            Hidden
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="max-w-xs truncate text-sm text-gray-500 dark:text-gray-400">
+                          {p.banner_message || "-"}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        {p.is_recurring ? (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                            {p.recurrence_type}
+                          </span>
+                        ) : (
+                          <span className="text-sm text-gray-500 dark:text-gray-400">
+                            -
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            aria-label="Edit"
+                            className="rounded-full p-2 hover:bg-blue-100 dark:hover:bg-blue-900 group transition-colors"
+                            title="Edit"
+                            onClick={() => openEdit(p)}
+                          >
+                            <svg
+                              className="w-5 h-5 text-blue-600 group-hover:text-blue-800 dark:text-blue-400 dark:group-hover:text-blue-200"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                d="M16.862 5.487a2.25 2.25 0 113.182 3.182L8.25 20.463 4 21.75l1.287-4.25 11.575-11.575z"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                              />
+                            </svg>
+                          </button>
+                          <button
+                            aria-label="Delete"
+                            className="rounded-full p-2 hover:bg-red-100 dark:hover:bg-red-900 group transition-colors"
+                            title="Delete"
+                            onClick={() => {
+                              setDeleteId(p.id || null);
+                              setDeleteConfirm(true);
+                            }}
+                          >
+                            <svg
+                              className="w-5 h-5 text-red-600 group-hover:text-red-800 dark:text-red-400 dark:group-hover:text-red-200"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                d="M6 18L18 6M6 6l12 12"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </>
         )}
       </Card>

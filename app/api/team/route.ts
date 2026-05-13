@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { isDayOffFeatureEnabled } from "@/config/feature-flags";
 import { supabaseAdmin } from "@/lib/supabase";
 
 /**
@@ -21,6 +22,19 @@ export async function GET() {
         { error: "Failed to fetch team" },
         { status: 500 },
       );
+    }
+
+    if (!isDayOffFeatureEnabled) {
+      const teamList = (team || []).map((member) => ({
+        ...member,
+        dayOffPeriods: [] as Array<{
+          start_date: string;
+          end_date: string;
+          reason: string | null;
+        }>,
+      }));
+
+      return NextResponse.json({ team: teamList });
     }
 
     // Fetch day-off periods for each team member (public data for availability)

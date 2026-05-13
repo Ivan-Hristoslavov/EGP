@@ -1,12 +1,18 @@
+import type { ClinicUtcDayHours } from "@/lib/resolve-clinic-working-hours-utc-day";
+
 import { NextRequest, NextResponse } from "next/server";
 
+import { isDayOffFeatureEnabled } from "@/config/feature-flags";
+import { supabaseAdmin } from "../../../../lib/supabase";
+import { isOnlineBookingBlackoutByRules } from "@/lib/booking-blackout-rules";
+import { fetchBookingBlackoutRulesFromDb } from "@/lib/booking-blackout-rules-db";
 import { fetchBookingClosedWeekdaysFromDb } from "@/lib/booking-closed-weekdays-db";
-import { addDaysUtcYyyyMmDd, parseYyyyMmDdUtcDayOfWeek } from "@/lib/calendar-local-date";
+import {
+  addDaysUtcYyyyMmDd,
+  parseYyyyMmDdUtcDayOfWeek,
+} from "@/lib/calendar-local-date";
 import { resolveClinicWorkingHoursForUtcDay } from "@/lib/resolve-clinic-working-hours-utc-day";
 import { requireAdmin } from "@/lib/admin-auth";
-import { supabaseAdmin } from "../../../../lib/supabase";
-
-import type { ClinicUtcDayHours } from "@/lib/resolve-clinic-working-hours-utc-day";
 
 const SLOT_INTERVAL_MINUTES = 30;
 
@@ -76,6 +82,8 @@ async function isTeamMemberOnDayOff(
   teamMemberId: string,
   date: string,
 ): Promise<boolean> {
+  if (!isDayOffFeatureEnabled) return false;
+
   const { data, error } = await supabaseAdmin
     .from("team_day_off_periods")
     .select("id")
@@ -181,7 +189,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const bookingClosedOnline = await fetchBookingClosedWeekdaysFromDb();
+    const [bookingClosedOnline, bookingBlackoutRules] = await Promise.all([
+      fetchBookingClosedWeekdaysFromDb(),
+      fetchBookingBlackoutRulesFromDb(),
+    ]);
     const closedSet = new Set(bookingClosedOnline);
 
     if (closedSet.has(utcDow)) {
@@ -190,6 +201,18 @@ export async function GET(request: NextRequest) {
         date,
         status: "closed",
         message: "Online booking is not available on this weekday.",
+        slots: [],
+        allSlots: [],
+        bookedSlots: [],
+      });
+    }
+
+    if (isOnlineBookingBlackoutByRules(date, utcDow, bookingBlackoutRules)) {
+      return NextResponse.json({
+        success: true,
+        date,
+        status: "closed",
+        message: "Online booking is closed for this date (scheduled blackout).",
         slots: [],
         allSlots: [],
         bookedSlots: [],
@@ -222,11 +245,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const payload = await buildSlotsForDate(
-      date,
-      resolved.hours,
-      teamMemberId,
-    );
+    const payload = await buildSlotsForDate(date, resolved.hours, teamMemberId);
 
     return NextResponse.json({
       success: true,
@@ -293,7 +312,10 @@ export async function POST(request: NextRequest) {
       Math.ceil((endT.getTime() - startT.getTime()) / (1000 * 60 * 60 * 24)) +
       1;
     const summaries = [];
-    const bookingClosedOnline = await fetchBookingClosedWeekdaysFromDb();
+    const [bookingClosedOnline, bookingBlackoutRules] = await Promise.all([
+      fetchBookingClosedWeekdaysFromDb(),
+      fetchBookingBlackoutRulesFromDb(),
+    ]);
     const closedSet = new Set(bookingClosedOnline);
 
     for (let i = 0; i < dayCount; i++) {
@@ -307,6 +329,11 @@ export async function POST(request: NextRequest) {
       const dow = parseYyyyMmDdUtcDayOfWeek(currentDate);
 
       if (dow === null || closedSet.has(dow)) {
+        summaries.push({ date: currentDate, generated: 0, skipped: true });
+        continue;
+      }
+
+      if (isOnlineBookingBlackoutByRules(currentDate, dow, bookingBlackoutRules)) {
         summaries.push({ date: currentDate, generated: 0, skipped: true });
         continue;
       }

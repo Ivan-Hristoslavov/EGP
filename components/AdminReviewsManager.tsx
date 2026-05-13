@@ -1,9 +1,6 @@
 "use client";
+import { Button, Card, CardBody, Chip, Spinner } from "@heroui/react";
 import { useState } from "react";
-import { Card, CardBody } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { Chip } from "@heroui/chip";
-import { Spinner } from "@heroui/spinner";
 import { CheckCircle, AlertCircle, Star, Trash2 } from "lucide-react";
 
 import { ConfirmationModal } from "@/components/ConfirmationModal";

@@ -10,7 +10,6 @@ import {
   Users,
   Calendar,
   CalendarDays,
-  CalendarOff,
   CreditCard,
   Image as ImageIcon,
   FileEdit,
@@ -22,12 +21,10 @@ import {
   User,
   Share2,
   Images,
-  FileText,
-  Percent,
-  BookOpen,
 } from "lucide-react";
 
 import ThemeToggleButton from "../../components/ThemeToggleButton";
+
 import { layout, textColors, typography } from "@/config/typography";
 
 // Navigation definition
@@ -48,11 +45,6 @@ const navigation = [
     icon: <Calendar className="w-5 h-5" />,
   },
   {
-    name: "Day off",
-    href: "/admin/day-off",
-    icon: <CalendarOff className="w-5 h-5" />,
-  },
-  {
     name: "Customers",
     href: "/admin/customers",
     icon: <Users className="w-5 h-5" />,
@@ -71,16 +63,6 @@ const navigation = [
     name: "Payments",
     href: "/admin/payments",
     icon: <CreditCard className="w-5 h-5" />,
-  },
-  {
-    name: "Invoices",
-    href: "/admin/invoices",
-    icon: <FileText className="w-5 h-5" />,
-  },
-  {
-    name: "VAT",
-    href: "/admin/settings/vat",
-    icon: <Percent className="w-5 h-5" />,
   },
   {
     name: "Gallery",
@@ -106,11 +88,6 @@ const navigation = [
     name: "About",
     href: "/admin/about",
     icon: <Info className="w-5 h-5" />,
-  },
-  {
-    name: "Site guidance",
-    href: "/admin/site-guidance",
-    icon: <BookOpen className="w-5 h-5" />,
   },
   {
     name: "Social Media",
@@ -152,6 +129,31 @@ export default function AdminLayout({
   }, []);
 
   useEffect(() => {
+    if (pathname === "/admin/login" || !pathname?.startsWith("/admin")) {
+      document.body.removeAttribute("data-egp-admin");
+
+      return () => {
+        document.body.removeAttribute("data-egp-admin");
+      };
+    }
+
+    const shouldMarkAdminChrome =
+      pathname !== "/admin/login" &&
+      pathname.startsWith("/admin") &&
+      (isAuthenticated || isLoading);
+
+    if (shouldMarkAdminChrome) {
+      document.body.setAttribute("data-egp-admin", "");
+    } else {
+      document.body.removeAttribute("data-egp-admin");
+    }
+
+    return () => {
+      document.body.removeAttribute("data-egp-admin");
+    };
+  }, [pathname, isAuthenticated, isLoading]);
+
+  useEffect(() => {
     if (pathname === "/admin/login") {
       setIsAuthenticated(false);
       setIsLoading(false);
@@ -169,6 +171,7 @@ export default function AdminLayout({
           credentials: "same-origin",
           cache: "no-store",
         });
+
         if (cancelled) return;
         if (res.ok) {
           setIsAuthenticated(true);
@@ -313,7 +316,7 @@ export default function AdminLayout({
           </Link>
           <button
             aria-label="Close menu"
-            className="flex h-10 w-10 shrink-0 items-center justify-center text-white transition-colors hover:text-white/90 lg:hidden"
+            className="egp-admin-chrome-exempt flex h-10 w-10 shrink-0 items-center justify-center text-white transition-colors hover:text-white/90 lg:hidden"
             onClick={() => setSidebarOpen(false)}
           >
             <svg
@@ -371,7 +374,7 @@ export default function AdminLayout({
         {/* User section */}
         <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
           <button
-            className="w-full flex items-center px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+            className="egp-admin-chrome-exempt w-full flex items-center px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
             onClick={async () => {
               try {
                 await fetch("/api/admin/auth", { method: "DELETE" });
@@ -408,7 +411,7 @@ export default function AdminLayout({
             <div className="flex items-center">
               <button
                 aria-label="Open menu"
-                className="lg:hidden min-h-[44px] min-w-[44px] p-2 flex items-center justify-center rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className="egp-admin-chrome-exempt lg:hidden min-h-[44px] min-w-[44px] p-2 flex items-center justify-center rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 onClick={() => setSidebarOpen(true)}
               >
                 <svg
@@ -435,7 +438,7 @@ export default function AdminLayout({
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <ThemeToggleButton />
+              <ThemeToggleButton className="egp-admin-chrome-exempt" />
             </div>
           </div>
         </header>

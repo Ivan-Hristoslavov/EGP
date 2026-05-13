@@ -1,5 +1,6 @@
 "use client";
 
+import { Input, Spinner, Tab, Tabs } from "@heroui/react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import {
@@ -24,9 +25,6 @@ import { siteConfig } from "@/config/site";
 import { useAdminProfile } from "@/hooks/useAdminProfile";
 import { useToast } from "@/components/Toast";
 import { AdminFAQManager } from "@/components/AdminFAQManager";
-import { Input } from "@heroui/input";
-import { Spinner } from "@heroui/spinner";
-import { Tab, Tabs } from "@heroui/tabs";
 import { inputClassNames } from "@/config/design-system";
 
 type ProfileData = {
@@ -468,8 +466,8 @@ export default function ProfilePage() {
                 />
 
                 <Input
-                  classNames={inputClassNames}
                   isRequired
+                  classNames={inputClassNames}
                   label="Company Name"
                   placeholder="Enter company name"
                   type="text"

@@ -1,9 +1,16 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import type { CalendarStatsStrip } from "@/components/admin/calendar/calendar-types";
+
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
+import { useSearchParams } from "next/navigation";
 import {
-  ChevronLeft,
-  ChevronRight,
   Plus,
   Calendar as CalendarIcon,
   Clock,
@@ -15,6 +22,7 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
+  Save,
 } from "lucide-react";
 import {
   Modal,
@@ -29,24 +37,24 @@ import {
   Divider,
   useDisclosure,
 } from "@heroui/react";
-import { Chip } from "@heroui/chip";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
-import { Spinner } from "@heroui/spinner";
-import { Textarea } from "@heroui/react";
+import { Chip, Input, Select, SelectItem, Spinner, Textarea } from "@heroui/react";
 
+import { CalendarToolbar } from "./calendar-toolbar";
+
+import { AdminDayOffManager } from "@/components/AdminDayOffManager";
 import { useToast } from "@/components/Toast";
-import WorkingHoursManager from "@/components/admin/WorkingHoursManager";
+import WorkingHoursManager, {
+  type WorkingHoursManagerHandle,
+} from "@/components/admin/WorkingHoursManager";
+import { isDayOffFeatureEnabled } from "@/config/feature-flags";
 import { CalendarDayPanel } from "@/components/admin/calendar/calendar-day-panel";
 import { CalendarMonthGrid } from "@/components/admin/calendar/calendar-month-grid";
 import { CalendarMoveBookingModal } from "@/components/admin/calendar/calendar-move-booking-modal";
 import { CalendarPageSkeleton } from "@/components/admin/calendar/calendar-page-skeleton";
 import { CalendarStatsChips } from "@/components/admin/calendar/calendar-stats-chips";
-import type { CalendarStatsStrip } from "@/components/admin/calendar/calendar-types";
 import { CalendarViewHeader } from "@/components/admin/calendar/calendar-view-header";
 import { CalendarWeekGrid } from "@/components/admin/calendar/calendar-week-grid";
-
-import { CalendarToolbar } from "./calendar-toolbar";
+import { typography, textColors } from "@/config/typography";
 
 interface Booking {
   id: string;
@@ -176,6 +184,7 @@ function statsFromBookingsForStrip(bookings: Booking[]): CalendarStatsStrip {
 }
 
 export default function CalendarPage() {
+  const searchParams = useSearchParams();
   const { showSuccess, showError } = useToast();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(getCurrentToday());
@@ -184,7 +193,14 @@ export default function CalendarPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [showHoursSettingsModal, setShowHoursSettingsModal] = useState(false);
+  const [showSchedulePanel, setShowSchedulePanel] = useState(false);
+  const scheduleHoursRef = useRef<WorkingHoursManagerHandle>(null);
+  const [schedulePanelHoursLoading, setSchedulePanelHoursLoading] =
+    useState(true);
+  const [schedulePanelAction, setSchedulePanelAction] = useState<
+    "save" | "generate" | null
+  >(null);
+  const pendingScheduleScrollRef = useRef<"weekly" | "closures" | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -272,6 +288,60 @@ export default function CalendarPage() {
   // Load bookings on component mount - load all bookings once
   useEffect(() => {
     loadBookings();
+  }, []);
+
+  useEffect(() => {
+    if (searchParams.get("schedule") === "closures") {
+      pendingScheduleScrollRef.current = isDayOffFeatureEnabled
+        ? "closures"
+        : "weekly";
+      setShowSchedulePanel(true);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (!showSchedulePanel) return;
+    const target = pendingScheduleScrollRef.current;
+
+    pendingScheduleScrollRef.current = null;
+    if (!target) return;
+    const id =
+      target === "closures"
+        ? "schedule-closed-periods"
+        : "schedule-weekly-hours";
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.getElementById(id)?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      });
+    });
+  }, [showSchedulePanel]);
+
+  useEffect(() => {
+    if (showSchedulePanel) {
+      setSchedulePanelHoursLoading(true);
+    }
+  }, [showSchedulePanel]);
+
+  const handleSchedulePanelSave = useCallback(async () => {
+    setSchedulePanelAction("save");
+    try {
+      await scheduleHoursRef.current?.saveSchedule();
+    } finally {
+      setSchedulePanelAction(null);
+    }
+  }, []);
+
+  const handleSchedulePanelGenerateSlots = useCallback(async () => {
+    setSchedulePanelAction("generate");
+    try {
+      await scheduleHoursRef.current?.generateSlots();
+    } finally {
+      setSchedulePanelAction(null);
+    }
   }, []);
 
   // Fetch time slots when target date changes in move modal
@@ -1189,9 +1259,12 @@ export default function CalendarPage() {
         <Button
           startContent={<Clock className="h-4 w-4" />}
           variant="bordered"
-          onPress={() => setShowHoursSettingsModal(true)}
+          onPress={() => {
+            pendingScheduleScrollRef.current = "weekly";
+            setShowSchedulePanel(true);
+          }}
         >
-          Clinic hours &amp; blackouts
+          {isDayOffFeatureEnabled ? "Hours & closures" : "Working hours"}
         </Button>
         <Button
           className="h-10 shrink-0 font-semibold sm:h-11 sm:min-w-[10.5rem]"
@@ -1213,17 +1286,17 @@ export default function CalendarPage() {
 
       <CalendarToolbar
         searchTerm={searchTerm}
-        onSearchTermChange={setSearchTerm}
-        statusFilter={statusFilter}
-        onStatusFilterChange={setStatusFilter}
         selectedDate={selectedDate}
+        statusFilter={statusFilter}
+        view={view}
+        onSearchTermChange={setSearchTerm}
         onSelectedDateChange={(value) => {
           setSelectedDate(value);
           if (view !== "day") {
             setView("day");
           }
         }}
-        view={view}
+        onStatusFilterChange={setStatusFilter}
         onViewChange={setView}
       />
 
@@ -1341,28 +1414,135 @@ export default function CalendarPage() {
       )}
 
       <Modal
-        isOpen={showHoursSettingsModal}
+        classNames={{
+          wrapper:
+            "items-stretch justify-stretch p-0 sm:items-stretch sm:justify-end",
+          base: "m-0 h-[100dvh] max-h-[100dvh] w-full max-w-full rounded-none sm:ml-auto sm:max-w-2xl sm:rounded-l-xl sm:rounded-r-none",
+          body: "overflow-y-auto py-0",
+        }}
+        isOpen={showSchedulePanel}
         scrollBehavior="inside"
-        size="5xl"
-        onClose={() => setShowHoursSettingsModal(false)}
+        size="full"
+        onClose={() => setShowSchedulePanel(false)}
       >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1 border-b border-divider">
-                <h2 className="text-xl font-bold">Clinic hours &amp; booking blackouts</h2>
-                <p className="text-sm font-normal text-default-500">
-                  Weekly schedule, online booking closed weekdays, and slot generation live
-                  here — use Save and Generate slots inside the form.
+              <ModalHeader className="flex-shrink-0 flex-col gap-1 border-b border-divider py-3">
+                <h2 className="text-lg font-bold sm:text-xl">
+                  Schedule
+                  {isDayOffFeatureEnabled ? " & closures" : ""}
+                </h2>
+                <p className="text-xs font-normal text-default-500 sm:text-sm">
+                  {isDayOffFeatureEnabled
+                    ? "Weekly hours, booking blackouts, and closed periods. Use Save and Generate slots in the footer."
+                    : "Default working hours and booking rules for each weekday. Footer actions save and refresh slots."}
                 </p>
               </ModalHeader>
-              <ModalBody className="gap-0 py-4">
-                <WorkingHoursManager />
+              <ModalBody className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-3 pb-4 pt-2 sm:px-4">
+                <section
+                  aria-labelledby="schedule-weekly-hours-heading"
+                  className="scroll-mt-4"
+                  id="schedule-weekly-hours"
+                >
+                  <div className="mb-3">
+                    <h3
+                      className={`${typography.headingSmall} ${textColors.heading}`}
+                      id="schedule-weekly-hours-heading"
+                    >
+                      Weekly hours
+                    </h3>
+                    <p className={`mt-1 text-sm ${textColors.muted}`}>
+                      Default working hours and booking rules for each weekday.
+                    </p>
+                  </div>
+                  <WorkingHoursManager
+                    ref={scheduleHoursRef}
+                    embedded
+                    hideEmbeddedToolbar
+                    onEmbeddedLoadingChange={setSchedulePanelHoursLoading}
+                  />
+                </section>
+                {isDayOffFeatureEnabled ? (
+                  <>
+                    <Divider />
+                    <section
+                      aria-labelledby="schedule-closed-periods-heading"
+                      className="scroll-mt-4"
+                      id="schedule-closed-periods"
+                    >
+                      <div className="mb-3">
+                        <h3
+                          className={`${typography.headingSmall} ${textColors.heading}`}
+                          id="schedule-closed-periods-heading"
+                        >
+                          Closed periods
+                        </h3>
+                        <p className={`mt-1 text-sm ${textColors.muted}`}>
+                          Holidays and blackout ranges when bookings are not
+                          accepted.
+                        </p>
+                      </div>
+                      <AdminDayOffManager embedded />
+                    </section>
+                  </>
+                ) : null}
               </ModalBody>
-              <ModalFooter>
-                <Button variant="light" onPress={onClose}>
-                  Close
-                </Button>
+              <ModalFooter className="flex-shrink-0 flex-col gap-3 border-t border-divider px-3 py-3 sm:px-4">
+                <p className="max-w-full text-xs leading-relaxed text-default-500 sm:max-w-xl">
+                  <span className="font-semibold text-foreground">
+                    Generate slots
+                  </span>{" "}
+                  rebuilds stored bookable times for about the next{" "}
+                  <strong>30 days</strong> from today, using the weekly hours and
+                  blackouts you have <strong>already saved</strong>.{" "}
+                  <span className="italic">
+                    Example: shorten Thursday to 17:00 close, tap{" "}
+                    <strong>Save</strong>, then <strong>Generate slots</strong> —
+                    new Thursday slots end at 17:00.
+                  </span>
+                </p>
+                <p className="text-[11px] leading-snug text-default-400">
+                  <strong>Save</strong> stores weekly hours, closed weekdays, and
+                  scheduled blackouts. Closed periods below still save from their own
+                  add/edit form.
+                </p>
+                <div className="flex w-full flex-wrap items-center justify-between gap-2 border-t border-divider pt-3 sm:border-t-0 sm:pt-0">
+                  <Button variant="light" onPress={onClose}>
+                    Close
+                  </Button>
+                  <div className="flex flex-wrap items-center justify-end gap-2">
+                    <Button
+                      className="font-semibold"
+                      isDisabled={
+                        schedulePanelHoursLoading ||
+                        schedulePanelAction !== null
+                      }
+                      isLoading={schedulePanelAction === "generate"}
+                      size="sm"
+                      startContent={<CalendarIcon className="h-4 w-4" />}
+                      variant="bordered"
+                      onPress={handleSchedulePanelGenerateSlots}
+                    >
+                      Generate slots
+                    </Button>
+                    <Button
+                      className="bg-emerald-600 font-semibold text-white shadow-sm hover:bg-emerald-700 data-[pressed=true]:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+                      color="default"
+                      isDisabled={
+                        schedulePanelHoursLoading ||
+                        schedulePanelAction !== null
+                      }
+                      isLoading={schedulePanelAction === "save"}
+                      size="sm"
+                      startContent={<Save className="h-4 w-4" />}
+                      variant="solid"
+                      onPress={handleSchedulePanelSave}
+                    >
+                      Save
+                    </Button>
+                  </div>
+                </div>
               </ModalFooter>
             </>
           )}

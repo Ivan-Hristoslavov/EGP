@@ -1,14 +1,12 @@
 "use client";
 
+import { Button, Card, CardBody, Input } from "@heroui/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, ArrowLeft, Shield } from "lucide-react";
 
-import { Button } from "@heroui/button";
-import { Card, CardBody } from "@heroui/card";
-import { Input } from "@heroui/input";
-
 import ThemeToggleButton from "../../../components/ThemeToggleButton";
+
 import { formLayout, inputClassNames } from "@/config/design-system";
 import { textColors, typography } from "@/config/typography";
 

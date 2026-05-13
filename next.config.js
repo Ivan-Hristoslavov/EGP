@@ -1,6 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   serverExternalPackages: ['bcryptjs'],
+  async redirects() {
+    return [
+      { source: '/admin/invoices', destination: '/admin/dashboard', permanent: false },
+      { source: '/admin/settings/vat', destination: '/admin/dashboard', permanent: false },
+      { source: '/admin/site-guidance', destination: '/admin/dashboard', permanent: false },
+    ];
+  },
   async headers() {
     return [
       {

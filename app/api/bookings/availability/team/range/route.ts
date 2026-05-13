@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { isDayOffFeatureEnabled } from "@/config/feature-flags";
+import { isOnlineBookingBlackoutByRules } from "@/lib/booking-blackout-rules";
+import { fetchBookingBlackoutRulesFromDb } from "@/lib/booking-blackout-rules-db";
 import { fetchBookingClosedWeekdaysFromDb } from "@/lib/booking-closed-weekdays-db";
 import { supabaseAdmin } from "@/lib/supabase";
 
@@ -39,15 +42,24 @@ export async function GET(request: NextRequest) {
           : adminSettingsData.value;
     }
 
-    // Get all day off periods for the team member in the date range
-    const { data: dayOffPeriods, error: dayOffError } = await supabaseAdmin
-      .from("team_day_off_periods")
-      .select("start_date, end_date, reason")
-      .eq("team_member_id", teamMemberId)
-      .or(`end_date.gte.${startDate},start_date.lte.${endDate}`);
+    let dayOffPeriods: Array<{
+      start_date: string;
+      end_date: string;
+      reason: string | null;
+    }> = [];
 
-    if (dayOffError) {
-      console.error("Error checking day off periods:", dayOffError);
+    if (isDayOffFeatureEnabled) {
+      const { data, error: dayOffError } = await supabaseAdmin
+        .from("team_day_off_periods")
+        .select("start_date, end_date, reason")
+        .eq("team_member_id", teamMemberId)
+        .or(`end_date.gte.${startDate},start_date.lte.${endDate}`);
+
+      if (dayOffError) {
+        console.error("Error checking day off periods:", dayOffError);
+      } else {
+        dayOffPeriods = data ?? [];
+      }
     }
 
     // Create a helper function to check if a date is in any day off period
@@ -124,7 +136,10 @@ export async function GET(request: NextRequest) {
       }
     > = {};
 
-    const bookingClosedOnline = await fetchBookingClosedWeekdaysFromDb();
+    const [bookingClosedOnline, bookingBlackoutRules] = await Promise.all([
+      fetchBookingClosedWeekdaysFromDb(),
+      fetchBookingBlackoutRulesFromDb(),
+    ]);
     const bookingClosedSet = new Set(bookingClosedOnline);
 
     const start = new Date(startDate);
@@ -168,6 +183,16 @@ export async function GET(request: NextRequest) {
       const currentDayKey = dayKeys[dayOfWeek];
 
       if (bookingClosedSet.has(dayOfWeek)) {
+        results[dateStr] = {
+          availableSlots: [],
+          bookedSlots: [],
+          status: "closed",
+        };
+        currentDate.setDate(currentDate.getDate() + 1);
+        continue;
+      }
+
+      if (isOnlineBookingBlackoutByRules(dateStr, dayOfWeek, bookingBlackoutRules)) {
         results[dateStr] = {
           availableSlots: [],
           bookedSlots: [],

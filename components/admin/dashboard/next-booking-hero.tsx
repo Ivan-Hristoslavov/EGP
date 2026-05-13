@@ -1,18 +1,12 @@
 "use client";
 
+import { Avatar, Button, Card, CardBody, CardHeader, Chip, Progress, Skeleton, Spinner } from "@heroui/react";
+import type { UpcomingBookingRow } from "./analytics-types";
+
 import { useEffect, useMemo, useState } from "react";
 import { formatDistanceStrict } from "date-fns";
 import { Calendar, Clock, Mail, Phone } from "lucide-react";
 import { motion } from "framer-motion";
-import { Avatar } from "@heroui/avatar";
-import { Button } from "@heroui/button";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Chip } from "@heroui/chip";
-import { Progress } from "@heroui/progress";
-import { Skeleton } from "@heroui/skeleton";
-import { Spinner } from "@heroui/spinner";
-
-import type { UpcomingBookingRow } from "./analytics-types";
 
 function parseStartMs(dateStr: string, timeStr: string): number {
   const [y, mo, d] = dateStr.split("-").map((x) => parseInt(x, 10));
@@ -20,7 +14,15 @@ function parseStartMs(dateStr: string, timeStr: string): number {
   const m24 = t.match(/^(\d{1,2}):(\d{2})$/);
 
   if (m24 && !Number.isNaN(y)) {
-    return new Date(y, mo - 1, d, parseInt(m24[1], 10), parseInt(m24[2], 10), 0, 0).getTime();
+    return new Date(
+      y,
+      mo - 1,
+      d,
+      parseInt(m24[1], 10),
+      parseInt(m24[2], 10),
+      0,
+      0,
+    ).getTime();
   }
   const m12 = t.match(/^(\d{1,2}):(\d{2})\s*(am|pm)?$/i);
 
@@ -46,7 +48,9 @@ function initialsFromBooking(b: UpcomingBookingRow) {
     const a = (c.first_name || "").charAt(0);
     const x = (c.last_name || "").charAt(0);
 
-    return `${a}${x}`.toUpperCase() || b.customer_name.slice(0, 2).toUpperCase();
+    return (
+      `${a}${x}`.toUpperCase() || b.customer_name.slice(0, 2).toUpperCase()
+    );
   }
 
   return b.customer_name
@@ -83,10 +87,10 @@ export function DashboardNextBookingHeroSkeleton() {
           <Skeleton className="h-6 w-44 max-w-full rounded-md sm:h-7 sm:w-52" />
         </div>
         <div
+          aria-busy="true"
+          aria-live="polite"
           className="flex shrink-0 items-center gap-2 rounded-full border border-divider bg-default-50/60 px-3 py-2 dark:bg-default-100/10"
           role="status"
-          aria-live="polite"
-          aria-busy="true"
         >
           <Spinner color="primary" size="sm" />
           <span className="text-xs font-medium text-default-600 dark:text-default-400">
@@ -147,10 +151,16 @@ export function DashboardNextBookingHero(props: {
               No upcoming bookings
             </p>
             <p className="mt-1 text-xs text-default-500">
-              When the next appointment is scheduled, it will appear here with a live countdown.
+              When the next appointment is scheduled, it will appear here with a
+              live countdown.
             </p>
           </div>
-          <Button color="primary" size="sm" variant="flat" onPress={props.onOpenBookings}>
+          <Button
+            color="primary"
+            size="sm"
+            variant="flat"
+            onPress={props.onOpenBookings}
+          >
             Manage bookings
           </Button>
         </CardBody>
@@ -161,10 +171,14 @@ export function DashboardNextBookingHero(props: {
   const ms = startMs - now;
   const within24h = ms > 0 && ms < 24 * 60 * 60 * 1000;
   const within2h = ms > 0 && ms < 2 * 60 * 60 * 1000;
-  const progress = ms <= 0 ? 100 : Math.max(0, Math.min(100, 100 - ms / (24 * 60 * 60 * 1000) * 100));
+  const progress =
+    ms <= 0
+      ? 100
+      : Math.max(0, Math.min(100, 100 - (ms / (24 * 60 * 60 * 1000)) * 100));
 
   const tel = props.booking.customer_phone?.replace(/\s+/g, "") || "";
-  const mail = props.booking.customer_email || props.booking.customers?.email || "";
+  const mail =
+    props.booking.customer_email || props.booking.customers?.email || "";
 
   return (
     <motion.div
@@ -173,7 +187,11 @@ export function DashboardNextBookingHero(props: {
           ? { boxShadow: "0 0 0 1px hsl(var(--heroui-primary-300) / 0.45)" }
           : { boxShadow: "0 0 0 1px transparent" }
       }
-      transition={{ duration: 1.6, repeat: within2h ? Infinity : 0, repeatType: "reverse" }}
+      transition={{
+        duration: 1.6,
+        repeat: within2h ? Infinity : 0,
+        repeatType: "reverse",
+      }}
     >
       <Card
         className={`relative overflow-hidden border shadow-sm ${
@@ -193,7 +211,9 @@ export function DashboardNextBookingHero(props: {
             <p className="text-[11px] font-medium uppercase tracking-wide text-default-500">
               Next appointment
             </p>
-            <h2 className="text-lg font-semibold sm:text-xl">Front desk focus</h2>
+            <h2 className="text-lg font-semibold sm:text-xl">
+              Front desk focus
+            </h2>
           </div>
           <Chip color="primary" size="sm" variant="flat">
             {formatCountdown(ms)}
@@ -210,7 +230,9 @@ export function DashboardNextBookingHero(props: {
               <p className="truncate text-lg font-semibold leading-tight">
                 {props.booking.customer_name}
               </p>
-              <p className="truncate text-sm text-default-500">{props.booking.service}</p>
+              <p className="truncate text-sm text-default-500">
+                {props.booking.service}
+              </p>
               <div className="flex flex-wrap items-center gap-2 text-xs text-default-500">
                 <span className="inline-flex items-center gap-1">
                   <Calendar className="h-3.5 w-3.5" />
@@ -241,9 +263,9 @@ export function DashboardNextBookingHero(props: {
               value={progress}
             />
             <div
+              aria-label="Booking shortcuts"
               className="flex flex-nowrap items-center gap-2 overflow-x-auto pb-0.5 sm:overflow-visible"
               role="group"
-              aria-label="Booking shortcuts"
             >
               <Button
                 className="shrink-0"
@@ -264,8 +286,8 @@ export function DashboardNextBookingHero(props: {
               {tel ? (
                 <Button
                   isIconOnly
-                  as="a"
                   aria-label="Call client"
+                  as="a"
                   className="shrink-0"
                   href={`tel:${tel}`}
                   size="sm"
@@ -277,8 +299,8 @@ export function DashboardNextBookingHero(props: {
               {mail ? (
                 <Button
                   isIconOnly
-                  as="a"
                   aria-label="Email client"
+                  as="a"
                   className="shrink-0"
                   href={`mailto:${mail}`}
                   size="sm"

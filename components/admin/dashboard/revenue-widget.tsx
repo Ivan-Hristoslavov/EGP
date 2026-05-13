@@ -1,7 +1,6 @@
 "use client";
 
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Chip } from "@heroui/chip";
+import { Card, CardBody, CardHeader, Chip } from "@heroui/react";
 import { motion } from "framer-motion";
 import {
   Area,
@@ -43,17 +42,22 @@ export function DashboardRevenueWidget(props: {
             Paid this calendar month
           </p>
         </div>
-        <Chip className="w-fit shrink-0 sm:self-start" color={chip} size="sm" variant="flat">
+        <Chip
+          className="w-fit shrink-0 sm:self-start"
+          color={chip}
+          size="sm"
+          variant="flat"
+        >
           MoM {formatMom(props.revenueMomRatio)}
         </Chip>
       </CardHeader>
       <CardBody className="flex flex-1 flex-col gap-3 px-4 pb-5 pt-3 sm:px-6">
         <motion.div
+          key={props.monthlyRevenue}
+          animate={{ opacity: 1, y: 0 }}
           className="text-3xl font-semibold tracking-tight text-default-800 tabular-nums dark:text-default-100"
           initial={{ opacity: 0.6, y: 4 }}
-          key={props.monthlyRevenue}
           transition={{ duration: 0.35, ease: "easeOut" }}
-          animate={{ opacity: 1, y: 0 }}
         >
           £{props.monthlyRevenue.toFixed(2)}
         </motion.div>
@@ -62,7 +66,10 @@ export function DashboardRevenueWidget(props: {
         </p>
         <div className="h-16 w-full opacity-90">
           <ResponsiveContainer height="100%" width="100%">
-            <AreaChart data={props.sparkPoints} margin={{ top: 2, right: 0, left: 0, bottom: 0 }}>
+            <AreaChart
+              data={props.sparkPoints}
+              margin={{ top: 2, right: 0, left: 0, bottom: 0 }}
+            >
               <defs>
                 <linearGradient id="revSpark" x1="0" x2="0" y1="0" y2="1">
                   <stop offset="0%" stopColor="hsl(212 55% 48% / 0.25)" />

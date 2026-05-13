@@ -14,8 +14,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@heroui/button";
-import { Card, CardBody, CardHeader } from "@heroui/react";
+import { Button, Card, CardBody, CardHeader } from "@heroui/react";
 import { Chip } from "@heroui/react";
 import { Tabs, Tab } from "@heroui/react";
 import { Spinner } from "@heroui/react";

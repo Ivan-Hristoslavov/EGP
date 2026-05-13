@@ -1,10 +1,9 @@
 "use client";
 
+import { Button, Chip } from "@heroui/react";
 import type { AdminCalendarBooking } from "./calendar-types";
 
 import { Calendar as CalendarIcon, Phone } from "lucide-react";
-import { Button } from "@heroui/button";
-import { Chip } from "@heroui/chip";
 
 function chipColor(
   status: string,

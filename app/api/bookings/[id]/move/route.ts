@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { supabaseAdmin } from "../../../../../lib/supabase";
+
 import { parseYyyyMmDdUtcDayOfWeek } from "@/lib/calendar-local-date";
 import { resolveClinicWorkingHoursForUtcDay } from "@/lib/resolve-clinic-working-hours-utc-day";
 import { requireAdmin } from "@/lib/admin-auth";
-import { supabaseAdmin } from "../../../../../lib/supabase";
 
 const SLOT_STEP = 30;
 
@@ -121,8 +122,7 @@ export async function PATCH(
         );
       }
 
-      const normalizedTime =
-        newTime.length > 5 ? newTime.slice(0, 5) : newTime;
+      const normalizedTime = newTime.length > 5 ? newTime.slice(0, 5) : newTime;
       let startIdx = timeSlots.indexOf(normalizedTime);
 
       if (startIdx < 0) {

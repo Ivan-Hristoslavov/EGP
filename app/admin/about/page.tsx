@@ -1,5 +1,6 @@
 "use client";
 
+import { Button, Card, CardBody, Chip, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, Spinner, Switch, Textarea } from "@heroui/react";
 import { useState, useEffect } from "react";
 import {
   Plus,
@@ -11,20 +12,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@heroui/modal";
-import { Button } from "@heroui/button";
-import { Input, Textarea } from "@heroui/input";
-import { Switch } from "@heroui/switch";
-import { Chip } from "@heroui/chip";
-import { Card, CardBody } from "@heroui/card";
-import { Spinner } from "@heroui/spinner";
-import { Select, SelectItem } from "@heroui/select";
+
 
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { ConfirmationModal } from "@/components/ConfirmationModal";
@@ -355,12 +343,8 @@ export default function AdminAboutPage() {
 
   return (
     <div className="w-full">
-      {/* Add Button */}
-      <div className="mb-6">
-        <Button
-          className="bg-gradient-to-r from-rose-500 to-pink-500 text-white"
-          onClick={openAddModal}
-        >
+      <div className="mb-6 flex w-full justify-end">
+        <Button color="primary" onPress={openAddModal}>
           <Plus className="w-5 h-5 mr-2" />
           Add Section
         </Button>
@@ -393,7 +377,7 @@ export default function AdminAboutPage() {
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <Chip color="danger" size="sm" variant="flat">
+                          <Chip color="primary" size="sm" variant="flat">
                             {section.section_type}
                           </Chip>
                           {!section.is_active && (
@@ -530,8 +514,8 @@ export default function AdminAboutPage() {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="bg-gradient-to-r from-rose-50 to-pink-50 dark:from-gray-900 dark:to-gray-800">
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent">
+              <ModalHeader className="border-b border-divider bg-default-100">
+                <h2 className="text-2xl font-bold text-foreground">
                   {editingSection ? "Edit Section" : "Add New Section"}
                 </h2>
               </ModalHeader>
@@ -594,13 +578,13 @@ export default function AdminAboutPage() {
 
                   {/* Bullet Points */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <p className="block text-sm font-medium text-foreground mb-2">
                       Bullet Points
-                    </label>
+                    </p>
                     <div className="flex gap-2 mb-2">
                       <Input
-                        classNames={inputClassNames}
                         className="flex-1"
+                        classNames={inputClassNames}
                         placeholder="Enter bullet point"
                         size="lg"
                         value={newBullet}
@@ -612,9 +596,9 @@ export default function AdminAboutPage() {
                       />
                       <Button
                         isIconOnly
-                        color="danger"
+                        color="primary"
                         size="lg"
-                        onClick={addBullet}
+                        onPress={addBullet}
                       >
                         <Plus className="w-5 h-5" />
                       </Button>
@@ -638,9 +622,9 @@ export default function AdminAboutPage() {
 
                   {/* Image Upload */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <p className="block text-sm font-medium text-foreground mb-2">
                       Team/Section Image
-                    </label>
+                    </p>
                     <div className="space-y-3">
                       {imagePreview && (
                         <div className="relative w-full h-48 border border-gray-300 dark:border-gray-600 rounded-xl overflow-hidden">
@@ -659,16 +643,16 @@ export default function AdminAboutPage() {
                         </div>
                       )}
                       <div className="flex items-center justify-center w-full">
-                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-xl cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 hover:from-rose-50 hover:to-pink-50 dark:hover:from-rose-900/20 dark:hover:to-pink-900/20 transition-all hover:border-rose-400 dark:hover:border-rose-600 group">
+                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-divider rounded-xl cursor-pointer bg-default-100 hover:bg-default-200/80 dark:hover:bg-default-50/10 transition-colors group">
                           <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                            <Upload className="w-8 h-8 mb-2 text-gray-400 group-hover:text-rose-500 transition-colors" />
-                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                              <span className="font-semibold text-rose-600 dark:text-rose-400">
+                            <Upload className="w-8 h-8 mb-2 text-default-400 group-hover:text-primary transition-colors" />
+                            <p className="mb-2 text-sm text-default-500">
+                              <span className="font-semibold text-primary">
                                 Click to upload
                               </span>{" "}
                               or drag and drop
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                            <p className="text-xs text-default-500">
                               PNG, JPG, WEBP (MAX. 5MB)
                             </p>
                           </div>
@@ -739,13 +723,12 @@ export default function AdminAboutPage() {
                   </div>
                 </div>
               </ModalBody>
-              <ModalFooter className="border-t border-gray-200 dark:border-gray-700">
+              <ModalFooter className="border-t border-divider">
                 <Button variant="light" onPress={onClose}>
                   Cancel
                 </Button>
                 <Button
-                  className="bg-gradient-to-r from-rose-500 to-pink-500"
-                  color="danger"
+                  color="primary"
                   isLoading={isSavingSection}
                   onPress={
                     editingSection ? handleUpdateSection : handleAddSection

@@ -42,11 +42,10 @@ export async function GET(request: Request) {
 
     // Use admin client to bypass RLS
     // 1. Today's Bookings count
-    const { count: todayBookingsCount } =
-      await supabaseAdmin
-        .from("bookings")
-        .select("*", { count: "exact", head: true })
-        .eq("date", todayStr);
+    const { count: todayBookingsCount } = await supabaseAdmin
+      .from("bookings")
+      .select("*", { count: "exact", head: true })
+      .eq("date", todayStr);
 
     // 2. Monthly Revenue (sum of paid payments this month)
     // Filter directly in database for better performance
@@ -81,11 +80,10 @@ export async function GET(request: Request) {
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
     const ninetyDaysAgoStr = ninetyDaysAgo.toISOString().split("T")[0];
 
-    const { data: activeCustomers } =
-      await supabaseAdmin
-        .from("customers")
-        .select("id", { count: "exact", head: false })
-        .eq("is_active", true);
+    const { data: activeCustomers } = await supabaseAdmin
+      .from("customers")
+      .select("id", { count: "exact", head: false })
+      .eq("is_active", true);
 
     // Also count customers from bookings/payments
     const { data: customersFromBookings } = await supabaseAdmin
@@ -132,7 +130,10 @@ export async function GET(request: Request) {
     let avgRatingCount = 0;
 
     if (reviewsError) {
-      console.error("Error fetching reviews for dashboard stats:", reviewsError);
+      console.error(
+        "Error fetching reviews for dashboard stats:",
+        reviewsError,
+      );
     } else if (reviews && reviews.length > 0) {
       const numericRatings = reviews
         .map((r) => Number(r.rating))
@@ -203,7 +204,11 @@ export async function GET(request: Request) {
       Math.round((weekBooked / Math.max(1, weekly_capacity_proxy)) * 100),
     );
 
-    const priorMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const priorMonthStart = new Date(
+      today.getFullYear(),
+      today.getMonth() - 1,
+      1,
+    );
     const priorMonthEnd = new Date(
       today.getFullYear(),
       today.getMonth(),

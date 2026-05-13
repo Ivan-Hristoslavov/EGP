@@ -96,7 +96,12 @@ export function addDaysUtcYyyyMmDd(
   const m = parts[1];
   const d = parts[2];
 
-  if (parts.length !== 3 || Number.isNaN(y) || Number.isNaN(m) || Number.isNaN(d)) {
+  if (
+    parts.length !== 3 ||
+    Number.isNaN(y) ||
+    Number.isNaN(m) ||
+    Number.isNaN(d)
+  ) {
     return null;
   }
 

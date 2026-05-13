@@ -1,5 +1,4 @@
 import { supabaseAdmin } from "@/lib/supabase";
-
 import {
   BOOKING_CLOSED_WEEKDAYS_KEY,
   parseBookingClosedWeekdays,

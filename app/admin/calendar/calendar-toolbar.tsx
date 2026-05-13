@@ -1,8 +1,6 @@
 "use client";
 
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
+import { Button, Input, Select, SelectItem } from "@heroui/react";
 import type { CalendarView } from "./use-calendar-bookings";
 
 import { Search } from "lucide-react";

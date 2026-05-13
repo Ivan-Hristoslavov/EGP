@@ -1,5 +1,6 @@
 "use client";
 
+import { Button, Card, CardBody, Chip, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, Switch, Textarea } from "@heroui/react";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Plus,
@@ -12,20 +13,9 @@ import {
   FolderTree,
   TrendingUp,
   Star,
+  Copy,
 } from "lucide-react";
-import { Input, Textarea } from "@heroui/input";
-import { Button } from "@heroui/button";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@heroui/modal";
-import { Switch } from "@heroui/switch";
-import { Select, SelectItem } from "@heroui/select";
-import { Chip } from "@heroui/chip";
-import { Card, CardBody } from "@heroui/card";
+
 
 import { ConfirmationModal } from "@/components/ConfirmationModal";
 import { useConfirmation } from "@/hooks/useConfirmation";
@@ -33,6 +23,7 @@ import { useServices } from "@/hooks/useServices";
 import { useToast } from "@/components/Toast";
 import Pagination from "@/components/Pagination";
 import { formLayout, inputClassNames } from "@/config/design-system";
+import { canonicalUrl } from "@/lib/seo";
 
 const SERVICES_PAGE_SIZE = 6;
 
@@ -224,6 +215,42 @@ export default function AdminServicesPage() {
   useEffect(() => {
     loadAllData();
   }, [loadAllData]);
+
+  const copyTextToClipboard = useCallback(
+    async (absoluteUrl: string) => {
+      try {
+        await navigator.clipboard.writeText(absoluteUrl);
+        showSuccess("Копирано", "Линкът е копиран в клипборда");
+      } catch {
+        showError("Грешка", "Копирането не бе успешно. Опитайте отново.");
+      }
+    },
+    [showError, showSuccess],
+  );
+
+  const copyServiceProcedureLink = useCallback(
+    (slug: string) => {
+      const trimmed = slug.trim();
+
+      if (!trimmed) return;
+      void copyTextToClipboard(
+        canonicalUrl(`/services/${encodeURIComponent(trimmed)}`),
+      );
+    },
+    [copyTextToClipboard],
+  );
+
+  const copyServiceBookingLink = useCallback(
+    (slug: string) => {
+      const trimmed = slug.trim();
+
+      if (!trimmed) return;
+      void copyTextToClipboard(
+        canonicalUrl(`/book?service=${encodeURIComponent(trimmed)}`),
+      );
+    },
+    [copyTextToClipboard],
+  );
 
   // Reset category filter when mainTab changes
   useEffect(() => {
@@ -978,9 +1005,11 @@ export default function AdminServicesPage() {
                                   <Chip
                                     color="warning"
                                     size="sm"
+                                    startContent={
+                                      <CheckCircle2 className="h-3 w-3 shrink-0" />
+                                    }
                                     variant="flat"
                                   >
-                                    <CheckCircle2 className="mr-1 h-3 w-3" />
                                     Featured
                                   </Chip>
                                 )}
@@ -1137,6 +1166,41 @@ export default function AdminServicesPage() {
                                     No additional information
                                   </p>
                                 )}
+                            </div>
+                          </div>
+                          <div className="mt-2 space-y-1.5 rounded-lg border border-dashed border-gray-200 bg-gray-50/90 p-2 dark:border-gray-600 dark:bg-gray-900/40">
+                            <p className="text-[10px] leading-snug text-gray-500 dark:text-gray-400">
+                              Линкът работи само ако услугата е активна.
+                            </p>
+                            <div className="flex gap-1.5">
+                              <Button
+                                className="min-w-0 flex-1 text-[10px] sm:text-xs"
+                                size="sm"
+                                startContent={
+                                  <Copy className="h-3.5 w-3.5 shrink-0" />
+                                }
+                                title="Копирай линк към страницата на процедурата"
+                                variant="bordered"
+                                onPress={() =>
+                                  copyServiceProcedureLink(service.slug)
+                                }
+                              >
+                                <span className="truncate">Страница</span>
+                              </Button>
+                              <Button
+                                className="min-w-0 flex-1 text-[10px] sm:text-xs"
+                                size="sm"
+                                startContent={
+                                  <Copy className="h-3.5 w-3.5 shrink-0" />
+                                }
+                                title="Копирай линк за директна резервация"
+                                variant="bordered"
+                                onPress={() =>
+                                  copyServiceBookingLink(service.slug)
+                                }
+                              >
+                                <span className="truncate">Резервация</span>
+                              </Button>
                             </div>
                           </div>
                           {/* Action Buttons */}
@@ -1397,8 +1461,8 @@ export default function AdminServicesPage() {
                       </>
                     </Select>
                     <Input
-                      classNames={inputClassNames}
                       isRequired
+                      classNames={inputClassNames}
                       label="Service Name"
                       placeholder="Enter service name"
                       size="lg"
@@ -1408,6 +1472,39 @@ export default function AdminServicesPage() {
                         setFormData((prev) => ({ ...prev, name: value }))
                       }
                     />
+                    {editingService && formData.slug.trim() ? (
+                      <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50/90 p-3 dark:border-gray-600 dark:bg-gray-900/40">
+                        <p className="mb-2 text-xs text-gray-600 dark:text-gray-400">
+                          Линкът работи само ако услугата е активна.
+                        </p>
+                        <div className="flex flex-col gap-2 sm:flex-row">
+                          <Button
+                            className="flex-1"
+                            size="sm"
+                            startContent={<Copy className="h-4 w-4" />}
+                            title="Копирай линк към страницата на процедурата"
+                            variant="bordered"
+                            onPress={() =>
+                              copyServiceProcedureLink(formData.slug)
+                            }
+                          >
+                            Копирай линк към страницата на процедурата
+                          </Button>
+                          <Button
+                            className="flex-1"
+                            size="sm"
+                            startContent={<Copy className="h-4 w-4" />}
+                            title="Копирай линк за директна резервация"
+                            variant="bordered"
+                            onPress={() =>
+                              copyServiceBookingLink(formData.slug)
+                            }
+                          >
+                            Копирай линк за директна резервация
+                          </Button>
+                        </div>
+                      </div>
+                    ) : null}
                     <Select
                       label="Discount group (optional)"
                       placeholder="None"
@@ -1440,8 +1537,8 @@ export default function AdminServicesPage() {
                     </Select>
                     <div className="grid grid-cols-2 gap-3 sm:gap-4">
                       <Input
-                        classNames={inputClassNames}
                         isRequired
+                        classNames={inputClassNames}
                         label="Price (£)"
                         placeholder="0.00"
                         size="lg"
@@ -1456,8 +1553,8 @@ export default function AdminServicesPage() {
                         }
                       />
                       <Input
-                        classNames={inputClassNames}
                         isRequired
+                        classNames={inputClassNames}
                         label="Duration (min)"
                         placeholder="30"
                         size="lg"
@@ -1502,8 +1599,8 @@ export default function AdminServicesPage() {
                       </label>
                       <div className="flex gap-2 mb-2">
                         <Input
-                          classNames={inputClassNames}
                           className="flex-1"
+                          classNames={inputClassNames}
                           placeholder="Enter benefit"
                           size="lg"
                           value={newBenefit}
@@ -1673,8 +1770,8 @@ export default function AdminServicesPage() {
                 <ModalBody className={formLayout.modalBody}>
                   <div className={formLayout.sectionGap}>
                     <Input
-                      classNames={inputClassNames}
                       isRequired
+                      classNames={inputClassNames}
                       label="Category Name"
                       placeholder="Enter category name"
                       size="lg"
@@ -1743,7 +1840,9 @@ export default function AdminServicesPage() {
                       : "Add discount group"}
                   </h2>
                 </ModalHeader>
-                <ModalBody className={`${formLayout.modalBody} ${formLayout.sectionGap}`}>
+                <ModalBody
+                  className={`${formLayout.modalBody} ${formLayout.sectionGap}`}
+                >
                   <Input
                     classNames={inputClassNames}
                     label="Group name"
@@ -1825,8 +1924,8 @@ export default function AdminServicesPage() {
                     )}
                     <div className="flex flex-col sm:flex-row gap-2 mb-3">
                       <Input
-                        classNames={inputClassNames}
                         className="flex-1"
+                        classNames={inputClassNames}
                         placeholder="Search services..."
                         size="sm"
                         startContent={

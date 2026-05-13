@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-} from "@heroui/modal";
-import { Button } from "@heroui/button";
-import { Chip } from "@heroui/chip";
+import { Button, Chip, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
 import { formLayout } from "@/config/design-system";
 
 type Booking = {

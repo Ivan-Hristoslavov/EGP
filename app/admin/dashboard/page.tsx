@@ -1,5 +1,12 @@
 "use client";
 
+import { Button, Card, CardBody, CardHeader, Chip, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, ScrollShadow, Skeleton, Tooltip } from "@heroui/react";
+import type {
+  DashboardAnalytics,
+  UpcomingBookingRow,
+} from "@/components/admin/dashboard/analytics-types";
+import type { DailyBookingPoint } from "@/lib/dashboard-analytics";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -17,19 +24,7 @@ import {
   XCircle,
   Trash2,
 } from "lucide-react";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { Chip } from "@heroui/chip";
-import { Input } from "@heroui/input";
-import { Skeleton } from "@heroui/skeleton";
-import { ScrollShadow } from "@heroui/scroll-shadow";
-import { Tooltip } from "@heroui/tooltip";
-import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-} from "@heroui/dropdown";
+
 
 import { DashboardBookingActivityChart } from "@/components/admin/dashboard/booking-activity-chart";
 import { DashboardBookingDetailModal } from "@/components/admin/dashboard/booking-detail-modal";
@@ -40,11 +35,6 @@ import {
 import { DashboardRevenueWidget } from "@/components/admin/dashboard/revenue-widget";
 import { DashboardServiceDistributionChart } from "@/components/admin/dashboard/service-distribution-chart";
 import { DashboardUtilizationRadial } from "@/components/admin/dashboard/utilization-radial";
-import type {
-  DashboardAnalytics,
-  UpcomingBookingRow,
-} from "@/components/admin/dashboard/analytics-types";
-import type { DailyBookingPoint } from "@/lib/dashboard-analytics";
 import { inputClassNames } from "@/config/design-system";
 import { textColors, typography } from "@/config/typography";
 
@@ -107,8 +97,11 @@ export default function DashboardPage() {
     avg_rating_count: 0,
   });
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
-  const [analytics, setAnalytics] = useState<DashboardAnalytics>(emptyAnalytics);
-  const [upcomingBookings, setUpcomingBookings] = useState<UpcomingBookingRow[]>([]);
+  const [analytics, setAnalytics] =
+    useState<DashboardAnalytics>(emptyAnalytics);
+  const [upcomingBookings, setUpcomingBookings] = useState<
+    UpcomingBookingRow[]
+  >([]);
 
   const loadDashboardData = useCallback(async () => {
     try {
@@ -134,7 +127,8 @@ export default function DashboardPage() {
             booking_series_7d: data.analytics.booking_series_7d || [],
             booking_series_30d: data.analytics.booking_series_30d || [],
             service_distribution: data.analytics.service_distribution || [],
-            utilization: data.analytics.utilization || emptyAnalytics.utilization,
+            utilization:
+              data.analytics.utilization || emptyAnalytics.utilization,
             revenue_prior_month: data.analytics.revenue_prior_month || 0,
             revenue_mom_ratio:
               data.analytics.revenue_mom_ratio === undefined
@@ -417,9 +411,9 @@ export default function DashboardPage() {
   return (
     <div className="w-full space-y-5 sm:space-y-7">
       <motion.div
+        animate={{ opacity: 1, y: 0 }}
         className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4"
         initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35 }}
       >
         {statCards.map((stat, index) => {
@@ -428,8 +422,8 @@ export default function DashboardPage() {
           return (
             <motion.div
               key={stat.title}
-              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 8 }}
               transition={{ delay: index * 0.04, duration: 0.3 }}
             >
               <Card className="border border-divider shadow-sm transition-transform hover:-translate-y-0.5">
@@ -492,8 +486,8 @@ export default function DashboardPage() {
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, y: 8 }}
         transition={{ duration: 0.35, delay: 0.08 }}
       >
         <DashboardNextBookingHero
@@ -505,9 +499,9 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3 lg:gap-6">
         <motion.div
+          animate={{ opacity: 1, y: 0 }}
           className="flex min-h-0 flex-col lg:col-span-2"
           initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.1 }}
         >
           <Card className="flex h-full min-h-0 flex-col border border-divider shadow-sm">
@@ -570,7 +564,11 @@ export default function DashboardPage() {
                   <div className="flex flex-col items-center rounded-xl border border-dashed border-default-200 py-10 text-center dark:border-default-100/25">
                     <motion.div
                       animate={{ scale: [1, 1.04, 1] }}
-                      transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+                      transition={{
+                        duration: 2.4,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
                     >
                       <Calendar className="mx-auto mb-3 h-12 w-12 text-default-300 sm:h-14 sm:w-14" />
                     </motion.div>
@@ -578,8 +576,8 @@ export default function DashboardPage() {
                       Nothing on the schedule
                     </p>
                     <p className="mt-1 max-w-sm text-xs text-default-500">
-                      Choose another date in the header or create a booking — this panel
-                      stays calm when the day is clear.
+                      Choose another date in the header or create a booking —
+                      this panel stays calm when the day is clear.
                     </p>
                     <Button
                       className="mt-4"
@@ -607,7 +605,9 @@ export default function DashboardPage() {
                             <p className="font-semibold text-default-800 dark:text-default-100">
                               {booking.customer_name}
                             </p>
-                            <p className="text-sm text-default-500">{booking.service}</p>
+                            <p className="text-sm text-default-500">
+                              {booking.service}
+                            </p>
                           </div>
                           <Chip
                             classNames={{ base: "shrink-0" }}
@@ -631,7 +631,8 @@ export default function DashboardPage() {
                 </h3>
                 {todayBookings.length === 0 ? (
                   <p className="py-6 text-center text-sm text-default-500">
-                    No booking cards for this date — add a booking or pick another day.
+                    No booking cards for this date — add a booking or pick
+                    another day.
                   </p>
                 ) : (
                   <div className="space-y-3">
@@ -662,7 +663,9 @@ export default function DashboardPage() {
                             </div>
                             <div className="flex items-center gap-4">
                               <div className="text-right">
-                                <p className="font-semibold">£{booking.amount}</p>
+                                <p className="font-semibold">
+                                  £{booking.amount}
+                                </p>
                                 <Chip
                                   color={
                                     booking.payment_status === "paid"
@@ -697,15 +700,21 @@ export default function DashboardPage() {
                                   </DropdownItem>
                                   <DropdownItem
                                     key="bookings"
-                                    startContent={<Calendar className="h-4 w-4" />}
-                                    onPress={() => router.push("/admin/bookings")}
+                                    startContent={
+                                      <Calendar className="h-4 w-4" />
+                                    }
+                                    onPress={() =>
+                                      router.push("/admin/bookings")
+                                    }
                                   >
                                     Go to bookings
                                   </DropdownItem>
                                   <DropdownItem
                                     key="delete"
                                     color="danger"
-                                    startContent={<Trash2 className="h-4 w-4" />}
+                                    startContent={
+                                      <Trash2 className="h-4 w-4" />
+                                    }
                                     onPress={() => deleteBooking(booking)}
                                   >
                                     Delete
@@ -725,16 +734,14 @@ export default function DashboardPage() {
         </motion.div>
 
         <motion.div
+          animate={{ opacity: 1, y: 0 }}
           className="flex min-h-0 flex-col lg:col-span-1"
           initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.12 }}
         >
           <Card className="flex h-full min-h-0 flex-col border border-divider shadow-sm">
             <CardHeader className="border-b border-divider p-4 sm:p-6">
-              <h2
-                className={`${typography.headingCard} ${textColors.heading}`}
-              >
+              <h2 className={`${typography.headingCard} ${textColors.heading}`}>
                 Activity
               </h2>
             </CardHeader>
@@ -749,12 +756,15 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <ScrollShadow
-                  className="min-h-0 flex-1 pr-1 lg:max-h-none"
                   hideScrollBar
+                  className="min-h-0 flex-1 pr-1 lg:max-h-none"
                 >
                   <div className="space-y-3 sm:space-y-4">
                     {recentActivity.map((activity: any) => (
-                      <div key={activity.id} className="flex items-start gap-2 sm:gap-3">
+                      <div
+                        key={activity.id}
+                        className="flex items-start gap-2 sm:gap-3"
+                      >
                         <Chip
                           color={getStatusColor(activity.status)}
                           size="sm"
@@ -762,35 +772,43 @@ export default function DashboardPage() {
                           variant="flat"
                         />
                         <div className="min-w-0 flex-1">
-                          <Tooltip closeDelay={0} content={activity.message} delay={400}>
+                          <Tooltip
+                            closeDelay={0}
+                            content={activity.message}
+                            delay={400}
+                          >
                             <p className="cursor-default truncate text-sm font-medium">
                               {activity.message}
                             </p>
                           </Tooltip>
-                          <p className="text-xs text-default-500">{activity.time}</p>
+                          <p className="text-xs text-default-500">
+                            {activity.time}
+                          </p>
                         </div>
                       </div>
                     ))}
                   </div>
                 </ScrollShadow>
               )}
-              <Button
-                className="mt-auto w-full shrink-0 pt-4 sm:pt-6"
-                size="sm"
-                variant="light"
-                onPress={() => router.push("/admin/bookings")}
-              >
-                View all activity
-              </Button>
+              <div className="mt-auto w-full shrink-0 pt-4 sm:pt-6">
+                <Button
+                  className="w-full"
+                  size="sm"
+                  variant="light"
+                  onPress={() => router.push("/admin/bookings")}
+                >
+                  View all activity
+                </Button>
+              </div>
             </CardBody>
           </Card>
         </motion.div>
       </div>
 
       <motion.div
+        animate={{ opacity: 1, y: 0 }}
         className="w-full"
         initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, delay: 0.14 }}
       >
         <DashboardBookingActivityChart
@@ -801,9 +819,9 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3 lg:gap-6">
         <motion.div
+          animate={{ opacity: 1, y: 0 }}
           className="min-w-0 flex h-full lg:min-h-[320px]"
           initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.16 }}
         >
           <DashboardRevenueWidget
@@ -813,9 +831,9 @@ export default function DashboardPage() {
           />
         </motion.div>
         <motion.div
+          animate={{ opacity: 1, y: 0 }}
           className="min-w-0 flex h-full lg:min-h-[320px]"
           initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.18 }}
         >
           <DashboardUtilizationRadial
@@ -825,36 +843,37 @@ export default function DashboardPage() {
           />
         </motion.div>
         <motion.div
+          animate={{ opacity: 1, y: 0 }}
           className="min-w-0 flex h-full lg:min-h-[320px]"
           initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.2 }}
         >
-          <DashboardServiceDistributionChart data={analytics.service_distribution} />
+          <DashboardServiceDistributionChart
+            data={analytics.service_distribution}
+          />
         </motion.div>
       </div>
 
       <motion.div
+        animate={{ opacity: 1, y: 0 }}
         className="w-full"
         initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, delay: 0.22 }}
       >
         <Card className="flex h-full flex-col border border-divider shadow-sm">
           <CardHeader className="border-b border-divider p-4 sm:p-6">
-            <h2
-              className={`${typography.headingCard} ${textColors.heading}`}
-            >
+            <h2 className={`${typography.headingCard} ${textColors.heading}`}>
               Calendar &amp; hours
             </h2>
             <p className="text-xs text-default-500">
-              Month, week, and day views plus closed weekdays and slot generation.
+              Month, week, and day views plus closed weekdays and slot
+              generation.
             </p>
           </CardHeader>
           <CardBody className="flex flex-1 flex-col justify-between gap-4 p-4 sm:p-6">
             <p className="text-sm text-default-600">
-              Configure which weekdays block online booking, edit weekly hours, and
-              regenerate slots from the calendar page.
+              Configure which weekdays block online booking, edit weekly hours,
+              and regenerate slots from the calendar page.
             </p>
             <Button
               color="primary"

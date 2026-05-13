@@ -1,5 +1,6 @@
 "use client";
 
+import { Button, Card, CardBody, Spinner } from "@heroui/react";
 import React, { useState, useEffect, useMemo } from "react";
 import { Plus } from "lucide-react";
 
@@ -11,9 +12,6 @@ import { useConfirmation } from "@/hooks/useConfirmation";
 import { ConfirmationModal } from "@/components/ConfirmationModal";
 import { getSupportedFormatsText, processImageFile } from "@/lib/image-utils";
 import Pagination from "@/components/Pagination";
-import { Button } from "@heroui/button";
-import { Card, CardBody } from "@heroui/card";
-import { Spinner } from "@heroui/spinner";
 
 export function AdminGalleryManager({
   triggerModal,
@@ -465,17 +463,17 @@ export function AdminGalleryManager({
       {/* Header */}
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-6">
-        <Button
-          className="font-semibold shadow-lg"
-          color="danger"
-          radius="lg"
-          size="lg"
-          startContent={<Plus className="h-5 w-5" />}
-          variant="shadow"
-          onPress={handleAdd}
-        >
-          Add Transformation
-        </Button>
+          <Button
+            className="font-semibold shadow-lg"
+            color="danger"
+            radius="lg"
+            size="lg"
+            startContent={<Plus className="h-5 w-5" />}
+            variant="shadow"
+            onPress={handleAdd}
+          >
+            Add Transformation
+          </Button>
         </div>
       </div>
 

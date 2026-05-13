@@ -12,6 +12,7 @@ import {
 import { useWorkingHours } from "@/hooks/useWorkingHours";
 import { useAdminSettings } from "@/hooks/useAdminSettings";
 import { useAdminProfile } from "@/components/AdminProfileContext";
+import { isDayOffFeatureEnabled } from "@/config/feature-flags";
 
 type DayOffSettings = {
   isEnabled: boolean;
@@ -101,6 +102,8 @@ export default function FormBooking() {
 
   // Check if a date is in day off period
   const isDateInDayOff = (date: string) => {
+    if (!isDayOffFeatureEnabled) return false;
+
     const dayOffSettings = adminSettings?.dayOffSettings;
 
     if (!dayOffSettings || !dayOffSettings.isEnabled) return false;
@@ -131,6 +134,8 @@ export default function FormBooking() {
 
   // Fetch day-off periods for date validation
   useEffect(() => {
+    if (!isDayOffFeatureEnabled) return;
+
     const fetchDayOffPeriods = async () => {
       try {
         const response = await fetch("/api/admin/day-off");
@@ -155,6 +160,8 @@ export default function FormBooking() {
 
   // Check if a date is in a day-off period
   const isDateDisabled = (date: string) => {
+    if (!isDayOffFeatureEnabled) return false;
+
     return dayOffPeriods.some((period) => {
       const checkDate = new Date(date);
       const startDate = new Date(period.start_date);
@@ -173,6 +180,8 @@ export default function FormBooking() {
 
   // Update selected date when day-off periods change
   useEffect(() => {
+    if (!isDayOffFeatureEnabled) return;
+
     if (dayOffPeriods.length > 0) {
       const nextAvailableDate = findNextAvailableDate(dayOffPeriods);
 

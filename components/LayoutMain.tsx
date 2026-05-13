@@ -56,9 +56,9 @@ export default function LayoutMain({
     return () => clearTimeout(t);
   }, [isMounted, isAdminPanel]);
 
-  // Always use default padding class to match server render
-  // Only apply dynamic padding class after mount to avoid hydration mismatch
-  const paddingClass = "pt-[90px] sm:pt-[100px]";
+  // Clear fixed header: top contact/social strip (~52–56px) + main bar (h-20/h-24).
+  // Previous pt-[90px] let service hero “← All treatments” sit under the nav.
+  const paddingClass = "pt-36 sm:pt-36 md:pt-40";
 
   // If we're in admin panel, render only the children without main layout elements
   if (isAdminPanel) {

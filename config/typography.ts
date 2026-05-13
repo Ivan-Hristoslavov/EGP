@@ -11,6 +11,12 @@ export const typography = {
   /** Hero-only: slightly larger on desktop, still readable on mobile */
   headingHero:
     "text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight",
+  /**
+   * Inner detail pages (e.g. single service, long-form article) — smaller than
+   * `headingPage` so titles do not dominate like a marketing hero.
+   */
+  headingArticle:
+    "text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight",
   /** Section title (h2) on landing and inner pages */
   headingSection:
     "text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight",
@@ -20,6 +26,9 @@ export const typography = {
   headingSmall: "text-base sm:text-lg font-semibold",
   /** Lead paragraph under a heading */
   lead: "text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 leading-relaxed",
+  /** Tighter lead for detail pages — caps below full `lead` on large screens */
+  leadCompact:
+    "text-base sm:text-lg text-gray-600 dark:text-gray-300 leading-relaxed",
   /** Body text */
   body: "text-sm sm:text-base leading-relaxed",
   /** Small / caption */

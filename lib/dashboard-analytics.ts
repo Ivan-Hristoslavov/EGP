@@ -23,7 +23,10 @@ export function buildDailyBookingSeries(
 
   for (const r of rows) {
     const key =
-      typeof r.date === "string" ? r.date.split("T")[0] : padDateKey(new Date(r.date));
+      typeof r.date === "string"
+        ? r.date.split("T")[0]
+        : padDateKey(new Date(r.date));
+
     if (!byDay.has(key))
       byDay.set(key, {
         bookings: 0,

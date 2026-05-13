@@ -1,7 +1,6 @@
 "use client";
 
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Progress } from "@heroui/progress";
+import { Card, CardBody, CardHeader, Progress } from "@heroui/react";
 import {
   PolarAngleAxis,
   RadialBar,
@@ -14,12 +13,16 @@ export function DashboardUtilizationRadial(props: {
   weekBooked: number;
   capacityProxy: number;
 }) {
-  const chartData = [{ name: "u", value: props.percent, fill: "hsl(220 45% 48% / 0.55)" }];
+  const chartData = [
+    { name: "u", value: props.percent, fill: "hsl(220 45% 48% / 0.55)" },
+  ];
 
   return (
     <Card className="flex h-full w-full flex-col border border-divider shadow-sm">
       <CardHeader className="flex flex-col gap-1 border-b border-divider px-4 py-4 sm:px-6">
-        <h2 className="text-base font-semibold leading-tight sm:text-lg">Weekly load</h2>
+        <h2 className="text-base font-semibold leading-tight sm:text-lg">
+          Weekly load
+        </h2>
         <p className="text-xs leading-relaxed text-default-500">
           Booked slots vs soft capacity ({props.capacityProxy}/week proxy)
         </p>
@@ -56,9 +59,9 @@ export function DashboardUtilizationRadial(props: {
           aria-label="Weekly booking count"
           className="max-w-xs"
           color="primary"
+          maxValue={Math.max(props.capacityProxy, props.weekBooked, 1)}
           size="sm"
           value={props.weekBooked}
-          maxValue={Math.max(props.capacityProxy, props.weekBooked, 1)}
         />
         <p className="text-center text-xs text-default-500">
           {props.weekBooked} active bookings this week · target proxy{" "}

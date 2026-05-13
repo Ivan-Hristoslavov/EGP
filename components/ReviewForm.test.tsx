@@ -1,8 +1,8 @@
+import { HeroUIProvider } from "@heroui/react";
 import type { ReactElement } from "react";
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { HeroUIProvider } from "@heroui/system";
 
 import { ReviewForm } from "./ReviewForm";
 

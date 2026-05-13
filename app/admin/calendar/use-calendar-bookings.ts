@@ -56,10 +56,12 @@ export function useCalendarBookings({
 
       if (response.ok) {
         const data = await response.json();
-        const normalizedBookings = (data.bookings || []).map((booking: any) => ({
-          ...booking,
-          date: booking.date ? booking.date.split("T")[0] : booking.date,
-        }));
+        const normalizedBookings = (data.bookings || []).map(
+          (booking: any) => ({
+            ...booking,
+            date: booking.date ? booking.date.split("T")[0] : booking.date,
+          }),
+        );
 
         setBookings(normalizedBookings);
       } else {

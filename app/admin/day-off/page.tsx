@@ -1,5 +1,5 @@
-import { AdminDayOffManager } from "@/components/AdminDayOffManager";
+import { redirect } from "next/navigation";
 
 export default function AdminDayOffPage() {
-  return <AdminDayOffManager />;
+  redirect("/admin/calendar");
 }

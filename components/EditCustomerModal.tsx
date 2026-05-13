@@ -1,17 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@heroui/modal";
-import { Input, Textarea } from "@heroui/react";
-import { Button } from "@heroui/button";
-import { Chip } from "@heroui/chip";
 
+import { Button, Chip, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Textarea } from "@heroui/react";
 import { inputClassNames, formLayout } from "@/config/design-system";
 import { Customer } from "@/types";
 

@@ -11,6 +11,7 @@ import {
   Instagram,
 } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { useAdminProfile } from "@/components/AdminProfileContext";
 import { useSocialLinks } from "@/hooks/useSocialLinks";
@@ -28,6 +29,13 @@ type QuickAction = {
 
 export default function FloatingContactButtons() {
   const [isExpanded, setIsExpanded] = useState(false);
+  const pathname = usePathname();
+
+  /** Sit above the service detail sticky booking bar (mobile) to avoid overlap */
+  const isServiceDetailPage =
+    pathname != null &&
+    pathname.startsWith("/services/") &&
+    pathname !== "/services";
 
   const adminProfile = useAdminProfile();
   const { socialLinks } = useSocialLinks();
@@ -104,7 +112,7 @@ export default function FloatingContactButtons() {
     book: "bg-slate-700 hover:bg-slate-800 text-white border border-slate-600/50 dark:bg-slate-600 dark:hover:bg-slate-500 dark:border-slate-500/50",
     call: "bg-rose-600/90 hover:bg-rose-600 text-white border border-rose-500/50 dark:bg-rose-700 dark:hover:bg-rose-600 dark:border-rose-600/50",
     whatsapp:
-      "bg-emerald-600/90 hover:bg-emerald-600 text-white border border-emerald-500/50 dark:bg-emerald-700 dark:hover:bg-emerald-600 dark:border-emerald-600/50",
+      "bg-egp-green-darker hover:bg-egp-green-dark text-white border border-egp-green/40 dark:border-egp-beige/25",
     videos:
       "bg-red-600/90 hover:bg-red-600 text-white border border-red-500/50 dark:bg-red-700 dark:hover:bg-red-600 dark:border-red-600/50",
     instagram:
@@ -181,7 +189,13 @@ export default function FloatingContactButtons() {
   };
 
   return (
-    <div className="fixed bottom-3 right-3 sm:bottom-6 sm:right-6 z-50">
+    <div
+      className={`fixed right-3 z-50 sm:right-6 ${
+        isServiceDetailPage
+          ? "bottom-[calc(5.75rem+env(safe-area-inset-bottom,0px))] md:bottom-6"
+          : "bottom-3 sm:bottom-6"
+      }`}
+    >
       <div className="relative flex flex-col items-end gap-3">
         {/* Unmount when collapsed so WebKit does not keep a hit-testing layer */}
         {isExpanded ? (

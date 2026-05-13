@@ -1,5 +1,6 @@
 "use client";
 
+import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
 import { useState } from "react";
 import {
   Star,
@@ -21,15 +22,7 @@ import {
   Flame,
   Target,
 } from "lucide-react";
-import { Button } from "@heroui/button";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@heroui/modal";
-import { Input } from "@heroui/input";
+
 
 export type IconType =
   | "star"

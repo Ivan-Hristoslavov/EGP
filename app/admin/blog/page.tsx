@@ -5,7 +5,7 @@ import { layout } from "@/config/typography";
 
 export default function AdminBlogPage() {
   return (
-    <div className={`w-full ${layout.container}`}>
+    <div className={`w-full ${layout.containerWide}`}>
       <AdminBlogManager />
     </div>
   );

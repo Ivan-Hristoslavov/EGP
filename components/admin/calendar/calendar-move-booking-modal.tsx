@@ -1,15 +1,8 @@
 "use client";
 
+import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
 import { Calendar as CalendarIcon } from "lucide-react";
 
-import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-} from "@heroui/modal";
-import { Button } from "@heroui/button";
 
 export type CalendarMoveBookingTarget = {
   customer_name: string;
@@ -119,7 +112,9 @@ export function CalendarMoveBookingModal(props: CalendarMoveBookingModalProps) {
                         className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
                         id="useCustomTime"
                         type="checkbox"
-                        onChange={(e) => onUseCustomTimeChange(e.target.checked)}
+                        onChange={(e) =>
+                          onUseCustomTimeChange(e.target.checked)
+                        }
                       />
                       <label
                         className="text-sm text-gray-600 dark:text-gray-400"
@@ -197,7 +192,9 @@ export function CalendarMoveBookingModal(props: CalendarMoveBookingModalProps) {
                       ) : (
                         <div className="rounded-lg border bg-gray-50 py-8 text-center text-gray-500 dark:bg-gray-900/50 dark:text-gray-400">
                           <div className="mb-2 text-lg">📅</div>
-                          <div className="font-medium">No available time slots</div>
+                          <div className="font-medium">
+                            No available time slots
+                          </div>
                           <div className="text-sm">
                             for {new Date(moveTargetDate).toLocaleDateString()}
                           </div>

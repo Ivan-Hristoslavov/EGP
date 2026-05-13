@@ -1,11 +1,10 @@
 "use client";
 
+import { Card, CardBody, Spinner } from "@heroui/react";
 import { useState, useEffect } from "react";
 
 import { supabase } from "@/lib/supabase";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
-import { Card, CardBody } from "@heroui/card";
-import { Spinner } from "@heroui/spinner";
 
 type SiteGuidanceItem = {
   id: number;
@@ -61,9 +60,7 @@ export function AdminSiteGuidance() {
   // Get unique categories
   const categories = [
     "all",
-    ...Array.from(
-      new Set(guidanceItems.map((item) => item.category)),
-    ),
+    ...Array.from(new Set(guidanceItems.map((item) => item.category))),
   ];
 
   // Filter items based on search and category

@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@heroui/modal";
+import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
 import Link from "next/link";
 import { X, Info, CheckCircle, Clock, Calendar, Shield } from "lucide-react";
 

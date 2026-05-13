@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { isDayOffFeatureEnabled } from "@/config/feature-flags";
 import { supabaseAdmin } from "@/lib/supabase";
 
 // GET - Get all day off periods for a team member
@@ -8,6 +9,10 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    if (!isDayOffFeatureEnabled) {
+      return NextResponse.json({ dayOffPeriods: [] });
+    }
+
     const { id } = await params;
 
     const { data: dayOffPeriods, error } = await supabaseAdmin

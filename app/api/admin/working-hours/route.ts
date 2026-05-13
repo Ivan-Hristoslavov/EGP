@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { supabaseAdmin } from "../../../../lib/supabase";
+
+import {
+  BOOKING_BLACKOUT_RULES_KEY,
+  parseBookingBlackoutRules,
+} from "@/lib/booking-blackout-rules";
 import {
   BOOKING_CLOSED_WEEKDAYS_KEY,
   parseBookingClosedWeekdays,
 } from "@/lib/booking-closed-weekdays";
-import { supabaseAdmin } from "../../../../lib/supabase";
 
 const DAY_KEYS = [
   "sunday",
@@ -88,20 +93,31 @@ export async function GET() {
 
     const normalized = normalizeWorkingHours(workingHours ?? []);
 
-    const { data: closedRow } = await supabaseAdmin
+    const { data: settingsRows, error: settingsError } = await supabaseAdmin
       .from("admin_settings")
-      .select("value")
-      .eq("key", BOOKING_CLOSED_WEEKDAYS_KEY)
-      .maybeSingle();
+      .select("key, value")
+      .in("key", [BOOKING_CLOSED_WEEKDAYS_KEY, BOOKING_BLACKOUT_RULES_KEY]);
 
-    const bookingClosedWeekdays = parseBookingClosedWeekdays(
-      closedRow?.value,
-    );
+    if (settingsError) {
+      console.error("Error fetching admin_settings:", settingsError);
+    }
+
+    let bookingClosedWeekdays: number[] = [];
+    let bookingBlackoutRules = parseBookingBlackoutRules(undefined);
+
+    for (const row of settingsRows ?? []) {
+      if (row.key === BOOKING_CLOSED_WEEKDAYS_KEY) {
+        bookingClosedWeekdays = parseBookingClosedWeekdays(row.value);
+      } else if (row.key === BOOKING_BLACKOUT_RULES_KEY) {
+        bookingBlackoutRules = parseBookingBlackoutRules(row.value);
+      }
+    }
 
     return NextResponse.json({
       workingHours: workingHours ?? [],
       normalized,
       bookingClosedWeekdays,
+      bookingBlackoutRules,
     });
   } catch (error) {
     console.error("Unexpected error:", error);
@@ -117,7 +133,7 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { workingHours, bookingClosedWeekdays } = body;
+    const { workingHours, bookingClosedWeekdays, bookingBlackoutRules } = body;
 
     if (!workingHours || !Array.isArray(workingHours)) {
       return NextResponse.json(
@@ -183,7 +199,9 @@ export async function PUT(request: NextRequest) {
     if (bookingClosedWeekdays !== undefined) {
       if (!Array.isArray(bookingClosedWeekdays)) {
         return NextResponse.json(
-          { error: "bookingClosedWeekdays must be an array of weekday numbers" },
+          {
+            error: "bookingClosedWeekdays must be an array of weekday numbers",
+          },
           { status: 400 },
         );
       }
@@ -211,17 +229,61 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    const { data: closedAfter } = await supabaseAdmin
+    if (bookingBlackoutRules !== undefined) {
+      if (!Array.isArray(bookingBlackoutRules)) {
+        return NextResponse.json(
+          {
+            error: "bookingBlackoutRules must be an array of blackout rule objects",
+          },
+          { status: 400 },
+        );
+      }
+
+      const cleanedRules = parseBookingBlackoutRules(bookingBlackoutRules);
+
+      const { error: blackoutError } = await supabaseAdmin
+        .from("admin_settings")
+        .upsert(
+          {
+            key: BOOKING_BLACKOUT_RULES_KEY,
+            value: cleanedRules,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "key" },
+        );
+
+      if (blackoutError) {
+        console.error("Error saving booking_blackout_rules:", blackoutError);
+
+        return NextResponse.json(
+          { error: "Failed to save scheduled booking blackouts" },
+          { status: 500 },
+        );
+      }
+    }
+
+    const { data: settingsAfter } = await supabaseAdmin
       .from("admin_settings")
-      .select("value")
-      .eq("key", BOOKING_CLOSED_WEEKDAYS_KEY)
-      .maybeSingle();
+      .select("key, value")
+      .in("key", [BOOKING_CLOSED_WEEKDAYS_KEY, BOOKING_BLACKOUT_RULES_KEY]);
+
+    let bookingClosedWeekdaysOut = parseBookingClosedWeekdays(undefined);
+    let bookingBlackoutRulesOut = parseBookingBlackoutRules(undefined);
+
+    for (const row of settingsAfter ?? []) {
+      if (row.key === BOOKING_CLOSED_WEEKDAYS_KEY) {
+        bookingClosedWeekdaysOut = parseBookingClosedWeekdays(row.value);
+      } else if (row.key === BOOKING_BLACKOUT_RULES_KEY) {
+        bookingBlackoutRulesOut = parseBookingBlackoutRules(row.value);
+      }
+    }
 
     return NextResponse.json({
       success: true,
       workingHours: updates,
       normalized,
-      bookingClosedWeekdays: parseBookingClosedWeekdays(closedAfter?.value),
+      bookingClosedWeekdays: bookingClosedWeekdaysOut,
+      bookingBlackoutRules: bookingBlackoutRulesOut,
       message: "Working hours updated successfully",
     });
   } catch (error) {

@@ -1,13 +1,7 @@
 "use client";
 
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import {
-  Cell,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-} from "recharts";
+import { Card, CardBody, CardHeader } from "@heroui/react";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 const COLORS = [
   "hsl(220 35% 58% / 0.85)",
@@ -28,7 +22,9 @@ export function DashboardServiceDistributionChart(props: {
   return (
     <Card className="flex h-full w-full flex-col border border-divider shadow-sm">
       <CardHeader className="flex flex-col gap-1 border-b border-divider px-4 py-4 sm:px-6">
-        <h2 className="text-base font-semibold leading-tight sm:text-lg">Services</h2>
+        <h2 className="text-base font-semibold leading-tight sm:text-lg">
+          Services
+        </h2>
         <p className="text-xs leading-relaxed text-default-500">
           Last 30 days by booking count
         </p>
@@ -55,10 +51,7 @@ export function DashboardServiceDistributionChart(props: {
                     strokeWidth={0}
                   >
                     {props.data.map((_, i) => (
-                      <Cell
-                        key={String(i)}
-                        fill={COLORS[i % COLORS.length]}
-                      />
+                      <Cell key={String(i)} fill={COLORS[i % COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip

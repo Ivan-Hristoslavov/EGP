@@ -1,7 +1,8 @@
 "use client";
 
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Tab, Tabs } from "@heroui/tabs";
+import { Card, CardBody, CardHeader, Tab, Tabs } from "@heroui/react";
+import type { DailyBookingPoint } from "@/lib/dashboard-analytics";
+
 import {
   Area,
   AreaChart,
@@ -11,8 +12,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
-import type { DailyBookingPoint } from "@/lib/dashboard-analytics";
 
 const grid = { stroke: "hsl(var(--heroui-default-200) / 0.25)" };
 
@@ -25,7 +24,10 @@ function shortLabel(iso: string) {
 function ChartInner({ data }: { data: DailyBookingPoint[] }) {
   return (
     <ResponsiveContainer height={280} width="100%">
-      <AreaChart data={data} margin={{ top: 8, right: 12, left: -12, bottom: 0 }}>
+      <AreaChart
+        data={data}
+        margin={{ top: 8, right: 12, left: -12, bottom: 0 }}
+      >
         <defs>
           <linearGradient id="dashFillBook" x1="0" x2="0" y1="0" y2="1">
             <stop offset="0%" stopColor="hsl(142 45% 42% / 0.22)" />
@@ -38,12 +40,12 @@ function ChartInner({ data }: { data: DailyBookingPoint[] }) {
         </defs>
         <CartesianGrid strokeDasharray="3 6" vertical={false} {...grid} />
         <XAxis
+          axisLine={false}
           dataKey="date"
           interval="preserveStartEnd"
           tick={{ fill: "hsl(var(--heroui-default-500))", fontSize: 10 }}
           tickFormatter={shortLabel}
           tickLine={false}
-          axisLine={false}
         />
         <YAxis hide />
         <Tooltip
@@ -93,11 +95,7 @@ export function DashboardBookingActivityChart(props: {
         </p>
       </CardHeader>
       <CardBody className="flex flex-1 flex-col gap-4 px-3 pb-4 pt-2 sm:px-6">
-        <Tabs
-          classNames={{ panel: "pt-2" }}
-          size="sm"
-          variant="underlined"
-        >
+        <Tabs classNames={{ panel: "pt-2" }} size="sm" variant="underlined">
           <Tab key="7d" title="7 days">
             <ChartInner data={props.series7} />
           </Tab>

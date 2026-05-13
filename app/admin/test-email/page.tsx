@@ -1,14 +1,9 @@
 "use client";
 
+import { Button, Card, CardBody, CardHeader, Input, Select, SelectItem, Spinner } from "@heroui/react";
 import { useState, useEffect } from "react";
 
 import { useToast } from "@/components/Toast";
-import { Button } from "@heroui/button";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
-import { Spinner } from "@heroui/spinner";
-
 import { formLayout, inputClassNames } from "@/config/design-system";
 import { textColors, typography } from "@/config/typography";
 
@@ -205,9 +200,7 @@ export default function TestEmailPage() {
         <Card className="border border-divider shadow-sm">
           <CardHeader className="flex flex-col gap-1 border-b border-divider pb-4">
             <div className="flex items-center justify-between">
-              <h3
-                className={`${typography.headingCard} ${textColors.heading}`}
-              >
+              <h3 className={`${typography.headingCard} ${textColors.heading}`}>
                 SMTP Email (Gmail)
               </h3>
               <div
@@ -254,9 +247,7 @@ export default function TestEmailPage() {
         <Card className="border border-divider shadow-sm">
           <CardHeader className="flex flex-col gap-1 border-b border-divider pb-4">
             <div className="flex items-center justify-between">
-              <h3
-                className={`${typography.headingCard} ${textColors.heading}`}
-              >
+              <h3 className={`${typography.headingCard} ${textColors.heading}`}>
                 Stripe Configuration
               </h3>
               <div
@@ -454,7 +445,9 @@ export default function TestEmailPage() {
                   Use an App Password for SMTP_PASSWORD (Google Account →
                   Security → 2-Step Verification → App passwords)
                 </li>
-                <li>Optionally set SMTP_TO_ADDRESS for default test recipient</li>
+                <li>
+                  Optionally set SMTP_TO_ADDRESS for default test recipient
+                </li>
               </ol>
             </div>
             <div>
@@ -472,8 +465,8 @@ export default function TestEmailPage() {
             <div>
               <strong>Sender Email Logic:</strong>
               <p className="ml-4 mt-1">
-                The system uses SMTP_FROM_ADDRESS from environment, or falls back
-                to business_email from admin profile, then ADMIN_EMAIL.
+                The system uses SMTP_FROM_ADDRESS from environment, or falls
+                back to business_email from admin profile, then ADMIN_EMAIL.
               </p>
             </div>
           </div>

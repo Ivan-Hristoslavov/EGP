@@ -23,7 +23,8 @@ export function parseBookingClosedWeekdays(raw: unknown): number[] {
   for (const x of arr) {
     const n = typeof x === "number" ? x : Number(x);
 
-    if (Number.isInteger(n) && n >= 0 && n <= 6 && !out.includes(n)) out.push(n);
+    if (Number.isInteger(n) && n >= 0 && n <= 6 && !out.includes(n))
+      out.push(n);
   }
 
   out.sort((a, b) => a - b);

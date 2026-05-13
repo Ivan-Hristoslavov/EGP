@@ -1,9 +1,9 @@
 "use client";
 
+import { Button } from "@heroui/react";
 import type { ReactNode } from "react";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@heroui/button";
 
 export interface CalendarViewHeaderProps {
   title: string;

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { isDayOffFeatureEnabled } from "@/config/feature-flags";
+import { isOnlineBookingBlackoutByRules } from "@/lib/booking-blackout-rules";
+import { fetchBookingBlackoutRulesFromDb } from "@/lib/booking-blackout-rules-db";
 import { fetchBookingClosedWeekdaysFromDb } from "@/lib/booking-closed-weekdays-db";
 import { resolveClinicWorkingHoursForUtcDay } from "@/lib/resolve-clinic-working-hours-utc-day";
 import { supabaseAdmin } from "@/lib/supabase";
@@ -82,7 +85,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const bookingClosedOnline = await fetchBookingClosedWeekdaysFromDb();
+    const [bookingClosedOnline, bookingBlackoutRules] = await Promise.all([
+      fetchBookingClosedWeekdaysFromDb(),
+      fetchBookingBlackoutRulesFromDb(),
+    ]);
     const bookingClosedSet = new Set(bookingClosedOnline);
 
     if (bookingClosedSet.has(dayOfWeek)) {
@@ -90,6 +96,14 @@ export async function GET(request: NextRequest) {
         availableSlots: [],
         bookedSlots: [],
         message: "Online booking is not available on this weekday.",
+      });
+    }
+
+    if (isOnlineBookingBlackoutByRules(date, dayOfWeek, bookingBlackoutRules)) {
+      return NextResponse.json({
+        availableSlots: [],
+        bookedSlots: [],
+        message: "Online booking is closed for this date (scheduled blackout).",
       });
     }
 
@@ -107,39 +121,39 @@ export async function GET(request: NextRequest) {
     const bufferMinutes = workingHours.buffer_minutes;
     const maxAppointments = workingHours.max_appointments;
 
-    // Check if team member is on day off for this date
-    const { data: dayOffPeriods, error: dayOffError } = await supabaseAdmin
-      .from("team_day_off_periods")
-      .select("start_date, end_date, reason")
-      .eq("team_member_id", teamMemberId)
-      .lte("start_date", date)
-      .gte("end_date", date);
+    if (isDayOffFeatureEnabled) {
+      const { data: dayOffPeriods, error: dayOffError } = await supabaseAdmin
+        .from("team_day_off_periods")
+        .select("start_date, end_date, reason")
+        .eq("team_member_id", teamMemberId)
+        .lte("start_date", date)
+        .gte("end_date", date);
 
-    if (dayOffError) {
-      console.error("Error checking day off periods:", dayOffError);
-    }
+      if (dayOffError) {
+        console.error("Error checking day off periods:", dayOffError);
+      }
 
-    const isOnDayOff = dayOffPeriods && dayOffPeriods.length > 0;
-    const dayOffReason = isOnDayOff ? dayOffPeriods[0].reason : null;
+      const isOnDayOff = dayOffPeriods && dayOffPeriods.length > 0;
+      const dayOffReason = isOnDayOff ? dayOffPeriods[0].reason : null;
 
-    // If team member is on day off, return no available slots
-    if (isOnDayOff) {
-      return NextResponse.json({
-        availableSlots: [],
-        bookedSlots: [],
-        workingHours: {
-          start: workingHours.start_time,
-          end: workingHours.end_time,
-          buffer_minutes: bufferMinutes,
-          max_appointments: maxAppointments,
-        },
-        serviceDuration: durationMinutes,
-        dayOfWeek: dayOfWeek,
-        isWorkingDay: workingHours.is_working_day,
-        isOnDayOff: true,
-        dayOffReason: dayOffReason,
-        message: `Team member is on day off from ${dayOffPeriods[0].start_date} to ${dayOffPeriods[0].end_date}`,
-      });
+      if (isOnDayOff) {
+        return NextResponse.json({
+          availableSlots: [],
+          bookedSlots: [],
+          workingHours: {
+            start: workingHours.start_time,
+            end: workingHours.end_time,
+            buffer_minutes: bufferMinutes,
+            max_appointments: maxAppointments,
+          },
+          serviceDuration: durationMinutes,
+          dayOfWeek: dayOfWeek,
+          isWorkingDay: workingHours.is_working_day,
+          isOnDayOff: true,
+          dayOffReason: dayOffReason,
+          message: `Team member is on day off from ${dayOffPeriods[0].start_date} to ${dayOffPeriods[0].end_date}`,
+        });
+      }
     }
 
     // Get existing bookings for this team member on this date
