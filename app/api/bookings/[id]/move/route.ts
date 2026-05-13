@@ -2,18 +2,64 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { supabaseAdmin } from "../../../../../lib/supabase";
 
+import { parseYyyyMmDdUtcDayOfWeek } from "@/lib/calendar-local-date";
+import { resolveClinicWorkingHoursForUtcDay } from "@/lib/resolve-clinic-working-hours-utc-day";
+import { requireAdmin } from "@/lib/admin-auth";
+
+const SLOT_STEP = 30;
+
+function buildHalfHourSlotStrings(
+  startTime: string,
+  endTime: string,
+): string[] {
+  const [sh, sm] = startTime.split(":").map(Number);
+  const [eh, em] = endTime.split(":").map(Number);
+  let cur = sh * 60 + sm;
+  const endM = eh * 60 + em;
+  const out: string[] = [];
+
+  while (cur + SLOT_STEP <= endM) {
+    const h = Math.floor(cur / 60);
+    const m = cur % 60;
+
+    out.push(
+      `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`,
+    );
+    cur += SLOT_STEP;
+  }
+
+  return out;
+}
+
+async function getFallbackSlotsForDate(dateStr: string): Promise<string[]> {
+  const dow = parseYyyyMmDdUtcDayOfWeek(dateStr);
+
+  if (dow === null) return [];
+
+  const resolved = await resolveClinicWorkingHoursForUtcDay(dow);
+
+  if (resolved.status === "closed") return [];
+
+  return buildHalfHourSlotStrings(
+    resolved.hours.start_time.slice(0, 5),
+    resolved.hours.end_time.slice(0, 5),
+  );
+}
+
 // PATCH - Move booking to a different date/time
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   const { id } = await params;
 
   try {
     const body = await request.json();
     const { newDate, newTime } = body;
-
-    console.log("Moving booking:", id, "to:", newDate, newTime);
 
     if (!newDate || !newTime) {
       return NextResponse.json(
@@ -67,27 +113,25 @@ export async function PATCH(
     let finalTime = newTime;
 
     if (conflictingBooking && conflictingBooking.length > 0) {
-      console.log("Time slot conflict detected, finding alternative...");
+      const timeSlots = await getFallbackSlotsForDate(newDate);
 
-      // Generate time slots for the target date (9:00 AM to 6:00 PM, 30-minute intervals)
-      const timeSlots = [];
-      const startHour = 9;
-      const endHour = 18;
-      const interval = 30;
-
-      for (let hour = startHour; hour < endHour; hour++) {
-        for (let minute = 0; minute < 60; minute += interval) {
-          const timeString = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
-
-          timeSlots.push(timeString);
-        }
+      if (timeSlots.length === 0) {
+        return NextResponse.json(
+          { error: "No available time slots for the selected date" },
+          { status: 409 },
+        );
       }
 
-      // Find the next available slot
-      const currentTimeIndex = timeSlots.indexOf(newTime);
+      const normalizedTime = newTime.length > 5 ? newTime.slice(0, 5) : newTime;
+      let startIdx = timeSlots.indexOf(normalizedTime);
+
+      if (startIdx < 0) {
+        startIdx = -1;
+      }
+
       let alternativeTime = null;
 
-      for (let i = currentTimeIndex + 1; i < timeSlots.length; i++) {
+      for (let i = startIdx + 1; i < timeSlots.length; i++) {
         const checkTime = timeSlots[i];
         const { data: checkConflict } = await supabaseAdmin
           .from("bookings")
@@ -104,7 +148,6 @@ export async function PATCH(
 
       if (alternativeTime) {
         finalTime = alternativeTime;
-        console.log("Using alternative time:", alternativeTime);
       } else {
         return NextResponse.json(
           { error: "No available time slots for the selected date" },
@@ -137,10 +180,8 @@ export async function PATCH(
     // Format the time to HH:MM for consistency with frontend
     const formattedBooking = {
       ...updatedBooking,
-      time: finalTime, // This is already in HH:MM format from our logic
+      time: finalTime,
     };
-
-    console.log("Booking moved successfully:", formattedBooking);
 
     return NextResponse.json({
       success: true,

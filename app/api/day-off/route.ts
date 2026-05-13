@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
 
+import { isDayOffFeatureEnabled } from "@/config/feature-flags";
 import { createClient } from "@/lib/supabase/server";
 
 // Public read-only endpoint for day-off periods (used by public banner)
 export async function GET() {
   try {
+    if (!isDayOffFeatureEnabled) {
+      return NextResponse.json([]);
+    }
+
     const supabase = createClient();
     const { data, error } = await supabase
       .from("day_off_periods")

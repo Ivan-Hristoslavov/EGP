@@ -1,11 +1,7 @@
 "use client";
+import { Button, Card, CardBody, Chip, Spinner, Tab, Tabs } from "@heroui/react";
 import { useState, useEffect } from "react";
 import NextImage from "next/image";
-import { Card, CardBody } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { Chip } from "@heroui/chip";
-import { Spinner } from "@heroui/spinner";
-import { Tabs, Tab } from "@heroui/tabs";
 import {
   Upload,
   X,

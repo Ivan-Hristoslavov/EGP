@@ -23,11 +23,18 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "10");
-    const offset = (page - 1) * limit;
     const status = searchParams.get("status");
     const date = searchParams.get("date");
     const search = searchParams.get("search");
+    const dateFrom = searchParams.get("date_from");
+    const dateTo = searchParams.get("date_to");
+    let limit = parseInt(searchParams.get("limit") || "10");
+
+    if (dateFrom && dateTo) {
+      limit = Math.min(Math.max(limit, 1), 3000);
+    }
+
+    const offset = (page - 1) * limit;
 
     // Build the base query
     let countQuery = supabaseAdmin
@@ -41,7 +48,10 @@ export async function GET(request: NextRequest) {
       bookingsQuery = bookingsQuery.eq("status", status);
     }
 
-    if (date && date !== "all") {
+    if (dateFrom && dateTo) {
+      countQuery = countQuery.gte("date", dateFrom).lte("date", dateTo);
+      bookingsQuery = bookingsQuery.gte("date", dateFrom).lte("date", dateTo);
+    } else if (date && date !== "all") {
       if (date === "today") {
         const today = new Date().toISOString().split("T")[0];
 

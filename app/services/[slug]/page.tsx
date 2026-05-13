@@ -1,21 +1,32 @@
 import type { Metadata } from "next";
 
-import Link from "next/link";
-import {
-  Calendar,
-  Clock,
-  CheckCircle,
-  Star,
-  ArrowRight,
-  Phone,
-  Shield,
-} from "lucide-react";
 import { notFound } from "next/navigation";
-import { Button } from "@heroui/button";
 
-import { typography, layout, textColors } from "@/config/typography";
-import { canonicalUrl, defaultOgImages, toMetaDescription } from "@/lib/seo";
+import { ServiceDetailAboutEditorial } from "@/components/services/service-detail/service-detail-about-editorial";
+import { ServiceDetailExtraInfo } from "@/components/services/service-detail/service-detail-extra-info";
+import { ServiceDetailFaq } from "@/components/services/service-detail/service-detail-faq";
+import { ServiceDetailFinalCta } from "@/components/services/service-detail/service-detail-final-cta";
+import { ServiceDetailHeroPremium } from "@/components/services/service-detail/service-detail-hero-premium";
+import { ServiceDetailPricingPanel } from "@/components/services/service-detail/service-detail-pricing-panel";
+import { ServiceDetailProcessTimeline } from "@/components/services/service-detail/service-detail-process-timeline";
+import { ServiceDetailQuickInfoBar } from "@/components/services/service-detail/service-detail-quick-info-bar";
+import { ServiceDetailResultsGallery } from "@/components/services/service-detail/service-detail-results-gallery";
+import { ServiceDetailResultsLongevity } from "@/components/services/service-detail/service-detail-results-longevity";
+import { ServiceDetailSafetyExpertise } from "@/components/services/service-detail/service-detail-safety-expertise";
+import { ServiceDetailStickyCta } from "@/components/services/service-detail/service-detail-sticky-cta";
+import { ServiceDetailWhoFor } from "@/components/services/service-detail/service-detail-who-for";
 import { siteConfig } from "@/config/site";
+import {
+  buildFaqPageJsonLd,
+  getServiceDetailEnrichment,
+} from "@/lib/service-detail-enrichment";
+import {
+  buildWhatsAppLink,
+  fetchGalleryForService,
+  fetchReviewsSummary,
+  fetchTeamSpotlight,
+} from "@/lib/service-detail-page-data";
+import { canonicalUrl, defaultOgImages, toMetaDescription } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -399,18 +410,43 @@ interface PageProps {
   }>;
 }
 
+function formatServiceDuration(value: unknown): string {
+  if (typeof value === "number" && !Number.isNaN(value)) {
+    return `${value} minutes`;
+  }
+
+  if (typeof value === "string" && value.trim()) return value;
+
+  return "30 minutes";
+}
+
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
 
-  // Try to fetch service for metadata
   const dbService = await getService(slug);
   const staticService = servicesData[slug as keyof typeof servicesData];
 
   const serviceTitle = dbService?.name || staticService?.title || "Service";
+  const categorySlug =
+    typeof dbService?.category === "object" && dbService.category
+      ? dbService.category.slug
+      : "";
+  const categoryName =
+    typeof dbService?.category === "object" && dbService.category
+      ? dbService.category.name
+      : staticService?.category || "";
+
+  const enrichment = getServiceDetailEnrichment(
+    slug,
+    categorySlug,
+    categoryName,
+  );
+
   const serviceDescription = toMetaDescription(
-    dbService?.description ||
+    enrichment.metaDescription ||
+      dbService?.description ||
       staticService?.description ||
       `Book ${serviceTitle} at our London aesthetic clinic.`,
   );
@@ -461,7 +497,7 @@ export default async function ServicePage({ params }: PageProps) {
         },
         price:
           typeof staticService.price === "string"
-            ? parseFloat(staticService.price.replace("£", ""))
+            ? parseFloat(staticService.price.replace(/[^0-9.]/g, ""))
             : staticService.price,
         duration: staticService.duration,
         description: staticService.description,
@@ -469,6 +505,11 @@ export default async function ServicePage({ params }: PageProps) {
         is_featured: staticService.popular || false,
         results_duration_weeks: null,
         details: null,
+        preparation: null,
+        aftercare: null,
+        downtime_days: null,
+        image_url: null,
+        requires_consultation: false,
       };
     } else {
       notFound();
@@ -481,240 +522,192 @@ export default async function ServicePage({ params }: PageProps) {
     typeof normalizedService.category === "object"
       ? normalizedService.category?.name
       : normalizedService.category || "";
-  const servicePrice = normalizedService.price || 0;
-  const serviceDuration = normalizedService.duration || "30 minutes";
+  const rawPrice = normalizedService.price;
+  const staticSource =
+    !service && slug in servicesData
+      ? servicesData[slug as keyof typeof servicesData]
+      : null;
+  const servicePriceDisplay =
+    staticSource && typeof staticSource.price === "string"
+      ? staticSource.price
+      : typeof rawPrice === "number" &&
+          !Number.isNaN(rawPrice) &&
+          rawPrice === 0
+        ? "Complimentary"
+        : typeof rawPrice === "number" && !Number.isNaN(rawPrice)
+          ? `£${rawPrice}`
+          : "Price on request";
+  const serviceDurationDisplay = formatServiceDuration(
+    normalizedService.duration,
+  );
   const serviceDescription = normalizedService.description || "";
   const serviceBenefits = Array.isArray(normalizedService.benefits)
     ? normalizedService.benefits
     : [];
   const isPopular = normalizedService.is_featured || false;
 
-  const procedureSteps = [
-    {
-      step: "1",
-      title: "Consultation",
-      description: "Assessment of your needs and discussion of desired results",
-    },
-    {
-      step: "2",
-      title: "Treatment Planning",
-      description: "Customised plan tailored to your individual requirements",
-    },
-    {
-      step: "3",
-      title: "Treatment Process",
-      description:
-        "Professional treatment performed by qualified practitioners",
-    },
-    {
-      step: "4",
-      title: "Aftercare",
-      description: "Post-treatment care instructions and follow-up guidance",
-    },
-  ];
+  const bookHref =
+    typeof normalizedService.id === "string" && normalizedService.id.length > 0
+      ? `/book?service=${encodeURIComponent(slug)}`
+      : "/book/new";
+
+  const callHref = `tel:${siteConfig.contact.phone}`;
+  const whatsappHref = buildWhatsAppLink(siteConfig.contact.whatsapp);
+
+  const serviceId =
+    typeof normalizedService.id === "string" && normalizedService.id.length > 0
+      ? normalizedService.id
+      : null;
+
+  const categorySlug =
+    typeof normalizedService.category === "object" &&
+    normalizedService.category &&
+    typeof normalizedService.category.slug === "string"
+      ? normalizedService.category.slug
+      : "";
+
+  const enrichment = getServiceDetailEnrichment(
+    slug,
+    categorySlug,
+    serviceCategory,
+  );
+
+  const [galleryRows, teamMember, reviewsSummary] = await Promise.all([
+    fetchGalleryForService(serviceId),
+    fetchTeamSpotlight(),
+    fetchReviewsSummary(),
+  ]);
+
+  const heroImageUrl =
+    (typeof normalizedService.image_url === "string" &&
+    normalizedService.image_url.trim()
+      ? normalizedService.image_url.trim()
+      : null) ||
+    (galleryRows[0]?.after_image_url ?? null);
+
+  const detailsText =
+    typeof normalizedService.details === "string"
+      ? normalizedService.details
+      : "";
+  const detailsMentionsTechnique =
+    /\b(cannula|needle)\b/i.test(detailsText) ||
+    /\b(cannula|needle)\b/i.test(serviceDescription);
+
+  const pageUrl = canonicalUrl(`/services/${slug}`);
+  const faqJsonLd = buildFaqPageJsonLd(enrichment.faqItems, pageUrl);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-egp-green-darker flex flex-col">
-      {/* Hero Section */}
-      <section className="py-12 md:py-16 bg-gradient-to-br from-egp-beige-lighter to-egp-beige-light dark:from-egp-green-dark dark:to-egp-green-darker">
-        <div className={layout.container}>
-          <div className="max-w-4xl mx-auto text-center">
-            {isPopular && (
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-egp-green/20 dark:bg-egp-green-dark rounded-full text-egp-green dark:text-white text-xs font-semibold mb-4">
-                <Star className="w-3 h-3" />
-                <span>Popular Treatment</span>
-              </div>
-            )}
-            <div className="inline-block px-3 py-1.5 bg-white/80 dark:bg-egp-green-dark rounded-full text-egp-green dark:text-white text-xs font-medium mb-4">
-              {serviceCategory}
-            </div>
-            <h1
-              className={`${typography.headingPage} ${textColors.heading} mb-4`}
-            >
-              {serviceTitle}
-            </h1>
-            <p className={`${typography.lead} ${textColors.body} mb-6`}>
-              {serviceDescription}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button
-                as={Link}
-                className="bg-egp-green hover:bg-egp-green-dark text-white"
-                href="/book/new"
-                size="lg"
-                startContent={<Calendar className="w-5 h-5" />}
-                onClick={() => {
-                  // Store service ID in sessionStorage for booking page
-                  if (typeof window !== "undefined" && normalizedService?.id) {
-                    sessionStorage.setItem(
-                      "pendingServiceId",
-                      normalizedService.id,
-                    );
-                  }
-                }}
-              >
-                Book Consultation -{" "}
-                {typeof servicePrice === "number"
-                  ? `£${servicePrice}`
-                  : servicePrice}
-              </Button>
-              <Button
-                as={Link}
-                className="border-egp-green text-egp-green dark:text-white dark:border-egp-green"
-                href={`tel:${siteConfig.contact.phone}`}
-                size="lg"
-                startContent={<Phone className="w-5 h-5" />}
-                variant="bordered"
-              >
-                Call Us
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
+    <>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqJsonLd),
+        }}
+        type="application/ld+json"
+      />
+      <div className="relative flex min-h-screen flex-col bg-white pb-[calc(5.5rem+env(safe-area-inset-bottom))] dark:bg-egp-green-darker md:pb-0">
+        <ServiceDetailHeroPremium
+          bookHref={bookHref}
+          callHref={callHref}
+          enrichment={enrichment}
+          imageUrl={heroImageUrl}
+          isPopular={isPopular}
+          requiresConsultation={Boolean(
+            normalizedService.requires_consultation,
+          )}
+          serviceCategory={serviceCategory}
+          servicePriceDisplay={servicePriceDisplay}
+          serviceTitle={serviceTitle}
+          whatsappHref={whatsappHref}
+        />
 
-      {/* Service Details */}
-      <section className="py-12 md:py-16 flex-1">
-        <div className={layout.container}>
-          <div className="max-w-6xl mx-auto">
-            <div className="grid lg:grid-cols-2 gap-8">
-              {/* Service Info */}
-              <div>
-                <h2
-                  className={`${typography.headingSection} ${textColors.heading} mb-4`}
-                >
-                  About This Treatment
-                </h2>
-                <p className="text-base text-gray-600 dark:text-gray-300 mb-4">
-                  {serviceDescription}. Our expert practitioners use advanced
-                  techniques and premium products to deliver exceptional results
-                  tailored to your individual needs.
-                </p>
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-egp-green" />
-                    <div>
-                      <div className="font-semibold text-sm text-gray-900 dark:text-white">
-                        Duration
-                      </div>
-                      <div className="text-xs text-gray-600 dark:text-gray-300">
-                        {serviceDuration}
-                      </div>
-                    </div>
-                  </div>
-                  {normalizedService.results_duration_weeks && (
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-5 h-5 text-egp-green" />
-                      <div>
-                        <div className="font-semibold text-sm text-gray-900 dark:text-white">
-                          Results
-                        </div>
-                        <div className="text-xs text-gray-600 dark:text-gray-300">
-                          {normalizedService.results_duration_weeks} weeks
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+        <ServiceDetailQuickInfoBar
+          downtimeDays={
+            typeof normalizedService.downtime_days === "number"
+              ? normalizedService.downtime_days
+              : null
+          }
+          enrichment={enrichment}
+          resultsDurationWeeks={
+            typeof normalizedService.results_duration_weeks === "number"
+              ? normalizedService.results_duration_weeks
+              : null
+          }
+          serviceDurationDisplay={serviceDurationDisplay}
+          servicePriceDisplay={servicePriceDisplay}
+        />
 
-              {/* Benefits */}
-              {serviceBenefits && serviceBenefits.length > 0 && (
-                <div>
-                  <h3
-                    className={`${typography.headingCard} ${textColors.heading} mb-4`}
-                  >
-                    Treatment Benefits
-                  </h3>
-                  <ul className="space-y-3">
-                    {serviceBenefits.map((benefit: string, index: number) => (
-                      <li key={index} className="flex items-start">
-                        <CheckCircle className="w-5 h-5 text-egp-green mr-2 mt-0.5 flex-shrink-0" />
-                        <span className="text-sm text-gray-600 dark:text-gray-300">
-                          {benefit}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
+        <ServiceDetailResultsGallery
+          items={galleryRows}
+          serviceCategoryName={serviceCategory}
+        />
 
-      {/* Procedure Steps */}
-      {normalizedService.details && (
-        <section className="py-12 md:py-16 bg-egp-beige-lighter dark:bg-egp-green-dark">
-          <div className="container mx-auto px-4">
-            <div className="max-w-6xl mx-auto">
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white text-center mb-8">
-                Treatment Process
-              </h2>
-              <div className="bg-white dark:bg-egp-green rounded-xl p-6 shadow-md">
-                <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {normalizedService.details}
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
+        <ServiceDetailAboutEditorial
+          benefits={serviceBenefits}
+          description={serviceDescription}
+          details={normalizedService.details ?? null}
+          enrichment={enrichment}
+          serviceTitle={serviceTitle}
+        />
 
-      {/* Pricing & CTA - Fixed at bottom */}
-      <section className="py-12 md:py-16 bg-egp-beige-lighter dark:bg-egp-green-dark mt-auto">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white dark:bg-egp-green rounded-2xl p-6 md:p-8 shadow-lg">
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-                  {serviceTitle}
-                </h2>
-                <div className="text-3xl font-bold text-egp-green dark:text-white mb-3">
-                  {typeof servicePrice === "number"
-                    ? `£${servicePrice}`
-                    : servicePrice}
-                </div>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
-                  Includes consultation, treatment, and aftercare instructions
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button
-                  as={Link}
-                  className="bg-egp-green hover:bg-egp-green-dark text-white"
-                  href="/book/new"
-                  size="lg"
-                  startContent={<Calendar className="w-5 h-5" />}
-                  onClick={() => {
-                    // Store service ID in sessionStorage for booking page
-                    if (
-                      typeof window !== "undefined" &&
-                      normalizedService?.id
-                    ) {
-                      sessionStorage.setItem(
-                        "pendingServiceId",
-                        normalizedService.id,
-                      );
-                    }
-                  }}
-                >
-                  Book Now
-                </Button>
-                <Button
-                  as={Link}
-                  className="bg-egp-green hover:bg-egp-green-dark text-white"
-                  href="/services"
-                  size="lg"
-                  startContent={<ArrowRight className="w-5 h-5" />}
-                >
-                  View All Services
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
+        <ServiceDetailWhoFor
+          enrichment={enrichment}
+          requiresConsultation={Boolean(
+            normalizedService.requires_consultation,
+          )}
+        />
+
+        <ServiceDetailProcessTimeline
+          detailsMentionsTechnique={detailsMentionsTechnique}
+          enrichment={enrichment}
+        />
+
+        <ServiceDetailResultsLongevity
+          aftercare={normalizedService.aftercare ?? null}
+          downtimeDays={
+            typeof normalizedService.downtime_days === "number"
+              ? normalizedService.downtime_days
+              : null
+          }
+          enrichment={enrichment}
+          resultsDurationWeeks={
+            typeof normalizedService.results_duration_weeks === "number"
+              ? normalizedService.results_duration_weeks
+              : null
+          }
+        />
+
+        <ServiceDetailSafetyExpertise
+          enrichment={enrichment}
+          teamMember={teamMember}
+        />
+
+        <ServiceDetailPricingPanel
+          enrichment={enrichment}
+          servicePriceDisplay={servicePriceDisplay}
+        />
+
+        <ServiceDetailExtraInfo
+          aftercare={normalizedService.aftercare ?? null}
+          details={normalizedService.details ?? null}
+          preparation={normalizedService.preparation ?? null}
+        />
+
+        <ServiceDetailFaq items={enrichment.faqItems} />
+
+        <ServiceDetailFinalCta
+          bookHref={bookHref}
+          callHref={callHref}
+          enrichment={enrichment}
+          reviews={reviewsSummary}
+          servicePriceDisplay={servicePriceDisplay}
+          whatsappHref={whatsappHref}
+        />
+
+        <ServiceDetailStickyCta
+          bookHref={bookHref}
+          servicePriceDisplay={servicePriceDisplay}
+        />
+      </div>
+    </>
   );
 }

@@ -1,15 +1,18 @@
+import type { ClinicUtcDayHours } from "@/lib/resolve-clinic-working-hours-utc-day";
+
 import { NextRequest, NextResponse } from "next/server";
 
+import { isDayOffFeatureEnabled } from "@/config/feature-flags";
 import { supabaseAdmin } from "../../../../lib/supabase";
-
-interface WorkingHour {
-  day_of_week: number;
-  start_time: string;
-  end_time: string;
-  is_working_day: boolean;
-  buffer_minutes: number;
-  max_appointments: number;
-}
+import { isOnlineBookingBlackoutByRules } from "@/lib/booking-blackout-rules";
+import { fetchBookingBlackoutRulesFromDb } from "@/lib/booking-blackout-rules-db";
+import { fetchBookingClosedWeekdaysFromDb } from "@/lib/booking-closed-weekdays-db";
+import {
+  addDaysUtcYyyyMmDd,
+  parseYyyyMmDdUtcDayOfWeek,
+} from "@/lib/calendar-local-date";
+import { resolveClinicWorkingHoursForUtcDay } from "@/lib/resolve-clinic-working-hours-utc-day";
+import { requireAdmin } from "@/lib/admin-auth";
 
 const SLOT_INTERVAL_MINUTES = 30;
 
@@ -37,27 +40,22 @@ function addMinutes(date: Date, minutes: number) {
   return next;
 }
 
-async function getWorkingHourForDate(date: Date) {
-  const dow = date.getDay();
-  const { data, error } = await supabaseAdmin
-    .from("working_hours")
-    .select("*")
-    .eq("day_of_week", dow)
-    .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  return data as WorkingHour | null;
-}
-
-async function getBookingsBetween(startDate: string, endDate: string) {
-  const { data, error } = await supabaseAdmin
+async function getBookingsBetween(
+  startDate: string,
+  endDate: string,
+  teamMemberId: string | null,
+) {
+  let q = supabaseAdmin
     .from("bookings")
-    .select("id, date, time, status")
+    .select("id, date, time, status, team_member_id")
     .gte("date", startDate)
     .lte("date", endDate);
+
+  if (teamMemberId) {
+    q = q.eq("team_member_id", teamMemberId);
+  }
+
+  const { data, error } = await q;
 
   if (error) {
     throw error;
@@ -80,9 +78,33 @@ function isSlotBooked(bookings: any[], date: string, time: string) {
   });
 }
 
+async function isTeamMemberOnDayOff(
+  teamMemberId: string,
+  date: string,
+): Promise<boolean> {
+  if (!isDayOffFeatureEnabled) return false;
+
+  const { data, error } = await supabaseAdmin
+    .from("team_day_off_periods")
+    .select("id")
+    .eq("team_member_id", teamMemberId)
+    .lte("start_date", date)
+    .gte("end_date", date)
+    .limit(1);
+
+  if (error) {
+    console.error("[time-slots] day off check:", error);
+
+    return false;
+  }
+
+  return (data?.length ?? 0) > 0;
+}
+
 async function buildSlotsForDate(
   date: string,
-  workingHour: WorkingHour | null,
+  workingHour: ClinicUtcDayHours | null,
+  teamMemberId: string | null,
 ) {
   if (!workingHour || !workingHour.is_working_day) {
     return { date, slots: [], bookedSlots: [], status: "closed" as const };
@@ -95,7 +117,7 @@ async function buildSlotsForDate(
     return { date, slots: [], bookedSlots: [], status: "closed" as const };
   }
 
-  const bookings = await getBookingsBetween(date, date);
+  const bookings = await getBookingsBetween(date, date, teamMemberId);
   const slots: Array<{
     start_time: string;
     end_time: string;
@@ -140,11 +162,16 @@ async function buildSlotsForDate(
   return { date, slots, bookedSlots, status };
 }
 
-// GET - Get available time slots for a specific date
+// GET - Get available time slots for a specific date (admin only)
 export async function GET(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const { searchParams } = new URL(request.url);
     const date = searchParams.get("date");
+    const teamMemberId = searchParams.get("team_member_id");
 
     if (!date) {
       return NextResponse.json(
@@ -153,17 +180,72 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const dateObj = new Date(date);
+    const utcDow = parseYyyyMmDdUtcDayOfWeek(date);
 
-    if (Number.isNaN(dateObj.getTime())) {
+    if (utcDow === null) {
       return NextResponse.json(
         { error: "Invalid date format" },
         { status: 400 },
       );
     }
 
-    const workingHour = await getWorkingHourForDate(dateObj);
-    const payload = await buildSlotsForDate(date, workingHour);
+    const [bookingClosedOnline, bookingBlackoutRules] = await Promise.all([
+      fetchBookingClosedWeekdaysFromDb(),
+      fetchBookingBlackoutRulesFromDb(),
+    ]);
+    const closedSet = new Set(bookingClosedOnline);
+
+    if (closedSet.has(utcDow)) {
+      return NextResponse.json({
+        success: true,
+        date,
+        status: "closed",
+        message: "Online booking is not available on this weekday.",
+        slots: [],
+        allSlots: [],
+        bookedSlots: [],
+      });
+    }
+
+    if (isOnlineBookingBlackoutByRules(date, utcDow, bookingBlackoutRules)) {
+      return NextResponse.json({
+        success: true,
+        date,
+        status: "closed",
+        message: "Online booking is closed for this date (scheduled blackout).",
+        slots: [],
+        allSlots: [],
+        bookedSlots: [],
+      });
+    }
+
+    if (teamMemberId && (await isTeamMemberOnDayOff(teamMemberId, date))) {
+      return NextResponse.json({
+        success: true,
+        date,
+        status: "closed",
+        message: "Team member is on day off for this date.",
+        slots: [],
+        allSlots: [],
+        bookedSlots: [],
+      });
+    }
+
+    const resolved = await resolveClinicWorkingHoursForUtcDay(utcDow);
+
+    if (resolved.status === "closed") {
+      return NextResponse.json({
+        success: true,
+        date,
+        status: "closed",
+        message: resolved.message,
+        slots: [],
+        allSlots: [],
+        bookedSlots: [],
+      });
+    }
+
+    const payload = await buildSlotsForDate(date, resolved.hours, teamMemberId);
 
     return NextResponse.json({
       success: true,
@@ -185,6 +267,10 @@ export async function GET(request: NextRequest) {
 
 // POST - Generate time slots for a date range and persist to time_slots table
 export async function POST(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const body = await request.json();
     const { startDate, endDate } = body;
@@ -196,17 +282,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    const startUtcDow = parseYyyyMmDdUtcDayOfWeek(startDate);
+    const endUtcDow = parseYyyyMmDdUtcDayOfWeek(endDate);
 
-    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    if (startUtcDow === null || endUtcDow === null) {
       return NextResponse.json(
         { error: "Invalid date format" },
         { status: 400 },
       );
     }
 
-    if (start > end) {
+    const startParts = startDate.split("-").map(Number);
+    const endParts = endDate.split("-").map(Number);
+    const startT = new Date(
+      Date.UTC(startParts[0], startParts[1] - 1, startParts[2], 12, 0, 0, 0),
+    );
+    const endT = new Date(
+      Date.UTC(endParts[0], endParts[1] - 1, endParts[2], 12, 0, 0, 0),
+    );
+
+    if (startT > endT) {
       return NextResponse.json(
         { error: "Start date must be before end date" },
         { status: 400 },
@@ -214,22 +309,47 @@ export async function POST(request: NextRequest) {
     }
 
     const dayCount =
-      Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      Math.ceil((endT.getTime() - startT.getTime()) / (1000 * 60 * 60 * 24)) +
+      1;
     const summaries = [];
+    const [bookingClosedOnline, bookingBlackoutRules] = await Promise.all([
+      fetchBookingClosedWeekdaysFromDb(),
+      fetchBookingBlackoutRulesFromDb(),
+    ]);
+    const closedSet = new Set(bookingClosedOnline);
 
     for (let i = 0; i < dayCount; i++) {
-      const current = new Date(start);
+      const currentDate = addDaysUtcYyyyMmDd(startDate, i);
 
-      current.setDate(start.getDate() + i);
-      const currentDate = current.toISOString().split("T")[0];
-      const workingHour = await getWorkingHourForDate(current);
+      if (!currentDate) {
+        summaries.push({ date: "", generated: 0, skipped: true });
+        continue;
+      }
 
-      if (!workingHour || !workingHour.is_working_day) {
+      const dow = parseYyyyMmDdUtcDayOfWeek(currentDate);
+
+      if (dow === null || closedSet.has(dow)) {
         summaries.push({ date: currentDate, generated: 0, skipped: true });
         continue;
       }
 
-      const payload = await buildSlotsForDate(currentDate, workingHour);
+      if (isOnlineBookingBlackoutByRules(currentDate, dow, bookingBlackoutRules)) {
+        summaries.push({ date: currentDate, generated: 0, skipped: true });
+        continue;
+      }
+
+      const resolved = await resolveClinicWorkingHoursForUtcDay(dow);
+
+      if (resolved.status === "closed") {
+        summaries.push({ date: currentDate, generated: 0, skipped: true });
+        continue;
+      }
+
+      const payload = await buildSlotsForDate(
+        currentDate,
+        resolved.hours,
+        null,
+      );
 
       await supabaseAdmin.from("time_slots").delete().eq("date", currentDate);
 
@@ -274,6 +394,10 @@ export async function POST(request: NextRequest) {
 
 // DELETE - Clear time slots for a specific date
 export async function DELETE(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const { searchParams } = new URL(request.url);
     const date = searchParams.get("date");

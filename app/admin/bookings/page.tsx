@@ -1,5 +1,6 @@
 "use client";
 
+import { Button, Card, CardBody, Chip, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, Spinner, Textarea } from "@heroui/react";
 import { useState, useEffect, useCallback } from "react";
 import {
   Plus,
@@ -18,28 +19,11 @@ import {
   Table2,
   Grid3x3,
 } from "lucide-react";
-import { Card, CardBody } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { Chip } from "@heroui/chip";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@heroui/modal";
-import { Textarea } from "@heroui/input";
-import { Spinner } from "@heroui/spinner";
-import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-} from "@heroui/dropdown";
+
+
 
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { AdminTruncatedText } from "@/components/admin/admin-truncated-text";
 import { formLayout } from "@/config/design-system";
 
 // Helper function to format time to HH:MM
@@ -1060,7 +1044,7 @@ export default function BookingsPage() {
                 }
               >
                 <table className="w-full min-w-[640px] table-fixed">
-                  <thead className="bg-default-100 border-b border-divider">
+                  <thead className="sticky top-0 z-10 bg-default-100 border-b border-divider">
                     <tr>
                       <th className="w-[22%] px-2 py-3 text-center text-xs font-semibold text-default-600 uppercase tracking-wider">
                         Customer
@@ -1093,8 +1077,12 @@ export default function BookingsPage() {
                       >
                         <td className="px-2 py-3 text-center">
                           <div className="flex flex-col items-center min-w-0">
-                            <div className="text-sm font-medium text-foreground truncate w-full">
-                              {booking.customer_name}
+                            <div className="text-sm font-medium text-foreground w-full min-w-0 flex justify-center px-0.5">
+                              <AdminTruncatedText
+                                className="block max-w-full text-center"
+                                maxChars={22}
+                                text={booking.customer_name}
+                              />
                             </div>
                             <div className="text-xs text-default-500 truncate w-full text-center">
                               {booking.customer_email ? (
@@ -1140,11 +1128,12 @@ export default function BookingsPage() {
                           </div>
                         </td>
                         <td className="px-2 py-3 text-center">
-                          <div
-                            className="text-sm text-foreground truncate cursor-help"
-                            title={booking.service}
-                          >
-                            {booking.service}
+                          <div className="mx-auto max-w-[10rem] min-w-0 text-sm text-foreground sm:max-w-[12rem]">
+                            <AdminTruncatedText
+                              className="block text-center"
+                              maxChars={24}
+                              text={booking.service}
+                            />
                           </div>
                         </td>
                         <td className="px-2 py-3 text-center">

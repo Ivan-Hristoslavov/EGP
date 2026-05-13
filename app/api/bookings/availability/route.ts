@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { isDayOffFeatureEnabled } from "@/config/feature-flags";
 import { supabase } from "@/lib/supabase";
 
 // GET - Check time slot availability for a specific date with enhanced features
@@ -30,36 +31,36 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // First, check if the date is in a day-off period
-    const { data: dayOffPeriods, error: dayOffError } = await supabase
-      .from("day_off_periods")
-      .select("title, description, banner_message")
-      .lte("start_date", date)
-      .gte("end_date", date)
-      .eq("is_recurring", false);
+    if (isDayOffFeatureEnabled) {
+      const { data: dayOffPeriods, error: dayOffError } = await supabase
+        .from("day_off_periods")
+        .select("title, description, banner_message")
+        .lte("start_date", date)
+        .gte("end_date", date)
+        .eq("is_recurring", false);
 
-    if (dayOffError) {
-      console.error("Error checking day-off periods:", dayOffError);
+      if (dayOffError) {
+        console.error("Error checking day-off periods:", dayOffError);
 
-      return NextResponse.json(
-        { error: "Failed to check day-off periods" },
-        { status: 500 },
-      );
-    }
+        return NextResponse.json(
+          { error: "Failed to check day-off periods" },
+          { status: 500 },
+        );
+      }
 
-    // If there's a day-off period for this date, return unavailable
-    if (dayOffPeriods && dayOffPeriods.length > 0) {
-      const dayOffPeriod = dayOffPeriods[0];
+      if (dayOffPeriods && dayOffPeriods.length > 0) {
+        const dayOffPeriod = dayOffPeriods[0];
 
-      return NextResponse.json({
-        date,
-        isDayOff: true,
-        dayOffTitle: dayOffPeriod.title,
-        dayOffDescription: dayOffPeriod.description,
-        bannerMessage: dayOffPeriod.banner_message,
-        timeSlots: [],
-        message: `Date ${date} is unavailable due to: ${dayOffPeriod.title}`,
-      });
+        return NextResponse.json({
+          date,
+          isDayOff: true,
+          dayOffTitle: dayOffPeriod.title,
+          dayOffDescription: dayOffPeriod.description,
+          bannerMessage: dayOffPeriod.banner_message,
+          timeSlots: [],
+          message: `Date ${date} is unavailable due to: ${dayOffPeriod.title}`,
+        });
+      }
     }
 
     // Get business hours from config or database

@@ -1,5 +1,6 @@
 "use client";
 
+import { Card, CardBody, Spinner } from "@heroui/react";
 import { useState, useEffect } from "react";
 
 import { supabase } from "@/lib/supabase";
@@ -75,9 +76,12 @@ export function AdminSiteGuidance() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent" />
-      </div>
+      <Card className="border border-divider shadow-sm">
+        <CardBody className="flex min-h-[400px] flex-col items-center justify-center gap-4 py-16">
+          <Spinner color="primary" size="lg" />
+          <p className="text-sm text-default-500">Loading site guidance…</p>
+        </CardBody>
+      </Card>
     );
   }
 

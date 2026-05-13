@@ -1,10 +1,15 @@
 "use client";
 
+import clsx from "clsx";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
-export default function ThemeToggleButton() {
+export default function ThemeToggleButton({
+  className,
+}: {
+  className?: string;
+} = {}) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -24,7 +29,10 @@ export default function ThemeToggleButton() {
       aria-label={
         theme === "light" ? "Switch to dark mode" : "Switch to light mode"
       }
-      className="p-2 rounded-full bg-white dark:bg-gray-800 border-2 border-[#E6DDD1] dark:border-[#CFC4B6] hover:border-[#D4C9BC] dark:hover:border-[#E6DDD1] transition-all shadow-md hover:shadow-lg active:scale-95"
+      className={clsx(
+        "p-2 rounded-full bg-white dark:bg-gray-800 border-2 border-[#E6DDD1] dark:border-[#CFC4B6] hover:border-[#D4C9BC] dark:hover:border-[#E6DDD1] transition-all shadow-md hover:shadow-lg active:scale-95",
+        className,
+      )}
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
     >
       {theme === "light" ? (

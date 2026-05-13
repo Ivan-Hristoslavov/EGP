@@ -1,18 +1,8 @@
 "use client";
 
+import { Button, Card, CardBody, CardHeader, Chip, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, Spinner } from "@heroui/react";
 import { useState, useEffect, useMemo } from "react";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { Chip } from "@heroui/chip";
-import { Input } from "@heroui/input";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@heroui/modal";
-import { Spinner } from "@heroui/spinner";
+
 import {
   Users,
   Plus,
@@ -32,7 +22,6 @@ import {
   Clock,
   Search,
 } from "lucide-react";
-import { Select, SelectItem } from "@heroui/select";
 
 import { inputClassNames, formLayout } from "@/config/design-system";
 import Pagination from "@/components/Pagination";
@@ -40,6 +29,7 @@ import { DeleteCustomerModal } from "@/components/DeleteCustomerModal";
 import { EditCustomerModal } from "@/components/EditCustomerModal";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useToast } from "@/components/Toast";
+import { AdminTruncatedText } from "@/components/admin/admin-truncated-text";
 
 type DiscountCode = {
   id: string;
@@ -480,11 +470,11 @@ export default function CustomersPage() {
 
   return (
     <div className="w-full space-y-6">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div className="flex items-center gap-3">
+      {/* Header: view toggle left, primary CTA right */}
+      <div className="flex w-full flex-wrap items-center justify-between gap-3">
+        <div className="flex min-h-10 items-center gap-3">
           {/* View Toggle - desktop only */}
-          <div className="hidden md:flex bg-default-100 rounded-lg p-1">
+          <div className="hidden md:flex rounded-lg bg-default-100 p-1">
             <Button
               className="min-w-0"
               color={viewMode === "table" ? "primary" : "default"}
@@ -506,14 +496,15 @@ export default function CustomersPage() {
               Cards
             </Button>
           </div>
-          <Button
-            color="primary"
-            startContent={<Plus className="w-4 h-4" />}
-            onPress={() => setShowAddModal(true)}
-          >
-            Add Customer
-          </Button>
         </div>
+        <Button
+          className="shrink-0"
+          color="primary"
+          startContent={<Plus className="w-4 h-4" />}
+          onPress={() => setShowAddModal(true)}
+        >
+          Add Customer
+        </Button>
       </div>
 
       {/* Loading state */}
@@ -636,8 +627,8 @@ export default function CustomersPage() {
                   <CardBody className="p-0">
                     <div className="overflow-x-auto">
                       <table className="min-w-full">
-                        <thead>
-                          <tr className="bg-default-100 border-b border-divider">
+                        <thead className="sticky top-0 z-10 bg-default-100 border-b border-divider">
+                          <tr>
                             <th className="px-6 py-4 text-left text-xs font-semibold text-default-600 uppercase tracking-wider">
                               <div className="flex items-center gap-2">
                                 <Users className="w-4 h-4" />
@@ -689,9 +680,12 @@ export default function CustomersPage() {
                                     </div>
                                     <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-success-500 rounded-full border-2 border-background" />
                                   </div>
-                                  <div>
+                                  <div className="min-w-0">
                                     <div className="font-semibold text-foreground">
-                                      {customer.name}
+                                      <AdminTruncatedText
+                                        maxChars={22}
+                                        text={customer.name}
+                                      />
                                     </div>
                                     {customer.notes && (
                                       <div className="text-xs text-default-500 mt-0.5 max-w-xs truncate">

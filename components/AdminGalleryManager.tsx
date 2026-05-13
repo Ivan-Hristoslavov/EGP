@@ -1,6 +1,8 @@
 "use client";
 
+import { Button, Card, CardBody, Spinner } from "@heroui/react";
 import React, { useState, useEffect, useMemo } from "react";
+import { Plus } from "lucide-react";
 
 import { useGallery } from "@/hooks/useGallery";
 import { useServices } from "@/hooks/useServices";
@@ -447,9 +449,12 @@ export function AdminGalleryManager({
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="text-center py-8">Loading...</div>
-      </div>
+      <Card className="border border-divider shadow-sm">
+        <CardBody className="flex min-h-[320px] flex-col items-center justify-center gap-4 py-16">
+          <Spinner color="danger" size="lg" />
+          <p className="text-sm text-default-500">Loading gallery…</p>
+        </CardBody>
+      </Card>
     );
   }
 
@@ -458,25 +463,17 @@ export function AdminGalleryManager({
       {/* Header */}
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-6">
-          <button
-            className="px-6 py-3 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 hover:from-rose-600 hover:via-pink-600 hover:to-purple-700 text-white rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center gap-2 font-semibold whitespace-nowrap"
-            onClick={handleAdd}
+          <Button
+            className="font-semibold shadow-lg"
+            color="danger"
+            radius="lg"
+            size="lg"
+            startContent={<Plus className="h-5 w-5" />}
+            variant="shadow"
+            onPress={handleAdd}
           >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M12 4v16m8-8H4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-              />
-            </svg>
             Add Transformation
-          </button>
+          </Button>
         </div>
       </div>
 

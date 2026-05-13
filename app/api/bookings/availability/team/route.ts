@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { isDayOffFeatureEnabled } from "@/config/feature-flags";
+import { isOnlineBookingBlackoutByRules } from "@/lib/booking-blackout-rules";
+import { fetchBookingBlackoutRulesFromDb } from "@/lib/booking-blackout-rules-db";
+import { fetchBookingClosedWeekdaysFromDb } from "@/lib/booking-closed-weekdays-db";
+import { resolveClinicWorkingHoursForUtcDay } from "@/lib/resolve-clinic-working-hours-utc-day";
 import { supabaseAdmin } from "@/lib/supabase";
 
 // GET - Get available booking hours for a team member and service
@@ -80,203 +85,75 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Debug: Log day of week calculation
-    const dayNames = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ];
-    const dayKeys = [
-      "sunday",
-      "monday",
-      "tuesday",
-      "wednesday",
-      "thursday",
-      "friday",
-      "saturday",
-    ];
-    const currentDayKey = dayKeys[dayOfWeek];
+    const [bookingClosedOnline, bookingBlackoutRules] = await Promise.all([
+      fetchBookingClosedWeekdaysFromDb(),
+      fetchBookingBlackoutRulesFromDb(),
+    ]);
+    const bookingClosedSet = new Set(bookingClosedOnline);
 
-    console.log(
-      `[Availability] Date: ${date}, Day of Week: ${dayOfWeek} (${dayNames[dayOfWeek]}), Key: ${currentDayKey}`,
-    );
-
-    // First, try to get working hours from admin_settings (source of truth)
-    const { data: adminSettingsData, error: adminSettingsError } =
-      await supabaseAdmin
-        .from("admin_settings")
-        .select("value")
-        .eq("key", "business_hours")
-        .single();
-
-    let workingHours: any = null;
-    let isWorkingDay = false;
-    let startTime = null;
-    let endTime = null;
-    let bufferMinutes = 15; // Default
-    let maxAppointments = 12; // Default
-
-    if (!adminSettingsError && adminSettingsData?.value) {
-      // Parse the JSON value from admin_settings
-      const businessHours =
-        typeof adminSettingsData.value === "string"
-          ? JSON.parse(adminSettingsData.value)
-          : adminSettingsData.value;
-
-      // Log all available keys in businessHours for debugging
-      console.log(
-        `[Availability] Available day keys in businessHours:`,
-        Object.keys(businessHours),
-      );
-      console.log(`[Availability] Looking for key: "${currentDayKey}"`);
-
-      const dayHours = businessHours[currentDayKey];
-
-      if (dayHours) {
-        // Simple logic: use isOpen to determine if day is closed
-        // If isOpen is false, day is closed regardless of other settings
-        if (dayHours.isOpen === false) {
-          console.log(
-            `[Availability] Day ${date} (${dayNames[dayOfWeek]}) is closed: isOpen=false`,
-          );
-
-          return NextResponse.json({
-            availableSlots: [],
-            bookedSlots: [],
-            message: "This day is not a working day",
-          });
-        }
-
-        // If isOpen is true, proceed with the times
-        isWorkingDay = true;
-        startTime = dayHours.open;
-        endTime = dayHours.close;
-        bufferMinutes = dayHours.bufferMinutes || 15;
-        maxAppointments = dayHours.maxAppointments || 12;
-
-        // Validate that we have times when isOpen is true
-        if (!startTime || !endTime) {
-          console.log(
-            `[Availability] Day ${date} (${dayNames[dayOfWeek]}) isOpen=true but missing open/close times`,
-          );
-
-          return NextResponse.json({
-            availableSlots: [],
-            bookedSlots: [],
-            message: "This day has no working hours configured",
-          });
-        }
-
-        console.log(
-          `[Availability] Using admin_settings for ${date} (${dayNames[dayOfWeek]}): isOpen=true, ${startTime}-${endTime}, buffer=${bufferMinutes}min`,
-        );
-      } else {
-        console.log(
-          `[Availability] No hours found in admin_settings for ${currentDayKey}. Available keys:`,
-          Object.keys(businessHours),
-        );
-
-        // If day not found in admin_settings, treat as closed
-        return NextResponse.json({
-          availableSlots: [],
-          bookedSlots: [],
-          message: "This day is not a working day",
-        });
-      }
-    } else {
-      console.log(
-        `[Availability] Error fetching admin_settings:`,
-        adminSettingsError,
-      );
-      // Fallback to working_hours table if admin_settings doesn't exist
-      const { data: whData, error: whError } = await supabaseAdmin
-        .from("working_hours")
-        .select("*")
-        .eq("day_of_week", dayOfWeek)
-        .single();
-
-      if (!whError && whData) {
-        // Use same simple logic: check is_working_day
-        if (whData.is_working_day === false) {
-          console.log(
-            `[Availability] Day ${date} (${dayNames[dayOfWeek]}) is closed: is_working_day=false`,
-          );
-
-          return NextResponse.json({
-            availableSlots: [],
-            bookedSlots: [],
-            message: "This day is not a working day",
-          });
-        }
-
-        workingHours = whData;
-        isWorkingDay = true;
-        startTime = whData.start_time;
-        endTime = whData.end_time;
-        bufferMinutes = whData.buffer_minutes || 15;
-        maxAppointments = whData.max_appointments || 12;
-        console.log(
-          `[Availability] Using working_hours table for ${date} (${dayNames[dayOfWeek]}): is_working_day=true, ${startTime}-${endTime}`,
-        );
-      } else {
-        console.log(
-          `[Availability] No working hours found in either admin_settings or working_hours for ${date} (${dayNames[dayOfWeek]})`,
-        );
-
-        return NextResponse.json({
-          availableSlots: [],
-          bookedSlots: [],
-          message: "This day is not a working day",
-        });
-      }
-    }
-
-    // Create a workingHours-like object for compatibility with rest of code
-    workingHours = {
-      start_time: startTime,
-      end_time: endTime,
-      is_working_day: isWorkingDay,
-      buffer_minutes: bufferMinutes,
-      max_appointments: maxAppointments,
-    };
-
-    // Check if team member is on day off for this date
-    const { data: dayOffPeriods, error: dayOffError } = await supabaseAdmin
-      .from("team_day_off_periods")
-      .select("start_date, end_date, reason")
-      .eq("team_member_id", teamMemberId)
-      .lte("start_date", date)
-      .gte("end_date", date);
-
-    if (dayOffError) {
-      console.error("Error checking day off periods:", dayOffError);
-    }
-
-    const isOnDayOff = dayOffPeriods && dayOffPeriods.length > 0;
-    const dayOffReason = isOnDayOff ? dayOffPeriods[0].reason : null;
-
-    // If team member is on day off, return no available slots
-    if (isOnDayOff) {
+    if (bookingClosedSet.has(dayOfWeek)) {
       return NextResponse.json({
         availableSlots: [],
         bookedSlots: [],
-        workingHours: {
-          start: workingHours.start_time,
-          end: workingHours.end_time,
-          buffer_minutes: bufferMinutes,
-          max_appointments: maxAppointments,
-        },
-        serviceDuration: durationMinutes,
-        dayOfWeek: dayOfWeek,
-        isWorkingDay: workingHours.is_working_day,
-        isOnDayOff: true,
-        dayOffReason: dayOffReason,
-        message: `Team member is on day off from ${dayOffPeriods[0].start_date} to ${dayOffPeriods[0].end_date}`,
+        message: "Online booking is not available on this weekday.",
       });
+    }
+
+    if (isOnlineBookingBlackoutByRules(date, dayOfWeek, bookingBlackoutRules)) {
+      return NextResponse.json({
+        availableSlots: [],
+        bookedSlots: [],
+        message: "Online booking is closed for this date (scheduled blackout).",
+      });
+    }
+
+    const resolvedHours = await resolveClinicWorkingHoursForUtcDay(dayOfWeek);
+
+    if (resolvedHours.status === "closed") {
+      return NextResponse.json({
+        availableSlots: [],
+        bookedSlots: [],
+        message: resolvedHours.message,
+      });
+    }
+
+    const workingHours = resolvedHours.hours;
+    const bufferMinutes = workingHours.buffer_minutes;
+    const maxAppointments = workingHours.max_appointments;
+
+    if (isDayOffFeatureEnabled) {
+      const { data: dayOffPeriods, error: dayOffError } = await supabaseAdmin
+        .from("team_day_off_periods")
+        .select("start_date, end_date, reason")
+        .eq("team_member_id", teamMemberId)
+        .lte("start_date", date)
+        .gte("end_date", date);
+
+      if (dayOffError) {
+        console.error("Error checking day off periods:", dayOffError);
+      }
+
+      const isOnDayOff = dayOffPeriods && dayOffPeriods.length > 0;
+      const dayOffReason = isOnDayOff ? dayOffPeriods[0].reason : null;
+
+      if (isOnDayOff) {
+        return NextResponse.json({
+          availableSlots: [],
+          bookedSlots: [],
+          workingHours: {
+            start: workingHours.start_time,
+            end: workingHours.end_time,
+            buffer_minutes: bufferMinutes,
+            max_appointments: maxAppointments,
+          },
+          serviceDuration: durationMinutes,
+          dayOfWeek: dayOfWeek,
+          isWorkingDay: workingHours.is_working_day,
+          isOnDayOff: true,
+          dayOffReason: dayOffReason,
+          message: `Team member is on day off from ${dayOffPeriods[0].start_date} to ${dayOffPeriods[0].end_date}`,
+        });
+      }
     }
 
     // Get existing bookings for this team member on this date

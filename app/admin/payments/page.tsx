@@ -1,5 +1,6 @@
 "use client";
 
+import { Button, Card, CardBody, Checkbox, Chip, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, Spinner } from "@heroui/react";
 import { useState, useEffect } from "react";
 import {
   Plus,
@@ -21,23 +22,11 @@ import {
   Table2,
   Grid3x3,
 } from "lucide-react";
-import { Card, CardBody } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { Chip } from "@heroui/chip";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@heroui/modal";
-import { Spinner } from "@heroui/spinner";
-import { Checkbox } from "@heroui/checkbox";
+
 
 import { useToast } from "@/components/Toast";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { AdminTruncatedText } from "@/components/admin/admin-truncated-text";
 import { formLayout } from "@/config/design-system";
 
 interface Payment {
@@ -1131,7 +1120,7 @@ export default function PaymentsPage() {
                   className="w-full table-fixed min-w-[640px]"
                   style={{ tableLayout: "fixed" }}
                 >
-                  <thead className="bg-default-100 border-b border-divider">
+                  <thead className="sticky top-0 z-10 bg-default-100 border-b border-divider">
                     <tr>
                       <th className="px-3 py-2.5 text-left text-xs font-semibold text-default-600 uppercase tracking-wider w-[14%] min-w-0">
                         Customer
@@ -1167,17 +1156,15 @@ export default function PaymentsPage() {
                       >
                         <td className="px-3 py-2.5 min-w-0">
                           <div className="min-w-0 overflow-hidden">
-                            <div
-                              className="text-sm font-medium text-foreground truncate"
-                              title={
-                                payment.customers?.name ||
-                                payment.bookings?.customer_name ||
-                                "Unknown Customer"
-                              }
-                            >
-                              {payment.customers?.name ||
-                                payment.bookings?.customer_name ||
-                                "Unknown Customer"}
+                            <div className="text-sm font-medium text-foreground">
+                              <AdminTruncatedText
+                                maxChars={22}
+                                text={
+                                  payment.customers?.name ||
+                                  payment.bookings?.customer_name ||
+                                  "Unknown Customer"
+                                }
+                              />
                             </div>
                             <div
                               className="text-xs text-default-500 truncate"
@@ -1189,13 +1176,13 @@ export default function PaymentsPage() {
                         </td>
                         <td className="px-3 py-2.5 min-w-0">
                           <div className="min-w-0 overflow-hidden">
-                            <div
-                              className="text-sm text-foreground truncate"
-                              title={
-                                payment.bookings?.service || "Manual Payment"
-                              }
-                            >
-                              {payment.bookings?.service || "Manual Payment"}
+                            <div className="text-sm text-foreground">
+                              <AdminTruncatedText
+                                maxChars={24}
+                                text={
+                                  payment.bookings?.service || "Manual Payment"
+                                }
+                              />
                             </div>
                             {payment.bookings?.date && (
                               <div className="text-xs text-default-500 flex items-center gap-1 truncate">

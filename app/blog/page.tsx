@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight, ArrowLeft } from "lucide-react";
-import { Button } from "@heroui/button";
-import { Card, CardBody } from "@heroui/react";
+import { Button, Card, CardBody } from "@heroui/react";
 import { Chip } from "@heroui/react";
 import { Spinner } from "@heroui/react";
 

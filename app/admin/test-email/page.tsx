@@ -1,8 +1,11 @@
 "use client";
 
+import { Button, Card, CardBody, CardHeader, Input, Select, SelectItem, Spinner } from "@heroui/react";
 import { useState, useEffect } from "react";
 
 import { useToast } from "@/components/Toast";
+import { formLayout, inputClassNames } from "@/config/design-system";
+import { textColors, typography } from "@/config/typography";
 
 type TemplateId =
   | "simple"
@@ -176,89 +179,89 @@ export default function TestEmailPage() {
   };
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
+    <div className={`space-y-8 ${formLayout.sectionGap}`}>
       <div className="mt-6 flex items-center justify-between">
         <div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
-            Test Email & Payment Configuration
+          <h1
+            className={`${typography.headingSection} ${textColors.heading} transition-colors duration-300`}
+          >
+            Test Email &amp; Payment Configuration
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1 transition-colors duration-300">
+          <p
+            className={`${typography.body} ${textColors.muted} mt-1 transition-colors duration-300`}
+          >
             Test SMTP (Gmail) email functionality and Stripe payment
             configuration.
           </p>
         </div>
       </div>
 
-      {/* Configuration Status */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* SMTP Email (Gmail) Status */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              SMTP Email (Gmail)
-            </h3>
-            <div
-              className={`w-3 h-3 rounded-full ${
-                testResults?.sendgrid?.configured
-                  ? "bg-green-500"
-                  : testResults?.sendgrid
-                    ? "bg-red-500"
-                    : "bg-gray-300"
-              }`}
-            />
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                SMTP configuration (SMTP_SERVER, SMTP_PORT, SMTP_USERNAME,
-                SMTP_PASSWORD) is verified when you run the test below. These
-                are server-side environment variables.
-              </p>
-            </div>
-
-            <button
-              className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              disabled={isTesting}
-              onClick={testSendGridConfig}
-            >
-              {isTesting ? "Testing..." : "Test SMTP Configuration"}
-            </button>
-
-            {testResults?.sendgrid && (
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <Card className="border border-divider shadow-sm">
+          <CardHeader className="flex flex-col gap-1 border-b border-divider pb-4">
+            <div className="flex items-center justify-between">
+              <h3 className={`${typography.headingCard} ${textColors.heading}`}>
+                SMTP Email (Gmail)
+              </h3>
               <div
-                className={`p-3 rounded-md text-sm ${
+                className={`h-3 w-3 rounded-full ${
+                  testResults?.sendgrid?.configured
+                    ? "bg-success-500"
+                    : testResults?.sendgrid
+                      ? "bg-danger-500"
+                      : "bg-default-300"
+                }`}
+              />
+            </div>
+          </CardHeader>
+          <CardBody className={formLayout.sectionGap}>
+            <p className={`${typography.small} ${textColors.muted}`}>
+              SMTP configuration (SMTP_SERVER, SMTP_PORT, SMTP_USERNAME,
+              SMTP_PASSWORD) is verified when you run the test below. These are
+              server-side environment variables.
+            </p>
+            <Button
+              className="w-full"
+              color="primary"
+              isDisabled={isTesting}
+              variant="solid"
+              onPress={testSendGridConfig}
+            >
+              {isTesting ? "Testing…" : "Test SMTP Configuration"}
+            </Button>
+            {testResults?.sendgrid ? (
+              <div
+                className={`rounded-md p-3 text-sm ${
                   testResults.sendgrid.success &&
                   testResults.sendgrid.configured
-                    ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300"
-                    : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300"
+                    ? "bg-success-50 text-success-700 dark:bg-success-900/20 dark:text-success-300"
+                    : "bg-danger-50 text-danger-700 dark:bg-danger-900/20 dark:text-danger-300"
                 }`}
               >
                 {testResults.sendgrid.message}
               </div>
-            )}
-          </div>
-        </div>
+            ) : null}
+          </CardBody>
+        </Card>
 
-        {/* Stripe Status */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Stripe Configuration
-            </h3>
-            <div
-              className={`w-3 h-3 rounded-full ${
-                testResults?.stripe?.success
-                  ? "bg-green-500"
-                  : testResults?.stripe
-                    ? "bg-red-500"
-                    : "bg-gray-300"
-              }`}
-            />
-          </div>
-
-          <div className="space-y-4">
+        <Card className="border border-divider shadow-sm">
+          <CardHeader className="flex flex-col gap-1 border-b border-divider pb-4">
+            <div className="flex items-center justify-between">
+              <h3 className={`${typography.headingCard} ${textColors.heading}`}>
+                Stripe Configuration
+              </h3>
+              <div
+                className={`h-3 w-3 rounded-full ${
+                  testResults?.stripe?.success
+                    ? "bg-success-500"
+                    : testResults?.stripe
+                      ? "bg-danger-500"
+                      : "bg-default-300"
+                }`}
+              />
+            </div>
+          </CardHeader>
+          <CardBody className={formLayout.sectionGap}>
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                 Environment Variables:
@@ -295,173 +298,180 @@ export default function TestEmailPage() {
               </div>
             </div>
 
-            <button
-              className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              disabled={isTesting}
-              onClick={testStripeConfig}
+            <Button
+              className="w-full"
+              color="success"
+              isDisabled={isTesting}
+              variant="solid"
+              onPress={testStripeConfig}
             >
-              {isTesting ? "Testing..." : "Test Stripe Configuration"}
-            </button>
+              {isTesting ? "Testing…" : "Test Stripe Configuration"}
+            </Button>
 
-            {testResults?.stripe && (
+            {testResults?.stripe ? (
               <div
-                className={`p-3 rounded-md text-sm ${
+                className={`rounded-md p-3 text-sm ${
                   testResults.stripe.success
-                    ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300"
-                    : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300"
+                    ? "bg-success-50 text-success-700 dark:bg-success-900/20 dark:text-success-300"
+                    : "bg-danger-50 text-danger-700 dark:bg-danger-900/20 dark:text-danger-300"
                 }`}
               >
                 {testResults.stripe.message || testResults.stripe.error}
               </div>
-            )}
-          </div>
-        </div>
+            ) : null}
+          </CardBody>
+        </Card>
       </div>
 
-      {/* Test Email Sending */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Send Test Email
-        </h3>
+      <Card className="border border-divider shadow-sm">
+        <CardHeader className="flex flex-col gap-1 border-b border-divider">
+          <h3 className={`${typography.headingCard} ${textColors.heading}`}>
+            Send Test Email
+          </h3>
+          <p className={`${typography.small} ${textColors.muted}`}>
+            Choose a template to send a test email with autofilled data (1:1
+            with real booking/newsletter emails).
+          </p>
+        </CardHeader>
+        <CardBody className={formLayout.sectionGap}>
+          <Select
+            label="Template"
+            selectedKeys={new Set([selectedTemplate])}
+            variant="bordered"
+            onSelectionChange={(keys) => {
+              const v = Array.from(keys)[0] as TemplateId | undefined;
 
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          Choose a template to send a test email with autofilled data (1:1 with
-          real booking/newsletter emails).
-        </p>
+              if (v) setSelectedTemplate(v);
+            }}
+          >
+            {TEMPLATE_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value}>{opt.label}</SelectItem>
+            ))}
+          </Select>
+          <Input
+            classNames={inputClassNames}
+            label="Email Address"
+            placeholder="Leave blank to use SMTP_TO_ADDRESS or ADMIN_EMAIL"
+            type="email"
+            value={testEmail}
+            variant="bordered"
+            onValueChange={setTestEmail}
+          />
 
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Template
-            </label>
-            <select
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              value={selectedTemplate}
-              onChange={(e) =>
-                setSelectedTemplate(e.target.value as TemplateId)
-              }
-            >
-              {TEMPLATE_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Email Address
-            </label>
-            <input
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Leave blank to use SMTP_TO_ADDRESS or ADMIN_EMAIL"
-              type="email"
-              value={testEmail}
-              onChange={(e) => setTestEmail(e.target.value)}
-            />
-          </div>
-
-          <button
-            className="w-full px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            disabled={isTesting}
-            onClick={sendTestEmail}
+          <Button
+            className="w-full"
+            color="secondary"
+            isDisabled={isTesting}
+            variant="solid"
+            onPress={sendTestEmail}
           >
             {isTesting
-              ? "Sending..."
+              ? "Sending…"
               : `Send "${TEMPLATE_OPTIONS.find((o) => o.value === selectedTemplate)?.label ?? selectedTemplate}" test email`}
-          </button>
+          </Button>
 
-          {/* Email preview */}
-          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
-            <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+          <div className="mt-6 border-t border-divider pt-6">
+            <h4
+              className={`${typography.headingSmall} ${textColors.heading} mb-2`}
+            >
               Preview
             </h4>
-            {previewSubject && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+            {previewSubject ? (
+              <p className={`${typography.small} ${textColors.muted} mb-2`}>
                 Subject:{" "}
-                <span className="font-medium text-gray-700 dark:text-gray-300">
+                <span className={`font-medium ${textColors.body}`}>
                   {previewSubject}
                 </span>
               </p>
-            )}
-            <div className="rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-900 overflow-hidden">
+            ) : null}
+            <div className="overflow-hidden rounded-lg border border-divider bg-content2">
               {previewLoading ? (
-                <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
-                  Loading preview…
+                <div className="flex h-64 flex-col items-center justify-center gap-3 text-default-500">
+                  <Spinner color="primary" size="lg" />
+                  <span className={typography.small}>Loading preview…</span>
                 </div>
               ) : previewHtml ? (
                 <iframe
-                  className="w-full min-h-[420px] max-h-[70vh] border-0 bg-white dark:bg-white"
+                  className="max-h-[70vh] min-h-[420px] w-full border-0 bg-white dark:bg-white"
                   sandbox="allow-same-origin"
                   srcDoc={previewHtml}
                   title="Email preview"
                 />
               ) : (
-                <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
-                  Select a template to preview
+                <div className="flex h-64 items-center justify-center text-default-500">
+                  <span className={typography.small}>
+                    Select a template to preview
+                  </span>
                 </div>
               )}
             </div>
           </div>
 
-          {testResults?.emailSent && (
+          {testResults?.emailSent ? (
             <div
-              className={`p-3 rounded-md text-sm ${
+              className={`rounded-md p-3 text-sm ${
                 testResults.emailSent.success
-                  ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300"
-                  : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300"
+                  ? "bg-success-50 text-success-700 dark:bg-success-900/20 dark:text-success-300"
+                  : "bg-danger-50 text-danger-700 dark:bg-danger-900/20 dark:text-danger-300"
               }`}
             >
               {testResults.emailSent.message || testResults.emailSent.error}
             </div>
-          )}
-        </div>
-      </div>
+          ) : null}
+        </CardBody>
+      </Card>
 
-      {/* Instructions */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-3">
-          Setup Instructions
-        </h3>
-        <div className="space-y-3 text-sm text-blue-800 dark:text-blue-200">
-          <div>
-            <strong>Gmail SMTP Setup:</strong>
-            <ol className="list-decimal list-inside mt-1 ml-4 space-y-1">
-              <li>
-                Add SMTP_SERVER=smtp.gmail.com, SMTP_PORT=465, SMTP_SECURITY=SSL
-                to .env
-              </li>
-              <li>
-                Set SMTP_USERNAME and SMTP_FROM_ADDRESS to your Gmail address
-              </li>
-              <li>
-                Use an App Password for SMTP_PASSWORD (Google Account → Security
-                → 2-Step Verification → App passwords)
-              </li>
-              <li>Optionally set SMTP_TO_ADDRESS for default test recipient</li>
-            </ol>
+      <Card className="border border-primary-200 bg-primary-50 dark:border-primary-800 dark:bg-primary-900/20">
+        <CardBody className={formLayout.sectionGap}>
+          <h3
+            className={`${typography.headingCard} text-primary-900 dark:text-primary-100`}
+          >
+            Setup Instructions
+          </h3>
+          <div
+            className={`space-y-3 ${typography.body} text-primary-800 dark:text-primary-200`}
+          >
+            <div>
+              <strong>Gmail SMTP Setup:</strong>
+              <ol className="ml-4 mt-1 list-inside list-decimal space-y-1">
+                <li>
+                  Add SMTP_SERVER=smtp.gmail.com, SMTP_PORT=465,
+                  SMTP_SECURITY=SSL to .env
+                </li>
+                <li>
+                  Set SMTP_USERNAME and SMTP_FROM_ADDRESS to your Gmail address
+                </li>
+                <li>
+                  Use an App Password for SMTP_PASSWORD (Google Account →
+                  Security → 2-Step Verification → App passwords)
+                </li>
+                <li>
+                  Optionally set SMTP_TO_ADDRESS for default test recipient
+                </li>
+              </ol>
+            </div>
+            <div>
+              <strong>Stripe Setup:</strong>
+              <ol className="ml-4 mt-1 list-inside list-decimal space-y-1">
+                <li>Create a Stripe account at stripe.com</li>
+                <li>Get your API keys from the Stripe dashboard</li>
+                <li>
+                  Add STRIPE_SECRET_KEY and NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+                  to environment variables
+                </li>
+                <li>Configure webhook endpoints if needed</li>
+              </ol>
+            </div>
+            <div>
+              <strong>Sender Email Logic:</strong>
+              <p className="ml-4 mt-1">
+                The system uses SMTP_FROM_ADDRESS from environment, or falls
+                back to business_email from admin profile, then ADMIN_EMAIL.
+              </p>
+            </div>
           </div>
-          <div>
-            <strong>Stripe Setup:</strong>
-            <ol className="list-decimal list-inside mt-1 ml-4 space-y-1">
-              <li>Create a Stripe account at stripe.com</li>
-              <li>Get your API keys from the Stripe dashboard</li>
-              <li>
-                Add STRIPE_SECRET_KEY and NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY to
-                environment variables
-              </li>
-              <li>Configure webhook endpoints if needed</li>
-            </ol>
-          </div>
-          <div>
-            <strong>Sender Email Logic:</strong>
-            <p className="mt-1 ml-4">
-              The system uses SMTP_FROM_ADDRESS from environment, or falls back
-              to business_email from admin profile, then ADMIN_EMAIL.
-            </p>
-          </div>
-        </div>
-      </div>
+        </CardBody>
+      </Card>
     </div>
   );
 }

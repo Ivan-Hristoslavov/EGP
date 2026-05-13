@@ -1,5 +1,6 @@
 "use client";
 
+import { Button, Card, CardBody, Input, Spinner } from "@heroui/react";
 import { useState, useEffect } from "react";
 import {
   Save,
@@ -9,7 +10,6 @@ import {
   Linkedin,
   Twitter,
 } from "lucide-react";
-import { Button, Input, Card, CardBody, Spinner } from "@heroui/react";
 
 import { useToast } from "@/components/Toast";
 import { siteConfig } from "@/config/site";

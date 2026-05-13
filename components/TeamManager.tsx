@@ -17,24 +17,7 @@ import {
   Power,
   Calendar,
 } from "lucide-react";
-import {
-  RangeCalendar,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  Textarea,
-  Card,
-  CardBody,
-  Input,
-  Select,
-  SelectItem,
-  Checkbox,
-  Chip,
-  Avatar,
-} from "@heroui/react";
+import { Avatar, Button, Card, CardBody, Checkbox, Chip, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, RangeCalendar, Select, SelectItem, Textarea } from "@heroui/react";
 import {
   today,
   getLocalTimeZone,
@@ -46,6 +29,7 @@ import { useToast } from "@/components/Toast";
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { ConfirmationModal } from "@/components/ConfirmationModal";
 import { useServices, Service } from "@/hooks/useServices";
+import { isDayOffFeatureEnabled } from "@/config/feature-flags";
 
 interface TeamMember {
   id: string;
@@ -1696,6 +1680,7 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
       </Card>
 
       {/* Day Off Management Modal */}
+      {isDayOffFeatureEnabled ? (
       <Modal
         classNames={{
           base: "max-h-[90vh]",
@@ -1882,6 +1867,7 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
           )}
         </ModalContent>
       </Modal>
+      ) : null}
 
       {/* Image Cropper Modal */}
       {showImageCropper && imageToCrop && (
@@ -2104,16 +2090,18 @@ function TeamMemberCard({
 
         {/* Action Buttons */}
         <div className="flex gap-2 pt-4 border-t border-divider">
-          <Button
-            isIconOnly
-            color="secondary"
-            size="sm"
-            title="Manage Day Off"
-            variant="flat"
-            onPress={() => onOpenDayOff(member)}
-          >
-            <Calendar className="w-4 h-4" />
-          </Button>
+          {isDayOffFeatureEnabled ? (
+            <Button
+              isIconOnly
+              color="secondary"
+              size="sm"
+              title="Manage Day Off"
+              variant="flat"
+              onPress={() => onOpenDayOff(member)}
+            >
+              <Calendar className="w-4 h-4" />
+            </Button>
+          ) : null}
           <Button
             className="flex-1"
             color="primary"

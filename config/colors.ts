@@ -97,8 +97,9 @@ export const aestheticsColors = {
     accentHover: "from-[#B8A99A] via-[#D4C9BC] to-[#EDE6DC]",
     dark: "from-[#3a4039] via-[#464C45] to-[#2d322c]", // Dark green
     darkHover: "from-[#2d322c] via-[#3a4039] to-[#464C45]",
-    whatsapp: "from-[#25D366] to-[#128C7E]", // WhatsApp green
-    whatsappHover: "from-[#128C7E] to-[#075E54]",
+    /** Legacy gradient tokens — messaging CTAs use solid `btnWhatsApp` (EGP greens). */
+    whatsapp: "from-[#464C45] to-[#3a4039]",
+    whatsappHover: "from-[#3a4039] to-[#2d322c]",
   },
 
   // Backgrounds - Beige + Green Palette
@@ -186,8 +187,8 @@ export const colorClasses = {
   // Dark button (Dark green) - Solid color, no gradient
   btnDark: `bg-egp-green-darker hover:bg-egp-green-dark text-white`,
 
-  // WhatsApp - Keep gradient for WhatsApp brand colors
-  btnWhatsApp: `bg-gradient-to-r ${aestheticsColors.buttons.whatsapp} hover:${aestheticsColors.buttons.whatsappHover} text-white`,
+  // WhatsApp / messaging — EGP medical greens (solid; reliable on Next Link + HeroUI)
+  btnWhatsApp: `bg-egp-green-darker hover:bg-egp-green-dark text-white border border-white/15 shadow-sm dark:border-egp-beige/25`,
 
   // Hero section
   hero: `bg-gradient-to-br ${aestheticsColors.backgrounds.hero}`,
@@ -240,7 +241,7 @@ export const forms = {
   labelRequired:
     "block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 after:content-['*'] after:ml-1 after:text-red-500",
 
-  // Textarea
+  // TextArea
   textarea:
     "px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-[#464C45] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#464C45] focus:border-[#464C45] transition-all resize-none",
 

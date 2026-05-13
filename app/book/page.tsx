@@ -24,8 +24,7 @@ import {
   Loader2,
   Search,
 } from "lucide-react";
-import { Button } from "@heroui/button";
-import { Card, CardBody, CardHeader } from "@heroui/react";
+import { Button, Card, CardBody, CardHeader } from "@heroui/react";
 import { Chip } from "@heroui/react";
 import { Spinner } from "@heroui/react";
 import { Input } from "@heroui/react";
@@ -319,9 +318,7 @@ function BookingPageContent() {
             const cat = (service.category?.name ?? "").toLowerCase();
             const desc = (service.description ?? "").toLowerCase();
 
-            return (
-              name.includes(q) || cat.includes(q) || desc.includes(q)
-            );
+            return name.includes(q) || cat.includes(q) || desc.includes(q);
           });
     const grouped: Record<string, Array<[string, any]>> = {};
 
@@ -1602,7 +1599,10 @@ function BookingPageContent() {
                           . Try another name or clear the search.
                         </>
                       ) : (
-                        <>Nothing left to add here — all listed items may already be in your booking.</>
+                        <>
+                          Nothing left to add here — all listed items may
+                          already be in your booking.
+                        </>
                       )}
                     </p>
                   </div>
@@ -1687,9 +1687,7 @@ function BookingPageContent() {
                                   className={`flex-1 ${bookingBtn} border-gray-400 text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:hover:bg-gray-700 sm:w-full`}
                                   size="md"
                                   variant="bordered"
-                                  onPress={() =>
-                                    setServiceInfoModal(serviceId)
-                                  }
+                                  onPress={() => setServiceInfoModal(serviceId)}
                                 >
                                   Details
                                 </Button>

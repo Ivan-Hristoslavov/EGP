@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-import { POST, DELETE } from "./route";
+import { GET, POST, DELETE } from "./route";
 
 const authMocks = vi.hoisted(() => ({
   maybeSingle: vi.fn(),
@@ -36,6 +36,37 @@ vi.mock("bcryptjs", () => ({
     compare: (...args: unknown[]) => authMocks.bcryptCompare(...args),
   },
 }));
+
+const requireAdminMock = vi.hoisted(() => vi.fn());
+
+vi.mock("@/lib/admin-auth", () => ({
+  requireAdmin: () => requireAdminMock(),
+}));
+
+describe("GET /api/admin/auth", () => {
+  beforeEach(() => {
+    requireAdminMock.mockReset();
+  });
+
+  it("returns 200 when session is valid", async () => {
+    requireAdminMock.mockResolvedValue(null);
+    const res = await GET();
+
+    expect(res.status).toBe(200);
+    const json = await res.json();
+
+    expect(json.authenticated).toBe(true);
+  });
+
+  it("returns 401 when requireAdmin denies", async () => {
+    requireAdminMock.mockResolvedValue(
+      NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+    );
+    const res = await GET();
+
+    expect(res.status).toBe(401);
+  });
+});
 
 describe("POST /api/admin/auth", () => {
   let jwtSecret: string | undefined;

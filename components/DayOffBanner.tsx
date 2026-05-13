@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 
+import { isDayOffFeatureEnabled } from "@/config/feature-flags";
 import { useActiveDayOffPeriods, DayOffPeriod } from "@/hooks/useDayOffPeriods";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 
@@ -43,6 +44,10 @@ export function DayOffBanner({ previewPeriod }: DayOffBannerProps) {
       setActivePeriod(null);
     }
   }, [previewPeriod, activePeriods]);
+
+  if (!isDayOffFeatureEnabled) {
+    return null;
+  }
 
   if (loading && !previewPeriod) {
     return null; // Don't show anything while loading

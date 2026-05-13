@@ -1,13 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Textarea } from "@heroui/react";
-import { Select, SelectItem } from "@heroui/select";
-import { Spinner } from "@heroui/spinner";
-import { Chip } from "@heroui/chip";
+import { Button, Card, CardBody, CardHeader, Chip, Input, Select, SelectItem, Spinner, Textarea } from "@heroui/react";
 import {
   X,
   Upload,

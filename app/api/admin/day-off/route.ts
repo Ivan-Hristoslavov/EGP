@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { isDayOffFeatureEnabled } from "@/config/feature-flags";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/admin-auth";
 
@@ -8,6 +9,11 @@ export async function GET() {
   const denied = await requireAdmin();
 
   if (denied) return denied;
+
+  if (!isDayOffFeatureEnabled) {
+    return NextResponse.json([]);
+  }
+
   const supabase = createClient();
   const { data, error } = await supabase
     .from("day_off_periods")

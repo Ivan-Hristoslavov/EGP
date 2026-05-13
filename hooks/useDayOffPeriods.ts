@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { usePathname } from "next/navigation";
 
+import { isDayOffFeatureEnabled } from "@/config/feature-flags";
+
 export interface DayOffPeriod {
   id?: string;
   title: string;
@@ -30,6 +32,16 @@ export function useDayOffPeriods() {
   const isMountedRef = useRef(true);
 
   const fetchPeriods = useCallback(async () => {
+    if (!isDayOffFeatureEnabled) {
+      cachedData = null;
+      cacheTimestamp = 0;
+      setPeriods([]);
+      setLoading(false);
+      setError(null);
+
+      return;
+    }
+
     // Check if we have valid cached data
     const now = Date.now();
 
