@@ -587,7 +587,6 @@ ${practitionerCard}
 <div style="font-weight:600;color:${L.text};margin-bottom:8px">Before your visit</div>
 <ul style="margin:0;padding-left:20px;color:${L.textMuted}">
 <li>Arrive 10 minutes early</li>
-<li>Bring a valid ID</li>
 <li>Reschedule at least 24 hours in advance if needed</li>
 </ul>
 <p style="margin:12px 0 0;font-size:13px;color:${L.danger};font-weight:500">You can cancel or request a refund up to 24 hours before your appointment.</p>
@@ -676,7 +675,6 @@ Booking Details:
 - Duration: ${data.duration}${practitionerPlainTextSection(data.practitioner)}
 Important Information:
 - Please arrive 10 minutes before your appointment
-- Bring a valid ID
 - Reschedule at least 24 hours in advance if needed
 - You can cancel or request a refund up to 24 hours before your appointment.
 

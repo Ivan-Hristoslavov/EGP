@@ -167,7 +167,7 @@ function getBookingConfirmation(s: typeof SAMPLE): {
 <div class="email-notice" style="background:#f0ede7;border-left:4px solid ${L.noticeBorder};padding:20px;margin:24px 0;border-radius:0 6px 6px 0">
 <div style="font-weight:600;color:${L.text};margin-bottom:8px">Before your visit</div>
 <ul style="margin:0;padding-left:20px;color:${L.textMuted}">
-<li>Arrive 10 minutes early</li><li>Bring a valid ID</li><li>Reschedule at least 24 hours in advance if needed</li>
+<li>Arrive 10 minutes early</li><li>Reschedule at least 24 hours in advance if needed</li>
 </ul>
 <p style="margin:12px 0 0;font-size:13px;color:${L.danger};font-weight:500">You can cancel or request a refund up to 24 hours before your appointment.</p>
 </div>
@@ -255,7 +255,7 @@ function getPaymentConfirmed(s: typeof SAMPLE): {
 <div class="email-notice" style="background:#fef7ed;border-left:4px solid ${L.noticeBorder};padding:20px;margin:24px 0;border-radius:0 6px 6px 0">
 <div style="font-weight:600;color:${L.text};margin-bottom:8px">Before your visit</div>
 <ul style="margin:0;padding-left:20px;color:${L.textMuted}">
-<li>Arrive 10 minutes early</li><li>Bring a valid ID</li><li>Reschedule at least 24 hours in advance if needed</li>
+<li>Arrive 10 minutes early</li><li>Reschedule at least 24 hours in advance if needed</li>
 </ul>
 <p style="margin:12px 0 0;font-size:13px;color:${L.danger};font-weight:500">You can cancel or request a refund up to 24 hours before your appointment.</p>
 </div>
