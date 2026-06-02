@@ -56,6 +56,12 @@ export default function FooterAesthetics() {
     adminProfile?.company_address ||
     siteConfig.contact.address.full ||
     `${siteConfig.contact.address.city}, ${siteConfig.contact.address.country}`;
+  const hasAnySocial = Boolean(
+    socialLinks.instagram ||
+      socialLinks.facebook ||
+      socialLinks.youtube ||
+      socialLinks.tiktok,
+  );
 
   useEffect(() => {
     // Fetch working hours from public API
@@ -260,18 +266,18 @@ export default function FooterAesthetics() {
   return (
     <footer className="relative bg-[#E6DDD1] dark:bg-gray-900 text-gray-900 dark:text-gray-300 border-t border-gray-200 dark:border-gray-700">
       <div className="relative">
-        {/* Main Footer Content - 6 sections: EGP, Contact Us, Opening Hours, Quick Links, Follow Us, Legal */}
+        {/* Main Footer Content - 4 columns: Brand, Contact, Opening Hours, Quick Links */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-6">
-            {/* 1. EGP (site name, tagline, description from config) - first in order */}
-            <div className="space-y-3 order-1 pb-6 border-b border-gray-300 dark:border-gray-600 sm:border-b-0 sm:pb-0">
-              <h2 className="text-base font-bold text-gray-900 dark:text-white text-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-x-12 xl:gap-x-20">
+            {/* 1. Brand (site name, tagline, description, trust badges) */}
+            <div className="space-y-3 pb-6 border-b border-gray-300 dark:border-gray-600 sm:border-b-0 sm:pb-0">
+              <h2 className="text-base font-bold text-gray-900 dark:text-white">
                 {siteConfig.shortName}
               </h2>
-              <p className="text-xs text-gray-700 dark:text-gray-400 font-semibold text-center">
+              <p className="text-xs font-semibold text-gray-700 dark:text-gray-400">
                 {siteConfig.tagline}
               </p>
-              <p className="text-xs text-gray-700 dark:text-gray-400 leading-relaxed text-left">
+              <p className="text-xs text-gray-700 dark:text-gray-400 leading-relaxed">
                 {siteConfig.description}
               </p>
               <div className="grid grid-cols-2 gap-2 pt-1">
@@ -302,21 +308,21 @@ export default function FooterAesthetics() {
               </div>
             </div>
 
-            {/* 2. Contact Us - second */}
-            <div className="space-y-3 order-2 pb-6 border-b border-gray-300 dark:border-gray-600 sm:border-b-0 sm:pb-0">
-              <h3 className="text-base font-bold text-gray-900 dark:text-white text-center">
+            {/* 2. Contact Us - single vertical list */}
+            <div className="space-y-3 pb-6 border-b border-gray-300 dark:border-gray-600 sm:border-b-0 sm:pb-0">
+              <h3 className="text-sm font-bold uppercase tracking-wide text-gray-900 dark:text-white">
                 Contact Us
               </h3>
-              <ul className="grid grid-cols-2 gap-x-3 gap-y-2.5 text-left">
+              <ul className="space-y-2.5 text-xs text-gray-700 dark:text-gray-400">
                 <li>
                   {profileLoading ? (
                     <div className="flex items-center gap-2">
                       <Phone className="w-3.5 h-3.5 flex-shrink-0 text-gray-400" />
-                      <div className="h-3 w-20 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
+                      <div className="h-3 w-24 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
                     </div>
                   ) : (
                     <a
-                      className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                      className="flex items-center gap-2 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors"
                       href={`tel:${contactPhone}`}
                     >
                       <Phone className="w-3.5 h-3.5 flex-shrink-0" />
@@ -327,29 +333,13 @@ export default function FooterAesthetics() {
                 <li>
                   {profileLoading ? (
                     <div className="flex items-center gap-2">
-                      <Mail className="w-3.5 h-3.5 flex-shrink-0 text-gray-400" />
-                      <div className="h-3 w-24 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
-                    </div>
-                  ) : (
-                    <a
-                      className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
-                      href={`mailto:${contactEmail}`}
-                    >
-                      <Mail className="w-3.5 h-3.5 flex-shrink-0" />
-                      <span className="break-all">{contactEmail}</span>
-                    </a>
-                  )}
-                </li>
-                <li>
-                  {profileLoading ? (
-                    <div className="flex items-center gap-2">
                       <MessageCircle className="w-3.5 h-3.5 flex-shrink-0 text-gray-400" />
-                      <div className="h-3 w-16 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
+                      <div className="h-3 w-20 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
                     </div>
                   ) : (
                     <a
                       aria-label="WhatsApp"
-                      className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                      className="flex items-center gap-2 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors"
                       href={`https://wa.me/${contactWhatsapp.replace(/\s/g, "")}`}
                       rel="noopener noreferrer"
                       target="_blank"
@@ -359,7 +349,23 @@ export default function FooterAesthetics() {
                     </a>
                   )}
                 </li>
-                <li className="col-span-2">
+                <li>
+                  {profileLoading ? (
+                    <div className="flex items-center gap-2">
+                      <Mail className="w-3.5 h-3.5 flex-shrink-0 text-gray-400" />
+                      <div className="h-3 w-28 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
+                    </div>
+                  ) : (
+                    <a
+                      className="flex items-center gap-2 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors"
+                      href={`mailto:${contactEmail}`}
+                    >
+                      <Mail className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span className="break-all">{contactEmail}</span>
+                    </a>
+                  )}
+                </li>
+                <li>
                   {profileLoading ? (
                     <div className="flex items-start gap-2">
                       <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-gray-400 mt-0.5" />
@@ -369,14 +375,23 @@ export default function FooterAesthetics() {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-start gap-2 text-left text-xs text-gray-700 dark:text-gray-400">
+                    <div className="flex items-start gap-2">
                       <MapPin className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
                       <div className="min-w-0">
-                        {contactAddress
-                          .split(",")
-                          .map((part: string, i: number) => (
-                            <div key={i}>{part.trim()}</div>
-                          ))}
+                        {(() => {
+                          const parts = contactAddress
+                            .split(",")
+                            .map((part: string) => part.trim())
+                            .filter(Boolean);
+                          const [street, ...rest] = parts;
+
+                          return (
+                            <>
+                              {street && <div>{street}</div>}
+                              {rest.length > 0 && <div>{rest.join(", ")}</div>}
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>
                   )}
@@ -385,11 +400,11 @@ export default function FooterAesthetics() {
             </div>
 
             {/* 3. Opening Hours */}
-            <div className="space-y-3 order-3 pb-6 border-b border-gray-300 dark:border-gray-600 sm:border-b-0 sm:pb-0">
-              <h3 className="text-base font-bold text-gray-900 dark:text-white text-center">
+            <div className="space-y-3 pb-6 border-b border-gray-300 dark:border-gray-600 sm:border-b-0 sm:pb-0">
+              <h3 className="text-sm font-bold uppercase tracking-wide text-gray-900 dark:text-white">
                 Opening Hours
               </h3>
-              <ul className="space-y-1 text-left text-xs text-gray-700 dark:text-gray-400">
+              <ul className="space-y-1 text-xs text-gray-700 dark:text-gray-400">
                 {loadingHours ? (
                   <li>Loading hours...</li>
                 ) : groupedHours.length === 0 ? (
@@ -409,15 +424,15 @@ export default function FooterAesthetics() {
               </ul>
             </div>
 
-            {/* 4. Quick Links - evenly distributed */}
-            <div className="space-y-3 order-4 pb-6 border-b border-gray-300 dark:border-gray-600 sm:border-b-0 sm:pb-0">
-              <h3 className="text-base font-bold text-gray-900 dark:text-white text-center">
+            {/* 4. Quick Links - vertical list */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-bold uppercase tracking-wide text-gray-900 dark:text-white">
                 Quick Links
               </h3>
-              <ul className="flex flex-wrap justify-evenly gap-x-4 gap-y-2.5 text-center sm:justify-between sm:gap-x-6">
+              <ul className="space-y-2 text-xs text-gray-700 dark:text-gray-400">
                 <li>
                   <Link
-                    className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                    className="hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors"
                     href="/book"
                   >
                     Book Appointment
@@ -425,7 +440,7 @@ export default function FooterAesthetics() {
                 </li>
                 <li>
                   <Link
-                    className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                    className="hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors"
                     href="/services"
                   >
                     Our Services
@@ -433,7 +448,7 @@ export default function FooterAesthetics() {
                 </li>
                 <li>
                   <Link
-                    className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                    className="hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors"
                     href="/conditions"
                   >
                     Conditions We Treat
@@ -441,7 +456,7 @@ export default function FooterAesthetics() {
                 </li>
                 <li>
                   <Link
-                    className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                    className="hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors"
                     href="/about"
                   >
                     About Us
@@ -449,7 +464,7 @@ export default function FooterAesthetics() {
                 </li>
                 <li>
                   <Link
-                    className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                    className="hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors"
                     href="/blog"
                   >
                     Blog
@@ -457,7 +472,7 @@ export default function FooterAesthetics() {
                 </li>
                 <li>
                   <Link
-                    className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                    className="hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors"
                     href="/find-us"
                   >
                     Find Us
@@ -466,7 +481,7 @@ export default function FooterAesthetics() {
                 {isPressPageEnabled === true && (
                   <li>
                     <Link
-                      className="text-xs text-gray-700 dark:text-gray-400 hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                      className="hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors"
                       href="/press"
                     >
                       Awards & Press
@@ -475,102 +490,106 @@ export default function FooterAesthetics() {
                 )}
               </ul>
             </div>
+          </div>
+        </div>
 
-            {/* 5. Follow Us */}
-            <div className="space-y-3 order-5 pb-6 border-b border-gray-300 dark:border-gray-600 sm:border-b-0 sm:pb-0">
-              <h3 className="text-base font-bold text-gray-900 dark:text-white text-center">
-                Follow Us
-              </h3>
-              <div className="flex gap-2 flex-wrap justify-center">
-                {socialLinks.instagram && (
-                  <a
-                    aria-label="Instagram"
-                    className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700"
-                    href={socialLinks.instagram}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    <Instagram className="w-4 h-4 text-gray-700 dark:text-gray-300" />
-                  </a>
-                )}
-                {socialLinks.facebook && (
-                  <a
-                    aria-label="Facebook"
-                    className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700"
-                    href={socialLinks.facebook}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    <Facebook className="w-4 h-4 text-gray-700 dark:text-gray-300" />
-                  </a>
-                )}
-                {socialLinks.youtube && (
-                  <a
-                    aria-label="YouTube"
-                    className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700"
-                    href={socialLinks.youtube}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    <Youtube className="w-4 h-4 text-gray-700 dark:text-gray-300" />
-                  </a>
-                )}
-                {socialLinks.tiktok && (
-                  <a
-                    aria-label="TikTok"
-                    className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700"
-                    href={socialLinks.tiktok}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    <svg
-                      className="w-4 h-4 text-gray-700 dark:text-gray-300"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
+        {/* Bottom Bar - social + legal, then copyright */}
+        <div className="border-t border-gray-400 dark:border-gray-700">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
+            {/* Social + Legal row */}
+            <div
+              className={`flex flex-col sm:flex-row items-center gap-4 ${
+                hasAnySocial ? "sm:justify-between" : "sm:justify-center"
+              }`}
+            >
+              {hasAnySocial && (
+                <div className="flex gap-2 flex-wrap justify-center">
+                  {socialLinks.instagram && (
+                    <a
+                      aria-label="Instagram"
+                      className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                      href={socialLinks.instagram}
+                      rel="noopener noreferrer"
+                      target="_blank"
                     >
-                      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
-                    </svg>
-                  </a>
-                )}
-              </div>
-            </div>
-
-            {/* 6. Legal - last section before copyright */}
-            <div className="space-y-3 order-6">
-              <h3 className="text-base font-bold text-gray-900 dark:text-white text-center">
-                Legal
-              </h3>
-              <p className="text-xs text-gray-700 dark:text-gray-400 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center">
+                      <Instagram className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+                    </a>
+                  )}
+                  {socialLinks.facebook && (
+                    <a
+                      aria-label="Facebook"
+                      className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                      href={socialLinks.facebook}
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      <Facebook className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+                    </a>
+                  )}
+                  {socialLinks.youtube && (
+                    <a
+                      aria-label="YouTube"
+                      className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                      href={socialLinks.youtube}
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      <Youtube className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+                    </a>
+                  )}
+                  {socialLinks.tiktok && (
+                    <a
+                      aria-label="TikTok"
+                      className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                      href={socialLinks.tiktok}
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      <svg
+                        className="w-4 h-4 text-gray-700 dark:text-gray-300"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+                      </svg>
+                    </a>
+                  )}
+                </div>
+              )}
+              <p className="text-xs text-gray-700 dark:text-gray-400 flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
                 <Link
-                  className="hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                  className="hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors"
                   href="/terms"
                 >
                   Terms
                 </Link>
                 <span className="text-gray-400 dark:text-gray-500">·</span>
                 <Link
-                  className="hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                  className="hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors"
                   href="/privacy"
                 >
                   Privacy
                 </Link>
                 <span className="text-gray-400 dark:text-gray-500">·</span>
                 <Link
-                  className="hover:text-[#9d9585] dark:hover:text-[#c9c1b0]"
+                  className="hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors"
                   href="/gdpr"
                 >
                   GDPR
                 </Link>
               </p>
             </div>
-          </div>
-        </div>
 
-        {/* Bottom Bar - copyright last on mobile */}
-        <div className="border-t border-gray-400 dark:border-gray-700">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
-              <p className="text-xs text-gray-600 dark:text-gray-500 text-center sm:order-2 sm:text-left order-1">
+            {/* Copyright row */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 border-t border-gray-300/70 dark:border-gray-700/70 pt-5">
+              <p className="text-sm text-gray-700 dark:text-gray-400 text-center sm:order-1 sm:text-left order-3">
+                © {currentYear}{" "}
+                <span className="font-bold text-gray-900 dark:text-white">
+                  {siteConfig.name}
+                </span>
+                . All rights reserved.
+              </p>
+              <p className="text-xs text-gray-600 dark:text-gray-500 text-center sm:order-2 order-1">
                 Made with{" "}
                 <Heart
                   className="w-3 h-3 inline text-red-500 dark:text-red-400 animate-pulse"
@@ -588,13 +607,6 @@ export default function FooterAesthetics() {
                 >
                   Serenity Web Studio
                 </a>
-              </p>
-              <p className="text-sm text-gray-700 dark:text-gray-400 text-center sm:order-1 sm:text-left order-3">
-                © {currentYear}{" "}
-                <span className="font-bold text-gray-900 dark:text-white">
-                  {siteConfig.name}
-                </span>
-                . All rights reserved.
               </p>
             </div>
           </div>

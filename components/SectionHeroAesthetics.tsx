@@ -42,6 +42,16 @@ const heroOverlayBaseClass =
 const heroOverlayGradientClass =
   "pointer-events-none absolute inset-0 z-[3] bg-[linear-gradient(180deg,rgba(0,0,0,0.62)_0%,rgba(0,0,0,0.52)_38%,rgba(0,0,0,0.46)_100%)] sm:bg-[linear-gradient(90deg,rgba(0,0,0,0.58)_0%,rgba(0,0,0,0.52)_22%,rgba(0,0,0,0.34)_48%,rgba(0,0,0,0.14)_100%)]";
 
+/** Build a wa.me link with UK number normalisation (strip non-digits, leading 0 -> 44). */
+function buildHeroWhatsAppUrl(phone: string, message: string): string {
+  const digits = (phone || "").replace(/\D/g, "");
+  const normalised = digits.startsWith("0")
+    ? `44${digits.slice(1)}`
+    : digits;
+
+  return `https://wa.me/${normalised}?text=${encodeURIComponent(message)}`;
+}
+
 export default function SectionHeroAesthetics() {
   const adminProfile = useAdminProfile();
   const { loading: profileLoading } = useAdminProfileContext();
@@ -413,10 +423,28 @@ export default function SectionHeroAesthetics() {
               />
             )}
             {heroSection?.button_2_text ? (
-              heroSection.button_2_type === "external" ? (
+              heroSection.button_2_icon === "whatsapp" ? (
                 <ButtonPrimary
                   as="a"
-                  className={`w-full sm:w-auto ${heroSection.button_2_icon === "whatsapp" ? "border-2 border-white/30" : ""}`}
+                  className="w-full sm:w-auto border-2 border-white/30"
+                  href={buildHeroWhatsAppUrl(
+                    heroSection?.phone_number ||
+                      adminProfile?.phone ||
+                      siteConfig.contact.whatsapp,
+                    "Hi! I'd like to book a treatment at EGP Aesthetics.",
+                  )}
+                  rel="noopener noreferrer"
+                  size="lg"
+                  startContent={<MessageCircle className="w-5 h-5" />}
+                  target="_blank"
+                  variant="whatsapp"
+                >
+                  {heroSection.button_2_text}
+                </ButtonPrimary>
+              ) : heroSection.button_2_type === "external" ? (
+                <ButtonPrimary
+                  as="a"
+                  className="w-full sm:w-auto"
                   href={heroSection.button_2_link || "#"}
                   rel="noopener noreferrer"
                   size="lg"
@@ -450,18 +478,14 @@ export default function SectionHeroAesthetics() {
                     }
                   })()}
                   target="_blank"
-                  variant={
-                    heroSection.button_2_icon === "whatsapp"
-                      ? "whatsapp"
-                      : "secondary"
-                  }
+                  variant="secondary"
                 >
                   {heroSection.button_2_text}
                 </ButtonPrimary>
               ) : (
                 <ButtonPrimary
                   as={Link}
-                  className={`w-full sm:w-auto ${heroSection.button_2_icon === "whatsapp" ? "border-2 border-white/30" : ""}`}
+                  className="w-full sm:w-auto"
                   href={heroSection.button_2_link || "#"}
                   size="lg"
                   startContent={(() => {
@@ -493,11 +517,7 @@ export default function SectionHeroAesthetics() {
                         return <MessageCircle className={iconClass} />;
                     }
                   })()}
-                  variant={
-                    heroSection.button_2_icon === "whatsapp"
-                      ? "whatsapp"
-                      : "secondary"
-                  }
+                  variant="secondary"
                 >
                   {heroSection.button_2_text}
                 </ButtonPrimary>

@@ -13,6 +13,7 @@ import {
 } from "@heroui/react";
 
 import ButtonBookNow from "@/components/ButtonBookNow";
+import { typography, layout } from "@/config/typography";
 
 const antiWrinkleServices = [
   {
@@ -80,10 +81,10 @@ export default function AntiWrinklePage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero */}
-      <section className="relative bg-gradient-to-br from-egp-green-dark via-egp-green to-egp-green-light text-white py-16 md:py-24">
-        <div className="container mx-auto px-4">
+      <section className={`relative bg-gradient-to-br from-egp-green-dark via-egp-green to-egp-green-light text-white ${layout.sectionPy}`}>
+        <div className={layout.container}>
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-6">
+            <h1 className={`${typography.headingHero} mb-6`}>
               Anti-wrinkle Injections
             </h1>
             <p className="text-xl md:text-2xl text-white/90 mb-8">
@@ -96,7 +97,7 @@ export default function AntiWrinklePage() {
 
       {/* Filters and Sort */}
       <section className="py-8 bg-egp-beige-lighter">
-        <div className="container mx-auto px-4">
+        <div className={layout.container}>
           <div className="max-w-6xl mx-auto">
             {/* Quick Filters */}
             <div className="flex flex-wrap gap-3 items-center mb-4">
@@ -214,8 +215,8 @@ export default function AntiWrinklePage() {
       </section>
 
       {/* Services Grid */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
+      <section className={layout.sectionPy}>
+        <div className={layout.container}>
           {(() => {
             // Filter services
             let filtered = antiWrinkleServices.filter((service) => {
@@ -346,9 +347,9 @@ export default function AntiWrinklePage() {
       </section>
 
       {/* CTA */}
-      <section className="py-12 sm:py-16 bg-gradient-to-br from-egp-green-dark via-egp-green to-egp-green-light text-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 px-4">
+      <section className={`${layout.sectionPy} bg-gradient-to-br from-egp-green-dark via-egp-green to-egp-green-light text-white`}>
+        <div className={`${layout.container} text-center`}>
+          <h2 className={`${typography.headingSection} mb-3 sm:mb-4 px-4`}>
             Start Your Anti-Aging Journey Today
           </h2>
           <p className="text-base sm:text-lg md:text-xl text-white/90 mb-6 sm:mb-8 max-w-2xl mx-auto px-4">

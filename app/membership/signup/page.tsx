@@ -133,7 +133,7 @@ export default function MembershipSignupPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-pink-50/50 to-purple-50/50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800">
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6">
         {/* Header */}
         <div className="mb-8">
           <Link
@@ -148,7 +148,7 @@ export default function MembershipSignupPage() {
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent font-montserrat mb-4">
               Choose Your Membership Plan
             </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               Join our exclusive membership program and enjoy premium benefits,
               priority booking, and exclusive discounts.
             </p>
