@@ -19,6 +19,7 @@ import {
 import { siteConfig } from "@/config/site";
 import { useAdminProfile } from "@/components/AdminProfileContext";
 import ButtonPrimary from "@/components/ButtonPrimary";
+import { typography, textColors, layout } from "@/config/typography";
 
 function BookingSuccessContent() {
   const searchParams = useSearchParams();
@@ -157,12 +158,12 @@ function BookingSuccessContent() {
   if (bookingDetails.error) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 sm:pt-24 pb-8">
-        <div className="container mx-auto px-4 max-w-4xl">
+        <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 text-center">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full mb-6">
               <X className="w-10 h-10 text-red-600 dark:text-red-400" />
             </div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            <h1 className={`${typography.headingSection} ${textColors.heading} mb-4`}>
               Booking Not Found
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
@@ -460,7 +461,7 @@ function BookingSuccessContent() {
       />
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 sm:pt-24 pb-8 print-content">
-        <div className="container mx-auto px-4 max-w-4xl print-container">
+        <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 print-container">
           {/* Logo - Print Only */}
           <div className="hidden print-only print-logo">
             <Image
@@ -478,7 +479,7 @@ function BookingSuccessContent() {
             <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-[#f5f1e9] dark:bg-[#9d9585]/30 rounded-full mb-2">
               <CheckCircle className="w-7 h-7 sm:w-8 sm:h-8 text-[#9d9585] dark:text-[#c9c1b0]" />
             </div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#464C45] dark:text-[#c9c1b0] mb-2 font-montserrat">
+            <h1 className={`${typography.headingSection} text-[#464C45] dark:text-[#c9c1b0] mb-2 font-montserrat`}>
               Booking Confirmed!
             </h1>
             <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 font-montserrat font-light">

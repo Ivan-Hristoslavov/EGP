@@ -970,7 +970,7 @@ export default function HeaderAesthetics() {
             />
             <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-gray-200/50 dark:via-gray-700/50 to-transparent z-20" />
             <div className="relative z-10 flex h-full flex-col min-h-0">
-              <div className="flex-1 min-h-0 overflow-y-auto">
+              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden menu-scroll">
                 <div className="w-full max-w-[96vw] 2xl:max-w-[1600px] mx-auto px-5 sm:px-6 lg:px-8 py-6">
                   <div
                     className={`grid ${
@@ -1012,12 +1012,12 @@ export default function HeaderAesthetics() {
                                   className="absolute left-0 top-[12%] bottom-[12%] w-px bg-gray-200/60 dark:bg-gray-600/60"
                                 />
                               )}
-                              <div className="flex items-center justify-between gap-6 mb-5">
-                                <h3 className="text-xs font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-widest font-montserrat">
+                              <div className="flex flex-col gap-0.5 mb-4">
+                                <h3 className="text-xs font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-wide font-montserrat leading-tight">
                                   {category.name}
                                 </h3>
                                 <Link
-                                  className="group relative text-xs font-medium text-gray-800 dark:text-gray-200 hover:text-egp-green dark:hover:text-egp-beige transition-all duration-300 whitespace-nowrap"
+                                  className="group relative self-start text-[11px] font-medium text-gray-700 dark:text-gray-300 hover:text-egp-green dark:hover:text-egp-beige transition-all duration-300 whitespace-nowrap"
                                   href={`/services?category=${encodeURIComponent(category.name)}`}
                                   onClick={() => setActiveMenu(null)}
                                 >
@@ -1029,7 +1029,7 @@ export default function HeaderAesthetics() {
                                   </span>
                                 </Link>
                               </div>
-                              <ul className="space-y-0.5 max-h-[min(78vh,680px)] overflow-y-auto overflow-x-hidden menu-scroll pl-2 pr-1">
+                              <ul className="space-y-0.5 pl-2 pr-1">
                                 {categoryServices.map((item) => {
                                   const hasDiscount =
                                     (item.originalPrice != null &&
@@ -1126,7 +1126,7 @@ export default function HeaderAesthetics() {
                               return (
                                 <ul
                                   key={`face-${col}`}
-                                  className="space-y-0.5 max-h-[min(78vh,680px)] overflow-y-auto overflow-x-hidden menu-scroll pl-2 pr-1"
+                                  className="space-y-0.5 pl-2 pr-1"
                                 >
                                   {slice.map((condition) => {
                                     const priceInfo =
@@ -1196,7 +1196,7 @@ export default function HeaderAesthetics() {
                               return (
                                 <ul
                                   key={`body-${col}`}
-                                  className="space-y-0.5 max-h-[min(78vh,680px)] overflow-y-auto overflow-x-hidden menu-scroll pl-2 pr-1"
+                                  className="space-y-0.5 pl-2 pr-1"
                                 >
                                   {slice.map((condition) => {
                                     const priceInfo =
@@ -1256,11 +1256,6 @@ export default function HeaderAesthetics() {
                     )}
                   </div>
                 </div>
-              </div>
-              {/* Scroll hint - always visible at bottom, outside scroll area */}
-              <div className="flex-shrink-0 border-t-2 border-white/50 dark:border-gray-500/50 bg-white/20 dark:bg-black/20 px-4 py-3 flex items-center justify-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200">
-                <ChevronDown className="w-4 h-4 flex-shrink-0 opacity-80" />
-                <span>Scroll within each column to see all services</span>
               </div>
             </div>
           </div>,
@@ -1349,7 +1344,7 @@ export default function HeaderAesthetics() {
                                   View All →
                                 </Link>
                               </div>
-                              <ul className="space-y-0.5 max-h-[300px] overflow-y-auto overflow-x-hidden menu-scroll pr-1">
+                              <ul className="space-y-0.5 pr-1">
                                 {categoryServices.map((item) => {
                                   const hasDiscount =
                                     (item.originalPrice != null &&
@@ -1446,7 +1441,7 @@ export default function HeaderAesthetics() {
                               View All →
                             </Link>
                           </div>
-                          <ul className="space-y-0.5 max-h-[250px] overflow-y-auto overflow-x-hidden menu-scroll pr-1">
+                          <ul className="space-y-0.5 pr-1">
                             {conditionsByCategory.face.map((condition) => {
                               const priceInfo = getConditionPrice(condition);
 
@@ -1489,7 +1484,7 @@ export default function HeaderAesthetics() {
                               View All →
                             </Link>
                           </div>
-                          <ul className="space-y-0.5 max-h-[250px] overflow-y-auto overflow-x-hidden menu-scroll pr-1">
+                          <ul className="space-y-0.5 pr-1">
                             {conditionsByCategory.body.map((condition) => {
                               const priceInfo = getConditionPrice(condition);
 

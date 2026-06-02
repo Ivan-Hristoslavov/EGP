@@ -31,7 +31,7 @@ import { Input } from "@heroui/react";
 
 import { useServices } from "@/hooks/useServices";
 import { ServiceDetailsModal } from "@/components/ServiceDetailsModal";
-import { typography, textColors } from "@/config/typography";
+import { typography, textColors, layout } from "@/config/typography";
 import StripePaymentForm from "@/components/StripePaymentForm";
 import {
   bookingCtaButtonClassName,
@@ -1161,7 +1161,7 @@ function BookingPageContent() {
   const renderServicesStep = () => (
     <div className="space-y-6">
       {selectedServices.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-[#d6ccb9] dark:border-gray-700 bg-[#faf7f1] dark:bg-gray-900/60 p-8 sm:p-10 text-center">
+        <div className="rounded-2xl border border-dashed border-[#d6ccb9] dark:border-gray-700 bg-[#faf7f1] dark:bg-gray-900/60 p-6 sm:p-8 text-center">
           <Calendar className="w-12 h-12 sm:w-16 sm:h-16 text-[#c0b49f] dark:text-[#b5ad9d] mx-auto mb-4" />
           <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
             No services selected yet
@@ -1282,7 +1282,7 @@ function BookingPageContent() {
           </span>
         </div>
       ) : teamMembers.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-[#d6ccb9] dark:border-gray-700 bg-[#faf7f1] dark:bg-gray-900/60 p-8 sm:p-10 text-center">
+        <div className="rounded-2xl border border-dashed border-[#d6ccb9] dark:border-gray-700 bg-[#faf7f1] dark:bg-gray-900/60 p-6 sm:p-8 text-center">
           <Shield className="w-12 h-12 sm:w-16 sm:h-16 text-[#c0b49f] dark:text-[#b5ad9d] mx-auto mb-4" />
           <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
             No practitioners available
@@ -2633,7 +2633,7 @@ function BookingPageContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-24 pb-16">
+      <div className={`${layout.containerWide} pt-24 pb-16`}>
         {/* Header */}
         <div className="text-center mb-8 sm:mb-12 px-1 sm:px-0">
           <h1
@@ -2699,7 +2699,7 @@ function BookingPageContent() {
                         <Icon className="h-[18px] w-[18px] sm:h-6 sm:w-6" />
                       </span>
                       <div className="flex flex-col gap-0.5 min-w-0">
-                        <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white whitespace-nowrap truncate">
+                        <h3 className={`${typography.headingSmall} ${textColors.heading} truncate`}>
                           {step.label}
                         </h3>
                         <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
@@ -2728,9 +2728,9 @@ function BookingPageContent() {
                   <div
                     className={`${isOpen ? "block" : "hidden"} border-t border-[#e4d9c8] dark:border-gray-800 px-4 sm:px-5 ${
                       step.key === "preview" || step.key === "pay"
-                        ? "min-h-[75vh] pb-24 sm:min-h-0 sm:pb-5"
+                        ? "pb-8 sm:pb-5"
                         : step.key === "customer"
-                          ? "pb-20 sm:pb-5"
+                          ? "pb-8 sm:pb-5"
                           : "pb-5"
                     }`}
                   >

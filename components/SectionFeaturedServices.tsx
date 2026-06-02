@@ -136,7 +136,7 @@ export default function SectionFeaturedServices() {
 
   if (isLoading) {
     return (
-      <section className="py-6 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <section className={`${layout.sectionPySm} bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900`}>
         <div className={layout.container}>
           <div className="text-center mb-4 sm:mb-6 md:mb-8">
             <div
@@ -172,7 +172,7 @@ export default function SectionFeaturedServices() {
 
   if (!isLoading && filteredServices.length === 0) {
     return (
-      <section className="py-6 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <section className={`${layout.sectionPySm} bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900`}>
         <div className={layout.container}>
           <div className="text-center mb-4 sm:mb-6 md:mb-8">
             <div
@@ -203,10 +203,10 @@ export default function SectionFeaturedServices() {
 
   return (
     <section
-      className="py-6 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900"
+      className={`${layout.sectionPySm} bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900`}
       id="featured-services"
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className={layout.container}>
         {/* Section Header - compact */}
         <div className="text-center mb-4 sm:mb-6 md:mb-8">
           <div
@@ -215,10 +215,10 @@ export default function SectionFeaturedServices() {
             <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             <span>Popular Treatments</span>
           </div>
-          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-1.5 sm:mb-3 px-4">
+          <h2 className={`${typography.headingSection} ${textColors.heading} mb-1.5 sm:mb-3 px-4`}>
             Featured Services
           </h2>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-4">
+          <p className={`${typography.lead} max-w-2xl mx-auto px-4`}>
             Discover our most popular aesthetic treatments
           </p>
         </div>
@@ -335,17 +335,14 @@ export default function SectionFeaturedServices() {
 
                 {/* Content */}
                 <div className="p-3 sm:p-4 flex flex-col flex-1">
-                  {/* Category */}
-                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                    <span className="inline-flex items-center px-2 py-0.5 bg-[#e4d9c8]/60 dark:bg-gray-700/60 text-gray-700 dark:text-gray-200 border border-[#c9c1b0]/40 dark:border-gray-600/50 rounded-md text-xs font-semibold">
-                      {service.category.name}
-                    </span>
-                    {service.main_tab && (
+                  {/* Main tab (category already shown on image badge) */}
+                  {service.main_tab && (
+                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                       <span className="text-xs text-gray-500 dark:text-gray-400">
                         {service.main_tab.name}
                       </span>
-                    )}
-                  </div>
+                    </div>
+                  )}
 
                   {/* Description */}
                   {service.description && (
