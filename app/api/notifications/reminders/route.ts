@@ -3,8 +3,28 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { sendEmail } from "@/lib/sendgrid-smtp";
 import { getAdminContactInfo } from "@/lib/admin-profile";
+import { requireAdminOrCron } from "@/lib/admin-auth";
+
+// Vercel Cron calls with GET, e.g. /api/notifications/reminders?type=24h
+export async function GET(request: NextRequest) {
+  const denied = await requireAdminOrCron(request);
+
+  if (denied) return denied;
+
+  return POST(
+    new NextRequest(request.url, {
+      method: "POST",
+      headers: request.headers,
+      body: JSON.stringify({ type: request.nextUrl.searchParams.get("type") }),
+    }),
+  );
+}
 
 export async function POST(request: NextRequest) {
+  const denied = await requireAdminOrCron(request);
+
+  if (denied) return denied;
+
   try {
     // This endpoint can be called by a cron job or scheduled task
     const { type } = await request.json();

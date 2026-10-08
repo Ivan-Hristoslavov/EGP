@@ -35,8 +35,17 @@ import {
   useAdminProfileContext,
 } from "@/components/AdminProfileContext";
 import { useHeroSection } from "@/hooks/useHeroSection";
+import { buildWhatsAppUrl } from "@/lib/whatsapp";
 
 /** Base wash + left-weighted gradient so the photo reads clearly darker (overlay above image via z-index). */
+/** Links saved in the admin as "services" must not become relative to the current page. */
+function internalHref(link: string | null | undefined, fallback = "#contact") {
+  if (!link) return fallback;
+  if (/^(\/|#|https?:|mailto:|tel:)/.test(link)) return link;
+
+  return `/${link}`;
+}
+
 const heroOverlayBaseClass =
   "pointer-events-none absolute inset-0 z-[2] bg-black/28 sm:bg-black/22";
 const heroOverlayGradientClass =
@@ -44,12 +53,7 @@ const heroOverlayGradientClass =
 
 /** Build a wa.me link with UK number normalisation (strip non-digits, leading 0 -> 44). */
 function buildHeroWhatsAppUrl(phone: string, message: string): string {
-  const digits = (phone || "").replace(/\D/g, "");
-  const normalised = digits.startsWith("0")
-    ? `44${digits.slice(1)}`
-    : digits;
-
-  return `https://wa.me/${normalised}?text=${encodeURIComponent(message)}`;
+  return buildWhatsAppUrl(phone, message);
 }
 
 export default function SectionHeroAesthetics() {
@@ -125,7 +129,7 @@ export default function SectionHeroAesthetics() {
   if (heroLoading || slides.length === 0) {
     return (
       <section
-        className="relative h-screen min-h-[500px] sm:min-h-[600px] max-h-[900px] overflow-hidden"
+        className="relative h-screen min-h-[680px] sm:min-h-[600px] max-h-[900px] overflow-hidden"
         style={{ zIndex: 1 }}
       >
         {/* Skeleton Loader */}
@@ -138,7 +142,7 @@ export default function SectionHeroAesthetics() {
         <div className={heroOverlayBaseClass} />
         <div className={heroOverlayGradientClass} />
         {/* Content skeleton */}
-        <div className="relative z-30 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center sm:items-start sm:pt-28 md:pt-32 pb-16">
+        <div className="relative z-30 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center sm:items-start sm:pt-28 md:pt-32 pb-24 sm:pb-16">
           <div className="w-full max-w-3xl text-center sm:text-left space-y-6">
             <div className="h-8 bg-white/20 rounded-full w-48 mx-auto sm:mx-0 animate-pulse" />
             <div className="h-16 bg-white/20 rounded-lg animate-pulse" />
@@ -158,7 +162,7 @@ export default function SectionHeroAesthetics() {
 
   return (
     <section
-      className="relative h-screen min-h-[500px] sm:min-h-[600px] max-h-[900px] overflow-hidden"
+      className="relative h-screen min-h-[680px] sm:min-h-[600px] max-h-[900px] overflow-hidden"
       style={{ zIndex: 1 }}
     >
       {/* Background Slides */}
@@ -215,7 +219,7 @@ export default function SectionHeroAesthetics() {
       ))}
 
       {/* Content */}
-      <div className="relative z-30 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center sm:items-start sm:pt-28 md:pt-32 pb-16">
+      <div className="relative z-30 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center sm:items-start sm:pt-28 md:pt-32 pb-24 sm:pb-16">
         <div className="w-full max-w-3xl text-center sm:text-left">
           {/* Badge */}
           {(heroSection?.badge_text || !heroSection) && (
@@ -223,9 +227,6 @@ export default function SectionHeroAesthetics() {
               aria-label={`Rated 5 stars. ${heroSection?.badge_text || "Award-Winning Clinic"}`}
               className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 backdrop-blur-md rounded-full text-white mb-4 sm:mb-6 border border-white/20 font-montserrat"
             >
-              <span className="text-xs sm:text-sm font-bold tabular-nums">
-                5
-              </span>
               {(() => {
                 const iconType = heroSection?.badge_icon || "star";
                 const iconClass =
@@ -248,7 +249,19 @@ export default function SectionHeroAesthetics() {
                     return <Target className={iconClass} />;
                   case "star":
                   default:
-                    return <Star className={iconClass} />;
+                    return (
+                      <span
+                        aria-hidden
+                        className="inline-flex items-center gap-0.5"
+                      >
+                        {[0, 1, 2, 3, 4].map((star) => (
+                          <Star
+                            key={star}
+                            className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-yellow-400 text-yellow-400"
+                          />
+                        ))}
+                      </span>
+                    );
                 }
               })()}
               <span className="text-xs sm:text-sm font-semibold">
@@ -274,7 +287,7 @@ export default function SectionHeroAesthetics() {
             heroSection?.feature_2_text ||
             heroSection?.feature_3_text ||
             !heroSection) && (
-            <div className="flex flex-wrap justify-center sm:justify-start gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8 text-white text-sm sm:text-base">
+            <div className="mx-auto sm:mx-0 w-fit flex flex-col items-start gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-3 mb-6 sm:mb-8 text-white text-sm sm:text-base">
               {heroSection
                 ? [
                     heroSection.feature_1_text,
@@ -371,7 +384,7 @@ export default function SectionHeroAesthetics() {
                 <ButtonPrimary
                   as={Link}
                   className="w-full sm:w-auto"
-                  href={heroSection.button_1_link || "#contact"}
+                  href={internalHref(heroSection.button_1_link)}
                   size="lg"
                   startContent={(() => {
                     const iconType = heroSection.button_1_icon || "calendar";
@@ -428,7 +441,8 @@ export default function SectionHeroAesthetics() {
                   as="a"
                   className="w-full sm:w-auto border-2 border-white/30"
                   href={buildHeroWhatsAppUrl(
-                    heroSection?.phone_number ||
+                    adminProfile?.whatsapp ||
+                      heroSection?.phone_number ||
                       adminProfile?.phone ||
                       siteConfig.contact.whatsapp,
                     "Hi! I'd like to book a treatment at EGP Aesthetics.",

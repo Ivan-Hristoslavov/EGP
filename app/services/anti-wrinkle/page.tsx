@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Clock, ArrowRight, Filter, X } from "lucide-react";
 import {
@@ -14,6 +14,8 @@ import {
 
 import ButtonBookNow from "@/components/ButtonBookNow";
 import { typography, layout } from "@/config/typography";
+import { useServices } from "@/hooks/useServices";
+import { applyLiveServices, liveFromServices } from "@/lib/category-services";
 
 const antiWrinkleServices = [
   {
@@ -60,7 +62,7 @@ const antiWrinkleServices = [
     name: "Bruxism Treatment (Teeth Grinding)",
     price: 279,
     duration: 20,
-    slug: "bruxism",
+    slug: "bruxism-grinding",
   },
 ];
 
@@ -77,6 +79,35 @@ export default function AntiWrinklePage() {
   const [showPopularOnly, setShowPopularOnly] = useState(false);
   const [priceRange, setPriceRange] = useState<string>("all");
   const [durationRange, setDurationRange] = useState<string>("all");
+  const { services, isLoading } = useServices();
+
+  // Our own copy and ordering, with price, duration and availability from the database.
+  const liveServices = useMemo(
+    () =>
+      applyLiveServices(
+        antiWrinkleServices,
+        services.length > 0 ? liveFromServices(services) : null,
+      ),
+    [services],
+  );
+  const durationOptions = useMemo(
+    () =>
+      Array.from(new Set(liveServices.map((service) => service.duration))).sort(
+        (a, b) => a - b,
+      ),
+    [liveServices],
+  );
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-egp-green mx-auto mb-4" />
+          <p className="text-gray-600">Loading anti-wrinkle treatments...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -171,6 +202,13 @@ export default function AntiWrinklePage() {
                     classNames={{
                       trigger: "bg-white border border-gray-200",
                     }}
+                    items={[
+                      { key: "all", label: "All Durations" },
+                      ...durationOptions.map((minutes) => ({
+                        key: String(minutes),
+                        label: `${minutes} minutes`,
+                      })),
+                    ]}
                     label="Duration"
                     selectedKeys={[durationRange]}
                     size="sm"
@@ -178,10 +216,9 @@ export default function AntiWrinklePage() {
                       setDurationRange(Array.from(keys)[0] as string)
                     }
                   >
-                    <SelectItem key="all">All Durations</SelectItem>
-                    <SelectItem key="10">10 minutes</SelectItem>
-                    <SelectItem key="15">15 minutes</SelectItem>
-                    <SelectItem key="20">20 minutes</SelectItem>
+                    {(option) => (
+                      <SelectItem key={option.key}>{option.label}</SelectItem>
+                    )}
                   </Select>
                 </div>
               </AccordionItem>
@@ -219,7 +256,7 @@ export default function AntiWrinklePage() {
         <div className={layout.container}>
           {(() => {
             // Filter services
-            let filtered = antiWrinkleServices.filter((service) => {
+            let filtered = liveServices.filter((service) => {
               if (showPopularOnly && !service.popular) return false;
 
               // Price filter
@@ -326,11 +363,16 @@ export default function AntiWrinklePage() {
                             <span className="text-xs text-gray-600">From</span>
                             <div className="text-lg font-bold text-egp-green">
                               £{service.price}
+                              {service.originalPrice != null && (
+                                <span className="ml-2 text-xs font-normal text-gray-500 line-through">
+                                  £{service.originalPrice}
+                                </span>
+                              )}
                             </div>
                           </div>
                           <Link
                             className="flex items-center gap-2 text-egp-green font-semibold hover:text-egp-green-dark hover:gap-3 transition-all"
-                            href="/book/new"
+                            href={`/book?service=${service.slug}`}
                           >
                             <span>Book</span>
                             <ArrowRight className="w-4 h-4" />

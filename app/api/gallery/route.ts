@@ -3,6 +3,8 @@ import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 
+import { requireAdmin } from "@/lib/admin-auth";
+
 // Helper function to transform image URLs from old 'gallery' bucket to 'egp' bucket
 function transformImageUrl(url: string | null | undefined): string | undefined {
   if (!url) return undefined;
@@ -100,6 +102,10 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const supabase = createClient();
     const body = await request.json();
@@ -194,6 +200,10 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const supabase = createClient();
     const body = await request.json();
@@ -286,6 +296,10 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const supabase = createClient();
     // Use service role client for storage operations

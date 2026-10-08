@@ -56,6 +56,8 @@ interface StripePaymentFormProps {
   };
   onPaymentSuccess: (bookingId: string) => void;
   onPaymentError: (error: string) => void;
+  /** The chosen time was just taken: send the client back to pick another one. */
+  onSlotTaken?: () => void;
   onTestBooking?: (bookingId: string) => void;
   /** Called when payment is initializing or processing (for loading overlay) */
   onProcessingChange?: (processing: boolean) => void;
@@ -83,6 +85,8 @@ interface PaymentFormProps {
   };
   onPaymentSuccess: (bookingId: string) => void;
   onPaymentError: (error: string) => void;
+  /** The chosen time was just taken: send the client back to pick another one. */
+  onSlotTaken?: () => void;
   onTestBooking?: (bookingId: string) => void;
   onProcessingChange?: (processing: boolean) => void;
 }
@@ -99,6 +103,7 @@ function FreeBookingConfirmation({
   serviceDurationMinutes,
   onPaymentSuccess,
   onPaymentError,
+  onSlotTaken,
   onProcessingChange,
 }: {
   formattedDate: string;
@@ -112,6 +117,8 @@ function FreeBookingConfirmation({
   serviceDurationMinutes?: number | null;
   onPaymentSuccess: (bookingId: string) => void;
   onPaymentError: (error: string) => void;
+  /** The chosen time was just taken: send the client back to pick another one. */
+  onSlotTaken?: () => void;
   onProcessingChange?: (processing: boolean) => void;
 }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -156,6 +163,12 @@ function FreeBookingConfirmation({
       });
 
       const data = await response.json();
+
+      if (data?.code === "SLOT_TAKEN" && onSlotTaken) {
+        onSlotTaken();
+
+        return;
+      }
 
       if (!response.ok || !data?.success || !data?.booking?.id) {
         throw new Error(data?.error || "Failed to create free booking");
@@ -233,6 +246,7 @@ function PaymentForm({
   customerData,
   onPaymentSuccess,
   onPaymentError,
+  onSlotTaken,
   onTestBooking,
   onProcessingChange,
 }: PaymentFormProps) {
@@ -354,6 +368,13 @@ function PaymentForm({
         });
 
         const data = await response.json();
+
+        if (data?.code === "SLOT_TAKEN" && onSlotTaken) {
+          setPaymentStatus("error");
+          onSlotTaken();
+
+          return;
+        }
 
         if (!response.ok || !data?.success || !data?.booking?.id) {
           throw new Error(data?.error || "Failed to create free booking");
@@ -782,6 +803,10 @@ export default function StripePaymentForm(props: StripePaymentFormProps) {
         setIsInitializing(false);
         props.onProcessingChange?.(false);
 
+        if (errorData.code === "SLOT_TAKEN") {
+          props.onSlotTaken?.();
+        }
+
         return;
       }
 
@@ -866,6 +891,7 @@ export default function StripePaymentForm(props: StripePaymentFormProps) {
         onPaymentError={props.onPaymentError}
         onPaymentSuccess={props.onPaymentSuccess}
         onProcessingChange={props.onProcessingChange}
+        onSlotTaken={props.onSlotTaken}
       />
     );
   }

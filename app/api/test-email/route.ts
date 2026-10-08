@@ -5,6 +5,8 @@ import { getTemplate, type TemplateId } from "./templates";
 import { getAdminProfile } from "@/lib/admin-profile";
 import { testSendGridConnection, sendEmail } from "@/lib/sendgrid-smtp";
 
+import { requireAdmin } from "@/lib/admin-auth";
+
 const TEMPLATE_IDS: TemplateId[] = [
   "simple",
   "booking_confirmation",
@@ -16,6 +18,10 @@ const TEMPLATE_IDS: TemplateId[] = [
 
 // GET - Test SMTP configuration, or return template preview (subject, html, text)
 export async function GET(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const { searchParams } = new URL(request.url);
     const template = searchParams.get("template") as TemplateId | null;
@@ -61,6 +67,10 @@ export async function GET(request: NextRequest) {
 
 // POST - Send test email (optionally for a specific template with autofilled data)
 export async function POST(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const body = await request.json().catch(() => ({}));
     const { to, subject, message, template } = body as {

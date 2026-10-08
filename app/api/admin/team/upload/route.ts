@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+import { requireAdmin } from "@/lib/admin-auth";
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -11,6 +13,10 @@ if (!supabaseUrl || !supabaseServiceKey) {
 const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
 
 export async function POST(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     if (!supabaseUrl || !supabaseServiceKey) {
       return NextResponse.json(

@@ -37,9 +37,17 @@ import {
   Divider,
   useDisclosure,
 } from "@heroui/react";
-import { Chip, Input, Select, SelectItem, Spinner, Textarea } from "@heroui/react";
+import {
+  Chip,
+  Input,
+  Select,
+  SelectItem,
+  Spinner,
+  Textarea,
+} from "@heroui/react";
 
 import { CalendarToolbar } from "./calendar-toolbar";
+import { useCalendarTeam } from "./use-calendar-team";
 
 import { AdminDayOffManager } from "@/components/AdminDayOffManager";
 import { useToast } from "@/components/Toast";
@@ -47,7 +55,20 @@ import WorkingHoursManager, {
   type WorkingHoursManagerHandle,
 } from "@/components/admin/WorkingHoursManager";
 import { isDayOffFeatureEnabled } from "@/config/feature-flags";
+import { formatLocalYyyyMmDd } from "@/lib/calendar-local-date";
 import { CalendarDayPanel } from "@/components/admin/calendar/calendar-day-panel";
+import { CalendarDayColumns } from "@/components/admin/calendar/calendar-day-columns";
+import { PractitionerFilter } from "@/components/admin/calendar/practitioner-filter";
+import { PractitionerAvatar } from "@/components/admin/calendar/practitioner-avatar";
+import {
+  FILTER_ALL,
+  FILTER_UNASSIGNED,
+  colorForMember,
+  countByPractitioner,
+  filterByPractitioner,
+  getPractitionerBadge,
+  type PractitionerFilter as PractitionerFilterValue,
+} from "@/lib/calendar-practitioners";
 import { CalendarMonthGrid } from "@/components/admin/calendar/calendar-month-grid";
 import { CalendarMoveBookingModal } from "@/components/admin/calendar/calendar-move-booking-modal";
 import { CalendarPageSkeleton } from "@/components/admin/calendar/calendar-page-skeleton";
@@ -69,6 +90,8 @@ interface Booking {
   payment_status: "pending" | "paid" | "refunded";
   amount: number;
   duration?: number | null;
+  service_duration_minutes?: number | null;
+  team_member_id?: string | null;
   address: string | null;
   notes: string | null;
   created_at: string;
@@ -193,6 +216,10 @@ export default function CalendarPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const { members: teamMembers } = useCalendarTeam();
+  const [practitionerFilter, setPractitionerFilter] =
+    useState<PractitionerFilterValue>(FILTER_ALL);
+  const [dayMode, setDayMode] = useState<"timeline" | "list">("timeline");
   const [showSchedulePanel, setShowSchedulePanel] = useState(false);
   const scheduleHoursRef = useRef<WorkingHoursManagerHandle>(null);
   const [schedulePanelHoursLoading, setSchedulePanelHoursLoading] =
@@ -255,6 +282,8 @@ export default function CalendarPage() {
     payment_status: "pending",
     address: "",
     notes: "",
+    team_member_id: "",
+    service_duration_minutes: "",
   });
   const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
   const [editAvailableSlots, setEditAvailableSlots] = useState<string[]>([]);
@@ -278,12 +307,59 @@ export default function CalendarPage() {
     payment_status: "pending",
     address: "",
     notes: "",
+    team_member_id: "",
+    service_duration_minutes: "60",
   });
   const [isSubmittingNew, setIsSubmittingNew] = useState(false);
   const [newBookingAvailableSlots, setNewBookingAvailableSlots] = useState<
     string[]
   >([]);
   const [loadingNewBookingSlots, setLoadingNewBookingSlots] = useState(false);
+
+  // Remember the practitioner filter and day layout in this browser
+  useEffect(() => {
+    try {
+      const savedFilter = localStorage.getItem("egp.calendar.practitioner");
+      const savedMode = localStorage.getItem("egp.calendar.dayMode");
+
+      if (savedFilter) setPractitionerFilter(savedFilter);
+      if (savedMode === "list" || savedMode === "timeline") {
+        setDayMode(savedMode);
+      }
+    } catch {
+      /* storage unavailable: keep defaults */
+    }
+  }, []);
+
+  // A remembered practitioner who no longer exists must not hide every booking
+  useEffect(() => {
+    if (
+      teamMembers.length > 0 &&
+      practitionerFilter !== FILTER_ALL &&
+      practitionerFilter !== FILTER_UNASSIGNED &&
+      !teamMembers.some((member) => member.id === practitionerFilter)
+    ) {
+      setPractitionerFilter(FILTER_ALL);
+    }
+  }, [teamMembers, practitionerFilter]);
+
+  const changePractitionerFilter = (value: PractitionerFilterValue) => {
+    setPractitionerFilter(value);
+    try {
+      localStorage.setItem("egp.calendar.practitioner", value);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const changeDayMode = (mode: "timeline" | "list") => {
+    setDayMode(mode);
+    try {
+      localStorage.setItem("egp.calendar.dayMode", mode);
+    } catch {
+      /* ignore */
+    }
+  };
 
   // Load bookings on component mount - load all bookings once
   useEffect(() => {
@@ -347,16 +423,20 @@ export default function CalendarPage() {
   // Fetch time slots when target date changes in move modal
   useEffect(() => {
     if (moveTargetDate) {
-      fetchTimeSlotsForDate(moveTargetDate);
+      fetchTimeSlotsForDate(moveTargetDate, bookingToMove?.team_member_id);
     }
   }, [moveTargetDate]);
 
   // Fetch time slots when date changes in new booking form
   useEffect(() => {
     if (newBookingForm.date && showAddModal) {
-      fetchNewBookingTimeSlots(newBookingForm.date);
+      fetchNewBookingTimeSlots(
+        newBookingForm.date,
+        newBookingForm.team_member_id || null,
+        newBookingForm.time || undefined,
+      );
     }
-  }, [newBookingForm.date, showAddModal]);
+  }, [newBookingForm.date, newBookingForm.team_member_id, showAddModal]);
 
   // Populate edit form when editing booking
   useEffect(() => {
@@ -380,20 +460,29 @@ export default function CalendarPage() {
         payment_status: editingBooking.payment_status || "pending",
         address: editingBooking.address || "",
         notes: editingBooking.notes || "",
+        team_member_id: editingBooking.team_member_id || "",
+        service_duration_minutes: editingBooking.service_duration_minutes
+          ? String(editingBooking.service_duration_minutes)
+          : "",
       });
 
       // Fetch available time slots for the booking's date
       if (editingBooking.date) {
-        fetchEditTimeSlots(editingBooking.date);
+        fetchEditTimeSlots(editingBooking.date, editingBooking.team_member_id);
       }
     }
   }, [editingBooking]);
 
   // Fetch available time slots for edit modal
-  const fetchEditTimeSlots = async (dateStr: string) => {
+  const fetchEditTimeSlots = async (
+    dateStr: string,
+    memberId?: string | null,
+  ) => {
     setLoadingEditSlots(true);
     try {
-      const response = await fetch(`/api/admin/time-slots?date=${dateStr}`);
+      const response = await fetch(
+        `/api/admin/time-slots?date=${dateStr}${memberId ? `&team_member_id=${memberId}` : ""}`,
+      );
       const data = await response.json();
 
       if (data.success && data.slots) {
@@ -412,14 +501,27 @@ export default function CalendarPage() {
   };
 
   // Fetch available time slots for new booking form
-  const fetchNewBookingTimeSlots = async (dateStr: string) => {
+  const fetchNewBookingTimeSlots = async (
+    dateStr: string,
+    memberId?: string | null,
+    ensureTime?: string,
+  ) => {
     setLoadingNewBookingSlots(true);
     try {
-      const response = await fetch(`/api/admin/time-slots?date=${dateStr}`);
+      const response = await fetch(
+        `/api/admin/time-slots?date=${dateStr}${memberId ? `&team_member_id=${memberId}` : ""}`,
+      );
       const data = await response.json();
 
       if (data.success && data.slots) {
         const slots = data.slots.map((slot: any) => slot.start_time).sort();
+
+        // A time picked by clicking the timeline must stay selectable even when it
+        // is not on the clinic's slot grid; the server still checks it on save.
+        if (ensureTime && !slots.includes(ensureTime)) {
+          slots.push(ensureTime);
+          slots.sort();
+        }
 
         setNewBookingAvailableSlots(slots);
       } else {
@@ -520,7 +622,7 @@ export default function CalendarPage() {
   };
 
   // Get bookings for the selected date in day view
-  const getBookingsForSelectedDate = () => {
+  const getBookingsForSelectedDate = (includeAllPractitioners = false) => {
     return bookings.filter((booking) => {
       // Filter by selected date - normalize booking dates (remove time if present)
       const bookingDate = booking.date ? booking.date.split("T")[0] : "";
@@ -542,11 +644,60 @@ export default function CalendarPage() {
       const matchesStatus =
         statusFilter === "all" || booking.status === statusFilter;
 
-      return matchesDate && matchesSearch && matchesStatus;
+      const matchesPractitioner =
+        includeAllPractitioners ||
+        practitionerFilter === FILTER_ALL ||
+        (practitionerFilter === FILTER_UNASSIGNED
+          ? !booking.team_member_id
+          : booking.team_member_id === practitionerFilter);
+
+      return (
+        matchesDate && matchesSearch && matchesStatus && matchesPractitioner
+      );
     });
   };
 
   const filteredBookings = getBookingsForSelectedDate();
+  const dayBookingsAllPractitioners = getBookingsForSelectedDate(true);
+
+  const scopedBookings = useMemo(
+    () => filterByPractitioner(bookings, practitionerFilter),
+    [bookings, practitionerFilter],
+  );
+
+  // Numbers on the practitioner chips: the period currently on screen
+  const periodBookings = useMemo(() => {
+    let from = selectedDate;
+    let to = selectedDate;
+
+    if (view === "month") {
+      from = formatLocalYyyyMmDd(
+        new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
+      );
+      to = formatLocalYyyyMmDd(
+        new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0),
+      );
+    } else if (view === "week") {
+      const days = getWeekDays(currentDate);
+
+      from = formatLocalYyyyMmDd(days[0]);
+      to = formatLocalYyyyMmDd(days[6]);
+    }
+
+    return bookings.filter((booking) => {
+      const bookingDate = booking.date ? booking.date.split("T")[0] : "";
+
+      return bookingDate >= from && bookingDate <= to;
+    });
+  }, [bookings, view, currentDate, selectedDate]);
+
+  const practitionerCounts = useMemo(
+    () => countByPractitioner(periodBookings),
+    [periodBookings],
+  );
+
+  const getBadge = (booking: { team_member_id?: string | null }) =>
+    getPractitionerBadge(teamMembers, booking.team_member_id);
 
   // Calculate statistics for month view
   const monthStats = useMemo(() => {
@@ -560,10 +711,10 @@ export default function CalendarPage() {
       currentDate.getMonth() + 1,
       0,
     );
-    const monthStartStr = monthStart.toISOString().split("T")[0];
-    const monthEndStr = monthEnd.toISOString().split("T")[0];
+    const monthStartStr = formatLocalYyyyMmDd(monthStart);
+    const monthEndStr = formatLocalYyyyMmDd(monthEnd);
 
-    const monthBookings = bookings.filter((booking) => {
+    const monthBookings = scopedBookings.filter((booking) => {
       const bookingDate = booking.date ? booking.date.split("T")[0] : "";
 
       return bookingDate >= monthStartStr && bookingDate <= monthEndStr;
@@ -580,17 +731,17 @@ export default function CalendarPage() {
       paid: monthBookings.filter((b) => b.payment_status === "paid").length,
       totalAmount: monthBookings.reduce((sum, b) => sum + (b.amount || 0), 0),
     };
-  }, [currentDate, bookings]);
+  }, [currentDate, scopedBookings]);
 
   // Calculate statistics for week view
   const weekStats = useMemo(() => {
     const weekDays = getWeekDays(currentDate);
     const weekStart = weekDays[0];
     const weekEnd = weekDays[6];
-    const weekStartStr = weekStart.toISOString().split("T")[0];
-    const weekEndStr = weekEnd.toISOString().split("T")[0];
+    const weekStartStr = formatLocalYyyyMmDd(weekStart);
+    const weekEndStr = formatLocalYyyyMmDd(weekEnd);
 
-    const weekBookings = bookings.filter((booking) => {
+    const weekBookings = scopedBookings.filter((booking) => {
       const bookingDate = booking.date ? booking.date.split("T")[0] : "";
 
       return bookingDate >= weekStartStr && bookingDate <= weekEndStr;
@@ -607,7 +758,7 @@ export default function CalendarPage() {
       paid: weekBookings.filter((b) => b.payment_status === "paid").length,
       totalAmount: weekBookings.reduce((sum, b) => sum + (b.amount || 0), 0),
     };
-  }, [currentDate, bookings]);
+  }, [currentDate, scopedBookings]);
 
   // Function to handle clicking on a day in the month view
   const handleDayClick = (day: number) => {
@@ -828,10 +979,15 @@ export default function CalendarPage() {
   };
 
   // Fetch available time slots for selected date
-  const fetchTimeSlotsForDate = async (dateStr: string) => {
+  const fetchTimeSlotsForDate = async (
+    dateStr: string,
+    memberId?: string | null,
+  ) => {
     setLoadingSlots(true);
     try {
-      const response = await fetch(`/api/admin/time-slots?date=${dateStr}`);
+      const response = await fetch(
+        `/api/admin/time-slots?date=${dateStr}${memberId ? `&team_member_id=${memberId}` : ""}`,
+      );
       const data = await response.json();
 
       if (data.success && data.slots) {
@@ -918,6 +1074,12 @@ export default function CalendarPage() {
   const handleEditSubmit = async () => {
     if (!editingBooking) return;
 
+    if (!editFormData.team_member_id) {
+      showError("Validation Error", "Please choose a practitioner");
+
+      return;
+    }
+
     setIsSubmittingEdit(true);
 
     try {
@@ -952,7 +1114,15 @@ export default function CalendarPage() {
       });
 
       if (response.ok) {
-        const updatedBooking = await response.json();
+        const result = await response.json();
+        // The API wraps the booking; keep the booking itself in state.
+        const updatedBooking = {
+          ...editingBooking,
+          ...(result.booking ?? {}),
+          date: String(result.booking?.date ?? editingBooking.date).split(
+            "T",
+          )[0],
+        };
 
         // Update bookings in state
         setBookings(
@@ -1022,7 +1192,7 @@ export default function CalendarPage() {
 
     // Fetch available time slots for the new date
     if (value) {
-      fetchEditTimeSlots(value);
+      fetchEditTimeSlots(value, editFormData.team_member_id || null);
     }
   };
 
@@ -1052,8 +1222,97 @@ export default function CalendarPage() {
     const dateStr = day.toISOString().split("T")[0];
 
     setSelectedDate(dateStr);
-    setNewBookingForm((prev) => ({ ...prev, date: dateStr, time: timeSlot }));
+    openNewBooking({ date: dateStr, time: timeSlot });
+  };
+
+  // Open "New booking", optionally prefilled from the timeline (practitioner + time)
+  const openNewBooking = ({
+    date,
+    memberId,
+    time,
+  }: {
+    date: string;
+    memberId?: string | null;
+    time?: string;
+  }) => {
+    const member =
+      memberId ??
+      (practitionerFilter !== FILTER_ALL &&
+      practitionerFilter !== FILTER_UNASSIGNED
+        ? practitionerFilter
+        : "");
+
+    setNewBookingForm((prev) => ({
+      ...prev,
+      date,
+      team_member_id: member,
+      time: time ?? "",
+    }));
     setShowAddModal(true);
+    fetchNewBookingTimeSlots(date, member || null, time);
+  };
+
+  // Give a booking (back) to a practitioner; the server re-checks for overlaps
+  const assignPractitioner = async (booking: Booking, memberId: string) => {
+    try {
+      const response = await fetch(`/api/bookings/${booking.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ team_member_id: memberId }),
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        showError(
+          "Could not assign",
+          data.error || "Failed to assign the practitioner",
+        );
+
+        return;
+      }
+
+      const updated: Booking = {
+        ...booking,
+        ...(data.booking ?? {}),
+        date: String(data.booking?.date ?? booking.date).split("T")[0],
+      };
+
+      setBookings((prev) =>
+        prev.map((b) => (b.id === booking.id ? updated : b)),
+      );
+      setSelectedBookingDetails((prev) =>
+        prev?.id === booking.id ? updated : prev,
+      );
+      showSuccess(
+        "Practitioner assigned",
+        `${booking.customer_name} is now with ${
+          teamMembers.find((member) => member.id === memberId)?.name ??
+          "the practitioner"
+        }`,
+      );
+    } catch (error) {
+      console.error("Error assigning practitioner:", error);
+      showError("Could not assign", "Network error. Please try again.");
+    }
+  };
+
+  const handleNewBookingPractitionerChange = (memberId: string) => {
+    setNewBookingForm((prev) => ({
+      ...prev,
+      team_member_id: memberId,
+      time: "", // times differ per practitioner
+    }));
+  };
+
+  const handleEditPractitionerChange = (memberId: string) => {
+    setEditFormData((prev) => ({
+      ...prev,
+      team_member_id: memberId,
+      time: "",
+    }));
+    if (editFormData.date) {
+      fetchEditTimeSlots(editFormData.date, memberId);
+    }
   };
 
   // Handle new booking form input changes
@@ -1084,7 +1343,7 @@ export default function CalendarPage() {
 
     // Fetch available time slots for the new date
     if (value) {
-      fetchNewBookingTimeSlots(value);
+      fetchNewBookingTimeSlots(value, newBookingForm.team_member_id || null);
     }
   };
 
@@ -1098,6 +1357,12 @@ export default function CalendarPage() {
       !newBookingForm.amount
     ) {
       showError("Validation Error", "Please fill in all required fields");
+
+      return;
+    }
+
+    if (!newBookingForm.team_member_id) {
+      showError("Validation Error", "Please choose a practitioner");
 
       return;
     }
@@ -1141,13 +1406,25 @@ export default function CalendarPage() {
           payment_status: newBookingForm.payment_status,
           address: newBookingForm.address || null,
           notes: newBookingForm.notes || null,
+          team_member_id: newBookingForm.team_member_id,
+          service_duration_minutes:
+            parseInt(newBookingForm.service_duration_minutes, 10) || null,
         }),
       });
 
       if (response.ok) {
-        const newBooking = await response.json();
+        const result = await response.json();
+        // The API wraps the booking; store the booking itself so it shows up right away.
+        const createdBooking = result.booking
+          ? {
+              ...result.booking,
+              date: result.booking.date
+                ? String(result.booking.date).split("T")[0]
+                : result.booking.date,
+            }
+          : null;
 
-        setBookings([...bookings, newBooking]);
+        if (createdBooking) setBookings([...bookings, createdBooking]);
         showSuccess(
           "Booking Created",
           "New booking has been successfully created",
@@ -1170,6 +1447,8 @@ export default function CalendarPage() {
           payment_status: "pending",
           address: "",
           notes: "",
+          team_member_id: "",
+          service_duration_minutes: "60",
         });
         setShowAddModal(false);
       } else {
@@ -1246,7 +1525,7 @@ export default function CalendarPage() {
       );
     }
 
-    return filteredBookings;
+    return filterByPractitioner(filteredBookings, practitionerFilter);
   };
 
   if (loading) {
@@ -1272,13 +1551,7 @@ export default function CalendarPage() {
           size="sm"
           startContent={<Plus className="h-4 w-4" />}
           variant="flat"
-          onPress={() => {
-            setShowAddModal(true);
-            setNewBookingForm((prev) => ({ ...prev, date: selectedDate }));
-            if (selectedDate) {
-              fetchNewBookingTimeSlots(selectedDate);
-            }
-          }}
+          onPress={() => openNewBooking({ date: selectedDate })}
         >
           New booking
         </Button>
@@ -1299,6 +1572,16 @@ export default function CalendarPage() {
         onStatusFilterChange={setStatusFilter}
         onViewChange={setView}
       />
+
+      {teamMembers.length > 0 ? (
+        <PractitionerFilter
+          counts={practitionerCounts}
+          members={teamMembers}
+          total={periodBookings.length}
+          value={practitionerFilter}
+          onChange={changePractitionerFilter}
+        />
+      ) : null}
 
       {/* Calendar View */}
       {view === "month" && (
@@ -1322,6 +1605,7 @@ export default function CalendarPage() {
             draggedBookingId={draggedBooking?.id ?? null}
             formatTime={formatTime}
             getBookingsForDate={getBookingsForDate}
+            getPractitioner={getBadge}
             selectedDate={selectedDate}
             onBookingClick={(b) => handleBookingClick(b as Booking)}
             onDayClick={handleDayClick}
@@ -1350,6 +1634,7 @@ export default function CalendarPage() {
           <CalendarWeekGrid
             formatTime={formatTime}
             getBookingsForDate={getBookingsForDate}
+            getPractitioner={getBadge}
             selectedDate={selectedDate}
             weekDays={getWeekDays(currentDate)}
             onBookingClick={(b) => handleBookingClick(b as Booking)}
@@ -1398,18 +1683,48 @@ export default function CalendarPage() {
             }}
             onToday={() => setSelectedDate(getCurrentToday())}
           />
-          <CalendarDayPanel
-            filteredBookings={filteredBookings}
-            formatTime={formatTime}
-            onBookingClick={(b) => handleBookingClick(b as Booking)}
-            onCreateBooking={() => {
-              setShowAddModal(true);
-              setNewBookingForm((prev) => ({ ...prev, date: selectedDate }));
-              if (selectedDate) {
-                fetchNewBookingTimeSlots(selectedDate);
+          <div
+            aria-label="Day layout"
+            className="flex justify-end gap-2 border-b border-default-200/70 px-3 py-2"
+            role="group"
+          >
+            {(["timeline", "list"] as const).map((mode) => (
+              <Button
+                key={mode}
+                aria-pressed={dayMode === mode}
+                className="min-h-[44px] rounded-full px-4 text-sm font-semibold"
+                color={dayMode === mode ? "primary" : "default"}
+                size="sm"
+                variant={dayMode === mode ? "solid" : "light"}
+                onPress={() => changeDayMode(mode)}
+              >
+                {mode === "timeline" ? "Timeline" : "List"}
+              </Button>
+            ))}
+          </div>
+          {dayMode === "timeline" && teamMembers.length > 0 ? (
+            <CalendarDayColumns
+              bookings={dayBookingsAllPractitioners}
+              date={selectedDate}
+              filter={practitionerFilter}
+              members={teamMembers}
+              onAssign={(b, memberId) =>
+                assignPractitioner(b as Booking, memberId)
               }
-            }}
-          />
+              onBookingClick={(b) => handleBookingClick(b as Booking)}
+              onCreateAt={({ memberId, time }) =>
+                openNewBooking({ date: selectedDate, memberId, time })
+              }
+            />
+          ) : (
+            <CalendarDayPanel
+              filteredBookings={filteredBookings}
+              formatTime={formatTime}
+              getPractitioner={getBadge}
+              onBookingClick={(b) => handleBookingClick(b as Booking)}
+              onCreateBooking={() => openNewBooking({ date: selectedDate })}
+            />
+          )}
         </div>
       )}
 
@@ -1494,18 +1809,18 @@ export default function CalendarPage() {
                     Generate slots
                   </span>{" "}
                   rebuilds stored bookable times for about the next{" "}
-                  <strong>30 days</strong> from today, using the weekly hours and
-                  blackouts you have <strong>already saved</strong>.{" "}
+                  <strong>30 days</strong> from today, using the weekly hours
+                  and blackouts you have <strong>already saved</strong>.{" "}
                   <span className="italic">
                     Example: shorten Thursday to 17:00 close, tap{" "}
-                    <strong>Save</strong>, then <strong>Generate slots</strong> —
-                    new Thursday slots end at 17:00.
+                    <strong>Save</strong>, then <strong>Generate slots</strong>{" "}
+                    — new Thursday slots end at 17:00.
                   </span>
                 </p>
                 <p className="text-[11px] leading-snug text-default-400">
-                  <strong>Save</strong> stores weekly hours, closed weekdays, and
-                  scheduled blackouts. Closed periods below still save from their own
-                  add/edit form.
+                  <strong>Save</strong> stores weekly hours, closed weekdays,
+                  and scheduled blackouts. Closed periods below still save from
+                  their own add/edit form.
                 </p>
                 <div className="flex w-full flex-wrap items-center justify-between gap-2 border-t border-divider pt-3 sm:border-t-0 sm:pt-0">
                   <Button variant="light" onPress={onClose}>
@@ -1573,6 +1888,8 @@ export default function CalendarPage() {
             card_amount: "",
             payment_type: "full" as "full" | "deposit",
             deposit_amount: "",
+            team_member_id: "",
+            service_duration_minutes: "60",
           });
         }}
       >
@@ -1655,6 +1972,49 @@ export default function CalendarPage() {
                       </div>
                     </CardHeader>
                     <CardBody className="pt-0">
+                      <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <Select
+                          isRequired
+                          label="Practitioner"
+                          placeholder="Who does the treatment?"
+                          selectedKeys={
+                            newBookingForm.team_member_id
+                              ? [newBookingForm.team_member_id]
+                              : []
+                          }
+                          onSelectionChange={(keys) => {
+                            const id = Array.from(keys)[0] as string;
+
+                            handleNewBookingPractitionerChange(id || "");
+                          }}
+                        >
+                          {teamMembers.map((member) => (
+                            <SelectItem
+                              key={member.id}
+                              startContent={
+                                <PractitionerAvatar
+                                  color={colorForMember(teamMembers, member.id)}
+                                  imageUrl={member.image_url}
+                                  name={member.name}
+                                  size="xs"
+                                />
+                              }
+                              textValue={member.name}
+                            >
+                              {member.name}
+                            </SelectItem>
+                          ))}
+                        </Select>
+                        <Input
+                          label="Duration (minutes)"
+                          min={15}
+                          name="service_duration_minutes"
+                          step={15}
+                          type="number"
+                          value={newBookingForm.service_duration_minutes}
+                          onChange={handleNewBookingInputChange}
+                        />
+                      </div>
                       <div className="grid grid-cols-2 gap-4">
                         <Input
                           isRequired
@@ -2064,6 +2424,53 @@ export default function CalendarPage() {
               <ModalBody>
                 {selectedBookingDetails && (
                   <div className="space-y-6">
+                    {/* Practitioner */}
+                    <div className="flex flex-col gap-2 rounded-xl border border-divider p-3 sm:flex-row sm:items-end sm:gap-4">
+                      <Select
+                        className="sm:max-w-xs"
+                        label="Practitioner"
+                        placeholder="Not assigned"
+                        selectedKeys={
+                          selectedBookingDetails.team_member_id
+                            ? [selectedBookingDetails.team_member_id]
+                            : []
+                        }
+                        onSelectionChange={(keys) => {
+                          const id = Array.from(keys)[0] as string;
+
+                          if (
+                            id &&
+                            id !== selectedBookingDetails.team_member_id
+                          ) {
+                            assignPractitioner(selectedBookingDetails, id);
+                          }
+                        }}
+                      >
+                        {teamMembers.map((member) => (
+                          <SelectItem
+                            key={member.id}
+                            startContent={
+                              <PractitionerAvatar
+                                color={colorForMember(teamMembers, member.id)}
+                                imageUrl={member.image_url}
+                                name={member.name}
+                                size="xs"
+                              />
+                            }
+                            textValue={member.name}
+                          >
+                            {member.name}
+                          </SelectItem>
+                        ))}
+                      </Select>
+                      {!selectedBookingDetails.team_member_id ? (
+                        <p className="text-xs text-warning-700 dark:text-warning-300">
+                          Not assigned yet: this booking blocks both
+                          practitioners until you choose one.
+                        </p>
+                      ) : null}
+                    </div>
+
                     {/* Customer & Service Info */}
                     <Card className="border border-divider">
                       <CardHeader className="pb-3">
@@ -2760,6 +3167,49 @@ export default function CalendarPage() {
                     </div>
                   </CardHeader>
                   <CardBody className="pt-0">
+                    <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <Select
+                        isRequired
+                        label="Practitioner"
+                        placeholder="Who does the treatment?"
+                        selectedKeys={
+                          editFormData.team_member_id
+                            ? [editFormData.team_member_id]
+                            : []
+                        }
+                        onSelectionChange={(keys) => {
+                          const id = Array.from(keys)[0] as string;
+
+                          handleEditPractitionerChange(id || "");
+                        }}
+                      >
+                        {teamMembers.map((member) => (
+                          <SelectItem
+                            key={member.id}
+                            startContent={
+                              <PractitionerAvatar
+                                color={colorForMember(teamMembers, member.id)}
+                                imageUrl={member.image_url}
+                                name={member.name}
+                                size="xs"
+                              />
+                            }
+                            textValue={member.name}
+                          >
+                            {member.name}
+                          </SelectItem>
+                        ))}
+                      </Select>
+                      <Input
+                        label="Duration (minutes)"
+                        min={15}
+                        name="service_duration_minutes"
+                        step={15}
+                        type="number"
+                        value={editFormData.service_duration_minutes}
+                        onChange={handleEditInputChange}
+                      />
+                    </div>
                     <div className="grid grid-cols-2 gap-4">
                       <Input
                         isRequired

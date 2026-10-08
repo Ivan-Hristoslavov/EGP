@@ -6,6 +6,10 @@ import { requireAdmin } from "@/lib/admin-auth";
 
 // POST - Create new customer
 export async function POST(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const body = await request.json();
     const { name, email, phone, address, postcode, city } = body;

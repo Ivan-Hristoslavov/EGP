@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { supabase } from "../../../../lib/supabase";
+import { supabase, supabaseAdmin } from "../../../../lib/supabase";
 import { sendEmail } from "../../../../lib/sendgrid-smtp";
 
+import { requireAdmin } from "@/lib/admin-auth";
+
 export async function POST(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const body = await request.json();
     const {
@@ -28,7 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get admin profile for email sender info
-    const { data: adminProfile } = await supabase
+    const { data: adminProfile } = await supabaseAdmin
       .from("admin_profile")
       .select("name, email, company_name")
       .single();

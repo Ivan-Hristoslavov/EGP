@@ -21,6 +21,7 @@ import { Spinner } from "@heroui/react";
 
 import { useSiteData } from "@/contexts/SiteDataContext";
 import { typography, layout } from "@/config/typography";
+import { buildWhatsAppUrl } from "@/lib/whatsapp";
 
 const defaultFindUsText = {
   howToFindUs:
@@ -28,66 +29,6 @@ const defaultFindUsText = {
   howToReachUs:
     "We are conveniently located near major transport links and landmarks.",
 };
-
-// Default transport and landmarks when DB has no data – ensures icons always show
-const defaultTransportOptions = [
-  {
-    type: "Tube/Underground",
-    icon: <Train className="w-5 h-5" />,
-    details: [
-      "Streatham Station (Southern Railway) – ~10 min walk",
-      "Tooting Station (Northern line) – ~15 min walk / ~5 min bus",
-      "Balham Station (Northern line) – ~15 min walk / ~5 min bus",
-    ],
-  },
-  {
-    type: "Bus",
-    icon: <Bus className="w-5 h-5" />,
-    details: [
-      "Bus routes 118, 250 – Hassocks Road stop – 2 min walk",
-      "Bus routes 57, 159 – Streatham High Road stop – ~5 min walk",
-      "Bus routes 118, 250, 333 – Tooting Bec stop – ~8 min walk",
-    ],
-  },
-  {
-    type: "Car/Parking",
-    icon: <Car className="w-5 h-5" />,
-    details: [
-      "On-street parking – Available on Hassocks Road and surrounding streets",
-      "Nearby car parks – ~3–5 min walk – Various options in the area",
-      "Residential parking – Please check parking restrictions",
-    ],
-  },
-  {
-    type: "Walking",
-    icon: <Navigation className="w-5 h-5" />,
-    details: [
-      "~10 minutes from Streatham High Road",
-      "~8 minutes from Tooting Bec Common",
-      "~12 minutes from Streatham Common",
-    ],
-  },
-];
-const defaultNearbyLandmarks: Array<{
-  name: string;
-  type: string;
-  distance: string;
-}> = [
-  { name: "Streatham Common", type: "Park", distance: "~12 min walk" },
-  { name: "Tooting Bec Common", type: "Park", distance: "~8 min walk" },
-  { name: "Streatham High Road", type: "Shopping", distance: "~10 min walk" },
-  {
-    name: "Tooting Broadway",
-    type: "Shopping",
-    distance: "~15 min walk / ~5 min bus",
-  },
-  { name: "Balham", type: "Area", distance: "~15 min walk / ~5 min bus" },
-  {
-    name: "Norbury Park",
-    type: "Park",
-    distance: "~20 min walk / ~10 min bus",
-  },
-];
 
 export default function FindUsPage() {
   const [activeTab, setActiveTab] = useState<"location" | "contact" | "hours">(
@@ -153,16 +94,10 @@ export default function FindUsPage() {
     });
   }
 
-  // Use transport options – fall back to defaults when DB has no data
-  const transportOptionsToShow =
-    transportOptions.length > 0 ? transportOptions : defaultTransportOptions;
-
-  // Use nearby landmarks from database – fall back to defaults when empty
-  const nearbyLandmarks =
-    Array.isArray(displayFindUsData.nearbyLandmarks) &&
-    displayFindUsData.nearbyLandmarks.length > 0
-      ? displayFindUsData.nearbyLandmarks
-      : defaultNearbyLandmarks;
+  // Nearby landmarks come from the database only (no hardcoded location data)
+  const nearbyLandmarks = Array.isArray(displayFindUsData.nearbyLandmarks)
+    ? displayFindUsData.nearbyLandmarks
+    : [];
 
   const handleDirections = () => {
     const addressToUse =
@@ -185,7 +120,7 @@ export default function FindUsPage() {
 
   const handleWhatsApp = () => {
     window.open(
-      `https://wa.me/${displayContactInfo.whatsapp.replace(/\s/g, "")}`,
+      buildWhatsAppUrl(displayContactInfo.whatsapp),
       "_blank",
     );
   };
@@ -296,7 +231,7 @@ export default function FindUsPage() {
                     defaultFindUsText.howToReachUs}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 mt-2 sm:mt-3">
-                  {transportOptionsToShow.map((option, index) => (
+                  {transportOptions.map((option, index) => (
                     <Card
                       key={index}
                       className="hover:shadow-md transition-shadow"

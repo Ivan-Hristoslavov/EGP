@@ -2,8 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { supabaseAdmin } from "../../../../lib/supabase";
 
+import { requireAdmin } from "@/lib/admin-auth";
+
 // GET - Fetch service durations
 export async function GET() {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const { data: services, error } = await supabaseAdmin
       .from("service_durations")
@@ -32,6 +38,10 @@ export async function GET() {
 
 // POST - Add new service duration
 export async function POST(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const body = await request.json();
     const { service_name, duration_minutes, buffer_minutes } = body;
@@ -86,6 +96,10 @@ export async function POST(request: NextRequest) {
 
 // PUT - Update service duration
 export async function PUT(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const body = await request.json();
     const { id, service_name, duration_minutes, buffer_minutes } = body;
@@ -147,6 +161,10 @@ export async function PUT(request: NextRequest) {
 
 // DELETE - Delete service duration
 export async function DELETE(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");

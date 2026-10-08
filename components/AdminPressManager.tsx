@@ -579,13 +579,14 @@ export function AdminPressManager() {
       </Card>
 
       {/* Header with Add Button */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm text-default-500">
             Manage awards and press features displayed on your press page
           </p>
         </div>
         <Button
+          className="w-full sm:w-auto"
           color="primary"
           startContent={<Plus className="w-5 h-5" />}
           onPress={handleAddClick}
@@ -595,36 +596,36 @@ export function AdminPressManager() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
         <Card className="border border-divider">
-          <CardBody className="p-4">
-            <div className="flex items-center gap-3">
+          <CardBody className="p-3 sm:p-4">
+            <div className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-3">
               <div className="p-2 bg-primary-100 dark:bg-primary-900/20 rounded-lg">
                 <Award className="w-5 h-5 text-primary-600 dark:text-primary-400" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{awards.length}</p>
-                <p className="text-sm text-default-500">Awards</p>
+                <p className="text-[11px] leading-tight text-default-500 sm:text-sm">Awards</p>
               </div>
             </div>
           </CardBody>
         </Card>
         <Card className="border border-divider">
-          <CardBody className="p-4">
-            <div className="flex items-center gap-3">
+          <CardBody className="p-3 sm:p-4">
+            <div className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-3">
               <div className="p-2 bg-secondary-100 dark:bg-secondary-900/20 rounded-lg">
                 <FileText className="w-5 h-5 text-secondary-600 dark:text-secondary-400" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{pressFeatures.length}</p>
-                <p className="text-sm text-default-500">Press Features</p>
+                <p className="text-[11px] leading-tight text-default-500 sm:text-sm">Press Features</p>
               </div>
             </div>
           </CardBody>
         </Card>
         <Card className="border border-divider">
-          <CardBody className="p-4">
-            <div className="flex items-center gap-3">
+          <CardBody className="p-3 sm:p-4">
+            <div className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-3">
               <div className="p-2 bg-warning-100 dark:bg-warning-900/20 rounded-lg">
                 <Star className="w-5 h-5 text-warning-600 dark:text-warning-400" />
               </div>
@@ -632,7 +633,7 @@ export function AdminPressManager() {
                 <p className="text-2xl font-bold">
                   {pressItems.filter((item) => item.is_featured).length}
                 </p>
-                <p className="text-sm text-default-500">Featured</p>
+                <p className="text-[11px] leading-tight text-default-500 sm:text-sm">Featured</p>
               </div>
             </div>
           </CardBody>

@@ -199,14 +199,7 @@ export default function BookConsultationPage() {
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               {treatmentCategories.map((category, index) => (
-                <Card
-                  key={index}
-                  isPressable
-                  as={Link}
-                  className="h-full"
-                  href={category.href}
-                  shadow="lg"
-                >
+                <Card key={index} className="h-full" shadow="lg">
                   <CardHeader className="pb-2">
                     <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
                       {category.title}

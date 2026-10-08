@@ -2,7 +2,7 @@ import type { Transporter } from "nodemailer";
 
 import nodemailer from "nodemailer";
 
-import { createClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase";
 
 let cachedTransporter: Transporter | null = null;
 
@@ -71,9 +71,7 @@ async function getSenderEmail(): Promise<string> {
   }
 
   try {
-    const supabase = createClient();
-
-    const { data: profile, error } = await supabase
+    const { data: profile, error } = await supabaseAdmin
       .from("admin_profile")
       .select("business_email, email")
       .single();

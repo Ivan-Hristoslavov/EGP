@@ -2,11 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { supabaseAdmin } from "@/lib/supabase";
 
+import { requireAdmin } from "@/lib/admin-auth";
+
 // PUT - Update a day off period
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string; dayOffId: string }> },
 ) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const { id, dayOffId } = await params;
     const body = await request.json();
@@ -71,6 +77,10 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string; dayOffId: string }> },
 ) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const { id, dayOffId } = await params;
 

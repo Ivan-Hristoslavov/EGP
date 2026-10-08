@@ -1,6 +1,25 @@
 "use client";
 
-import { Button, Card, CardBody, Chip, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, Spinner, Textarea } from "@heroui/react";
+import {
+  Button,
+  Card,
+  CardBody,
+  Chip,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Select,
+  SelectItem,
+  Spinner,
+  Textarea,
+} from "@heroui/react";
 import { useState, useEffect, useCallback } from "react";
 import {
   Plus,
@@ -20,8 +39,13 @@ import {
   Grid3x3,
 } from "lucide-react";
 
-
-
+import { useCalendarTeam } from "@/app/admin/calendar/use-calendar-team";
+import { PractitionerAvatar } from "@/components/admin/calendar/practitioner-avatar";
+import { useToast } from "@/components/Toast";
+import {
+  colorForMember,
+  getPractitionerBadge,
+} from "@/lib/calendar-practitioners";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { AdminTruncatedText } from "@/components/admin/admin-truncated-text";
 import { formLayout } from "@/config/design-system";
@@ -58,6 +82,8 @@ interface Booking {
   status: "pending" | "confirmed" | "completed" | "cancelled";
   payment_status: "pending" | "paid" | "refunded";
   amount: number;
+  team_member_id?: string | null;
+  service_duration_minutes?: number | null;
   payment_type?: "full" | "deposit";
   total_amount?: number;
   amount_paid?: number;
@@ -82,14 +108,28 @@ const getDate = (daysOffset: number) => {
   return date.toISOString().split("T")[0];
 };
 
+const DEFAULT_DATE_FILTER = "upcoming";
+
+/** Today as YYYY-MM-DD in the browser's local time (booking dates are plain dates). */
+const getLocalDateString = () => {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+
+  return `${now.getFullYear()}-${month}-${day}`;
+};
+
 // Empty bookings array - will be populated from database
 
 export default function BookingsPage() {
+  const { showError } = useToast();
+  const { members: teamMembers } = useCalendarTeam();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [dateFilter, setDateFilter] = useState<string>("all");
+  // Open on upcoming bookings (soonest first) instead of the oldest ones
+  const [dateFilter, setDateFilter] = useState<string>(DEFAULT_DATE_FILTER);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -117,6 +157,8 @@ export default function BookingsPage() {
     notes: "",
     status: "pending",
     payment_status: "pending",
+    team_member_id: "",
+    service_duration_minutes: "60",
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -311,6 +353,26 @@ export default function BookingsPage() {
   };
 
   // Client-side filtering
+  const todayString = getLocalDateString();
+  // Past/all lists read best newest-first; everything else soonest-first
+  const newestFirst = dateFilter === "all" || dateFilter === "past";
+  const filtersActive =
+    searchTerm !== "" ||
+    statusFilter !== "all" ||
+    dateFilter !== DEFAULT_DATE_FILTER;
+
+  const resetFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+    setDateFilter(DEFAULT_DATE_FILTER);
+  };
+
+  const showAllBookings = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+    setDateFilter("all");
+  };
+
   const allFilteredBookings = bookings.filter((booking) => {
     // Search filter
     const matchesSearch =
@@ -334,6 +396,12 @@ export default function BookingsPage() {
       const bookingDate = new Date(booking.date);
 
       switch (dateFilter) {
+        case "upcoming":
+          matchesDate = booking.date.slice(0, 10) >= todayString;
+          break;
+        case "past":
+          matchesDate = booking.date.slice(0, 10) < todayString;
+          break;
         case "today":
           matchesDate = bookingDate.toDateString() === today.toDateString();
           break;
@@ -381,6 +449,13 @@ export default function BookingsPage() {
     return matchesSearch && matchesStatus && matchesDate;
   });
 
+  allFilteredBookings.sort((a, b) => {
+    const keyA = `${a.date.slice(0, 10)} ${formatTime(a.time)}`;
+    const keyB = `${b.date.slice(0, 10)} ${formatTime(b.time)}`;
+
+    return newestFirst ? keyB.localeCompare(keyA) : keyA.localeCompare(keyB);
+  });
+
   // Calculate pagination for filtered results
   const totalFilteredCount = allFilteredBookings.length;
   const totalFilteredPages = Math.ceil(totalFilteredCount / limit);
@@ -389,6 +464,11 @@ export default function BookingsPage() {
   const startIndex = (currentPage - 1) * limit;
   const endIndex = startIndex + limit;
   const filteredBookings = allFilteredBookings.slice(startIndex, endIndex);
+
+  // Always start from the first page when a filter or the search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, dateFilter]);
 
   // Update pagination state when filters change
   useEffect(() => {
@@ -514,6 +594,8 @@ export default function BookingsPage() {
       notes: "",
       status: "pending",
       payment_status: "pending",
+      team_member_id: "",
+      service_duration_minutes: "60",
     });
     setFormErrors({});
   };
@@ -547,6 +629,10 @@ export default function BookingsPage() {
 
     if (!formData.service.trim()) {
       errors.service = "Service is required";
+    }
+
+    if (!formData.team_member_id) {
+      errors.team_member_id = "Choose who does the treatment";
     }
 
     if (!formData.date) {
@@ -622,6 +708,8 @@ export default function BookingsPage() {
         },
         body: JSON.stringify({
           ...formData,
+          service_duration_minutes:
+            parseInt(formData.service_duration_minutes, 10) || null,
           amount: isDeposit ? depositAmount : totalAmount,
           total_amount: totalAmount,
           amount_paid: depositAmount,
@@ -711,10 +799,14 @@ export default function BookingsPage() {
         const errorData = await response.json();
 
         console.error("Error saving booking:", errorData);
-        // You could show a toast notification here
+        showError(
+          "Booking not saved",
+          errorData.error || errorData.message || "Failed to save booking",
+        );
       }
     } catch (error) {
       console.error("Error saving booking:", error);
+      showError("Booking not saved", "Network error. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -742,6 +834,10 @@ export default function BookingsPage() {
         notes: editingBooking.notes || "",
         status: editingBooking.status || "pending",
         payment_status: editingBooking.payment_status || "pending",
+        team_member_id: editingBooking.team_member_id || "",
+        service_duration_minutes: editingBooking.service_duration_minutes
+          ? String(editingBooking.service_duration_minutes)
+          : "",
       });
     } else {
       resetForm();
@@ -823,11 +919,13 @@ export default function BookingsPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Input
               isClearable
+              aria-label="Search bookings by name, service or email"
               placeholder="Search bookings..."
               startContent={<Search className="w-4 h-4 text-default-400" />}
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onClear={() => setSearchTerm("")}
             />
             <Select
               label="Status"
@@ -841,6 +939,7 @@ export default function BookingsPage() {
             >
               <SelectItem key="all">All Status</SelectItem>
               <SelectItem key="pending">Pending</SelectItem>
+              <SelectItem key="confirmed">Confirmed</SelectItem>
               <SelectItem key="scheduled">Scheduled</SelectItem>
               <SelectItem key="completed">Completed</SelectItem>
               <SelectItem key="cancelled">Cancelled</SelectItem>
@@ -855,19 +954,35 @@ export default function BookingsPage() {
                 setDateFilter(selected || "all");
               }}
             >
-              <SelectItem key="all">All Dates</SelectItem>
+              <SelectItem key="upcoming">Upcoming</SelectItem>
               <SelectItem key="today">Today</SelectItem>
               <SelectItem key="tomorrow">Tomorrow</SelectItem>
               <SelectItem key="this_week">This Week</SelectItem>
               <SelectItem key="next_week">Next Week</SelectItem>
+              <SelectItem key="this_month">This Month</SelectItem>
+              <SelectItem key="next_month">Next Month</SelectItem>
+              <SelectItem key="past">Past</SelectItem>
+              <SelectItem key="all">All Dates</SelectItem>
             </Select>
             <Button
+              className="min-h-[44px]"
+              isDisabled={!filtersActive}
               startContent={<Filter className="w-4 h-4" />}
               variant="bordered"
+              onPress={resetFilters}
             >
-              More Filters
+              Reset filters
             </Button>
           </div>
+          <p
+            aria-live="polite"
+            className="mt-3 text-sm text-default-500"
+            role="status"
+          >
+            {totalFilteredCount}{" "}
+            {totalFilteredCount === 1 ? "booking" : "bookings"}
+            {dateFilter === "upcoming" ? " from today onwards" : ""}
+          </p>
         </CardBody>
       </Card>
 
@@ -877,17 +992,40 @@ export default function BookingsPage() {
           {filteredBookings.length === 0 ? (
             <div className="text-center py-12">
               <Calendar className="w-12 h-12 text-default-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No bookings found</h3>
-              <p className="text-default-500 mb-4">
-                Get started by creating your first booking.
-              </p>
-              <Button
-                color="primary"
-                startContent={<Plus className="w-4 h-4" />}
-                onPress={() => setShowAddModal(true)}
-              >
-                Create Booking
-              </Button>
+              {bookings.length > 0 ? (
+                <>
+                  <h3 className="text-lg font-semibold mb-2">
+                    No bookings match these filters
+                  </h3>
+                  <p className="text-default-500 mb-4">
+                    Try another date or status, or show every booking.
+                  </p>
+                  <Button
+                    className="min-h-[44px]"
+                    color="primary"
+                    variant="flat"
+                    onPress={showAllBookings}
+                  >
+                    Show all bookings
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-lg font-semibold mb-2">
+                    No bookings found
+                  </h3>
+                  <p className="text-default-500 mb-4">
+                    Get started by creating your first booking.
+                  </p>
+                  <Button
+                    color="primary"
+                    startContent={<Plus className="w-4 h-4" />}
+                    onPress={() => setShowAddModal(true)}
+                  >
+                    Create Booking
+                  </Button>
+                </>
+              )}
             </div>
           ) : (
             <>
@@ -985,8 +1123,33 @@ export default function BookingsPage() {
                           </DropdownMenu>
                         </Dropdown>
                       </div>
-                      <div className="text-sm text-foreground font-medium">
+                      <div className="flex flex-wrap items-center gap-2 text-sm text-foreground font-medium">
                         {booking.service}
+                        {(() => {
+                          const badge = getPractitionerBadge(
+                            teamMembers,
+                            booking.team_member_id,
+                          );
+
+                          return teamMembers.length > 0 ? (
+                            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-default-600">
+                              {badge ? (
+                                <PractitionerAvatar
+                                  color={badge.color}
+                                  imageUrl={badge.imageUrl}
+                                  name={badge.name}
+                                  size="xs"
+                                />
+                              ) : (
+                                <PractitionerAvatar
+                                  name="Unassigned"
+                                  size="xs"
+                                />
+                              )}
+                              {badge ? badge.name : "Unassigned"}
+                            </span>
+                          ) : null;
+                        })()}
                       </div>
                       <div className="flex items-center gap-3 text-sm text-default-600">
                         <span className="flex items-center gap-1">
@@ -1522,6 +1685,54 @@ export default function BookingsPage() {
                     </Select>
                   </div>
 
+                  {/* Practitioner and duration */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Select
+                      isRequired
+                      errorMessage={formErrors.team_member_id}
+                      isInvalid={!!formErrors.team_member_id}
+                      label="Practitioner"
+                      placeholder="Who does the treatment?"
+                      selectedKeys={
+                        formData.team_member_id ? [formData.team_member_id] : []
+                      }
+                      onSelectionChange={(keys) => {
+                        const id = Array.from(keys)[0] as string;
+
+                        setFormData((prev) => ({
+                          ...prev,
+                          team_member_id: id || "",
+                        }));
+                      }}
+                    >
+                      {teamMembers.map((member) => (
+                        <SelectItem
+                          key={member.id}
+                          startContent={
+                            <PractitionerAvatar
+                              color={colorForMember(teamMembers, member.id)}
+                              imageUrl={member.image_url}
+                              name={member.name}
+                              size="xs"
+                            />
+                          }
+                          textValue={member.name}
+                        >
+                          {member.name}
+                        </SelectItem>
+                      ))}
+                    </Select>
+                    <Input
+                      label="Duration (minutes)"
+                      min={15}
+                      name="service_duration_minutes"
+                      step={15}
+                      type="number"
+                      value={formData.service_duration_minutes}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+
                   {/* Date and Time */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
@@ -1734,6 +1945,7 @@ export default function BookingsPage() {
                     >
                       <>
                         <SelectItem key="pending">Pending</SelectItem>
+                        <SelectItem key="confirmed">Confirmed</SelectItem>
                         <SelectItem key="scheduled">Scheduled</SelectItem>
                         <SelectItem key="completed">Completed</SelectItem>
                         <SelectItem key="cancelled">Cancelled</SelectItem>

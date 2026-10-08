@@ -6,6 +6,7 @@ import { useWorkingHours } from "@/hooks/useWorkingHours";
 import { useAdminSettings } from "@/hooks/useAdminSettings";
 import { useToast } from "@/components/Toast";
 import { useAdminProfile } from "@/components/AdminProfileContext";
+import { buildWhatsAppUrl } from "@/lib/whatsapp";
 
 type ServiceArea = {
   id: number;
@@ -430,7 +431,10 @@ export default function SectionContact() {
                 </a>
                 <a
                   className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-green-500 text-green-500 dark:text-green-400 text-lg font-semibold rounded-full hover:bg-green-500 hover:text-white transition-all"
-                  href={`https://wa.me/${businessData.businessPhone.replace(/\s/g, "").replace(/\+/g, "")}?text=${encodeURIComponent("Hi! I'd like to book a treatment.")}`}
+                  href={buildWhatsAppUrl(
+                    businessData.businessPhone,
+                    "Hi! I'd like to book a treatment.",
+                  )}
                   rel="noopener noreferrer"
                   target="_blank"
                 >

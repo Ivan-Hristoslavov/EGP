@@ -5,21 +5,44 @@ import { sendEmail } from "@/lib/sendgrid-smtp";
 import { siteConfig } from "@/config/site";
 import { getEmailHead, EMAIL } from "@/lib/email-theme";
 
+const EMAIL_PATTERN = /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/;
+
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { firstName, email, mobile } = body;
+    const { firstName: rawFirstName, mobile } = body;
 
     // Validate required fields
-    if (!email) {
+    if (!body.email) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
+
+    const email = String(body.email).trim().toLowerCase();
+
+    if (email.length > 254 || !EMAIL_PATTERN.test(email)) {
+      return NextResponse.json(
+        { error: "Please enter a valid email address." },
+        { status: 400 },
+      );
+    }
+
+    const firstName =
+      typeof rawFirstName === "string"
+        ? rawFirstName.trim().slice(0, 80)
+        : undefined;
 
     // Check if customer already exists by email
     const { data: existingCustomer } = await supabaseAdmin
       .from("customers")
       .select("id, first_name, last_name, phone, marketing_emails")
-      .eq("email", email.toLowerCase())
+      .eq("email", email)
       .single();
 
     let customerId: string;
@@ -57,7 +80,7 @@ export async function POST(request: NextRequest) {
           {
             first_name: firstName || "Newsletter",
             last_name: "Subscriber",
-            email: email.toLowerCase(),
+            email,
             phone: mobile || null,
             password_hash: null, // Newsletter subscriber - no password required
             marketing_emails: true,
@@ -80,40 +103,60 @@ export async function POST(request: NextRequest) {
       customerId = newCustomer.id;
     }
 
-    // Generate discount code
     const codePrefix = siteConfig.newsletter.discountCodePrefix || "WELCOME";
-    const randomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
-    const discountCode = `${codePrefix}-${randomCode}`;
 
-    // Calculate valid until date (30 days from now)
-    const validUntil = new Date();
-
-    validUntil.setDate(
-      validUntil.getDate() + (siteConfig.newsletter.discountValidDays || 30),
-    );
-
-    // Save discount code to database
-    const { data: savedCode, error: codeError } = await supabaseAdmin
+    // One welcome code per customer while it is still valid: repeating the form
+    // must not hand out a fresh discount every time.
+    const { data: activeCodes } = await supabaseAdmin
       .from("discount_codes")
-      .insert([
-        {
-          customer_id: customerId,
-          code: discountCode,
-          discount_percentage:
-            siteConfig.newsletter.welcomeDiscountPercent || 10,
-          valid_from: new Date().toISOString(),
-          valid_until: validUntil.toISOString(),
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-      ])
-      .select()
-      .single();
+      .select("code")
+      .eq("customer_id", customerId)
+      .eq("is_active", true)
+      .gt("valid_until", new Date().toISOString())
+      .like("code", `${codePrefix}-%`)
+      .order("created_at", { ascending: false })
+      .limit(1);
 
-    if (codeError) {
-      console.error("Error saving discount code:", codeError);
-      // Continue anyway - code is generated, just not saved
+    let discountCode: string;
+
+    if (activeCodes && activeCodes.length > 0) {
+      discountCode = activeCodes[0].code;
+    } else {
+      const randomCode = Math.random()
+        .toString(36)
+        .substring(2, 7)
+        .toUpperCase();
+
+      discountCode = `${codePrefix}-${randomCode}`;
+
+      // Calculate valid until date (30 days from now)
+      const validUntil = new Date();
+
+      validUntil.setDate(
+        validUntil.getDate() + (siteConfig.newsletter.discountValidDays || 30),
+      );
+
+      // Save discount code to database
+      const { error: codeError } = await supabaseAdmin
+        .from("discount_codes")
+        .insert([
+          {
+            customer_id: customerId,
+            code: discountCode,
+            discount_percentage:
+              siteConfig.newsletter.welcomeDiscountPercent || 10,
+            valid_from: new Date().toISOString(),
+            valid_until: validUntil.toISOString(),
+            is_active: true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+        ]);
+
+      if (codeError) {
+        console.error("Error saving discount code:", codeError);
+        // Continue anyway - code is generated, just not saved
+      }
     }
 
     // Send email with discount code
@@ -135,7 +178,7 @@ ${getEmailHead()}
 <div class="email-accent-bar" style="width:48px;height:3px;background:${L.accent};margin:20px auto 0"></div>
 </div>
 <div style="padding:40px 32px;font-size:15px;line-height:1.7;color:${L.text}">
-<p style="margin:0 0 8px;color:${L.text}">Thank you for subscribing, ${firstName || "Valued Customer"}.</p>
+<p style="margin:0 0 8px;color:${L.text}">Thank you for subscribing, ${escapeHtml(firstName || "Valued Customer")}.</p>
 <p style="margin:0 0 24px;color:${L.textMuted}">Enjoy <strong>${siteConfig.newsletter.welcomeDiscountPercent}% off</strong> your first visit.</p>
 
 <div style="background:${L.green};color:#fff;padding:28px;text-align:center;margin:28px 0;letter-spacing:4px;font-size:28px;font-weight:600;border:1px solid ${L.accent}">

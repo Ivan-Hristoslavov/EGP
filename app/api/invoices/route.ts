@@ -5,6 +5,8 @@ import { supabase } from "../../../lib/supabase";
 
 import { processImageFile } from "@/lib/image-utils";
 
+import { requireAdmin } from "@/lib/admin-auth";
+
 const supabaseStorage = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -12,6 +14,10 @@ const supabaseStorage = createClient(
 
 // GET - Get all invoices
 export async function GET(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
@@ -89,6 +95,10 @@ export async function GET(request: NextRequest) {
 
 // POST - Create new invoice
 export async function POST(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     console.log("🔍 Invoice creation API called");
 

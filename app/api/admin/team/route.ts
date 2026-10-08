@@ -3,8 +3,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase";
 
+import { requireAdmin } from "@/lib/admin-auth";
+
 // GET - Fetch all team members (public access for booking)
 export async function GET() {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     // Use admin client to bypass RLS for admin panel access
     // Return all team members (both active and inactive) for admin management
@@ -35,6 +41,10 @@ export async function GET() {
 
 // POST - Create new team member
 export async function POST(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const supabase = createClient();
     const body = await request.json();
@@ -66,7 +76,7 @@ export async function POST(request: NextRequest) {
     let profileId = admin_profile_id;
 
     if (!profileId) {
-      const { data: profiles } = await supabase
+      const { data: profiles } = await supabaseAdmin
         .from("admin_profile")
         .select("id")
         .limit(1)

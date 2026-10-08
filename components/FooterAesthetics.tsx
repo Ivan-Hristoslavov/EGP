@@ -19,7 +19,9 @@ import {
   useAdminProfileContext,
 } from "@/components/AdminProfileContext";
 import { useSocialLinks } from "@/hooks/useSocialLinks";
+import { fetchDeduped } from "@/lib/fetch-deduped";
 import { formatUkPhoneForDisplay } from "@/lib/phone";
+import { buildWhatsAppUrl } from "@/lib/whatsapp";
 
 type WorkingHoursData = {
   [key: string]: {
@@ -67,7 +69,7 @@ export default function FooterAesthetics() {
     // Fetch working hours from public API
     const fetchWorkingHours = async () => {
       try {
-        const response = await fetch("/api/working-hours");
+        const response = await fetchDeduped("/api/working-hours");
 
         if (response.ok) {
           const data = await response.json();
@@ -90,7 +92,7 @@ export default function FooterAesthetics() {
   useEffect(() => {
     const fetchPressPageSetting = async () => {
       try {
-        const response = await fetch("/api/press-settings");
+        const response = await fetchDeduped("/api/press-settings");
 
         if (response.ok) {
           const data = await response.json();
@@ -340,7 +342,7 @@ export default function FooterAesthetics() {
                     <a
                       aria-label="WhatsApp"
                       className="flex items-center gap-2 hover:text-[#9d9585] dark:hover:text-[#c9c1b0] transition-colors"
-                      href={`https://wa.me/${contactWhatsapp.replace(/\s/g, "")}`}
+                      href={buildWhatsAppUrl(contactWhatsapp)}
                       rel="noopener noreferrer"
                       target="_blank"
                     >

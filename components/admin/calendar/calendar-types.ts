@@ -17,6 +17,8 @@ export interface AdminCalendarBooking {
   payment_status: "pending" | "paid" | "refunded";
   amount: number;
   duration?: number | null;
+  service_duration_minutes?: number | null;
+  team_member_id?: string | null;
   customer_phone?: string | null;
 }
 

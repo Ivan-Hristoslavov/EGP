@@ -556,35 +556,35 @@ export function AdminGalleryManager({
               {/* Before/After Images */}
               <div className="flex gap-3 mb-2 shrink-0">
                 {/* Before Card */}
-                <div className="flex-1 relative bg-gray-100 dark:bg-gray-700 rounded-xl border-2 border-red-200 dark:border-red-800 overflow-hidden group/image">
+                <div className="relative aspect-[4/5] min-w-0 flex-1 bg-gray-100 dark:bg-gray-700 rounded-xl border-2 border-red-200 dark:border-red-800 overflow-hidden group/image">
                   <div className="absolute top-2 left-2 z-10 bg-red-500 text-white px-2.5 py-1 rounded-lg text-xs font-bold shadow-lg">
                     Before
                   </div>
                   {item.before_image_url ? (
                     <img
                       alt="Before"
-                      className="w-full h-36 object-cover group-hover/image:scale-105 transition-transform duration-300"
+                      className="absolute inset-0 h-full w-full object-cover object-top group-hover/image:scale-105 transition-transform duration-300"
                       src={item.before_image_url}
                     />
                   ) : (
-                    <div className="w-full h-36 flex items-center justify-center text-gray-400">
+                    <div className="absolute inset-0 flex items-center justify-center text-gray-400">
                       <span className="text-xs">No image</span>
                     </div>
                   )}
                 </div>
                 {/* After Card */}
-                <div className="flex-1 relative bg-gray-100 dark:bg-gray-700 rounded-xl border-2 border-green-200 dark:border-green-800 overflow-hidden group/image">
+                <div className="relative aspect-[4/5] min-w-0 flex-1 bg-gray-100 dark:bg-gray-700 rounded-xl border-2 border-green-200 dark:border-green-800 overflow-hidden group/image">
                   <div className="absolute top-2 left-2 z-10 bg-green-500 text-white px-2.5 py-1 rounded-lg text-xs font-bold shadow-lg">
                     After
                   </div>
                   {item.after_image_url ? (
                     <img
                       alt="After"
-                      className="w-full h-36 object-cover group-hover/image:scale-105 transition-transform duration-300"
+                      className="absolute inset-0 h-full w-full object-cover object-top group-hover/image:scale-105 transition-transform duration-300"
                       src={item.after_image_url}
                     />
                   ) : (
-                    <div className="w-full h-36 flex items-center justify-center text-gray-400">
+                    <div className="absolute inset-0 flex items-center justify-center text-gray-400">
                       <span className="text-xs">No image</span>
                     </div>
                   )}

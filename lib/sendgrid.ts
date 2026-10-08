@@ -1,6 +1,6 @@
 import sgMail from "@sendgrid/mail";
 
-import { createClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase";
 
 // Initialize SendGrid with API key
 const sendgridApiKey = process.env.SENDGRID_API_KEY;
@@ -37,9 +37,7 @@ export interface EmailOptions {
  */
 async function getSenderEmail(): Promise<string> {
   try {
-    const supabase = createClient();
-
-    const { data: profile, error } = await supabase
+    const { data: profile, error } = await supabaseAdmin
       .from("admin_profile")
       .select("business_email, email")
       .single();

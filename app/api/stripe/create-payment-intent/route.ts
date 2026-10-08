@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
+import { assertSlotFree } from "@/lib/booking-conflicts";
+import { validateOnlineCharge } from "@/lib/booking-pricing-server";
+
 export async function POST(request: NextRequest) {
   try {
     // Check if Stripe is configured
@@ -24,6 +27,54 @@ export async function POST(request: NextRequest) {
 
     if (!amount || amount <= 0) {
       return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
+    }
+
+    // Never charge less than the selected services cost, whatever the browser says.
+    if (metadata.services) {
+      const isDeposit = metadata.isDeposit === "true";
+      const priceCheck = await validateOnlineCharge({
+        amount: Number(amount),
+        services: metadata.services,
+        isDeposit,
+      });
+
+      if (!priceCheck.ok) {
+        return NextResponse.json(
+          { error: priceCheck.message, code: "INVALID_AMOUNT" },
+          { status: 400 },
+        );
+      }
+
+      if (isDeposit) {
+        // The booking records these figures later: use the server's, not the browser's.
+        metadata.totalAmount = String(priceCheck.total);
+        metadata.depositAmount = String(amount);
+        metadata.remainingAmount = String(
+          Math.max(
+            0,
+            Math.round((priceCheck.total - Number(amount)) * 100) / 100,
+          ),
+        );
+      }
+    }
+
+    // Never take money for a time that is already taken.
+    if (metadata.selectedDate && metadata.selectedTime) {
+      const slotCheck = await assertSlotFree({
+        date: metadata.selectedDate,
+        time: metadata.selectedTime,
+        durationMinutes: metadata.serviceDurationMinutes
+          ? parseInt(metadata.serviceDurationMinutes, 10)
+          : null,
+        teamMemberId: metadata.teamMemberId || null,
+      });
+
+      if (!slotCheck.ok) {
+        return NextResponse.json(
+          { error: slotCheck.publicMessage, code: "SLOT_TAKEN" },
+          { status: 409 },
+        );
+      }
     }
 
     // Create Payment Intent

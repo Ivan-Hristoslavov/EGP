@@ -19,6 +19,8 @@ import {
   Bus,
   Car,
   Navigation,
+  Clock,
+  ExternalLink,
 } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
@@ -55,21 +57,20 @@ type PasswordData = {
   confirmPassword: string;
 };
 
-type SettingsState = {
-  // Business Information
-  businessCity: string;
-  businessPostcode: string;
-  businessAddress: string;
-  businessPhone: string;
-  businessEmail: string;
-};
+const formatSavedAt = (iso: string) =>
+  new Date(iso).toLocaleString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
-const defaultSettings: SettingsState = {
-  businessCity: "London",
-  businessPostcode: "SW1A 1AA",
-  businessAddress: "",
-  businessPhone: siteConfig.contact.phone,
-  businessEmail: siteConfig.contact.email,
+/** Values as last loaded from / saved to the database, used to detect address changes. */
+type SavedLocationText = {
+  companyAddress: string;
+  howToFindUs: string;
+  howToReachUs: string;
 };
 
 export default function ProfilePage() {
@@ -84,9 +85,14 @@ export default function ProfilePage() {
     loading,
     error: profileError,
   } = useAdminProfile();
-  const { showSuccess, showError } = useToast();
+  const { showSuccess, showError, showWarning } = useToast();
 
-  const [settings, setSettings] = useState<SettingsState>(defaultSettings);
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
+  const [savedLocation, setSavedLocation] = useState<SavedLocationText>({
+    companyAddress: "",
+    howToFindUs: "",
+    howToReachUs: "",
+  });
 
   const [profileData, setProfileData] = useState<ProfileData>({
     firstName: "",
@@ -149,6 +155,17 @@ export default function ProfilePage() {
           console.error("Error parsing nearby_landmarks:", e);
         }
 
+        const loadedAddress =
+          dbProfile.company_address ||
+          "809 Wandsworth Road, SW8 3JH, London, UK";
+
+        setSavedLocation({
+          companyAddress: loadedAddress,
+          howToFindUs: (dbProfile as any).how_to_find_us || "",
+          howToReachUs: (dbProfile as any).how_to_reach_us || "",
+        });
+        setLastSavedAt(dbProfile.updated_at || null);
+
         // Use functional update to access current state and preserve avatar value
         setProfileData((prev) => ({
           firstName: firstName || "",
@@ -164,9 +181,7 @@ export default function ProfilePage() {
             dbProfile.phone ||
             siteConfig.contact.whatsapp,
           companyName: dbProfile.company_name || "EGP Aesthetics",
-          companyAddress:
-            dbProfile.company_address ||
-            "809 Wandsworth Road, SW8 3JH, London, UK",
+          companyAddress: loadedAddress,
           // Preserve existing avatar value from previous state (avatar is not stored in database)
           avatar: prev.avatar || "",
           howToFindUs: (dbProfile as any).how_to_find_us || "",
@@ -178,23 +193,6 @@ export default function ProfilePage() {
           transportOptions: transportOptions,
           nearbyLandmarks: nearbyLandmarks,
         }));
-
-        // Load settings from database profile instead of localStorage
-        setSettings({
-          businessCity:
-            (dbProfile.company_address || "").split(",").pop()?.trim() ||
-            "London",
-          businessPostcode:
-            (dbProfile.company_address || "").match(
-              /[A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2}/i,
-            )?.[0] || "SW1A 1AA",
-          businessAddress: dbProfile.company_address || "",
-          businessPhone: dbProfile.phone || siteConfig.contact.phone,
-          businessEmail:
-            dbProfile.business_email ||
-            process.env.NEXT_PUBLIC_BUSINESS_EMAIL ||
-            "",
-        });
       } else {
         // Initialize with default values if no profile exists
         setProfileData((prev) => ({
@@ -236,7 +234,32 @@ export default function ProfilePage() {
       });
 
       if (response.ok) {
-        showSuccess("Success", "Profile updated successfully!");
+        const addressChanged =
+          profileData.companyAddress.trim() !==
+          savedLocation.companyAddress.trim();
+        const locationTextUnchanged =
+          profileData.howToFindUs === savedLocation.howToFindUs &&
+          profileData.howToReachUs === savedLocation.howToReachUs;
+
+        if (addressChanged && locationTextUnchanged) {
+          showWarning(
+            "Address saved",
+            "Please also check “How to Find Us”, “How to Reach Us”, transport options and nearby landmarks — they may still describe the old location.",
+            10000,
+          );
+        } else {
+          showSuccess("Success", "Profile updated successfully!");
+        }
+
+        setSavedLocation({
+          companyAddress: profileData.companyAddress,
+          howToFindUs: profileData.howToFindUs,
+          howToReachUs: profileData.howToReachUs,
+        });
+
+        const saved = await response.json().catch(() => null);
+
+        setLastSavedAt(saved?.profile?.updated_at ?? new Date().toISOString());
       } else {
         showError("Error", "Failed to update profile. Please try again.");
       }
@@ -284,47 +307,6 @@ export default function ProfilePage() {
       }
     } catch (error) {
       showError("Error", "An error occurred while updating your password.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleSettingsInputChange = (key: keyof SettingsState, value: any) => {
-    setSettings((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleSettingsSave = async () => {
-    setIsSaving(true);
-    try {
-      // Save settings to database via profile API
-      const response = await fetch("/api/admin/profile", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          businessEmail: settings.businessEmail,
-          phone: settings.businessPhone,
-          whatsapp: profileData.whatsapp,
-          companyName: profileData.companyName,
-          companyAddress: settings.businessAddress,
-          howToFindUs: profileData.howToFindUs,
-          howToReachUs: profileData.howToReachUs,
-          googleMapsAddress: profileData.googleMapsAddress,
-          transportOptions: profileData.transportOptions,
-          nearbyLandmarks: profileData.nearbyLandmarks,
-        }),
-      });
-
-      if (response.ok) {
-        showSuccess("Success", "Settings saved successfully!");
-        // Refresh profile data
-        window.location.reload();
-      } else {
-        showError("Error", "Failed to save settings. Please try again.");
-      }
-    } catch (error) {
-      showError("Error", "Failed to save settings. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -391,6 +373,15 @@ export default function ProfilePage() {
                   <span className="truncate">{profileData.phone}</span>
                 </span>
               </div>
+              {lastSavedAt && (
+                <p className="mt-2 flex items-center gap-1.5 text-xs text-white/90 sm:text-sm">
+                  <Clock
+                    aria-hidden="true"
+                    className="w-3.5 h-3.5 flex-shrink-0"
+                  />
+                  <span>Last saved: {formatSavedAt(lastSavedAt)}</span>
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -510,9 +501,28 @@ export default function ProfilePage() {
                     setProfileData((prev) => ({
                       ...prev,
                       companyAddress: e.target.value,
+                      // Keep the map/directions address in sync while it still mirrors the company address
+                      googleMapsAddress:
+                        !prev.googleMapsAddress ||
+                        prev.googleMapsAddress === prev.companyAddress
+                          ? e.target.value
+                          : prev.googleMapsAddress,
                     }))
                   }
                 />
+                {profileData.companyAddress.trim() !==
+                  savedLocation.companyAddress.trim() && (
+                  <p
+                    className="mt-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-200"
+                    role="status"
+                  >
+                    You changed the address. Also update{" "}
+                    <strong>How to Find Us</strong>,{" "}
+                    <strong>How to Reach Us</strong>, the Google Maps address,
+                    transport options and nearby landmarks below — they appear
+                    on the Find Us page and may still describe the old location.
+                  </p>
+                )}
               </div>
 
               <div>
@@ -1282,55 +1292,48 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="pt-4">
+            <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:items-center sm:gap-5">
               <button
-                className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 text-white font-semibold rounded-xl hover:from-rose-600 hover:via-pink-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center px-8 py-3 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 text-white font-semibold rounded-xl hover:from-rose-600 hover:via-pink-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isSaving}
                 onClick={handleSave}
               >
                 {isSaving ? "Saving..." : "Save Changes"}
               </button>
+              <a
+                className="inline-flex min-h-[44px] items-center gap-2 text-sm font-medium text-rose-700 hover:underline dark:text-rose-300"
+                href="/find-us"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Check the Find Us page on the website
+                <ExternalLink aria-hidden="true" className="h-4 w-4" />
+                <span className="sr-only">(opens in a new tab)</span>
+              </a>
             </div>
           </div>
         )}
 
         {activeTab === "business" && (
           <div className="space-y-8">
-            <div>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Business City
-                  </label>
-                  <input
-                    className="w-full min-h-[44px] px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                    placeholder="Enter city"
-                    type="text"
-                    value={settings.businessCity}
-                    onChange={(e) =>
-                      handleSettingsInputChange("businessCity", e.target.value)
-                    }
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Postcode
-                  </label>
-                  <input
-                    className="w-full min-h-[44px] px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                    placeholder="Enter postcode"
-                    type="text"
-                    value={settings.businessPostcode}
-                    onChange={(e) =>
-                      handleSettingsInputChange(
-                        "businessPostcode",
-                        e.target.value,
-                      )
-                    }
-                  />
-                </div>
-              </div>
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 sm:p-6 dark:border-gray-700 dark:bg-gray-800/40">
+              <h3 className="mb-2 text-base font-semibold text-gray-900 dark:text-white">
+                Address, city &amp; postcode
+              </h3>
+              <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+                The business address (street, postcode and city) is a single
+                field. Edit it under Company &amp; Business →{" "}
+                <strong>Full Address / Location</strong> and press{" "}
+                <strong>Save Changes</strong>.
+              </p>
+              <button
+                className="inline-flex items-center gap-2 text-sm font-medium text-rose-600 hover:underline dark:text-rose-400"
+                type="button"
+                onClick={() => setActiveTab("company")}
+              >
+                Go to Company &amp; Business
+                <span aria-hidden="true">→</span>
+              </button>
             </div>
 
             <div className="border-t border-gray-200 pt-8 dark:border-gray-700">

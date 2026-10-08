@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 
+import { requireAdmin } from "@/lib/admin-auth";
+
 type GoogleCalendarConnection = {
   isConnected: boolean;
   accessToken?: string;
@@ -147,6 +149,10 @@ Booking ID: ${booking.id}
 }
 
 export async function POST(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const supabase = createClient();
 

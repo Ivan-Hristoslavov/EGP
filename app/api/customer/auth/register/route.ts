@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 import { supabase } from "@/lib/supabase";
+import { getJwtSecret } from "@/lib/jwt-secret";
 
 export async function POST(request: NextRequest) {
   try {
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
         email: customer.email,
         type: "customer",
       },
-      process.env.JWT_SECRET || "fallback-secret",
+      getJwtSecret(),
       { expiresIn: "7d" },
     );
 

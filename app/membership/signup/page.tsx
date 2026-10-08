@@ -72,7 +72,11 @@ export default function MembershipSignupPage() {
       const token = localStorage.getItem("customer_token");
 
       if (!token) {
-        router.push("/customer/login?redirect=/membership/signup");
+        // Customer login was switched off, so there is nothing to sign in to.
+        setError(
+          "Membership sign-up is not available online right now. Please contact the clinic.",
+        );
+        setProcessing(false);
 
         return;
       }

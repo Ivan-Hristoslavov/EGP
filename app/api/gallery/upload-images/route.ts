@@ -3,6 +3,8 @@ import { createClient } from "@supabase/supabase-js";
 
 import { processImageFile } from "@/lib/image-utils";
 
+import { requireAdmin } from "@/lib/admin-auth";
+
 // Validate environment variables
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -19,6 +21,10 @@ const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
 
 // POST - Upload before and after images for gallery
 export async function POST(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     console.log("Gallery upload API called");
     console.log("Environment:", process.env.NODE_ENV);

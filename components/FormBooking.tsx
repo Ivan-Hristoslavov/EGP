@@ -138,7 +138,7 @@ export default function FormBooking() {
 
     const fetchDayOffPeriods = async () => {
       try {
-        const response = await fetch("/api/admin/day-off");
+        const response = await fetch("/api/day-off");
 
         if (response.ok) {
           const periods = await response.json();

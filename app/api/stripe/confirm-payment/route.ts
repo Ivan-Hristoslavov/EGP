@@ -11,6 +11,8 @@ import {
   type BookingPractitionerForCustomerEmail,
 } from "@/lib/booking-practitioner-for-customer-email";
 import { getAdminContactInfo } from "@/lib/admin-profile";
+import { assertSlotFree } from "@/lib/booking-conflicts";
+import { sendBookingConflictAlert } from "@/lib/booking-conflict-notification";
 import { getEmailHead, EMAIL } from "@/lib/email-theme";
 
 export async function POST(request: NextRequest) {
@@ -72,6 +74,24 @@ export async function POST(request: NextRequest) {
           },
           { status: 400 },
         );
+      }
+
+      // The same PaymentIntent must never create a second booking.
+      const { data: alreadyBooked } = await supabaseAdmin
+        .from("bookings")
+        .select("id, booking_number")
+        .ilike("notes", `%Payment Intent: ${paymentIntentId}%`)
+        .limit(1)
+        .maybeSingle();
+
+      if (alreadyBooked) {
+        return NextResponse.json({
+          success: true,
+          paymentIntent,
+          bookingId: alreadyBooked.id,
+          bookingNumber: alreadyBooked.booking_number,
+          alreadyProcessed: true,
+        });
       }
 
       // Total amount: from metadata when deposit (full booking total), else from services
@@ -270,6 +290,15 @@ export async function POST(request: NextRequest) {
       console.log("Final customer ID:", customerId);
 
       // === STEP 2: Create Booking ===
+      // Final check: the time may have been taken while the client was paying.
+      const slotCheck = await assertSlotFree({
+        date: selectedDate,
+        time: selectedTime,
+        durationMinutes: serviceDurationMinutes,
+        teamMemberId,
+      });
+      const hasConflict = !slotCheck.ok;
+
       const bookingInsert: Record<string, unknown> = {
         customer_id: customerId, // May be null if customer creation failed
         customer_name: customerName,
@@ -285,9 +314,13 @@ export async function POST(request: NextRequest) {
         remaining_amount: paymentType === "deposit" ? remainingAmount : 0,
         team_member_id: teamMemberId || null,
         service_duration_minutes: serviceDurationMinutes || null,
-        status: "confirmed",
+        status: hasConflict ? "pending" : "confirmed",
         payment_status: "paid",
-        notes: `Payment via Stripe - Payment Intent: ${paymentIntentId}`,
+        notes: `Payment via Stripe - Payment Intent: ${paymentIntentId}${
+          hasConflict
+            ? " | CONFLICT – the time was taken by another booking while paying; contact the client to reschedule or refund"
+            : ""
+        }`,
       };
       const { data: booking, error: bookingError } = await supabaseAdmin
         .from("bookings")
@@ -360,7 +393,11 @@ export async function POST(request: NextRequest) {
         await fetchBookingPractitionerForCustomerEmail(teamMemberId);
 
       // Send booking confirmation email to customer
-      if (finalCustomerEmail && !finalCustomerEmail.includes("@stripe.guest")) {
+      if (
+        !hasConflict &&
+        finalCustomerEmail &&
+        !finalCustomerEmail.includes("@stripe.guest")
+      ) {
         try {
           const contactInfo = await getAdminContactInfo();
           const bookingDate = new Date(selectedDate).toLocaleDateString(
@@ -437,39 +474,64 @@ export async function POST(request: NextRequest) {
       }
 
       // === STEP 5: Staff notification (clinic inbox from admin_profile) ===
-      try {
-        let notesForStaff = String(booking.notes || "");
-
-        if (
-          paymentType === "deposit" &&
-          amountPaid > 0 &&
-          remainingAmount > 0
-        ) {
-          notesForStaff =
-            `${notesForStaff}\nPaid (deposit): £${amountPaid.toFixed(2)} · Due on arrival: £${remainingAmount.toFixed(2)}`.trim();
+      if (!slotCheck.ok) {
+        try {
+          await sendBookingConflictAlert(
+            {
+              id: booking.id,
+              customer_name: customerName,
+              customer_email: finalCustomerEmail,
+              customer_phone: customerPhone,
+              service: serviceNames,
+              date: selectedDate,
+              time: selectedTime,
+              amount: totalAmount,
+              total_amount: totalAmount,
+              notes: booking.notes,
+              team_member_id: teamMemberId,
+              created_at: booking.created_at,
+              payment_status: booking.payment_status,
+            },
+            slotCheck.adminMessage,
+          );
+        } catch (alertError) {
+          console.error("Error sending booking conflict alert:", alertError);
         }
+      } else {
+        try {
+          let notesForStaff = String(booking.notes || "");
 
-        await sendStaffNewBookingNotification({
-          id: booking.id,
-          customer_name: customerName,
-          customer_email: finalCustomerEmail,
-          customer_phone: customerPhone,
-          service: serviceNames,
-          date: selectedDate,
-          time: selectedTime,
-          amount: totalAmount,
-          total_amount: totalAmount,
-          notes: notesForStaff || null,
-          team_member_id: teamMemberId,
-          created_at: booking.created_at,
-          payment_status: booking.payment_status,
-        });
-        console.log("Staff new-booking notification sent (Stripe flow)");
-      } catch (staffEmailError) {
-        console.error(
-          "Error sending staff new-booking notification:",
-          staffEmailError,
-        );
+          if (
+            paymentType === "deposit" &&
+            amountPaid > 0 &&
+            remainingAmount > 0
+          ) {
+            notesForStaff =
+              `${notesForStaff}\nPaid (deposit): £${amountPaid.toFixed(2)} · Due on arrival: £${remainingAmount.toFixed(2)}`.trim();
+          }
+
+          await sendStaffNewBookingNotification({
+            id: booking.id,
+            customer_name: customerName,
+            customer_email: finalCustomerEmail,
+            customer_phone: customerPhone,
+            service: serviceNames,
+            date: selectedDate,
+            time: selectedTime,
+            amount: totalAmount,
+            total_amount: totalAmount,
+            notes: notesForStaff || null,
+            team_member_id: teamMemberId,
+            created_at: booking.created_at,
+            payment_status: booking.payment_status,
+          });
+          console.log("Staff new-booking notification sent (Stripe flow)");
+        } catch (staffEmailError) {
+          console.error(
+            "Error sending staff new-booking notification:",
+            staffEmailError,
+          );
+        }
       }
 
       console.log("=== Booking Process Completed Successfully ===");
@@ -483,6 +545,7 @@ export async function POST(request: NextRequest) {
         bookingId: booking.id,
         bookingNumber: booking.booking_number,
         customerId: customerId,
+        conflict: hasConflict,
       });
     } else {
       return NextResponse.json({

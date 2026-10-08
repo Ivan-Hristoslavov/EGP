@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { supabaseAdmin } from "../../../lib/supabase";
 
+import { slotNeedsRecheck } from "@/lib/booking-availability";
+import { assertSlotFree } from "@/lib/booking-conflicts";
+import { priceServiceSummary } from "@/lib/booking-pricing-server";
 import { sendEmail } from "@/lib/sendgrid-smtp";
 import { sendStaffNewBookingNotification } from "@/lib/booking-staff-notification";
 import {
@@ -237,71 +240,54 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get working hours for this date to check max appointments
-    const bookingDate = new Date(date);
-    const dayOfWeek = bookingDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const isAdmin = (await requireAdmin()) === null;
 
-    const { data: workingHour, error: workingHourError } = await supabaseAdmin
-      .from("working_hours")
-      .select("max_appointments")
-      .eq("day_of_week", dayOfWeek)
-      .single();
+    // Visitors never decide the price or whether a booking counts as paid: the
+    // amount comes from the services table and anything not free stays pending.
+    let publicTotal = 0;
+    // A request that names no service we sell (e.g. the "Book Treatment Now"
+    // enquiry form) is kept as a pending, unpaid enquiry for the clinic to call back.
+    let isEnquiry = false;
 
-    const maxAppointments = workingHour?.max_appointments || 12;
+    if (!isAdmin) {
+      const priced = await priceServiceSummary(String(service));
 
-    // Check for booking conflicts - same date and time
-    const { data: existingBookings, error: conflictError } = await supabaseAdmin
-      .from("bookings")
-      .select("id, customer_name, time")
-      .eq("date", date)
-      .eq("time", time)
-      .in("status", ["scheduled", "pending", "confirmed"]);
-
-    if (conflictError) {
-      console.error("Error checking booking conflicts:", conflictError);
-
-      return NextResponse.json(
-        { error: "Failed to check booking availability" },
-        { status: 500 },
-      );
+      if (priced.ok) {
+        publicTotal = priced.total;
+      } else {
+        isEnquiry = true;
+      }
     }
+    const isFreePublic = !isAdmin && !isEnquiry && publicTotal === 0;
 
-    if (existingBookings && existingBookings.length > 0) {
+    // Admin-created bookings must name a practitioner so two rooms can never be mixed up.
+    // Public flows without one (legacy contact forms) are unchanged.
+    if (!team_member_id && isAdmin) {
       return NextResponse.json(
         {
-          error: "Time slot already booked",
-          conflict: true,
-          message: `This time slot is already booked by ${existingBookings[0].customer_name}. Please select a different time.`,
+          error: "Choose a practitioner for this booking.",
+          code: "PRACTITIONER_REQUIRED",
         },
-        { status: 409 },
+        { status: 400 },
       );
     }
 
-    // Check max appointments limit for this date
-    const { data: dayBookings, error: dayBookingsError } = await supabaseAdmin
-      .from("bookings")
-      .select("id")
-      .eq("date", date)
-      .in("status", ["scheduled", "pending", "confirmed"]);
+    // One shared rule set for every path: per practitioner, with duration and buffer.
+    const slotCheck = await assertSlotFree({
+      date,
+      time,
+      durationMinutes: service_duration_minutes,
+      teamMemberId: team_member_id,
+    });
 
-    if (dayBookingsError) {
-      console.error("Error checking day bookings:", dayBookingsError);
+    if (!slotCheck.ok) {
+      // Admins see who holds the slot; the public never learns another customer's name.
+      const message = isAdmin
+        ? slotCheck.adminMessage
+        : slotCheck.publicMessage;
 
       return NextResponse.json(
-        { error: "Failed to check booking availability" },
-        { status: 500 },
-      );
-    }
-
-    const currentBookingsCount = (dayBookings || []).length;
-
-    if (currentBookingsCount >= maxAppointments) {
-      return NextResponse.json(
-        {
-          error: "Maximum appointments reached",
-          conflict: true,
-          message: `This day has reached the maximum of ${maxAppointments} appointments. Please select a different date.`,
-        },
+        { error: message, message, code: "SLOT_TAKEN", conflict: true },
         { status: 409 },
       );
     }
@@ -340,9 +326,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const parsedAmount = parseFloat(amount);
-    const parsedTotalAmount =
-      total_amount != null ? parseFloat(total_amount) : parsedAmount;
+    const parsedAmount = isAdmin ? parseFloat(amount) : publicTotal;
+    const parsedTotalAmount = !isAdmin
+      ? publicTotal
+      : total_amount != null
+        ? parseFloat(total_amount)
+        : parsedAmount;
 
     const { data: booking, error: bookingError } = await supabaseAdmin
       .from("bookings")
@@ -357,18 +346,38 @@ export async function POST(request: NextRequest) {
           time,
           amount: parsedAmount,
           total_amount: parsedTotalAmount,
-          amount_paid:
-            amount_paid != null ? parseFloat(amount_paid) : parsedAmount,
-          remaining_amount:
-            remaining_amount != null ? parseFloat(remaining_amount) : 0,
-          payment_type: payment_type || "full",
-          payment_method: payment_method || null,
+          amount_paid: !isAdmin
+            ? 0
+            : amount_paid != null
+              ? parseFloat(amount_paid)
+              : parsedAmount,
+          remaining_amount: !isAdmin
+            ? publicTotal
+            : remaining_amount != null
+              ? parseFloat(remaining_amount)
+              : 0,
+          payment_type: isAdmin ? payment_type || "full" : "full",
+          payment_method: isAdmin
+            ? payment_method || null
+            : isFreePublic
+              ? "free"
+              : null,
           address: address || null,
           notes: notes || null,
           team_member_id: team_member_id || null,
           service_duration_minutes: service_duration_minutes || null,
-          status: bodyStatus || "pending",
-          payment_status: bodyPaymentStatus || "pending",
+          status: isAdmin
+            ? bodyStatus || "pending"
+            : isFreePublic
+              ? bodyStatus === "pending"
+                ? "pending"
+                : "confirmed"
+              : "pending",
+          payment_status: isAdmin
+            ? bodyPaymentStatus || "pending"
+            : isFreePublic
+              ? "paid"
+              : "pending",
         },
       ])
       .select()
@@ -848,6 +857,8 @@ export async function PUT(request: NextRequest) {
       total_amount,
       amount_paid,
       remaining_amount,
+      team_member_id,
+      service_duration_minutes,
     } = body;
 
     if (!customer_name || !service || !date || !time || !amount) {
@@ -858,6 +869,46 @@ export async function PUT(request: NextRequest) {
         },
         { status: 400 },
       );
+    }
+
+    // Only re-check when the edit changes what the booking occupies.
+    const { data: existingBooking, error: existingError } = await supabaseAdmin
+      .from("bookings")
+      .select("date, time, team_member_id, service_duration_minutes, status")
+      .eq("id", bookingId)
+      .single();
+
+    if (existingError || !existingBooking) {
+      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
+    }
+
+    const recheck = slotNeedsRecheck(existingBooking, {
+      date,
+      time,
+      status: status || "pending",
+      team_member_id:
+        team_member_id === undefined ? undefined : team_member_id || null,
+      service_duration_minutes:
+        service_duration_minutes === undefined
+          ? undefined
+          : Number(service_duration_minutes) || null,
+    });
+
+    if (recheck.needed) {
+      const slotCheck = await assertSlotFree({
+        date: recheck.effective.date.slice(0, 10),
+        time: recheck.effective.time,
+        durationMinutes: recheck.effective.service_duration_minutes,
+        teamMemberId: recheck.effective.team_member_id,
+        excludeBookingId: bookingId,
+      });
+
+      if (!slotCheck.ok) {
+        return NextResponse.json(
+          { error: slotCheck.adminMessage, code: "SLOT_TAKEN" },
+          { status: 409 },
+        );
+      }
     }
 
     const parsedAmount = parseFloat(amount);
@@ -883,6 +934,13 @@ export async function PUT(request: NextRequest) {
       updateData.remaining_amount = parseFloat(remaining_amount);
     if (payment_type) updateData.payment_type = payment_type;
     if (payment_method) updateData.payment_method = payment_method;
+    if (team_member_id !== undefined) {
+      updateData.team_member_id = team_member_id || null;
+    }
+    if (service_duration_minutes !== undefined) {
+      updateData.service_duration_minutes =
+        Number(service_duration_minutes) || null;
+    }
 
     const { data: booking, error } = await supabaseAdmin
       .from("bookings")

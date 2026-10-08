@@ -2,8 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { supabaseAdmin } from "@/lib/supabase";
 
+import { requireAdmin } from "@/lib/admin-auth";
+
 // GET - Retrieve press page enabled setting
 export async function GET() {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const { data, error } = await supabaseAdmin
       .from("admin_settings")
@@ -38,6 +44,10 @@ export async function GET() {
 
 // PUT - Update press page enabled setting
 export async function PUT(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const body = await request.json();
     const { enabled } = body;

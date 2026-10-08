@@ -2,9 +2,12 @@
 
 import type { DragEvent } from "react";
 import type { AdminCalendarBooking } from "./calendar-types";
+import type { PractitionerBadge } from "@/lib/calendar-practitioners";
 
 import clsx from "clsx";
 import { AlertCircle, CheckCircle, Clock, XCircle } from "lucide-react";
+
+import { PractitionerAvatar } from "./practitioner-avatar";
 
 function statusMeta(status: AdminCalendarBooking["status"]) {
   switch (status) {
@@ -64,6 +67,8 @@ export interface BookingEventPillProps {
   /** Month view drag-and-drop; week view uses pointer only. */
   draggable?: boolean;
   isDragging: boolean;
+  /** Practitioner badge; `null` = unassigned, `undefined` = do not show. */
+  practitioner?: PractitionerBadge | null;
   onBookingClick: (booking: AdminCalendarBooking) => void;
   onDragStart: (e: DragEvent, booking: AdminCalendarBooking) => void;
   onDragEnd: (e: DragEvent) => void;
@@ -75,6 +80,7 @@ export function BookingEventPill({
   variant,
   draggable = true,
   isDragging,
+  practitioner,
   onBookingClick,
   onDragStart,
   onDragEnd,
@@ -85,7 +91,7 @@ export function BookingEventPill({
   return (
     <div
       className={clsx(
-        "group rounded-lg border px-1.5 py-1 text-left shadow-sm transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:ring-offset-background",
+        "group relative overflow-hidden rounded-lg border px-1.5 py-1 text-left shadow-sm transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:ring-offset-background",
         cursorClass,
         meta.pill,
         isDragging && "opacity-50",
@@ -95,11 +101,11 @@ export function BookingEventPill({
       draggable={draggable}
       role="button"
       tabIndex={0}
-      title={
-        draggable
-          ? `${formatTime(booking.time)} — ${booking.customer_name} (${booking.service}) — £${booking.amount}. Drag to move.`
-          : `${formatTime(booking.time)} — ${booking.customer_name} (${booking.service}) — £${booking.amount}.`
-      }
+      title={`${formatTime(booking.time)} — ${booking.customer_name} (${booking.service}) — £${booking.amount}${
+        practitioner !== undefined
+          ? ` — ${practitioner ? practitioner.name : "No practitioner assigned"}`
+          : ""
+      }.${draggable ? " Drag to move." : ""}`}
       onClick={(e) => {
         e.stopPropagation();
         onBookingClick(booking);
@@ -114,7 +120,21 @@ export function BookingEventPill({
         }
       }}
     >
-      <div className="flex min-w-0 items-start gap-1">
+      {practitioner ? (
+        <span
+          aria-hidden
+          className={clsx(
+            "absolute inset-y-0 left-0 w-1",
+            practitioner.color.dot,
+          )}
+        />
+      ) : null}
+      <div
+        className={clsx(
+          "flex min-w-0 items-start gap-1",
+          practitioner && "pl-1",
+        )}
+      >
         <span aria-hidden className="mt-0.5 shrink-0 text-default-500">
           <Clock className="h-3 w-3" />
         </span>
@@ -133,6 +153,25 @@ export function BookingEventPill({
             <span className="min-w-0 flex-1 truncate text-[10px] font-semibold sm:text-xs">
               {booking.customer_name}
             </span>
+            {practitioner !== undefined ? (
+              <span className="inline-flex shrink-0 items-center">
+                {practitioner ? (
+                  <PractitionerAvatar
+                    color={practitioner.color}
+                    imageUrl={practitioner.imageUrl}
+                    name={practitioner.name}
+                    size="xs"
+                  />
+                ) : (
+                  <PractitionerAvatar name="Unassigned" size="xs" />
+                )}
+                <span className="sr-only">
+                  {practitioner
+                    ? `, ${practitioner.name}`
+                    : ", no practitioner assigned"}
+                </span>
+              </span>
+            ) : null}
           </div>
           <div className="max-h-0 overflow-hidden opacity-0 transition-[max-height,opacity] duration-200 group-hover:max-h-8 group-hover:opacity-90 sm:max-h-none sm:opacity-100">
             <div className="truncate text-[10px] text-default-600 dark:text-default-400 sm:text-[11px]">

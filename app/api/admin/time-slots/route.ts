@@ -4,6 +4,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { isDayOffFeatureEnabled } from "@/config/feature-flags";
 import { supabaseAdmin } from "../../../../lib/supabase";
+import {
+  DEFAULT_DURATION_MINUTES,
+  OCCUPYING_STATUSES,
+  findOverlap,
+} from "@/lib/booking-availability";
 import { isOnlineBookingBlackoutByRules } from "@/lib/booking-blackout-rules";
 import { fetchBookingBlackoutRulesFromDb } from "@/lib/booking-blackout-rules-db";
 import { fetchBookingClosedWeekdaysFromDb } from "@/lib/booking-closed-weekdays-db";
@@ -40,22 +45,13 @@ function addMinutes(date: Date, minutes: number) {
   return next;
 }
 
-async function getBookingsBetween(
-  startDate: string,
-  endDate: string,
-  teamMemberId: string | null,
-) {
-  let q = supabaseAdmin
+async function getBookingsBetween(startDate: string, endDate: string) {
+  const { data, error } = await supabaseAdmin
     .from("bookings")
-    .select("id, date, time, status, team_member_id")
+    .select("id, date, time, service_duration_minutes, status, team_member_id")
     .gte("date", startDate)
-    .lte("date", endDate);
-
-  if (teamMemberId) {
-    q = q.eq("team_member_id", teamMemberId);
-  }
-
-  const { data, error } = await q;
+    .lte("date", endDate)
+    .in("status", [...OCCUPYING_STATUSES]);
 
   if (error) {
     throw error;
@@ -64,18 +60,22 @@ async function getBookingsBetween(
   return data ?? [];
 }
 
-function isSlotBooked(bookings: any[], date: string, time: string) {
-  return bookings.some((booking) => {
-    if (!booking || !booking.time || !booking.date) return false;
-
-    const matchesDate = booking.date === date;
-    const normalizedTime =
-      booking.time.length > 5 ? booking.time.slice(0, 5) : booking.time;
-    const matchesTime = normalizedTime === time;
-    const isCancelled = booking.status === "cancelled";
-
-    return matchesDate && matchesTime && !isCancelled;
-  });
+function isSlotBooked(
+  bookings: any[],
+  date: string,
+  time: string,
+  teamMemberId: string | null,
+  bufferMinutes: number,
+) {
+  return (
+    findOverlap({
+      startTime: time,
+      durationMinutes: DEFAULT_DURATION_MINUTES,
+      bufferMinutes,
+      teamMemberId,
+      bookings: bookings.filter((booking) => booking.date === date),
+    }) !== null
+  );
 }
 
 async function isTeamMemberOnDayOff(
@@ -117,7 +117,7 @@ async function buildSlotsForDate(
     return { date, slots: [], bookedSlots: [], status: "closed" as const };
   }
 
-  const bookings = await getBookingsBetween(date, date, teamMemberId);
+  const bookings = await getBookingsBetween(date, date);
   const slots: Array<{
     start_time: string;
     end_time: string;
@@ -137,7 +137,13 @@ async function buildSlotsForDate(
 
     const slotStartStr = toTimeString(slotStart);
     const slotEndStr = toTimeString(slotEnd);
-    const reserved = isSlotBooked(bookings, date, slotStartStr);
+    const reserved = isSlotBooked(
+      bookings,
+      date,
+      slotStartStr,
+      teamMemberId,
+      workingHour.buffer_minutes ?? 0,
+    );
 
     slots.push({
       start_time: slotStartStr,

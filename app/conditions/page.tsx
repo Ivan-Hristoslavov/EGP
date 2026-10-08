@@ -507,7 +507,7 @@ function ConditionsPageContent() {
 
         {/* Pagination - matches services */}
         {totalPages > 1 && (
-          <div className="flex justify-center items-center gap-2 mt-6">
+          <div className="flex flex-wrap justify-center items-center gap-2 mt-6">
             <Button
               className="border-gray-300 dark:border-gray-600 hover:border-egp-green hover:text-egp-green"
               isDisabled={currentPage === 1}

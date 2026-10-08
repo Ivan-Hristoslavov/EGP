@@ -2,6 +2,7 @@
 
 import type { DragEvent } from "react";
 import type { AdminCalendarBooking } from "./calendar-types";
+import type { PractitionerBadge } from "@/lib/calendar-practitioners";
 
 import React from "react";
 import clsx from "clsx";
@@ -32,6 +33,8 @@ export interface CalendarWeekGridProps {
   onSelectDayGoToDayView: (dayDateStr: string) => void;
   onTimeSlotActivate: (day: Date, timeSlot: string) => void;
   onBookingClick: (booking: AdminCalendarBooking) => void;
+  /** Optional: practitioner badge for a booking (null = unassigned). */
+  getPractitioner?: (booking: AdminCalendarBooking) => PractitionerBadge | null;
 }
 
 export function CalendarWeekGrid({
@@ -42,6 +45,7 @@ export function CalendarWeekGrid({
   onSelectDayGoToDayView,
   onTimeSlotActivate,
   onBookingClick,
+  getPractitioner,
 }: CalendarWeekGridProps) {
   const noopDragStart = (_e: DragEvent, _b: AdminCalendarBooking) => {};
   const noopDragEnd = (_e: DragEvent) => {};
@@ -153,6 +157,7 @@ export function CalendarWeekGrid({
                             draggable={false}
                             formatTime={formatTime}
                             isDragging={false}
+                            practitioner={getPractitioner?.(booking)}
                             variant="week"
                             onBookingClick={onBookingClick}
                             onDragEnd={noopDragEnd}

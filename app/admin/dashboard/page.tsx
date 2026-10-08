@@ -1,12 +1,12 @@
 "use client";
 
-import { Button, Card, CardBody, CardHeader, Chip, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, ScrollShadow, Skeleton, Tooltip } from "@heroui/react";
 import type {
   DashboardAnalytics,
   UpcomingBookingRow,
 } from "@/components/admin/dashboard/analytics-types";
 import type { DailyBookingPoint } from "@/lib/dashboard-analytics";
 
+import { Button, Card, CardBody, CardHeader, Chip, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, ScrollShadow, Skeleton, Tooltip } from "@heroui/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -25,8 +25,14 @@ import {
   Trash2,
 } from "lucide-react";
 
-
+import { useCalendarTeam } from "@/app/admin/calendar/use-calendar-team";
+import { PractitionerAvatar } from "@/components/admin/calendar/practitioner-avatar";
 import { DashboardBookingActivityChart } from "@/components/admin/dashboard/booking-activity-chart";
+import { DashboardTeamToday } from "@/components/admin/dashboard/team-today";
+import {
+  getPractitionerBadge,
+  type PractitionerBadge,
+} from "@/lib/calendar-practitioners";
 import { DashboardBookingDetailModal } from "@/components/admin/dashboard/booking-detail-modal";
 import {
   DashboardNextBookingHero,
@@ -50,6 +56,7 @@ interface Booking {
   status: "scheduled" | "completed" | "cancelled" | "pending" | "confirmed";
   payment_status: "pending" | "paid" | "refunded";
   amount: number;
+  team_member_id?: string | null;
   address: string | null;
   notes: string | null;
   created_at: string;
@@ -68,6 +75,48 @@ interface StatCard {
 
 const getTodayString = () => new Date().toISOString().split("T")[0];
 
+const STAT_STYLES: Record<StatCard["color"], { chip: string; bar: string }> = {
+  primary: {
+    chip: "bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-300",
+    bar: "border-t-primary-500",
+  },
+  success: {
+    chip: "bg-success-100 text-success-600 dark:bg-success-900/30 dark:text-success-300",
+    bar: "border-t-success-500",
+  },
+  warning: {
+    chip: "bg-warning-100 text-warning-600 dark:bg-warning-900/30 dark:text-warning-300",
+    bar: "border-t-warning-500",
+  },
+  danger: {
+    chip: "bg-danger-100 text-danger-600 dark:bg-danger-900/30 dark:text-danger-300",
+    bar: "border-t-danger-500",
+  },
+  secondary: {
+    chip: "bg-secondary-100 text-secondary-600 dark:bg-secondary-900/30 dark:text-secondary-300",
+    bar: "border-t-secondary-500",
+  },
+};
+
+/** Who does the treatment: photo + name, or a muted "Unassigned". */
+function PractitionerTag({ badge }: { badge: PractitionerBadge | null }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-default-600">
+      {badge ? (
+        <PractitionerAvatar
+          color={badge.color}
+          imageUrl={badge.imageUrl}
+          name={badge.name}
+          size="xs"
+        />
+      ) : (
+        <PractitionerAvatar name="Unassigned" size="xs" />
+      )}
+      {badge ? badge.name : "Unassigned"}
+    </span>
+  );
+}
+
 const emptyAnalytics: DashboardAnalytics = {
   booking_series_7d: [],
   booking_series_30d: [],
@@ -85,6 +134,7 @@ function shortDay(iso: string) {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { members: teamMembers } = useCalendarTeam();
   const [selectedDate, setSelectedDate] = useState(getTodayString());
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -297,6 +347,7 @@ export default function DashboardPage() {
     {
       title: "Active clients",
       value: stats.active_clients.toString(),
+      subtitle: "Booked or paid in the last 90 days",
       change: "0%",
       changeType: "neutral",
       icon: Users,
@@ -408,8 +459,45 @@ export default function DashboardPage() {
     );
   }
 
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+
   return (
     <div className="w-full space-y-5 sm:space-y-7">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm font-medium text-default-500">
+            {new Date().toLocaleDateString(undefined, {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+            })}
+          </p>
+          <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            {greeting}
+          </h2>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            className="min-h-[44px] font-semibold"
+            color="primary"
+            startContent={<Plus className="h-4 w-4" />}
+            onPress={() => router.push("/admin/bookings")}
+          >
+            New booking
+          </Button>
+          <Button
+            className="min-h-[44px] font-semibold"
+            startContent={<Calendar className="h-4 w-4" />}
+            variant="bordered"
+            onPress={() => router.push("/admin/calendar")}
+          >
+            Open calendar
+          </Button>
+        </div>
+      </header>
+
       <motion.div
         animate={{ opacity: 1, y: 0 }}
         className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4"
@@ -418,6 +506,7 @@ export default function DashboardPage() {
       >
         {statCards.map((stat, index) => {
           const Icon = stat.icon;
+          const style = STAT_STYLES[stat.color];
 
           return (
             <motion.div
@@ -426,58 +515,38 @@ export default function DashboardPage() {
               initial={{ opacity: 0, y: 8 }}
               transition={{ delay: index * 0.04, duration: 0.3 }}
             >
-              <Card className="border border-divider shadow-sm transition-transform hover:-translate-y-0.5">
-                <CardBody className="p-4 sm:p-5">
-                  <div className="mb-2 flex items-center justify-between gap-2 sm:mb-3">
-                    <div
-                      className={`flex-shrink-0 rounded-lg p-2 sm:p-2.5 ${
-                        stat.color === "primary"
-                          ? "bg-primary-100 dark:bg-primary-900/20"
-                          : stat.color === "success"
-                            ? "bg-success-100 dark:bg-success-900/20"
-                            : stat.color === "warning"
-                              ? "bg-warning-100 dark:bg-warning-900/20"
-                              : stat.color === "danger"
-                                ? "bg-danger-100 dark:bg-danger-900/20"
-                                : "bg-default-100 dark:bg-default-900/20"
-                      }`}
+              <Card
+                className={`h-full border border-divider border-t-[3px] shadow-sm transition-transform hover:-translate-y-0.5 ${style.bar}`}
+              >
+                <CardBody className="gap-1 p-4 sm:p-5">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-default-500 sm:text-xs">
+                      {stat.title}
+                    </p>
+                    <span
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${style.chip}`}
                     >
-                      <Icon
-                        className={`h-5 w-5 sm:h-6 sm:w-6 ${
-                          stat.color === "primary"
-                            ? "text-primary-600 dark:text-primary-400"
-                            : stat.color === "success"
-                              ? "text-success-600 dark:text-success-400"
-                              : stat.color === "warning"
-                                ? "text-warning-600 dark:text-warning-400"
-                                : stat.color === "danger"
-                                  ? "text-danger-600 dark:text-danger-400"
-                                  : "text-default-600 dark:text-default-400"
-                        }`}
-                      />
-                    </div>
-                    {stat.changeType !== "neutral" ? (
-                      <Chip
-                        className="flex-shrink-0"
-                        color={stat.changeType === "up" ? "success" : "danger"}
-                        size="sm"
-                        variant="flat"
-                      >
-                        {stat.change}
-                      </Chip>
-                    ) : null}
+                      <Icon aria-hidden className="h-4 w-4" />
+                    </span>
                   </div>
-                  <h3 className="mb-0.5 truncate text-lg font-bold sm:text-xl">
+                  <p className="mt-1 truncate text-2xl font-bold tabular-nums sm:text-3xl">
                     {stat.value}
-                  </h3>
+                  </p>
                   {stat.subtitle ? (
-                    <p className="mb-0.5 line-clamp-2 text-[10px] text-default-400 sm:text-xs">
+                    <p className="line-clamp-2 text-xs text-default-500">
                       {stat.subtitle}
                     </p>
                   ) : null}
-                  <p className="truncate text-[10px] text-default-500 sm:text-xs">
-                    {stat.title}
-                  </p>
+                  {stat.changeType !== "neutral" ? (
+                    <Chip
+                      className="mt-1 w-fit"
+                      color={stat.changeType === "up" ? "success" : "danger"}
+                      size="sm"
+                      variant="flat"
+                    >
+                      {stat.change}
+                    </Chip>
+                  ) : null}
                 </CardBody>
               </Card>
             </motion.div>
@@ -485,17 +554,51 @@ export default function DashboardPage() {
         })}
       </motion.div>
 
-      <motion.div
-        animate={{ opacity: 1, y: 0 }}
-        initial={{ opacity: 0, y: 8 }}
-        transition={{ duration: 0.35, delay: 0.08 }}
-      >
-        <DashboardNextBookingHero
-          booking={nextUpcoming}
-          onOpenBookings={() => router.push("/admin/bookings")}
-          onOpenCalendar={() => router.push("/admin/calendar")}
-        />
-      </motion.div>
+      <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3 lg:gap-6">
+        <motion.div
+          animate={{ opacity: 1, y: 0 }}
+          className="lg:col-span-2"
+          initial={{ opacity: 0, y: 8 }}
+          transition={{ duration: 0.35, delay: 0.08 }}
+        >
+          <DashboardNextBookingHero
+            booking={nextUpcoming}
+            practitioner={
+              teamMembers.length > 0 && nextUpcoming
+                ? getPractitionerBadge(teamMembers, nextUpcoming.team_member_id)
+                : undefined
+            }
+            onOpenBookings={() => router.push("/admin/bookings")}
+            onOpenCalendar={() => router.push("/admin/calendar")}
+          />
+        </motion.div>
+        <motion.div
+          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 8 }}
+          transition={{ duration: 0.35, delay: 0.1 }}
+        >
+          <DashboardTeamToday
+            bookings={todayBookings}
+            date={selectedDate}
+            dayLabel={
+              selectedDate === getTodayString()
+                ? "Today"
+                : new Date(selectedDate).toLocaleDateString(undefined, {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                  })
+            }
+            members={teamMembers}
+            nowMinutes={
+              selectedDate === getTodayString()
+                ? new Date().getHours() * 60 + new Date().getMinutes()
+                : null
+            }
+            onOpenCalendar={() => router.push("/admin/calendar")}
+          />
+        </motion.div>
+      </div>
 
       <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3 lg:gap-6">
         <motion.div
@@ -552,7 +655,7 @@ export default function DashboardPage() {
                 </Button>
               </div>
             </CardHeader>
-            <CardBody className="flex min-h-0 flex-1 flex-col space-y-8 p-4 sm:p-6">
+            <CardBody className="flex min-h-0 flex-1 flex-col space-y-6 p-4 sm:p-6">
               <section aria-labelledby="dash-timeline-heading">
                 <h3
                   className="mb-3 text-xs font-semibold uppercase tracking-wide text-default-500"
@@ -561,26 +664,21 @@ export default function DashboardPage() {
                   Timeline
                 </h3>
                 {sortedToday.length === 0 ? (
-                  <div className="flex flex-col items-center rounded-xl border border-dashed border-default-200 py-10 text-center dark:border-default-100/25">
-                    <motion.div
-                      animate={{ scale: [1, 1.04, 1] }}
-                      transition={{
-                        duration: 2.4,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                      }}
-                    >
-                      <Calendar className="mx-auto mb-3 h-12 w-12 text-default-300 sm:h-14 sm:w-14" />
-                    </motion.div>
-                    <p className="text-sm font-medium text-default-600">
-                      Nothing on the schedule
-                    </p>
-                    <p className="mt-1 max-w-sm text-xs text-default-500">
-                      Choose another date in the header or create a booking —
-                      this panel stays calm when the day is clear.
-                    </p>
+                  <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-default-200 px-4 py-6 text-center dark:border-default-100/25 sm:flex-row sm:text-left">
+                    <Calendar
+                      aria-hidden
+                      className="h-8 w-8 shrink-0 text-default-300"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-default-700 dark:text-default-200">
+                        Nothing scheduled for this day
+                      </p>
+                      <p className="text-xs text-default-500">
+                        Pick another date above, or add a booking.
+                      </p>
+                    </div>
                     <Button
-                      className="mt-4"
+                      className="min-h-[44px]"
                       color="primary"
                       size="sm"
                       variant="flat"
@@ -600,7 +698,7 @@ export default function DashboardPage() {
                         <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
                           <div>
                             <p className="text-xs font-medium uppercase tracking-wide text-default-400">
-                              {booking.time}
+                              {booking.time.slice(0, 5)}
                             </p>
                             <p className="font-semibold text-default-800 dark:text-default-100">
                               {booking.customer_name}
@@ -608,6 +706,16 @@ export default function DashboardPage() {
                             <p className="text-sm text-default-500">
                               {booking.service}
                             </p>
+                            {teamMembers.length > 0 ? (
+                              <div className="mt-1">
+                                <PractitionerTag
+                                  badge={getPractitionerBadge(
+                                    teamMembers,
+                                    booking.team_member_id,
+                                  )}
+                                />
+                              </div>
+                            ) : null}
                           </div>
                           <Chip
                             classNames={{ base: "shrink-0" }}
@@ -625,7 +733,13 @@ export default function DashboardPage() {
                 )}
               </section>
 
-              <div className="border-t border-divider pt-8">
+              <div
+                className={
+                  todayBookings.length === 0
+                    ? "hidden"
+                    : "border-t border-divider pt-6"
+                }
+              >
                 <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-default-500">
                   Appointments
                 </h3>
@@ -657,8 +771,16 @@ export default function DashboardPage() {
                                   {booking.customer_name}
                                 </h4>
                                 <p className="truncate text-sm text-default-500">
-                                  {booking.service} • {booking.time}
+                                  {booking.service} • {booking.time.slice(0, 5)}
                                 </p>
+                                {teamMembers.length > 0 ? (
+                                  <PractitionerTag
+                                    badge={getPractitionerBadge(
+                                      teamMembers,
+                                      booking.team_member_id,
+                                    )}
+                                  />
+                                ) : null}
                               </div>
                             </div>
                             <div className="flex items-center gap-4">
@@ -860,22 +982,18 @@ export default function DashboardPage() {
         initial={{ opacity: 0, y: 8 }}
         transition={{ duration: 0.35, delay: 0.22 }}
       >
-        <Card className="flex h-full flex-col border border-divider shadow-sm">
-          <CardHeader className="border-b border-divider p-4 sm:p-6">
-            <h2 className={`${typography.headingCard} ${textColors.heading}`}>
-              Calendar &amp; hours
-            </h2>
-            <p className="text-xs text-default-500">
-              Month, week, and day views plus closed weekdays and slot
-              generation.
-            </p>
-          </CardHeader>
-          <CardBody className="flex flex-1 flex-col justify-between gap-4 p-4 sm:p-6">
-            <p className="text-sm text-default-600">
-              Configure which weekdays block online booking, edit weekly hours,
-              and regenerate slots from the calendar page.
-            </p>
+        <Card className="border border-divider shadow-sm">
+          <CardBody className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+            <div>
+              <h2 className="text-base font-semibold">
+                Hours &amp; availability
+              </h2>
+              <p className="text-sm text-default-500">
+                Weekly hours, closed weekdays and online booking slots.
+              </p>
+            </div>
             <Button
+              className="min-h-[44px]"
               color="primary"
               startContent={<Calendar className="h-4 w-4" />}
               variant="flat"

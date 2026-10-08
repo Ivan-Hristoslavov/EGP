@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
 
 import { createClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase";
 import { siteConfig } from "@/config/site";
 
 const baseUrl = () => siteConfig.url.replace(/\/$/, "");
@@ -25,15 +26,33 @@ function entry(
   return item;
 }
 
+/** Same rule as the /press page: on unless switched off in the admin. */
+async function isPressPageEnabled(): Promise<boolean> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("admin_settings")
+      .select("value")
+      .eq("key", "press_page_enabled")
+      .single();
+
+    if (error) return error.code === "PGRST116";
+
+    return data?.value === true || data?.value === "true";
+  } catch {
+    return false;
+  }
+}
+
+// Service slugs that have their own page which redirects elsewhere.
+const REDIRECTED_SERVICE_SLUGS = new Set(["anti-wrinkle-injections"]);
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries: MetadataRoute.Sitemap = [
     entry("/", { changeFrequency: "weekly", priority: 1 }),
     entry("/about", { changeFrequency: "monthly", priority: 0.85 }),
     entry("/services", { changeFrequency: "weekly", priority: 0.95 }),
     entry("/blog", { changeFrequency: "weekly", priority: 0.75 }),
-    entry("/press", { changeFrequency: "monthly", priority: 0.6 }),
     entry("/find-us", { changeFrequency: "monthly", priority: 0.7 }),
-    entry("/membership/signup", { changeFrequency: "monthly", priority: 0.65 }),
     entry("/book", { changeFrequency: "weekly", priority: 0.95 }),
     entry("/book/new", { changeFrequency: "weekly", priority: 0.85 }),
     entry("/book-consultation", { changeFrequency: "monthly", priority: 0.8 }),
@@ -51,10 +70,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry("/services/baby-botox", {
       changeFrequency: "monthly",
       priority: 0.75,
-    }),
-    entry("/services/anti-wrinkle-injections", {
-      changeFrequency: "monthly",
-      priority: 0.8,
     }),
     entry("/services/free-discovery-consultation", {
       changeFrequency: "monthly",
@@ -107,6 +122,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
 
   const dynamic: MetadataRoute.Sitemap = [];
+  let conditionsFromDb = false;
 
   try {
     const supabase = createClient();
@@ -133,7 +149,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .eq("is_active", true);
 
     for (const s of services || []) {
-      if (!s.slug) continue;
+      if (!s.slug || REDIRECTED_SERVICE_SLUGS.has(s.slug)) continue;
       const last = s.updated_at;
 
       dynamic.push(
@@ -150,10 +166,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .select("slug, updated_at")
       .eq("is_active", true);
 
+    // The database is the truth; the fixed list below is only a fallback when it cannot be read.
+    conditionsFromDb = (conditions || []).length > 0;
+
     for (const c of conditions || []) {
       if (!c.slug) continue;
-      if (faceConditions.includes(c.slug) || bodyConditions.includes(c.slug))
-        continue;
       const last = c.updated_at;
 
       dynamic.push(
@@ -168,7 +185,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Build without DB (e.g. missing env in CI)
   }
 
-  const merged = [...staticEntries, ...conditionPages, ...dynamic];
+  const pressEntries: MetadataRoute.Sitemap = (await isPressPageEnabled())
+    ? [entry("/press", { changeFrequency: "monthly", priority: 0.6 })]
+    : [];
+  const merged = [
+    ...staticEntries,
+    ...pressEntries,
+    ...(conditionsFromDb ? [] : conditionPages),
+    ...dynamic,
+  ];
   const seen = new Set<string>();
 
   return merged.filter((item) => {

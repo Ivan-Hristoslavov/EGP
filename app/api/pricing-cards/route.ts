@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase";
+
+import { requireAdmin } from "@/lib/admin-auth";
 
 export async function GET(request: NextRequest) {
   try {
@@ -23,6 +26,10 @@ export async function GET(request: NextRequest) {
     const { data: pricingCards, error } = await query;
 
     if (error) {
+      // The pricing_cards table was never created in this project: show no cards.
+      if (error.code === "PGRST205") {
+        return NextResponse.json({ pricingCards: [] });
+      }
       console.error("Error fetching pricing cards:", error);
 
       return NextResponse.json(
@@ -43,6 +50,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const supabase = createClient();
     const body = await request.json();
@@ -58,7 +69,7 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Get admin profile ID (assuming there's only one admin)
-    const { data: adminProfile, error: adminError } = await supabase
+    const { data: adminProfile, error: adminError } = await supabaseAdmin
       .from("admin_profile")
       .select("id")
       .single();

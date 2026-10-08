@@ -11,6 +11,8 @@ import {
   parseBookingClosedWeekdays,
 } from "@/lib/booking-closed-weekdays";
 
+
+import { requireAdmin } from "@/lib/admin-auth";
 const DAY_KEYS = [
   "sunday",
   "monday",
@@ -76,6 +78,10 @@ async function persistNormalizedHours(hours: NormalizedHours) {
 
 // GET - Fetch working hours
 export async function GET() {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const { data: workingHours, error } = await supabaseAdmin
       .from("working_hours")
@@ -131,6 +137,10 @@ export async function GET() {
 
 // PUT - Update working hours
 export async function PUT(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const body = await request.json();
     const { workingHours, bookingClosedWeekdays, bookingBlackoutRules } = body;

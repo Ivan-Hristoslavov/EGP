@@ -20,6 +20,10 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const { id: customerId } = await params;
 
@@ -223,6 +227,10 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const { id: customerId } = await params;
 

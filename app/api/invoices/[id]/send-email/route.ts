@@ -8,11 +8,17 @@ import { createPaymentLink, isStripeAvailable } from "@/lib/stripe";
 import { sendEmail, EmailAttachment } from "@/lib/sendgrid-smtp";
 import { generateInvoicePDF } from "@/lib/invoice-pdf-generator";
 
+import { requireAdmin } from "@/lib/admin-auth";
+
 // POST - Send invoice email
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const { id } = await params;
     const body = await request.json();

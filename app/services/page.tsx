@@ -26,6 +26,7 @@ import {
 
 import { typography, layout, textColors } from "@/config/typography";
 import { useServices } from "@/hooks/useServices";
+import { formatCategoryLabel } from "@/lib/category-label";
 import { PriceWithDiscount } from "@/components/PriceWithDiscount";
 import { ServiceDetailsModal } from "@/components/ServiceDetailsModal";
 
@@ -287,7 +288,11 @@ function ServicesPageContent() {
                   }}
                 >
                   {categories.map((category) => (
-                    <SelectItem key={category}>{category}</SelectItem>
+                    <SelectItem key={category}>
+                      {category === "All"
+                        ? category
+                        : formatCategoryLabel(category)}
+                    </SelectItem>
                   ))}
                 </Select>
 
@@ -411,7 +416,7 @@ function ServicesPageContent() {
                       size="sm"
                       variant="flat"
                     >
-                      {service.category}
+                      {formatCategoryLabel(service.category)}
                     </Chip>
                     <Chip
                       className="bg-white/90 dark:bg-egp-green-dark/90 text-egp-green dark:text-white text-[8px] h-5"
@@ -534,7 +539,7 @@ function ServicesPageContent() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex justify-center items-center gap-2 mt-6">
+          <div className="flex flex-wrap justify-center items-center gap-2 mt-6">
             <Button
               className="border-gray-300 dark:border-gray-600 hover:border-egp-green hover:text-egp-green"
               isDisabled={currentPage === 1}

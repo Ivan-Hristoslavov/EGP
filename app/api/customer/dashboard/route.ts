@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
 import { supabase } from "@/lib/supabase";
+import { getJwtSecret } from "@/lib/jwt-secret";
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
     // Verify JWT token
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || "fallback-secret",
+      getJwtSecret(),
     ) as any;
 
     if (decoded.type !== "customer") {

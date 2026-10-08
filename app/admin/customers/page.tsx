@@ -1,8 +1,22 @@
 "use client";
 
-import { Button, Card, CardBody, CardHeader, Chip, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, Spinner } from "@heroui/react";
+import {
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Chip,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Select,
+  SelectItem,
+  Spinner,
+} from "@heroui/react";
 import { useState, useEffect, useMemo } from "react";
-
 import {
   Users,
   Plus,
@@ -522,7 +536,7 @@ export default function CustomersPage() {
           {/* Combined: Total Customers + Search & filters (close to table) */}
           <Card className="border border-divider">
             <CardBody className="p-4">
-              <div className="flex flex-row flex-wrap items-center gap-3">
+              <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center">
                 <div className="flex items-center gap-4 flex-shrink-0">
                   <div className="p-3 bg-primary-100 dark:bg-primary-900/20 rounded-lg">
                     <Users className="w-6 h-6 text-primary-600 dark:text-primary-400" />
@@ -534,10 +548,10 @@ export default function CustomersPage() {
                     <p className="text-sm text-default-500">Total Customers</p>
                   </div>
                 </div>
-                <div className="flex flex-1 min-w-0 items-center gap-2 flex-wrap">
+                <div className="grid w-full min-w-0 flex-1 grid-cols-2 gap-2 lg:flex lg:w-auto lg:flex-wrap lg:items-center">
                   <Input
                     isClearable
-                    className="w-full sm:min-w-[180px] sm:max-w-[280px]"
+                    className="col-span-2 w-full lg:col-auto lg:min-w-[220px] lg:max-w-[320px]"
                     classNames={{ input: "text-sm" }}
                     placeholder="Search by name, email, or phone..."
                     size="sm"
@@ -550,7 +564,7 @@ export default function CustomersPage() {
                   />
                   <Select
                     aria-label="Sort customers"
-                    className="max-w-[140px] flex-shrink-0"
+                    className="w-full lg:max-w-[140px] lg:flex-shrink-0"
                     label="Sort"
                     placeholder="Sort by"
                     selectedKeys={sort ? [sort] : ["newest"]}
@@ -568,7 +582,7 @@ export default function CustomersPage() {
                   </Select>
                   <Select
                     aria-label="Filter by discount code"
-                    className="max-w-[160px] flex-shrink-0"
+                    className="w-full lg:max-w-[160px] lg:flex-shrink-0"
                     label="Discount code"
                     placeholder="Filter"
                     selectedKeys={hasDiscountCode ? [hasDiscountCode] : ["all"]}
