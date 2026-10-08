@@ -1,10 +1,10 @@
 "use client";
 
-import { useAdminProfile } from "@/hooks/useAdminProfile";
+import { useAdminProfile } from "@/components/AdminProfileContext";
 import { siteConfig } from "@/config/site";
 
 export function ButtonCallNow() {
-  const { profile, loading, error } = useAdminProfile();
+  const profile = useAdminProfile();
 
   const phone = profile?.phone || siteConfig.contact.phone;
 

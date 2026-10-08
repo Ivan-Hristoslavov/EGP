@@ -58,7 +58,7 @@ export default function CustomerDashboardPage() {
     const token = localStorage.getItem("customer_token");
 
     if (!token) {
-      router.push("/customer/login");
+      router.push("/");
 
       return;
     }
@@ -84,7 +84,7 @@ export default function CustomerDashboardPage() {
         // Token expired or invalid
         localStorage.removeItem("customer_token");
         localStorage.removeItem("customer_id");
-        router.push("/customer/login");
+        router.push("/");
       }
     } catch (error) {
       console.error("Error loading customer data:", error);
@@ -151,9 +151,9 @@ export default function CustomerDashboardPage() {
           </p>
           <button
             className="mt-4 text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300"
-            onClick={() => router.push("/customer/login")}
+            onClick={() => router.push("/")}
           >
-            Back to Login
+            Back to home
           </button>
         </div>
       </div>

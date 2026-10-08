@@ -5,7 +5,12 @@ import { Clock, ArrowRight } from "lucide-react";
 
 import ButtonBookNow from "@/components/ButtonBookNow";
 import { typography, layout } from "@/config/typography";
+import { applyLiveServices } from "@/lib/category-services";
+import { loadLiveServices } from "@/lib/category-services-server";
 import { canonicalUrl } from "@/lib/seo";
+
+// Prices and durations come from the database, so this page must not be cached.
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Body Contouring & Sculpting Treatments in London",
@@ -21,7 +26,7 @@ const bodyServices = [
     name: "Body Fat Burning Mesotherapy",
     price: 170,
     duration: 30,
-    slug: "body-mesotherapy",
+    slug: "body-fat-burning-mesotherapy",
     description: "One area 20×20 cm",
     popular: true,
   },
@@ -29,14 +34,14 @@ const bodyServices = [
     name: "Radiofrequency & Ultrasound",
     price: 250,
     duration: 60,
-    slug: "rf-ultrasound",
+    slug: "rf-ultrasound-tightening",
     description: "Skin tightening & anti-cellulite",
   },
   {
     name: "Fat Freezing Treatment",
     price: 200,
     duration: 60,
-    slug: "fat-freezing",
+    slug: "fat-freezing-abolten",
     description: "Abdomen, lose centimetres",
     featured: true,
   },
@@ -44,19 +49,24 @@ const bodyServices = [
     name: "Ultrasound Lift & Tighten",
     price: 190,
     duration: 45,
-    slug: "ultrasound-lift",
+    slug: "ultrasound-lift-tighten",
     description: "Face or body",
   },
   {
     name: "Ultrasound + Mesotherapy Combined",
     price: 350,
     duration: 75,
-    slug: "ultrasound-mesotherapy",
+    slug: "ultrasound-mesotherapy-combined",
     description: "Maximum results",
   },
 ];
 
-export default function BodyTreatmentsPage() {
+export default async function BodyTreatmentsPage() {
+  const services = applyLiveServices(
+    bodyServices,
+    await loadLiveServices(bodyServices.map((service) => service.slug)),
+  );
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero */}
@@ -78,7 +88,7 @@ export default function BodyTreatmentsPage() {
       <section className="py-16">
         <div className={layout.container}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {bodyServices.map((service) => (
+            {services.map((service) => (
               <div
                 key={service.slug}
                 className="group relative bg-white dark:bg-egp-green border-2 border-gray-300 dark:border-egp-green-dark rounded-xl p-5 hover:border-egp-green dark:hover:border-egp-green hover:shadow-xl transition-all duration-300 flex flex-col"
@@ -120,6 +130,11 @@ export default function BodyTreatmentsPage() {
                     </span>
                     <div className="text-lg font-bold text-egp-green dark:text-white">
                       £{service.price}
+                      {service.originalPrice != null && (
+                        <span className="ml-2 text-xs font-normal text-gray-500 line-through">
+                          £{service.originalPrice}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <Link

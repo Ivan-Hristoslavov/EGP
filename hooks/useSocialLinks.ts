@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 
 import { siteConfig } from "@/config/site";
+import { fetchDeduped } from "@/lib/fetch-deduped";
 
 export type SocialLinks = {
   instagram: string;
@@ -30,7 +31,7 @@ export function useSocialLinks() {
     let cancelled = false;
 
     setLoading(true);
-    fetch("/api/social-links")
+    fetchDeduped("/api/social-links")
       .then((res) => (res.ok ? res.json() : defaults))
       .then((data) => {
         if (!cancelled)

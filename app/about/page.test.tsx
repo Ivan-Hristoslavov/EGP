@@ -21,7 +21,6 @@ vi.mock("@/lib/supabase/server", () => ({
 
 vi.mock("next/image", () => ({
   default: function MockImage({ src, alt }: { src: string; alt: string }) {
-    // eslint-disable-next-line @next/next/no-img-element
     return <img alt={alt} src={src} />;
   },
 }));

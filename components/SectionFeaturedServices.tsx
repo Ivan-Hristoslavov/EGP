@@ -14,6 +14,7 @@ import { PriceWithDiscount } from "@/components/PriceWithDiscount";
 import { ServiceDetailsModal } from "@/components/ServiceDetailsModal";
 import { badgeBackgroundClass } from "@/config/badge-styles";
 import ButtonPrimary from "@/components/ButtonPrimary";
+import { formatCategoryLabel } from "@/lib/category-label";
 
 /** Unified cream header gradient for all featured service cards */
 const featuredCardHeaderGradient = "from-[#E6DDD1] via-[#dfd4c8] to-[#cfc4b6]";
@@ -235,9 +236,9 @@ export default function SectionFeaturedServices() {
                   Filter by
                 </span>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:items-center">
                 <button
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                  className={`w-full sm:w-auto px-2 sm:px-4 py-1.5 sm:py-2 rounded-full text-[13px] sm:text-sm font-medium text-center transition-all duration-200 whitespace-nowrap ${
                     selectedCategory === "all"
                       ? "bg-egp-green dark:bg-egp-green-dark text-white shadow-md"
                       : "bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-transparent hover:border-gray-300 dark:hover:border-gray-600"
@@ -248,7 +249,7 @@ export default function SectionFeaturedServices() {
                 </button>
                 {hasDiscountedFeatured && (
                   <button
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-1.5 ${
+                    className={`w-full sm:w-auto px-2 sm:px-4 py-1.5 sm:py-2 rounded-full text-[13px] sm:text-sm font-medium text-center transition-all duration-200 flex items-center justify-center gap-1.5 ${
                       showDiscountedOnly
                         ? "bg-amber-500 dark:bg-amber-600 text-white shadow-md"
                         : "bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-transparent hover:border-gray-300 dark:hover:border-gray-600"
@@ -262,14 +263,14 @@ export default function SectionFeaturedServices() {
                 {availableCategories.map((category) => (
                   <button
                     key={category.id}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                    className={`w-full sm:w-auto px-2 sm:px-4 py-1.5 sm:py-2 rounded-full text-[13px] sm:text-sm font-medium text-center transition-all duration-200 whitespace-nowrap ${
                       selectedCategory === category.id
                         ? "bg-egp-green dark:bg-egp-green-dark text-white shadow-md"
                         : "bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-transparent hover:border-gray-300 dark:hover:border-gray-600"
                     }`}
                     onClick={() => setSelectedCategory(category.id)}
                   >
-                    {category.name}
+                    {formatCategoryLabel(category.name)}
                   </button>
                 ))}
               </div>
@@ -328,7 +329,7 @@ export default function SectionFeaturedServices() {
                   {/* Category Badge */}
                   <div className="absolute top-1.5 right-1.5 sm:top-3 sm:right-3 z-10">
                     <span className="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 bg-white/90 dark:bg-gray-800/90 text-gray-800 dark:text-white text-[9px] sm:text-[10px] font-semibold rounded-full shadow-lg backdrop-blur-sm">
-                      {service.category.name}
+                      {formatCategoryLabel(service.category.name)}
                     </span>
                   </div>
                 </div>
@@ -338,7 +339,7 @@ export default function SectionFeaturedServices() {
                   {/* Category */}
                   <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                     <span className="inline-flex items-center px-2 py-0.5 bg-[#e4d9c8]/60 dark:bg-gray-700/60 text-gray-700 dark:text-gray-200 border border-[#c9c1b0]/40 dark:border-gray-600/50 rounded-md text-xs font-semibold">
-                      {service.category.name}
+                      {formatCategoryLabel(service.category.name)}
                     </span>
                     {service.main_tab && (
                       <span className="text-xs text-gray-500 dark:text-gray-400">

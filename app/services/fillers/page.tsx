@@ -4,7 +4,12 @@ import Link from "next/link";
 import { Clock, ArrowRight } from "lucide-react";
 
 import ButtonBookNow from "@/components/ButtonBookNow";
+import { applyLiveServices } from "@/lib/category-services";
+import { loadLiveServices } from "@/lib/category-services-server";
 import { canonicalUrl } from "@/lib/seo";
+
+// Prices and durations come from the database, so this page must not be cached.
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Dermal Fillers in London | Lip, Cheek & Jawline Enhancement",
@@ -20,7 +25,7 @@ const fillerServices = [
     name: "Cheek & Mid-Face Filler",
     price: 390,
     duration: 45,
-    slug: "cheek-filler",
+    slug: "cheek-mid-face-filler",
     popular: true,
   },
   { name: "Chin Filler", price: 290, duration: 30, slug: "chin-filler" },
@@ -28,13 +33,13 @@ const fillerServices = [
     name: "Filler for Marionette Lines",
     price: 290,
     duration: 30,
-    slug: "marionette-lines",
+    slug: "filler-marionette-lines",
   },
   {
     name: "Filler for Nasolabial Folds",
     price: 290,
     duration: 30,
-    slug: "nasolabial-folds",
+    slug: "filler-nasolabial-folds",
   },
   {
     name: "Jawline Filler",
@@ -55,7 +60,7 @@ const fillerServices = [
     name: "Tear Trough Filler",
     price: 390,
     duration: 45,
-    slug: "tear-trough",
+    slug: "tear-trough-filler",
     popular: true,
   },
   { name: "Temple Filler", price: 290, duration: 30, slug: "temple-filler" },
@@ -67,7 +72,12 @@ const fillerServices = [
   },
 ];
 
-export default function FillersPage() {
+export default async function FillersPage() {
+  const services = applyLiveServices(
+    fillerServices,
+    await loadLiveServices(fillerServices.map((service) => service.slug)),
+  );
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero */}
@@ -89,7 +99,7 @@ export default function FillersPage() {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {fillerServices.map((service) => (
+            {services.map((service) => (
               <div
                 key={service.slug}
                 className="group relative bg-white border-2 border-gray-200 rounded-xl p-5 hover:border-egp-green hover:shadow-xl transition-all duration-300 flex flex-col"
@@ -123,11 +133,16 @@ export default function FillersPage() {
                     <span className="text-xs text-gray-600">From</span>
                     <div className="text-lg font-bold text-egp-green">
                       £{service.price}
+                      {service.originalPrice != null && (
+                        <span className="ml-2 text-xs font-normal text-gray-500 line-through">
+                          £{service.originalPrice}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <Link
                     className="flex items-center gap-2 text-egp-green font-semibold hover:text-egp-green-dark hover:gap-3 transition-all"
-                    href="/book/new"
+                    href={`/book?service=${service.slug}`}
                   >
                     <span>Book</span>
                     <ArrowRight className="w-4 h-4" />

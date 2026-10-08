@@ -15,6 +15,7 @@ import { usePathname } from "next/navigation";
 
 import { useAdminProfile } from "@/components/AdminProfileContext";
 import { useSocialLinks } from "@/hooks/useSocialLinks";
+import { buildWhatsAppUrl, toWhatsAppNumber } from "@/lib/whatsapp";
 
 type QuickAction = {
   id: string;
@@ -41,10 +42,10 @@ export default function FloatingContactButtons() {
   const { socialLinks } = useSocialLinks();
 
   const contactPhone = adminProfile?.phone || "";
-  const whatsappNumber = (adminProfile?.whatsapp || adminProfile?.phone || "")
-    .replace(/\s/g, "")
-    .replace(/\+/g, "");
-  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hi! I'd like to book a treatment.")}`;
+  const whatsappUrl = buildWhatsAppUrl(
+    adminProfile?.whatsapp || adminProfile?.phone,
+    "Hi! I'd like to book a treatment.",
+  );
 
   const quickActions: QuickAction[] = [
     {
@@ -67,7 +68,7 @@ export default function FloatingContactButtons() {
           },
         ]
       : []),
-    ...(whatsappNumber
+    ...(toWhatsAppNumber(adminProfile?.whatsapp || adminProfile?.phone)
       ? [
           {
             id: "whatsapp",

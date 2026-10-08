@@ -28,6 +28,7 @@ import {
   useAdminProfileContext,
 } from "@/components/AdminProfileContext";
 import { useSocialLinks } from "@/hooks/useSocialLinks";
+import { fetchDeduped } from "@/lib/fetch-deduped";
 
 export default function HeaderAesthetics() {
   const { services } = useServices();
@@ -96,7 +97,7 @@ export default function HeaderAesthetics() {
   useEffect(() => {
     const fetchPressPageSetting = async () => {
       try {
-        const response = await fetch("/api/press-settings");
+        const response = await fetchDeduped("/api/press-settings");
 
         if (response.ok) {
           const data = await response.json();
