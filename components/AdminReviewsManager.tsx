@@ -125,15 +125,15 @@ export function AdminReviewsManager() {
   return (
     <div className="w-full space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 md:grid-cols-4">
         <Card className="border border-divider hover:shadow-lg transition-shadow">
-          <CardBody className="p-6">
+          <CardBody className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold mb-1">{totalReviews}</p>
-                <p className="text-xs text-default-500">Total Reviews</p>
+                <p className="mb-1 text-xl font-bold sm:text-2xl">{totalReviews}</p>
+                <p className="text-[11px] leading-tight text-default-500 sm:text-xs">Total Reviews</p>
               </div>
-              <div className="p-3 bg-primary-100 dark:bg-primary-900/20 rounded-xl">
+              <div className="hidden p-3 sm:block bg-primary-100 dark:bg-primary-900/20 rounded-xl">
                 <Star className="w-5 h-5 text-primary-600 dark:text-primary-400" />
               </div>
             </div>
@@ -141,13 +141,13 @@ export function AdminReviewsManager() {
         </Card>
 
         <Card className="border border-divider hover:shadow-lg transition-shadow">
-          <CardBody className="p-6">
+          <CardBody className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold mb-1">{approvedReviews}</p>
-                <p className="text-xs text-default-500">Approved</p>
+                <p className="mb-1 text-xl font-bold sm:text-2xl">{approvedReviews}</p>
+                <p className="text-[11px] leading-tight text-default-500 sm:text-xs">Approved</p>
               </div>
-              <div className="p-3 bg-success-100 dark:bg-success-900/20 rounded-xl">
+              <div className="hidden p-3 sm:block bg-success-100 dark:bg-success-900/20 rounded-xl">
                 <CheckCircle className="w-5 h-5 text-success-600 dark:text-success-400" />
               </div>
             </div>
@@ -155,20 +155,20 @@ export function AdminReviewsManager() {
         </Card>
 
         <Card className="border border-divider hover:shadow-lg transition-shadow">
-          <CardBody className="p-6">
+          <CardBody className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold mb-1">{pendingReviews}</p>
-                <p className="text-xs text-default-500">Pending</p>
+                <p className="mb-1 text-xl font-bold sm:text-2xl">{pendingReviews}</p>
+                <p className="text-[11px] leading-tight text-default-500 sm:text-xs">Pending</p>
               </div>
-              <div className="p-3 bg-warning-100 dark:bg-warning-900/20 rounded-xl">
+              <div className="hidden p-3 sm:block bg-warning-100 dark:bg-warning-900/20 rounded-xl">
                 <AlertCircle className="w-5 h-5 text-warning-600 dark:text-warning-400" />
               </div>
             </div>
           </CardBody>
         </Card>
 
-        <div className="flex items-center justify-center">
+        <div className="col-span-3 flex items-center justify-center md:col-span-1">
           <Button
             color="primary"
             startContent={

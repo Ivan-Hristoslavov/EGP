@@ -878,7 +878,7 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
       <Card>
         <CardBody className="p-6">
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
             <div>
               <h3 className="text-xl font-bold flex items-center gap-2">
                 <User className="w-5 h-5 text-primary" />
@@ -889,6 +889,7 @@ export function TeamManager({ className = "" }: TeamManagerProps) {
               </p>
             </div>
             <Button
+              className="w-full sm:w-auto"
               color="primary"
               startContent={<Plus className="w-4 h-4" />}
               onPress={() => {
@@ -2061,7 +2062,11 @@ function TeamMemberCard({
           {member.experience_years && (
             <div className="flex items-center gap-2 text-default-500">
               <User className="w-4 h-4 flex-shrink-0" />
-              <span>{member.experience_years} experience</span>
+              <span>
+                {/^\d+$/.test(String(member.experience_years).trim())
+                  ? `${member.experience_years} years experience`
+                  : `${member.experience_years} experience`}
+              </span>
             </div>
           )}
         </div>

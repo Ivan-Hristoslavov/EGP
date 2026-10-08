@@ -1,6 +1,21 @@
 "use client";
 
-import { Button, Card, CardBody, Checkbox, Chip, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, Spinner } from "@heroui/react";
+import {
+  Button,
+  Card,
+  CardBody,
+  Checkbox,
+  Chip,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Select,
+  SelectItem,
+  Spinner,
+} from "@heroui/react";
 import { useState, useEffect } from "react";
 import {
   Plus,
@@ -22,7 +37,6 @@ import {
   Table2,
   Grid3x3,
 } from "lucide-react";
-
 
 import { useToast } from "@/components/Toast";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -718,119 +732,9 @@ export default function PaymentsPage() {
         </Button>
       </div>
 
-      {/* Deposit options — single compact row (wraps only on very narrow screens) */}
-      <Card className="border border-divider">
-        <CardBody className="p-2 sm:p-3">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 sm:gap-x-3">
-            <h3 className="text-xs font-semibold text-foreground shrink-0">
-              Deposit options
-            </h3>
-            <Checkbox
-              classNames={{
-                base: "shrink-0 max-w-none",
-                label: "text-xs whitespace-nowrap",
-              }}
-              isSelected={depositSettings.enabled}
-              size="sm"
-              onValueChange={(v) => handleDepositSettingsChange({ enabled: v })}
-            >
-              Allow deposit only (rest on arrival)
-            </Checkbox>
-            {depositSettings.enabled && (
-              <>
-                <div className="flex items-center gap-2 shrink-0">
-                  <label className="flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
-                    <input
-                      checked={depositSettings.type === "percentage"}
-                      className="rounded-full w-3.5 h-3.5 shrink-0"
-                      name="depositType"
-                      type="radio"
-                      onChange={() =>
-                        handleDepositSettingsChange({ type: "percentage" })
-                      }
-                    />
-                    <span className="text-xs">%</span>
-                  </label>
-                  <label className="flex items-center gap-1.5 cursor-pointer">
-                    <input
-                      checked={depositSettings.type === "fixed"}
-                      className="rounded-full w-3.5 h-3.5 shrink-0"
-                      name="depositType"
-                      type="radio"
-                      onChange={() =>
-                        handleDepositSettingsChange({ type: "fixed" })
-                      }
-                    />
-                    <span className="text-xs whitespace-nowrap">£ Fixed</span>
-                  </label>
-                </div>
-                {depositSettings.type === "percentage" ? (
-                  <Input
-                    className="w-[4.5rem] min-w-0 shrink"
-                    classNames={{
-                      inputWrapper: "min-h-8 h-8",
-                      input: "text-xs",
-                    }}
-                    endContent="%"
-                    max={100}
-                    min={1}
-                    placeholder="50"
-                    size="sm"
-                    type="number"
-                    value={String(depositSettings.percentage ?? "")}
-                    onChange={(e) =>
-                      handleDepositSettingsChange({
-                        percentage: e.target.value
-                          ? Number(e.target.value)
-                          : null,
-                      })
-                    }
-                  />
-                ) : (
-                  <Input
-                    className="w-[5.5rem] min-w-0 shrink"
-                    classNames={{
-                      inputWrapper: "min-h-8 h-8",
-                      input: "text-xs",
-                    }}
-                    min={0}
-                    placeholder="100"
-                    size="sm"
-                    startContent={
-                      <span className="text-default-500 text-xs">£</span>
-                    }
-                    step={0.01}
-                    type="number"
-                    value={String(depositSettings.fixedAmount ?? "")}
-                    onChange={(e) =>
-                      handleDepositSettingsChange({
-                        fixedAmount: e.target.value
-                          ? Number(e.target.value)
-                          : null,
-                      })
-                    }
-                  />
-                )}
-              </>
-            )}
-            <Button
-              className="min-h-8 h-8 px-2.5 text-xs shrink-0 ml-auto"
-              color="primary"
-              isLoading={isSavingDeposit}
-              size="sm"
-              startContent={!isSavingDeposit && <Save className="w-3 h-3" />}
-              variant="flat"
-              onPress={handleSaveDepositSettings}
-            >
-              {isSavingDeposit ? "Saving..." : "Save deposit settings"}
-            </Button>
-          </div>
-        </CardBody>
-      </Card>
-
       {/* Summary Cards - compact for mobile */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-        <Card className="border border-divider bg-emerald-50/50 dark:bg-emerald-950/20">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+        <Card className="col-span-2 border border-divider bg-emerald-50/50 dark:bg-emerald-950/20 sm:col-span-1">
           <CardBody className="p-4 sm:p-5">
             <div className="flex items-center justify-between gap-2">
               <div className="min-w-0">
@@ -884,6 +788,135 @@ export default function PaymentsPage() {
           </CardBody>
         </Card>
       </div>
+
+      <details className="group rounded-xl border border-divider bg-content1 shadow-sm">
+        <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between gap-2 px-4 py-2 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary [&::-webkit-details-marker]:hidden">
+          <span>Deposit settings for online booking</span>
+          <span
+            aria-hidden
+            className="text-default-400 transition-transform group-open:rotate-180"
+          >
+            ⌄
+          </span>
+        </summary>
+        <div className="border-t border-divider p-2">
+          {/* Deposit options — single compact row (wraps only on very narrow screens) */}
+          <Card className="border border-divider">
+            <CardBody className="p-2 sm:p-3">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 sm:gap-x-3">
+                <h3 className="text-xs font-semibold text-foreground shrink-0">
+                  Deposit options
+                </h3>
+                <Checkbox
+                  classNames={{
+                    base: "shrink-0 max-w-none",
+                    label: "text-xs whitespace-nowrap",
+                  }}
+                  isSelected={depositSettings.enabled}
+                  size="sm"
+                  onValueChange={(v) =>
+                    handleDepositSettingsChange({ enabled: v })
+                  }
+                >
+                  Allow deposit only (rest on arrival)
+                </Checkbox>
+                {depositSettings.enabled && (
+                  <>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <label className="flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
+                        <input
+                          checked={depositSettings.type === "percentage"}
+                          className="rounded-full w-3.5 h-3.5 shrink-0"
+                          name="depositType"
+                          type="radio"
+                          onChange={() =>
+                            handleDepositSettingsChange({ type: "percentage" })
+                          }
+                        />
+                        <span className="text-xs">%</span>
+                      </label>
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input
+                          checked={depositSettings.type === "fixed"}
+                          className="rounded-full w-3.5 h-3.5 shrink-0"
+                          name="depositType"
+                          type="radio"
+                          onChange={() =>
+                            handleDepositSettingsChange({ type: "fixed" })
+                          }
+                        />
+                        <span className="text-xs whitespace-nowrap">
+                          £ Fixed
+                        </span>
+                      </label>
+                    </div>
+                    {depositSettings.type === "percentage" ? (
+                      <Input
+                        className="w-[4.5rem] min-w-0 shrink"
+                        classNames={{
+                          inputWrapper: "min-h-8 h-8",
+                          input: "text-xs",
+                        }}
+                        endContent="%"
+                        max={100}
+                        min={1}
+                        placeholder="50"
+                        size="sm"
+                        type="number"
+                        value={String(depositSettings.percentage ?? "")}
+                        onChange={(e) =>
+                          handleDepositSettingsChange({
+                            percentage: e.target.value
+                              ? Number(e.target.value)
+                              : null,
+                          })
+                        }
+                      />
+                    ) : (
+                      <Input
+                        className="w-[5.5rem] min-w-0 shrink"
+                        classNames={{
+                          inputWrapper: "min-h-8 h-8",
+                          input: "text-xs",
+                        }}
+                        min={0}
+                        placeholder="100"
+                        size="sm"
+                        startContent={
+                          <span className="text-default-500 text-xs">£</span>
+                        }
+                        step={0.01}
+                        type="number"
+                        value={String(depositSettings.fixedAmount ?? "")}
+                        onChange={(e) =>
+                          handleDepositSettingsChange({
+                            fixedAmount: e.target.value
+                              ? Number(e.target.value)
+                              : null,
+                          })
+                        }
+                      />
+                    )}
+                  </>
+                )}
+                <Button
+                  className="min-h-8 h-8 px-2.5 text-xs shrink-0 ml-auto"
+                  color="primary"
+                  isLoading={isSavingDeposit}
+                  size="sm"
+                  startContent={
+                    !isSavingDeposit && <Save className="w-3 h-3" />
+                  }
+                  variant="flat"
+                  onPress={handleSaveDepositSettings}
+                >
+                  {isSavingDeposit ? "Saving..." : "Save deposit settings"}
+                </Button>
+              </div>
+            </CardBody>
+          </Card>
+        </div>
+      </details>
 
       {/* Filters */}
       <Card className="border border-divider">

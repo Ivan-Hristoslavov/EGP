@@ -21,6 +21,7 @@ import {
   User,
   Share2,
   Images,
+  ExternalLink,
 } from "lucide-react";
 
 import ThemeToggleButton from "../../components/ThemeToggleButton";
@@ -111,6 +112,47 @@ const navigation = [
   },
 ];
 
+/** Developer-only tools (hidden from the live admin menu, still reachable by URL). */
+const SHOW_DEV_TOOLS = process.env.NODE_ENV === "development";
+
+// Sidebar sections: the same pages as `navigation`, grouped by what the owner does with them
+const navigationGroups = [
+  {
+    label: "Daily work",
+    hrefs: [
+      "/admin/dashboard",
+      "/admin/bookings",
+      "/admin/calendar",
+      "/admin/customers",
+      "/admin/payments",
+    ],
+  },
+  {
+    label: "Website content",
+    hrefs: [
+      "/admin/services",
+      "/admin/team",
+      "/admin/gallery",
+      "/admin/reviews",
+      "/admin/blog",
+      "/admin/press",
+      "/admin/about",
+      "/admin/social",
+      "/admin/hero-section",
+    ],
+  },
+  {
+    label: "Settings",
+    hrefs: ["/admin/profile", ...(SHOW_DEV_TOOLS ? ["/admin/test-email"] : [])],
+  },
+].map(({ label, hrefs }) => ({
+  label,
+  items: navigation.filter((item) => hrefs.includes(item.href)),
+}));
+
+const isNavItemActive = (pathname: string | null, href: string) =>
+  pathname === href || !!pathname?.startsWith(`${href}/`);
+
 export default function AdminLayout({
   children,
 }: {
@@ -127,6 +169,19 @@ export default function AdminLayout({
   useEffect(() => {
     setHasMounted(true);
   }, []);
+
+  // Let keyboard users close the mobile menu with Escape
+  useEffect(() => {
+    if (!sidebarOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSidebarOpen(false);
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [sidebarOpen]);
 
   useEffect(() => {
     if (pathname === "/admin/login" || !pathname?.startsWith("/admin")) {
@@ -283,9 +338,17 @@ export default function AdminLayout({
       suppressHydrationWarning
       className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-800 transition-colors duration-500"
     >
+      <a
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-rose-700 focus:shadow-lg"
+        href="#admin-main"
+      >
+        Skip to main content
+      </a>
+
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
+          aria-hidden="true"
           className="fixed inset-0 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         >
@@ -336,38 +399,62 @@ export default function AdminLayout({
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-4 py-6">
-          <div className="space-y-2">
-            {navigation.map((item) => {
-              const isActive = pathname === item.href;
-
-              return (
-                <Link
-                  key={item.name}
-                  className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 group ${
-                    isActive
-                      ? "bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30 text-rose-700 dark:text-rose-300 shadow-sm"
-                      : "text-gray-600 dark:text-gray-300 hover:bg-gradient-to-r hover:from-rose-50 hover:to-pink-50 dark:hover:from-rose-900/20 dark:hover:to-pink-900/20 hover:text-rose-700 dark:hover:text-rose-300"
-                  }`}
-                  href={item.href}
-                  onClick={() => setSidebarOpen(false)}
+        <nav
+          aria-label="Admin navigation"
+          className="flex-1 overflow-y-auto px-4 py-4"
+        >
+          <div className="space-y-5">
+            {navigationGroups.map((group) => (
+              <div key={group.label}>
+                <p
+                  className="mb-1.5 px-4 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                  id={`admin-nav-${group.label.replace(/\s+/g, "-").toLowerCase()}`}
                 >
-                  <span
-                    className={`mr-3 transition-colors ${
-                      isActive
-                        ? "text-rose-700 dark:text-rose-300"
-                        : "text-gray-400 dark:text-gray-500 group-hover:text-rose-600 dark:group-hover:text-rose-300"
-                    }`}
-                  >
-                    {item.icon}
-                  </span>
-                  {item.name}
-                  {isActive && (
-                    <div className="ml-auto w-2 h-2 bg-gradient-to-r from-rose-500 to-pink-500 rounded-full" />
-                  )}
-                </Link>
-              );
-            })}
+                  {group.label}
+                </p>
+                <div
+                  aria-labelledby={`admin-nav-${group.label.replace(/\s+/g, "-").toLowerCase()}`}
+                  className="space-y-1"
+                  role="group"
+                >
+                  {group.items.map((item) => {
+                    const isActive = isNavItemActive(pathname, item.href);
+
+                    return (
+                      <Link
+                        key={item.name}
+                        aria-current={isActive ? "page" : undefined}
+                        className={`flex min-h-[44px] items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group ${
+                          isActive
+                            ? "bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30 text-rose-700 dark:text-rose-300 shadow-sm"
+                            : "text-gray-600 dark:text-gray-300 hover:bg-gradient-to-r hover:from-rose-50 hover:to-pink-50 dark:hover:from-rose-900/20 dark:hover:to-pink-900/20 hover:text-rose-700 dark:hover:text-rose-300"
+                        }`}
+                        href={item.href}
+                        onClick={() => setSidebarOpen(false)}
+                      >
+                        <span
+                          aria-hidden="true"
+                          className={`mr-3 transition-colors ${
+                            isActive
+                              ? "text-rose-700 dark:text-rose-300"
+                              : "text-gray-400 dark:text-gray-500 group-hover:text-rose-600 dark:group-hover:text-rose-300"
+                          }`}
+                        >
+                          {item.icon}
+                        </span>
+                        {item.name}
+                        {isActive && (
+                          <div
+                            aria-hidden="true"
+                            className="ml-auto w-2 h-2 bg-gradient-to-r from-rose-500 to-pink-500 rounded-full"
+                          />
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         </nav>
 
@@ -432,12 +519,23 @@ export default function AdminLayout({
                 <h1
                   className={`${typography.headingSmall} ${textColors.heading}`}
                 >
-                  {navigation.find((item) => item.href === pathname)?.name ||
-                    "Admin Panel"}
+                  {navigation.find((item) =>
+                    isNavItemActive(pathname, item.href),
+                  )?.name || "Admin Panel"}
                 </h1>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <a
+                aria-label="View website (opens in a new tab)"
+                className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-2 rounded-lg px-3 text-sm font-medium text-gray-600 transition-colors hover:bg-rose-50 hover:text-rose-700 dark:text-gray-300 dark:hover:bg-rose-900/20 dark:hover:text-rose-300"
+                href="/"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <ExternalLink aria-hidden="true" className="h-4 w-4" />
+                <span className="hidden sm:inline">View website</span>
+              </a>
               <ThemeToggleButton className="egp-admin-chrome-exempt" />
             </div>
           </div>
@@ -445,7 +543,9 @@ export default function AdminLayout({
         {/* Page content */}
         <main
           suppressHydrationWarning
-          className="min-h-screen bg-gradient-to-br from-rose-50/30 via-pink-50/30 to-purple-50/30 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800 transition-colors duration-300"
+          className="min-h-screen focus:outline-none bg-gradient-to-br from-rose-50/30 via-pink-50/30 to-purple-50/30 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800 transition-colors duration-300"
+          id="admin-main"
+          tabIndex={-1}
         >
           <div
             className={`${layout.containerWide} py-3 sm:py-4 lg:py-6 xl:py-8 min-w-0 overflow-x-hidden`}

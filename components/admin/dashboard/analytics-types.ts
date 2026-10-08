@@ -23,6 +23,7 @@ export type UpcomingBookingRow = {
   time: string;
   status: string;
   amount?: number;
+  team_member_id?: string | null;
   customers?: {
     first_name: string | null;
     last_name: string | null;

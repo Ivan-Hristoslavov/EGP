@@ -1,12 +1,15 @@
 "use client";
 
-import { Avatar, Button, Card, CardBody, CardHeader, Chip, Progress, Skeleton, Spinner } from "@heroui/react";
 import type { UpcomingBookingRow } from "./analytics-types";
+import type { PractitionerBadge } from "@/lib/calendar-practitioners";
 
+import { Avatar, Button, Card, CardBody, CardHeader, Chip, Progress, Skeleton, Spinner } from "@heroui/react";
 import { useEffect, useMemo, useState } from "react";
 import { formatDistanceStrict } from "date-fns";
 import { Calendar, Clock, Mail, Phone } from "lucide-react";
 import { motion } from "framer-motion";
+
+import { PractitionerAvatar } from "@/components/admin/calendar/practitioner-avatar";
 
 function parseStartMs(dateStr: string, timeStr: string): number {
   const [y, mo, d] = dateStr.split("-").map((x) => parseInt(x, 10));
@@ -124,6 +127,8 @@ export function DashboardNextBookingHeroSkeleton() {
 
 export function DashboardNextBookingHero(props: {
   booking: UpcomingBookingRow | null;
+  /** Who does the treatment; null = nobody assigned yet. */
+  practitioner?: PractitionerBadge | null;
   onOpenBookings: () => void;
   onOpenCalendar: () => void;
 }) {
@@ -144,7 +149,7 @@ export function DashboardNextBookingHero(props: {
   if (!props.booking || Number.isNaN(startMs)) {
     return (
       <Card className="border border-dashed border-default-200 bg-default-50/40 dark:border-default-100/20 dark:bg-default-50/5">
-        <CardBody className="flex flex-col items-center gap-3 px-6 py-12 text-center">
+        <CardBody className="flex flex-col items-center gap-3 px-6 py-8 text-center">
           <Calendar className="h-10 w-10 text-default-300" />
           <div>
             <p className="text-sm font-medium text-default-700 dark:text-default-200">
@@ -211,9 +216,7 @@ export function DashboardNextBookingHero(props: {
             <p className="text-[11px] font-medium uppercase tracking-wide text-default-500">
               Next appointment
             </p>
-            <h2 className="text-lg font-semibold sm:text-xl">
-              Front desk focus
-            </h2>
+            <h2 className="text-lg font-semibold sm:text-xl">Up next</h2>
           </div>
           <Chip color="primary" size="sm" variant="flat">
             {formatCountdown(ms)}
@@ -244,9 +247,31 @@ export function DashboardNextBookingHero(props: {
                 </span>
                 <span className="inline-flex items-center gap-1">
                   <Clock className="h-3.5 w-3.5" />
-                  {props.booking.time}
+                  {props.booking.time.slice(0, 5)}
                 </span>
               </div>
+              {props.practitioner !== undefined ? (
+                <p className="flex items-center gap-2 pt-1 text-sm font-medium text-default-700 dark:text-default-200">
+                  {props.practitioner ? (
+                    <>
+                      <PractitionerAvatar
+                        color={props.practitioner.color}
+                        imageUrl={props.practitioner.imageUrl}
+                        name={props.practitioner.name}
+                        size="sm"
+                      />
+                      with {props.practitioner.name}
+                    </>
+                  ) : (
+                    <>
+                      <PractitionerAvatar name="Unassigned" size="sm" />
+                      <span className="text-warning-700 dark:text-warning-300">
+                        No practitioner assigned yet
+                      </span>
+                    </>
+                  )}
+                </p>
+              ) : null}
               <p className="text-xs text-default-400">
                 {ms > 0
                   ? `${formatDistanceStrict(new Date(startMs), new Date(now), { addSuffix: true })}`

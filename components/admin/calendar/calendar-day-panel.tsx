@@ -1,9 +1,12 @@
 "use client";
 
-import { Button, Chip } from "@heroui/react";
 import type { AdminCalendarBooking } from "./calendar-types";
+import type { PractitionerBadge } from "@/lib/calendar-practitioners";
 
+import { Button, Chip } from "@heroui/react";
 import { Calendar as CalendarIcon, Phone } from "lucide-react";
+
+import { PractitionerAvatar } from "./practitioner-avatar";
 
 function chipColor(
   status: string,
@@ -28,6 +31,8 @@ export interface CalendarDayPanelProps {
   formatTime: (t: string) => string;
   onBookingClick: (booking: AdminCalendarBooking) => void;
   onCreateBooking: () => void;
+  /** Optional: practitioner badge for a booking (null = unassigned). */
+  getPractitioner?: (booking: AdminCalendarBooking) => PractitionerBadge | null;
 }
 
 export function CalendarDayPanel({
@@ -35,6 +40,7 @@ export function CalendarDayPanel({
   formatTime,
   onBookingClick,
   onCreateBooking,
+  getPractitioner,
 }: CalendarDayPanelProps) {
   if (filteredBookings.length === 0) {
     return (
@@ -78,8 +84,29 @@ export function CalendarDayPanel({
                 {formatTime(booking.time)}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="font-semibold text-foreground">
+                <div className="flex flex-wrap items-center gap-2 font-semibold text-foreground">
                   {booking.customer_name}
+                  {(() => {
+                    const practitioner = getPractitioner?.(booking);
+
+                    if (practitioner === undefined) return null;
+
+                    return (
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-default-600">
+                        {practitioner ? (
+                          <PractitionerAvatar
+                            color={practitioner.color}
+                            imageUrl={practitioner.imageUrl}
+                            name={practitioner.name}
+                            size="xs"
+                          />
+                        ) : (
+                          <PractitionerAvatar name="Unassigned" size="xs" />
+                        )}
+                        {practitioner ? practitioner.name : "Unassigned"}
+                      </span>
+                    );
+                  })()}
                 </div>
                 <div className="text-sm text-default-600 dark:text-default-400">
                   {booking.service}

@@ -2,6 +2,7 @@
 
 import type { DragEvent } from "react";
 import type { AdminCalendarBooking } from "./calendar-types";
+import type { PractitionerBadge } from "@/lib/calendar-practitioners";
 
 import clsx from "clsx";
 
@@ -37,6 +38,8 @@ export interface CalendarMonthGridProps {
   onDragEnd: (e: DragEvent) => void;
   onBookingClick: (booking: AdminCalendarBooking) => void;
   onExpandDay: (date: number, month: number, year: number) => void;
+  /** Optional: practitioner badge for a booking (null = unassigned). */
+  getPractitioner?: (booking: AdminCalendarBooking) => PractitionerBadge | null;
 }
 
 export function CalendarMonthGrid({
@@ -53,6 +56,7 @@ export function CalendarMonthGrid({
   onDragEnd,
   onBookingClick,
   onExpandDay,
+  getPractitioner,
 }: CalendarMonthGridProps) {
   const y = currentDate.getFullYear();
   const m = currentDate.getMonth();
@@ -80,7 +84,7 @@ export function CalendarMonthGrid({
               <div
                 key={`empty-${index}`}
                 aria-hidden
-                className="min-h-[7.5rem] bg-default-50/40 dark:bg-default-50/5"
+                className="min-h-[6.5rem] bg-default-50/40 dark:bg-default-50/5 sm:min-h-[8.5rem]"
               />
             );
           }
@@ -99,7 +103,7 @@ export function CalendarMonthGrid({
             <div
               key={`day-${day}-${index}`}
               className={clsx(
-                "group relative flex min-h-[7.5rem] flex-col rounded-md bg-content1 p-2 outline-none transition-colors duration-200 sm:min-h-[8.5rem]",
+                "group relative flex min-h-[6.5rem] flex-col rounded-md bg-content1 p-1.5 outline-none transition-colors duration-200 sm:min-h-[8.5rem] sm:p-2",
                 "focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                 "hover:bg-default-100/60 dark:hover:bg-default-50/10",
                 "data-[today]:bg-primary/5 data-[today]:shadow-[inset_0_0_0_1px] data-[today]:shadow-primary/25",
@@ -143,13 +147,53 @@ export function CalendarMonthGrid({
                 ) : null}
               </div>
 
-              <div className="flex min-h-0 flex-1 flex-col gap-1">
+              {/* Phones: just the time plus the practitioner's colour, so it stays readable in a narrow cell */}
+              <div className="flex min-h-0 flex-1 flex-col gap-1 sm:hidden">
+                {dayBookings.slice(0, 3).map((booking) => {
+                  const practitioner = getPractitioner?.(booking);
+
+                  return (
+                    <span
+                      key={booking.id}
+                      className={clsx(
+                        "relative block truncate rounded bg-default-100 py-0.5 pl-2 pr-0.5 text-[10px] font-semibold leading-4 tabular-nums text-foreground",
+                        booking.status === "cancelled" &&
+                          "line-through opacity-60",
+                      )}
+                    >
+                      <span
+                        aria-hidden
+                        className={clsx(
+                          "absolute inset-y-0 left-0 w-1 rounded-l",
+                          practitioner
+                            ? practitioner.color.dot
+                            : "bg-slate-400",
+                        )}
+                      />
+                      {formatTime(booking.time)}
+                      <span className="sr-only">
+                        , {booking.customer_name}
+                        {practitioner ? `, ${practitioner.name}` : ""}
+                      </span>
+                    </span>
+                  );
+                })}
+                {dayBookings.length > 3 ? (
+                  <span className="text-center text-[10px] font-semibold text-primary">
+                    +{dayBookings.length - 3}
+                    <span className="sr-only"> more bookings</span>
+                  </span>
+                ) : null}
+              </div>
+
+              <div className="hidden min-h-0 flex-1 flex-col gap-1 sm:flex">
                 {dayBookings.slice(0, 3).map((booking) => (
                   <BookingEventPill
                     key={booking.id}
                     booking={booking}
                     formatTime={formatTime}
                     isDragging={draggedBookingId === booking.id}
+                    practitioner={getPractitioner?.(booking)}
                     variant="month"
                     onBookingClick={onBookingClick}
                     onDragEnd={onDragEnd}
