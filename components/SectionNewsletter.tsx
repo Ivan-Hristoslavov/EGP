@@ -186,7 +186,7 @@ export default function SectionNewsletter() {
   }
 
   return (
-    <section className="py-6 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <section className={`${layout.sectionPySm} bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900`}>
       <div className={layout.container}>
         <div className="max-w-3xl mx-auto">
           <div
@@ -205,7 +205,7 @@ export default function SectionNewsletter() {
                   <Gift className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   <span>Exclusive Offer</span>
                 </div>
-                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2 sm:mb-3">
+                <h2 className={`${typography.headingSection} text-white mb-2 sm:mb-3`}>
                   Get {siteConfig.newsletter.welcomeDiscountPercent}% Off Your
                   First Visit
                 </h2>

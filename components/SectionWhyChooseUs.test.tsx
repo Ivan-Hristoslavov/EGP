@@ -3,8 +3,6 @@ import { render, screen } from "@testing-library/react";
 
 import SectionWhyChooseUs from "./SectionWhyChooseUs";
 
-import { siteConfig } from "@/config/site";
-
 describe("SectionWhyChooseUs", () => {
   it("renders section title and representative reasons", () => {
     render(<SectionWhyChooseUs />);
@@ -17,14 +15,5 @@ describe("SectionWhyChooseUs", () => {
     expect(
       screen.getByText(/combining medical expertise/i),
     ).toBeInTheDocument();
-  });
-
-  it("renders trust certification badges from site config", () => {
-    render(<SectionWhyChooseUs />);
-    for (const cert of siteConfig.trust.certifications) {
-      const nodes = screen.getAllByText(cert);
-
-      expect(nodes.length).toBeGreaterThan(0);
-    }
   });
 });

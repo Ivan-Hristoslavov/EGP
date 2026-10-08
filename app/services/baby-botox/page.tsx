@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
+import { typography, textColors, layout } from "@/config/typography";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -60,17 +61,17 @@ export default function BabyBotoxPage() {
   return (
     <div className="min-h-screen bg-white dark:bg-egp-green-darker">
       {/* Hero Section */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-egp-beige-lighter to-egp-beige-light dark:from-egp-green-dark dark:to-egp-green-darker">
-        <div className="container mx-auto px-4">
+      <section className={`${layout.sectionPy} bg-gradient-to-br from-egp-beige-lighter to-egp-beige-light dark:from-egp-green-dark dark:to-egp-green-darker`}>
+        <div className={layout.container}>
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-egp-green/20 dark:bg-egp-green-dark rounded-full text-egp-green dark:text-white text-sm font-semibold mb-6">
               <Star className="w-4 h-4" />
               <span>Anti-Wrinkle Injections</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+            <h1 className={`${typography.headingPage} ${textColors.heading} mb-6`}>
               Baby Botox Treatment
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8">
+            <p className={`${typography.lead} mb-8`}>
               Subtle, natural-looking anti-wrinkle injections for a refreshed
               appearance
             </p>
@@ -95,13 +96,13 @@ export default function BabyBotoxPage() {
       </section>
 
       {/* Service Details */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
+      <section className={layout.sectionPy}>
+        <div className={layout.container}>
           <div className="max-w-6xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-12">
               {/* Service Info */}
               <div>
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6">
+                <h2 className={`${typography.headingSection} ${textColors.heading} mb-6`}>
                   About Baby Botox
                 </h2>
                 <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
@@ -110,7 +111,7 @@ export default function BabyBotoxPage() {
                   natural-looking results. Perfect for younger patients or those
                   seeking minimal intervention.
                 </p>
-                <div className="grid grid-cols-2 gap-6 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
                   <div className="flex items-center gap-3">
                     <Clock className="w-6 h-6 text-egp-green" />
                     <div>
@@ -158,10 +159,10 @@ export default function BabyBotoxPage() {
       </section>
 
       {/* Procedure Steps */}
-      <section className="py-16 md:py-24 bg-egp-beige-lighter dark:bg-egp-green-dark">
-        <div className="container mx-auto px-4">
+      <section className={`${layout.sectionPy} bg-egp-beige-lighter dark:bg-egp-green-dark`}>
+        <div className={layout.container}>
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white text-center mb-12">
+            <h2 className={`${typography.headingSection} ${textColors.heading} text-center mb-12`}>
               Treatment Process
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -189,11 +190,11 @@ export default function BabyBotoxPage() {
       </section>
 
       {/* Pricing & CTA */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
+      <section className={layout.sectionPy}>
+        <div className={layout.container}>
           <div className="max-w-4xl mx-auto text-center">
             <div className="bg-gradient-to-br from-egp-beige-lighter to-egp-beige-light dark:from-egp-green-dark dark:to-egp-green rounded-2xl p-8 mb-8">
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              <h2 className={`${typography.headingSection} ${textColors.heading} mb-4`}>
                 Baby Botox Treatment
               </h2>
               <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-egp-green dark:text-white mb-4">

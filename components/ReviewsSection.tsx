@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 
 import { useReviews } from "@/hooks/useReviews";
 import { badgeBackgroundClass } from "@/config/badge-styles";
+import { typography, textColors, layout } from "@/config/typography";
 
 export function ReviewsSection() {
   const { reviews, isLoading, error } = useReviews();
@@ -60,10 +61,10 @@ export function ReviewsSection() {
 
   return (
     <section
-      className="py-6 sm:py-8 md:py-10 bg-egp-beige-lighter dark:bg-gray-900"
+      className={`${layout.sectionPySm} bg-egp-beige-lighter dark:bg-gray-900`}
       id="reviews"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className={layout.container}>
         {/* Header - compact */}
         <div className="text-center mb-4 sm:mb-6 md:mb-8">
           <div
@@ -80,10 +81,10 @@ export function ReviewsSection() {
               Client Impressions
             </span>
           </div>
-          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3">
+          <h2 className={`${typography.headingSection} ${textColors.heading} mb-2 sm:mb-3`}>
             What Our Clients Say
           </h2>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <p className={`${typography.lead} max-w-2xl mx-auto`}>
             Real experiences from valued customers who trust our services
           </p>
         </div>

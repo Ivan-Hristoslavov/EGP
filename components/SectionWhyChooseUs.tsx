@@ -5,7 +5,7 @@ import { Award, Shield, Heart, Sparkles, Clock, Star } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { aestheticsColors } from "@/config/colors";
 import { badgeBackgroundClass } from "@/config/badge-styles";
-import { textColors, layout } from "@/config/typography";
+import { textColors, layout, typography } from "@/config/typography";
 
 const reasons = [
   {
@@ -53,7 +53,7 @@ const reasons = [
 
 export default function SectionWhyChooseUs() {
   return (
-    <section className="py-6 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <section className={`${layout.sectionPySm} bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900`}>
       <div className={layout.container}>
         {/* Section Header - compact */}
         <div className="text-center mb-4 sm:mb-6 md:mb-8">
@@ -63,10 +63,10 @@ export default function SectionWhyChooseUs() {
             <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             <span>Why Choose Us</span>
           </div>
-          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold leading-tight text-gray-900 dark:text-white mb-1.5 sm:mb-3 px-2 sm:px-4">
+          <h2 className={`${typography.headingSection} ${textColors.heading} mb-1.5 sm:mb-3 px-2 sm:px-4`}>
             Why Choose EGP Aesthetics?
           </h2>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-2 sm:px-4 leading-relaxed">
+          <p className={`${typography.lead} max-w-2xl mx-auto px-2 sm:px-4`}>
             Combining medical expertise with artistic vision to deliver
             exceptional results
           </p>
@@ -97,22 +97,6 @@ export default function SectionWhyChooseUs() {
               </div>
             );
           })}
-        </div>
-
-        {/* Trust Badges */}
-        <div className="mt-4 sm:mt-6 md:mt-8 flex justify-center">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 sm:gap-3 max-w-4xl w-full mx-auto px-2 sm:px-4">
-            {siteConfig.trust.certifications.map((cert) => (
-              <div
-                key={cert}
-                className="text-center px-2 sm:px-3 md:px-4 py-1.5 sm:py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] flex items-center justify-center bg-[#4b5563] dark:bg-[#1f2937] border border-[#374151] dark:border-[#111827]"
-              >
-                <div className="text-[9px] sm:text-xs font-bold leading-tight text-white dark:text-gray-200">
-                  {cert}
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </section>

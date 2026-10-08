@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Move } from "lucide-react";
 
 import { badgeBackgroundClass } from "@/config/badge-styles";
-import { textColors, layout } from "@/config/typography";
+import { textColors, layout, typography } from "@/config/typography";
 
 interface BeforeAfterItem {
   id: string;
@@ -191,7 +191,7 @@ export default function BeforeAfterSlideLine({
 
   return (
     <section
-      className={`py-8 sm:py-10 md:py-12 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 ${className}`}
+      className={`${layout.sectionPySm} bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 ${className}`}
     >
       <div className={layout.container}>
         {/* Section Header */}
@@ -201,12 +201,10 @@ export default function BeforeAfterSlideLine({
           >
             Real Results
           </div>
-          <h2
-            className={`text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold leading-tight ${textColors.heading} mb-2 sm:mb-3 px-4`}
-          >
+          <h2 className={`${typography.headingSection} ${textColors.heading} mb-2 sm:mb-3 px-4`}>
             Before & After Gallery
           </h2>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-4 leading-relaxed">
+          <p className={`${typography.lead} max-w-2xl mx-auto px-4`}>
             See the natural, beautiful transformations we've achieved for our
             clients
           </p>
@@ -430,7 +428,7 @@ export default function BeforeAfterSlideLine({
 
         {/* Thumbnail Navigation - more columns for 30-40 items */}
         <div className="max-w-4xl lg:max-w-5xl xl:max-w-6xl mx-auto">
-          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8 gap-1.5 sm:gap-2">
+          <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8 gap-1.5 sm:gap-2">
             {items.map((item, index) => (
               <button
                 key={item.id}

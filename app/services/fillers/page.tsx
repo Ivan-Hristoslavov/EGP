@@ -7,6 +7,7 @@ import ButtonBookNow from "@/components/ButtonBookNow";
 import { applyLiveServices } from "@/lib/category-services";
 import { loadLiveServices } from "@/lib/category-services-server";
 import { canonicalUrl } from "@/lib/seo";
+import { typography, layout } from "@/config/typography";
 
 // Prices and durations come from the database, so this page must not be cached.
 export const dynamic = "force-dynamic";
@@ -81,10 +82,10 @@ export default async function FillersPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero */}
-      <section className="relative bg-gradient-to-br from-fuchsia-500 via-pink-500 to-rose-600 text-white py-12 sm:py-16 md:py-24">
-        <div className="container mx-auto px-4">
+      <section className={`relative bg-gradient-to-br from-fuchsia-500 via-pink-500 to-rose-600 text-white ${layout.sectionPy}`}>
+        <div className={layout.container}>
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-6">
+            <h1 className={`${typography.headingHero} mb-6`}>
               Dermal Fillers
             </h1>
             <p className="text-xl md:text-2xl text-blue-100 mb-8">
@@ -96,8 +97,8 @@ export default async function FillersPage() {
       </section>
 
       {/* Services Grid */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
+      <section className={layout.sectionPy}>
+        <div className={layout.container}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service) => (
               <div
@@ -155,9 +156,9 @@ export default async function FillersPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-12 sm:py-16 bg-gradient-to-br from-fuchsia-600 via-pink-600 to-rose-600 text-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 px-4">
+      <section className={`${layout.sectionPy} bg-gradient-to-br from-fuchsia-600 via-pink-600 to-rose-600 text-white`}>
+        <div className={`${layout.container} text-center`}>
+          <h2 className={`${typography.headingSection} mb-3 sm:mb-4 px-4`}>
             Enhance Your Natural Features
           </h2>
           <p className="text-base sm:text-lg md:text-xl text-white/90 mb-6 sm:mb-8 max-w-2xl mx-auto px-4">

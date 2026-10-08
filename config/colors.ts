@@ -203,13 +203,26 @@ export const colorClasses = {
 };
 
 // Typography System
+//
+// IMPORTANT: The heading scales below (h1..h6) are NOT mobile-first (they jump
+// straight to large `text-4xl`/`text-3xl` on the smallest screens) and are
+// retained only for backwards compatibility. They are currently unused.
+// For all new code use the canonical, mobile-first tokens in
+// `@/config/typography` (typography.headingPage / headingSection / headingCard,
+// etc.). Do not reach for these heading scales.
 export const typography = {
   // Headings
+  /** @deprecated Use `typography.headingPage` from `@/config/typography`. */
   h1: "text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white",
+  /** @deprecated Use `typography.headingSection` from `@/config/typography`. */
   h2: "text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white",
+  /** @deprecated Use `typography.headingCard` from `@/config/typography`. */
   h3: "text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white",
+  /** @deprecated Use `typography.headingSmall` from `@/config/typography`. */
   h4: "text-xl md:text-2xl lg:text-3xl font-semibold text-gray-900 dark:text-white",
+  /** @deprecated Use a token from `@/config/typography`. */
   h5: "text-lg md:text-xl lg:text-2xl font-semibold text-gray-900 dark:text-white",
+  /** @deprecated Use a token from `@/config/typography`. */
   h6: "text-base md:text-lg lg:text-xl font-semibold text-gray-900 dark:text-white",
 
   // Body text

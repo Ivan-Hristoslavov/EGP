@@ -6,7 +6,7 @@ import { Accordion, AccordionItem, Spinner } from "@heroui/react";
 
 import { useFAQ } from "@/hooks/useFAQ";
 import { badgeBackgroundClass } from "@/config/badge-styles";
-import { typography, textColors } from "@/config/typography";
+import { typography, textColors, layout } from "@/config/typography";
 
 const FAQ_INITIAL_COUNT = 3;
 
@@ -111,10 +111,10 @@ export function FAQSection() {
 
   return (
     <section
-      className="py-6 sm:py-8 md:py-10 bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-500"
+      className={`${layout.sectionPySm} bg-egp-beige-lighter dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-500`}
       id="faq"
     >
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-4 sm:mb-6 md:mb-8">
           <div
             className={`inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 ${badgeBackgroundClass} text-gray-900 dark:text-gray-200 text-xs font-semibold mb-2 sm:mb-3`}
@@ -122,10 +122,10 @@ export function FAQSection() {
             <HelpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>Questions & Answers</span>
           </div>
-          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3">
+          <h2 className={`${typography.headingSection} ${textColors.heading} mb-2 sm:mb-3`}>
             Frequently Asked Questions
           </h2>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          <p className={`${typography.lead} max-w-2xl mx-auto`}>
             Find answers to common questions about our aesthetic treatments
           </p>
         </div>
