@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+import { requireAdmin } from "@/lib/admin-auth";
+
 export async function GET() {
   try {
     const supabase = createClient(
@@ -58,6 +60,10 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

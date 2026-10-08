@@ -6,6 +6,8 @@ import {
 } from "../../../../lib/dashboard-analytics";
 import { supabaseAdmin } from "../../../../lib/supabase";
 
+import { requireAdmin } from "@/lib/admin-auth";
+
 // Helper function to map activity types to status values
 function getActivityStatus(activityType: string): string {
   switch (activityType) {
@@ -26,6 +28,10 @@ function getActivityStatus(activityType: string): string {
 
 // GET - Fetch dashboard statistics
 export async function GET(request: Request) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const { searchParams } = new URL(request.url);
     const getAllActivity = searchParams.get("allActivity") === "true";
@@ -80,12 +86,8 @@ export async function GET(request: Request) {
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
     const ninetyDaysAgoStr = ninetyDaysAgo.toISOString().split("T")[0];
 
-    const { data: activeCustomers } = await supabaseAdmin
-      .from("customers")
-      .select("id", { count: "exact", head: false })
-      .eq("is_active", true);
-
-    // Also count customers from bookings/payments
+    // Only customers with a recent booking or payment count as active; newsletter
+    // subscribers and other contacts without activity are excluded.
     const { data: customersFromBookings } = await supabaseAdmin
       .from("bookings")
       .select("customer_id")
@@ -111,7 +113,6 @@ export async function GET(request: Request) {
 
     const uniqueCustomerIds = new Set<string>();
 
-    activeCustomers?.forEach((c) => c.id && uniqueCustomerIds.add(c.id));
     customersFromBookings?.forEach(
       (b) => b.customer_id && uniqueCustomerIds.add(b.customer_id),
     );

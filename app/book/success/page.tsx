@@ -102,6 +102,7 @@ function BookingSuccessContent() {
             customerEmail: booking.customer_email,
             customerPhone: booking.customer_phone,
             status: booking.status || "confirmed",
+            hasConflict: String(booking.notes || "").includes("CONFLICT"),
             teamMember: booking.team
               ? {
                   name: booking.team.name,
@@ -479,12 +480,24 @@ function BookingSuccessContent() {
               <CheckCircle className="w-7 h-7 sm:w-8 sm:h-8 text-[#9d9585] dark:text-[#c9c1b0]" />
             </div>
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#464C45] dark:text-[#c9c1b0] mb-2 font-montserrat">
-              Booking Confirmed!
+              {bookingDetails.hasConflict
+                ? "Payment Received"
+                : "Booking Confirmed!"}
             </h1>
             <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 font-montserrat font-light">
               Thank you for choosing EGP Aesthetics London
             </p>
           </div>
+
+          {bookingDetails.hasConflict && (
+            <div
+              className="mb-5 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-200"
+              role="status"
+            >
+              We received your payment, but this time slot needs to be adjusted.
+              We will contact you shortly to agree a new time.
+            </div>
+          )}
 
           {/* Booking Details Card - consistent with book page */}
           <div className="border border-[#e4d9c8] dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden mb-5">

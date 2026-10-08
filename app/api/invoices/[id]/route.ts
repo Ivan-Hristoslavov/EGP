@@ -5,6 +5,8 @@ import sharp from "sharp";
 import { supabase } from "@/lib/supabase";
 import { createClient } from "@/lib/supabase/server";
 
+import { requireAdmin } from "@/lib/admin-auth";
+
 const supabaseStorage = createStorageClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -86,6 +88,10 @@ interface RouteParams {
 
 // GET - Fetch single invoice
 export async function GET(request: NextRequest, { params }: RouteParams) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const { id } = await params;
 
@@ -123,6 +129,10 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const { id } = await params;
     const supabase = createClient();
@@ -307,6 +317,10 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const { id } = await params;
     const supabase = createClient();

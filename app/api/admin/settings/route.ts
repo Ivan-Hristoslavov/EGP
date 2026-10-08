@@ -2,8 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { supabaseAdmin } from "@/lib/supabase";
 
+import { requireAdmin } from "@/lib/admin-auth";
+
 // GET - Fetch admin settings (service role bypasses RLS)
 export async function GET(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const supabase = supabaseAdmin;
     const { searchParams } = new URL(request.url);
@@ -83,6 +89,10 @@ export async function GET(request: NextRequest) {
 
 // PUT - Update admin settings (service role bypasses RLS)
 export async function PUT(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const supabase = supabaseAdmin;
     const body = await request.json();
@@ -122,6 +132,10 @@ export async function PUT(request: NextRequest) {
 
 // POST - Create or update admin setting (service role bypasses RLS)
 export async function POST(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const supabase = supabaseAdmin;
     const { key, value } = await request.json();

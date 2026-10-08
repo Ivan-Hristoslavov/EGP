@@ -2,8 +2,14 @@ import { NextResponse } from "next/server";
 
 import { supabase } from "@/lib/supabase";
 
+import { requireAdmin } from "@/lib/admin-auth";
+
 // GET - Fetch VAT settings
 export async function GET() {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const { data: settings, error } = await supabase
       .from("vat_settings")
@@ -56,6 +62,10 @@ export async function GET() {
 
 // PUT - Update VAT settings
 export async function PUT(request: Request) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const body = await request.json();
     const { is_enabled, vat_rate, vat_number } = body;

@@ -4,8 +4,14 @@ import { supabaseAdmin } from "@/lib/supabase";
 import { sendEmail } from "@/lib/sendgrid-smtp";
 import { siteConfig } from "@/config/site";
 
+import { requireAdmin } from "@/lib/admin-auth";
+
 // GET - List all discount codes with customer info
 export async function GET(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
@@ -86,6 +92,10 @@ export async function GET(request: NextRequest) {
 
 // POST - Create a new discount code for a customer
 export async function POST(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const body = await request.json();
     const { customer_id, discount_percentage, valid_days, send_email } = body;

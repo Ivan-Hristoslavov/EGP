@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
+
+import { discountedPriceFromGroup } from "@/lib/booking-pricing";
 import { createClient } from "@supabase/supabase-js";
+
+import { requireAdmin } from "@/lib/admin-auth";
 
 export async function GET() {
   try {
@@ -34,16 +38,11 @@ export async function GET() {
     // Transform the data to flatten the structure
     const transformedServices =
       services?.map((service) => {
-        const discountGroup = service.discount_group;
-        const discountPercentage =
-          discountGroup?.is_active && discountGroup?.discount_percentage != null
-            ? parseFloat(discountGroup.discount_percentage.toString())
-            : null;
         const price = parseFloat(service.price.toString());
-        const discountedPrice =
-          discountPercentage != null && discountPercentage > 0
-            ? Math.round(price * (1 - discountPercentage / 100) * 100) / 100
-            : null;
+        const { discountPercentage, discountedPrice } = discountedPriceFromGroup(
+          price,
+          service.discount_group,
+        );
 
         return {
           id: service.id,
@@ -95,6 +94,10 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

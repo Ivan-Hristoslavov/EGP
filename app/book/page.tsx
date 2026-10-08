@@ -925,6 +925,18 @@ function BookingPageContent() {
     window.location.href = `/book/success?booking=${bookingId}`;
   };
 
+  // Someone else took the chosen time: tell the client and return to the time step.
+  const handleSlotTaken = () => {
+    showError(
+      "Time no longer available",
+      "Sorry, this time was just taken. Please choose another.",
+    );
+    setSelectedTime("");
+    setSelectedTimeSlots([]);
+    setCurrentStep("date");
+    loadAvailability();
+  };
+
   const handlePaymentError = (error: string) => {
     if (process.env.NODE_ENV === "development") {
       console.error("Payment error:", error);
@@ -2596,6 +2608,7 @@ function BookingPageContent() {
                   onPaymentError={handlePaymentError}
                   onPaymentSuccess={handlePaymentSuccess}
                   onProcessingChange={setIsPaymentProcessing}
+                  onSlotTaken={handleSlotTaken}
                   onTestBooking={handlePaymentSuccess}
                 />
               );

@@ -2,9 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { supabaseAdmin } from "../../../../lib/supabase";
 
+import { requireAdmin } from "@/lib/admin-auth";
+
 const MAX_QUERY_LENGTH = 2000;
 
 export async function POST(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const body = await request.json();
     const query = typeof body?.query === "string" ? body.query.trim() : "";

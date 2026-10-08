@@ -302,6 +302,10 @@ export async function POST(request: NextRequest) {
 
 // PUT - Update payment status (usually called by webhooks)
 export async function PUT(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const body = await request.json();
     const { session_id, payment_intent_id, status, payment_method } = body;

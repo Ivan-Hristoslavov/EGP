@@ -56,10 +56,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (rating < 0 || rating > 6) {
+    if (!Number.isInteger(Number(rating)) || rating < 1 || rating > 5) {
       return NextResponse.json(
         {
-          error: "Rating must be between 0 and 6",
+          error: "Rating must be a whole number from 1 to 5",
         },
         { status: 400 },
       );

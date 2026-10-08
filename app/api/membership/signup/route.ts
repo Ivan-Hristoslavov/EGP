@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 
 import { supabase } from "@/lib/supabase";
 import { getStripeServer } from "@/lib/stripe";
+import { getJwtSecret } from "@/lib/jwt-secret";
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
     const token = authHeader.substring(7);
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || "fallback-secret",
+      getJwtSecret(),
     ) as any;
 
     if (decoded.type !== "customer") {

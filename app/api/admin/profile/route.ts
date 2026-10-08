@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { createClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase";
 import { requireAdmin } from "@/lib/admin-auth";
 
 // GET - Fetch admin profile
@@ -9,7 +9,7 @@ export async function GET() {
 
   if (denied) return denied;
   try {
-    const supabase = createClient();
+    const supabase = supabaseAdmin;
 
     const { data: profile, error } = await supabase
       .from("admin_profile")
@@ -28,6 +28,9 @@ export async function GET() {
         { status: 500 },
       );
     }
+
+    // Never send the password hash to the browser
+    if (profile) delete (profile as Record<string, unknown>).password;
 
     // Parse JSONB fields that might be double-encoded as strings
     if (profile) {
@@ -84,7 +87,7 @@ export async function PUT(request: NextRequest) {
 
   if (denied) return denied;
   try {
-    const supabase = createClient();
+    const supabase = supabaseAdmin;
     const body = await request.json();
 
     // Destructure the required fields from the request body
@@ -173,6 +176,8 @@ export async function PUT(request: NextRequest) {
         { status: 500 },
       );
     }
+
+    delete (data as Record<string, unknown>).password;
 
     return NextResponse.json({ profile: data });
   } catch (error) {

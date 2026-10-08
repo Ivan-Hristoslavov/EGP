@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { isDayOffFeatureEnabled } from "@/config/feature-flags";
+import {
+  OCCUPYING_STATUSES,
+  buildDaySlots,
+  getClinicNow,
+  type BookingLike,
+} from "@/lib/booking-availability";
 import { isOnlineBookingBlackoutByRules } from "@/lib/booking-blackout-rules";
 import { fetchBookingBlackoutRulesFromDb } from "@/lib/booking-blackout-rules-db";
 import { fetchBookingClosedWeekdaysFromDb } from "@/lib/booking-closed-weekdays-db";
@@ -84,14 +90,16 @@ export async function GET(request: NextRequest) {
       return { isOnDayOff: false };
     };
 
-    // Get all bookings for the team member in the date range
+    // All active bookings in the range: the practitioner's own plus unassigned ones
+    // (unassigned bookings occupy everyone's time).
     const { data: existingBookings, error: bookingsError } = await supabaseAdmin
       .from("bookings")
-      .select("date, time, service_duration_minutes, status")
-      .eq("team_member_id", teamMemberId)
+      .select(
+        "id, date, time, service_duration_minutes, team_member_id, status",
+      )
       .gte("date", startDate)
       .lte("date", endDate)
-      .in("status", ["pending", "confirmed", "scheduled"]);
+      .in("status", [...OCCUPYING_STATUSES]);
 
     if (bookingsError) {
       console.error("Error fetching bookings:", bookingsError);
@@ -103,20 +111,16 @@ export async function GET(request: NextRequest) {
     }
 
     // Group bookings by date
-    const bookingsByDate = new Map<
-      string,
-      Array<{ time: string; duration: number }>
-    >();
+    const bookingsByDate = new Map<string, BookingLike[]>();
 
     (existingBookings || []).forEach((booking) => {
       if (!bookingsByDate.has(booking.date)) {
         bookingsByDate.set(booking.date, []);
       }
-      bookingsByDate.get(booking.date)!.push({
-        time: booking.time,
-        duration: booking.service_duration_minutes || 30,
-      });
+      bookingsByDate.get(booking.date)!.push(booking);
     });
+
+    const clinicNow = getClinicNow();
 
     // Generate availability for each date in range
     const results: Record<
@@ -234,79 +238,18 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
-      // Get bookings for this date
       const dateBookings = bookingsByDate.get(dateStr) || [];
-
-      // Parse working hours
-      const [startHour, startMinute] = startTime.split(":").map(Number);
-      const [endHour, endMinute] = endTime.split(":").map(Number);
-      const startTimeMinutes = startHour * 60 + startMinute;
-      const endTimeMinutes = endHour * 60 + endMinute;
-
-      // Create booked ranges for this date (including buffer after each booking)
-      const bookedRanges: Array<{ start: number; end: number }> = [];
-
-      dateBookings.forEach((booking) => {
-        const [hour, minute] = booking.time.split(":").map(Number);
-        const bookingStartMinutes = hour * 60 + minute;
-        // Add buffer after the booking ends
-        const bookingEndMinutes =
-          bookingStartMinutes + booking.duration + bufferMinutes;
-
-        bookedRanges.push({
-          start: bookingStartMinutes,
-          end: bookingEndMinutes,
-        });
+      const { availableSlots, bookedSlots } = buildDaySlots({
+        openTime: startTime,
+        closeTime: endTime,
+        durationMinutes: serviceDurationMinutes,
+        bufferMinutes,
+        maxAppointments,
+        teamMemberId,
+        bookings: dateBookings,
+        earliestStartMinutes:
+          dateStr === clinicNow.date ? clinicNow.minutes : undefined,
       });
-
-      bookedRanges.sort((a, b) => a.start - b.start);
-
-      // Check if max appointments limit is reached for this date
-      const existingBookingsCount = dateBookings.length;
-      const isMaxAppointmentsReached = existingBookingsCount >= maxAppointments;
-
-      // Generate available and booked slots
-      const availableSlots: string[] = [];
-      const bookedSlots: string[] = [];
-      const slotInterval = 15;
-      const requiredDuration = serviceDurationMinutes;
-
-      for (
-        let timeMinutes = startTimeMinutes;
-        timeMinutes < endTimeMinutes;
-        timeMinutes += slotInterval
-      ) {
-        const hours = Math.floor(timeMinutes / 60);
-        const minutes = timeMinutes % 60;
-        const timeString = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
-
-        const isBooked = bookedRanges.some((booked) => {
-          return timeMinutes >= booked.start && timeMinutes < booked.end;
-        });
-
-        if (isBooked) {
-          bookedSlots.push(timeString);
-        } else {
-          // Skip if max appointments reached
-          if (isMaxAppointmentsReached) {
-            continue;
-          }
-
-          // Check if this slot can accommodate the required duration + buffer
-          const slotEndMinutes = timeMinutes + requiredDuration + bufferMinutes;
-
-          if (slotEndMinutes <= endTimeMinutes) {
-            // Check if the full duration + buffer is available (no overlap with booked times)
-            const isAvailable = !bookedRanges.some((booked) => {
-              return timeMinutes < booked.end && slotEndMinutes > booked.start;
-            });
-
-            if (isAvailable) {
-              availableSlots.push(timeString);
-            }
-          }
-        }
-      }
 
       results[dateStr] = {
         availableSlots,

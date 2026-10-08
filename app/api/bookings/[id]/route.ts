@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase, supabaseAdmin } from "../../../../lib/supabase";
 
 import { requireAdmin } from "@/lib/admin-auth";
+import { slotNeedsRecheck } from "@/lib/booking-availability";
+import { assertSlotFree } from "@/lib/booking-conflicts";
 
 // GET - Fetch single booking by ID (UUID) or booking_number
 export async function GET(
@@ -127,6 +129,26 @@ export async function PATCH(
     }
 
     console.log("Existing booking found:", existingBooking);
+
+    // Only re-check when the edit changes what the booking occupies.
+    const recheck = slotNeedsRecheck(existingBooking, body);
+
+    if (recheck.needed) {
+      const slotCheck = await assertSlotFree({
+        date: recheck.effective.date.slice(0, 10),
+        time: recheck.effective.time,
+        durationMinutes: recheck.effective.service_duration_minutes,
+        teamMemberId: recheck.effective.team_member_id,
+        excludeBookingId: id,
+      });
+
+      if (!slotCheck.ok) {
+        return NextResponse.json(
+          { error: slotCheck.adminMessage, code: "SLOT_TAKEN" },
+          { status: 409 },
+        );
+      }
+    }
 
     const { data: booking, error } = await supabaseAdmin
       .from("bookings")

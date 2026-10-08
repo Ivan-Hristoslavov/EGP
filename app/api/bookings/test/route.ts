@@ -3,7 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { siteConfig } from "@/config/site";
 import { supabaseAdmin } from "@/lib/supabase";
 
+import { requireAdmin } from "@/lib/admin-auth";
+
 export async function POST(request: NextRequest) {
+  const denied = await requireAdmin();
+
+  if (denied) return denied;
+
   try {
     const body = await request.json();
 

@@ -38,3 +38,20 @@ export async function requireAdmin(): Promise<NextResponse | null> {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 }
+
+/**
+ * For scheduled jobs: accepts either an admin session or the `CRON_SECRET`
+ * (sent as `Authorization: Bearer <secret>`, which Vercel Cron adds automatically
+ * when the `CRON_SECRET` environment variable is set).
+ */
+export async function requireAdminOrCron(
+  request: Request,
+): Promise<NextResponse | null> {
+  const secret = process.env.CRON_SECRET;
+
+  if (secret && request.headers.get("authorization") === `Bearer ${secret}`) {
+    return null;
+  }
+
+  return requireAdmin();
+}
