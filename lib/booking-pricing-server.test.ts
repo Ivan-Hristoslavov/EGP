@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const db = vi.hoisted(() => ({
   services: [] as any[],
   deposit: null as any,
+  servicesError: null as any,
 }));
 
 vi.mock("@/lib/supabase", () => ({
@@ -12,7 +13,7 @@ vi.mock("@/lib/supabase", () => ({
         select: () => chain,
         eq: () =>
           table === "services"
-            ? Promise.resolve({ data: db.services, error: null })
+            ? Promise.resolve({ data: db.services, error: db.servicesError })
             : chain,
         single: () =>
           Promise.resolve({
@@ -37,6 +38,7 @@ const order = (items: Array<{ name: string; quantity?: number }>) =>
 
 describe("validateOnlineCharge", () => {
   beforeEach(() => {
+    db.servicesError = null;
     db.services = [
       { name: "Cheek filler", price: "450", discount_group: null },
       {
@@ -170,5 +172,147 @@ describe("priceServiceSummary", () => {
       ok: false,
     });
     expect(await priceServiceSummary("")).toEqual({ ok: false });
+  });
+});
+
+describe("deposit settings", () => {
+  const order = () => JSON.stringify([{ name: "Cheek filler", quantity: 1 }]);
+
+  beforeEach(() => {
+    db.servicesError = null;
+    db.services = [
+      { name: "Cheek filler", price: "450", discount_group: null },
+    ];
+  });
+
+  it("reads settings stored as JSON text", async () => {
+    db.deposit = JSON.stringify({
+      enabled: true,
+      type: "percentage",
+      percentage: 20,
+    });
+
+    expect(
+      (
+        await validateOnlineCharge({
+          amount: 90,
+          services: order(),
+          isDeposit: true,
+        })
+      ).ok,
+    ).toBe(true);
+    expect(
+      (
+        await validateOnlineCharge({
+          amount: 80,
+          services: order(),
+          isDeposit: true,
+        })
+      ).ok,
+    ).toBe(false);
+  });
+
+  it("supports a fixed deposit amount", async () => {
+    db.deposit = { enabled: true, type: "fixed", fixedAmount: 80 };
+
+    expect(
+      (
+        await validateOnlineCharge({
+          amount: 80,
+          services: order(),
+          isDeposit: true,
+        })
+      ).ok,
+    ).toBe(true);
+    expect(
+      (
+        await validateOnlineCharge({
+          amount: 79,
+          services: order(),
+          isDeposit: true,
+        })
+      ).ok,
+    ).toBe(false);
+  });
+
+  it("treats unreadable or missing settings as deposits switched off", async () => {
+    db.deposit = "{not json";
+    expect(
+      (
+        await validateOnlineCharge({
+          amount: 225,
+          services: order(),
+          isDeposit: true,
+        })
+      ).ok,
+    ).toBe(false);
+
+    db.deposit = null;
+    expect(
+      (
+        await validateOnlineCharge({
+          amount: 225,
+          services: order(),
+          isDeposit: true,
+        })
+      ).ok,
+    ).toBe(false);
+    expect(
+      (
+        await validateOnlineCharge({
+          amount: 450,
+          services: order(),
+          isDeposit: true,
+        })
+      ).ok,
+    ).toBe(true);
+
+    db.deposit = 42;
+    expect(
+      (
+        await validateOnlineCharge({
+          amount: 450,
+          services: order(),
+          isDeposit: false,
+        })
+      ).ok,
+    ).toBe(true);
+  });
+
+  it("accepts services already parsed, and counts a missing quantity as one", async () => {
+    db.deposit = { enabled: false };
+    const parsed = [{ name: "Cheek filler" }];
+
+    expect(
+      (
+        await validateOnlineCharge({
+          amount: 450,
+          services: parsed,
+          isDeposit: false,
+        })
+      ).ok,
+    ).toBe(true);
+    expect(
+      (
+        await validateOnlineCharge({
+          amount: 450,
+          services: [],
+          isDeposit: false,
+        })
+      ).ok,
+    ).toBe(false);
+  });
+
+  it("fails loudly when the price list cannot be read", async () => {
+    db.servicesError = new Error("db down");
+    db.deposit = { enabled: false };
+
+    await expect(
+      validateOnlineCharge({
+        amount: 450,
+        services: order(),
+        isDeposit: false,
+      }),
+    ).rejects.toThrow("db down");
   });
 });
